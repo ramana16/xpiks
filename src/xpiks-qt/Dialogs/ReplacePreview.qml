@@ -144,6 +144,18 @@ Item {
                                 anchors.rightMargin: 10
                                 height: childrenRect.height
                                 radius: 2
+                                Item {
+                                    id: checkedItem
+                                    StyledCheckbox {
+                                        id: isChecked
+                                        checked: true
+                                        onCheckedChanged:{
+                                            replaceModel.setReplacableState(imageWrapper.delegateIndex,isChecked.checkedState)
+                                        }
+                                    }
+
+                                }
+
 
                                 Item {
                                     id: imageItem
