@@ -147,10 +147,10 @@ Item {
                                 Item {
                                     id: checkedItem
                                     StyledCheckbox {
-                                        id: isChecked
+                                        id: searchableState
                                         checked: true
-                                        onCheckedChanged:{
-                                            replaceModel.setReplacableState(imageWrapper.delegateIndex,isChecked.checkedState)
+                                        onCheckedChanged: {
+                                            replaceModel.setReplacableState(imageWrapper.delegateIndex, searchableState.checkedState)
                                         }
                                     }
 
