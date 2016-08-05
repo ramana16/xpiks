@@ -88,8 +88,10 @@ namespace Conectivity {
             QObject::connect(this, SIGNAL(cancelAll()), worker, SIGNAL(workerCancelled()));
             QObject::connect(worker, SIGNAL(progressChanged(double,double)),
                              this, SLOT(workerProgressChanged(double,double)));
-            QObject::connect(worker, SIGNAL(transferFailed(QString, QString)),
-                             this, SLOT(transferFailed(QString, QString)));
+            QObject::connect(worker, SIGNAL(transferFailed(QString, QString, QString)),
+                             this, SLOT(transferFailed(QString, QString, QString)));
+            QObject::connect(worker, SIGNAL(transferFailed(QString, QString, QString)),
+                             this, SIGNAL(transferFailedSignal(QString, QString, QString)));
 
             thread->start();
         }
@@ -100,7 +102,8 @@ namespace Conectivity {
         emit cancelAll();
     }
 
-    void FtpCoordinator::transferFailed(const QString &filepath, const QString &host) {
+    void FtpCoordinator::transferFailed(const QString &filepath, const QString &host, const QString &title) {
+        Q_UNUSED(title);
         LOG_WARNING << "Upload failed for file [" << filepath << "] to host {" << host << "}";
         // TODO: show failed transfers on the UI
     }

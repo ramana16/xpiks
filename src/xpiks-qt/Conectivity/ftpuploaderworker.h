@@ -57,7 +57,7 @@ namespace Conectivity {
         void uploadFinished(bool anyErrors);
         void stopped();
         void workerCancelled();
-        void transferFailed(const QString &filename, const QString &host);
+        void transferFailed(const QString &filename, const QString &host, const QString &title);
 
     public slots:
         void process();
