@@ -63,7 +63,6 @@ namespace Conectivity {
         void transferFailed(const QString &filepath, const QString &host);
 
     private slots:
-        void transferFailedHandler(const QString &filepath, const QString &host);
         void workerProgressChanged(double oldPercents, double newPercents);
         void workerFinished(bool anyErrors);
 

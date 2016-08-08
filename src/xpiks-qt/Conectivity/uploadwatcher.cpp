@@ -1,5 +1,6 @@
 #include "uploadwatcher.h"
 #include <QFileInfo>
+#include "../Common/defines.h"
 
 namespace Conectivity {
     UploadWatcher::UploadWatcher(QObject *parent):
@@ -8,6 +9,7 @@ namespace Conectivity {
 
     void UploadWatcher::resetModel() {
         beginResetModel();
+        LOG_WARNING <<"Resetting UploadWatcher..";
         m_FtpInfo.clear();
         endResetModel();
     }
@@ -51,6 +53,7 @@ namespace Conectivity {
 
     void UploadWatcher::reportUploadErrorHandler(const QString &filepath, const QString &host) {
         if (QFileInfo(filepath).completeSuffix().toLower() == "eps") {
+            LOG_WARNING <<"Skipping "<<filepath;
             return;
         }
 
@@ -67,6 +70,7 @@ namespace Conectivity {
 
         if (!found) {
             m_FtpInfo.append(QPair<QString, QStringList>(host, QStringList(filepath)));
+            LOG_WARNING << "Creating new entry for " << host;
         }
     }
 }
