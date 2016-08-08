@@ -888,7 +888,13 @@ Item {
                         text: "Show failed artworks"
                         width: 130
                         onClicked: {
-                            Common.launchDialog("Dialogs/FailedUploadArtworks.qml", uploadArtworksComponent, {});
+                            Common.launchDialog("Dialogs/FailedUploadArtworks.qml",
+                                                uploadArtworksComponent.componentParent,
+                                                {
+                                                    componentParent: uploadArtworksComponent.componentParent,
+                                                    modelUploader: artworkUploader.getUploadWatcher(),
+                                                    isRestricted: true
+                                                });
                         }
                     }
 
@@ -906,7 +912,7 @@ Item {
                                 if (uploadInfos.getSelectedInfosCount() === 0) {
                                     selectHostsMessageBox.open()
                                 } else {
-                                    artworkUploader.uploadWatcher.resetModel()
+                                    artworkUploader.resetUploadModel()
                                     var agencies = uploadInfos.getAgenciesWithMissingDetails();
                                     if (agencies.length !== 0) {
                                         noPasswordDialog.agenciesList = agencies

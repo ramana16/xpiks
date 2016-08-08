@@ -36,6 +36,7 @@ Item {
     id: failedUploadArtworks
     Keys.onEscapePressed: closePopup()
     anchors.fill: parent
+    property variant modelUploader
 
     function closePopup() {
         failedUploadArtworks.destroy();
@@ -124,7 +125,7 @@ Item {
 
                         ListView {
                             id: warningsListView
-                            model: artworkUploader.uploadWatcher
+                            model: modelUploader
                             anchors.fill:parent
                             spacing : 10
 
@@ -135,29 +136,42 @@ Item {
                                 anchors.margins: 10
                                 anchors.left: parent.left
                                 anchors.right: parent.right
-                                height: hostTitle.height + flow.height + 30
+                                height: hostAddress.height + flow.height + 30
 
                                 StyledText {
                                     anchors.top: parent.top
-                                    anchors.right : parent.right
                                     anchors.left: parent.left
-                                    id: hostTitle
-                                    text: hostname
+                                    anchors.leftMargin: 10
+                                    id: hostAddress
+                                    text: artworkUploader.getFtpName(ftpaddress)
                                     font.pixelSize: 30
+                                    color: Colors.artworkActiveColor
+                                }
+
+                                StyledText {
+                                    anchors.topMargin: 10 //difference in fonts
+                                    anchors.top: parent.top
+                                    anchors.right : parent.right
+                                    anchors.left: hostAddress.right
+                                    anchors.rightMargin: 10
+                                    horizontalAlignment: Text.AlignRight
+                                    id: hostName
+                                    text: ftpaddress
+                                    font.pixelSize: 20
                                     color: Colors.artworkActiveColor
                                 }
 
                                 Flow {
                                     id: flow
                                     spacing: 20
-                                    anchors.top: hostTitle.bottom
+                                    anchors.top: hostAddress.bottom
                                     anchors.left: parent.left
                                     anchors.right: parent.right
                                     anchors.margins: 20
 
                                     Repeater {
                                         id: photosGrid
-                                        model: artworkUploader.uploadWatcher.getFailedImages(delegateIndex)
+                                        model: modelUploader.getFailedImages(delegateIndex)
                                         delegate: Item{
                                             id: imageItem
                                             width: 120

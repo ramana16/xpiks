@@ -36,7 +36,7 @@ namespace Conectivity {
         auto &item = m_FtpInfo.at(row);
 
         switch (role) {
-            case HostName:
+            case FtpAddress:
                 return item.first;
             default:
                 return QVariant();
@@ -45,7 +45,7 @@ namespace Conectivity {
 
     QHash<int, QByteArray> UploadWatcher::roleNames() const {
         QHash<int, QByteArray> names = QAbstractListModel::roleNames();
-        names[HostName] = "hostname";
+        names[FtpAddress] = "ftpaddress";
         return names;
     }
 

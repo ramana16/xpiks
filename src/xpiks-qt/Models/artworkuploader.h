@@ -51,10 +51,6 @@ namespace Models {
     {
     Q_OBJECT
 
-#if !(defined(INTEGRATION_TESTS) || defined(CORE_TESTS))
-    Q_PROPERTY(Conectivity::UploadWatcher* uploadWatcher READ getUploadWatcher())
-#endif
-
     public:
         ArtworkUploader(Conectivity::IFtpCoordinator *ftpCoordinator, QObject *parent=0);
         virtual ~ArtworkUploader();
@@ -89,8 +85,15 @@ namespace Models {
         Q_INVOKABLE bool needCreateArchives() const;
 
         Q_INVOKABLE QString getFtpAddress(const QString &stockName) const { return m_StocksFtpList.getFtpAddress(stockName); }
-        Conectivity::UploadWatcher *getUploadWatcher() {
-            return &m_UploadWatcher;
+        Q_INVOKABLE QString getFtpName(const QString &stockAddress) const;
+
+        Q_INVOKABLE QObject* getUploadWatcher() {
+            auto *model = &m_UploadWatcher;
+            QQmlEngine::setObjectOwnership(model, QQmlEngine::CppOwnership);
+            return model;
+        }
+        Q_INVOKABLE void resetUploadModel(){
+            m_UploadWatcher.resetModel();
         }
 
         void initializeStocksList();
