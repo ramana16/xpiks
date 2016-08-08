@@ -47,6 +47,11 @@ Item {
     Component.onCompleted: focus = true
     Keys.onEscapePressed: closePopup()
 
+    Connections {
+        target: replaceModel
+        onReplaceSucceeded: closePopup()
+    }
+
     PropertyAnimation { target: replacePreviewComponent; property: "opacity";
         duration: 400; from: 0; to: 1;
         easing.type: Easing.InOutQuad ; running: true }
@@ -238,30 +243,34 @@ Item {
                                     height: (childrenRect.height < 130) ? 150 : (childrenRect.height + 20)
                                     color: isselected ? Colors.selectedArtworkBackground : Colors.artworkBackground
 
-                                    Column {
-                                        id: replaceHitText
-                                        spacing: 3
-                                        anchors.top: parent.top
+                                    Item {
+                                        clip: true
                                         anchors.left: parent.left
+                                        anchors.top: parent.top
                                         anchors.right: parent.right
                                         anchors.leftMargin: 10
                                         anchors.rightMargin: 10
                                         anchors.topMargin: 10
+                                        height: childrenRect.height
 
                                         StyledText {
                                             id: titleHit
                                             text: i18.n + qsTr("Title:")
-                                            visible: hastitle
                                             isActive: isselected
+                                            anchors.left: parent.left
+                                            anchors.top: parent.top
                                         }
 
                                         Rectangle {
                                             id: titleRectangle
                                             height: childrenRect.height + 10
-                                            color: isselected ? Colors.inputBackgroundColor : Colors.inputInactiveBackground
+                                            color: (isselected && enabled) ? Colors.inputBackgroundColor : Colors.inputInactiveBackground
                                             anchors.right: parent.right
                                             anchors.left: parent.left
-                                            visible: hastitle
+                                            anchors.top: titleHit.bottom
+                                            anchors.topMargin: 3
+                                            enabled: hastitle
+                                            opacity: (isselected && enabled) ? 1 : 0.5
 
                                             StyledTextEdit {
                                                 id: titleText
@@ -283,25 +292,25 @@ Item {
                                             }
                                         }
 
-                                        Item {
-                                            width: 10
-                                            height: 1
-                                        }
-
                                         StyledText {
                                             id: descriptionHit
                                             text: i18.n + qsTr("Description:")
-                                            visible: hasdescription
                                             isActive: isselected
+                                            anchors.left: parent.left
+                                            anchors.top: titleRectangle.bottom
+                                            anchors.topMargin: 10
                                         }
 
                                         Rectangle {
                                             id: descriptionRectangle
-                                            color: isselected ? Colors.inputBackgroundColor : Colors.inputInactiveBackground
+                                            color: (isselected && enabled) ? Colors.inputBackgroundColor : Colors.inputInactiveBackground
                                             height: childrenRect.height + 10
+                                            anchors.top: descriptionHit.bottom
+                                            anchors.topMargin: 3
                                             anchors.right: parent.right
                                             anchors.left: parent.left
-                                            visible: hasdescription
+                                            enabled: hasdescription
+                                            opacity: (isselected && enabled) ? 1 : 0.5
 
                                             StyledTextEdit {
                                                 id: descriptionText
@@ -323,24 +332,25 @@ Item {
                                             }
                                         }
 
-                                        Item {
-                                            width: 10
-                                            height: 1
-                                        }
-
                                         StyledText {
                                             id: keywordsHit
                                             text: i18.n + qsTr("Keywords:")
-                                            visible: haskeywords
                                             isActive: isselected
+                                            anchors.left: parent.left
+                                            anchors.top: descriptionRectangle.bottom
+                                            anchors.topMargin: 10
                                         }
 
                                         Rectangle {
-                                            color: isselected ? Colors.inputBackgroundColor : Colors.inputInactiveBackground
+                                            id: keywordsRectangle
+                                            color: (isselected && enabled) ? Colors.inputBackgroundColor : Colors.inputInactiveBackground
                                             height: childrenRect.height + 10
                                             anchors.right: parent.right
                                             anchors.left: parent.left
-                                            visible: haskeywords
+                                            enabled: haskeywords
+                                            anchors.top: keywordsHit.bottom
+                                            anchors.topMargin: 3
+                                            opacity: (isselected && enabled) ? 1 : 0.5
 
                                             StyledTextEdit {
                                                 id: keywordsText
@@ -373,7 +383,7 @@ Item {
                         visible: replaceModel.count == 0
 
                         StyledText {
-                            text: i18.n + qsTr("There are no items to replace")
+                            text: i18.n + qsTr("Nothing found")
                             anchors.centerIn: parent
                             color: Colors.selectedArtworkBackground
                         }
@@ -391,6 +401,7 @@ Item {
                     StyledButton {
                         text: i18.n + qsTr("Select all")
                         width: 100
+                        enabled: replaceModel.count > 0
                         onClicked: {
                             replaceModel.selectAll();
                         }
@@ -399,6 +410,7 @@ Item {
                     StyledButton {
                         text: i18.n + qsTr("Unselect all")
                         width: 100
+                        enabled: replaceModel.count > 0
                         onClicked: {
                             replaceModel.unselectAll();
                         }
@@ -410,11 +422,10 @@ Item {
 
                     StyledButton {
                         text: i18.n + qsTr("Replace")
+                        enabled: replaceModel.count > 0
                         width: 100
                         onClicked: {
                             replaceModel.replace()
-                            // replacePreviewComponent.closePopup()
-                            componentParent.closePopup()
                         }
                     }
 
@@ -422,7 +433,7 @@ Item {
                         text: i18.n + qsTr("Close")
                         width: 100
                         onClicked: {
-                            replacePreviewComponent.closePopup()
+                            closePopup()
                         }
                     }
                 }

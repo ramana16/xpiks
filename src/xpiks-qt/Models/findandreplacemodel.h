@@ -27,11 +27,13 @@
 #include <QQuickTextDocument>
 #include "../Models/previewmetadataelement.h"
 #include "../Common/flags.h"
+#include "../Common/iflagsprovider.h"
 
 namespace Models {
     class FindAndReplaceModel:
         public QAbstractListModel,
-        public Common::BaseEntity
+        public Common::BaseEntity,
+        public Common::IFlagsProvider
     {
         Q_OBJECT
         Q_PROPERTY(QString replaceFrom READ getReplaceFrom WRITE setReplaceFrom NOTIFY replaceFromChanged)
@@ -40,14 +42,20 @@ namespace Models {
         Q_PROPERTY(bool searchInDescription READ getSearchInDescription WRITE setSearchInDescription NOTIFY searchInDescriptionChanged)
         Q_PROPERTY(bool searchInKeywords READ getSearchInKeywords WRITE setSearchInKeywords NOTIFY searchInKeywordsChanged)
         Q_PROPERTY(bool caseSensitive READ getCaseSensitive WRITE setCaseSensitive NOTIFY caseSensitiveChanged)
-        Q_PROPERTY(int count READ getCount NOTIFY countChanged)
+        Q_PROPERTY(bool searchWholeWords READ getSearchWholeWords WRITE setSearchWholeWords NOTIFY searchWholeWordsChanged)
+        Q_PROPERTY(int count READ getArtworksCount NOTIFY countChanged)
 
     public:
         FindAndReplaceModel(QMLExtensions::ColorsModel *colorsModel, QObject *parent=0);
 
         virtual ~FindAndReplaceModel() {}
 
+    public:
+        virtual int getFlags() const { return m_Flags; }
         const QString &getReplaceFrom() const { return m_ReplaceFrom; }
+        const QString &getReplaceTo() const { return m_ReplaceTo; }
+        int getArtworksCount() const { return (int)m_ArtworksList.size(); }
+
         void setReplaceFrom(const QString &value) {
             QString valueTrimmed = value.trimmed();
 
@@ -57,7 +65,6 @@ namespace Models {
             }
         }
 
-        const QString &getReplaceTo() const { return m_ReplaceTo; }
         void setReplaceTo(const QString &value) {
             QString valueTrimmed = value.trimmed();
 
@@ -67,7 +74,8 @@ namespace Models {
             }
         }
 
-        bool inline getSearchInTitle() const {
+    public:
+        bool getSearchInTitle() const {
             return Common::HasFlag(m_Flags, Common::SearchFlagSearchTitle);
         }
 
@@ -78,7 +86,7 @@ namespace Models {
             }
         }
 
-        bool inline getSearchInDescription() const {
+        bool getSearchInDescription() const {
             return Common::HasFlag(m_Flags, Common::SearchFlagSearchDescription);
         }
 
@@ -89,7 +97,7 @@ namespace Models {
             }
         }
 
-        bool inline getSearchInKeywords() const {
+        bool getSearchInKeywords() const {
             return Common::HasFlag(m_Flags, Common::SearchFlagSearchKeywords);
         }
 
@@ -100,7 +108,7 @@ namespace Models {
             }
         }
 
-        bool inline getCaseSensitive() const {
+        bool getCaseSensitive() const {
             return Common::HasFlag(m_Flags, Common::SearchFlagCaseSensitive);
         }
 
@@ -111,7 +119,16 @@ namespace Models {
             }
         }
 
-        int getCount() const { return (int)m_ArtworksList.size(); }
+        bool getSearchWholeWords() const {
+            return Common::HasFlag(m_Flags, Common::SearchFlagExactMatch);
+        }
+
+        void setSearchWholeWords(bool value) {
+            if (value != getSearchWholeWords()) {
+                Common::ApplyFlag(m_Flags, value, Common::SearchFlagExactMatch);
+                emit searchWholeWordsChanged(value);
+            }
+        }
 
     public:
         enum FindAndReplaceModelRoles {
@@ -126,7 +143,7 @@ namespace Models {
     public:
         Q_INVOKABLE void initArtworksList();
 
-#ifndef CORE_TESTS
+#if !defined(CORE_TESTS) && !defined(INTEGRATION_TESTS)
         Q_INVOKABLE void initHighlighting(QQuickTextDocument *document);
 #endif
         Q_INVOKABLE QString getSearchTitle(int index);
@@ -135,6 +152,15 @@ namespace Models {
         Q_INVOKABLE void replace();
         Q_INVOKABLE void selectAll() { setAllSelected(true); }
         Q_INVOKABLE void unselectAll() { setAllSelected(false); }
+        Q_INVOKABLE bool anySearchDestination() const;
+        Q_INVOKABLE void resetModel();
+
+#ifdef INTEGRATION_TESTS
+        void setItemSelected(int index, bool selected) {
+            m_ArtworksList[index].setSelected(selected);
+        }
+
+#endif
 
     public:
         virtual int rowCount(const QModelIndex &parent=QModelIndex()) const;
@@ -152,12 +178,15 @@ namespace Models {
         void searchInDescriptionChanged(bool value);
         void searchInKeywordsChanged(bool value);
         void caseSensitiveChanged(bool value);
+        void searchWholeWordsChanged(bool value);
         void countChanged(int value);
         void allSelectedChanged();
+        void replaceSucceeded();
 
     private:
         QString filterText(const QString &text);
         void setAllSelected(bool isSelected);
+        void initDefaultFlags();
 
     private:
         std::vector<Models::PreviewMetadataElement> m_ArtworksList;

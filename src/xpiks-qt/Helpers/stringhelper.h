@@ -26,12 +26,19 @@
 #include <vector>
 #include <QString>
 #include <stdarg.h>
+#include <functional>
 
 class QString;
 class QStringList;
 class QByteArray;
 
 namespace Helpers {
+    void foreachWord(const QString &text,
+                     const std::function<bool (const QString &word)> &pred,
+                     const std::function<void (int start, int length, const QString &word)> &action);
+    QString replaceWholeWords(const QString &text, const QString &replaceWhat,
+                              const QString &replaceTo, Qt::CaseSensitivity caseSensitivity=Qt::CaseInsensitive);
+    bool containsWholeWords(const QString &haystack, const QString &needle, Qt::CaseSensitivity caseSensitivity=Qt::CaseInsensitive);
     QString getLastNLines(const QString &text, int N);
     void splitText(const QString &text, QStringList &parts);
     int levensteinDistance(const QString &s1, const QString &s2);
@@ -39,7 +46,7 @@ namespace Helpers {
     QString detectEncodingAndDecode(const std::string &value);
     bool is7BitAscii(const QByteArray &s);
     std::string string_format(const std::string fmt, ...);
-    QString getReplacementSubstrings(const QString &text, const std::vector<int> &hits, int size);
+    QString getUnitedHitsString(const QString &text, const std::vector<int> &hits, int radius);
 }
 
 #endif // STRINGHELPER

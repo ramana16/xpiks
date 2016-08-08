@@ -183,8 +183,9 @@ void Commands::CommandManager::InjectDependency(QMLExtensions::ImageCachingServi
     Q_ASSERT(imageCachingService != NULL); m_ImageCachingService = imageCachingService;
 }
 
-void Commands::CommandManager::InjectDependency(Models::FindAndReplaceModel *replacePreview) {
-    Q_ASSERT(replacePreview != NULL); replacePreview->setCommandManager(this);
+void Commands::CommandManager::InjectDependency(Models::FindAndReplaceModel *findAndReplaceModel) {
+    Q_ASSERT(findAndReplaceModel != NULL); m_FindAndReplaceModel = findAndReplaceModel;
+    m_FindAndReplaceModel->setCommandManager(this);
 }
 
 void Commands::CommandManager::InjectDependency(Models::DeleteKeywordsViewModel *deleteKeywordsViewModel) {
@@ -282,6 +283,7 @@ void Commands::CommandManager::ensureDependenciesInjected() {
     Q_ASSERT(m_ColorsModel != NULL);
     Q_ASSERT(m_AutoCompleteService != NULL);
     Q_ASSERT(m_ImageCachingService != NULL);
+    Q_ASSERT(m_FindAndReplaceModel != NULL);
     Q_ASSERT(m_DeleteKeywordsViewModel != NULL);
 }
 
@@ -289,7 +291,7 @@ void Commands::CommandManager::recodePasswords(const QString &oldMasterPassword,
                                                const QString &newMasterPassword,
                                                const std::vector<std::shared_ptr<Models::UploadInfo> > &uploadInfos) const {
     if (m_SecretsManager) {
-        LOG_DEBUG << uploadInfos.size() << "item(s)";
+        LOG_INFO << uploadInfos.size() << "item(s)";
 
         for (auto &info: uploadInfos) {
             if (info->hasPassword()) {
@@ -302,7 +304,7 @@ void Commands::CommandManager::recodePasswords(const QString &oldMasterPassword,
 }
 
 void Commands::CommandManager::combineArtwork(Models::ArtworkMetadata *metadata, int index) const {
-    LOG_DEBUG << "one item with index" << index;
+    LOG_INFO << "one item with index" << index;
     if (m_CombinedArtworksModel) {
         std::vector<Models::MetadataElement> items;
         items.emplace_back(metadata, index);
@@ -313,7 +315,7 @@ void Commands::CommandManager::combineArtwork(Models::ArtworkMetadata *metadata,
 }
 
 void Commands::CommandManager::combineArtworks(std::vector<Models::MetadataElement> &artworks) const {
-    LOG_DEBUG << artworks.size() << "artworks";
+    LOG_INFO << artworks.size() << "artworks";
     if (m_CombinedArtworksModel) {
         m_CombinedArtworksModel->resetModel();
         m_CombinedArtworksModel->setArtworks(artworks);
@@ -321,7 +323,7 @@ void Commands::CommandManager::combineArtworks(std::vector<Models::MetadataEleme
 }
 
 void Commands::CommandManager::deleteKeywordsFromArtworks(std::vector<Models::MetadataElement> &artworks) const {
-    LOG_DEBUG << artworks.size() << "artworks";
+    LOG_INFO << artworks.size() << "artworks";
     if (m_DeleteKeywordsViewModel != NULL) {
         m_DeleteKeywordsViewModel->setArtworks(artworks);
     }
@@ -342,9 +344,7 @@ void Commands::CommandManager::setArtworksForZipping(const QVector<Models::Artwo
 /*virtual*/
 void Commands::CommandManager::connectArtworkSignals(Models::ArtworkMetadata *metadata) const {
     if (m_ArtItemsModel) {
-#ifdef INTEGRATION_TESTS
-        LOG_DEBUG << "Connecting to ArtItemsModel...";
-#endif
+        LOG_INTEGRATION_TESTS << "Connecting to ArtItemsModel...";
 
         QObject::connect(metadata, SIGNAL(modifiedChanged(bool)),
             m_ArtItemsModel, SLOT(itemModifiedChanged(bool)));
@@ -357,18 +357,14 @@ void Commands::CommandManager::connectArtworkSignals(Models::ArtworkMetadata *me
     }
 
     if (m_FilteredItemsModel) {
-#ifdef INTEGRATION_TESTS
-        LOG_DEBUG << "Connecting to FilteredItemsModel...";
-#endif
+        LOG_INTEGRATION_TESTS << "Connecting to FilteredItemsModel...";
 
         QObject::connect(metadata, SIGNAL(selectedChanged(bool)),
             m_FilteredItemsModel, SLOT(itemSelectedChanged(bool)));
     }
 
     if (m_ArtworksRepository) {
-#ifdef INTEGRATION_TESTS
-        LOG_DEBUG << "Connecting to ArtworksRepository...";
-#endif
+        LOG_INTEGRATION_TESTS << "Connecting to ArtworksRepository...";
         // QObject::connect(metadata, SIGNAL(fileSelectedChanged(QString,bool)),
         //                 m_ArtworksRepository, SLOT(fileSelectedChanged(QString,bool)));
     }
@@ -527,9 +523,7 @@ void Commands::CommandManager::submitForWarningsCheck(Models::ArtworkMetadata *i
 
     int count = m_WarningsCheckers.length();
 
-#ifdef INTEGRATION_TESTS
-    LOG_DEBUG << count << "checkers available";
-#endif
+    LOG_INTEGRATION_TESTS << count << "checkers available";
 
     for (int i = 0; i < count; ++i) {
         Common::IServiceBase<Common::IBasicArtwork> *checker = m_WarningsCheckers.at(i);

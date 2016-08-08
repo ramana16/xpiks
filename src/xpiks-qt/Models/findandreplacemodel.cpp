@@ -33,47 +33,87 @@
 #include "../Common/defines.h"
 #include "../Helpers/stringhelper.h"
 
+QString searchFlagsToString(int flags) {
+    QStringList items;
+    items.reserve(10);
+
+    if (Common::HasFlag(flags, Common::SearchFlagCaseSensitive)) {
+        items.append("SearchFlagCaseSensitive");
+    }
+
+    if (Common::HasFlag(flags, Common::SearchFlagSearchDescription)) {
+        items.append("SearchFlagSearchDescription");
+    }
+
+    if (Common::HasFlag(flags, Common::SearchFlagSearchTitle)) {
+        items.append("SearchFlagSearchTitle");
+    }
+
+    if (Common::HasFlag(flags, Common::SearchFlagSearchKeywords)) {
+        items.append("SearchFlagSearchKeywords");
+    }
+
+    if (Common::HasFlag(flags, Common::SearchFlagExactMatch)) {
+        items.append("SearchFlagExactMatch");
+    }
+
+    if (Common::HasFlag(flags, Common::SearchFlagAllSearchTerms)) {
+        items.append("SearchFlagAllSearchTerms");
+    }
+
+    return items.join(" | ");
+}
+
 namespace Models {
     FindAndReplaceModel::FindAndReplaceModel(QMLExtensions::ColorsModel *colorsModel, QObject *parent):
         QAbstractListModel(parent),
         Common::BaseEntity(),
         m_ColorsModel(colorsModel),
         m_Flags(0)
-    { }
+    {
+        Q_ASSERT(colorsModel != nullptr);
+        initDefaultFlags();
+    }
 
     void FindAndReplaceModel::initArtworksList() {
-        m_ArtworksList.clear();
+        LOG_INFO << "Flags:" << searchFlagsToString(m_Flags);
+        LOG_INFO << "ReplaceFrom:" << m_ReplaceFrom;
 
         Models::FilteredArtItemsProxyModel *filteredItemsModel = m_CommandManager->getFilteredArtItemsModel();
         m_ArtworksList = std::move(filteredItemsModel->getSearchablePreviewOriginalItems(m_ReplaceFrom, m_Flags));
 
-        int initialFlag = 0;
-        Common::ApplyFlag(initialFlag, getCaseSensitive(), Common::SearchFlagCaseSensitive);
+        LOG_INFO << "Found" << m_ArtworksList.size() << "item(s)";
 
         for (auto &preview: m_ArtworksList) {
             Models::ArtworkMetadata *metadata = preview.getOrigin();
-            int flags = initialFlag;
-            bool value = false;
+            bool hasMatch = false;
+            int flags = 0;
 
-            if (FindAndReplaceModel::getSearchInTitle()) {
-                flags = initialFlag;
-                Common::ApplyFlag(flags, true, Common::SearchFlagSearchTitle);
-                value = Helpers::hasSearchMatch(m_ReplaceFrom, metadata, flags);
-                preview.setHasTitleMatch(value);
+            if (getSearchInTitle()) {
+                flags = m_Flags;
+                Common::UnsetFlag(flags, Common::SearchFlagSearchDescription);
+                Common::UnsetFlag(flags, Common::SearchFlagSearchKeywords);
+
+                hasMatch = Helpers::hasSearchMatch(m_ReplaceFrom, metadata, flags);
+                preview.setHasTitleMatch(hasMatch);
             }
 
-            if (FindAndReplaceModel::getSearchInDescription()) {
-                flags = initialFlag;
-                Common::ApplyFlag(flags, true, Common::SearchFlagSearchDescription);
-                value = Helpers::hasSearchMatch(m_ReplaceFrom, metadata, flags);
-                preview.setHasDescriptionMatch(value);
+            if (getSearchInDescription()) {
+                flags = m_Flags;
+                Common::UnsetFlag(flags, Common::SearchFlagSearchTitle);
+                Common::UnsetFlag(flags, Common::SearchFlagSearchKeywords);
+
+                hasMatch = Helpers::hasSearchMatch(m_ReplaceFrom, metadata, flags);
+                preview.setHasDescriptionMatch(hasMatch);
             }
 
-            if (FindAndReplaceModel::getSearchInKeywords()) {
-                flags = initialFlag;
-                Common::ApplyFlag(flags, true, Common::SearchFlagSearchKeywords);
-                value = Helpers::hasSearchMatch(m_ReplaceFrom, metadata, flags);
-                preview.setHasKeywordsMatch(value);
+            if (getSearchInKeywords()) {
+                flags = m_Flags;
+                Common::UnsetFlag(flags, Common::SearchFlagSearchDescription);
+                Common::UnsetFlag(flags, Common::SearchFlagSearchTitle);
+
+                hasMatch = Helpers::hasSearchMatch(m_ReplaceFrom, metadata, flags);
+                preview.setHasKeywordsMatch(hasMatch);
             }
         }
     }
@@ -148,9 +188,10 @@ namespace Models {
         return roles;
     }
 
-#ifndef CORE_TESTS
+#if !defined(CORE_TESTS) && !defined(INTEGRATION_TESTS)
     void FindAndReplaceModel::initHighlighting(QQuickTextDocument *document) {
-        Helpers::MetadataHighlighter *highlighter = new Helpers::MetadataHighlighter(m_ReplaceFrom, FindAndReplaceModel::getCaseSensitive(),
+        Helpers::MetadataHighlighter *highlighter = new Helpers::MetadataHighlighter(m_ReplaceFrom,
+                                                                                     this,
                                                                                      m_ColorsModel,
                                                                                      document->textDocument());
 
@@ -166,9 +207,17 @@ namespace Models {
         }
 
         Models::PreviewMetadataElement const &item = m_ArtworksList.at(index);
+        Models::ArtworkMetadata *metadata = item.getOrigin();
+
         if (item.hasTitleMatch()) {
-            Models::ArtworkMetadata *metadata = item.getOrigin();
             text = filterText(metadata->getTitle());
+        } else {
+            auto title = metadata->getTitle();
+            if (title.size() > PREVIEWOFFSET*2) {
+                text = title.left(PREVIEWOFFSET*2) + " ...";
+            } else {
+                text = title;
+            }
         }
 
         return text;
@@ -182,9 +231,17 @@ namespace Models {
         }
 
         Models::PreviewMetadataElement const &item = m_ArtworksList.at(index);
+        Models::ArtworkMetadata *metadata = item.getOrigin();
+
         if (item.hasDescriptionMatch()) {
-            Models::ArtworkMetadata *metadata = item.getOrigin();
             text = filterText(metadata->getDescription());
+        } else {
+            auto description = metadata->getDescription();
+            if (description.size() > PREVIEWOFFSET*2) {
+                text = description.left(PREVIEWOFFSET*2) + " ...";
+            } else {
+                text = description;
+            }
         }
 
         return text;
@@ -198,38 +255,73 @@ namespace Models {
         }
 
         Models::PreviewMetadataElement const &item = m_ArtworksList.at(index);
+        Models::ArtworkMetadata *metadata = item.getOrigin();
+        QStringList list = metadata->getKeywords();
+
         if (item.hasKeywordsMatch()) {
-            Models::ArtworkMetadata *metadata = item.getOrigin();
-            QStringList list = metadata->getKeywords();
             Qt::CaseSensitivity caseSensitivity = FindAndReplaceModel::getCaseSensitive() ? Qt::CaseSensitive : Qt::CaseInsensitive;
+            const bool wholeWords = getSearchWholeWords();
 
             QStringList listNew;
             for (auto &el: list) {
-                if (el.contains(m_ReplaceFrom, caseSensitivity)) {
+                if (!wholeWords) {
+                    if (el.contains(m_ReplaceFrom, caseSensitivity)) {
+                        listNew.append(el);
+                    }
+                } else if (QString::compare(m_ReplaceFrom, el, caseSensitivity) == 0) {
                     listNew.append(el);
                 }
             }
 
             text.append(listNew.join(", "));
+        } else {
+            if (list.length() > PREVIEWKEYWORDSCOUNT) {
+                auto part = list.mid(0, PREVIEWKEYWORDSCOUNT);
+                text = part.join(", ") + " ...";
+            } else {
+                text = list.join(", ");
+            }
         }
 
         return text;
     }
 
     void FindAndReplaceModel::replace() {
+        LOG_INFO << "Flags:" << searchFlagsToString(m_Flags);
+
         std::shared_ptr<Commands::FindAndReplaceCommand> replaceCommand(new Commands::FindAndReplaceCommand(m_ArtworksList, m_ReplaceFrom,
                                                                                                             m_ReplaceTo,
                                                                                                             m_Flags));
 
         m_CommandManager->processCommand(replaceCommand);
+
+        emit replaceSucceeded();
+    }
+
+    bool FindAndReplaceModel::anySearchDestination() const {
+        return
+                getSearchInDescription() ||
+                getSearchInTitle() ||
+                getSearchInKeywords();
+    }
+
+    void FindAndReplaceModel::resetModel() {
+        LOG_DEBUG << "#";
+
+        initDefaultFlags();
+        m_ArtworksList.clear();
+        m_ReplaceFrom.clear();
+        m_ReplaceTo.clear();
     }
 
     QString FindAndReplaceModel::filterText(const QString &text) {
         int size = m_ReplaceFrom.size();
 
+#ifndef QT_DEBUG
         if (text.size() <= 2*PREVIEWOFFSET) {
             return text;
         }
+#endif
 
         QString result;
         Qt::CaseSensitivity caseSensitivity = FindAndReplaceModel::getCaseSensitive() ? Qt::CaseSensitive : Qt::CaseInsensitive;
@@ -245,13 +337,15 @@ namespace Models {
         }
 
         if (!hits.empty()) {
-            result = Helpers::getReplacementSubstrings(text, hits, size);
+            result = Helpers::getUnitedHitsString(text, hits, PREVIEWOFFSET);
         }
 
         return result;
     }
 
     void FindAndReplaceModel::setAllSelected(bool isSelected) {
+        LOG_INFO << "isSelected:" << isSelected;
+
         for (auto &item: m_ArtworksList) {
             item.setSelected(isSelected);
         }
@@ -261,5 +355,14 @@ namespace Models {
         emit dataChanged(first, last, QVector<int>() << IsSelectedRole);
 
         emit allSelectedChanged();
+    }
+
+    void FindAndReplaceModel::initDefaultFlags() {
+        m_Flags = 0;
+        Common::SetFlag(m_Flags, Common::SearchFlagCaseSensitive);
+        Common::SetFlag(m_Flags, Common::SearchFlagSearchTitle);
+        Common::SetFlag(m_Flags, Common::SearchFlagSearchDescription);
+        Common::SetFlag(m_Flags, Common::SearchFlagSearchKeywords);
+        // Common::SetFlag(m_Flags, Common::SearchFlagExactMatch);
     }
 }

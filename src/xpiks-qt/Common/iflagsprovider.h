@@ -19,23 +19,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INDICESHELPER_H
-#define INDICESHELPER_H
+#ifndef IFLAGSPROVIDER_H
+#define IFLAGSPROVIDER_H
 
-#include <QVector>
-#include <QPair>
-#include <vector>
-#include <utility>
+namespace Common {
+    class IFlagsProvider {
+    public:
+        virtual ~IFlagsProvider() {}
 
-namespace Helpers {
-    typedef std::vector<std::pair<int, int> > RangesVector;
-
-    template<class T>
-    int splitIntoChunks(const QVector<T> &items, int chunksCount, QVector<QVector<T> > &chunks);
-
-    void indicesToRanges(const QVector<int> &indices, QVector<QPair<int, int> > &ranges);
-    int getRangesLength(const QVector<QPair<int, int> > &ranges);
-    RangesVector unionRanges(RangesVector &ranges);
+        virtual int getFlags() const = 0;
+    };
 }
 
-#endif // INDICESHELPER_H
+#endif // IFLAGSPROVIDER_H

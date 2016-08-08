@@ -280,7 +280,8 @@ HEADERS += \
     Models/deletekeywordsviewmodel.h \
     Models/artworksviewmodel.h \
     Helpers/keywordshelpers.h \
-    Conectivity/uploadwatcher.h
+    Conectivity/uploadwatcher.h \
+    Common/iflagsprovider.h
 
 DISTFILES += \
     Components/CloseIcon.qml \

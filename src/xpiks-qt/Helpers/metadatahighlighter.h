@@ -25,6 +25,7 @@
 #include <QSyntaxHighlighter>
 #include <QString>
 #include <QTextDocument>
+#include "../Common/iflagsprovider.h"
 
 namespace QMLExtensions {
     class ColorsModel;
@@ -35,7 +36,8 @@ namespace Helpers {
         public QSyntaxHighlighter
     {
     public:
-        MetadataHighlighter(const QString &replaceFrom, bool caseSensitive, QMLExtensions::ColorsModel *colorsModel, QTextDocument *document=0);
+        MetadataHighlighter(const QString &replaceFrom, Common::IFlagsProvider *flagsProvider,
+                            QMLExtensions::ColorsModel *colorsModel, QTextDocument *document=0);
 
     protected:
         void highlightBlock(const QString &text);
@@ -43,7 +45,7 @@ namespace Helpers {
     private:
         QMLExtensions::ColorsModel *m_ColorsModel;
         QString m_ReplaceFrom;
-        bool m_CaseSensitive;
+        Common::IFlagsProvider *m_FlagsProvider;
         QTextCharFormat m_Format;
     };
 }

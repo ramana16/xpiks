@@ -7,9 +7,7 @@ namespace Conectivity {
         QAbstractListModel(parent)
     {}
 
-
-    void UploadWatcher::resetModel()
-    {
+    void UploadWatcher::resetModel() {
         beginResetModel();
         m_FtpInfo.clear();
         endResetModel();
@@ -19,6 +17,7 @@ namespace Conectivity {
         if (row < 0 || row >= (int)m_FtpInfo.size()) {
             return QStringList();
         }
+
         auto &item = m_FtpInfo.at(row);
         return item.second;
     }
@@ -56,9 +55,11 @@ namespace Conectivity {
 
         bool found = false;
         int size = m_FtpInfo.size();
-        if (filepath.right(3).toLower() == "eps"){
+
+        if (filepath.right(3).toLower() == "eps") {
             return;
         }
+
         for (int i = 0; i < size; i++) {
             if (m_FtpInfo[i].first == host) {
                 m_FtpInfo[i].second.append(filepath);
@@ -66,6 +67,7 @@ namespace Conectivity {
                 break;
             }
         }
+
         if (!found) {
             m_FtpInfo.append(QPair<QString, QStringList>(host, QStringList(filepath)));
         }

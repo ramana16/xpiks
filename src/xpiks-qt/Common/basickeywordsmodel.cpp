@@ -63,12 +63,9 @@ namespace Common {
         bool wasCorrect = false;
 
         this->takeKeywordAtUnsafe(row, removedKeyword, wasCorrect);
-#ifdef INTEGRATION_TESTS
-        LOG_DEBUG << "keyword:" << removedKeyword << "was correct:" << wasCorrect;
-#else
+        LOG_INTEGRATION_TESTS << "keyword:" << removedKeyword << "was correct:" << wasCorrect;
         Q_UNUSED(removedKeyword);
         Q_UNUSED(wasCorrect);
-#endif
     }
 
     int BasicKeywordsModel::rowCount(const QModelIndex &parent) const {
@@ -261,19 +258,16 @@ namespace Common {
         Q_ASSERT((flags & Common::SearchFlagSearchMetadata) != 0);
         bool anyChanged = false;
 
-        bool isCaseSensitive = Common::HasFlag(flags, Common::SearchFlagCaseSensitive);
-        Qt::CaseSensitivity caseSensivity = isCaseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive;
-
         const bool needToCheckDescription = Common::HasFlag(flags, Common::SearchFlagSearchDescription);
         if (needToCheckDescription) {
-            if (this->replaceInDescription(replaceWhat, replaceTo, caseSensivity)) {
+            if (this->replaceInDescription(replaceWhat, replaceTo, flags)) {
                 anyChanged = true;
             }
         }
 
         const bool needToCheckTitle = Common::HasFlag(flags, Common::SearchFlagSearchTitle);
         if (needToCheckTitle) {
-            if (this->replaceInTitle(replaceWhat, replaceTo, caseSensivity)) {
+            if (this->replaceInTitle(replaceWhat, replaceTo, flags)) {
                 anyChanged = true;
             }
         }
@@ -282,7 +276,7 @@ namespace Common {
         if (needToCheckKeywords) {
             QWriteLocker locker(&m_KeywordsLock);
             Q_UNUSED(locker);
-            if (this->replaceInKeywordsUnsafe(replaceWhat, replaceTo, caseSensivity)) {
+            if (this->replaceInKeywordsUnsafe(replaceWhat, replaceTo, flags)) {
                 anyChanged = true;
             }
         }
@@ -390,7 +384,7 @@ namespace Common {
 
                 result = true;
             } else if (lowerCasedNew == lowerCasedExisting) {
-                LOG_DEBUG << "changing case in same keyword";
+                LOG_INFO << "changing case in same keyword";
                 m_KeywordsList[index] = sanitized;
 
                 result = true;
@@ -412,7 +406,7 @@ namespace Common {
                 result = true;
             }
         } else if (internal.contains(existing) && internal.contains(QChar::Space)) {
-            LOG_DEBUG << "Replacing composite keyword";
+            LOG_INFO << "Replacing composite keyword";
             QString existingFixed = internal;
             existingFixed.replace(existing, replacement);
             if (this->editKeywordUnsafe(index, existingFixed)) {
@@ -517,31 +511,60 @@ namespace Common {
     }
 
     bool BasicKeywordsModel::replaceInDescription(const QString &replaceWhat, const QString &replaceTo,
-                                                  Qt::CaseSensitivity caseSensivity) {
+                                                  int flags) {
+        const bool wholeWords = Common::HasFlag(flags, Common::SearchFlagExactMatch);
+        const bool caseSensitive = Common::HasFlag(flags, Common::SearchFlagCaseSensitive);
+        const Qt::CaseSensitivity caseSensivity = caseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive;
+
         QString description = getDescription();
-        description.replace(replaceWhat, replaceTo, caseSensivity);
+        if (!wholeWords) {
+            description.replace(replaceWhat, replaceTo, caseSensivity);
+        } else {
+            description = Helpers::replaceWholeWords(description, replaceWhat, replaceTo, caseSensivity);
+        }
+
         bool result = setDescription(description);
         return result;
     }
 
     bool BasicKeywordsModel::replaceInTitle(const QString &replaceWhat, const QString &replaceTo,
-                                            Qt::CaseSensitivity caseSensivity) {
+                                            int flags) {
+        const bool wholeWords = Common::HasFlag(flags, Common::SearchFlagExactMatch);
+        const bool caseSensitive = Common::HasFlag(flags, Common::SearchFlagCaseSensitive);
+        const Qt::CaseSensitivity caseSensivity = caseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive;
+
         QString title = getTitle();
-        title.replace(replaceWhat, replaceTo, caseSensivity);
+        if (!wholeWords) {
+            title.replace(replaceWhat, replaceTo, caseSensivity);
+        } else {
+            title = Helpers::replaceWholeWords(title, replaceWhat, replaceTo, caseSensivity);
+        }
+
         bool result = setTitle(title);
         return result;
     }
 
     bool BasicKeywordsModel::replaceInKeywordsUnsafe(const QString &replaceWhat, const QString &replaceTo,
-                                                     Qt::CaseSensitivity caseSensivity) {
+                                                     int flags) {
         bool anyChanged = false;
         QVector<int> indicesToRemove;
 
-        int size = m_KeywordsList.length();
+        const bool caseSensitive = Common::HasFlag(flags, Common::SearchFlagCaseSensitive);
+        const bool wholeWords = Common::HasFlag(flags, Common::SearchFlagExactMatch);
+        const Qt::CaseSensitivity caseSensivity = caseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive;
+
+        const int size = m_KeywordsList.size();
         for (int i = 0; i < size; ++i) {
             QString internal = m_KeywordsList.at(i);
-            if (internal.contains(replaceWhat, caseSensivity)) {
-                QString replaced = internal.replace(replaceWhat, replaceTo, caseSensivity);
+            const bool hasMatch = wholeWords ?
+                        Helpers::containsWholeWords(internal, replaceWhat, caseSensivity) :
+                        internal.contains(replaceWhat, caseSensivity);
+
+            if (hasMatch) {
+                QString replaced = wholeWords ?
+                            Helpers::replaceWholeWords(internal, replaceWhat, replaceTo, caseSensivity) :
+                            internal.replace(replaceWhat, replaceTo, caseSensivity);
+
                 QString replacement = Helpers::doSanitizeKeyword(replaced);
 
                 if (!this->editKeywordUnsafe(i, replacement) &&
@@ -792,13 +815,11 @@ namespace Common {
 
         Q_UNUSED(writeLocker);
 
-#ifdef INTEGRATION_TESTS
         if (m_KeywordsList.length() != m_SpellCheckResults.length()) {
-            LOG_DEBUG << "Current keywords list length:" << m_KeywordsList.length();
-            LOG_DEBUG << "SpellCheck list length:" << m_SpellCheckResults.length();
+            LOG_INTEGRATION_TESTS << "Current keywords list length:" << m_KeywordsList.length();
+            LOG_INTEGRATION_TESTS << "SpellCheck list length:" << m_SpellCheckResults.length();
         }
 
-#endif
         // sync issue between adding/removing/undo/spellcheck
         Q_ASSERT(m_KeywordsList.length() == m_SpellCheckResults.length());
 
@@ -906,7 +927,7 @@ namespace Common {
 
         m_KeywordsLock.lockForWrite();
         {
-            LOG_DEBUG << "Replacing" << existing << "to" << replacement << "with index" << index;
+            LOG_INFO << "Replacing" << existing << "to" << replacement << "with index" << index;
             if (0 <= index && index < m_KeywordsList.length()) {
                 if (replaceKeywordUnsafe(index, existing, replacement)) {
                     m_SpellCheckResults[index] = true;
@@ -915,7 +936,7 @@ namespace Common {
                     result = Common::KeywordReplaceFailedDuplicate;
                 }
             } else {
-                LOG_DEBUG << "Failure. Index is negative or exceeds count" << m_KeywordsList.length();
+                LOG_INFO << "Failure. Index is negative or exceeds count" << m_KeywordsList.length();
                 result = Common::KeywordReplaceFailedIndex;
             }
         }
@@ -931,7 +952,7 @@ namespace Common {
     }
 
     bool BasicKeywordsModel::processFailedKeywordReplacements(const QVector<SpellCheck::KeywordSpellSuggestions *> &candidatesForRemoval) {
-        LOG_DEBUG << candidatesForRemoval.size() << "candidates to remove";
+        LOG_INFO << candidatesForRemoval.size() << "candidates to remove";
         bool anyReplaced = false;
 
         if (candidatesForRemoval.isEmpty()) { return anyReplaced; }
@@ -970,11 +991,17 @@ namespace Common {
     }
 
     void BasicKeywordsModel::fixDescriptionSpelling(const QString &word, const QString &replacement) {
-        replaceInDescription(word, replacement);
+        int flags = 0;
+        Common::SetFlag(flags, Common::SearchFlagCaseSensitive);
+        Common::SetFlag(flags, Common::SearchFlagSearchDescription);
+        replaceInDescription(word, replacement, flags);
     }
 
     void BasicKeywordsModel::fixTitleSpelling(const QString &word, const QString &replacement) {
-        replaceInTitle(word, replacement);
+        int flags = 0;
+        Common::SetFlag(flags, Common::SearchFlagCaseSensitive);
+        Common::SetFlag(flags, Common::SearchFlagSearchDescription);
+        replaceInTitle(word, replacement, flags);
     }
 
     void BasicKeywordsModel::afterReplaceCallback() {
@@ -1022,9 +1049,9 @@ namespace Common {
         if (existingCurrent == existingPrev) {
             if (m_KeywordsSet.contains(replacement.toLower())) {
                 isDuplicate = true;
-                LOG_DEBUG << "safe to remove duplicate [" << existingCurrent << "] at index" << index;
+                LOG_INFO << "safe to remove duplicate [" << existingCurrent << "] at index" << index;
             } else {
-                LOG_DEBUG << replacement << "was not found";
+                LOG_INFO << replacement << "was not found";
             }
         } else if (existingCurrent.contains(existingPrev) && existingCurrent.contains(QChar::Space)) {
             QString existingFixed = existingCurrent;
@@ -1032,12 +1059,12 @@ namespace Common {
 
             if (m_KeywordsSet.contains(existingFixed.toLower())) {
                 isDuplicate = true;
-                LOG_DEBUG << "safe to remove composite duplicate [" << existingCurrent << "] at index" << index;
+                LOG_INFO << "safe to remove composite duplicate [" << existingCurrent << "] at index" << index;
             } else {
-                LOG_DEBUG << existingFixed << "was not found";
+                LOG_INFO << existingFixed << "was not found";
             }
         } else {
-            LOG_DEBUG << existingCurrent << "is now instead of" << existingPrev << "at index" << index;
+            LOG_INFO << existingCurrent << "is now instead of" << existingPrev << "at index" << index;
         }
 
         return isDuplicate;

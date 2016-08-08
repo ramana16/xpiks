@@ -46,10 +46,15 @@ namespace Commands {
 namespace Models {
     class ArtworkMetadata;
 
-    class ArtworkUploader : public ArtworksProcessor
+    class ArtworkUploader:
+        public ArtworksProcessor
     {
-        Q_OBJECT
-        Q_PROPERTY(Conectivity::UploadWatcher* uploadWatcher READ getUploadWatcher())
+    Q_OBJECT
+
+#if !(defined(INTEGRATION_TESTS) || defined(CORE_TESTS))
+    Q_PROPERTY(Conectivity::UploadWatcher* uploadWatcher READ getUploadWatcher())
+#endif
+
     public:
         ArtworkUploader(Conectivity::IFtpCoordinator *ftpCoordinator, QObject *parent=0);
         virtual ~ArtworkUploader();
@@ -79,26 +84,30 @@ namespace Models {
         Q_INVOKABLE void uploadArtworks();
         Q_INVOKABLE void checkCredentials(const QString &host, const QString &username,
                                           const QString &password, bool disablePassiveMode, bool disableEPSV) const;
+
 #endif
         Q_INVOKABLE bool needCreateArchives() const;
+
         Q_INVOKABLE QString getFtpAddress(const QString &stockName) const { return m_StocksFtpList.getFtpAddress(stockName); }
-        Conectivity::UploadWatcher* getUploadWatcher() {
-            return &m_UploadWatcher;
+        Conectivity::UploadWatcher *getUploadWatcher() {
+            return m_UploadWatcher;
         }
 
         void initializeStocksList();
 
     private:
 #ifndef CORE_TESTS
-        void doUploadArtworks(const QVector<ArtworkMetadata*> &artworkList);
+        void doUploadArtworks(const QVector<ArtworkMetadata *> &artworkList);
+
 #endif
 
     protected:
         virtual void cancelProcessing();
+
         virtual void innerResetModel() { m_Percent = 0; }
 
     private:
-        Conectivity::UploadWatcher m_UploadWatcher;
+        Conectivity::UploadWatcher *m_UploadWatcher;
         Conectivity::IFtpCoordinator *m_FtpCoordinator;
         AutoComplete::StringFilterProxyModel m_StocksCompletionSource;
         AutoComplete::StocksFtpListModel m_StocksFtpList;

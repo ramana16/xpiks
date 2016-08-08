@@ -28,16 +28,154 @@
 #include <QString>
 #include <QtGlobal>
 #include <vector>
+#include <utility>
+#include <algorithm>
 #include "../Common/defines.h"
+#include "../Helpers/indiceshelper.h"
 
 namespace Helpers {
+    void foreachWord(const QString &text,
+            const std::function<bool (const QString &word)> &pred,
+            const std::function<void (int start, int length, const QString &word)> &action)
+    {
+        int i = 0;
+        const int size = text.size();
+        int lastStart = -1;
+
+        while (i < size) {
+            QChar c = text[i];
+            if (c.isSpace() || c.isPunct()) {
+                if (lastStart != -1) {
+                    int wordLength = i - lastStart;
+                    QString word = text.mid(lastStart, wordLength);
+
+                    if (pred(word)) {
+                        action(lastStart, wordLength, word);
+                    }
+
+                    lastStart = -1;
+                }
+            } else {
+                if (lastStart == -1) {
+                    lastStart = i;
+                }
+            }
+
+            i++;
+        }
+
+        if (lastStart != -1) {
+            int wordLength = size - lastStart;
+            QString word = text.mid(lastStart, wordLength);
+
+            if (pred(word)) {
+                action(lastStart, wordLength, word);
+            }
+        }
+    }
+
+    bool isLeftWordBound(const QString &text, int index, bool skipWordBounds=false) {
+        if (index == 0) { return true; }
+
+        QChar curr = text[index];
+        QChar prev = text[index - 1];
+
+        const bool currIsSeparator = curr.isPunct() || curr.isSpace();
+        const bool prevIsSeparator = prev.isPunct() || prev.isSpace();
+
+        return (skipWordBounds || !currIsSeparator) && (prevIsSeparator);
+    }
+
+    bool isRightWordBound(const QString &text, int lastIndex, int index, bool skipWordBounds=false) {
+        if (index == lastIndex) { return true; }
+
+        QChar curr = text[index];
+        QChar next = text[index + 1];
+
+        const bool currIsSeparator = curr.isPunct() || curr.isSpace();
+        const bool nextIsSeparator = next.isPunct() || next.isSpace();
+
+        return (skipWordBounds || !currIsSeparator) && (nextIsSeparator);
+    }
+
+    bool isAWholeWord(const QString &text, int start, int length, bool onlyCheckBounds=false) {
+        if (text.isEmpty()) { return false; }
+
+        if (!isLeftWordBound(text, start, onlyCheckBounds)) { return false; }
+        const int lastIndex = text.size() - 1;
+        if (!isRightWordBound(text, lastIndex, start + length - 1, onlyCheckBounds)) { return false; }
+
+        return true;
+    }
+
+    QString replaceWholeWords(const QString &text, const QString &replaceWhat,
+                              const QString &replaceTo, Qt::CaseSensitivity caseSensitivity) {
+        int pos = 0;
+        const int size = replaceWhat.size();
+        std::vector<std::pair<int, int> > hits;
+        hits.reserve(std::max(text.length() / replaceWhat.length(), 10));
+
+        while (pos != -1) {
+            pos = text.indexOf(replaceWhat, pos, caseSensitivity);
+            if (pos >= 0) {
+                if (isAWholeWord(text, pos, size, true)) {
+                    hits.emplace_back(std::make_pair(pos, size));
+                }
+
+                pos += size;
+            }
+        }
+
+        if (hits.empty()) { return text; }
+
+        QString result;
+        result.reserve(text.length());
+
+        int lastStart = 0;
+        for (auto &hit: hits) {
+            if (hit.first > lastStart) {
+                result.append(text.mid(lastStart, hit.first - lastStart));
+            }
+
+            result.append(replaceTo);
+            lastStart = hit.first + hit.second;
+        }
+
+        if (lastStart < text.length() - 1) {
+            result.append(text.mid(lastStart));
+        }
+
+        return result;
+    }
+
+    bool containsWholeWords(const QString &haystack, const QString &needle, Qt::CaseSensitivity caseSensitivity) {
+        bool anyHit = false;
+
+        int pos = 0;
+        const int size = needle.size();
+
+        while (pos != -1) {
+            pos = haystack.indexOf(needle, pos, caseSensitivity);
+            if (pos >= 0) {
+                if (isAWholeWord(haystack, pos, size, true)) {
+                    anyHit = true;
+                    break;
+                }
+
+                pos += size;
+            }
+        }
+
+        return anyHit;
+    }
+
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 4, 0))
     QString getLastNLines(const QString &text, int N) {
         QString result;
 
         QVector<QStringRef> items = text.splitRef(QRegExp("[\r\n]"), QString::SkipEmptyParts);
 
-        int length = items.length();
+        const int length = items.length();
 
         if (length > 0) {
             int startIndex = length - N;
@@ -84,34 +222,9 @@ namespace Helpers {
 #endif
 
     void splitText(const QString &text, QStringList &parts) {
-        int i = 0;
-        int size = text.size();
-        int lastStart = -1;
-
-        while (i < size) {
-            QChar c = text[i];
-            if (c.isSpace() || c.isPunct()) {
-                if (lastStart != -1) {
-                    int wordLength = i - lastStart;
-                    QString word = text.mid(lastStart, wordLength);
-                    parts.append(word);
-
-                    lastStart = -1;
-                }
-            } else {
-                if (lastStart == -1) {
-                    lastStart = i;
-                }
-            }
-
-            i++;
-        }
-
-        if (lastStart != -1) {
-            int wordLength = size - lastStart;
-            QString word = text.mid(lastStart, wordLength);
-            parts.append(word);
-        }
+        foreachWord(text,
+                    [](const QString&) { return true; },
+        [&parts](int, int, const QString &word) { parts.append(word); });
     }
 
     std::string string_format(const std::string fmt, ...) {
@@ -302,37 +415,55 @@ done:
         return !anyFault;
     }
 
-    QString getReplacementSubstrings(const QString &text, const std::vector<int> &hits, int size) {
-        QString result;
-        QVector<QPair<int, int> > positions;
-        Q_ASSERT(!hits.empty());
-        int start = (hits[0] > PREVIEWOFFSET) ? (hits[0] - PREVIEWOFFSET) : 0;
-        int end = hits[0] + PREVIEWOFFSET;
+    void extendSegmentToWordBoundaries(const QString &text, std::pair<int, int> &segment) {
+        int left = segment.first;
+        while (!isLeftWordBound(text, left)) { left--; }
 
-        positions.push_back(qMakePair(start, 2*PREVIEWOFFSET));
+        int right = segment.second;
+        const int lastIndex = text.size() - 1;
+        while (!isRightWordBound(text, lastIndex, right)) { right++; }
 
-        int i = 0;
-        for (int el: hits) {
-            if ((el - PREVIEWOFFSET) > end) {
-                start = el - PREVIEWOFFSET;
-                end = el + PREVIEWOFFSET;
-                positions.push_back(qMakePair(start, 2*PREVIEWOFFSET));
-                i++;
-            } else {
-                int delta = (el + size) - end;
-                if (delta > 0) {
-                    positions[i].second += delta;
-                    end += delta;
-                }
-            }
+        segment.first = left;
+        segment.second = right;
+    }
+
+    std::pair<int, int> getSegmentFromHit(const QString &text, int hit, int radius) {
+        int left = hit;
+        while (!isLeftWordBound(text, left)) { left--; }
+
+        int right = hit;
+        const int lastIndex = text.size() - 1;
+        while (!isRightWordBound(text, lastIndex, right)) { right++; }
+
+        int first = std::max(0, left - radius);
+        int second = std::min(lastIndex, right + radius);
+        return std::make_pair(first, second);
+    }
+
+    QString getUnitedHitsString(const QString &text, const std::vector<int> &hits, int radius) {
+        std::vector<std::pair<int, int> > segments;
+        segments.resize(hits.size());
+
+        // create segment from each hit
+        std::transform(hits.begin(), hits.end(), segments.begin(),
+                       [&text, radius](int hit) {
+            return getSegmentFromHit(text, hit, radius);
+        });
+
+        for (auto &item: segments) {
+            extendSegmentToWordBoundaries(text, item);
         }
 
-        result.reserve(positions.size());
+        auto unitedSegments = Helpers::unionRanges(segments);
 
-        for (auto &element: positions) {
-            result.append(text.mid(element.first, element.second));
+        QStringList entries;
+        entries.reserve((int)unitedSegments.size());
+
+        for (auto &element: unitedSegments) {
+            entries.append(text.mid(element.first, element.second - element.first + 1));
         }
 
+        QString result = entries.join(" ... ");
         return result;
     }
 }

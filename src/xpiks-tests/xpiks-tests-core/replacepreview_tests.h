@@ -8,10 +8,11 @@ class ReplacePreviewTests: public QObject
 {
     Q_OBJECT
 private slots:
-    void noTructationTest();
-    void simpleTructationTest();
-    void doubleTructationTest();
-    void advancedTructationTest();
+    void smokeTest();
+    void simpleEntryTest();
+    void overlappingEntryTest();
+    void advancedEntryTest();
+    void hitInTheMiddleTest();
 };
 
 #endif // REPLACEPREVIEW_H
