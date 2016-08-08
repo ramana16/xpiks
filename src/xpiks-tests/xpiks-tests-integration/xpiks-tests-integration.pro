@@ -142,7 +142,7 @@ SOURCES += main.cpp \
     combinededitfixspellingtest.cpp \
     findandreplacemodeltest.cpp \
     ../../xpiks-qt/Models/findandreplacemodel.cpp \
-    ../../xpiks-qt/Conectivity\uploadwatcher.cpp
+    ../../xpiks-qt/Conectivity/uploadwatcher.cpp
 
 RESOURCES +=
 
@@ -311,7 +311,7 @@ HEADERS += \
     ../../xpiks-qt/Common/iflagsprovider.h \
     findandreplacemodeltest.h \
     ../../xpiks-qt/Models/findandreplacemodel.h \
-    ../../xpiks-qt/Conectivity\uploadwatcher.h
+    ../../xpiks-qt/Conectivity/uploadwatcher.h
 
 INCLUDEPATH += ../../tiny-aes
 INCLUDEPATH += ../../cpp-libface

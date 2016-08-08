@@ -50,9 +50,7 @@ namespace Conectivity {
     }
 
     void UploadWatcher::reportUploadErrorHandler(const QString &filepath, const QString &host) {
-        QFileInfo fi(filepath);
-
-        if (fi.suffix() == "eps") {
+        if (QFileInfo(filepath).completeSuffix().toLower() == "eps") {
             return;
         }
 

@@ -218,7 +218,8 @@ namespace Models {
                 return info->getTitle();
             }
         }
-
+#else
+        Q_UNUSED(stockAddress)
 #endif
         return QString();
     }
