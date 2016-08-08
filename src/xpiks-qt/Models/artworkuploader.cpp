@@ -42,6 +42,7 @@
 namespace Models {
     ArtworkUploader::ArtworkUploader(Conectivity::IFtpCoordinator *ftpCoordinator, QObject *parent):
         ArtworksProcessor(parent),
+        m_UploadWatcher(NULL),
         m_FtpCoordinator(ftpCoordinator),
         m_Percent(0) {
 #ifndef CORE_TESTS
