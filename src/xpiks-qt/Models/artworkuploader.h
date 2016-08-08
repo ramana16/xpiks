@@ -90,7 +90,7 @@ namespace Models {
 
         Q_INVOKABLE QString getFtpAddress(const QString &stockName) const { return m_StocksFtpList.getFtpAddress(stockName); }
         Conectivity::UploadWatcher *getUploadWatcher() {
-            return m_UploadWatcher;
+            return &m_UploadWatcher;
         }
 
         void initializeStocksList();
@@ -107,7 +107,7 @@ namespace Models {
         virtual void innerResetModel() { m_Percent = 0; }
 
     private:
-        Conectivity::UploadWatcher *m_UploadWatcher;
+        Conectivity::UploadWatcher m_UploadWatcher;
         Conectivity::IFtpCoordinator *m_FtpCoordinator;
         AutoComplete::StringFilterProxyModel m_StocksCompletionSource;
         AutoComplete::StocksFtpListModel m_StocksFtpList;

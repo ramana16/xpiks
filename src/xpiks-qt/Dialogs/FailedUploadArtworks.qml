@@ -42,7 +42,6 @@ Item {
     }
 
     Component.onCompleted: focus = true
-
     PropertyAnimation { target: failedUploadArtworks; property: "opacity";
         duration: 400; from: 0; to: 1;
         easing.type: Easing.InOutQuad ; running: true }
@@ -72,7 +71,7 @@ Item {
             property real old_x : 0
             property real old_y : 0
 
-            onPressed:{
+            onPressed: {
                 var tmp = mapToItem(failedUploadArtworks, mouse.x, mouse.y);
                 old_x = tmp.x;
                 old_y = tmp.y;
@@ -107,6 +106,7 @@ Item {
             color: Colors.selectedImageBackground
             anchors.centerIn: parent
             Component.onCompleted: anchors.centerIn = undefined
+
             ColumnLayout {
                 anchors.fill: parent
                 anchors.margins: 20
@@ -137,7 +137,6 @@ Item {
                                 anchors.right: parent.right
                                 height: hostTitle.height + flow.height + 30
 
-
                                 StyledText {
                                     anchors.top: parent.top
                                     anchors.right : parent.right
@@ -147,6 +146,7 @@ Item {
                                     font.pixelSize: 30
                                     color: Colors.artworkActiveColor
                                 }
+
                                 Flow {
                                     id: flow
                                     spacing: 20
@@ -163,6 +163,7 @@ Item {
                                             width: 120
                                             height: 80
                                             property string delegateData: modelData
+
                                             Image {
                                                 anchors.fill: parent
                                                 source: "image://cached/" + imageItem.delegateData

@@ -1,5 +1,4 @@
 #include "uploadwatcher.h"
-#include "Conectivity/ftpcoordinator.h"
 #include <QFileInfo>
 
 namespace Conectivity {
@@ -51,14 +50,13 @@ namespace Conectivity {
     }
 
     void UploadWatcher::reportUploadErrorHandler(const QString &filepath, const QString &host) {
-        QMutexLocker lock(&m_Mutex);
-
-        bool found = false;
-        int size = m_FtpInfo.size();
 
         if (filepath.right(3).toLower() == "eps") {
             return;
         }
+
+        bool found = false;
+        int size = m_FtpInfo.size();
 
         for (int i = 0; i < size; i++) {
             if (m_FtpInfo[i].first == host) {

@@ -4,11 +4,7 @@
 #include <QAbstractListModel>
 #include <QVector>
 #include <QPair>
-#include <QMutex>
 
-namespace Conectivity {
-    class FtpCoordinator;
-}
 namespace Conectivity {
     class UploadWatcher:
         public QAbstractListModel
@@ -37,7 +33,6 @@ namespace Conectivity {
 
     private:
         QVector<QPair<QString, QStringList> > m_FtpInfo;
-        QMutex m_Mutex;
     };
 }
 #endif // UPLOADWATCHER_H
