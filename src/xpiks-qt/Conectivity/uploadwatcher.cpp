@@ -9,7 +9,7 @@ namespace Conectivity {
 
     void UploadWatcher::resetModel() {
         beginResetModel();
-        LOG_WARNING <<"Resetting UploadWatcher..";
+        LOG_INFO << "Resetting UploadWatcher..";
         m_FtpInfo.clear();
         endResetModel();
     }
@@ -52,8 +52,9 @@ namespace Conectivity {
     }
 
     void UploadWatcher::reportUploadErrorHandler(const QString &filepath, const QString &host) {
+        LOG_WARNING << "Upload failed for file [" << filepath << "] to host {" << host << "}";
         if (QFileInfo(filepath).completeSuffix().toLower() == "eps") {
-            LOG_WARNING <<"Skipping "<<filepath;
+            LOG_INFO << "Skipping" << filepath;
             return;
         }
 
@@ -70,7 +71,7 @@ namespace Conectivity {
 
         if (!found) {
             m_FtpInfo.append(QPair<QString, QStringList>(host, QStringList(filepath)));
-            LOG_WARNING << "Creating new entry for " << host;
+            LOG_INFO << "Creating new entry for" << host;
         }
     }
 }
