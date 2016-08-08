@@ -56,6 +56,10 @@ namespace Models {
 #endif
 
         QObject::connect(&m_StocksFtpList, SIGNAL(stocksListUpdated()), this, SLOT(stocksListUpdated()));
+        if ( m_FtpCoordinator != NULL ){
+            QObject::connect(coordinator, SIGNAL(transferFailedSignal(QString, QString)),
+                             &m_UploadWatcher, SLOT(reportUploadErrorHandler( QString, QString) ) );
+        }
     }
 
     ArtworkUploader::~ArtworkUploader() {

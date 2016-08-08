@@ -349,7 +349,8 @@ DISTFILES += \
     Dialogs/WhatsNewMinorDialog.qml \
     Dialogs/FindAndReplace.qml \
     Dialogs/ReplacePreview.qml \
-    Dialogs/DeleteKeywordsDialog.qml
+    Dialogs/DeleteKeywordsDialog.qml \
+    Dialogs/FailedUploadArtworks.qml
 
 lupdate_only {
 SOURCES += *.qml \

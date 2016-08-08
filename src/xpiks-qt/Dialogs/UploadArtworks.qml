@@ -34,6 +34,7 @@ import "../StyledControls"
 Item {
     id: uploadArtworksComponent
     anchors.fill: parent
+
     property string uploadhostskey: appSettings.uploadHostsKey
     // if MasterPassword wasn't entered do not show passwords
     property bool emptyPasswords: false
@@ -850,7 +851,7 @@ Item {
                     height: 24
                     spacing: 20
 
-                    StyledText {
+                    /*StyledText {
                         visible: !skipUploadItems
                         enabled: uploadArtworksComponent.uploadEnabled && !skipUploadItems
                         text: i18.n + getOriginalText()
@@ -876,6 +877,16 @@ Item {
                                 }
                             }
                         }
+                    }*/
+
+                    StyledButton{
+                        id: showFailedArtworks
+                        enabled: !artworkUploader.inProgress
+                        text: "Show failed artworks"
+                        width: 130
+                        onClicked: {
+                            Common.launchDialog("Dialogs/FailedUploadArtworks.qml", uploadArtworksComponent, {});
+                        }
                     }
 
                     Item {
@@ -892,6 +903,7 @@ Item {
                                 if (uploadInfos.getSelectedInfosCount() === 0) {
                                     selectHostsMessageBox.open()
                                 } else {
+                                    artworkUploader.uploadWatcher.resetModel()
                                     var agencies = uploadInfos.getAgenciesWithMissingDetails();
                                     if (agencies.length !== 0) {
                                         noPasswordDialog.agenciesList = agencies

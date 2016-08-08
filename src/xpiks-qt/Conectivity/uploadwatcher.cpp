@@ -1,18 +1,26 @@
 #include "uploadwatcher.h"
 #include "Conectivity/ftpcoordinator.h"
+#include <QFileInfo>
 
 namespace Conectivity {
     UploadWatcher::UploadWatcher(QObject *parent):
         QAbstractListModel(parent)
     {}
 
-    void UploadWatcher::injectConnection(FtpCoordinator *ftpCoordinator) {
-        QObject::connect(ftpCoordinator, SIGNAL(transferFailedSignal(QString, QString, QString)),
-                         this, SLOT(reportUploadErrorHandler( QString, QString, QString) ) );
+
+    void UploadWatcher::resetModel()
+    {
+        beginResetModel();
+        m_FtpInfo.clear();
+        endResetModel();
     }
 
-    QStringList UploadWatcher::getFailedImages(int index) {
-        return m_FtpInfo.at(index).second;
+    QStringList UploadWatcher::getFailedImages(int row) {
+        if (row < 0 || row >= (int)m_FtpInfo.size()) {
+            return QStringList();
+        }
+        auto &item = m_FtpInfo.at(row);
+        return item.second;
     }
 
     int UploadWatcher::rowCount(const QModelIndex &parent) const {
@@ -43,24 +51,23 @@ namespace Conectivity {
         return names;
     }
 
-    void UploadWatcher::reportUploadErrorHandler(const QString &filepath, const QString &host, const QString &title) {
-        Q_UNUSED(host);
+    void UploadWatcher::reportUploadErrorHandler(const QString &filepath, const QString &host) {
         QMutexLocker lock(&m_Mutex);
 
-        LOG_INFO<<"OKI DOKI S"<<title<<" "<<filepath;
         bool found = false;
         int size = m_FtpInfo.size();
-
+        if (filepath.right(3).toLower() == "eps"){
+            return;
+        }
         for (int i = 0; i < size; i++) {
-            if (m_FtpInfo[i].first == title) {
+            if (m_FtpInfo[i].first == host) {
                 m_FtpInfo[i].second.append(filepath);
                 found = true;
                 break;
             }
         }
-
         if (!found) {
-            m_FtpInfo.append(QPair<QString, QStringList>(title, QStringList(filepath)));
+            m_FtpInfo.append(QPair<QString, QStringList>(host, QStringList(filepath)));
         }
     }
 }

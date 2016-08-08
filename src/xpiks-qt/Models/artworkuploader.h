@@ -29,6 +29,7 @@
 #include "../Conectivity/testconnection.h"
 #include "../AutoComplete/stringfilterproxymodel.h"
 #include "../AutoComplete/stocksftplistmodel.h"
+#include "../Conectivity/uploadwatcher.h"
 
 namespace Helpers {
     class TestConnectionResult;
@@ -48,6 +49,7 @@ namespace Models {
     class ArtworkUploader : public ArtworksProcessor
     {
         Q_OBJECT
+        Q_PROPERTY(Conectivity::UploadWatcher* uploadWatcher READ getUploadWatcher())
     public:
         ArtworkUploader(Conectivity::IFtpCoordinator *ftpCoordinator, QObject *parent=0);
         virtual ~ArtworkUploader();
@@ -80,6 +82,10 @@ namespace Models {
 #endif
         Q_INVOKABLE bool needCreateArchives() const;
         Q_INVOKABLE QString getFtpAddress(const QString &stockName) const { return m_StocksFtpList.getFtpAddress(stockName); }
+        Conectivity::UploadWatcher* getUploadWatcher() {
+            return &m_UploadWatcher;
+        }
+
         void initializeStocksList();
 
     private:
@@ -92,6 +98,7 @@ namespace Models {
         virtual void innerResetModel() { m_Percent = 0; }
 
     private:
+        Conectivity::UploadWatcher m_UploadWatcher;
         Conectivity::IFtpCoordinator *m_FtpCoordinator;
         AutoComplete::StringFilterProxyModel m_StocksCompletionSource;
         AutoComplete::StocksFtpListModel m_StocksFtpList;

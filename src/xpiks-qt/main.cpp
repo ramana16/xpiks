@@ -84,7 +84,6 @@
 #include "Models/proxysettings.h"
 #include "Models/findandreplacemodel.h"
 #include "Models/previewmetadataelement.h"
-#include "Conectivity/uploadwatcher.h"
 
 void myMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg) {
     Q_UNUSED(context);
@@ -364,8 +363,6 @@ int main(int argc, char *argv[]) {
     cachingProvider->setImageCachingService(&imageCachingService);
 
     Helpers::HelpersQmlWrapper helpersQmlWrapper(&commandManager);
-    Conectivity::UploadWatcher uploadwatcher;
-    uploadwatcher.injectConnection(ftpCoordinator);
 
     QQmlContext *rootContext = engine.rootContext();
     rootContext->setContextProperty("artItemsModel", &artItemsModel);
@@ -398,7 +395,6 @@ int main(int argc, char *argv[]) {
     rootContext->setContextProperty("ftpListAC", artworkUploader.getStocksCompletionSource());
     rootContext->setContextProperty("replaceModel", &replaceModel);
     rootContext->setContextProperty("deleteKeywordsModel", &deleteKeywordsModel);
-    rootContext->setContextProperty("uploadwatcher", &uploadwatcher);
 
 #ifdef QT_DEBUG
     QVariant isDebug(true);

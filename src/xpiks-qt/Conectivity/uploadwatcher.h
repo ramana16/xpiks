@@ -15,8 +15,8 @@ namespace Conectivity {
         Q_OBJECT
     public:
         UploadWatcher( QObject *parent = 0 );
-        void injectConnection(Conectivity::FtpCoordinator *ftpCoordinator);
-        Q_INVOKABLE QStringList getFailedImages(int index);
+        Q_INVOKABLE void resetModel();
+        Q_INVOKABLE QStringList getFailedImages(int row);
     public:
         enum UploadWatcher_Roles {
             HostName = Qt::UserRole + 1
@@ -24,10 +24,10 @@ namespace Conectivity {
     public:
         virtual int rowCount(const QModelIndex &parent) const;
         virtual QVariant data(const QModelIndex &index, int role) const;
+    public slots:
+        void reportUploadErrorHandler(const QString &filepath, const QString &host);
     protected:
         virtual QHash<int, QByteArray> roleNames() const;
-    private slots:
-        void reportUploadErrorHandler(const QString &filepath, const QString &host, const QString &title);
     private:
         QVector<QPair<QString, QStringList>> m_FtpInfo;
         QMutex m_Mutex;
