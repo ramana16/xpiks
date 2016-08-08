@@ -68,11 +68,13 @@ namespace Models {
     ArtworkUploader::~ArtworkUploader() {
 #ifndef CORE_TESTS
         delete m_TestingCredentialWatcher;
-        delete m_UploadWatcher;
 #endif
 
         if (m_FtpCoordinator != NULL) {
             delete m_FtpCoordinator;
+        }
+        if (m_UploadWatcher !=NULL){
+            delete m_UploadWatcher;
         }
     }
 
