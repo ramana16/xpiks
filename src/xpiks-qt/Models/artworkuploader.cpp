@@ -209,18 +209,19 @@ namespace Models {
         m_FtpCoordinator->cancelUpload();
     }
 
+#ifndef CORE_TESTS
     QString ArtworkUploader::getFtpName(const QString &stockAddress) const {
-#if !(defined(CORE_TESTS) || defined(INTEGRATION_TEST))
         const UploadInfoRepository *uploadInfoRepository = m_CommandManager->getUploadInfoRepository();
         auto &infos = uploadInfoRepository->getUploadInfos();
+
         for (auto &info: infos) {
             if (Conectivity::sanitizeHost(info->getHost()) == stockAddress) {
                 return info->getTitle();
             }
         }
-#else
-        Q_UNUSED(stockAddress)
-#endif
+
         return QString();
     }
+
+#endif
 }
