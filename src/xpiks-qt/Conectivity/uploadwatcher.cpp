@@ -4,13 +4,16 @@
 
 namespace Conectivity {
     UploadWatcher::UploadWatcher(QObject *parent):
-        QAbstractListModel(parent)
+        QAbstractListModel(parent),
+        m_failedImagesCount(0)
     {}
 
     void UploadWatcher::resetModel() {
         beginResetModel();
         LOG_INFO << "Resetting UploadWatcher..";
         m_FtpInfo.clear();
+        m_failedImagesCount = 0;
+        emit failedImagesCountChanged();
         endResetModel();
     }
 
@@ -73,5 +76,8 @@ namespace Conectivity {
             m_FtpInfo.append(QPair<QString, QStringList>(host, QStringList(filepath)));
             LOG_INFO << "Creating new entry for" << host;
         }
+
+        m_failedImagesCount++;
+        emit failedImagesCountChanged();
     }
 }
