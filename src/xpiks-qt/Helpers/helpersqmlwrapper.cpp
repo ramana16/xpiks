@@ -27,7 +27,6 @@
 #include <QSysInfo>
 #include <QCoreApplication>
 #include <QQmlEngine>
-#include <QDesktopServices>
 #include "keywordshelpers.h"
 #include "../Commands/commandmanager.h"
 #include "../Models/logsmodel.h"
@@ -103,7 +102,24 @@ namespace Helpers {
     }
 
     void HelpersQmlWrapper::revealArtworkFile(const QString &path) {
-        QDesktopServices::openUrl(QUrl("file:///" + path));
+#ifdef Q_OS_MAC
+        QStringList args;
+        args << "-e";
+        args << "tell application \"Finder\"";
+        args << "-e";
+        args << "activate";
+        args << "-e";
+        args << "select POSIX file \"" + path + "\"";
+        args << "-e";
+        args << "end tell";
+        QProcess::startDetached("osascript", args);
+#endif
+
+#ifdef Q_OS_WIN
+    QStringList args;
+    args << "/select," << QDir::toNativeSeparators(path);
+    QProcess::startDetached("explorer", args);
+#endif
     }
 
     void Helpers::HelpersQmlWrapper::reportOpen() {

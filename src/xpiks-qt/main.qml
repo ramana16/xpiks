@@ -825,6 +825,15 @@ ApplicationWindow {
         property string originalText: vectorsAttached > 1 ? qsTr("%1 vectors attached").arg(vectorsAttached) : qsTr("1 vector attached")
         text: i18.n + originalText
     }
+    Menu {
+        id: openFileMenu
+        enabled: false
+        MenuItem {
+            text: "Open Artwork"
+            onTriggered:  helpersWrapper.revealArtworkFile(currentPath);
+        }
+    }
+
 
     Connections {
         target: artItemsModel
@@ -871,6 +880,16 @@ ApplicationWindow {
     Rectangle {
         color: Colors.defaultDarkColor
         anchors.fill: parent
+        MouseArea {
+            anchors.fill: parent
+            acceptedButtons: Qt.RightButton
+            onClicked: {
+                if (filteredArtItemsModel.selectedArtworksCount == 1) {
+                    openFileMenu.popup()
+                    console.log("Right")
+                }
+            }
+        }
 
         DropArea {
             enabled: applicationWindow.openedDialogsCount == 0
@@ -2367,28 +2386,6 @@ ApplicationWindow {
             }
 
             StyledText {
-                text: "|"
-                color: Colors.labelInactiveForeground
-                verticalAlignment: Text.AlignVCenter
-            }
-
-            StyledText {
-                text: i18.n + qsTr("Open Artwork")
-                color: filteredArtItemsModel.selectedArtworksCount == 1 ? Colors.artworkActiveColor : Colors.labelInactiveForeground
-
-                MouseArea {
-                    id: artworkOpenMA
-                    enabled: filteredArtItemsModel.selectedArtworksCount == 1
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: {
-                        helpersWrapper.revealArtworkFile(currentPath);
-                    }
-                }
-            }
-
-            StyledText {
-                visible: applicationWindow.showUpdateLink
                 text: "|"
                 color: Colors.labelInactiveForeground
                 verticalAlignment: Text.AlignVCenter
