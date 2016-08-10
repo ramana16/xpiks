@@ -34,6 +34,7 @@ import "../StyledControls"
 Item {
     id: uploadArtworksComponent
     anchors.fill: parent
+
     property string uploadhostskey: appSettings.uploadHostsKey
     // if MasterPassword wasn't entered do not show passwords
     property bool emptyPasswords: false
@@ -42,6 +43,7 @@ Item {
     property bool uploadEnabled: (artworkRepository.artworksSourcesCount > 0) && (filteredArtItemsModel.selectedArtworksCount > 0)
     property var ftpListAC: helpersWrapper.getFtpACList()
     property var artworkUploader: helpersWrapper.getArtworkUploader()
+    property var uploadWatcher: artworkUploader.getUploadWatcher()
     property var uploadInfos: helpersWrapper.getUploadInfos();
 
     signal dialogDestruction();
@@ -65,6 +67,7 @@ Item {
         uploadInfos.finalizeAccounts()
         saveSettings()
         uploadArtworksComponent.destroy()
+        uploadWatcher.resetModel()
     }
 
     function saveSettings() {
@@ -233,8 +236,8 @@ Item {
                         Connections {
                             target: artworkUploader
                             onItemsNumberChanged: {
-                               textItemsAvailable.originalText = artworkUploader.itemsCount === 1 ? qsTr("1 artwork selected") : qsTr("%1 artworks selected").arg(artworkUploader.itemsCount)
-                               textItemsAvailable.text=i18.n + originalText
+                                textItemsAvailable.originalText = artworkUploader.itemsCount === 1 ? qsTr("1 artwork selected") : qsTr("%1 artworks selected").arg(artworkUploader.itemsCount)
+                                textItemsAvailable.text=i18.n + originalText
                             }
                         }
                     }
@@ -835,7 +838,7 @@ Item {
                             anchors.fill: parent
                             color: Colors.selectedImageBackground
                             opacity: 0.6
-                            visible: (uploadInfos.infosCount == 0) || artworkUploader.inProgress
+                            visible: (uploadInfos.infosCount === 0) || artworkUploader.inProgress
                         }
                     }
                 }
@@ -854,7 +857,7 @@ Item {
                     spacing: 20
 
                     StyledText {
-                        visible: !skipUploadItems
+                        visible: !skipUploadItems && (!artworkUploader.inProgress) && (uploadWatcher.failedImagesCount === 0)
                         enabled: uploadArtworksComponent.uploadEnabled && !skipUploadItems
                         text: i18.n + getOriginalText()
                         color: uploadWarmingsMA.pressed ? Colors.linkClickedColor : warningsModel.warningsCount > 0 ? Colors.artworkModifiedColor : Colors.labelActiveForeground
@@ -877,6 +880,32 @@ Item {
                                                             isRestricted: true
                                                         });
                                 }
+                            }
+                        }
+                    }
+
+                    StyledText {
+                        id: failedArtworksStatus
+                        visible: !skipUploadItems && (uploadWatcher.failedImagesCount > 0)
+                        enabled: uploadArtworksComponent.uploadEnabled && !skipUploadItems && (uploadWatcher.failedImagesCount > 0)
+                        text: i18.n + getOriginalText()
+                        color: showFailedArtworksMA.pressed ? Colors.linkClickedColor : Colors.artworkModifiedColor
+
+                        function getOriginalText() {
+                            return uploadWatcher.failedImagesCount === 1 ?
+                                        qsTr("1 failed upload") :
+                                        qsTr("%1 failed uploads").arg(uploadWatcher.failedImagesCount)
+                        }
+
+                        MouseArea {
+                            id: showFailedArtworksMA
+                            anchors.fill: parent
+                            cursorShape: uploadWatcher.failedImagesCount > 0 ? Qt.PointingHandCursor : Qt.ArrowCursor
+                            enabled: uploadWatcher.failedImagesCount > 0
+                            onClicked: {
+                                Common.launchDialog("Dialogs/FailedUploadArtworks.qml",
+                                                    uploadArtworksComponent.componentParent,
+                                                    {})
                             }
                         }
                     }
