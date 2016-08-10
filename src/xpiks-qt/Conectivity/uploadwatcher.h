@@ -42,7 +42,7 @@ namespace Conectivity {
         virtual QHash<int, QByteArray> roleNames() const;
 
     private:
-        QVector<QPair<QString, QStringList> > m_FtpInfo;
+        QVector<QPair<QString, QStringList> > m_ftpInfo;
         int m_failedImagesCount;
     };
 }

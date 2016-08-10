@@ -9,36 +9,36 @@ namespace Conectivity {
     {}
 
     void UploadWatcher::resetModel() {
-        beginResetModel();
         LOG_INFO << "Resetting UploadWatcher..";
-        m_FtpInfo.clear();
+        beginResetModel();
+        m_ftpInfo.clear();
         m_failedImagesCount = 0;
-        emit failedImagesCountChanged();
         endResetModel();
+        emit failedImagesCountChanged();
     }
 
     QStringList UploadWatcher::getFailedImages(int row) {
-        if (row < 0 || row >= (int)m_FtpInfo.size()) {
+        if (row < 0 || row >= (int)m_ftpInfo.size()) {
             return QStringList();
         }
 
-        auto &item = m_FtpInfo.at(row);
+        auto &item = m_ftpInfo.at(row);
         return item.second;
     }
 
     int UploadWatcher::rowCount(const QModelIndex &parent) const {
         Q_UNUSED(parent);
-        return (int)m_FtpInfo.size();
+        return (int)m_ftpInfo.size();
     }
 
     QVariant UploadWatcher::data(const QModelIndex &index, int role) const {
         int row = index.row();
 
-        if (row < 0 || row >= (int)m_FtpInfo.size()) {
+        if (row < 0 || row >= (int)m_ftpInfo.size()) {
             return QVariant();
         }
 
-        auto &item = m_FtpInfo.at(row);
+        auto &item = m_ftpInfo.at(row);
 
         switch (role) {
             case FtpAddress:
@@ -62,18 +62,18 @@ namespace Conectivity {
         }
 
         bool found = false;
-        int size = m_FtpInfo.size();
+        int size = m_ftpInfo.size();
 
         for (int i = 0; i < size; i++) {
-            if (m_FtpInfo[i].first == host) {
-                m_FtpInfo[i].second.append(filepath);
+            if (m_ftpInfo[i].first == host) {
+                m_ftpInfo[i].second.append(filepath);
                 found = true;
                 break;
             }
         }
 
         if (!found) {
-            m_FtpInfo.append(QPair<QString, QStringList>(host, QStringList(filepath)));
+            m_ftpInfo.append(QPair<QString, QStringList>(host, QStringList(filepath)));
             LOG_INFO << "Creating new entry for" << host;
         }
 

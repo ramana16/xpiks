@@ -892,7 +892,7 @@ Item {
                         color: getColor(modelUploader.failedImagesCount)
 
                         function getOriginalText(count) {
-                            return count == 1 ? qsTr("1 failed upload") : qsTr("%1 failed uploads").arg(count)
+                            return count === 1 ? qsTr("1 failed upload") : qsTr("%1 failed uploads").arg(count)
                         }
 
                         function getColor(count) {
