@@ -47,6 +47,7 @@ ApplicationWindow {
     property bool needToCenter: true
     property bool listLayout: true
     property bool initializedColors: false
+    property string currentPath
 
     onBeforeRendering: {
         if (!initializedColors) {
@@ -1621,7 +1622,10 @@ ApplicationWindow {
                                                 anchors.left: parent.left
                                                 anchors.verticalCenter: parent.verticalCenter
                                                 activeFocusOnPress: false
-                                                onClicked: editisselected = checked
+                                                onClicked: {
+                                                    currentPath = filename;
+                                                    editisselected = checked;
+                                                }
                                                 Component.onCompleted: itemCheckedCheckbox.checked = isselected
 
                                                 Connections {
@@ -2358,6 +2362,27 @@ ApplicationWindow {
                         Common.launchDialog("Dialogs/WarningsDialog.qml", applicationWindow, {
                                                 componentParent: applicationWindow
                                             });
+                    }
+                }
+            }
+
+            StyledText {
+                text: "|"
+                color: Colors.labelInactiveForeground
+                verticalAlignment: Text.AlignVCenter
+            }
+
+            StyledText {
+                text: i18.n + qsTr("Open Artwork")
+                color: filteredArtItemsModel.selectedArtworksCount == 1 ? Colors.artworkActiveColor : Colors.labelInactiveForeground
+
+                MouseArea {
+                    id: artworkOpenMA
+                    enabled: filteredArtItemsModel.selectedArtworksCount == 1
+                    anchors.fill: parent
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        helpersWrapper.revealArtworkFile(currentPath);
                     }
                 }
             }

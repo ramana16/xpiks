@@ -27,6 +27,7 @@
 #include <QSysInfo>
 #include <QCoreApplication>
 #include <QQmlEngine>
+#include <QDesktopServices>
 #include "keywordshelpers.h"
 #include "../Commands/commandmanager.h"
 #include "../Models/logsmodel.h"
@@ -99,6 +100,10 @@ namespace Helpers {
     args << "/select," << QDir::toNativeSeparators(logFilePath);
     QProcess::startDetached("explorer", args);
 #endif
+    }
+
+    void HelpersQmlWrapper::revealArtworkFile(const QString &path) {
+        QDesktopServices::openUrl(QUrl("file:///" + path));
     }
 
     void Helpers::HelpersQmlWrapper::reportOpen() {
