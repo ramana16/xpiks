@@ -17,7 +17,7 @@ namespace Conectivity {
         void resetModel();
 
         int getFailedImagesCount() {
-            return m_failedImagesCount;
+            return m_FailedImagesCount;
         }
 
     public:
@@ -42,8 +42,8 @@ namespace Conectivity {
         virtual QHash<int, QByteArray> roleNames() const;
 
     private:
-        QVector<QPair<QString, QStringList> > m_ftpInfo;
-        int m_failedImagesCount;
+        QVector<QPair<QString, QStringList> > m_FtpInfo;
+        int m_FailedImagesCount;
     };
 }
 #endif // UPLOADWATCHER_H
