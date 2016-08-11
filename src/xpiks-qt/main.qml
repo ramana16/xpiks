@@ -1634,7 +1634,6 @@ ApplicationWindow {
                                                 activeFocusOnPress: false
                                                 onClicked: {
                                                     editisselected = checked;
-                                                    openFileMenu.filename = filename;
                                                 }
                                                 Component.onCompleted: itemCheckedCheckbox.checked = isselected
 
@@ -1721,11 +1720,10 @@ ApplicationWindow {
                                                         }
 
                                                         onClicked: {
-                                                            if(mouse.button & Qt.RightButton) {
-                                                                if (filteredArtItemsModel.selectedArtworksCount == 1) {
-                                                                    openFileMenu.popup()
-                                                                    console.log("Right")
-                                                                }
+                                                            if(mouse.button ==  Qt.RightButton) {
+                                                                openFileMenu.filename = filename;
+                                                                openFileMenu.popup()
+                                                                console.log("Right")
                                                             } else {
 
                                                                 if (dblClickTimer.running) {
