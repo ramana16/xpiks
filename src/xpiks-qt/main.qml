@@ -2363,7 +2363,6 @@ ApplicationWindow {
 
             StyledText {
                 text: "|"
-                visible: applicationWindow.showUpdateLink
                 color: Colors.labelInactiveForeground
                 verticalAlignment: Text.AlignVCenter
             }
@@ -2388,6 +2387,7 @@ ApplicationWindow {
 
             StyledText {
                 text: "|"
+                visible: applicationWindow.showUpdateLink
                 color: Colors.labelInactiveForeground
                 verticalAlignment: Text.AlignVCenter
             }
