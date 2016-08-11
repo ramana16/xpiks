@@ -47,7 +47,6 @@ ApplicationWindow {
     property bool needToCenter: true
     property bool listLayout: true
     property bool initializedColors: false
-    property string currentPath
 
     onBeforeRendering: {
         if (!initializedColors) {
@@ -825,14 +824,6 @@ ApplicationWindow {
         property string originalText: vectorsAttached > 1 ? qsTr("%1 vectors attached").arg(vectorsAttached) : qsTr("1 vector attached")
         text: i18.n + originalText
     }
-    Menu {
-        id: openFileMenu
-        enabled: false
-        MenuItem {
-            text: "Open Artwork"
-            onTriggered:  helpersWrapper.revealArtworkFile(currentPath);
-        }
-    }
 
 
     Connections {
@@ -880,16 +871,6 @@ ApplicationWindow {
     Rectangle {
         color: Colors.defaultDarkColor
         anchors.fill: parent
-        MouseArea {
-            anchors.fill: parent
-            acceptedButtons: Qt.RightButton
-            onClicked: {
-                if (filteredArtItemsModel.selectedArtworksCount == 1) {
-                    openFileMenu.popup()
-                    console.log("Right")
-                }
-            }
-        }
 
         DropArea {
             enabled: applicationWindow.openedDialogsCount == 0
@@ -1641,10 +1622,7 @@ ApplicationWindow {
                                                 anchors.left: parent.left
                                                 anchors.verticalCenter: parent.verticalCenter
                                                 activeFocusOnPress: false
-                                                onClicked: {
-                                                    currentPath = filename;
-                                                    editisselected = checked;
-                                                }
+                                                onClicked: editisselected = checked;
                                                 Component.onCompleted: itemCheckedCheckbox.checked = isselected
 
                                                 Connections {
@@ -1712,6 +1690,7 @@ ApplicationWindow {
                                                     MouseArea {
                                                         anchors.fill: parent
                                                         propagateComposedEvents: true
+                                                        acceptedButtons: Qt.LeftButton | Qt.RightButton
 
                                                         function dblClickHandler() {
                                                             Common.launchItemEditing(rowWrapper.getIndex(), applicationWindow, {
@@ -1728,12 +1707,29 @@ ApplicationWindow {
                                                             }
                                                         }
 
+                                                        Menu {
+                                                            id: openFileMenu
+                                                            enabled: false
+                                                            MenuItem {
+                                                                text: "Open Artwork"
+                                                                onTriggered:  helpersWrapper.revealArtworkFile(filename);
+                                                            }
+                                                        }
+
                                                         onClicked: {
-                                                            if (dblClickTimer.running) {
-                                                                dblClickTimer.stop()
-                                                                dblClickHandler()
+                                                            if(mouse.button & Qt.RightButton) {
+                                                                if (filteredArtItemsModel.selectedArtworksCount == 1) {
+                                                                    openFileMenu.popup()
+                                                                    console.log("Right")
+                                                                }
                                                             } else {
-                                                                dblClickTimer.restart()
+
+                                                                if (dblClickTimer.running) {
+                                                                    dblClickTimer.stop()
+                                                                    dblClickHandler()
+                                                                } else {
+                                                                    dblClickTimer.restart()
+                                                                }
                                                             }
                                                         }
                                                     }

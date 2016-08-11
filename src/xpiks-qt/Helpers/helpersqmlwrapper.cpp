@@ -82,45 +82,11 @@ namespace Helpers {
     void HelpersQmlWrapper::revealLogFile() {
         LOG_DEBUG << "#";
         QString logFilePath = Logger::getInstance().getLogFilePath();
-#ifdef Q_OS_MAC
-        QStringList args;
-        args << "-e";
-        args << "tell application \"Finder\"";
-        args << "-e";
-        args << "activate";
-        args << "-e";
-        args << "select POSIX file \"" + logFilePath + "\"";
-        args << "-e";
-        args << "end tell";
-        QProcess::startDetached("osascript", args);
-#endif
-
-#ifdef Q_OS_WIN
-    QStringList args;
-    args << "/select," << QDir::toNativeSeparators(logFilePath);
-    QProcess::startDetached("explorer", args);
-#endif
+        HelpersQmlWrapper::revealFile(logFilePath);
     }
 
     void HelpersQmlWrapper::revealArtworkFile(const QString &path) {
-#ifdef Q_OS_MAC
-        QStringList args;
-        args << "-e";
-        args << "tell application \"Finder\"";
-        args << "-e";
-        args << "activate";
-        args << "-e";
-        args << "select POSIX file \"" + path + "\"";
-        args << "-e";
-        args << "end tell";
-        QProcess::startDetached("osascript", args);
-#endif
-
-#ifdef Q_OS_WIN
-    QStringList args;
-    args << "/select," << QDir::toNativeSeparators(path);
-    QProcess::startDetached("explorer", args);
-#endif
+        HelpersQmlWrapper::revealFile(path);
     }
 
     void Helpers::HelpersQmlWrapper::reportOpen() {
@@ -248,6 +214,26 @@ namespace Helpers {
         auto *model = m_CommandManager->getSpellSuggestionsModel();
         QQmlEngine::setObjectOwnership(model, QQmlEngine::CppOwnership);
         return model;
+    }
+    void HelpersQmlWrapper::revealFile(const QString &path) {
+#ifdef Q_OS_MAC
+        QStringList args;
+        args << "-e";
+        args << "tell application \"Finder\"";
+        args << "-e";
+        args << "activate";
+        args << "-e";
+        args << "select POSIX file \"" + path + "\"";
+        args << "-e";
+        args << "end tell";
+        QProcess::startDetached("osascript", args);
+#endif
+
+#ifdef Q_OS_WIN
+    QStringList args;
+    args << "/select," << QDir::toNativeSeparators(path);
+    QProcess::startDetached("explorer", args);
+#endif
     }
 }
 

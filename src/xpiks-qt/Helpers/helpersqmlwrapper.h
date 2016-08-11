@@ -72,6 +72,8 @@ namespace Helpers {
 
     public:
         bool getPluginsAvailable() const;
+   private:
+        void HelpersQmlWrapper::revealFile(const QString &path);
 
     signals:
         void globalCloseRequested();
