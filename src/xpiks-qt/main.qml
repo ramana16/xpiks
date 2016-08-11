@@ -674,6 +674,16 @@ ApplicationWindow {
         }
     }
 
+
+    Menu {
+        id: openFileMenu
+        property string filename
+        enabled: false
+        MenuItem {
+            text: "Open Artwork"
+            onTriggered:  helpersWrapper.revealArtworkFile(openFileMenu.filename);
+        }
+    }
     MessageDialog {
         id: configExitDialog
 
@@ -1622,7 +1632,10 @@ ApplicationWindow {
                                                 anchors.left: parent.left
                                                 anchors.verticalCenter: parent.verticalCenter
                                                 activeFocusOnPress: false
-                                                onClicked: editisselected = checked;
+                                                onClicked: {
+                                                    editisselected = checked;
+                                                    openFileMenu.filename = filename;
+                                                }
                                                 Component.onCompleted: itemCheckedCheckbox.checked = isselected
 
                                                 Connections {
@@ -1704,15 +1717,6 @@ ApplicationWindow {
                                                             onTriggered: {
                                                                 rowWrapper.switchChecked()
                                                                 rowWrapper.focusIfNeeded()
-                                                            }
-                                                        }
-
-                                                        Menu {
-                                                            id: openFileMenu
-                                                            enabled: false
-                                                            MenuItem {
-                                                                text: "Open Artwork"
-                                                                onTriggered:  helpersWrapper.revealArtworkFile(filename);
                                                             }
                                                         }
 
