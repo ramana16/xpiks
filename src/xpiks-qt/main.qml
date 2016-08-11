@@ -680,7 +680,7 @@ ApplicationWindow {
         property string filename
         enabled: false
         MenuItem {
-            text: "Show in folder"
+            text: qsTr("Show in folder")
             onTriggered:  helpersWrapper.revealArtworkFile(openFileMenu.filename);
         }
     }
