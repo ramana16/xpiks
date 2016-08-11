@@ -680,7 +680,7 @@ ApplicationWindow {
         property string filename
         enabled: false
         MenuItem {
-            text: "Open Artwork"
+            text: "Show in folder"
             onTriggered:  helpersWrapper.revealArtworkFile(openFileMenu.filename);
         }
     }
@@ -1720,7 +1720,7 @@ ApplicationWindow {
                                                         }
 
                                                         onClicked: {
-                                                            if(mouse.button ==  Qt.RightButton) {
+                                                            if (mouse.button == Qt.RightButton) {
                                                                 openFileMenu.filename = filename;
                                                                 openFileMenu.popup()
                                                                 console.log("Right")
