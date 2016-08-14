@@ -43,6 +43,7 @@ namespace SpellCheck {
 
     public:
         QStringList retrieveCorrections(const QString &word);
+        void addToUserWordlist(const QString &word);
 
     protected:
         virtual bool initWorker();
@@ -66,6 +67,8 @@ namespace SpellCheck {
         bool checkWordSpelling(const std::shared_ptr<SpellCheckQueryItem> &queryItem);
         bool isHunspellSpellingCorrect(const QString &word) const;
         void findSuggestions(const QString &word);
+        void putWord(const QString &word);
+        void initFromUserDict();
 
     private:
         QHash<QString, QStringList> m_Suggestions;
@@ -75,6 +78,7 @@ namespace SpellCheck {
         Hunspell *m_Hunspell;
         // Coded does not need destruction
         QTextCodec *m_Codec;
+        QString m_userDictionary;
     };
 }
 

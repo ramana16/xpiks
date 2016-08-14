@@ -200,6 +200,10 @@ namespace Models {
         m_CommandManager->setupSpellCheckSuggestions(&m_CommonKeywordsModel, -1, Common::CorrectAll);
     }
 
+    void CombinedArtworksModel::addUserWordToDictionary(const QString &word) {
+        m_CommandManager->addUserWordToDictionary(word);
+    }
+
     void CombinedArtworksModel::initDescriptionHighlighting(QQuickTextDocument *document) {
         SpellCheck::SpellCheckItemInfo *info = m_CommonKeywordsModel.getSpellCheckInfo();
         if (info == NULL) {

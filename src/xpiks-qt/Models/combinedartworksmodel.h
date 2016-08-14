@@ -164,6 +164,7 @@ namespace Models {
             return item;
         }
         Q_INVOKABLE void suggestCorrections();
+        Q_INVOKABLE void addUserWordToDictionary(const QString &word);
         Q_INVOKABLE void initDescriptionHighlighting(QQuickTextDocument *document);
         Q_INVOKABLE void initTitleHighlighting(QQuickTextDocument *document);
         Q_INVOKABLE void spellCheckDescription();

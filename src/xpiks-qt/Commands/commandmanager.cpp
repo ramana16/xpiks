@@ -511,6 +511,12 @@ void Commands::CommandManager::setupSpellCheckSuggestions(Common::BasicKeywordsM
     }
 }
 
+void Commands::CommandManager::addUserWordToDictionary(const QString &word) const {
+    if (m_SpellCheckerService != NULL) {
+        m_SpellCheckerService->addToUserWordlist(word);
+    }
+}
+
 void Commands::CommandManager::submitKeywordsForWarningsCheck(Models::ArtworkMetadata *item) const {
     Q_ASSERT(item != NULL);
     this->submitForWarningsCheck(item, Common::WarningsCheckKeywords);

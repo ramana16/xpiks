@@ -276,6 +276,10 @@ namespace Models {
         }
     }
 
+    void ArtItemsModel::addUserWordToDictionary(const QString &word) {
+        m_CommandManager->addUserWordToDictionary(word);
+    }
+
     void ArtItemsModel::backupItem(int metadataIndex) {
         if (0 <= metadataIndex && metadataIndex < getArtworksCount()) {
             ArtworkMetadata *metadata = m_ArtworkList.at(metadataIndex);

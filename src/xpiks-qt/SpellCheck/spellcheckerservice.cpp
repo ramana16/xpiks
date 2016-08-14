@@ -138,6 +138,12 @@ namespace SpellCheck {
         return m_SpellCheckWorker->retrieveCorrections(word);
     }
 
+    void SpellCheckerService::addToUserWordlist(const QString &word) const {
+        if (m_SpellCheckWorker != NULL ){
+            m_SpellCheckWorker->addToUserWordlist(word);
+        }
+    }
+
     void SpellCheckerService::restartWorker() {
         m_RestartRequired = true;
         stopService();
