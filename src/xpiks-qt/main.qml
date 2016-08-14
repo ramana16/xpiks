@@ -674,6 +674,16 @@ ApplicationWindow {
         }
     }
 
+    Menu {
+        id: artworkContextMenu
+        property string filename
+
+        MenuItem {
+            text: qsTr("Show in folder")
+            onTriggered: helpersWrapper.revealArtworkFile(artworkContextMenu.filename);
+        }
+    }
+
     MessageDialog {
         id: configExitDialog
 
@@ -824,6 +834,7 @@ ApplicationWindow {
         property string originalText: vectorsAttached > 1 ? qsTr("%1 vectors attached").arg(vectorsAttached) : qsTr("1 vector attached")
         text: i18.n + originalText
     }
+
 
     Connections {
         target: artItemsModel
@@ -1689,6 +1700,7 @@ ApplicationWindow {
                                                     MouseArea {
                                                         anchors.fill: parent
                                                         propagateComposedEvents: true
+                                                        acceptedButtons: Qt.LeftButton | Qt.RightButton
 
                                                         function dblClickHandler() {
                                                             Common.launchItemEditing(rowWrapper.getIndex(), applicationWindow, {
@@ -1706,11 +1718,17 @@ ApplicationWindow {
                                                         }
 
                                                         onClicked: {
-                                                            if (dblClickTimer.running) {
-                                                                dblClickTimer.stop()
-                                                                dblClickHandler()
+                                                            if (mouse.button == Qt.RightButton) {
+                                                                console.log("Context menu for artwork")
+                                                                artworkContextMenu.filename = filename;
+                                                                artworkContextMenu.popup()
                                                             } else {
-                                                                dblClickTimer.restart()
+                                                                if (dblClickTimer.running) {
+                                                                    dblClickTimer.stop()
+                                                                    dblClickHandler()
+                                                                } else {
+                                                                    dblClickTimer.restart()
+                                                                }
                                                             }
                                                         }
                                                     }
@@ -1723,7 +1741,7 @@ ApplicationWindow {
                                                     elide: Text.ElideMiddle
                                                     color: moreInfoMA.pressed ? Colors.linkClickedColor : Colors.labelActiveForeground
                                                     horizontalAlignment: Text.AlignHCenter
-                                                    text: filename.split(/[\\/]/).pop()
+                                                    text: basefilename
 
                                                     MouseArea {
                                                         id: moreInfoMA

@@ -624,6 +624,7 @@ void Commands::CommandManager::afterConstructionCallback() {
 #endif
 #endif
 
+    m_TelemetryService->startReporting();
     m_UpdateService->startChecking();
     m_ArtworkUploader->initializeStocksList();
 
@@ -682,6 +683,7 @@ void Commands::CommandManager::beforeDestructionCallback() const {
 
     // we have a second for important stuff
     m_TelemetryService->reportAction(Conectivity::UserActionClose);
+    m_TelemetryService->stopReporting();
 }
 
 void Commands::CommandManager::restartSpellChecking() {
