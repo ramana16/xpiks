@@ -56,6 +56,7 @@ namespace Models {
 
     ArtworkMetadata *ArtItemsModel::createMetadata(const QString &filepath) {
         int id = m_LastID++;
+
         return new ImageArtwork(filepath, id);
     }
 
@@ -80,6 +81,7 @@ namespace Models {
                 m_FinalizationList.push_back(metadata);
             }
         }
+
         m_ArtworkList.clear();
         endResetModel();
     }
@@ -107,6 +109,7 @@ namespace Models {
 
     void ArtItemsModel::forceUnselectAllItems() const {
         size_t count = m_ArtworkList.size();
+
         for (size_t i = 0; i < count; ++i) {
             m_ArtworkList.at(i)->resetSelected();
         }
@@ -161,6 +164,7 @@ namespace Models {
 
     void ArtItemsModel::generateAboutToBeRemoved() {
         size_t size = m_ArtworkList.size();
+
         for (size_t i = 0; i < size; ++i) {
             ArtworkMetadata *metadata = m_ArtworkList.at(i);
 
@@ -218,8 +222,8 @@ namespace Models {
     void ArtItemsModel::pasteKeywords(int metadataIndex, const QStringList &keywords) {
         LOG_INFO << "item index" << metadataIndex << "|" << keywords;
         if (metadataIndex >= 0
-                && metadataIndex < getArtworksCount()
-                && !keywords.empty()) {
+            && metadataIndex < getArtworksCount()
+            && !keywords.empty()) {
             std::vector<MetadataElement> metadataElements;
             QVector<int> selectedIndices;
 
@@ -238,8 +242,9 @@ namespace Models {
                 return;
             }
 
-            foreach (int index, selectedIndices) {
+            foreach(int index, selectedIndices) {
                 ArtworkMetadata *metadata = m_ArtworkList.at(index);
+
                 metadataElements.emplace_back(metadata, index);
             }
 
@@ -251,9 +256,8 @@ namespace Models {
     void ArtItemsModel::addSuggestedKeywords(int metadataIndex, const QStringList &keywords) {
         LOG_DEBUG << "item index" << metadataIndex;
         if (metadataIndex >= 0
-                && metadataIndex < getArtworksCount()
-                && !keywords.empty()) {
-
+            && metadataIndex < getArtworksCount()
+            && !keywords.empty()) {
             std::vector<MetadataElement> metadataElements;
 
             ArtworkMetadata *metadata = m_ArtworkList.at(metadataIndex);
@@ -276,10 +280,6 @@ namespace Models {
         }
     }
 
-    void ArtItemsModel::addUserWordToDictionary(const QString &word) {
-        m_CommandManager->addUserWordToDictionary(word);
-    }
-
     void ArtItemsModel::backupItem(int metadataIndex) {
         if (0 <= metadataIndex && metadataIndex < getArtworksCount()) {
             ArtworkMetadata *metadata = m_ArtworkList.at(metadataIndex);
@@ -295,6 +295,7 @@ namespace Models {
 
         foreach(const QUrl &url, urls) {
             bool isDirectory = QDir(url.toLocalFile()).exists();
+
             if (isDirectory) {
                 directories.append(url);
             } else {
@@ -305,11 +306,11 @@ namespace Models {
         QStringList filesToImport;
         filesToImport.reserve(files.size() + directories.size() * 10);
 
-        foreach (const QUrl &fileUrl, files) {
+        foreach(const QUrl &fileUrl, files) {
             filesToImport.append(fileUrl.toLocalFile());
         }
 
-        foreach (const QUrl &dirUrl, directories) {
+        foreach(const QUrl &dirUrl, directories) {
             doAddDirectory(dirUrl.toLocalFile(), filesToImport);
         }
 
@@ -319,7 +320,7 @@ namespace Models {
 
     void ArtItemsModel::setSelectedItemsSaved(const QVector<int> &selectedIndices) {
         LOG_INFO << "Setting selected" << selectedIndices.length() << "item(s) saved";
-        foreach (int index, selectedIndices) {
+        foreach(int index, selectedIndices) {
             m_ArtworkList.at(index)->resetModified();
         }
 
@@ -346,7 +347,7 @@ namespace Models {
     }
 
     void ArtItemsModel::saveSelectedArtworks(const QVector<int> &selectedIndices, bool overwriteAll, bool useBackups) {
-        QVector<ArtworkMetadata*> modifiedSelectedArtworks;
+        QVector<ArtworkMetadata *> modifiedSelectedArtworks;
         int count = selectedIndices.count();
         modifiedSelectedArtworks.reserve(count/2);
 
@@ -386,12 +387,16 @@ namespace Models {
     }
 
     QSize ArtItemsModel::retrieveImageSize(int metadataIndex) const {
-        if (metadataIndex < 0 || metadataIndex >= getArtworksCount()) { return QSize(); }
+        if (metadataIndex < 0 || metadataIndex >= getArtworksCount()) {
+            return QSize();
+        }
 
         ArtworkMetadata *metadata = m_ArtworkList.at(metadataIndex);
-        ImageArtwork *image = dynamic_cast<ImageArtwork*>(metadata);
+        ImageArtwork *image = dynamic_cast<ImageArtwork *>(metadata);
 
-        if (image == NULL) { return QSize(); }
+        if (image == NULL) {
+            return QSize();
+        }
 
         QSize size;
 
@@ -400,13 +405,16 @@ namespace Models {
         } else {
             QImageReader reader(image->getFilepath());
             size = reader.size();
-            //metadata->setSize(size);
+            // metadata->setSize(size);
         }
+
         return size;
     }
 
     QString ArtItemsModel::retrieveFileSize(int metadataIndex) const {
-        if (metadataIndex < 0 || metadataIndex >= getArtworksCount()) { return QLatin1String("-"); }
+        if (metadataIndex < 0 || metadataIndex >= getArtworksCount()) {
+            return QLatin1String("-");
+        }
 
         ArtworkMetadata *metadata = m_ArtworkList.at(metadataIndex);
 
@@ -433,17 +441,21 @@ namespace Models {
     }
 
     QString ArtItemsModel::getArtworkFilepath(int metadataIndex) const {
-        if (metadataIndex < 0 || metadataIndex >= getArtworksCount()) { return QLatin1String(""); }
+        if (metadataIndex < 0 || metadataIndex >= getArtworksCount()) {
+            return QLatin1String("");
+        }
 
         ArtworkMetadata *metadata = m_ArtworkList.at(metadataIndex);
         return metadata->getFilepath();
     }
 
     QString ArtItemsModel::getArtworkDateTaken(int metadataIndex) const {
-        if (metadataIndex < 0 || metadataIndex >= getArtworksCount()) { return QLatin1String(""); }
+        if (metadataIndex < 0 || metadataIndex >= getArtworksCount()) {
+            return QLatin1String("");
+        }
 
         ArtworkMetadata *metadata = m_ArtworkList.at(metadataIndex);
-        ImageArtwork *image = dynamic_cast<ImageArtwork*>(metadata);
+        ImageArtwork *image = dynamic_cast<ImageArtwork *>(metadata);
         if (image != NULL) {
             return image->getDateTaken();
         } else {
@@ -452,10 +464,12 @@ namespace Models {
     }
 
     QString ArtItemsModel::getAttachedVectorPath(int metadataIndex) const {
-        if (metadataIndex < 0 || metadataIndex >= getArtworksCount()) { return QLatin1String(""); }
+        if (metadataIndex < 0 || metadataIndex >= getArtworksCount()) {
+            return QLatin1String("");
+        }
 
         ArtworkMetadata *metadata = m_ArtworkList.at(metadataIndex);
-        ImageArtwork *image = dynamic_cast<ImageArtwork*>(metadata);
+        ImageArtwork *image = dynamic_cast<ImageArtwork *>(metadata);
         if (image != NULL) {
             return image->getAttachedVectorPath();
         } else {
@@ -516,10 +530,10 @@ namespace Models {
             int flags = 0;
             Common::SetFlag(flags, Common::EditKeywords);
             std::shared_ptr<Commands::CombinedEditCommand> combinedEditCommand(new Commands::CombinedEditCommand(
-                        flags,
-                        items,
-                        "", "",
-                        keywords));
+                    flags,
+                    items,
+                    "", "",
+                    keywords));
 
             m_CommandManager->processCommand(combinedEditCommand);
             updateItemAtIndex(metadataIndex);
@@ -530,9 +544,10 @@ namespace Models {
         QVector<int> indicesToUpdate;
         indicesToUpdate.reserve(selectedIndices.length());
 
-        foreach (int index, selectedIndices) {
+        foreach(int index, selectedIndices) {
             ArtworkMetadata *metadata = m_ArtworkList.at(index);
             ImageArtwork *image = dynamic_cast<ImageArtwork *>(metadata);
+
             if (image != NULL) {
                 image->detachVector();
                 indicesToUpdate.append(index);
@@ -555,44 +570,43 @@ namespace Models {
 
     QVariant ArtItemsModel::data(const QModelIndex &index, int role) const {
         int row = index.row();
+
         if (row < 0 || row >= getArtworksCount()) {
             return QVariant();
         }
 
         ArtworkMetadata *metadata = m_ArtworkList.at(row);
         switch (role) {
-        case ArtworkDescriptionRole:
-            return metadata->getDescription();
-        case ArtworkFilenameRole:
-            return metadata->getFilepath();
-        case ArtworkTitleRole:
-            return metadata->getTitle();
-        case KeywordsStringRole: {
+            case ArtworkDescriptionRole:
+                return metadata->getDescription();
+            case ArtworkFilenameRole:
+                return metadata->getFilepath();
+            case ArtworkTitleRole:
+                return metadata->getTitle();
+            case KeywordsStringRole: {
                 Common::BasicKeywordsModel *keywordsModel = metadata->getKeywordsModel();
                 return keywordsModel->getKeywordsString();
             }
-        case IsModifiedRole:
-            return metadata->isModified();
-        case IsSelectedRole:
-            return metadata->isSelected();
-        case KeywordsCountRole: {
+            case IsModifiedRole:
+                return metadata->isModified();
+            case IsSelectedRole:
+                return metadata->isSelected();
+            case KeywordsCountRole: {
                 Common::BasicKeywordsModel *keywordsModel = metadata->getKeywordsModel();
                 return keywordsModel->getKeywordsCount();
             }
-        case HasVectorAttachedRole: {
-                ImageArtwork *image = dynamic_cast<ImageArtwork*>(metadata);
+            case HasVectorAttachedRole: {
+                ImageArtwork *image = dynamic_cast<ImageArtwork *>(metadata);
                 return (image != NULL) && image->hasVectorAttached();
             }
-        case BaseFilenameRole:
-            return metadata->getBaseFilename();
-
-        default:
-            return QVariant();
+            default:
+                return QVariant();
         }
     }
 
     Qt::ItemFlags ArtItemsModel::flags(const QModelIndex &index) const {
         int row = index.row();
+
         if (row < 0 || row >= getArtworksCount()) {
             return Qt::ItemIsEnabled;
         }
@@ -602,6 +616,7 @@ namespace Models {
 
     bool ArtItemsModel::setData(const QModelIndex &index, const QVariant &value, int role) {
         int row = index.row();
+
         if (row < 0 || row >= getArtworksCount()) {
             return false;
         }
@@ -610,27 +625,27 @@ namespace Models {
         int roleToUpdate = 0;
         bool needToUpdate = false;
         switch (role) {
-        case EditArtworkDescriptionRole:
-            needToUpdate = metadata->setDescription(value.toString());
-            roleToUpdate = ArtworkDescriptionRole;
-            break;
-        case EditArtworkTitleRole:
-            needToUpdate = metadata->setTitle(value.toString());
-            roleToUpdate = ArtworkTitleRole;
-            break;
-        case EditIsSelectedRole:
-            needToUpdate = metadata->setIsSelected(value.toBool());
-            roleToUpdate = IsSelectedRole;
-            break;
-        default:
-            return false;
+            case EditArtworkDescriptionRole:
+                needToUpdate = metadata->setDescription(value.toString());
+                roleToUpdate = ArtworkDescriptionRole;
+                break;
+            case EditArtworkTitleRole:
+                needToUpdate = metadata->setTitle(value.toString());
+                roleToUpdate = ArtworkTitleRole;
+                break;
+            case EditIsSelectedRole:
+                needToUpdate = metadata->setIsSelected(value.toBool());
+                roleToUpdate = IsSelectedRole;
+                break;
+            default:
+                return false;
         }
 
         if (needToUpdate) {
             emit dataChanged(index, index, QVector<int>() << IsModifiedRole << roleToUpdate);
 
             if (role == EditArtworkDescriptionRole ||
-                    role == EditArtworkTitleRole) {
+                role == EditArtworkTitleRole) {
                 if (metadata->isInitialized()) {
                     metadata->requestBackup();
                 }
@@ -645,7 +660,7 @@ namespace Models {
         QStringList fileList;
         fileList.reserve(artworksPaths.length());
 
-        foreach (const QUrl &url, artworksPaths) {
+        foreach(const QUrl &url, artworksPaths) {
             fileList.append(url.toLocalFile());
         }
 
@@ -658,7 +673,7 @@ namespace Models {
         QStringList directoriesList;
         directoriesList.reserve(directories.length());
 
-        foreach (const QUrl &url, directories) {
+        foreach(const QUrl &url, directories) {
             if (url.isLocalFile()) {
                 directoriesList.append(url.toLocalFile());
             } else {
@@ -672,7 +687,7 @@ namespace Models {
 
     void ArtItemsModel::spellCheckErrorsChanged() {
         LOG_INTEGRATION_TESTS << "#";
-        ArtworkMetadata *item = qobject_cast<ArtworkMetadata*>(sender());
+        ArtworkMetadata *item = qobject_cast<ArtworkMetadata *>(sender());
 
 #ifndef QT_DEBUG
         if (item != NULL)
@@ -689,6 +704,7 @@ namespace Models {
 
     void ArtItemsModel::beginAccountingFiles(int filesCount) {
         int rowsCount = rowCount();
+
         beginInsertRows(QModelIndex(), rowsCount, rowsCount + filesCount - 1);
     }
 
@@ -712,11 +728,15 @@ namespace Models {
         Q_ASSERT(index >= 0 && index <= getArtworksCount());
         Q_ASSERT(metadata != NULL);
         m_ArtworkList.insert(m_ArtworkList.begin() + index, metadata);
+        Common::BasicKeywordsModel *keywordsModel = metadata->getKeywordsModel();
+        QObject::connect(this, SIGNAL(addedUserWordToDictionary(QString)), keywordsModel, SLOT(addedUserWordToDictionaryHandler(QString)));
     }
 
     void ArtItemsModel::appendMetadata(ArtworkMetadata *metadata) {
         Q_ASSERT(metadata != NULL);
         m_ArtworkList.push_back(metadata);
+        Common::BasicKeywordsModel *keywordsModel = metadata->getKeywordsModel();
+        QObject::connect(this, SIGNAL(addedUserWordToDictionary(QString)), keywordsModel, SLOT(addedUserWordToDictionaryHandler(QString)));
     }
 
     void ArtItemsModel::removeArtworks(const QVector<QPair<int, int> > &ranges) {
@@ -726,6 +746,7 @@ namespace Models {
 
     ArtworkMetadata *ArtItemsModel::getArtwork(int index) const {
         ArtworkMetadata *result = NULL;
+
         if (0 <= index && index < getArtworksCount()) {
             result = m_ArtworkList.at(index);
         }
@@ -735,6 +756,7 @@ namespace Models {
 
     void ArtItemsModel::raiseArtworksAdded(int imagesCount, int vectorsCount) {
         emit artworksAdded(imagesCount, vectorsCount);
+
         LOG_INFO << imagesCount << "images" << vectorsCount << "vectors";
     }
 
@@ -779,8 +801,10 @@ namespace Models {
 
         for (size_t i = 0; i < size; ++i) {
             ArtworkMetadata *metadata = m_ArtworkList.at(i);
-            ImageArtwork *image = dynamic_cast<ImageArtwork*>(metadata);
-            if (image == NULL) { continue; }
+            ImageArtwork *image = dynamic_cast<ImageArtwork *>(metadata);
+            if (image == NULL) {
+                continue;
+            }
 
             const QString &filepath = image->getFilepath();
             QFileInfo fi(filepath);
@@ -807,6 +831,7 @@ namespace Models {
 
     Common::IBasicArtwork *ArtItemsModel::getBasicArtwork(int index) const {
         Common::IBasicArtwork *result = NULL;
+
         if (0 <= index && index < getArtworksCount()) {
             result = m_ArtworkList.at(index);
         }
@@ -827,7 +852,7 @@ namespace Models {
         int filesCount = 0;
         QStringList files;
 
-        foreach (const QString &directory, directories) {
+        foreach(const QString &directory, directories) {
             doAddDirectory(directory, files);
         }
 
@@ -861,13 +886,13 @@ namespace Models {
         filenames.reserve(rawFilenames.length());
         vectors.reserve(rawFilenames.length());
 
-        foreach (const QString &filepath, rawFilenames) {
+        foreach(const QString &filepath, rawFilenames) {
             QImageReader imageReader(filepath);
 
             QString format = QString::fromLatin1(imageReader.format().toLower());
 
             if (format == QLatin1String("jpeg") ||
-                    format == QLatin1String("tiff")) {
+                format == QLatin1String("tiff")) {
                 filenames.append(filepath);
             } else if (format == QLatin1String("png")) {
                 LOG_WARNING << "PNG is unsupported file format";
@@ -875,7 +900,7 @@ namespace Models {
                 QFileInfo fi(filepath);
                 QString suffix = fi.completeSuffix().toLower();
                 if (suffix == QLatin1String("eps") ||
-                        suffix == QLatin1String("ai")) {
+                    suffix == QLatin1String("ai")) {
                     vectors.append(filepath);
                 } else {
                     LOG_WARNING << "Unsupported format:" << format << "of file" << filepath;
@@ -898,8 +923,8 @@ namespace Models {
         LOG_DEBUG << "index" << index;
         if (0 <= index && index < getArtworksCount()) {
             ArtworkMetadata *metadata = m_ArtworkList.at(index);
-            //QModelIndex qmIndex = this->index(index);
-            //emit dataChanged(qmIndex, qmIndex, QVector<int>() << IsSelectedRole);
+            // QModelIndex qmIndex = this->index(index);
+            // emit dataChanged(qmIndex, qmIndex, QVector<int>() << IsSelectedRole);
 
             m_CommandManager->combineArtwork(metadata, index);
         }
@@ -918,7 +943,6 @@ namespace Models {
         roles[EditIsSelectedRole] = "editisselected";
         roles[KeywordsCountRole] = "keywordscount";
         roles[HasVectorAttachedRole] = "hasvectorattached";
-        roles[BaseFilenameRole] = "basefilename";
         return roles;
     }
 
@@ -952,21 +976,23 @@ namespace Models {
 
         ArtworksRepository *artworkRepository = m_CommandManager->getArtworksRepository();
 
-        std::deque<ArtworkMetadata*>::iterator itBegin = m_ArtworkList.begin() + start;
-        std::deque<ArtworkMetadata*>::iterator itEnd = m_ArtworkList.begin() + (end + 1);
+        std::deque<ArtworkMetadata *>::iterator itBegin = m_ArtworkList.begin() + start;
+        std::deque<ArtworkMetadata *>::iterator itEnd = m_ArtworkList.begin() + (end + 1);
 
-        std::vector<ArtworkMetadata*> itemsToDelete(itBegin, itEnd);
+        std::vector<ArtworkMetadata *> itemsToDelete(itBegin, itEnd);
         m_ArtworkList.erase(itBegin, itEnd);
 
         int selectedItems = 0;
 
-        std::vector<ArtworkMetadata*>::iterator it = itemsToDelete.begin();
-        std::vector<ArtworkMetadata*>::iterator itemsEnd = itemsToDelete.end();
+        std::vector<ArtworkMetadata *>::iterator it = itemsToDelete.begin();
+        std::vector<ArtworkMetadata *>::iterator itemsEnd = itemsToDelete.end();
         for (; it < itemsEnd; it++) {
             ArtworkMetadata *metadata = *it;
 
             artworkRepository->removeFile(metadata->getFilepath(), metadata->getDirectory());
-            if (metadata->isSelected()) { selectedItems++; }
+            if (metadata->isSelected()) {
+                selectedItems++;
+            }
 
             LOG_INFO << "File removed:" << metadata->getFilepath();
             destroyInnerItem(metadata);
@@ -999,11 +1025,13 @@ namespace Models {
 
     void ArtItemsModel::doRemoveItemsInRanges(const QVector<QPair<int, int> > &rangesToRemove) {
         std::shared_ptr<Commands::RemoveArtworksCommand> removeArtworksCommand(new Commands::RemoveArtworksCommand(rangesToRemove));
+
         m_CommandManager->processCommand(removeArtworksCommand);
     }
 
     void ArtItemsModel::getSelectedItemsIndices(QVector<int> &indices) {
         size_t size = m_ArtworkList.size();
+
         indices.reserve((int)size / 3);
         for (size_t i = 0; i < size; ++i) {
             if (m_ArtworkList.at(i)->isSelected()) {
@@ -1014,7 +1042,7 @@ namespace Models {
 
     void ArtItemsModel::fillStandardRoles(QVector<int> &roles) const {
         roles << ArtworkDescriptionRole << IsModifiedRole <<
-                 ArtworkTitleRole << KeywordsCountRole << HasVectorAttachedRole;
+            ArtworkTitleRole << KeywordsCountRole << HasVectorAttachedRole;
     }
 
     void ArtItemsModel::onFilesUnavailableHandler() {
@@ -1026,8 +1054,8 @@ namespace Models {
         bool anyVectorUnavailable = false;
 
         for (size_t i = 0; i < count; ++i) {
-            ArtworkMetadata* artwork = m_ArtworkList.at(i);
-            ImageArtwork *image = dynamic_cast<ImageArtwork*>(artwork);
+            ArtworkMetadata *artwork = m_ArtworkList.at(i);
+            ImageArtwork *image = dynamic_cast<ImageArtwork *>(artwork);
             const QString &path = artwork->getFilepath();
 
             if (artworksRepository->isFileUnavailable(path)) {
@@ -1051,7 +1079,7 @@ namespace Models {
 
     void ArtItemsModel::artworkBackupRequested() {
         LOG_DEBUG << "#";
-        ArtworkMetadata *metadata = qobject_cast<ArtworkMetadata*>(sender());
+        ArtworkMetadata *metadata = qobject_cast<ArtworkMetadata *>(sender());
         if (metadata != NULL) {
             m_CommandManager->saveArtworkBackup(metadata);
         }
@@ -1066,5 +1094,15 @@ namespace Models {
                 m_FinalizationList.clear();
             }
         }
+    }
+
+    void ArtItemsModel::afterClearUserDictionaryHandler() {
+        QVector<ArtworkMetadata *> metadata;
+        metadata.reserve(m_ArtworkList.size());
+        for (auto el : m_ArtworkList) {
+            metadata.append(el);
+        }
+
+        m_CommandManager->submitForSpellCheck(metadata);
     }
 }

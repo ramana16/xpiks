@@ -38,252 +38,288 @@
 #define EN_HUNSPELL_AFF "en_US.aff"
 
 namespace SpellCheck {
-SpellCheckWorker::SpellCheckWorker(QObject *parent) :
-    QObject(parent),
-    m_Hunspell(NULL),
-    m_Codec(NULL)
-{
-}
+    SpellCheckWorker::SpellCheckWorker(QObject *parent):
+        QObject(parent),
+        m_Hunspell(NULL),
+        m_Codec(NULL),
+        m_userDictionary(""),
+        m_userDictionaryWordsNumber(0)
+    {}
 
-SpellCheckWorker::~SpellCheckWorker() {
-    if (m_Hunspell != NULL) {
-        delete m_Hunspell;
+    SpellCheckWorker::~SpellCheckWorker() {
+        if (m_Hunspell != NULL) {
+            delete m_Hunspell;
+        }
+
+        LOG_INFO << "destroyed";
     }
 
-    LOG_INFO << "destroyed";
-}
+    bool SpellCheckWorker::initWorker() {
+        LOG_INFO << "#";
 
-bool SpellCheckWorker::initWorker() {
-    LOG_INFO << "#";
-
-    QString resourcesPath;
-    QString affPath;
-    QString dicPath;
+        QString resourcesPath;
+        QString affPath;
+        QString dicPath;
 
 #if !defined(Q_OS_LINUX)
-    resourcesPath = QCoreApplication::applicationDirPath();
-    qDebug() << "App path:" << resourcesPath;
+        resourcesPath = QCoreApplication::applicationDirPath();
+        qDebug() << "App path:" << resourcesPath;
 
 #if defined(Q_OS_MAC)
-    resourcesPath += "/../Resources/";
+        resourcesPath += "/../Resources/";
 #elif defined(APPVEYOR)
-    resourcesPath += "/../../../xpiks-qt/deps/dict/";
+        resourcesPath += "/../../../xpiks-qt/deps/dict/";
 #elif defined(Q_OS_WIN)
-    resourcesPath += "/dict/";
+        resourcesPath += "/dict/";
 #endif
 
-    QDir resourcesDir(resourcesPath);
-    affPath = resourcesDir.absoluteFilePath(EN_HUNSPELL_AFF);
-    dicPath = resourcesDir.absoluteFilePath(EN_HUNSPELL_DIC);
+        QDir resourcesDir(resourcesPath);
+        affPath = resourcesDir.absoluteFilePath(EN_HUNSPELL_AFF);
+        dicPath = resourcesDir.absoluteFilePath(EN_HUNSPELL_DIC);
 
 #else
-    Helpers::AppSettings appSettings;
-    resourcesPath = appSettings.value(Constants::DICT_PATH, "").toString();
-    if (resourcesPath.isEmpty()) {
-        resourcesPath = "hunspell/";
-        dicPath = QStandardPaths::locate(QStandardPaths::GenericDataLocation, resourcesPath + EN_HUNSPELL_DIC);
-        affPath = QStandardPaths::locate(QStandardPaths::GenericDataLocation, resourcesPath + EN_HUNSPELL_AFF);
-    } else {
-        QDir resourcesDirectory(resourcesPath);
-        affPath = resourcesDirectory.absoluteFilePath(EN_HUNSPELL_AFF);
-        dicPath = resourcesDirectory.absoluteFilePath(EN_HUNSPELL_DIC);
-    }
+        Helpers::AppSettings appSettings;
+        resourcesPath = appSettings.value(Constants::DICT_PATH, "").toString();
+        if (resourcesPath.isEmpty()) {
+            resourcesPath = "hunspell/";
+            dicPath = QStandardPaths::locate(QStandardPaths::GenericDataLocation, resourcesPath + EN_HUNSPELL_DIC);
+            affPath = QStandardPaths::locate(QStandardPaths::GenericDataLocation, resourcesPath + EN_HUNSPELL_AFF);
+        } else {
+            QDir resourcesDirectory(resourcesPath);
+            affPath = resourcesDirectory.absoluteFilePath(EN_HUNSPELL_AFF);
+            dicPath = resourcesDirectory.absoluteFilePath(EN_HUNSPELL_DIC);
+        }
+
 #endif
 
-    bool initResult = false;
+        bool initResult = false;
 
-    if (QFileInfo(affPath).exists() && QFileInfo(dicPath).exists()) {
+        if (QFileInfo(affPath).exists() && QFileInfo(dicPath).exists()) {
 #ifdef Q_OS_WIN
-        // specific Hunspell handling of UTF-8 encoded pathes
-        affPath = "\\\\?\\" + QDir::toNativeSeparators(affPath);
-        dicPath = "\\\\?\\" + QDir::toNativeSeparators(dicPath);
+            // specific Hunspell handling of UTF-8 encoded pathes
+            affPath = "\\\\?\\" + QDir::toNativeSeparators(affPath);
+            dicPath = "\\\\?\\" + QDir::toNativeSeparators(dicPath);
 #endif
+
+            try {
+                m_Hunspell = new Hunspell(affPath.toUtf8().constData(),
+                                          dicPath.toUtf8().constData());
+                LOG_DEBUG << "Hunspell with AFF" << affPath << "and DIC" << dicPath;
+                initResult = true;
+                m_Encoding = QString::fromLatin1(m_Hunspell->get_dic_encoding());
+                m_Codec = QTextCodec::codecForName(m_Encoding.toLatin1().constData());
+            } catch (...) {
+                LOG_DEBUG << "Error in Hunspell with AFF" << affPath << "and DIC" << dicPath;
+                m_Hunspell = NULL;
+            }
+        } else {
+            LOG_WARNING << "DIC or AFF file not found." << dicPath << "||" << affPath;
+        }
+
+        initFromUserDict();
+
+        return initResult;
+    }
+
+    void SpellCheckWorker::processOneItem(std::shared_ptr<SpellCheckItemBase> &item) {
+        if (std::dynamic_pointer_cast<SpellCheckSeparatorItem>(item)) {
+            emit queueIsEmpty();
+            return;
+        }
+
+        bool neededSuggestions = item->needsSuggestions();
+        auto &queryItems = item->getQueries();
+        bool anyWrong = false;
+
+        if (!neededSuggestions) {
+            size_t size = queryItems.size();
+            for (size_t i = 0; i < size; ++i) {
+                auto &queryItem = queryItems.at(i);
+                bool isOk = checkWordSpelling(queryItem);
+                item->accountResultAt((int)i);
+                anyWrong = anyWrong || !isOk;
+            }
+
+            item->submitSpellCheckResult();
+        } else {
+            for (auto &queryItem: queryItems) {
+                if (!queryItem->m_IsCorrect) {
+                    findSuggestions(queryItem->m_Word);
+                }
+            }
+        }
+
+        if (anyWrong) {
+            item->requestSuggestions();
+            this->submitItem(item);
+        }
+    }
+
+    QStringList SpellCheckWorker::retrieveCorrections(const QString &word) {
+        QReadLocker locker(&m_SuggestionsLock);
+        QStringList result;
+
+        if (m_Suggestions.contains(word)) {
+            result = m_Suggestions.value(word);
+        }
+
+        return result;
+    }
+
+    void SpellCheckWorker::addToUserWordlist(const QString &word) {
+        qWarning() << "Entered addToUserWordlist";
+        if (word.size() == 0) {
+            return;
+        }
+
+        QString wordLow = word.toLower();
+        m_WrongWords.remove(wordLow);
+        putWord(word);
+        m_userDictionaryWordsNumber++;
+
+        if (!m_userDictionary.isEmpty()) {
+            QFile userDictonaryFile(m_userDictionary);
+            if (userDictonaryFile.open(QIODevice::Append)) {
+                QTextStream stream(&userDictonaryFile);
+                stream << wordLow << "\n";
+                userDictonaryFile.close();
+            } else {
+                qWarning() << "User dictionary in " << m_userDictionary << "could not be opened for appending a new word";
+            }
+        } else {
+            qWarning() << "User dictionary not set.";
+        }
+    }
+
+    void SpellCheckWorker::clearUserDictionary() {
+        if (!m_userDictionary.isEmpty()) {
+            QFile userDictonaryFile(m_userDictionary);
+            if (userDictonaryFile.open(QIODevice::ReadWrite)) {
+                QTextStream stream(&userDictonaryFile);
+
+                for (QString word = stream.readLine(); !word.isEmpty(); word = stream.readLine()) {
+                    removeWord(word);
+                }
+
+                userDictonaryFile.resize(0);
+                userDictonaryFile.close();
+                m_userDictionaryWordsNumber = 0;
+            } else {
+                qWarning() << "User dictionary in " << m_userDictionary << "could not be opened for appending a new word";
+            }
+        }
+    }
+
+    QStringList SpellCheckWorker::suggestCorrections(const QString &word) {
+        QStringList suggestions;
+        char **suggestWordList = NULL;
 
         try {
-            m_Hunspell = new Hunspell(affPath.toUtf8().constData(),
-                                      dicPath.toUtf8().constData());
-            LOG_DEBUG << "Hunspell with AFF" << affPath << "and DIC" << dicPath;
-            initResult = true;
-            m_Encoding = QString::fromLatin1(m_Hunspell->get_dic_encoding());
-            m_Codec = QTextCodec::codecForName(m_Encoding.toLatin1().constData());
+            // Encode from Unicode to the encoding used by current dictionary
+            int count = m_Hunspell->suggest(&suggestWordList, m_Codec->fromUnicode(word).constData());
+            QString lowerWord = word.toLower();
+
+            for (int i = 0; i < count; ++i) {
+                QString suggestion = m_Codec->toUnicode(suggestWordList[i]);
+
+                if (suggestion.toLower() != lowerWord) {
+                    suggestions << suggestion;
+                }
+
+                free(suggestWordList[i]);
+            }
+        } catch (...) {
+            LOG_WARNING << "Error for keyword:" << word;
         }
-        catch(...) {
-            LOG_DEBUG << "Error in Hunspell with AFF" << affPath << "and DIC" << dicPath;
-            m_Hunspell = NULL;
-        }
-    } else {
-        LOG_WARNING << "DIC or AFF file not found." << dicPath << "||" << affPath;
+        return suggestions;
     }
 
-    initFromUserDict();
+    bool SpellCheckWorker::checkWordSpelling(const std::shared_ptr<SpellCheckQueryItem> &queryItem) {
+        bool isOk = false;
 
-    return initResult;
-}
+        const QString &word = queryItem->m_Word;
+        bool isCached = m_WrongWords.contains(word);
 
-void SpellCheckWorker::processOneItem(std::shared_ptr<SpellCheckItemBase> &item) {
-    if (std::dynamic_pointer_cast<SpellCheckSeparatorItem>(item)) {
-        emit queueIsEmpty();
-        return;
-    }
+        if (!isCached) {
+            isOk = isHunspellSpellingCorrect(word);
 
-    bool neededSuggestions = item->needsSuggestions();
-    auto &queryItems = item->getQueries();
-    bool anyWrong = false;
+            if (!isOk) {
+                QString capitalized = word;
+                capitalized[0] = capitalized[0].toUpper();
 
-    if (!neededSuggestions) {
-        size_t size = queryItems.size();
-        for (size_t i = 0; i < size; ++i) {
-            auto &queryItem = queryItems.at(i);
-            bool isOk = checkWordSpelling(queryItem);
-            item->accountResultAt((int)i);
-            anyWrong = anyWrong || !isOk;
-        }
-
-        item->submitSpellCheckResult();
-    } else {
-        for (auto &queryItem: queryItems) {
-            if (!queryItem->m_IsCorrect) {
-                findSuggestions(queryItem->m_Word);
+                if (isHunspellSpellingCorrect(capitalized)) {
+                    isOk = true;
+                }
             }
         }
-    }
 
-    if (anyWrong) {
-        item->requestSuggestions();
-        this->submitItem(item);
-    }
-}
-
-QStringList SpellCheckWorker::retrieveCorrections(const QString &word) {
-    QReadLocker locker(&m_SuggestionsLock);
-    QStringList result;
-
-    if (m_Suggestions.contains(word)) {
-        result = m_Suggestions.value(word);
-    }
-
-    return result;
-}
-
-void SpellCheckWorker::addToUserWordlist(const QString &word)
-{
-    putWord(word);
-    if(!m_userDictionary.isEmpty()) {
-        QFile userDictonaryFile(m_userDictionary);
-        if(userDictonaryFile.open(QIODevice::Append)) {
-            QTextStream stream(&userDictonaryFile);
-            stream << word << "\n";
-            userDictonaryFile.close();
-        } else {
-            qWarning() << "User dictionary in " << m_userDictionary << "could not be opened for appending a new word";
-        }
-    } else {
-        qDebug() << "User dictionary not set.";
-    }
-}
-
-QStringList SpellCheckWorker::suggestCorrections(const QString &word) {
-    QStringList suggestions;
-    char **suggestWordList = NULL;
-
-    try {
-        // Encode from Unicode to the encoding used by current dictionary
-        int count = m_Hunspell->suggest(&suggestWordList, m_Codec->fromUnicode(word).constData());
-        QString lowerWord = word.toLower();
-
-        for (int i = 0; i < count; ++i) {
-            QString suggestion = m_Codec->toUnicode(suggestWordList[i]);
-
-            if (suggestion.toLower() != lowerWord) {
-                suggestions << suggestion;
-            }
-
-            free(suggestWordList[i]);
-        }
-    }
-    catch (...) {
-        LOG_WARNING << "Error for keyword:" << word;
-    }
-
-    return suggestions;
-}
-
-bool SpellCheckWorker::checkWordSpelling(const std::shared_ptr<SpellCheckQueryItem> &queryItem) {
-    bool isOk = false;
-
-    const QString &word = queryItem->m_Word;
-    bool isCached = m_WrongWords.contains(word);
-
-    if (!isCached) {
-        isOk = isHunspellSpellingCorrect(word);
+        queryItem->m_IsCorrect = isOk;
 
         if (!isOk) {
-            QString capitalized = word;
-            capitalized[0] = capitalized[0].toUpper();
-
-            if (isHunspellSpellingCorrect(capitalized)) {
-                isOk = true;
-            }
+            m_WrongWords.insert(word);
         }
+
+        return isOk;
     }
 
-    queryItem->m_IsCorrect = isOk;
+    bool SpellCheckWorker::isHunspellSpellingCorrect(const QString &word) const {
+        bool isOk = false;
 
-    if (!isOk) {
-        m_WrongWords.insert(word);
+        try {
+            isOk = m_Hunspell->spell(m_Codec->fromUnicode(word).constData()) != 0;
+        } catch (...) {
+            isOk = false;
+        }
+        return isOk;
     }
 
-    return isOk;
-}
+    void SpellCheckWorker::findSuggestions(const QString &word) {
+        bool needsCorrections = false;
 
-bool SpellCheckWorker::isHunspellSpellingCorrect(const QString &word) const {
-    bool isOk = false;
-    try {
-        isOk = m_Hunspell->spell(m_Codec->fromUnicode(word).constData()) != 0;
-    }
-    catch (...) {
-        isOk = false;
-    }
-    return isOk;
-}
-
-void SpellCheckWorker::findSuggestions(const QString &word) {
-    bool needsCorrections = false;
-
-    m_SuggestionsLock.lockForRead();
-    needsCorrections = !m_Suggestions.contains(word);
-    m_SuggestionsLock.unlock();
-
-    if (needsCorrections) {
-        QStringList suggestions = suggestCorrections(word);
-        m_SuggestionsLock.lockForWrite();
-        m_Suggestions.insert(word, suggestions);
+        m_SuggestionsLock.lockForRead();
+        needsCorrections = !m_Suggestions.contains(word);
         m_SuggestionsLock.unlock();
-    }
-}
 
-void SpellCheckWorker::putWord(const QString &word)
-{
-    m_Hunspell->add(m_Codec->fromUnicode(word).constData());
-}
-
-
-void SpellCheckWorker::initFromUserDict(){
-    QString appDataPath = XPIKS_USERDATA_PATH;
-    const QString &useDictDir = QDir::cleanPath(appDataPath + QDir::separator() + Constants::USER_DICT_DIR);
-    QDir dir(useDictDir);
-    m_userDictionary = dir.filePath(QString(Constants::USER_DICT_FILENAME));
-    QFile userDictonaryFile(m_userDictionary);
-
-    if(userDictonaryFile.open(QIODevice::ReadOnly)) {
-        QTextStream stream(&userDictonaryFile);
-
-        for(QString word = stream.readLine(); !word.isEmpty(); word = stream.readLine()) {
-            putWord(word);
+        if (needsCorrections) {
+            QStringList suggestions = suggestCorrections(word);
+            m_SuggestionsLock.lockForWrite();
+            m_Suggestions.insert(word, suggestions);
+            m_SuggestionsLock.unlock();
         }
-        userDictonaryFile.close();
-    } else {
-        qWarning() << "User dictionary in " << m_userDictionary << "could not be opened";
     }
-}
+
+    void SpellCheckWorker::putWord(const QString &word) {
+        m_Hunspell->add(m_Codec->fromUnicode(word).constData());
+    }
+
+    void SpellCheckWorker::removeWord(const QString &word) {
+        m_Hunspell->remove(m_Codec->fromUnicode(word).constData());
+    }
+
+    void SpellCheckWorker::initFromUserDict() {
+        QString appDataPath = XPIKS_USERDATA_PATH;
+        const QString &useDictDir = QDir::cleanPath(appDataPath + QDir::separator() + Constants::USER_DICT_DIR);
+        QDir dir(useDictDir);
+
+        if (!dir.exists()) {
+            bool created = QDir().mkpath(useDictDir);
+            Q_UNUSED(created);
+        }
+
+        m_userDictionary = dir.filePath(QString(Constants::USER_DICT_FILENAME));
+        QFile userDictonaryFile(m_userDictionary);
+
+        if (userDictonaryFile.open(QIODevice::ReadOnly)) {
+            QTextStream stream(&userDictonaryFile);
+
+            for (QString word = stream.readLine(); !word.isEmpty(); word = stream.readLine()) {
+                m_userDictionaryWordsNumber++;
+                putWord(word);
+            }
+
+            userDictonaryFile.close();
+        } else {
+            qWarning() << "User dictionary in " << m_userDictionary << "could not be opened";
+        }
+    }
 }

@@ -684,6 +684,16 @@ ApplicationWindow {
         }
     }
 
+    Menu {
+        id: addWordContextMenu
+        property string word
+
+        MenuItem {
+            text: qsTr("Add to dictionary")
+            onTriggered: helpersWrapper.getSpellCheckerService().addUserWordToDictionary(addWordContextMenu.word);
+        }
+    }
+
     MessageDialog {
         id: configExitDialog
 
@@ -2060,6 +2070,12 @@ ApplicationWindow {
                                                                                         previousKeyword: keyword,
                                                                                         keywordsModel: filteredArtItemsModel.getKeywordsModel(rowWrapper.delegateIndex)
                                                                                     })
+                                                            }
+
+                                                            onActionRightClicked: {
+                                                                console.log("Context menu for add word")
+                                                                addWordContextMenu.word = kw.keywordText;
+                                                                addWordContextMenu.popup()
                                                             }
                                                         }
 

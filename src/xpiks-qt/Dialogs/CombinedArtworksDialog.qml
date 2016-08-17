@@ -241,8 +241,8 @@ CloseRequested")
                         Connections {
                             target: combinedArtworks
                             onArtworksCountChanged: {
-                               var originalText = textItemsAvailable.getOriginalText()
-                               textItemsAvailable.text = i18.n + originalText
+                                var originalText = textItemsAvailable.getOriginalText()
+                                textItemsAvailable.text = i18.n + originalText
                             }
                         }
                     }
@@ -869,6 +869,12 @@ CloseRequested")
                                                                     keywordsModel: keywordsWrapper.keywordsModel
                                                                 })
                                         }
+                                        onActionRightClicked: {
+                                            console.log("Context menu for add word")
+                                            addWordContextMenu.word = kw.keywordText;
+                                            addWordContextMenu.popup()
+                                        }
+
                                     }
 
                                     onTagAdded: {

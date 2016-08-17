@@ -34,9 +34,11 @@ class Hunspell;
 class QTextCodec;
 
 namespace SpellCheck {
-    class SpellCheckWorker : public QObject, public Common::ItemProcessingWorker<SpellCheckItemBase>
+    class SpellCheckWorker:
+        public QObject, public Common::ItemProcessingWorker<SpellCheckItemBase>
     {
-        Q_OBJECT
+    Q_OBJECT
+
     public:
         SpellCheckWorker(QObject *parent=0);
         virtual ~SpellCheckWorker();
@@ -44,6 +46,11 @@ namespace SpellCheck {
     public:
         QStringList retrieveCorrections(const QString &word);
         void addToUserWordlist(const QString &word);
+        void clearUserDictionary();
+
+        int getUserDictionaryWordsNumber() {
+            return m_userDictionaryWordsNumber;
+        }
 
     protected:
         virtual bool initWorker();
@@ -68,6 +75,7 @@ namespace SpellCheck {
         bool isHunspellSpellingCorrect(const QString &word) const;
         void findSuggestions(const QString &word);
         void putWord(const QString &word);
+        void removeWord(const QString &word);
         void initFromUserDict();
 
     private:
@@ -79,6 +87,7 @@ namespace SpellCheck {
         // Coded does not need destruction
         QTextCodec *m_Codec;
         QString m_userDictionary;
+        int m_userDictionaryWordsNumber;
     };
 }
 
