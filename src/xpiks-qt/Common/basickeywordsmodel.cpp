@@ -46,7 +46,6 @@ namespace Common {
         setDescription(description);
         setKeywords(rawKeywords.split(',', QString::SkipEmptyParts));
     }
-
 #endif
 
     void BasicKeywordsModel::removeItemsAtIndices(const QVector<QPair<int, int> > &ranges) {
@@ -256,7 +255,6 @@ namespace Common {
         LOG_INFO << replaceWhat << "->" << replaceTo << "with flags:" << flags;
         Q_ASSERT(!replaceWhat.isEmpty());
         Q_ASSERT(!replaceTo.isEmpty());
-        Q_ASSERT((flags &Common::SearchFlagSearchMetadata) != 0);
         bool anyChanged = false;
 
         const bool needToCheckDescription = Common::HasFlag(flags, Common::SearchFlagSearchDescription);
@@ -369,7 +367,6 @@ namespace Common {
 
     bool BasicKeywordsModel::editKeywordUnsafe(int index, const QString &replacement) {
         bool result = false;
-
         LOG_INFO << "index:" << index << "replacement:" << replacement;
         QString sanitized = Helpers::doSanitizeKeyword(replacement);
 
@@ -478,7 +475,6 @@ namespace Common {
                 break;
             }
         }
-
         return anyError;
     }
 
@@ -552,7 +548,6 @@ namespace Common {
     bool BasicKeywordsModel::replaceInKeywordsUnsafe(const QString &replaceWhat, const QString &replaceTo,
                                                      int flags) {
         bool anyChanged = false;
-
         QVector<int> indicesToRemove;
 
         const bool caseSensitive = Common::HasFlag(flags, Common::SearchFlagCaseSensitive);
@@ -749,7 +744,7 @@ namespace Common {
     void BasicKeywordsModel::updateDescriptionSpellErrors(const QHash<QString, bool> &results) {
         QSet<QString> descriptionErrors;
         QStringList descriptionWords = getDescriptionWords();
-        foreach(const QString &word, descriptionWords) {
+        foreach (const QString &word, descriptionWords) {
             if (results.value(word, true) == false) {
                 descriptionErrors.insert(word);
             }
@@ -761,7 +756,7 @@ namespace Common {
     void BasicKeywordsModel::updateTitleSpellErrors(const QHash<QString, bool> &results) {
         QSet<QString> titleErrors;
         QStringList titleWords = getTitleWords();
-        foreach(const QString &word, titleWords) {
+        foreach (const QString &word, titleWords) {
             if (results.value(word, true) == false) {
                 titleErrors.insert(word);
             }
@@ -817,38 +812,12 @@ namespace Common {
 
     void BasicKeywordsModel::setSpellCheckResults(const std::vector<std::shared_ptr<SpellCheck::SpellCheckQueryItem> > &items,
                                                   bool onlyOneKeyword) {
-        QWriteLocker writeLocker(&m_KeywordsLock);
+        LOG_DEBUG << items.size() << "results";
 
+        QWriteLocker writeLocker(&m_KeywordsLock);
         Q_UNUSED(writeLocker);
 
-        if (m_KeywordsList.length() != m_SpellCheckResults.length()) {
-            LOG_INTEGRATION_TESTS << "Current keywords list length:" << m_KeywordsList.length();
-            LOG_INTEGRATION_TESTS << "SpellCheck list length:" << m_SpellCheckResults.length();
-        }
-
-        // sync issue between adding/removing/undo/spellcheck
-        Q_ASSERT(m_KeywordsList.length() == m_SpellCheckResults.length());
-
-        if (!onlyOneKeyword) {
-            resetSpellCheckResultsUnsafe();
-        } else {
-            Q_ASSERT(!items.empty());
-            int index = items.front()->m_Index;
-            m_SpellCheckResults[index] = true;
-        }
-
-        size_t size = items.size();
-        for (size_t i = 0; i < size; ++i) {
-            auto &item = items.at(i);
-            int index = item->m_Index;
-            if (0 <= index && index < m_KeywordsList.length()) {
-                if (m_KeywordsList[index].contains(item->m_Word)) {
-                    // if keyword contains several words, there would be
-                    // several queryitems and there's error if any has error
-                    m_SpellCheckResults[index] = m_SpellCheckResults[index] && item->m_IsCorrect;
-                }
-            }
-        }
+        setSpellCheckResultsUnsafe(items, onlyOneKeyword);
     }
 
     void BasicKeywordsModel::setSpellCheckResults(const QHash<QString, bool> &results, int flags) {
@@ -861,29 +830,26 @@ namespace Common {
         }
     }
 
-    QVector<SpellCheck::SpellSuggestionsItem *> BasicKeywordsModel::createKeywordsSuggestionsList() {
+    std::vector<std::shared_ptr<SpellCheck::SpellSuggestionsItem> > BasicKeywordsModel::createKeywordsSuggestionsList() {
         QReadLocker readLocker(&m_KeywordsLock);
 
         Q_UNUSED(readLocker);
 
-        QVector<SpellCheck::SpellSuggestionsItem *> spellCheckSuggestions;
+        std::vector<std::shared_ptr<SpellCheck::SpellSuggestionsItem> > spellCheckSuggestions;
         int length = m_KeywordsList.length();
         spellCheckSuggestions.reserve(length/2);
 
         for (int i = 0; i < length; ++i) {
             if (!m_SpellCheckResults[i]) {
-                const QString &keyword = m_KeywordsList[i];
+                const QString &keyword = m_KeywordsList.at(i);
+                LOG_DEBUG << keyword << "has wrong spelling";
 
                 if (!keyword.contains(QChar::Space)) {
-                    SpellCheck::KeywordSpellSuggestions *suggestionsItem = new SpellCheck::KeywordSpellSuggestions(keyword, i);
-                    spellCheckSuggestions.append(suggestionsItem);
+                    spellCheckSuggestions.emplace_back(new SpellCheck::KeywordSpellSuggestions(keyword, i));
                 } else {
                     QStringList items = keyword.split(QChar::Space, QString::SkipEmptyParts);
                     foreach(const QString &item, items) {
-                        SpellCheck::KeywordSpellSuggestions *suggestionsItem =
-                            new SpellCheck::KeywordSpellSuggestions(item, i, keyword);
-
-                        spellCheckSuggestions.append(suggestionsItem);
+                        spellCheckSuggestions.emplace_back(new SpellCheck::KeywordSpellSuggestions(item, i, keyword));
                     }
                 }
             }
@@ -892,38 +858,40 @@ namespace Common {
         return spellCheckSuggestions;
     }
 
-    QVector<SpellCheck::SpellSuggestionsItem *> BasicKeywordsModel::createDescriptionSuggestionsList() {
+    std::vector<std::shared_ptr<SpellCheck::SpellSuggestionsItem> > BasicKeywordsModel::createDescriptionSuggestionsList() {
         LOG_DEBUG << "#";
         QStringList descriptionWords = getDescriptionWords();
         int length = descriptionWords.length();
 
-        QVector<SpellCheck::SpellSuggestionsItem *> spellCheckSuggestions;
+        std::vector<std::shared_ptr<SpellCheck::SpellSuggestionsItem> > spellCheckSuggestions;
         spellCheckSuggestions.reserve(length / 3);
 
         for (int i = 0; i < length; ++i) {
             const QString &word = descriptionWords.at(i);
             if (m_SpellCheckInfo->hasDescriptionError(word)) {
-                SpellCheck::DescriptionSpellSuggestions *suggestionsItem = new SpellCheck::DescriptionSpellSuggestions(word);
-                spellCheckSuggestions.append(suggestionsItem);
+                LOG_DEBUG << word << "has wrong spelling";
+
+                spellCheckSuggestions.emplace_back(new SpellCheck::DescriptionSpellSuggestions(word));
             }
         }
 
         return spellCheckSuggestions;
     }
 
-    QVector<SpellCheck::SpellSuggestionsItem *> BasicKeywordsModel::createTitleSuggestionsList() {
+    std::vector<std::shared_ptr<SpellCheck::SpellSuggestionsItem> > BasicKeywordsModel::createTitleSuggestionsList() {
         LOG_DEBUG << "#";
         QStringList titleWords = getTitleWords();
         int length = titleWords.length();
 
-        QVector<SpellCheck::SpellSuggestionsItem *> spellCheckSuggestions;
+        std::vector<std::shared_ptr<SpellCheck::SpellSuggestionsItem> > spellCheckSuggestions;
         spellCheckSuggestions.reserve(length / 3);
 
         for (int i = 0; i < length; ++i) {
             const QString &word = titleWords.at(i);
             if (m_SpellCheckInfo->hasTitleError(word)) {
-                SpellCheck::TitleSpellSuggestions *suggestionsItem = new SpellCheck::TitleSpellSuggestions(word);
-                spellCheckSuggestions.append(suggestionsItem);
+                LOG_DEBUG << word << "has wrong spelling";
+
+                spellCheckSuggestions.emplace_back(new SpellCheck::TitleSpellSuggestions(word));
             }
         }
 
@@ -933,9 +901,10 @@ namespace Common {
     Common::KeywordReplaceResult BasicKeywordsModel::fixKeywordSpelling(int index, const QString &existing, const QString &replacement) {
         Common::KeywordReplaceResult result;
 
+        LOG_INFO << "Replacing" << existing << "to" << replacement << "with index" << index;
+
         m_KeywordsLock.lockForWrite();
         {
-            LOG_INFO << "Replacing" << existing << "to" << replacement << "with index" << index;
             if (0 <= index && index < m_KeywordsList.length()) {
                 if (replaceKeywordUnsafe(index, existing, replacement)) {
                     m_SpellCheckResults[index] = true;
@@ -959,22 +928,20 @@ namespace Common {
         return result;
     }
 
-    bool BasicKeywordsModel::processFailedKeywordReplacements(const QVector<SpellCheck::KeywordSpellSuggestions *> &candidatesForRemoval) {
+    bool BasicKeywordsModel::processFailedKeywordReplacements(const std::vector<std::shared_ptr<SpellCheck::KeywordSpellSuggestions> > &candidatesForRemoval) {
         LOG_INFO << candidatesForRemoval.size() << "candidates to remove";
         bool anyReplaced = false;
 
-        if (candidatesForRemoval.isEmpty()) {
-            return anyReplaced;
-        }
+        if (candidatesForRemoval.empty()) { return anyReplaced; }
 
         QVector<int> indicesToRemove;
-        int size = candidatesForRemoval.size();
-        indicesToRemove.reserve(size);
+        size_t size = candidatesForRemoval.size();
+        indicesToRemove.reserve((int)size);
 
         QWriteLocker writeLocker(&m_KeywordsLock);
 
-        for (int i = 0; i < size; ++i) {
-            SpellCheck::KeywordSpellSuggestions *item = candidatesForRemoval.at(i);
+        for (size_t i = 0; i < size; ++i) {
+            auto &item = candidatesForRemoval.at(i);
 
             int index = item->getOriginalIndex();
             if (index < 0 || index >= m_KeywordsList.length()) {
@@ -1004,7 +971,6 @@ namespace Common {
         int flags = 0;
         Common::SetFlag(flags, Common::SearchFlagCaseSensitive);
         Common::SetFlag(flags, Common::SearchFlagSearchDescription);
-
         replaceInDescription(word, replacement, flags);
     }
 
@@ -1012,11 +978,11 @@ namespace Common {
         int flags = 0;
         Common::SetFlag(flags, Common::SearchFlagCaseSensitive);
         Common::SetFlag(flags, Common::SearchFlagSearchDescription);
-
         replaceInTitle(word, replacement, flags);
     }
 
     void BasicKeywordsModel::afterReplaceCallback() {
+        LOG_DEBUG << "#";
         emit spellCheckErrorsChanged();
         emit afterSpellingErrorsFixed();
     }
@@ -1059,21 +1025,40 @@ namespace Common {
         bool result = addedUserWordToDictionaryHandlerUnsafe(keyword);
         m_KeywordsLock.unlock();
         if (result) {
-            int size = m_KeywordsList.length();
-            QString keywordLow = keyword.toLower();
-            for (int i = 0; i < size; i++) {
-                if (m_KeywordsList.at(i) == keywordLow) {
-                    if (m_SpellCheckResults[i] != true) {
-                        LOG_INFO<<"Changing status of keyword "<<keywordLow;
-                        m_SpellCheckResults[i] = true;
-                        QModelIndex j = this->index(i);
-                        emit dataChanged(j, j, QVector<int>() << KeywordRole << IsCorrectRole);
-                        result = true;
-                    }
+            emitSpellCheckChanged(-1);
+            notifySpellCheckResults(Common::SpellCheckDescription || Common::SpellCheckTitle);
+        }
+    }
+
+    void BasicKeywordsModel::setSpellCheckResultsUnsafe(const std::vector<std::shared_ptr<SpellCheck::SpellCheckQueryItem> > &items,
+                                                        bool onlyOneKeyword) {
+        if (m_KeywordsList.length() != m_SpellCheckResults.length()) {
+            LOG_INTEGRATION_TESTS << "Current keywords list length:" << m_KeywordsList.length();
+            LOG_INTEGRATION_TESTS << "SpellCheck list length:" << m_SpellCheckResults.length();
+        }
+
+        // sync issue between adding/removing/undo/spellcheck
+        Q_ASSERT(m_KeywordsList.length() == m_SpellCheckResults.length());
+
+        if (!onlyOneKeyword) {
+            resetSpellCheckResultsUnsafe();
+        } else {
+            Q_ASSERT(!items.empty());
+            int index = items.front()->m_Index;
+            m_SpellCheckResults[index] = true;
+        }
+
+        size_t size = items.size();
+        for (size_t i = 0; i < size; ++i) {
+            auto &item = items.at(i);
+            int index = item->m_Index;
+            if (0 <= index && index < m_KeywordsList.length()) {
+                if (m_KeywordsList[index].contains(item->m_Word)) {
+                    // if keyword contains several words, there would be
+                    // several queryitems and there's error if any has error
+                    m_SpellCheckResults[index] = m_SpellCheckResults[index] && item->m_IsCorrect;
                 }
             }
-
-            notifySpellCheckResults(Common::SpellCheckDescription || Common::SpellCheckTitle);
         }
     }
 
@@ -1112,6 +1097,13 @@ namespace Common {
 
         if (m_KeywordsSet.contains(keywordLow)) {
             result = true;
+            int size = m_KeywordsList.length();
+            QString keywordLow = keyword.toLower();
+            for (int i = 0; i < size; i++) {
+                if (m_KeywordsList.at(i) == keywordLow) {
+                    m_SpellCheckResults[i] = true;
+                }
+            }
         }
 
         if (m_SpellCheckInfo->removeWordFromErrorListInDescription(keywordLow)) {

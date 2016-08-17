@@ -26,6 +26,8 @@
 #include <QStringList>
 #include <QAbstractListModel>
 #include <QVector>
+#include <vector>
+#include <memory>
 #include "../Common/flags.h"
 
 namespace SpellCheck {
@@ -69,6 +71,7 @@ namespace SpellCheck {
 
         // doesn't work like that because of f&cking c++ standard
         // about accessing base protected members in derived class
+        // (you cannot access protected members of freestanding objects of base type)
         //protected:
         virtual void replaceToSuggested(ISpellCheckable *item, const QString &word, const QString &replacement) = 0;
 
@@ -109,7 +112,7 @@ namespace SpellCheck {
         bool isPotentialDuplicate() const { return m_ReplaceResult == Common::KeywordReplaceFailedDuplicate; }
         virtual void replaceToSuggested(ISpellCheckable *item);
 
-        // TODO: fix this back in future when c++ will be normal language
+        // TODO: fix this back in future when c++ will be normal language (see comments in base class)
     //protected:
         virtual void replaceToSuggested(ISpellCheckable *item, const QString &word, const QString &replacement);
 
@@ -153,21 +156,21 @@ namespace SpellCheck {
     class CombinedSpellSuggestions: public SpellSuggestionsItem {
         Q_OBJECT
     public:
-        CombinedSpellSuggestions(const QString &word, const QVector<SpellSuggestionsItem*> &suggestions);
+        CombinedSpellSuggestions(const QString &word, std::vector<std::shared_ptr<SpellSuggestionsItem> > &suggestions);
         virtual ~CombinedSpellSuggestions();
 
     public:
 #if defined(CORE_TESTS) || defined(INTEGRATION_TESTS)
         virtual QString toDebugString() const { return "Multireplace: " + SpellSuggestionsItem::toDebugString(); }
 #endif
-        QVector<KeywordSpellSuggestions *> getKeywordsDuplicateSuggestions() const;
+        std::vector<std::shared_ptr<KeywordSpellSuggestions> > getKeywordsDuplicateSuggestions() const;
         virtual void replaceToSuggested(ISpellCheckable *item);
 
     //protected:
         virtual void replaceToSuggested(ISpellCheckable *item, const QString &word, const QString &replacement);
 
     private:
-        QVector<SpellSuggestionsItem*> m_SpellSuggestions;
+        std::vector<std::shared_ptr<SpellSuggestionsItem> > m_SpellSuggestions;
     };
 }
 

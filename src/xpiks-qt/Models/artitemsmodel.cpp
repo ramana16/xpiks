@@ -1098,7 +1098,7 @@ namespace Models {
 
     void ArtItemsModel::afterClearUserDictionaryHandler() {
         QVector<ArtworkMetadata *> metadata;
-        metadata.reserve(m_ArtworkList.size());
+        metadata.reserve((int)m_ArtworkList.size());
         for (auto el : m_ArtworkList) {
             metadata.append(el);
         }

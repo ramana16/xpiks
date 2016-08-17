@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
 
     int result = 0;
 
-    /*QTEST_CLASS(EncryptionTests, et, result);
+    QTEST_CLASS(EncryptionTests, et, result);
     QTEST_CLASS(IndicesToRangesTests, itrt, result);
     QTEST_CLASS(AddCommandTests, act, result);
     QTEST_CLASS(RemoveCommandTests, rct, result);
@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
     QTEST_CLASS(DeleteOldLogsTest, dolt, result);
     QTEST_CLASS(ReplaceTests, rpl, result);
     QTEST_CLASS(ReplacePreviewTests, rplp, result);
-    QTEST_CLASS(DeleteKeywordsTests, dkt, result);*/
+    QTEST_CLASS(DeleteKeywordsTests, dkt, result);
     QTEST_CLASS(AddSpellingWordTests, ast, result);
 
     QThread::sleep(1);

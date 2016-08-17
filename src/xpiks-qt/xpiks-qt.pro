@@ -119,7 +119,6 @@ RESOURCES += qml.qrc
 DEFINES += QT_NO_CAST_TO_ASCII \
            QT_RESTRICTED_CAST_FROM_ASCII \
            QT_NO_CAST_FROM_BYTEARRAY
-DEFINES += QUAZIP_STATIC
 DEFINES += HUNSPELL_STATIC
 DEFINES += LIBFACE_STATIC
 DEFINES += QT_MESSAGELOGCONTEXT
@@ -467,6 +466,7 @@ travis-ci {
     LIBS -= -lz
     LIBS += /usr/lib/x86_64-linux-gnu/libz.so
     DEFINES += TRAVIS_CI
+    INCLUDEPATH += "../quazip"
 }
 
 linux-g++-64 {

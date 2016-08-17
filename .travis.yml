@@ -23,7 +23,7 @@ before_install:
 install:
   - if [ "$CXX" = "g++" ]; then sudo apt-get install -qq g++ gcc; export CXX="g++" CC="gcc"; $CXX --version; fi
   - sudo apt-get install -qq qt55base; source /opt/qt55/bin/qt55-env.sh
-  - sudo apt-get install qt55base qt55quickcontrols qt55svg qt55declarative libcurl4-openssl-dev libhunspell-dev libquazip0-dev zlib1g-dev libimage-exiftool-perl
+  - sudo apt-get install qt55base qt55quickcontrols qt55svg qt55declarative libcurl4-openssl-dev libhunspell-dev zlib1g-dev libimage-exiftool-perl
   - sudo apt-get install -y gdb
   - sudo apt-get install -y libexiv2-dev expat
 
@@ -35,13 +35,17 @@ script:
   - cd quazip/quazip/
   - qmake "CONFIG+=debug" quazip.pro
   - make
-  - cp libquazip.a ../../libs/
+  - cp libquazip.so.1.0.0 ../../libs/
   - cd ../../
+  - ln -s libquazip.so.1.0.0 libs/libquazip.so
+  - ln -s libquazip.so.1.0.0 libs/libquazip.so.1
+  - ln -s libquazip.so.1.0.0 libs/libquazip.so.1.0
   - mv tiny-aes/aes.c tiny-aes/aes.cpp
   - cd cpp-libface
   - make lib-face
   - cp libface.a ../libs/
   - cd ../
+  - ls -la libs/
   - if [ -n "$XPIKS_BINARY" ]; then cd xpiks-qt/; fi
   - if [ -n "$CORE_TESTS" ]; then cd xpiks-tests/xpiks-tests-core; fi
   - if [ -n "$INTEGRATION_TESTS" ]; then cd xpiks-tests/xpiks-tests-integration; fi
@@ -49,6 +53,7 @@ script:
   - if [ -n "$CORE_TESTS" ]; then qmake "CONFIG+=debug travis-ci" xpiks-tests-core.pro; fi
   - if [ -n "$INTEGRATION_TESTS" ]; then qmake "CONFIG+=debug travis-ci" xpiks-tests-integration.pro; fi
   - make
+  - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../../libs/
   - if [ -n "$CORE_TESTS" ]; then ./xpiks-tests-core; fi
   - if [ -n "$INTEGRATION_TESTS" ]; then ./xpiks-tests-integration; fi
 

@@ -4,11 +4,15 @@ QT -= gui
 
 
 win32 {
-LIBS += -L"$$PWD/../../libs/" -lz
-INCLUDEPATH += "$$PWD/../../zlib-1.2.8/"
+    LIBS += -L"$$PWD/../../libs/" -lz
+    INCLUDEPATH += "$$PWD/../../zlib-1.2.8/"
 }
 
-CONFIG += staticlib
+macx {
+    LIBS += -lz
+}
+
+#CONFIG += staticlib
 CONFIG += c++11
 
 # The ABI version.
