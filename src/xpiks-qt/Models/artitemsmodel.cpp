@@ -599,6 +599,8 @@ namespace Models {
                 ImageArtwork *image = dynamic_cast<ImageArtwork *>(metadata);
                 return (image != NULL) && image->hasVectorAttached();
             }
+            case BaseFilenameRole:
+                return metadata->getBaseFilename();
             default:
                 return QVariant();
         }
@@ -943,6 +945,7 @@ namespace Models {
         roles[EditIsSelectedRole] = "editisselected";
         roles[KeywordsCountRole] = "keywordscount";
         roles[HasVectorAttachedRole] = "hasvectorattached";
+        roles[BaseFilenameRole] = "basefilename";
         return roles;
     }
 

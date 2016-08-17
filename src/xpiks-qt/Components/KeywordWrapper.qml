@@ -78,7 +78,7 @@ Rectangle {
                 }
 
                 preventStealing: true
-                //propagateComposedEvents: true
+                propagateComposedEvents: true
             }
         }
 
