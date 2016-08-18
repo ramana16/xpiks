@@ -82,23 +82,51 @@ namespace SpellCheck {
         Q_ASSERT(spellCheckable != NULL);
         spellCheckable->acquire();
 
+        std::function<bool (const QString &word)> alwaysTrue = [](const QString &) {return true;};
+
         if (Common::HasFlag(spellCheckFlags, Common::SpellCheckKeywords)) {
             QStringList keywords = spellCheckable->getKeywords();
             reserve(keywords.length());
-            addWords(keywords, 0);
+            addWords(keywords, 0, alwaysTrue);
         }
 
         if (Common::HasFlag(spellCheckFlags, Common::SpellCheckDescription)) {
             QStringList descriptionWords = spellCheckable->getDescriptionWords();
             reserve(descriptionWords.length());
-            addWords(descriptionWords, 100000);
+            addWords(descriptionWords, 100000, alwaysTrue);
         }
 
         if (Common::HasFlag(spellCheckFlags, Common::SpellCheckTitle)) {
             QStringList titleWords = spellCheckable->getTitleWords();
             reserve(titleWords.length());
-            addWords(titleWords, 100000);
+            addWords(titleWords, 100000, alwaysTrue);
         }
+    }
+
+    SpellCheckItem::SpellCheckItem(Common::BasicKeywordsModel *spellCheckable, const QString &keywordToCheck) :
+        SpellCheckItemBase(),
+        m_SpellCheckable(spellCheckable),
+        m_SpellCheckFlags(Common::SpellCheckAll),
+        m_OnlyOneKeyword(false)
+    {
+        Q_ASSERT(spellCheckable != NULL);
+        spellCheckable->acquire();
+
+        std::function<bool (const QString &word)> sameKeywordFunc = [&keywordToCheck](const QString &word) {
+            return QString::compare(word, keywordToCheck, Qt::CaseInsensitive) == 0;
+        };
+
+        QStringList keywords = spellCheckable->getKeywords();
+        reserve(keywords.length());
+        addWords(keywords, 0, sameKeywordFunc);
+
+        QStringList descriptionWords = spellCheckable->getDescriptionWords();
+        reserve(descriptionWords.length());
+        addWords(descriptionWords, 100000, sameKeywordFunc);
+
+        QStringList titleWords = spellCheckable->getTitleWords();
+        reserve(titleWords.length());
+        addWords(titleWords, 100000, sameKeywordFunc);
     }
 
     SpellCheckItem::~SpellCheckItem() {
@@ -107,25 +135,35 @@ namespace SpellCheck {
         }
     }
 
-    void SpellCheckItem::addWords(const QStringList &words, int startingIndex) {
+    void SpellCheckItem::addWords(const QStringList &words, int startingIndex, const std::function<bool (const QString &word)> &pred) {
         int index = startingIndex;
 
         foreach (const QString &word, words) {
+            bool added = false;
+
             if (!word.contains(QChar::Space)) {
-                std::shared_ptr<SpellCheckQueryItem> queryItem(new SpellCheckQueryItem(index, word));
-                appendItem(queryItem);
+                if (pred(word)) {
+                    std::shared_ptr<SpellCheckQueryItem> queryItem(new SpellCheckQueryItem(index, word));
+                    appendItem(queryItem);
+                    added = true;
+                }
             } else {
                 QStringList parts = word.split(QChar::Space, QString::SkipEmptyParts);
                 foreach (const QString &part, parts) {
                     QString item = part.trimmed();
                     if (item.length() >= 2) {
-                        std::shared_ptr<SpellCheckQueryItem> queryItem(new SpellCheckQueryItem(index, item));
-                        appendItem(queryItem);
+                        if (pred(item)) {
+                            std::shared_ptr<SpellCheckQueryItem> queryItem(new SpellCheckQueryItem(index, item));
+                            appendItem(queryItem);
+                            added = true;
+                        }
                     }
                 }
             }
 
-            index++;
+            if (added) {
+                index++;
+            }
         }
     }
 
@@ -146,4 +184,36 @@ namespace SpellCheck {
         int index = m_OnlyOneKeyword ? items.front()->m_Index : -1;
         emit resultsReady(m_SpellCheckFlags, index);
     }
+
+    AddWordItem::AddWordItem(const QString &keyword):
+    m_KeyWords(QStringList()),
+    m_ClearFlag(false)
+    {
+        if (keyword.isEmpty()){
+            m_ClearFlag = true;
+            return;
+        }
+     QString lowerCase = keyword.toLower();
+     QString simplified = lowerCase.simplified();
+     QStringList words = simplified.split(QChar::Space);
+     QSet<QString> wordsSet;
+     m_KeyWords.reserve(words.size());
+     for (QString &el : words) {
+         if (!wordsSet.contains(el)) {
+             wordsSet.insert(el);
+             m_KeyWords.append(el);
+         }
+     }
+    }
+
+    AddWordItem::~AddWordItem()
+    {
+
+    }
+
+    void AddWordItem::submitSpellCheckResult()
+    {
+
+    }
+
 }

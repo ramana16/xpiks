@@ -27,6 +27,7 @@
 #include <QStringList>
 #include <QObject>
 #include <QHash>
+#include <functional>
 
 namespace Common {
     class BasicKeywordsModel;
@@ -56,7 +57,12 @@ namespace SpellCheck {
         QStringList m_Suggestions;
     };
 
-    class SpellCheckItemBase : public QObject {
+    class ISpellCheckItem {
+    public:
+        virtual ~ISpellCheckItem() {}
+    };
+
+    class SpellCheckItemBase : public QObject, public ISpellCheckItem {
         Q_OBJECT
     public:
         virtual ~SpellCheckItemBase();
@@ -85,10 +91,9 @@ namespace SpellCheck {
         volatile bool m_NeedsSuggestions;
     };
 
-    class SpellCheckSeparatorItem : public SpellCheckItemBase {
-        Q_OBJECT
+    class SpellCheckSeparatorItem : public ISpellCheckItem {
     public:
-        virtual void submitSpellCheckResult() { /*BUMP*/ }
+        virtual ~SpellCheckSeparatorItem() {}
     };
 
     class SpellCheckItem : public SpellCheckItemBase {
@@ -96,10 +101,11 @@ namespace SpellCheck {
     public:
         SpellCheckItem(Common::BasicKeywordsModel *spellCheckable, int spellCheckFlags, int keywordIndex);
         SpellCheckItem(Common::BasicKeywordsModel *spellCheckable, int spellCheckFlags);
+        SpellCheckItem(Common::BasicKeywordsModel *spellCheckable, const QString &keywordToCheck);
         virtual ~SpellCheckItem();
 
     private:
-        void addWords(const QStringList &words, int startingIndex);
+        void addWords(const QStringList &words, int startingIndex, const std::function<bool (const QString &word)> &pred);
 
     signals:
         void resultsReady(int flags, int index);
@@ -112,6 +118,22 @@ namespace SpellCheck {
         Common::BasicKeywordsModel *m_SpellCheckable;
         int m_SpellCheckFlags;
         volatile bool m_OnlyOneKeyword;
+    };
+
+    class AddWordItem : public SpellCheckItemBase {
+        Q_OBJECT
+    public:
+        AddWordItem(const QString& keyword = "");
+        virtual ~AddWordItem();
+
+    public:
+        virtual void submitSpellCheckResult();
+        const QStringList& getKeywords() const { return m_KeyWords; }
+        bool getClearFlag() {return m_ClearFlag;}
+
+    private:
+        QStringList m_KeyWords;
+        bool m_ClearFlag;
     };
 }
 

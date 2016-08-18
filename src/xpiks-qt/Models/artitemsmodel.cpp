@@ -484,6 +484,7 @@ namespace Models {
     }
 
     void ArtItemsModel::initDescriptionHighlighting(int metadataIndex, QQuickTextDocument *document) {
+        qInfo()<<"#";
         if (0 <= metadataIndex && metadataIndex < getArtworksCount()) {
             ArtworkMetadata *metadata = m_ArtworkList.at(metadataIndex);
             Common::BasicKeywordsModel *keywordsModel = metadata->getKeywordsModel();
@@ -495,6 +496,7 @@ namespace Models {
     }
 
     void ArtItemsModel::initTitleHighlighting(int metadataIndex, QQuickTextDocument *document) {
+        qInfo()<<"#";
         if (0 <= metadataIndex && metadataIndex < getArtworksCount()) {
             ArtworkMetadata *metadata = m_ArtworkList.at(metadataIndex);
             Common::BasicKeywordsModel *keywordsModel = metadata->getKeywordsModel();
@@ -730,15 +732,11 @@ namespace Models {
         Q_ASSERT(index >= 0 && index <= getArtworksCount());
         Q_ASSERT(metadata != NULL);
         m_ArtworkList.insert(m_ArtworkList.begin() + index, metadata);
-        Common::BasicKeywordsModel *keywordsModel = metadata->getKeywordsModel();
-        QObject::connect(this, SIGNAL(addedUserWordToDictionary(QString)), keywordsModel, SLOT(addedUserWordToDictionaryHandler(QString)));
     }
 
     void ArtItemsModel::appendMetadata(ArtworkMetadata *metadata) {
         Q_ASSERT(metadata != NULL);
         m_ArtworkList.push_back(metadata);
-        Common::BasicKeywordsModel *keywordsModel = metadata->getKeywordsModel();
-        QObject::connect(this, SIGNAL(addedUserWordToDictionary(QString)), keywordsModel, SLOT(addedUserWordToDictionaryHandler(QString)));
     }
 
     void ArtItemsModel::removeArtworks(const QVector<QPair<int, int> > &ranges) {
@@ -1099,13 +1097,22 @@ namespace Models {
         }
     }
 
-    void ArtItemsModel::afterClearUserDictionaryHandler() {
-        QVector<ArtworkMetadata *> metadata;
-        metadata.reserve((int)m_ArtworkList.size());
-        for (auto el : m_ArtworkList) {
-            metadata.append(el);
+    void ArtItemsModel::addedUserWordHandler(const QString &keyword) {
+
+        int size = m_ArtworkList.size();
+        QVector<Common::BasicKeywordsModel *> itemsToCheck;
+        itemsToCheck.reserve(size);
+
+        for (int i = 0; i < size; i++) {
+            ArtworkMetadata *metadata = m_ArtworkList.at(i);
+            Common::BasicKeywordsModel *keywordsModel = metadata->getKeywordsModel();
+            itemsToCheck.append(keywordsModel);
         }
 
-        m_CommandManager->submitForSpellCheck(metadata);
+        if (!keyword.isEmpty()) {
+            m_CommandManager->submitForSpellCheck(itemsToCheck, keyword);
+        } else {
+            m_CommandManager->submitForSpellCheck(itemsToCheck);
+        }
     }
 }

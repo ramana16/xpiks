@@ -46,6 +46,7 @@ namespace Common {
         setDescription(description);
         setKeywords(rawKeywords.split(',', QString::SkipEmptyParts));
     }
+
 #endif
 
     void BasicKeywordsModel::removeItemsAtIndices(const QVector<QPair<int, int> > &ranges) {
@@ -255,7 +256,7 @@ namespace Common {
         LOG_INFO << replaceWhat << "->" << replaceTo << "with flags:" << flags;
         Q_ASSERT(!replaceWhat.isEmpty());
         Q_ASSERT(!replaceTo.isEmpty());
-        Q_ASSERT((flags & Common::SearchFlagSearchMetadata) != 0);
+        Q_ASSERT((flags &Common::SearchFlagSearchMetadata) != 0);
         bool anyChanged = false;
 
         const bool needToCheckDescription = Common::HasFlag(flags, Common::SearchFlagSearchDescription);
@@ -368,6 +369,7 @@ namespace Common {
 
     bool BasicKeywordsModel::editKeywordUnsafe(int index, const QString &replacement) {
         bool result = false;
+
         LOG_INFO << "index:" << index << "replacement:" << replacement;
         QString sanitized = Helpers::doSanitizeKeyword(replacement);
 
@@ -476,6 +478,7 @@ namespace Common {
                 break;
             }
         }
+
         return anyError;
     }
 
@@ -549,6 +552,7 @@ namespace Common {
     bool BasicKeywordsModel::replaceInKeywordsUnsafe(const QString &replaceWhat, const QString &replaceTo,
                                                      int flags) {
         bool anyChanged = false;
+
         QVector<int> indicesToRemove;
 
         const bool caseSensitive = Common::HasFlag(flags, Common::SearchFlagCaseSensitive);
@@ -745,7 +749,7 @@ namespace Common {
     void BasicKeywordsModel::updateDescriptionSpellErrors(const QHash<QString, bool> &results) {
         QSet<QString> descriptionErrors;
         QStringList descriptionWords = getDescriptionWords();
-        foreach (const QString &word, descriptionWords) {
+        foreach(const QString &word, descriptionWords) {
             if (results.value(word, true) == false) {
                 descriptionErrors.insert(word);
             }
@@ -757,7 +761,7 @@ namespace Common {
     void BasicKeywordsModel::updateTitleSpellErrors(const QHash<QString, bool> &results) {
         QSet<QString> titleErrors;
         QStringList titleWords = getTitleWords();
-        foreach (const QString &word, titleWords) {
+        foreach(const QString &word, titleWords) {
             if (results.value(word, true) == false) {
                 titleErrors.insert(word);
             }
@@ -929,11 +933,15 @@ namespace Common {
         return result;
     }
 
-    bool BasicKeywordsModel::processFailedKeywordReplacements(const std::vector<std::shared_ptr<SpellCheck::KeywordSpellSuggestions> > &candidatesForRemoval) {
+    bool BasicKeywordsModel::processFailedKeywordReplacements(const
+                                                              std::vector<std::shared_ptr<SpellCheck::KeywordSpellSuggestions> > &candidatesForRemoval)
+    {
         LOG_INFO << candidatesForRemoval.size() << "candidates to remove";
         bool anyReplaced = false;
 
-        if (candidatesForRemoval.empty()) { return anyReplaced; }
+        if (candidatesForRemoval.empty()) {
+            return anyReplaced;
+        }
 
         QVector<int> indicesToRemove;
         size_t size = candidatesForRemoval.size();
@@ -972,6 +980,7 @@ namespace Common {
         int flags = 0;
         Common::SetFlag(flags, Common::SearchFlagCaseSensitive);
         Common::SetFlag(flags, Common::SearchFlagSearchDescription);
+
         replaceInDescription(word, replacement, flags);
     }
 
@@ -979,6 +988,7 @@ namespace Common {
         int flags = 0;
         Common::SetFlag(flags, Common::SearchFlagCaseSensitive);
         Common::SetFlag(flags, Common::SearchFlagSearchDescription);
+
         replaceInTitle(word, replacement, flags);
     }
 
@@ -1018,17 +1028,6 @@ namespace Common {
         }
 
         notifySpellCheckResults(flags);
-    }
-
-    void BasicKeywordsModel::addedUserWordToDictionaryHandler(const QString &keyword) {
-        LOG_INFO << "entered addedUserWordToDictionaryHandler";
-        m_KeywordsLock.lockForWrite();
-        bool result = addedUserWordToDictionaryHandlerUnsafe(keyword);
-        m_KeywordsLock.unlock();
-        if (result) {
-            emitSpellCheckChanged(-1);
-            notifySpellCheckResults(Common::SpellCheckDescription || Common::SpellCheckTitle);
-        }
     }
 
     void BasicKeywordsModel::setSpellCheckResultsUnsafe(const std::vector<std::shared_ptr<SpellCheck::SpellCheckQueryItem> > &items,
@@ -1090,32 +1089,6 @@ namespace Common {
         }
 
         return isDuplicate;
-    }
-
-    bool BasicKeywordsModel::addedUserWordToDictionaryHandlerUnsafe(const QString &keyword) {
-        bool result = false;
-        QString keywordLow = keyword.toLower();
-
-        if (m_KeywordsSet.contains(keywordLow)) {
-            result = true;
-            int size = m_KeywordsList.length();
-            QString keywordLow = keyword.toLower();
-            for (int i = 0; i < size; i++) {
-                if (m_KeywordsList.at(i) == keywordLow) {
-                    m_SpellCheckResults[i] = true;
-                }
-            }
-        }
-
-        if (m_SpellCheckInfo->removeWordFromErrorListInDescription(keywordLow)) {
-            result = true;
-        }
-
-        if (m_SpellCheckInfo->removeWordFromErrorListInTitle(keyword)) {
-            result = true;
-        }
-
-        return result;
     }
 
     void BasicKeywordsModel::emitSpellCheckChanged(int index) {

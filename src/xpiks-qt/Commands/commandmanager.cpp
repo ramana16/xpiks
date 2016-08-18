@@ -256,8 +256,9 @@ void Commands::CommandManager::connectEntitiesSignalsSlots() const {
                          m_KeywordsSuggestor, SLOT(onLanguageChanged()));
     }
 
-    QObject::connect(m_SpellCheckerService, SIGNAL(addedUserWordToDictionary(QString)), m_ArtItemsModel, SIGNAL(addedUserWordToDictionary(QString)));
-    QObject::connect(m_SpellCheckerService, SIGNAL(afterClearUserDictionary()), m_ArtItemsModel, SLOT(afterClearUserDictionaryHandler()));
+    if (m_SpellCheckerService != NULL && m_ArtItemsModel != NULL) {
+        QObject::connect(m_SpellCheckerService, SIGNAL(addedUserWord(QString)), m_ArtItemsModel, SLOT(addedUserWordHandler(QString)));
+    }
 }
 
 void Commands::CommandManager::ensureDependenciesInjected() {
@@ -512,6 +513,13 @@ void Commands::CommandManager::setupSpellCheckSuggestions(Common::BasicKeywordsM
     if (m_SpellCheckSuggestionModel) {
         m_SpellCheckSuggestionModel->setupModel(item, index, flags);
         reportUserAction(Conectivity::UserActionSpellSuggestions);
+    }
+}
+
+void Commands::CommandManager::submitForSpellCheck(const QVector<Common::BasicKeywordsModel *> &items,
+                                                   const QString &wordToCheck) const {
+    if ((m_SettingsModel != NULL) && m_SettingsModel->getUseSpellCheck() && m_SpellCheckerService != NULL) {
+        m_SpellCheckerService->submitItems(items, wordToCheck);
     }
 }
 

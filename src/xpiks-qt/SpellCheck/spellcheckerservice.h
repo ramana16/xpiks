@@ -40,7 +40,7 @@ namespace SpellCheck {
         public Common::IServiceBase<Common::BasicKeywordsModel>
     {
     Q_OBJECT
-    Q_PROPERTY(int userDictionaryWordsNumber READ getUserDictionaryWordsNumber NOTIFY userDictionaryWordsNumberChanged)
+    Q_PROPERTY(int userDictWordsNumber READ getUserDictWordsNumber NOTIFY userDictWordsNumberChanged)
 
     public:
         SpellCheckerService();
@@ -57,10 +57,11 @@ namespace SpellCheck {
         virtual void submitItem(Common::BasicKeywordsModel *itemToCheck);
         virtual void submitItem(Common::BasicKeywordsModel *itemToCheck, int flags);
         virtual void submitItems(const QVector<Common::BasicKeywordsModel *> &itemsToCheck);
+        void submitItems(const QVector<Common::BasicKeywordsModel *> &itemsToCheck, const QString &wordToCheck);
         void submitKeyword(Common::BasicKeywordsModel *itemToCheck, int keywordIndex);
         virtual QStringList suggestCorrections(const QString &word) const;
         void restartWorker();
-        int getUserDictionaryWordsNumber();
+        int getUserDictWordsNumber();
 
     public:
         Q_INVOKABLE void cancelCurrentBatch();
@@ -73,17 +74,19 @@ namespace SpellCheck {
         void spellCheckQueueIsEmpty();
         void serviceAvailable(bool afterRestart);
         void addedUserWordToDictionary(const QString &word);
-        void userDictionaryWordsNumberChanged();
-        void afterClearUserDictionary();
+        void userDictWordsNumberChanged();
+        void addedUserWord(const QString &keyword);
 
     private slots:
         void workerFinished();
         void workerDestroyed(QObject *object);
+        void wordsNumberReadyHandler(int number);
 
     private:
         SpellCheckWorker *m_SpellCheckWorker;
         volatile bool m_RestartRequired;
         QString m_DictionariesPath;
+        int m_userDictWordsNumber;
     };
 }
 

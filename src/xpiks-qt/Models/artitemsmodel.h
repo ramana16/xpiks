@@ -145,7 +145,7 @@ namespace Models {
         void onFilesUnavailableHandler();
         void artworkBackupRequested();
         void onUndoStackEmpty();
-        void afterClearUserDictionaryHandler();
+        void addedUserWordHandler(const QString &keyword);
 
     public:
         virtual void removeItemsAtIndices(const QVector<QPair<int, int> > &ranges);

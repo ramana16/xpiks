@@ -34,8 +34,7 @@ class Hunspell;
 class QTextCodec;
 
 namespace SpellCheck {
-    class SpellCheckWorker:
-        public QObject, public Common::ItemProcessingWorker<SpellCheckItemBase>
+    class SpellCheckWorker : public QObject, public Common::ItemProcessingWorker<ISpellCheckItem>
     {
     Q_OBJECT
 
@@ -45,16 +44,15 @@ namespace SpellCheck {
 
     public:
         QStringList retrieveCorrections(const QString &word);
-        void addToUserWordlist(const QString &word);
-        void clearUserDictionary();
-
-        int getUserDictionaryWordsNumber() {
-            return m_userDictionaryWordsNumber;
-        }
 
     protected:
         virtual bool initWorker();
-        virtual void processOneItem(std::shared_ptr<SpellCheckItemBase> &item);
+        virtual void processOneItem(std::shared_ptr<ISpellCheckItem> &item);
+
+    private:
+        void processSeparatorItem(std::shared_ptr<SpellCheckSeparatorItem> &item);
+        void processQueryItem(std::shared_ptr<SpellCheckItem> &item);
+        void processAddWordItem(std::shared_ptr<AddWordItem> &item);
 
     protected:
         virtual void notifyQueueIsEmpty() { emit queueIsEmpty(); }
@@ -67,6 +65,7 @@ namespace SpellCheck {
     signals:
         void stopped();
         void queueIsEmpty();
+        void wordsNumberReady(int number);
 
     private:
         void detectAffEncoding();
