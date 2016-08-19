@@ -74,7 +74,7 @@ namespace SpellCheck {
         void spellCheckQueueIsEmpty();
         void serviceAvailable(bool afterRestart);
         void userDictWordsNumberChanged();
-        void uDictStateChanged(const QString &keyword);
+        void userDictUpdate(const QString &keyword);
 
     private slots:
         void workerFinished();

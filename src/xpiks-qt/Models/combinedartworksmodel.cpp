@@ -431,7 +431,7 @@ namespace Models {
         m_CommonKeywordsModel.notifyAboutToBeRemoved();
     }
 
-    void CombinedArtworksModel::uDictStateChangedHandler(const QString &keyword) {
+    void CombinedArtworksModel::userDictUpdateHandler(const QString &keyword) {
         QString lowCase = keyword.toLower();
         QString simplified = lowCase.simplified();
         QStringList words = simplified.split(QChar::Space);

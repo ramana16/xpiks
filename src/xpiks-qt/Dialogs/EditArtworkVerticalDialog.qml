@@ -529,9 +529,12 @@ Item {
                             }
 
                             onActionRightClicked: {
-                                console.log("Context menu for add word")
-                                addWordContextMenu.word = kw.keywordText;
-                                addWordContextMenu.popup()
+                                var keywordsModel = combinedArtworks.getKeywordsModel();
+                                if (keywordsModel.hasKeywordErrors(kw.delegateIndex)) {
+                                    console.log("Context menu for add word")
+                                    addWordContextMenu.word = kw.keywordText;
+                                    addWordContextMenu.popup()
+                                }
                             }
                         }
 

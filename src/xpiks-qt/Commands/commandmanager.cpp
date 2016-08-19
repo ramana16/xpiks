@@ -257,11 +257,11 @@ void Commands::CommandManager::connectEntitiesSignalsSlots() const {
     }
 
     if (m_SpellCheckerService != NULL && m_ArtItemsModel != NULL) {
-        QObject::connect(m_SpellCheckerService, SIGNAL(uDictStateChanged(QString)), m_ArtItemsModel, SLOT(uDictStateChangedHandler(QString)));
+        QObject::connect(m_SpellCheckerService, SIGNAL(userDictUpdate(QString)), m_ArtItemsModel, SLOT(userDictUpdateHandler(QString)));
     }
 
     if (m_SpellCheckerService != NULL && m_CombinedArtworksModel != NULL) {
-        QObject::connect(m_SpellCheckerService, SIGNAL(uDictStateChanged(QString)), m_CombinedArtworksModel, SLOT(uDictStateChangedHandler(QString)));
+        QObject::connect(m_SpellCheckerService, SIGNAL(userDictUpdate(QString)), m_CombinedArtworksModel, SLOT(userDictUpdateHandler(QString)));
     }
 }
 

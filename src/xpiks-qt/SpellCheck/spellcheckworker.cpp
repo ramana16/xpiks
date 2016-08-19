@@ -133,7 +133,7 @@ namespace SpellCheck {
         } else if (separatorItem) {
             processSeparatorItem(separatorItem);
         } else if (addWordItem) {
-            processChangeUDict(addWordItem);
+            processChangeUserDict(addWordItem);
         }
     }
 
@@ -171,7 +171,7 @@ namespace SpellCheck {
         }
     }
 
-    void SpellCheckWorker::processChangeUDict(std::shared_ptr<AddWordItem> &item) {
+    void SpellCheckWorker::processChangeUserDict(std::shared_ptr<AddWordItem> &item) {
         if (m_userDictionary.isEmpty()) {
             qWarning() << "User dictionary not set.";
             return;
@@ -201,6 +201,10 @@ namespace SpellCheck {
 
             QStringList words = item->getKeywords();
             for (QString &word: words) {
+                if (isSpellingCorrect(word)) {
+                    continue;
+                }
+
                 qInfo() << "adding word "<<word<<" to dictionary";
                 m_WrongWords.remove(word);
                 stream << word + "\n";
@@ -249,9 +253,21 @@ namespace SpellCheck {
     }
 
     bool SpellCheckWorker::checkWordSpelling(const std::shared_ptr<SpellCheckQueryItem> &queryItem) {
+        const QString &word = queryItem->m_Word;
+        bool isOk = isSpellingCorrect(word);
+
+        queryItem->m_IsCorrect = isOk;
+
+        if (!isOk) {
+            m_WrongWords.insert(word);
+        }
+
+        return isOk;
+    }
+
+    bool SpellCheckWorker::isSpellingCorrect(const QString &word) {
         bool isOk = false;
 
-        const QString &word = queryItem->m_Word;
         bool isCached = m_WrongWords.contains(word);
 
         if (!isCached) {
@@ -265,12 +281,6 @@ namespace SpellCheck {
                     isOk = true;
                 }
             }
-        }
-
-        queryItem->m_IsCorrect = isOk;
-
-        if (!isOk) {
-            m_WrongWords.insert(word);
         }
 
         return isOk;

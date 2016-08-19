@@ -124,6 +124,7 @@ namespace SpellCheck {
         Q_OBJECT
     public:
         AddWordItem(const QString& keyword);
+        AddWordItem(bool clearFlag);
         virtual ~AddWordItem();
 
     public:

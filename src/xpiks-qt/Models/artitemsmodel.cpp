@@ -1097,7 +1097,7 @@ namespace Models {
         }
     }
 
-    void ArtItemsModel::uDictStateChangedHandler(const QString &keyword) {
+    void ArtItemsModel::userDictUpdateHandler(const QString &keyword) {
 
         int size = m_ArtworkList.size();
         QVector<Common::BasicKeywordsModel *> itemsToCheck;

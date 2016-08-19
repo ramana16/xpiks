@@ -161,6 +161,7 @@ namespace Common {
 
     public:
         Q_INVOKABLE bool hasKeyword(const QString &keyword);
+        Q_INVOKABLE bool hasKeywordErrors(int index);
 
     public:
         // ISPELLCHECKABLE

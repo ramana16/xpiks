@@ -52,7 +52,7 @@ namespace SpellCheck {
     private:
         void processSeparatorItem(std::shared_ptr<SpellCheckSeparatorItem> &item);
         void processQueryItem(std::shared_ptr<SpellCheckItem> &item);
-        void processChangeUDict(std::shared_ptr<AddWordItem> &item);
+        void processChangeUserDict(std::shared_ptr<AddWordItem> &item);
 
     protected:
         virtual void notifyQueueIsEmpty() { emit queueIsEmpty(); }
@@ -71,6 +71,7 @@ namespace SpellCheck {
         void detectAffEncoding();
         QStringList suggestCorrections(const QString &word);
         bool checkWordSpelling(const std::shared_ptr<SpellCheckQueryItem> &queryItem);
+        bool isSpellingCorrect(const QString &word);
         bool isHunspellSpellingCorrect(const QString &word) const;
         void findSuggestions(const QString &word);
         void putWord(const QString &word);

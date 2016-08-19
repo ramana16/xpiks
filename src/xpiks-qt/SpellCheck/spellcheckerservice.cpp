@@ -209,14 +209,14 @@ namespace SpellCheck {
     void SpellCheckerService::addUserWordToDictionary(const QString &word) {
         LOG_INFO << "#";
         m_SpellCheckWorker->submitItem(std::shared_ptr<ISpellCheckItem>(new AddWordItem(word)));
-        emit uDictStateChanged(word);
+        emit userDictUpdate(word);
     }
 
     void SpellCheckerService::clearUserDictionary() {
         LOG_INFO << "#";
+        m_SpellCheckWorker->submitItem(std::shared_ptr<ISpellCheckItem>(new AddWordItem(true)));
         QString empty;
-        m_SpellCheckWorker->submitItem(std::shared_ptr<ISpellCheckItem>(new AddWordItem(empty)));
-        emit uDictStateChanged(empty);
+        emit userDictUpdate(empty);
     }
 
     void SpellCheckerService::workerFinished() {

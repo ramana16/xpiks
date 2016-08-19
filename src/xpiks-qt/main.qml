@@ -2063,9 +2063,12 @@ ApplicationWindow {
                                                             }
 
                                                             onActionRightClicked: {
-                                                                console.log("Context menu for add word")
-                                                                addWordContextMenu.word = kw.keywordText;
-                                                                addWordContextMenu.popup()
+                                                                var keywordsModel = filteredArtItemsModel.getKeywordsModel(rowWrapper.delegateIndex);
+                                                                if (keywordsModel.hasKeywordErrors(kw.delegateIndex)) {
+                                                                    console.log("Context menu for add word")
+                                                                    addWordContextMenu.word = kw.keywordText;
+                                                                    addWordContextMenu.popup()
+                                                                }
                                                             }
                                                         }
 

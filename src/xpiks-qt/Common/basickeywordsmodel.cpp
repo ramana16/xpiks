@@ -794,6 +794,11 @@ namespace Common {
         return !canBeAddedUnsafe(keyword.simplified());
     }
 
+    bool BasicKeywordsModel::hasKeywordErrors(int index)
+    {
+        return !m_SpellCheckResults.at(index);
+    }
+
     QString BasicKeywordsModel::retrieveKeyword(int wordIndex) {
         QReadLocker readLocker(&m_KeywordsLock);
 

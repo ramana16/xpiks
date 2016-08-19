@@ -145,7 +145,7 @@ namespace Models {
         void onFilesUnavailableHandler();
         void artworkBackupRequested();
         void onUndoStackEmpty();
-        void uDictStateChangedHandler(const QString &keyword);
+        void userDictUpdateHandler(const QString &keyword);
 
     public:
         virtual void removeItemsAtIndices(const QVector<QPair<int, int> > &ranges);
@@ -189,7 +189,7 @@ namespace Models {
         void fileWithIndexUnavailable(int index);
         void unavailableArtworksFound();
         void unavailableVectorsFound();
-        void uDictStateChanged(const QString &word);
+        void userDictUpdate(const QString &word);
 
     protected:
         virtual QHash<int, QByteArray> roleNames() const;
