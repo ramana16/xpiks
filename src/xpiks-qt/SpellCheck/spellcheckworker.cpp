@@ -185,7 +185,7 @@ namespace SpellCheck {
             }
 
             qInfo() <<  "Cleaning user dictionary";
-            for (const QString &word = stream.readLine(); !word.isEmpty(); word = stream.readLine()) {
+            for (QString word = stream.readLine(); !word.isEmpty(); word = stream.readLine()) {
                 removeWord(word);
             }
 
