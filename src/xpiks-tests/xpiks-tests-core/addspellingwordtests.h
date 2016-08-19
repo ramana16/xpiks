@@ -11,10 +11,8 @@ class AddSpellingWordTests:
 Q_OBJECT
 
 private slots:
-    void addWordSignalTest();
 
 private:
-    Common::Hold m_FakeHold;
 };
 
 #endif // ADDSPELLINGWORDTESTS_H

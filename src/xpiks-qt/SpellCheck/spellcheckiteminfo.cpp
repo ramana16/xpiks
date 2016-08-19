@@ -83,12 +83,11 @@ namespace SpellCheck {
         m_TitleErrors.setErrorWords(errors);
     }
 
-    bool SpellCheckItemInfo::removeWordFromErrorListInTitle(const QString &word) {
-        return m_TitleErrors.removeWordFromSet(word);
-    }
-
-    bool SpellCheckItemInfo::removeWordFromErrorListInDescription(const QString &word) {
-        return m_DescriptionErrors.removeWordFromSet(word);
+    void SpellCheckItemInfo::removeWordsFromErrors(const QStringList &words) {
+        for (const QString &word : words) {
+            m_TitleErrors.removeWordFromSet(word);
+            m_DescriptionErrors.removeWordFromSet(word);
+        }
     }
 
     void SpellCheckItemInfo::createHighlighterForDescription(QTextDocument *document, QMLExtensions::ColorsModel *colorsModel,

@@ -194,6 +194,7 @@ namespace SpellCheck {
     m_ClearFlag(false)
     {
         if (keyword.isEmpty()){
+            qInfo() << "Setting clear dictionary flag to true";
             m_ClearFlag = true;
             return;
         }

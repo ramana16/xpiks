@@ -196,7 +196,7 @@ ApplicationWindow {
         standardButtons: StandardButton.Yes | StandardButton.No
 
         onYes: {
-            helpersWrapper.getSpellCheckerService().clearUserDictionary()
+            spellCheckService.clearUserDictionary()
         }
     }
 
@@ -794,7 +794,7 @@ ApplicationWindow {
                         StyledText {
                             Layout.maximumWidth: parent.width/2
                             horizontalAlignment: Text.AlignLeft
-                            text: i18.n + qsTr("Number of words in user dictionary: ") + helpersWrapper.getSpellCheckerService().userDictionaryWordsNumber
+                            text: i18.n + qsTr("Number of words in user dictionary: ") + helpersWrapper.getSpellCheckerService().userDictWordsNumber
                         }
 
                         StyledButton {

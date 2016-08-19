@@ -60,8 +60,7 @@ namespace SpellCheck {
     public:
         void setDescriptionErrors(const QSet<QString> &errors);
         void setTitleErrors(const QSet<QString> &errors);
-        bool removeWordFromErrorListInTitle(const QString &word);
-        bool removeWordFromErrorListInDescription(const QString &word);
+        void removeWordsFromErrors(const QStringList &words);
         void createHighlighterForDescription(QTextDocument *document, QMLExtensions::ColorsModel *colorsModel,
                                              Common::BasicKeywordsModel *basicKeywordsModel);
         void createHighlighterForTitle(QTextDocument *document, QMLExtensions::ColorsModel *colorsModel,

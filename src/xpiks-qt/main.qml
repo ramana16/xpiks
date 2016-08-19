@@ -47,6 +47,7 @@ ApplicationWindow {
     property bool needToCenter: true
     property bool listLayout: true
     property bool initializedColors: false
+    property var spellCheckService : helpersWrapper.getSpellCheckerService()
 
     onBeforeRendering: {
         if (!initializedColors) {
@@ -679,7 +680,7 @@ ApplicationWindow {
 
         MenuItem {
             text: qsTr("Add to dictionary")
-            onTriggered: helpersWrapper.getSpellCheckerService().addUserWordToDictionary(addWordContextMenu.word);
+            onTriggered: spellCheckService.addUserWordToDictionary(addWordContextMenu.word);
         }
     }
 

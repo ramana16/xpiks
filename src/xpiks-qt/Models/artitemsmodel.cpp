@@ -1097,20 +1097,25 @@ namespace Models {
         }
     }
 
-    void ArtItemsModel::addedUserWordHandler(const QString &keyword) {
+    void ArtItemsModel::uDictStateChangedHandler(const QString &keyword) {
 
         int size = m_ArtworkList.size();
         QVector<Common::BasicKeywordsModel *> itemsToCheck;
         itemsToCheck.reserve(size);
+        QString lowCase = keyword.toLower();
+        QString simplified =  lowCase.simplified();
+        QStringList words = simplified.split(QChar::Space);
 
         for (int i = 0; i < size; i++) {
             ArtworkMetadata *metadata = m_ArtworkList.at(i);
             Common::BasicKeywordsModel *keywordsModel = metadata->getKeywordsModel();
+            SpellCheck::SpellCheckItemInfo *info = keywordsModel->getSpellCheckInfo();
+            info->removeWordsFromErrors(words);
             itemsToCheck.append(keywordsModel);
         }
 
         if (!keyword.isEmpty()) {
-            m_CommandManager->submitForSpellCheck(itemsToCheck, keyword);
+            m_CommandManager->submitForSpellCheck(itemsToCheck);//, keyword);
         } else {
             m_CommandManager->submitForSpellCheck(itemsToCheck);
         }

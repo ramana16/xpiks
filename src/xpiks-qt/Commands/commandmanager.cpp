@@ -257,7 +257,7 @@ void Commands::CommandManager::connectEntitiesSignalsSlots() const {
     }
 
     if (m_SpellCheckerService != NULL && m_ArtItemsModel != NULL) {
-        QObject::connect(m_SpellCheckerService, SIGNAL(addedUserWord(QString)), m_ArtItemsModel, SLOT(addedUserWordHandler(QString)));
+        QObject::connect(m_SpellCheckerService, SIGNAL(uDictStateChanged(QString)), m_ArtItemsModel, SLOT(uDictStateChangedHandler(QString)));
     }
 }
 

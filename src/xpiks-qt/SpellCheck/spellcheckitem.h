@@ -123,7 +123,7 @@ namespace SpellCheck {
     class AddWordItem : public SpellCheckItemBase {
         Q_OBJECT
     public:
-        AddWordItem(const QString& keyword = "");
+        AddWordItem(const QString& keyword);
         virtual ~AddWordItem();
 
     public:

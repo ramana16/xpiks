@@ -122,7 +122,6 @@ namespace SpellCheck {
     }
 
     void SpellCheckWorker::processOneItem(std::shared_ptr<ISpellCheckItem> &item) {
-        qInfo()<<"#";
         auto separatorItem = std::dynamic_pointer_cast<SpellCheckSeparatorItem>(item);
         auto queryItem = std::dynamic_pointer_cast<SpellCheckItem>(item);
         auto addWordItem = std::dynamic_pointer_cast<AddWordItem>(item);
@@ -132,7 +131,7 @@ namespace SpellCheck {
         } else if (separatorItem) {
             processSeparatorItem(separatorItem);
         } else if (addWordItem) {
-            processAddWordItem(addWordItem);
+            processChangeUDict(addWordItem);
         }
     }
 
@@ -142,7 +141,6 @@ namespace SpellCheck {
     }
 
     void SpellCheckWorker::processQueryItem(std::shared_ptr<SpellCheckItem> &item) {
-        qInfo()<<"#";
         bool neededSuggestions = item->needsSuggestions();
         auto &queryItems = item->getQueries();
         bool anyWrong = false;
@@ -171,20 +169,22 @@ namespace SpellCheck {
         }
     }
 
-    void SpellCheckWorker::processAddWordItem(std::shared_ptr<AddWordItem> &item) {
+    void SpellCheckWorker::processChangeUDict(std::shared_ptr<AddWordItem> &item) {
         if (m_userDictionary.isEmpty()) {
             qWarning() << "User dictionary not set.";
             return;
         }
 
         QFile userDictonaryFile(m_userDictionary);
-        if (!userDictonaryFile.open(QIODevice::Append)) {
-            qWarning() << "Unable to open user dictionary";
-            return;
-        }
 
         QTextStream stream(&userDictonaryFile);
         if (item->getClearFlag()) {
+            if (!userDictonaryFile.open(QIODevice::ReadWrite)) {
+                qWarning() << "Unable to open user dictionary";
+                return;
+            }
+
+            qInfo() <<  "Cleaning user dictionary";
             for (QString &word = stream.readLine(); !word.isEmpty(); word = stream.readLine()) {
                 removeWord(word);
             }
@@ -192,9 +192,16 @@ namespace SpellCheck {
             m_userDictionaryWordsNumber = 0;
             userDictonaryFile.resize(0);
         } else {
+            if (!userDictonaryFile.open(QIODevice::Append)) {
+                qWarning() << "Unable to open user dictionary";
+                return;
+            }
+
             QStringList words = item->getKeywords();
             for (QString &word: words) {
+                qInfo() << "adding word "<<word<<" to dictionary";
                 m_WrongWords.remove(word);
+                stream << word + "\n";
                 putWord(word);
                 m_userDictionaryWordsNumber++;
             }

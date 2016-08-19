@@ -52,7 +52,7 @@ namespace SpellCheck {
     private:
         void processSeparatorItem(std::shared_ptr<SpellCheckSeparatorItem> &item);
         void processQueryItem(std::shared_ptr<SpellCheckItem> &item);
-        void processAddWordItem(std::shared_ptr<AddWordItem> &item);
+        void processChangeUDict(std::shared_ptr<AddWordItem> &item);
 
     protected:
         virtual void notifyQueueIsEmpty() { emit queueIsEmpty(); }

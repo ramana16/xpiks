@@ -109,6 +109,7 @@ namespace SpellCheck {
     void SpellCheckerService::submitItems(const QVector<Common::BasicKeywordsModel *> &itemsToCheck) {
         if (m_SpellCheckWorker == NULL) {
             return;
+        }
 
             std::vector<std::shared_ptr<ISpellCheckItem> > items;
             int length = itemsToCheck.length();
@@ -128,7 +129,6 @@ namespace SpellCheck {
 
             m_SpellCheckWorker->submitItems(items);
             m_SpellCheckWorker->submitItem(std::shared_ptr<ISpellCheckItem>(new SpellCheckSeparatorItem()));
-        }
     }
 
     // used for spellchecking after adding a word to user dictionary
@@ -209,13 +209,14 @@ namespace SpellCheck {
     void SpellCheckerService::addUserWordToDictionary(const QString &word) {
         LOG_INFO << "#";
         m_SpellCheckWorker->submitItem(std::shared_ptr<ISpellCheckItem>(new AddWordItem(word)));
-        emit addedUserWord(word);
+        emit uDictStateChanged(word);
     }
 
     void SpellCheckerService::clearUserDictionary() {
         LOG_INFO << "#";
-        m_SpellCheckWorker->submitItem(std::shared_ptr<ISpellCheckItem>(new AddWordItem()));
-        emit addedUserWord("");
+        QString empty;
+        m_SpellCheckWorker->submitItem(std::shared_ptr<ISpellCheckItem>(new AddWordItem(empty)));
+        emit uDictStateChanged(empty);
     }
 
     void SpellCheckerService::workerFinished() {
@@ -235,6 +236,7 @@ namespace SpellCheck {
     }
 
     void SpellCheckerService::wordsNumberReadyHandler(int number) {
+        LOG_DEBUG << "number of words in user dictonary " << number;
         m_userDictWordsNumber = number;
         emit userDictWordsNumberChanged();
     }
