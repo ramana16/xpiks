@@ -1718,7 +1718,7 @@ ApplicationWindow {
                                                         }
 
                                                         onClicked: {
-                                                            if (mouse.button == Qt.RightButton) {
+                                                            if (mouse.button == Qt.RightButton && openedDialogsCount == 0) {
                                                                 console.log("Context menu for artwork")
                                                                 artworkContextMenu.filename = filename;
                                                                 artworkContextMenu.popup()

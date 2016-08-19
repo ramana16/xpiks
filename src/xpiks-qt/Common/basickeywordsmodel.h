@@ -166,8 +166,7 @@ namespace Common {
         // ISPELLCHECKABLE
         virtual QString retrieveKeyword(int wordIndex);
         virtual QStringList getKeywords();
-        virtual void setSpellCheckResults(const std::vector<std::shared_ptr<SpellCheck::SpellCheckQueryItem> > &items,
-                                          bool onlyOneKeyword);
+        virtual void setSpellCheckResults(const std::vector<std::shared_ptr<SpellCheck::SpellCheckQueryItem> > &items);
         virtual void setSpellCheckResults(const QHash<QString, bool> &results, int flags);
 
         virtual std::vector<std::shared_ptr<SpellCheck::SpellSuggestionsItem> > createKeywordsSuggestionsList();
@@ -195,11 +194,10 @@ namespace Common {
         void spellCheckRequestReady(int flags, int index);
 
     private:
-        void setSpellCheckResultsUnsafe(const std::vector<std::shared_ptr<SpellCheck::SpellCheckQueryItem> > &items,
-                                        bool onlyOneKeyword);
-        bool isReplacedADuplicateUnsafe(int index, const QString &existingPrev,
-                                        const QString &replacement) const;
-        void emitSpellCheckChanged(int index=-1);
+         void setSpellCheckResultsUnsafe(const std::vector<std::shared_ptr<SpellCheck::SpellCheckQueryItem> > &items);
+         bool isReplacedADuplicateUnsafe(int index, const QString &existingPrev,
+                                         const QString &replacement) const;
+         void emitSpellCheckChanged(int index=-1);
 
     protected:
         virtual QHash<int, QByteArray> roleNames() const;

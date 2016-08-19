@@ -186,6 +186,9 @@ namespace Models {
         void spellCheckErrorsChangedHandler();
         void spellCheckErrorsFixedHandler();
 
+    public slots:
+        void uDictStateChangedHandler(const QString &keyword);
+
     protected:
         virtual bool doRemoveSelectedArtworks();
         virtual void doResetModel();

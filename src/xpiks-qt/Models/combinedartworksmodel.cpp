@@ -66,7 +66,9 @@ namespace Models {
         LOG_DEBUG << "Before recombine title:" << getTitle();
         LOG_DEBUG << "Before recombine keywords:" << getKeywordsString();
 
-        if (isEmpty()) { return; }
+        if (isEmpty()) {
+            return;
+        }
 
         if (getArtworksCount() == 1) {
             assignFromOneArtwork();
@@ -427,5 +429,20 @@ namespace Models {
     void CombinedArtworksModel::generateAboutToBeRemoved() {
         LOG_DEBUG << "#";
         m_CommonKeywordsModel.notifyAboutToBeRemoved();
+    }
+
+    void CombinedArtworksModel::uDictStateChangedHandler(const QString &keyword) {
+        QString lowCase = keyword.toLower();
+        QString simplified = lowCase.simplified();
+        QStringList words = simplified.split(QChar::Space);
+        SpellCheck::SpellCheckItemInfo *info = m_CommonKeywordsModel.getSpellCheckInfo();
+
+        info->removeWordsFromErrors(words);
+
+        if (!keyword.isEmpty()) {
+            m_CommandManager->submitItemForSpellCheck(&m_CommonKeywordsModel, Common::SpellCheckAll); // , keyword);
+        } else {
+            m_CommandManager->submitItemForSpellCheck(&m_CommonKeywordsModel, Common::SpellCheckAll);
+        }
     }
 }
