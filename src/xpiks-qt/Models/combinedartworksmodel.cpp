@@ -438,11 +438,13 @@ namespace Models {
         SpellCheck::SpellCheckItemInfo *info = m_CommonKeywordsModel.getSpellCheckInfo();
 
         info->removeWordsFromErrors(words);
+        QVector<Common::BasicKeywordsModel *> vec;
+        vec.append(&m_CommonKeywordsModel);
 
         if (!keyword.isEmpty()) {
-            m_CommandManager->submitItemForSpellCheck(&m_CommonKeywordsModel, Common::SpellCheckAll); // , keyword);
+            m_CommandManager->submitForSpellCheck(vec, words);
         } else {
-            m_CommandManager->submitItemForSpellCheck(&m_CommonKeywordsModel, Common::SpellCheckAll);
+            m_CommandManager->submitItemForSpellCheck(&m_CommonKeywordsModel);
         }
     }
 }

@@ -111,28 +111,28 @@ namespace SpellCheck {
             return;
         }
 
-            std::vector<std::shared_ptr<ISpellCheckItem> > items;
-            int length = itemsToCheck.length();
+        std::vector<std::shared_ptr<ISpellCheckItem> > items;
+        int length = itemsToCheck.length();
 
-            items.reserve(length);
-            auto deleter = [](SpellCheckItem *item) { item->deleteLater(); };
+        items.reserve(length);
+        auto deleter = [](SpellCheckItem *item) { item->deleteLater(); };
 
-            for (int i = 0; i < length; ++i) {
-                Common::BasicKeywordsModel *itemToCheck = itemsToCheck.at(i);
-                std::shared_ptr<SpellCheckItem> item(new SpellCheckItem(itemToCheck, Common::SpellCheckAll),
-                    deleter);
-                itemToCheck->connectSignals(item.get());
-                items.emplace_back(std::dynamic_pointer_cast<ISpellCheckItem>(item));
-            }
+        for (int i = 0; i < length; ++i) {
+            Common::BasicKeywordsModel *itemToCheck = itemsToCheck.at(i);
+            std::shared_ptr<SpellCheckItem> item(new SpellCheckItem(itemToCheck, Common::SpellCheckAll),
+                deleter);
+            itemToCheck->connectSignals(item.get());
+            items.emplace_back(std::dynamic_pointer_cast<ISpellCheckItem>(item));
+        }
 
-            LOG_INFO << length << "item(s)";
+        LOG_INFO << length << "item(s)";
 
-            m_SpellCheckWorker->submitItems(items);
-            m_SpellCheckWorker->submitItem(std::shared_ptr<ISpellCheckItem>(new SpellCheckSeparatorItem()));
+        m_SpellCheckWorker->submitItems(items);
+        m_SpellCheckWorker->submitItem(std::shared_ptr<ISpellCheckItem>(new SpellCheckSeparatorItem()));
     }
 
     // used for spellchecking after adding a word to user dictionary
-    void SpellCheckerService::submitItems(const QVector<Common::BasicKeywordsModel *> &itemsToCheck, const QString &wordToCheck) {
+    void SpellCheckerService::submitItems(const QVector<Common::BasicKeywordsModel *> &itemsToCheck, const QStringList &words) {
         if (m_SpellCheckWorker == NULL) {
             return;
         }
@@ -145,7 +145,7 @@ namespace SpellCheck {
 
         for (int i = 0; i < length; ++i) {
             Common::BasicKeywordsModel *itemToCheck = itemsToCheck.at(i);
-            std::shared_ptr<SpellCheckItem> item(new SpellCheckItem(itemToCheck, wordToCheck),
+            std::shared_ptr<SpellCheckItem> item(new SpellCheckItem(itemToCheck, words),
                 deleter);
             itemToCheck->connectSignals(item.get());
             items.emplace_back(std::dynamic_pointer_cast<ISpellCheckItem>(item));

@@ -1115,7 +1115,7 @@ namespace Models {
         }
 
         if (!keyword.isEmpty()) {
-            m_CommandManager->submitForSpellCheck(itemsToCheck);//, keyword);
+            m_CommandManager->submitForSpellCheck(itemsToCheck, words);
         } else {
             m_CommandManager->submitForSpellCheck(itemsToCheck);
         }
