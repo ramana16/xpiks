@@ -116,7 +116,9 @@ namespace SpellCheck {
             LOG_WARNING << "DIC or AFF file not found." << dicPath << "||" << affPath;
         }
 
+#ifndef INTEGRATION_TESTS
         initFromUserDict();
+#endif
 
         return initResult;
     }
