@@ -870,8 +870,7 @@ CloseRequested")
                                                                 })
                                         }
                                         onActionRightClicked: {
-                                            var keywordsModel = keywordsWrapper.keywordsModel;
-                                             if (keywordsModel.hasKeywordErrors(kw.delegateIndex)) {
+                                            if (!iscorrect) {
                                                 console.log("Context menu for add word")
                                                 addWordContextMenu.word = kw.keywordText;
                                                 addWordContextMenu.popup()

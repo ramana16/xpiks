@@ -431,20 +431,20 @@ namespace Models {
         m_CommonKeywordsModel.notifyAboutToBeRemoved();
     }
 
-    void CombinedArtworksModel::userDictUpdateHandler(const QString &keyword) {
-        QString lowCase = keyword.toLower();
-        QString simplified = lowCase.simplified();
-        QStringList words = simplified.split(QChar::Space);
+    void CombinedArtworksModel::userDictUpdateHandler(const QStringList &keywords) {
+        Q_ASSERT(!keywords.isEmpty());
         SpellCheck::SpellCheckItemInfo *info = m_CommonKeywordsModel.getSpellCheckInfo();
-
-        info->removeWordsFromErrors(words);
+        info->removeWordsFromErrors(keywords);
         QVector<Common::BasicKeywordsModel *> vec;
         vec.append(&m_CommonKeywordsModel);
 
-        if (!keyword.isEmpty()) {
-            m_CommandManager->submitForSpellCheck(vec, words);
-        } else {
-            m_CommandManager->submitItemForSpellCheck(&m_CommonKeywordsModel);
-        }
+        m_CommandManager->submitForSpellCheck(vec, keywords);
+    }
+
+    void CombinedArtworksModel::userDictUpdateHandler() {
+        QVector<Common::BasicKeywordsModel *> vec;
+        vec.append(&m_CommonKeywordsModel);
+
+        m_CommandManager->submitItemForSpellCheck(&m_CommonKeywordsModel);
     }
 }

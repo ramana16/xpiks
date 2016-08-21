@@ -794,11 +794,6 @@ namespace Common {
         return !canBeAddedUnsafe(keyword.simplified());
     }
 
-    bool BasicKeywordsModel::hasKeywordErrors(int index)
-    {
-        return !m_SpellCheckResults.at(index);
-    }
-
     QString BasicKeywordsModel::retrieveKeyword(int wordIndex) {
         QReadLocker readLocker(&m_KeywordsLock);
 
@@ -1054,7 +1049,9 @@ namespace Common {
                 m_SpellCheckResults[index] = true;
             }
 
-            if (index >= keywordsLength) { break; }
+            if (index >= keywordsLength) {
+                break;
+            }
         }
 
         for (size_t i = 0; i < size; ++i) {
@@ -1070,7 +1067,9 @@ namespace Common {
                 }
             }
 
-            if (index >= keywordsLength) { break; }
+            if (index >= keywordsLength) {
+                break;
+            }
         }
     }
 

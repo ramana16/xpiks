@@ -257,11 +257,13 @@ void Commands::CommandManager::connectEntitiesSignalsSlots() const {
     }
 
     if (m_SpellCheckerService != NULL && m_ArtItemsModel != NULL) {
-        QObject::connect(m_SpellCheckerService, SIGNAL(userDictUpdate(QString)), m_ArtItemsModel, SLOT(userDictUpdateHandler(QString)));
+        QObject::connect(m_SpellCheckerService, SIGNAL(userDictUpdate(QStringList)), m_ArtItemsModel, SLOT(userDictUpdateHandler(QStringList)));
+        QObject::connect(m_SpellCheckerService, SIGNAL(userDictUpdate()), m_ArtItemsModel, SLOT(userDictUpdateHandler()));
     }
 
     if (m_SpellCheckerService != NULL && m_CombinedArtworksModel != NULL) {
-        QObject::connect(m_SpellCheckerService, SIGNAL(userDictUpdate(QString)), m_CombinedArtworksModel, SLOT(userDictUpdateHandler(QString)));
+        QObject::connect(m_SpellCheckerService, SIGNAL(userDictUpdate(QStringList)), m_CombinedArtworksModel, SLOT(userDictUpdateHandler(QStringList)));
+        QObject::connect(m_SpellCheckerService, SIGNAL(userDictUpdate()), m_CombinedArtworksModel, SLOT(userDictUpdateHandler()));
     }
 }
 
@@ -521,9 +523,9 @@ void Commands::CommandManager::setupSpellCheckSuggestions(Common::BasicKeywordsM
 }
 
 void Commands::CommandManager::submitForSpellCheck(const QVector<Common::BasicKeywordsModel *> &items,
-                                                   const QStringList &words) const {
+                                                   const QStringList &wordsToCheck) const {
     if ((m_SettingsModel != NULL) && m_SettingsModel->getUseSpellCheck() && m_SpellCheckerService != NULL) {
-        m_SpellCheckerService->submitItems(items, words);
+        m_SpellCheckerService->submitItems(items, wordsToCheck);
     }
 }
 

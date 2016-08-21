@@ -2063,8 +2063,7 @@ ApplicationWindow {
                                                             }
 
                                                             onActionRightClicked: {
-                                                                var keywordsModel = filteredArtItemsModel.getKeywordsModel(rowWrapper.delegateIndex);
-                                                                if (keywordsModel.hasKeywordErrors(kw.delegateIndex)) {
+                                                                if (!iscorrect) {
                                                                     console.log("Context menu for add word")
                                                                     addWordContextMenu.word = kw.keywordText;
                                                                     addWordContextMenu.popup()

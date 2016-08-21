@@ -66,28 +66,28 @@ namespace SpellCheck {
         void stopped();
         void queueIsEmpty();
         void wordsNumberReady(int number);
+        void userDictUpdate(const QStringList &keywords);
+        void userDictUpdate();
 
     private:
         void detectAffEncoding();
         QStringList suggestCorrections(const QString &word);
         bool checkWordSpelling(const std::shared_ptr<SpellCheckQueryItem> &queryItem);
-        bool isSpellingCorrect(const QString &word);
         bool isHunspellSpellingCorrect(const QString &word) const;
         void findSuggestions(const QString &word);
-        void putWord(const QString &word);
-        void removeWord(const QString &word);
         void initFromUserDict();
 
     private:
         QHash<QString, QStringList> m_Suggestions;
         QSet<QString> m_WrongWords;
+        QSet<QString> m_UserWords;
         QReadWriteLock m_SuggestionsLock;
         QString m_Encoding;
         Hunspell *m_Hunspell;
         // Coded does not need destruction
         QTextCodec *m_Codec;
-        QString m_userDictionary;
-        int m_userDictionaryWordsNumber;
+        QString m_UserDictionary;
+        int m_UserDictionaryWordsNumber;
     };
 }
 

@@ -57,7 +57,7 @@ namespace SpellCheck {
         virtual void submitItem(Common::BasicKeywordsModel *itemToCheck);
         virtual void submitItem(Common::BasicKeywordsModel *itemToCheck, int flags);
         virtual void submitItems(const QVector<Common::BasicKeywordsModel *> &itemsToCheck);
-        void submitItems(const QVector<Common::BasicKeywordsModel *> &itemsToCheck, const QStringList &words);
+        void submitItems(const QVector<Common::BasicKeywordsModel *> &itemsToCheck, const QStringList &wordsToCheck);
         void submitKeyword(Common::BasicKeywordsModel *itemToCheck, int keywordIndex);
         virtual QStringList suggestCorrections(const QString &word) const;
         void restartWorker();
@@ -74,7 +74,8 @@ namespace SpellCheck {
         void spellCheckQueueIsEmpty();
         void serviceAvailable(bool afterRestart);
         void userDictWordsNumberChanged();
-        void userDictUpdate(const QString &keyword);
+        void userDictUpdate(const QStringList &keywords);
+        void userDictUpdate();
 
     private slots:
         void workerFinished();
@@ -85,7 +86,7 @@ namespace SpellCheck {
         SpellCheckWorker *m_SpellCheckWorker;
         volatile bool m_RestartRequired;
         QString m_DictionariesPath;
-        int m_userDictWordsNumber;
+        int m_UserDictWordsNumber;
     };
 }
 

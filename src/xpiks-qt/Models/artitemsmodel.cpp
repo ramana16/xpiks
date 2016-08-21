@@ -484,7 +484,6 @@ namespace Models {
     }
 
     void ArtItemsModel::initDescriptionHighlighting(int metadataIndex, QQuickTextDocument *document) {
-        qInfo()<<"#";
         if (0 <= metadataIndex && metadataIndex < getArtworksCount()) {
             ArtworkMetadata *metadata = m_ArtworkList.at(metadataIndex);
             Common::BasicKeywordsModel *keywordsModel = metadata->getKeywordsModel();
@@ -496,7 +495,6 @@ namespace Models {
     }
 
     void ArtItemsModel::initTitleHighlighting(int metadataIndex, QQuickTextDocument *document) {
-        qInfo()<<"#";
         if (0 <= metadataIndex && metadataIndex < getArtworksCount()) {
             ArtworkMetadata *metadata = m_ArtworkList.at(metadataIndex);
             Common::BasicKeywordsModel *keywordsModel = metadata->getKeywordsModel();
@@ -1097,27 +1095,36 @@ namespace Models {
         }
     }
 
-    void ArtItemsModel::userDictUpdateHandler(const QString &keyword) {
-
+    void ArtItemsModel::userDictUpdateHandler(const QStringList &keywords) {
         int size = m_ArtworkList.size();
+
+        Q_ASSERT(!keywords.isEmpty());
+
         QVector<Common::BasicKeywordsModel *> itemsToCheck;
         itemsToCheck.reserve(size);
-        QString lowCase = keyword.toLower();
-        QString simplified =  lowCase.simplified();
-        QStringList words = simplified.split(QChar::Space);
 
         for (int i = 0; i < size; i++) {
             ArtworkMetadata *metadata = m_ArtworkList.at(i);
             Common::BasicKeywordsModel *keywordsModel = metadata->getKeywordsModel();
             SpellCheck::SpellCheckItemInfo *info = keywordsModel->getSpellCheckInfo();
-            info->removeWordsFromErrors(words);
+            info->removeWordsFromErrors(keywords);
             itemsToCheck.append(keywordsModel);
         }
 
-        if (!keyword.isEmpty()) {
-            m_CommandManager->submitForSpellCheck(itemsToCheck, words);
-        } else {
-            m_CommandManager->submitForSpellCheck(itemsToCheck);
+        m_CommandManager->submitForSpellCheck(itemsToCheck);
+    }
+
+    void ArtItemsModel::userDictUpdateHandler( ) {
+        int size = m_ArtworkList.size();
+        QVector<Common::BasicKeywordsModel *> itemsToCheck;
+        itemsToCheck.reserve(size);
+
+        for (int i = 0; i < size; i++) {
+            ArtworkMetadata *metadata = m_ArtworkList.at(i);
+            Common::BasicKeywordsModel *keywordsModel = metadata->getKeywordsModel();
+            itemsToCheck.append(keywordsModel);
         }
+
+        m_CommandManager->submitForSpellCheck(itemsToCheck);
     }
 }

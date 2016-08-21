@@ -50,7 +50,6 @@ namespace Constants {
     const char USE_PROXY[] = "USE_PROXY";
     const char PROXY_HOST[] = "PROXY_HOST_HASH";
     const char USER_DICT_FILENAME[] = "userdict.dic";
-    const char USER_DICT_DIR[] = "userdict";
 
     // different for DEBUG and RELEASE
 

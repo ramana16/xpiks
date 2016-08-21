@@ -30,7 +30,7 @@ namespace SpellCheck {
     SpellCheckerService::SpellCheckerService():
         m_SpellCheckWorker(NULL),
         m_RestartRequired(false),
-        m_userDictWordsNumber(0)
+        m_UserDictWordsNumber(0)
     {}
 
     SpellCheckerService::~SpellCheckerService() {
@@ -67,6 +67,10 @@ namespace SpellCheck {
                          this, SLOT(workerDestroyed(QObject *)));
         QObject::connect(m_SpellCheckWorker, SIGNAL(wordsNumberReady(int)),
                          this, SLOT(wordsNumberReadyHandler(int)));
+        QObject::connect(m_SpellCheckWorker, SIGNAL(userDictUpdate(QStringList)),
+                         this, SIGNAL(userDictUpdate(QStringList)));
+        QObject::connect(m_SpellCheckWorker, SIGNAL(userDictUpdate()),
+                         this, SIGNAL(userDictUpdate()));
 
         LOG_DEBUG << "starting thread...";
         thread->start();
@@ -132,10 +136,9 @@ namespace SpellCheck {
     }
 
     // used for spellchecking after adding a word to user dictionary
-    void SpellCheckerService::submitItems(const QVector<Common::BasicKeywordsModel *> &itemsToCheck, const QStringList &words) {
-        if (m_SpellCheckWorker == NULL) {
-            return;
-        }
+    void SpellCheckerService::submitItems(const QVector<Common::BasicKeywordsModel *> &itemsToCheck,
+                                          const QStringList &wordsToCheck) {
+        if (m_SpellCheckWorker == NULL) { return; }
 
         std::vector<std::shared_ptr<ISpellCheckItem> > items;
         int length = itemsToCheck.length();
@@ -145,8 +148,8 @@ namespace SpellCheck {
 
         for (int i = 0; i < length; ++i) {
             Common::BasicKeywordsModel *itemToCheck = itemsToCheck.at(i);
-            std::shared_ptr<SpellCheckItem> item(new SpellCheckItem(itemToCheck, words),
-                deleter);
+            std::shared_ptr<SpellCheckItem> item(new SpellCheckItem(itemToCheck, wordsToCheck),
+                                                 deleter);
             itemToCheck->connectSignals(item.get());
             items.emplace_back(std::dynamic_pointer_cast<ISpellCheckItem>(item));
         }
@@ -183,7 +186,7 @@ namespace SpellCheck {
     }
 
     int SpellCheckerService::getUserDictWordsNumber() {
-        return m_userDictWordsNumber;
+        return m_UserDictWordsNumber;
     }
 
     void SpellCheckerService::cancelCurrentBatch() {
@@ -209,14 +212,11 @@ namespace SpellCheck {
     void SpellCheckerService::addUserWordToDictionary(const QString &word) {
         LOG_INFO << "#";
         m_SpellCheckWorker->submitItem(std::shared_ptr<ISpellCheckItem>(new AddWordItem(word)));
-        emit userDictUpdate(word);
     }
 
     void SpellCheckerService::clearUserDictionary() {
         LOG_INFO << "#";
         m_SpellCheckWorker->submitItem(std::shared_ptr<ISpellCheckItem>(new AddWordItem(true)));
-        QString empty;
-        emit userDictUpdate(empty);
     }
 
     void SpellCheckerService::workerFinished() {
@@ -237,7 +237,7 @@ namespace SpellCheck {
 
     void SpellCheckerService::wordsNumberReadyHandler(int number) {
         LOG_DEBUG << "number of words in user dictonary " << number;
-        m_userDictWordsNumber = number;
+        m_UserDictWordsNumber = number;
         emit userDictWordsNumberChanged();
     }
 }

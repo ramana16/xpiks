@@ -27,6 +27,7 @@
 #include "../Common/flags.h"
 #include "../Common/defines.h"
 #include "../Common/basickeywordsmodel.h"
+#include "../Helpers/stringhelper.h"
 
 namespace SpellCheck {
     SpellCheckItemBase::~SpellCheckItemBase() {}
@@ -102,7 +103,7 @@ namespace SpellCheck {
         }
     }
 
-    SpellCheckItem::SpellCheckItem(Common::BasicKeywordsModel *spellCheckable, const QStringList &keywordsToCheck) :
+    SpellCheckItem::SpellCheckItem(Common::BasicKeywordsModel *spellCheckable, const QStringList &keywordsToCheck):
         SpellCheckItemBase(),
         m_SpellCheckable(spellCheckable),
         m_SpellCheckFlags(Common::SpellCheckAll),
@@ -111,32 +112,34 @@ namespace SpellCheck {
         spellCheckable->acquire();
 
         std::function<bool (const QString &word)> containsFunc = [&keywordsToCheck](const QString &word) {
-            bool contains = false;
-            for (auto &item: keywordsToCheck) {
-                if (word.contains(item, Qt::CaseInsensitive)) {
-                    contains = true;
-                    break;
-                }
-            }
+                                                                     bool contains = false;
 
-            return contains;
-        };
+                                                                     for (auto &item: keywordsToCheck) {
+                                                                         if (word.contains(item, Qt::CaseInsensitive)) {
+                                                                             contains = true;
+                                                                             break;
+                                                                         }
+                                                                     }
+
+                                                                     return contains;
+                                                                 };
 
         QStringList keywords = spellCheckable->getKeywords();
         reserve(keywords.length());
         addWords(keywords, 0, containsFunc);
 
         std::function<bool (const QString &word)> sameKeywordFunc = [&keywordsToCheck](const QString &word) {
-            bool match = false;
-            for (auto &item: keywordsToCheck) {
-                if (QString::compare(word, item, Qt::CaseInsensitive) == 0) {
-                    match = true;
-                    break;
-                }
-            }
+                                                                        bool match = false;
 
-            return match;
-        };
+                                                                        for (auto &item: keywordsToCheck) {
+                                                                            if (QString::compare(word, item, Qt::CaseInsensitive) == 0) {
+                                                                                match = true;
+                                                                                break;
+                                                                            }
+                                                                        }
+
+                                                                        return match;
+                                                                    };
 
         QStringList descriptionWords = spellCheckable->getDescriptionWords();
         reserve(descriptionWords.length());
@@ -201,18 +204,9 @@ namespace SpellCheck {
     AddWordItem::AddWordItem(const QString &keyword):
         m_KeyWords(QStringList()),
         m_ClearFlag(false) {
-        QString lowerCase = keyword.toLower();
-        QString simplified = lowerCase.simplified();
-        QStringList words = simplified.split(QChar::Space);
+        Helpers::splitText(keyword, m_KeyWords);
 
-        QSet<QString> wordsSet;
-        m_KeyWords.reserve(words.size());
-        for (QString &el : words) {
-            if (!wordsSet.contains(el)) {
-                wordsSet.insert(el);
-                m_KeyWords.append(el);
-            }
-        }
+        m_KeyWords.removeDuplicates();
     }
 
     AddWordItem::AddWordItem(bool clearFlag):

@@ -187,7 +187,8 @@ namespace Models {
         void spellCheckErrorsFixedHandler();
 
     public slots:
-        void userDictUpdateHandler(const QString &keyword);
+        void userDictUpdateHandler(const QStringList &keywords);
+        void userDictUpdateHandler();
 
     protected:
         virtual bool doRemoveSelectedArtworks();
