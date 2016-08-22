@@ -65,7 +65,7 @@ namespace SpellCheck {
     signals:
         void stopped();
         void queueIsEmpty();
-        void wordsNumberReady(int number);
+        void wordsNumberChanged(int number);
         void userDictUpdate(const QStringList &keywords);
         void userDictUpdate();
 
@@ -76,6 +76,8 @@ namespace SpellCheck {
         bool isHunspellSpellingCorrect(const QString &word) const;
         void findSuggestions(const QString &word);
         void initFromUserDict();
+        void cleanUserDict();
+        void addWordUserDict(const QStringList &words);
 
     private:
         QHash<QString, QStringList> m_Suggestions;

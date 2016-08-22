@@ -65,8 +65,8 @@ namespace SpellCheck {
 
         QObject::connect(m_SpellCheckWorker, SIGNAL(destroyed(QObject *)),
                          this, SLOT(workerDestroyed(QObject *)));
-        QObject::connect(m_SpellCheckWorker, SIGNAL(wordsNumberReady(int)),
-                         this, SLOT(wordsNumberReadyHandler(int)));
+        QObject::connect(m_SpellCheckWorker, SIGNAL(wordsNumberChanged(int)),
+                         this, SLOT(wordsNumberChangedHandler(int)));
         QObject::connect(m_SpellCheckWorker, SIGNAL(userDictUpdate(QStringList)),
                          this, SIGNAL(userDictUpdate(QStringList)));
         QObject::connect(m_SpellCheckWorker, SIGNAL(userDictUpdate()),
@@ -235,7 +235,7 @@ namespace SpellCheck {
         }
     }
 
-    void SpellCheckerService::wordsNumberReadyHandler(int number) {
+    void SpellCheckerService::wordsNumberChangedHandler(int number) {
         LOG_DEBUG << "number of words in user dictonary " << number;
         m_UserDictWordsNumber = number;
         emit userDictWordsNumberChanged();

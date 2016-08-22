@@ -175,49 +175,14 @@ namespace SpellCheck {
             return;
         }
 
-        QFile userDictonaryFile(m_UserDictionary);
         if (item->getClearFlag()) {
-            if (!userDictonaryFile.open(QIODevice::ReadWrite)) {
-                qWarning() << "Unable to open user dictionary";
-                return;
-            }
-
-            qInfo() <<  "Cleaning user dictionary";
-            m_UserWords.clear();
-            m_UserDictionaryWordsNumber = 0;
-            userDictonaryFile.resize(0);
-            emit userDictUpdate();
+            cleanUserDict();
         } else {
-            if (!userDictonaryFile.open(QIODevice::Append)) {
-                qWarning() << "Unable to open user dictionary";
-                return;
-            }
-
-            QTextStream stream(&userDictonaryFile);
-
             QStringList words = item->getKeywords();
-            QSet<QString> newWords;
-            for (QString &word: words) {
-                bool isCached = m_WrongWords.contains(word);
-                if (!isCached) {
-                    continue;
-                }
-
-                 LOG_INFO << "adding word "<<word<<" to dictionary";
-                if (!m_WrongWords.contains(word)) {
-                    continue;
-                }
-
-                newWords.insert(word);
-                stream << word << endl;
-                m_UserDictionaryWordsNumber++;
-            }
-
-            m_UserWords.unite(newWords);
-            emit userDictUpdate(newWords.toList());
+            addWordUserDict(words);
         }
 
-        emit wordsNumberReady(m_UserDictionaryWordsNumber);
+        emit wordsNumberChanged(m_UserDictionaryWordsNumber);
     }
 
     QStringList SpellCheckWorker::retrieveCorrections(const QString &word) {
@@ -327,9 +292,56 @@ namespace SpellCheck {
             }
 
             m_UserDictionaryWordsNumber = m_UserWords.size();
-            emit wordsNumberReady(m_UserDictionaryWordsNumber);
+            emit wordsNumberChanged(m_UserDictionaryWordsNumber);
         } else {
             LOG_WARNING << "User dictionary in " << m_UserDictionary << "could not be opened";
         }
     }
+
+
+    void SpellCheckWorker::cleanUserDict() {
+        QFile userDictonaryFile(m_UserDictionary);
+
+        if (!userDictonaryFile.open(QIODevice::ReadWrite)) {
+            qWarning() << "Unable to open user dictionary";
+            return;
+        }
+
+        qInfo() <<  "Cleaning user dictionary";
+        m_UserWords.clear();
+        m_UserDictionaryWordsNumber = 0;
+        userDictonaryFile.resize(0);
+        emit userDictUpdate();
+    }
+
+    void SpellCheckWorker::addWordUserDict(const QStringList &words) {
+        QFile userDictonaryFile(m_UserDictionary);
+
+        if (!userDictonaryFile.open(QIODevice::Append)) {
+            qWarning() << "Unable to open user dictionary";
+            return;
+        }
+
+        QTextStream stream(&userDictonaryFile);
+        QSet<QString> newWords;
+        for (const QString &word: words) {
+            bool isCached = m_WrongWords.contains(word);
+            if (!isCached) {
+                continue;
+            }
+
+            LOG_INFO << "adding word "<<word<<" to dictionary";
+            if (!m_WrongWords.contains(word)) {
+                continue;
+            }
+
+            newWords.insert(word);
+            stream << word << endl;
+            m_UserDictionaryWordsNumber++;
+        }
+
+        m_UserWords.unite(newWords);
+        emit userDictUpdate(newWords.toList());
+    }
+
 }

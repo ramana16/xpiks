@@ -80,7 +80,7 @@ namespace SpellCheck {
     private slots:
         void workerFinished();
         void workerDestroyed(QObject *object);
-        void wordsNumberReadyHandler(int number);
+        void wordsNumberChangedHandler(int number);
 
     private:
         SpellCheckWorker *m_SpellCheckWorker;
