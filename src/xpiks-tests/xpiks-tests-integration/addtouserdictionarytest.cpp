@@ -22,6 +22,7 @@ void AddToUserDictionaryTest::setup() {
 
 int AddToUserDictionaryTest::doTest() {
     Models::ArtItemsModel *artItemsModel = m_CommandManager->getArtItemsModel();
+
     QList<QUrl> files;
     files << getImagePathForTest("images-for-tests/pixmap/seagull.jpg");
 
@@ -78,25 +79,29 @@ int AddToUserDictionaryTest::doTest() {
     VERIFY(basicModel->hasKeywordsSpellError(), "Keywords spell error not detected");
 
     SpellCheck::SpellCheckerService *spellcheckService = m_CommandManager->getSpellCheckerService();
+    QObject::connect(spellCheckService, SIGNAL(spellCheckQueueIsEmpty()), &waiter, SIGNAL(finished()));
     spellcheckService->addWordToUserDictionary(wrongWord);
 
     // wait add user word to finish
-    QThread::sleep(1);
+    if (!waiter.wait(5)) {
+        VERIFY(false, "Timeout for waiting for spellcheck results");
+    }
 
     int userDictWords = spellcheckService->getUserDictWordsNumber();
     VERIFY(userDictWords == 1, "Wrong number of words in user dictionary");
+    VERIFY(!basicModel->hasDescriptionSpellError(), "After clear. Description spell error is still present");
+    VERIFY(!basicModel->hasTitleSpellError(), "After clear. Title spell error is still present");
+    VERIFY(!basicModel->hasKeywordsSpellError(), "After clear. Keywords spell error is still present");
 
-    VERIFY(!basicModel->hasDescriptionSpellError(), "Description spell error is still present");
-    VERIFY(!basicModel->hasTitleSpellError(), "Title spell error is still present");
-    VERIFY(!basicModel->hasKeywordsSpellError(), "Keywords spell error is still present");
-
+    QObject::connect(spellCheckService, SIGNAL(spellCheckQueueIsEmpty()), &waiter, SIGNAL(finished()));
     spellcheckService->clearUserDictionary();
     // wait clear user dict to finish
-    QThread::sleep(1);
+    if (!waiter.wait(5)) {
+        VERIFY(false, "Timeout for waiting for spellcheck results");
+    }
 
     userDictWords = spellcheckService->getUserDictWordsNumber();
     VERIFY(userDictWords == 0, "User dictionary was not cleared");
-
     VERIFY(basicModel->hasDescriptionSpellError(), "Description spell error not detected");
     VERIFY(basicModel->hasTitleSpellError(), "Title spell error not detected");
     VERIFY(basicModel->hasKeywordsSpellError(), "Keywords spell error not detected");
