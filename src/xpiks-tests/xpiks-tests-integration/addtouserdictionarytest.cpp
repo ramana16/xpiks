@@ -74,7 +74,7 @@ int AddToUserDictionaryTest::doTest() {
 
     SpellCheck::SpellCheckerService *spellcheckService = m_CommandManager->getSpellCheckerService();
     QObject::connect(spellcheckService, SIGNAL(spellCheckQueueIsEmpty()), &waiter, SIGNAL(finished()));
-    spellcheckService->addWordToUserDictionary(wrongWord);
+    spellcheckService->addWordToUserDictionary("correct part " + wrongWord);
 
     // wait add user word to finish
     if (!waiter.wait(5)) {
