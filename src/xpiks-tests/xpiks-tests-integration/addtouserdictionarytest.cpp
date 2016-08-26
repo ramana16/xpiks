@@ -89,9 +89,9 @@ int AddToUserDictionaryTest::doTest() {
 
     int userDictWords = spellcheckService->getUserDictWordsNumber();
     VERIFY(userDictWords == 1, "Wrong number of words in user dictionary");
-    VERIFY(!basicModel->hasDescriptionSpellError(), "After clear. Description spell error is still present");
-    VERIFY(!basicModel->hasTitleSpellError(), "After clear. Title spell error is still present");
-    VERIFY(!basicModel->hasKeywordsSpellError(), "After clear. Keywords spell error is still present");
+    VERIFY(!basicModel->hasDescriptionSpellError(), "After adding word. Description spell error is still present");
+    VERIFY(!basicModel->hasTitleSpellError(), "After adding word. Title spell error is still present");
+    VERIFY(!basicModel->hasKeywordsSpellError(), "After adding word. Keywords spell error is still present");
 
     QObject::connect(spellCheckService, SIGNAL(spellCheckQueueIsEmpty()), &waiter, SIGNAL(finished()));
     spellcheckService->clearUserDictionary();
@@ -102,9 +102,9 @@ int AddToUserDictionaryTest::doTest() {
 
     userDictWords = spellcheckService->getUserDictWordsNumber();
     VERIFY(userDictWords == 0, "User dictionary was not cleared");
-    VERIFY(basicModel->hasDescriptionSpellError(), "Description spell error not detected");
-    VERIFY(basicModel->hasTitleSpellError(), "Title spell error not detected");
-    VERIFY(basicModel->hasKeywordsSpellError(), "Keywords spell error not detected");
+    VERIFY(basicModel->hasDescriptionSpellError(), "After clear. Description spell error not detected");
+    VERIFY(basicModel->hasTitleSpellError(), "After clear. Title spell error not detected");
+    VERIFY(basicModel->hasKeywordsSpellError(), "After clear. Keywords spell error not detected");
 
     return 0;
 }
