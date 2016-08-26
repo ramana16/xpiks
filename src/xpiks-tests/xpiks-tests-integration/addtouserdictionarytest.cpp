@@ -84,6 +84,7 @@ int AddToUserDictionaryTest::doTest() {
      QThread::sleep(1);
 
     int userDictWords = spellcheckService->getUserDictWordsNumber();
+    LOG_INFO << userDictWords;
     VERIFY(userDictWords == 1, "Wrong number of words in user dictionary");
     VERIFY(!basicModel->hasDescriptionSpellError(), "After adding word. Description spell error is still present");
     VERIFY(!basicModel->hasTitleSpellError(), "After adding word. Title spell error is still present");
