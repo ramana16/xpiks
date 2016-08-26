@@ -63,6 +63,7 @@
 #include "jsonmerge_tests.h"
 #include "combinededitfixspellingtest.h"
 #include "findandreplacemodeltest.h"
+#include "addtouserdictionarytest.h"
 
 #if defined(WITH_LOGS)
 #undef WITH_LOGS
@@ -201,6 +202,7 @@ int main(int argc, char *argv[]) {
     integrationTests.append(new JsonMergeTests(&commandManager));
     integrationTests.append(new CombinedEditFixSpellingTest(&commandManager));
     integrationTests.append(new FindAndReplaceModelTest(&commandManager));
+    integrationTests.append(new AddToUserDictionaryTest(&commandManager));
 
     qDebug("\n");
     int succeededTestsCount = 0, failedTestsCount = 0;
