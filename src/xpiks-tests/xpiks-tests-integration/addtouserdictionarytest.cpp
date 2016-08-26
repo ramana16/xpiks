@@ -55,6 +55,7 @@ int AddToUserDictionaryTest::doTest() {
 
     QString wrongWord = "abbreviatioe";
     combinedModel->setDescription(combinedModel->getDescription() + ' ' + wrongWord);
+    combinedModel->setTitle(combinedModel->getDescription() + ' ' + wrongWord);
     combinedModel->appendKeyword("correct part " + wrongWord);
 
     combinedModel->spellCheckDescription();
@@ -68,7 +69,7 @@ int AddToUserDictionaryTest::doTest() {
     QThread::sleep(1);
 
     VERIFY(basicModel->hasDescriptionSpellError(), "Description spell error not detected");
-    VERIFY(!basicModel->hasTitleSpellError(), "Title spell error not detected");
+    VERIFY(basicModel->hasTitleSpellError(), "Title spell error not detected");
     VERIFY(basicModel->hasKeywordsSpellError(), "Keywords spell error not detected");
 
     SpellCheck::SpellCheckerService *spellcheckService = m_CommandManager->getSpellCheckerService();
@@ -79,6 +80,8 @@ int AddToUserDictionaryTest::doTest() {
     if (!waiter.wait(5)) {
         VERIFY(false, "Timeout for waiting for spellcheck results");
     }
+
+     QThread::sleep(1);
 
     int userDictWords = spellcheckService->getUserDictWordsNumber();
     VERIFY(userDictWords == 1, "Wrong number of words in user dictionary");
@@ -92,6 +95,8 @@ int AddToUserDictionaryTest::doTest() {
     if (!waiter.wait(5)) {
         VERIFY(false, "Timeout for waiting for spellcheck results");
     }
+
+     QThread::sleep(1);
 
     userDictWords = spellcheckService->getUserDictWordsNumber();
     VERIFY(userDictWords == 0, "User dictionary was not cleared");
