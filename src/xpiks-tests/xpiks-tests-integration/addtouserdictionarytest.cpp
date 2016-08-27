@@ -73,7 +73,7 @@ int AddToUserDictionaryTest::doTest() {
     VERIFY(basicModel->hasKeywordsSpellError(), "Keywords spell error not detected");
 
     SpellCheck::SpellCheckerService *spellcheckService = m_CommandManager->getSpellCheckerService();
-    QObject::connect(spellcheckService, SIGNAL(spellCheckQueueIsEmpty()), &waiter, SIGNAL(finished()));
+    QObject::connect(spellcheckService, SIGNAL(userDictWordsNumberChanged()), &waiter, SIGNAL(finished()));
     spellcheckService->addWordToUserDictionary("correct part " + wrongWord);
 
     // wait add user word to finish
@@ -90,7 +90,7 @@ int AddToUserDictionaryTest::doTest() {
     VERIFY(!basicModel->hasTitleSpellError(), "After adding word. Title spell error is still present");
     VERIFY(!basicModel->hasKeywordsSpellError(), "After adding word. Keywords spell error is still present");
 
-    QObject::connect(spellcheckService, SIGNAL(spellCheckQueueIsEmpty()), &waiter, SIGNAL(finished()));
+    QObject::connect(spellcheckService, SIGNAL(userDictWordsNumberChanged()), &waiter, SIGNAL(finished()));
     spellcheckService->clearUserDictionary();
     // wait clear user dict to finish
     if (!waiter.wait(5)) {
