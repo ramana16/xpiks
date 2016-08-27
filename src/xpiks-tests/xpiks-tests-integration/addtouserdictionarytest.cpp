@@ -81,7 +81,7 @@ int AddToUserDictionaryTest::doTest() {
         VERIFY(false, "Timeout for waiting for spellcheck results");
     }
 
-     QThread::sleep(1);
+     QThread::sleep(5);
 
     int userDictWords = spellcheckService->getUserDictWordsNumber();
 
@@ -97,7 +97,7 @@ int AddToUserDictionaryTest::doTest() {
         VERIFY(false, "Timeout for waiting for spellcheck results");
     }
 
-     QThread::sleep(1);
+     QThread::sleep(5);
 
     userDictWords = spellcheckService->getUserDictWordsNumber();
     VERIFY(userDictWords == 0, "User dictionary was not cleared");
