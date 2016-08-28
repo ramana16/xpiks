@@ -76,14 +76,14 @@ int AddToUserDictionaryTest::doTest() {
     SignalWaiter waiterSpell;
     QObject::connect(spellCheckService, SIGNAL(spellCheckQueueIsEmpty()), &waiterSpell, SIGNAL(finished()));
 
+    QCoreApplication::processEvents(QEventLoop::AllEvents);
+
     // wait add user word to finish
     if (!waiterSpell.wait(5)) {
         VERIFY(false, "Timeout for waiting for spellcheck results");
     }
 
     QThread::sleep(5);
-
-    QCoreApplication::processEvents(QEventLoop::AllEvents);
 
     int userDictWords = spellCheckService->getUserDictWordsNumber();
 
