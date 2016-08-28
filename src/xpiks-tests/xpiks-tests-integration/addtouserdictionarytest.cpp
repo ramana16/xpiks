@@ -22,6 +22,7 @@ void AddToUserDictionaryTest::setup() {
 
 int AddToUserDictionaryTest::doTest() {
     Models::ArtItemsModel *artItemsModel = m_CommandManager->getArtItemsModel();
+
     QList<QUrl> files;
     files << getImagePathForTest("images-for-tests/pixmap/seagull.jpg");
 
@@ -41,25 +42,23 @@ int AddToUserDictionaryTest::doTest() {
 
     VERIFY(!ioCoordinator->getHasErrors(), "Errors in IO Coordinator while reading");
 
-    Models::FilteredArtItemsProxyModel *filteredModel = m_CommandManager->getFilteredArtItemsModel();
-    filteredModel->selectFilteredArtworks();
-    filteredModel->combineSelectedArtworks();
+    Models::ArtworkMetadata *metadata = artItemsModel->getArtwork(0);
 
     // wait for after-add spellchecking
     QThread::sleep(1);
-
-    Models::CombinedArtworksModel *combinedModel = m_CommandManager->getCombinedArtworksModel();
-    Common::BasicKeywordsModel *basicModel = combinedModel->getBasicKeywordsModel();
-    QObject::connect(basicModel, SIGNAL(spellCheckErrorsChanged()),
-                     &waiter, SIGNAL(finished()));
+    Common::BasicKeywordsModel *basicKeywordsModel = metadata->getKeywordsModel();
 
     QString wrongWord = "abbreviatioe";
-    combinedModel->setDescription(combinedModel->getDescription() + ' ' + wrongWord);
-    combinedModel->setTitle(combinedModel->getDescription() + ' ' + wrongWord);
-    combinedModel->appendKeyword("correct part " + wrongWord);
+    metadata->setDescription(metadata->getDescription() + ' ' + wrongWord);
+    metadata->setTitle(metadata->getTitle() + ' ' + wrongWord);
+    metadata->appendKeyword("correct part " + wrongWord);
+    metadata->setIsSelected(true);
 
-    combinedModel->spellCheckDescription();
-    combinedModel->spellCheckTitle();
+    Models::FilteredArtItemsProxyModel *filteredModel = m_CommandManager->getFilteredArtItemsModel();
+    SpellCheck::SpellCheckerService *spellCheckService = m_CommandManager->getSpellCheckerService();
+    QObject::connect(spellCheckService, SIGNAL(spellCheckQueueIsEmpty()), &waiter, SIGNAL(finished()));
+
+    filteredModel->spellCheckSelected();
 
     if (!waiter.wait(5)) {
         VERIFY(false, "Timeout for waiting for spellcheck results");
@@ -68,42 +67,30 @@ int AddToUserDictionaryTest::doTest() {
     // wait for finding suggestions
     QThread::sleep(1);
 
-    VERIFY(basicModel->hasDescriptionSpellError(), "Description spell error not detected");
-    VERIFY(basicModel->hasTitleSpellError(), "Title spell error not detected");
-    VERIFY(basicModel->hasKeywordsSpellError(), "Keywords spell error not detected");
+    VERIFY(basicKeywordsModel->hasDescriptionSpellError(), "Description spell error not detected");
+    VERIFY(basicKeywordsModel->hasTitleSpellError(), "Title spell error not detected");
+    VERIFY(basicKeywordsModel->hasKeywordsSpellError(), "Keywords spell error not detected");
 
-    SpellCheck::SpellCheckerService *spellcheckService = m_CommandManager->getSpellCheckerService();
-    QObject::connect(spellcheckService, SIGNAL(userDictWordsNumberChanged()), &waiter, SIGNAL(finished()));
-    spellcheckService->addWordToUserDictionary("correct part " + wrongWord);
+    spellCheckService->addWordToUserDictionary("correct part " + wrongWord);
+
+    SignalWaiter waiterSpell;
+    QObject::connect(spellCheckService, SIGNAL(spellCheckQueueIsEmpty()), &waiterSpell, SIGNAL(finished()));
 
     // wait add user word to finish
-    if (!waiter.wait(5)) {
+    if (!waiterSpell.wait(5)) {
         VERIFY(false, "Timeout for waiting for spellcheck results");
     }
 
-     QThread::sleep(5);
+    QThread::sleep(5);
 
-    int userDictWords = spellcheckService->getUserDictWordsNumber();
+    QCoreApplication::processEvents(QEventLoop::AllEvents);
+
+    int userDictWords = spellCheckService->getUserDictWordsNumber();
 
     VERIFY(userDictWords == 1, "Wrong number of words in user dictionary");
-    VERIFY(!basicModel->hasDescriptionSpellError(), "After adding word. Description spell error is still present");
-    VERIFY(!basicModel->hasTitleSpellError(), "After adding word. Title spell error is still present");
-    VERIFY(!basicModel->hasKeywordsSpellError(), "After adding word. Keywords spell error is still present");
-
-    QObject::connect(spellcheckService, SIGNAL(userDictWordsNumberChanged()), &waiter, SIGNAL(finished()));
-    spellcheckService->clearUserDictionary();
-    // wait clear user dict to finish
-    if (!waiter.wait(5)) {
-        VERIFY(false, "Timeout for waiting for spellcheck results");
-    }
-
-     QThread::sleep(5);
-
-    userDictWords = spellcheckService->getUserDictWordsNumber();
-    VERIFY(userDictWords == 0, "User dictionary was not cleared");
-    VERIFY(basicModel->hasDescriptionSpellError(), "After clear. Description spell error not detected");
-    VERIFY(basicModel->hasTitleSpellError(), "After clear. Title spell error not detected");
-    VERIFY(basicModel->hasKeywordsSpellError(), "After clear. Keywords spell error not detected");
+    VERIFY(!basicKeywordsModel->hasDescriptionSpellError(), "After adding word. Description spell error is still present");
+    VERIFY(!basicKeywordsModel->hasTitleSpellError(), "After adding word. Title spell error is still present");
+    VERIFY(!basicKeywordsModel->hasKeywordsSpellError(), "After adding word. Keywords spell error is still present");
 
     return 0;
 }
