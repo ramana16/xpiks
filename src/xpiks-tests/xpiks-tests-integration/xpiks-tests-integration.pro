@@ -143,7 +143,9 @@ SOURCES += main.cpp \
     ../../xpiks-qt/Models/findandreplacemodel.cpp \
     ../../xpiks-qt/Conectivity/uploadwatcher.cpp \
     ../../xpiks-qt/Conectivity/telemetryworker.cpp \
-    addtouserdictionarytest.cpp
+    addtouserdictionarytest.cpp \
+    autodetachvectortest.cpp \
+    removefromuserdictionarytest.cpp
 
 RESOURCES +=
 
@@ -314,7 +316,9 @@ HEADERS += \
     ../../xpiks-qt/Models/findandreplacemodel.h \
     ../../xpiks-qt/Conectivity/uploadwatcher.h \
     ../../xpiks-qt/Conectivity/telemetryworker.h \
-    addtouserdictionarytest.h
+    addtouserdictionarytest.h \
+    autodetachvectortest.h \
+    removefromuserdictionarytest.h
 
 INCLUDEPATH += ../../tiny-aes
 INCLUDEPATH += ../../cpp-libface

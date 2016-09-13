@@ -252,28 +252,28 @@ namespace Common {
         return m_KeywordsList.isEmpty();
     }
 
-    bool BasicKeywordsModel::replace(const QString &replaceWhat, const QString &replaceTo, int flags) {
-        LOG_INFO << replaceWhat << "->" << replaceTo << "with flags:" << flags;
+    bool BasicKeywordsModel::replace(const QString &replaceWhat, const QString &replaceTo, Common::SearchFlags flags) {
+        LOG_INFO << replaceWhat << "->" << replaceTo << "with flags:" << (int)flags;
         Q_ASSERT(!replaceWhat.isEmpty());
         Q_ASSERT(!replaceTo.isEmpty());
-        Q_ASSERT((flags & Common::SearchFlagSearchMetadata) != 0);
+        Q_ASSERT(((int)flags & (int)Common::SearchFlags::Metadata) != 0);
         bool anyChanged = false;
 
-        const bool needToCheckDescription = Common::HasFlag(flags, Common::SearchFlagSearchDescription);
+        const bool needToCheckDescription = Common::HasFlag(flags, Common::SearchFlags::Description);
         if (needToCheckDescription) {
             if (this->replaceInDescription(replaceWhat, replaceTo, flags)) {
                 anyChanged = true;
             }
         }
 
-        const bool needToCheckTitle = Common::HasFlag(flags, Common::SearchFlagSearchTitle);
+        const bool needToCheckTitle = Common::HasFlag(flags, Common::SearchFlags::Title);
         if (needToCheckTitle) {
             if (this->replaceInTitle(replaceWhat, replaceTo, flags)) {
                 anyChanged = true;
             }
         }
 
-        const bool needToCheckKeywords = Common::HasFlag(flags, Common::SearchFlagSearchKeywords);
+        const bool needToCheckKeywords = Common::HasFlag(flags, Common::SearchFlags::Keywords);
         if (needToCheckKeywords) {
             QWriteLocker locker(&m_KeywordsLock);
             Q_UNUSED(locker);
@@ -441,10 +441,10 @@ namespace Common {
         return anyKeywords;
     }
 
-    bool BasicKeywordsModel::containsKeywordUnsafe(const QString &searchTerm, int searchFlags) {
+    bool BasicKeywordsModel::containsKeywordUnsafe(const QString &searchTerm, Common::SearchFlags searchFlags) {
         bool hasMatch = false;
         int length = m_KeywordsList.length();
-        const bool exactMatch = Common::HasFlag(searchFlags, Common::SearchFlagExactMatch);
+        const bool exactMatch = Common::HasFlag(searchFlags, Common::SearchFlags::ExactMatch);
 
         if (exactMatch) {
             for (int i = 0; i < length; ++i) {
@@ -454,7 +454,7 @@ namespace Common {
                 }
             }
         } else {
-            const bool caseSensitive = Common::HasFlag(searchFlags, Common::SearchFlagCaseSensitive);
+            const bool caseSensitive = Common::HasFlag(searchFlags, Common::SearchFlags::CaseSensitive);
             Qt::CaseSensitivity caseSensitity = caseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive;
 
             for (int i = 0; i < length; ++i) {
@@ -514,10 +514,10 @@ namespace Common {
     }
 
     bool BasicKeywordsModel::replaceInDescription(const QString &replaceWhat, const QString &replaceTo,
-                                                  int flags) {
+                                                  Common::SearchFlags flags) {
         LOG_DEBUG << "#";
-        const bool wholeWords = Common::HasFlag(flags, Common::SearchFlagExactMatch);
-        const bool caseSensitive = Common::HasFlag(flags, Common::SearchFlagCaseSensitive);
+        const bool wholeWords = Common::HasFlag(flags, Common::SearchFlags::ExactMatch);
+        const bool caseSensitive = Common::HasFlag(flags, Common::SearchFlags::CaseSensitive);
         const Qt::CaseSensitivity caseSensivity = caseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive;
 
         QString description = getDescription();
@@ -532,10 +532,10 @@ namespace Common {
     }
 
     bool BasicKeywordsModel::replaceInTitle(const QString &replaceWhat, const QString &replaceTo,
-                                            int flags) {
+                                            Common::SearchFlags flags) {
         LOG_DEBUG << "#";
-        const bool wholeWords = Common::HasFlag(flags, Common::SearchFlagExactMatch);
-        const bool caseSensitive = Common::HasFlag(flags, Common::SearchFlagCaseSensitive);
+        const bool wholeWords = Common::HasFlag(flags, Common::SearchFlags::ExactMatch);
+        const bool caseSensitive = Common::HasFlag(flags, Common::SearchFlags::CaseSensitive);
         const Qt::CaseSensitivity caseSensivity = caseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive;
 
         QString title = getTitle();
@@ -550,13 +550,13 @@ namespace Common {
     }
 
     bool BasicKeywordsModel::replaceInKeywordsUnsafe(const QString &replaceWhat, const QString &replaceTo,
-                                                     int flags) {
+                                                     Common::SearchFlags flags) {
         bool anyChanged = false;
 
         QVector<int> indicesToRemove;
 
-        const bool caseSensitive = Common::HasFlag(flags, Common::SearchFlagCaseSensitive);
-        const bool wholeWords = Common::HasFlag(flags, Common::SearchFlagExactMatch);
+        const bool caseSensitive = Common::HasFlag(flags, Common::SearchFlags::CaseSensitive);
+        const bool wholeWords = Common::HasFlag(flags, Common::SearchFlags::ExactMatch);
         const Qt::CaseSensitivity caseSensivity = caseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive;
 
         const int size = m_KeywordsList.size();
@@ -646,9 +646,8 @@ namespace Common {
         return m_Description.trimmed().isEmpty();
     }
 
-    bool BasicKeywordsModel::containsKeyword(const QString &searchTerm, int searchFlags) {
+    bool BasicKeywordsModel::containsKeyword(const QString &searchTerm, Common::SearchFlags searchFlags) {
         QReadLocker readLocker(&m_KeywordsLock);
-
         Q_UNUSED(readLocker);
 
         return containsKeywordUnsafe(searchTerm, searchFlags);
@@ -729,9 +728,9 @@ namespace Common {
         clearKeywords();
     }
 
-    void BasicKeywordsModel::notifySpellCheckResults(int flags) {
-        if (Common::HasFlag(flags, Common::SpellCheckDescription) ||
-            Common::HasFlag(flags, Common::SpellCheckTitle)) {
+    void BasicKeywordsModel::notifySpellCheckResults(Common::SpellCheckFlags flags) {
+        if (Common::HasFlag(flags, Common::SpellCheckFlags::Description) ||
+            Common::HasFlag(flags, Common::SpellCheckFlags::Title)) {
             emit spellCheckResultsReady();
         }
 
@@ -824,12 +823,12 @@ namespace Common {
         setSpellCheckResultsUnsafe(items);
     }
 
-    void BasicKeywordsModel::setSpellCheckResults(const QHash<QString, bool> &results, int flags) {
-        if (Common::HasFlag(flags, Common::SpellCheckDescription)) {
+    void BasicKeywordsModel::setSpellCheckResults(const QHash<QString, bool> &results, Common::SpellCheckFlags flags) {
+        if (Common::HasFlag(flags, Common::SpellCheckFlags::Description)) {
             updateDescriptionSpellErrors(results);
         }
 
-        if (Common::HasFlag(flags, Common::SpellCheckTitle)) {
+        if (Common::HasFlag(flags, Common::SpellCheckFlags::Title)) {
             updateTitleSpellErrors(results);
         }
     }
@@ -912,18 +911,18 @@ namespace Common {
             if (0 <= index && index < m_KeywordsList.length()) {
                 if (replaceKeywordUnsafe(index, existing, replacement)) {
                     m_SpellCheckResults[index] = true;
-                    result = Common::KeywordReplaceSucceeded;
+                    result = Common::KeywordReplaceResult::Succeeded;
                 } else {
-                    result = Common::KeywordReplaceFailedDuplicate;
+                    result = Common::KeywordReplaceResult::FailedDuplicate;
                 }
             } else {
                 LOG_INFO << "Failure. Index is negative or exceeds count" << m_KeywordsList.length();
-                result = Common::KeywordReplaceFailedIndex;
+                result = Common::KeywordReplaceResult::FailedIndex;
             }
         }
         m_KeywordsLock.unlock();
 
-        if (result == Common::KeywordReplaceSucceeded) {
+        if (result == Common::KeywordReplaceResult::Succeeded) {
             QModelIndex i = this->index(index);
             // combined roles from legacy editKeyword() and replace()
             emit dataChanged(i, i, QVector<int>() << KeywordRole << IsCorrectRole);
@@ -976,17 +975,17 @@ namespace Common {
     }
 
     void BasicKeywordsModel::fixDescriptionSpelling(const QString &word, const QString &replacement) {
-        int flags = 0;
-        Common::SetFlag(flags, Common::SearchFlagCaseSensitive);
-        Common::SetFlag(flags, Common::SearchFlagSearchDescription);
+        Common::SearchFlags flags = Common::SearchFlags::None;
+        Common::SetFlag(flags, Common::SearchFlags::CaseSensitive);
+        Common::SetFlag(flags, Common::SearchFlags::Description);
 
         replaceInDescription(word, replacement, flags);
     }
 
     void BasicKeywordsModel::fixTitleSpelling(const QString &word, const QString &replacement) {
-        int flags = 0;
-        Common::SetFlag(flags, Common::SearchFlagCaseSensitive);
-        Common::SetFlag(flags, Common::SearchFlagSearchDescription);
+        Common::SearchFlags flags = Common::SearchFlags::None;
+        Common::SetFlag(flags, Common::SearchFlags::CaseSensitive);
+        Common::SetFlag(flags, Common::SearchFlags::Description);
 
         replaceInTitle(word, replacement, flags);
     }
@@ -998,7 +997,8 @@ namespace Common {
     }
 
     void BasicKeywordsModel::connectSignals(SpellCheck::SpellCheckItem *item) {
-        QObject::connect(item, SIGNAL(resultsReady(int, int)), this, SLOT(spellCheckRequestReady(int, int)));
+        QObject::connect(item, SIGNAL(resultsReady(Common::SpellCheckFlags, int)),
+                         this, SLOT(spellCheckRequestReady(Common::SpellCheckFlags, int)));
     }
 
     QStringList BasicKeywordsModel::getDescriptionWords() {
@@ -1021,8 +1021,8 @@ namespace Common {
         return words;
     }
 
-    void BasicKeywordsModel::spellCheckRequestReady(int flags, int index) {
-        if (Common::HasFlag(flags, Common::SpellCheckKeywords)) {
+    void BasicKeywordsModel::spellCheckRequestReady(Common::SpellCheckFlags flags, int index) {
+        if (Common::HasFlag(flags, Common::SpellCheckFlags::Keywords)) {
             emitSpellCheckChanged(index);
         }
 

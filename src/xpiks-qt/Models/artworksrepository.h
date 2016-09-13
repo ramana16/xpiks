@@ -41,7 +41,7 @@ namespace Models {
         virtual ~ArtworksRepository() {}
 
     public:
-        enum ArtworksDirectoriesRoles {
+        enum ArtworksRepository_Roles {
             PathRole = Qt::UserRole + 1,
             UsedImagesCountRole,
             IsSelectedRole
@@ -83,10 +83,16 @@ namespace Models {
 
     public:
         bool accountFile(const QString &filepath);
+        void accountVector(const QString &vectorPath);
         bool removeFile(const QString &filepath, const QString &fileDirectory);
+        void removeVector(const QString &vectorPath);
         void setFileSelected(const QString &filepath, bool selected);
         void purgeUnavailableFiles();
 
+    private:
+        void watchFilePath(const QString &filepath);
+
+    public:
         const QString &getDirectory(int index) const { return m_DirectoriesList[index]; }
 #ifdef CORE_TESTS
         int getFilesCountForDirectory(const QString &directory) const { return m_DirectoriesHash[directory]; }
@@ -101,6 +107,7 @@ namespace Models {
     public:
         virtual int rowCount(const QModelIndex & parent = QModelIndex()) const;
         virtual QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
+
     protected:
         virtual QHash<int, QByteArray> roleNames() const;
 

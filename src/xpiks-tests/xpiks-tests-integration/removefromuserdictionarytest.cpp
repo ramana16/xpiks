@@ -1,4 +1,4 @@
-#include "addtouserdictionarytest.h"
+#include "removefromuserdictionarytest.h"
 #include "../../xpiks-qt/Commands/commandmanager.h"
 #include "../../xpiks-qt/Models/settingsmodel.h"
 #include "../../xpiks-qt/Models/artitemsmodel.h"
@@ -10,16 +10,17 @@
 #include "signalwaiter.h"
 #include <QObject>
 
-QString AddToUserDictionaryTest::testName() {
-    return QLatin1String("AddToUserDictionaryTest");
+QString RemoveFromUserDictionaryTest::testName() {
+    return QLatin1String("RemoveFromUserDictionaryTest");
 }
 
-void AddToUserDictionaryTest::setup() {
+void RemoveFromUserDictionaryTest::setup() {
     Models::SettingsModel *settingsModel = m_CommandManager->getSettingsModel();
+
     settingsModel->setUseSpellCheck(true);
 }
 
-int AddToUserDictionaryTest::doTest() {
+int RemoveFromUserDictionaryTest::doTest() {
     Models::ArtItemsModel *artItemsModel = m_CommandManager->getArtItemsModel();
 
     QList<QUrl> files;
@@ -85,13 +86,30 @@ int AddToUserDictionaryTest::doTest() {
 
     QThread::sleep(5);
 
-    int userDictWords = spellCheckService->getUserDictWordsNumber();
-    LOG_DEBUG << "User dict words count:" << userDictWords;
+    // now clean user dict
 
-    VERIFY(userDictWords == 1, "Wrong number of words in user dictionary");
-    VERIFY(!basicKeywordsModel->hasDescriptionSpellError(), "After adding word. Description spell error is still present");
-    VERIFY(!basicKeywordsModel->hasTitleSpellError(), "After adding word. Title spell error is still present");
-    VERIFY(!basicKeywordsModel->hasKeywordsSpellError(), "After adding word. Keywords spell error is still present");
+    spellCheckService->clearUserDictionary();
+
+    // wait clear user dict to finish
+
+    SignalWaiter clearWaiter;
+    QObject::connect(spellCheckService, SIGNAL(spellCheckQueueIsEmpty()), &clearWaiter, SIGNAL(finished()));
+
+    QCoreApplication::processEvents(QEventLoop::AllEvents);
+
+    // wait add user word to finish
+    if (!clearWaiter.wait(5)) {
+        VERIFY(false, "Timeout for waiting for spellcheck results");
+    }
+
+    QThread::sleep(5);
+
+    int userDictWords = spellCheckService->getUserDictWordsNumber();
+
+    VERIFY(userDictWords == 0, "Wrong number of words in user dictionary");
+    VERIFY(basicKeywordsModel->hasDescriptionSpellError(), "Description spell error not detected");
+    VERIFY(basicKeywordsModel->hasTitleSpellError(), "Title spell error not detected");
+    VERIFY(basicKeywordsModel->hasKeywordsSpellError(), "Keywords spell error not detected");
 
     return 0;
 }

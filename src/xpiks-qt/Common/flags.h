@@ -22,116 +22,154 @@
 #ifndef FLAGS
 #define FLAGS
 
+#include <type_traits>
+#include <QObject>
+
 namespace Common {
-    enum CombinedEditFlags {
-        EditTitle = 1,
-        EditDesctiption = 2,
-        EditKeywords = 4,
-        AppendKeywords = 8,
-        Clear = 16,
+    template<typename FlagType>
+    struct enable_bitmask_operators {
+        static constexpr bool enable=false;
+    };
+
+    template<typename FlagType>
+    typename std::enable_if<enable_bitmask_operators<FlagType>::enable, FlagType>::type
+    operator|(FlagType a, FlagType b) {
+        typedef typename std::underlying_type<FlagType>::type underlying;
+        return static_cast<FlagType>(static_cast<underlying>(a) | static_cast<underlying>(b));
+    }
+
+    template<typename FlagType>
+    typename std::enable_if<enable_bitmask_operators<FlagType>::enable, FlagType>::type
+    &operator|=(FlagType &a, FlagType b) {
+        typedef typename std::underlying_type<FlagType>::type underlying;
+        a = static_cast<FlagType>(static_cast<underlying>(a) | static_cast<underlying>(b));
+        return a;
+    }
+
+    enum struct CombinedEditFlags: int {
+        None = 0,
+        EditTitle = 1 << 0,
+        EditDesctiption = 1 << 1,
+        EditKeywords = 1 << 2,
+        AppendKeywords = 1 << 3,
+        Clear = 1 << 4,
         EditEverything = EditTitle | EditDesctiption | EditKeywords
     };
 
-    enum SuggestCorrectionsFlags {
-        CorrectTitle = 1,
-        CorrectDescription = 2,
-        CorrectKeywords = 4,
-        CorrectAll = 7
+    enum struct SuggestionFlags: int {
+        None = 0,
+        Title = 1 << 0,
+        Description = 1 << 1,
+        Keywords = 1 << 2,
+        All = Title | Description | Keywords
     };
 
-    enum SpellCheckFlags {
-        SpellCheckTitle = 1,
-        SpellCheckDescription = 2,
-        SpellCheckKeywords = 4,
-        SpellCheckAll = 7
+    enum struct SpellCheckFlags: int {
+        Title = 1 << 0,
+        Description = 1 << 1,
+        Keywords = 1 << 2,
+        All = Title | Description | Keywords
     };
 
-    enum KeywordReplaceResult {
-        KeywordReplaceSucceeded = 0,
-        KeywordReplaceFailedIndex = 1,
-        KeywordReplaceFailedDuplicate = 2,
-        KeywordReplaceUnknown = 1 << 20
+    enum struct KeywordReplaceResult: int {
+        Succeeded = 0,
+        FailedIndex = 1,
+        FailedDuplicate = 2,
+        Unknown = 1 << 20
     };
 
-    enum SearchFlags {
-        SearchFlagCaseSensitive = 1 << 0,
-        SearchFlagSearchDescription = 1 << 1,
-        SearchFlagSearchTitle = 1 << 2,
-        SearchFlagSearchKeywords = 1 << 3,
-        SearchFlagReservedTerms = 1 << 4, // include reserved terms like "x:empty"
-        SearchFlagAllSearchTerms = 1 << 5, // all of the search terms included in the result
-        SearchFlagSearchFilepath = 1 << 6,
-        SearchFlagExactMatch = 1 << 7,
+    enum struct SearchFlags: int {
+        None = 0,
+        CaseSensitive = 1 << 0,
+        Description = 1 << 1,
+        Title = 1 << 2,
+        Keywords = 1 << 3,
+        ReservedTerms = 1 << 4, // include reserved terms like "x:empty"
+        AllTerms = 1 << 5, // all of the search terms included in the result
+        Filepath = 1 << 6,
+        ExactMatch = 1 << 7,
 
-        SearchFlagSearchMetadata = SearchFlagSearchDescription |
-            SearchFlagSearchTitle |
-            SearchFlagSearchKeywords,
+        Metadata = Description | Title | Keywords,
+        ExactKeywords = ExactMatch | Keywords,
+        MetadataCaseSensitive = Metadata | CaseSensitive,
 
-        SearchFlagExactKeywords = SearchFlagExactMatch |
-            SearchFlagSearchKeywords,
-
-        SearchFlagsSearchMetadataCaseSensitive = SearchFlagSearchMetadata | SearchFlagCaseSensitive,
-
-        SearchFlagSearchEverything = SearchFlagSearchMetadata | SearchFlagSearchFilepath | SearchFlagReservedTerms,
-        SearchFlagSearchAllTermsEverything = SearchFlagSearchEverything | SearchFlagAllSearchTerms,
-        SearchFlagSearchAnyTermsEverything = SearchFlagSearchEverything
+        Everything = Metadata | Filepath | ReservedTerms,
+        AllTermsEverything = Everything | AllTerms,
+        AnyTermsEverything = Everything
     };
 
-    enum WarningType {
-        WarningTypeNoWarnings = 0,
-        WarningTypeSizeLessThanMinimum = 1 << 0,
-        WarningTypeNoKeywords = 1 << 1,
-        WarningTypeTooFewKeywords = 1 << 2,
-        WarningTypeTooManyKeywords = 1 << 3,
-        WarningTypeDescriptionIsEmpty = 1 << 4,
-        WarningTypeDescriptionNotEnoughWords = 1 << 5,
-        WarningTypeDescriptionTooBig = 1 << 6,
-        WarningTypeTitleIsEmpty = 1 << 7,
-        WarningTypeTitleNotEnoughWords = 1 << 8,
-        WarningTypeTitleTooManyWords = 1 << 9,
-        WarningTypeTitleTooBig = 1 << 10,
-        WarningTypeSpellErrorsInKeywords = 1 << 11,
-        WarningTypeSpellErrorsInDescription = 1 << 12,
-        WarningTypeSpellErrorsInTitle = 1 << 13,
-        WarningTypeFileIsTooBig = 1 << 14,
-        WarningTypeKeywordsInDescription = 1 << 15,
-        WarningTypeKeywordsInTitle = 1 << 16,
-        WarningTypeFilenameSymbols = 1 << 17,
-
-        WarningTypeDescriptionGroup = WarningTypeDescriptionIsEmpty |
-            WarningTypeDescriptionNotEnoughWords |
-            WarningTypeDescriptionTooBig |
-            WarningTypeSpellErrorsInDescription |
-            WarningTypeKeywordsInDescription,
-
-        WarningTypeTitleGroup = WarningTypeTitleIsEmpty |
-            WarningTypeTitleNotEnoughWords |
-            WarningTypeTitleTooManyWords |
-            WarningTypeTitleTooBig |
-            WarningTypeSpellErrorsInTitle |
-            WarningTypeKeywordsInTitle,
-
-        WarningTypeKeywordsGroup = WarningTypeNoKeywords |
-            WarningTypeTooFewKeywords |
-            WarningTypeTooManyKeywords |
-            WarningTypeSpellErrorsInKeywords |
-            WarningTypeKeywordsInDescription |
-            WarningTypeKeywordsInTitle,
-
-        WarningTypeSpellingGroup = WarningTypeSpellErrorsInKeywords |
-            WarningTypeSpellErrorsInDescription |
-            WarningTypeSpellErrorsInTitle
+#ifdef CORE_TESTS
+    template<>
+    struct enable_bitmask_operators<SearchFlags> {
+        static constexpr bool enable = true;
     };
 
-    enum WarningsCheckFlags {
-        WarningsCheckAll = 0,
-        WarningsCheckKeywords = 1,
-        WarningsCheckTitle = 2,
-        WarningsCheckDescription = 3,
-        WarningsCheckSpelling = 4
+    template<>
+    struct enable_bitmask_operators<CombinedEditFlags> {
+        static constexpr bool enable = true;
+    };
+#endif
+
+    enum struct WarningFlags: int {
+        None = 0,
+        SizeLessThanMinimum = 1 << 0,
+        NoKeywords = 1 << 1,
+        TooFewKeywords = 1 << 2,
+        TooManyKeywords = 1 << 3,
+        DescriptionIsEmpty = 1 << 4,
+        DescriptionNotEnoughWords = 1 << 5,
+        DescriptionTooBig = 1 << 6,
+        TitleIsEmpty = 1 << 7,
+        TitleNotEnoughWords = 1 << 8,
+        TitleTooManyWords = 1 << 9,
+        TitleTooBig = 1 << 10,
+        SpellErrorsInKeywords = 1 << 11,
+        SpellErrorsInDescription = 1 << 12,
+        SpellErrorsInTitle = 1 << 13,
+        FileIsTooBig = 1 << 14,
+        KeywordsInDescription = 1 << 15,
+        KeywordsInTitle = 1 << 16,
+        FilenameSymbols = 1 << 17,
+
+        DescriptionGroup = DescriptionIsEmpty |
+            DescriptionNotEnoughWords |
+            DescriptionTooBig |
+            SpellErrorsInDescription |
+            KeywordsInDescription,
+
+        TitleGroup = TitleIsEmpty |
+            TitleNotEnoughWords |
+            TitleTooManyWords |
+            TitleTooBig |
+            SpellErrorsInTitle |
+            KeywordsInTitle,
+
+        KeywordsGroup = NoKeywords |
+            TooFewKeywords |
+            TooManyKeywords |
+            SpellErrorsInKeywords |
+            KeywordsInDescription |
+            KeywordsInTitle,
+
+        SpellingGroup = SpellErrorsInKeywords |
+            SpellErrorsInDescription |
+            SpellErrorsInTitle
     };
 
-    const char *warningsFlagToString(int flags);
+    template<>
+    struct enable_bitmask_operators<WarningFlags> {
+        static constexpr bool enable = true;
+    };
+
+    enum struct WarningsCheckFlags {
+        All = 0,
+        Keywords = 1,
+        Title = 2,
+        Description = 3,
+        Spelling = 4
+    };
+
+    const char *warningsFlagToString(WarningsCheckFlags flags);
 
     template<typename FlagType>
     bool HasFlag(int value, FlagType flag) {
@@ -141,8 +179,21 @@ namespace Common {
     }
 
     template<typename FlagType>
+    bool HasFlag(FlagType value, FlagType flag) {
+        int intValue = static_cast<int>(value);
+        int intFlag = static_cast<int>(flag);
+        bool result = (intValue & intFlag) == intFlag;
+        return result;
+    }
+
+    template<typename FlagType>
     void SetFlag(int &value, FlagType flag) {
         value |= static_cast<int>(flag);
+    }
+
+    template<typename FlagType>
+    void SetFlag(FlagType &value, FlagType flag) {
+        value = static_cast<FlagType>(static_cast<int>(value) | static_cast<int>(flag));
     }
 
     template<typename FlagType>
@@ -151,8 +202,18 @@ namespace Common {
     }
 
     template<typename FlagType>
+    void SetFlag(volatile FlagType &value, FlagType flag) {
+        value = static_cast<FlagType>(static_cast<int>(value) | static_cast<int>(flag));
+    }
+
+    template<typename FlagType>
     void UnsetFlag(int &value, FlagType flag) {
         value &= ~(static_cast<int>(flag));
+    }
+
+    template<typename FlagType>
+    void UnsetFlag(FlagType &value, FlagType flag) {
+        value = static_cast<FlagType>(static_cast<int>(value) & (~(static_cast<int>(flag))));
     }
 
     template<typename FlagType>
@@ -161,7 +222,21 @@ namespace Common {
     }
 
     template<typename FlagType>
+    void UnsetFlag(volatile FlagType &value, FlagType flag) {
+        value = static_cast<FlagType>(static_cast<int>(value) & (~(static_cast<int>(flag))));
+    }
+
+    template<typename FlagType>
     void ApplyFlag(int &value, bool applySwitch, FlagType flag) {
+        if (applySwitch) {
+            SetFlag(value, flag);
+        } else {
+            UnsetFlag(value, flag);
+        }
+    }
+
+    template<typename FlagType>
+    void ApplyFlag(FlagType &value, bool applySwitch, FlagType flag) {
         if (applySwitch) {
             SetFlag(value, flag);
         } else {
@@ -178,6 +253,8 @@ namespace Common {
         }
     }
 }
+
+Q_DECLARE_METATYPE(Common::SpellCheckFlags)
 
 #endif // FLAGS
 

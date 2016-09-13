@@ -64,6 +64,8 @@
 #include "combinededitfixspellingtest.h"
 #include "findandreplacemodeltest.h"
 #include "addtouserdictionarytest.h"
+#include "autodetachvectortest.h"
+#include "removefromuserdictionarytest.h"
 
 #if defined(WITH_LOGS)
 #undef WITH_LOGS
@@ -81,6 +83,7 @@ int main(int argc, char *argv[]) {
     std::cout << "Initialized application" << std::endl;
 
     qSetMessagePattern("%{time hh:mm:ss.zzz} %{type} T#%{threadid} %{function} - %{message}");
+    qRegisterMetaType<Common::SpellCheckFlags>("Common::SpellCheckFlags");
 
     Helpers::AppSettings appSettings;
     Suggestion::LocalLibrary localLibrary;
@@ -203,6 +206,8 @@ int main(int argc, char *argv[]) {
     integrationTests.append(new CombinedEditFixSpellingTest(&commandManager));
     integrationTests.append(new FindAndReplaceModelTest(&commandManager));
     integrationTests.append(new AddToUserDictionaryTest(&commandManager));
+    integrationTests.append(new AutoDetachVectorTest(&commandManager));
+    integrationTests.append(new RemoveFromUserDictionaryTest(&commandManager));
 
     qDebug("\n");
     int succeededTestsCount = 0, failedTestsCount = 0;

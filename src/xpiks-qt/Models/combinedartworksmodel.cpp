@@ -35,7 +35,7 @@ namespace Models {
     CombinedArtworksModel::CombinedArtworksModel(QObject *parent):
         ArtworksViewModel(parent),
         m_CommonKeywordsModel(m_HoldPlaceholder, this),
-        m_EditFlags(0),
+        m_EditFlags(Common::CombinedEditFlags::None),
         m_ModifiedFlags(0) {
         m_CommonKeywordsModel.setSpellCheckInfo(&m_SpellCheckInfo);
 
@@ -92,32 +92,36 @@ namespace Models {
 
     void CombinedArtworksModel::setChangeDescription(bool value) {
         LOG_INFO << value;
-        if (Common::HasFlag(m_EditFlags, Common::EditDesctiption) != value) {
-            Common::ApplyFlag(m_EditFlags, value, Common::EditDesctiption);
+        auto flag = Common::CombinedEditFlags::EditDesctiption;
+        if (Common::HasFlag(m_EditFlags, flag) != value) {
+            Common::ApplyFlag(m_EditFlags, value, flag);
             emit changeDescriptionChanged();
         }
     }
 
     void CombinedArtworksModel::setChangeTitle(bool value) {
         LOG_INFO << value;
-        if (Common::HasFlag(m_EditFlags, Common::EditTitle) != value) {
-            Common::ApplyFlag(m_EditFlags, value, Common::EditTitle);
+        auto flag = Common::CombinedEditFlags::EditTitle;
+        if (Common::HasFlag(m_EditFlags, flag) != value) {
+            Common::ApplyFlag(m_EditFlags, value, flag);
             emit changeTitleChanged();
         }
     }
 
     void CombinedArtworksModel::setChangeKeywords(bool value) {
         LOG_INFO << value;
-        if (Common::HasFlag(m_EditFlags, Common::EditKeywords) != value) {
-            Common::ApplyFlag(m_EditFlags, value, Common::EditKeywords);
+        auto flag = Common::CombinedEditFlags::EditKeywords;
+        if (Common::HasFlag(m_EditFlags, flag) != value) {
+            Common::ApplyFlag(m_EditFlags, value, flag);
             emit changeKeywordsChanged();
         }
     }
 
     void CombinedArtworksModel::setAppendKeywords(bool value) {
         LOG_INFO << value;
-        if (Common::HasFlag(m_EditFlags, Common::AppendKeywords) != value) {
-            Common::ApplyFlag(m_EditFlags, value, Common::AppendKeywords);
+        auto flag = Common::CombinedEditFlags::AppendKeywords;
+        if (Common::HasFlag(m_EditFlags, flag) != value) {
+            Common::ApplyFlag(m_EditFlags, value, flag);
             emit appendKeywordsChanged();
         }
     }
@@ -182,12 +186,12 @@ namespace Models {
             emit keywordsCountChanged();
             setKeywordsModified(true);
 
-            m_CommandManager->submitItemForSpellCheck(&m_CommonKeywordsModel, Common::SpellCheckKeywords);
+            m_CommandManager->submitItemForSpellCheck(&m_CommonKeywordsModel, Common::SpellCheckFlags::Keywords);
         }
     }
 
     void CombinedArtworksModel::saveEdits() {
-        LOG_INFO << "edit flags:" << m_EditFlags << "modified flags:" << m_ModifiedFlags;
+        LOG_INFO << "edit flags:" << (int)m_EditFlags << "modified flags:" << m_ModifiedFlags;
         bool needToSave = false;
 
         if (getChangeTitle() ||
@@ -217,7 +221,7 @@ namespace Models {
 
     void CombinedArtworksModel::suggestCorrections() {
         LOG_DEBUG << "#";
-        m_CommandManager->setupSpellCheckSuggestions(&m_CommonKeywordsModel, -1, Common::CorrectAll);
+        m_CommandManager->setupSpellCheckSuggestions(&m_CommonKeywordsModel, -1, Common::SuggestionFlags::All);
     }
 
     void CombinedArtworksModel::initDescriptionHighlighting(QQuickTextDocument *document) {
@@ -253,18 +257,18 @@ namespace Models {
     void CombinedArtworksModel::spellCheckDescription() {
         LOG_DEBUG << "#";
         if (!m_CommonKeywordsModel.getDescription().trimmed().isEmpty()) {
-            m_CommandManager->submitItemForSpellCheck(&m_CommonKeywordsModel, Common::SpellCheckDescription);
+            m_CommandManager->submitItemForSpellCheck(&m_CommonKeywordsModel, Common::SpellCheckFlags::Description);
         } else {
-            m_CommonKeywordsModel.notifySpellCheckResults(Common::SpellCheckDescription);
+            m_CommonKeywordsModel.notifySpellCheckResults(Common::SpellCheckFlags::Description);
         }
     }
 
     void CombinedArtworksModel::spellCheckTitle() {
         LOG_DEBUG << "#";
         if (!m_CommonKeywordsModel.getTitle().trimmed().isEmpty()) {
-            m_CommandManager->submitItemForSpellCheck(&m_CommonKeywordsModel, Common::SpellCheckTitle);
+            m_CommandManager->submitItemForSpellCheck(&m_CommonKeywordsModel, Common::SpellCheckFlags::Title);
         } else {
-            m_CommonKeywordsModel.notifySpellCheckResults(Common::SpellCheckTitle);
+            m_CommonKeywordsModel.notifySpellCheckResults(Common::SpellCheckFlags::Title);
         }
     }
 
@@ -405,7 +409,7 @@ namespace Models {
 
         // TEMPORARY (enable everything on initial launch) --
         m_ModifiedFlags = 0;
-        m_EditFlags = 0;
+        m_EditFlags = Common::CombinedEditFlags::None;
         enableAllFields();
         // TEMPORARY (enable everything on initial launch) --
 

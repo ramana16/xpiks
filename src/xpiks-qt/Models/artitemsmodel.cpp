@@ -69,7 +69,7 @@ namespace Models {
         for (size_t i = 0; i < size; ++i) {
             ArtworkMetadata *metadata = m_ArtworkList.at(i);
             if (metadata->release()) {
-                delete metadata;
+                metadata->deleteLater();
             } else {
                 LOG_WARNING << "Metadata at index" << i << "is locked. Postponing destruction...";
 
@@ -270,13 +270,14 @@ namespace Models {
 
     void ArtItemsModel::suggestCorrections(int metadataIndex) {
         if (0 <= metadataIndex && metadataIndex < getArtworksCount()) {
-            int flags = 0;
-            Common::SetFlag(flags, Common::CorrectDescription);
-            Common::SetFlag(flags, Common::CorrectTitle);
-            Common::SetFlag(flags, Common::CorrectKeywords);
+            using namespace Common;
+            auto flags = 0;
+            Common::SetFlag(flags, SuggestionFlags::Description);
+            Common::SetFlag(flags, SuggestionFlags::Title);
+            Common::SetFlag(flags, SuggestionFlags::Keywords);
             ArtworkMetadata *metadata = m_ArtworkList.at(metadataIndex);
             Common::BasicKeywordsModel *keywordsModel = metadata->getKeywordsModel();
-            m_CommandManager->setupSpellCheckSuggestions(keywordsModel, metadataIndex, flags);
+            m_CommandManager->setupSpellCheckSuggestions(keywordsModel, metadataIndex, (SuggestionFlags)flags);
         }
     }
 
@@ -527,8 +528,8 @@ namespace Models {
             std::vector<MetadataElement> items;
             items.emplace_back(metadata, metadataIndex);
 
-            int flags = 0;
-            Common::SetFlag(flags, Common::EditKeywords);
+            Common::CombinedEditFlags flags = Common::CombinedEditFlags::None;
+            Common::SetFlag(flags, Common::CombinedEditFlags::EditKeywords);
             std::shared_ptr<Commands::CombinedEditCommand> combinedEditCommand(new Commands::CombinedEditCommand(
                     flags,
                     items,
@@ -543,13 +544,16 @@ namespace Models {
     void ArtItemsModel::detachVectorsFromSelected(const QVector<int> &selectedIndices) {
         QVector<int> indicesToUpdate;
         indicesToUpdate.reserve(selectedIndices.length());
+        Models::ArtworksRepository *artworksRepository = m_CommandManager->getArtworksRepository();
 
         foreach(int index, selectedIndices) {
             ArtworkMetadata *metadata = m_ArtworkList.at(index);
             ImageArtwork *image = dynamic_cast<ImageArtwork *>(metadata);
 
             if (image != NULL) {
+                const QString vectorPath = image->getAttachedVectorPath();
                 image->detachVector();
+                artworksRepository->removeVector(vectorPath);
                 indicesToUpdate.append(index);
             }
         }
@@ -695,7 +699,7 @@ namespace Models {
         if (item != NULL)
 #endif
         {
-            m_CommandManager->submitForWarningsCheck(item, Common::WarningsCheckSpelling);
+            m_CommandManager->submitForWarningsCheck(item, Common::WarningsCheckFlags::Spelling);
         }
     }
 
@@ -793,6 +797,7 @@ namespace Models {
 
         int attachedVectors = 0;
         QString defaultPath;
+        Models::ArtworksRepository *artworksRepository = m_CommandManager->getArtworksRepository();
 
         size_t size = getArtworksCount();
         indicesToUpdate.reserve((int)size);
@@ -816,6 +821,7 @@ namespace Models {
                 QString vectorsPath = innerHash.value(filename, defaultPath);
                 if (!vectorsPath.isEmpty()) {
                     image->attachVector(vectorsPath);
+                    artworksRepository->accountVector(vectorsPath);
                     indicesToUpdate.append((int)i);
                     attachedVectors++;
                 }
@@ -957,8 +963,13 @@ namespace Models {
         Q_ASSERT(row >= 0 && row < getArtworksCount());
         ArtworkMetadata *metadata = m_ArtworkList.at(row);
         m_ArtworkList.erase(m_ArtworkList.begin() + row);
-        ArtworksRepository *artworkRepository = m_CommandManager->getArtworksRepository();
-        artworkRepository->removeFile(metadata->getFilepath(), metadata->getDirectory());
+        ArtworksRepository *artworksRepository = m_CommandManager->getArtworksRepository();
+        artworksRepository->removeFile(metadata->getFilepath(), metadata->getDirectory());
+
+        ImageArtwork *image = dynamic_cast<ImageArtwork*>(metadata);
+        if ((image != nullptr) && image->hasVectorAttached()) {
+            artworksRepository->removeVector(image->getAttachedVectorPath());
+        }
 
         if (metadata->isSelected()) {
             emit selectedArtworksRemoved(1);
@@ -1002,7 +1013,7 @@ namespace Models {
 
     void ArtItemsModel::destroyInnerItem(ArtworkMetadata *metadata) {
         if (metadata->release()) {
-            delete metadata;
+            metadata->deleteLater();
         } else {
             LOG_DEBUG << "Metadata is locked. Postponing destruction...";
 
@@ -1089,21 +1100,23 @@ namespace Models {
         if (m_ArtworkList.empty()) {
             if (!m_FinalizationList.empty()) {
                 LOG_DEBUG << "Clearing the finalization list";
-                qDeleteAll(m_FinalizationList);
+                for (auto *item: m_FinalizationList) {
+                    item->deleteLater();
+                }
                 m_FinalizationList.clear();
             }
         }
     }
 
     void ArtItemsModel::userDictUpdateHandler(const QStringList &keywords) {
-        int size = m_ArtworkList.size();
+        size_t size = m_ArtworkList.size();
 
         Q_ASSERT(!keywords.isEmpty());
 
         QVector<Common::BasicKeywordsModel *> itemsToCheck;
-        itemsToCheck.reserve(size);
+        itemsToCheck.reserve((int)size);
 
-        for (int i = 0; i < size; i++) {
+        for (size_t i = 0; i < size; i++) {
             ArtworkMetadata *metadata = m_ArtworkList.at(i);
             Common::BasicKeywordsModel *keywordsModel = metadata->getKeywordsModel();
             SpellCheck::SpellCheckItemInfo *info = keywordsModel->getSpellCheckInfo();
@@ -1115,11 +1128,11 @@ namespace Models {
     }
 
     void ArtItemsModel::userDictClearedHandler() {
-        int size = m_ArtworkList.size();
+        size_t size = m_ArtworkList.size();
         QVector<Common::BasicKeywordsModel *> itemsToCheck;
-        itemsToCheck.reserve(size);
+        itemsToCheck.reserve((int)size);
 
-        for (int i = 0; i < size; i++) {
+        for (size_t i = 0; i < size; i++) {
             ArtworkMetadata *metadata = m_ArtworkList.at(i);
             Common::BasicKeywordsModel *keywordsModel = metadata->getKeywordsModel();
             itemsToCheck.append(keywordsModel);

@@ -117,16 +117,16 @@ namespace Models {
 
         int getKeywordsCount() { return m_CommonKeywordsModel.getKeywordsCount(); }
 
-        bool getChangeDescription() const { return Common::HasFlag(m_EditFlags, Common::EditDesctiption); }
+        bool getChangeDescription() const { return Common::HasFlag(m_EditFlags, Common::CombinedEditFlags::EditDesctiption); }
         void setChangeDescription(bool value);
 
-        bool getChangeTitle() const { return Common::HasFlag(m_EditFlags, Common::EditTitle); }
+        bool getChangeTitle() const { return Common::HasFlag(m_EditFlags, Common::CombinedEditFlags::EditTitle); }
         void setChangeTitle(bool value);
 
-        bool getChangeKeywords() const { return Common::HasFlag(m_EditFlags, Common::EditKeywords); }
+        bool getChangeKeywords() const { return Common::HasFlag(m_EditFlags, Common::CombinedEditFlags::EditKeywords); }
         void setChangeKeywords(bool value);
 
-        bool getAppendKeywords() const { return Common::HasFlag(m_EditFlags, Common::AppendKeywords); }
+        bool getAppendKeywords() const { return Common::HasFlag(m_EditFlags, Common::CombinedEditFlags::AppendKeywords); }
         void setAppendKeywords(bool value);
 
     signals:
@@ -201,7 +201,7 @@ namespace Models {
         Common::Hold m_HoldPlaceholder;
         Common::BasicKeywordsModel m_CommonKeywordsModel;
         SpellCheck::SpellCheckItemInfo m_SpellCheckInfo;
-        int m_EditFlags;
+        Common::CombinedEditFlags m_EditFlags;
         int m_ModifiedFlags;
     };
 }

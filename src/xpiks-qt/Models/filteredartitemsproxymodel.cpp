@@ -63,7 +63,7 @@ namespace Models {
         LOG_DEBUG << "#";
         QVector<ArtworkMetadata *> allArtworks = getAllOriginalItems();
         m_CommandManager->submitForSpellCheck(allArtworks);
-        m_CommandManager->reportUserAction(Conectivity::UserActionSpellCheck);
+        m_CommandManager->reportUserAction(Conectivity::UserAction::SpellCheck);
     }
 
     int FilteredArtItemsProxyModel::getOriginalIndex(int index) {
@@ -165,7 +165,7 @@ namespace Models {
         LOG_DEBUG << "#";
         QVector<ArtworkMetadata *> selectedArtworks = getSelectedOriginalItems();
         m_CommandManager->submitForSpellCheck(selectedArtworks);
-        m_CommandManager->reportUserAction(Conectivity::UserActionSpellCheck);
+        m_CommandManager->reportUserAction(Conectivity::UserAction::SpellCheck);
     }
 
     int FilteredArtItemsProxyModel::getModifiedSelectedCount(bool overwriteAll) const {
@@ -219,11 +219,12 @@ namespace Models {
     void FilteredArtItemsProxyModel::removeMetadataInSelected() const {
         LOG_DEBUG << "#";
         auto selectedArtworks = getSelectedOriginalItemsWithIndices();
-        int flags = 0;
-        Common::SetFlag(flags, Common::EditDesctiption);
-        Common::SetFlag(flags, Common::EditKeywords);
-        Common::SetFlag(flags, Common::EditTitle);
-        Common::SetFlag(flags, Common::Clear);
+        Common::CombinedEditFlags flags = Common::CombinedEditFlags::None;
+        using namespace Common;
+        Common::SetFlag(flags, CombinedEditFlags::EditDesctiption);
+        Common::SetFlag(flags, CombinedEditFlags::EditKeywords);
+        Common::SetFlag(flags, CombinedEditFlags::EditTitle);
+        Common::SetFlag(flags, CombinedEditFlags::Clear);
         removeMetadataInItems(selectedArtworks, flags);
     }
 
@@ -276,13 +277,13 @@ namespace Models {
                 Common::BasicKeywordsModel *keywordsModel = metadata->getKeywordsModel();
 
                 if (!metadata->getDescription().trimmed().isEmpty()) {
-                    m_CommandManager->submitItemForSpellCheck(keywordsModel, Common::SpellCheckDescription);
+                    m_CommandManager->submitItemForSpellCheck(keywordsModel, Common::SpellCheckFlags::Description);
                 } else {
                     LOG_INFO << "description is empty";
-                    keywordsModel->notifySpellCheckResults(Common::SpellCheckDescription);
+                    keywordsModel->notifySpellCheckResults(Common::SpellCheckFlags::Description);
                 }
 
-                m_CommandManager->submitForWarningsCheck(metadata, Common::WarningsCheckDescription);
+                m_CommandManager->submitForWarningsCheck(metadata, Common::WarningsCheckFlags::Description);
             }
         }
     }
@@ -297,13 +298,13 @@ namespace Models {
                 Common::BasicKeywordsModel *keywordsModel = metadata->getKeywordsModel();
 
                 if (!metadata->getTitle().trimmed().isEmpty()) {
-                    m_CommandManager->submitItemForSpellCheck(keywordsModel, Common::SpellCheckTitle);
+                    m_CommandManager->submitItemForSpellCheck(keywordsModel, Common::SpellCheckFlags::Title);
                 } else {
                     LOG_INFO << "title is empty";
-                    keywordsModel->notifySpellCheckResults(Common::SpellCheckTitle);
+                    keywordsModel->notifySpellCheckResults(Common::SpellCheckFlags::Title);
                 }
 
-                m_CommandManager->submitForWarningsCheck(metadata, Common::WarningsCheckTitle);
+                m_CommandManager->submitForWarningsCheck(metadata, Common::WarningsCheckFlags::Title);
             }
         }
     }
@@ -369,8 +370,8 @@ namespace Models {
         }
     }
 
-    void FilteredArtItemsProxyModel::removeMetadataInItems(std::vector<MetadataElement> &itemsToClear, int flags) const {
-        LOG_INFO << itemsToClear.size() << "item(s) with flags =" << flags;
+    void FilteredArtItemsProxyModel::removeMetadataInItems(std::vector<MetadataElement> &itemsToClear, Common::CombinedEditFlags flags) const {
+        LOG_INFO << itemsToClear.size() << "item(s) with flags =" << (int)flags;
         std::shared_ptr<Commands::CombinedEditCommand> combinedEditCommand(new Commands::CombinedEditCommand(
                 flags,
                 itemsToClear));
@@ -379,9 +380,9 @@ namespace Models {
     }
 
     void FilteredArtItemsProxyModel::removeKeywordsInItem(ArtworkMetadata *metadata, int originalIndex) {
-        int flags = 0;
-        Common::SetFlag(flags, Common::EditKeywords);
-        Common::SetFlag(flags, Common::Clear);
+        Common::CombinedEditFlags flags = Common::CombinedEditFlags::None;
+        Common::SetFlag(flags, Common::CombinedEditFlags::EditKeywords);
+        Common::SetFlag(flags, Common::CombinedEditFlags::Clear);
 
         std::vector<MetadataElement> items;
         items.emplace_back(metadata, originalIndex);
@@ -577,7 +578,7 @@ namespace Models {
 
 #endif
 
-    std::vector<MetadataElement> FilteredArtItemsProxyModel::getSearchableOriginalItems(const QString &searchTerm, int flags) const {
+    std::vector<MetadataElement> FilteredArtItemsProxyModel::getSearchableOriginalItems(const QString &searchTerm, Common::SearchFlags flags) const {
         return getFilteredOriginalItems<MetadataElement>(
                     [&searchTerm, flags](ArtworkMetadata *artwork) {
             return Helpers::hasSearchMatch(searchTerm, artwork, flags);
@@ -585,7 +586,7 @@ namespace Models {
         [] (ArtworkMetadata *metadata, int index) { return MetadataElement(metadata, index); });
     }
 
-    std::vector<PreviewMetadataElement> FilteredArtItemsProxyModel::getSearchablePreviewOriginalItems(const QString &searchTerm, int flags) const {
+    std::vector<PreviewMetadataElement> FilteredArtItemsProxyModel::getSearchablePreviewOriginalItems(const QString &searchTerm, Common::SearchFlags flags) const {
         return getFilteredOriginalItems<PreviewMetadataElement>(
                     [&searchTerm, flags](ArtworkMetadata *artwork) {
             return Helpers::hasSearchMatch(searchTerm, artwork, flags);

@@ -156,15 +156,17 @@ namespace Models {
                 occurances = m_DirectoriesHash[absolutePath];
             }
 
-#ifndef CORE_TESTS
-            m_FilesWatcher.addPath(filepath);
-#endif
+            watchFilePath(filepath);
             m_FilesSet.insert(filepath);
             m_DirectoriesHash[absolutePath] = occurances + 1;
             wasModified = true;
         }
 
         return wasModified;
+    }
+
+    void ArtworksRepository::accountVector(const QString &vectorPath) {
+        watchFilePath(vectorPath);
     }
 
     bool ArtworksRepository::removeFile(const QString &filepath, const QString &fileDirectory) {
@@ -182,6 +184,10 @@ namespace Models {
         }
 
         return result;
+    }
+
+    void ArtworksRepository::removeVector(const QString &vectorPath) {
+        m_FilesWatcher.removePath(vectorPath);
     }
 
     void ArtworksRepository::setFileSelected(const QString &filepath, bool selected) {
@@ -202,6 +208,12 @@ namespace Models {
         LOG_DEBUG << "#";
         m_UnavailableFiles.clear();
         m_LastUnavailableFilesCount = 0;
+    }
+
+    void ArtworksRepository::watchFilePath(const QString &filepath) {
+#ifndef CORE_TESTS
+        m_FilesWatcher.addPath(filepath);
+#endif
     }
 
     bool ArtworksRepository::isFileUnavailable(const QString &filepath) const {
@@ -282,6 +294,7 @@ namespace Models {
 
     void ArtworksRepository::checkFileUnavailable(const QString &path) {
         LOG_INFO << "File changed:" << path;
+
         QFileInfo fi(path);
         if (!fi.exists()) {
             LOG_INFO << "File become unavailable:" << path;
@@ -294,7 +307,8 @@ namespace Models {
     void ArtworksRepository::onAvailabilityTimer() {
         int currentUnavailableSize = m_UnavailableFiles.size();
         LOG_INFO << "Current:" << currentUnavailableSize << "Last:" << m_LastUnavailableFilesCount;
-        if (currentUnavailableSize > m_LastUnavailableFilesCount ) {
+
+        if (currentUnavailableSize > m_LastUnavailableFilesCount) {
             m_LastUnavailableFilesCount = currentUnavailableSize;
             emit filesUnavailable();
         }

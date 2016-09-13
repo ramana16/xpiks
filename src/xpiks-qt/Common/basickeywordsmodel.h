@@ -56,7 +56,7 @@ namespace Common {
         virtual ~BasicKeywordsModel() {}
 
     public:
-        enum BasicKeywordsModellRoles {
+        enum BasicKeywordsModel_Roles {
             KeywordRole = Qt::UserRole + 1,
             IsCorrectRole
         };
@@ -95,7 +95,7 @@ namespace Common {
         bool editKeyword(int index, const QString &replacement);
         bool clearKeywords();
         bool areKeywordsEmpty();
-        bool replace(const QString &replaceWhat, const QString &replaceTo, int flags);
+        bool replace(const QString &replaceWhat, const QString &replaceTo, Common::SearchFlags flags);
         bool removeKeywords(const QSet<QString> &keywords, bool caseSensitive);
 
     private:
@@ -106,7 +106,7 @@ namespace Common {
         bool editKeywordUnsafe(int index, const QString &replacement);
         bool replaceKeywordUnsafe(int index, const QString &existing, const QString &replacement);
         bool clearKeywordsUnsafe();
-        bool containsKeywordUnsafe(const QString &searchTerm, int searchFlags=Common::SearchFlagSearchKeywords);
+        bool containsKeywordUnsafe(const QString &searchTerm, Common::SearchFlags searchFlags=Common::SearchFlags::Keywords);
         bool hasKeywordsSpellErrorUnsafe() const;
         bool removeKeywordsUnsafe(const QSet<QString> &keywordsToRemove, bool caseSensitive);
 
@@ -116,11 +116,11 @@ namespace Common {
     private:
         void removeKeywordsAtIndicesUnsafe(const QVector<int> &indices);
         bool replaceInDescription(const QString &replaceWhat, const QString &replaceTo,
-                                  int flags);
+                                  Common::SearchFlags flags);
         bool replaceInTitle(const QString &replaceWhat, const QString &replaceTo,
-                            int flags);
+                            SearchFlags flags);
         bool replaceInKeywordsUnsafe(const QString &replaceWhat, const QString &replaceTo,
-                                     int flags);
+                                     Common::SearchFlags flags);
 
     public:
         bool setDescription(const QString &value);
@@ -128,7 +128,7 @@ namespace Common {
         bool isEmpty();
         bool isTitleEmpty();
         bool isDescriptionEmpty();
-        bool containsKeyword(const QString &searchTerm, int searchFlags=Common::SearchFlagExactKeywords);
+        bool containsKeyword(const QString &searchTerm, Common::SearchFlags searchFlags = Common::SearchFlags::ExactKeywords);
 
         bool hasKeywordsSpellError();
         bool hasDescriptionSpellError();
@@ -142,7 +142,7 @@ namespace Common {
     public:
         SpellCheck::SpellCheckItemInfo *getSpellCheckInfo() const { return m_SpellCheckInfo; }
         void setSpellCheckInfo(SpellCheck::SpellCheckItemInfo *info) { m_SpellCheckInfo = info; }
-        void notifySpellCheckResults(int flags);
+        void notifySpellCheckResults(SpellCheckFlags flags);
         void notifyDescriptionSpellCheck();
         void notifyTitleSpellCheck();
 
@@ -167,7 +167,7 @@ namespace Common {
         virtual QString retrieveKeyword(int wordIndex);
         virtual QStringList getKeywords();
         virtual void setSpellCheckResults(const std::vector<std::shared_ptr<SpellCheck::SpellCheckQueryItem> > &items);
-        virtual void setSpellCheckResults(const QHash<QString, bool> &results, int flags);
+        virtual void setSpellCheckResults(const QHash<QString, bool> &results, SpellCheckFlags flags);
 
         virtual std::vector<std::shared_ptr<SpellCheck::SpellSuggestionsItem> > createKeywordsSuggestionsList();
 
@@ -191,7 +191,7 @@ namespace Common {
         void afterSpellingErrorsFixed();
 
     protected slots:
-        void spellCheckRequestReady(int flags, int index);
+        void spellCheckRequestReady(Common::SpellCheckFlags flags, int index);
 
     private:
          void setSpellCheckResultsUnsafe(const std::vector<std::shared_ptr<SpellCheck::SpellCheckQueryItem> > &items);
