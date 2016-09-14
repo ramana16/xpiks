@@ -24,6 +24,8 @@ import "../Constants"
 import "../Constants/UIConfig.js" as UIConfig
 
 TextEdit {
+    signal actionRightClicked();
+    property string rightClickedWord;
     property bool isActive: true
     font.family: Qt.platform.os === "windows" ? "Arial" : "Helvetica"
     font.pixelSize: UIConfig.fontPixelSize * settingsModel.keywordSizeScale
@@ -31,10 +33,39 @@ TextEdit {
     selectedTextColor: Colors.inputForegroundColor
     selectionColor: Colors.defaultControlColor
     renderType: Text.NativeRendering
-    selectByMouse: true
+    //selectByMouse: true
     cursorVisible: false
     wrapMode: TextEdit.NoWrap
     activeFocusOnPress: true
     color: (enabled && isActive) ? Colors.inputForegroundColor : Colors.inputInactiveForeground
+
+    MouseArea{
+
+        anchors.fill: parent
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
+        onClicked: {
+            var oldVal = parent.cursorPosition;
+            parent.cursorPosition = parent.positionAt(this.mouseX, this.mouseY);
+
+            if (mouse.button == Qt.RightButton) {
+                parent.selectWord();
+                parent.rightClickedWord = parent.selectedText;
+                console.log(parent.rightClickedWord);
+
+                // get back to initial state
+                parent.cursorPosition = oldVal;
+                parent.deselect();
+                actionRightClicked();
+            }else {
+                parent.forceActiveFocus();
+            }
+        }
+        onDoubleClicked: {
+            if (mouse.button == Qt.LeftButton) {
+                parent.cursorPosition = parent.positionAt(this.mouseX, this.mouseY);
+                parent.selectWord();
+            }
+        }
+    }
 }
 

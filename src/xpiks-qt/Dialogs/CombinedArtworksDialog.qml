@@ -493,6 +493,13 @@ CloseRequested")
                                         text: combinedArtworks.title
                                         onTextChanged: combinedArtworks.title = text
 
+                                        onActionRightClicked: {
+                                            console.log("Context menu for add word" + rightClickedWord)
+                                            addWordContextMenu.word = this.rightClickedWord
+                                            addWordContextMenu.popup()
+
+                                        }
+
                                         Keys.onBacktabPressed: {
                                             event.accepted = true
                                         }
@@ -672,6 +679,13 @@ CloseRequested")
 
                                             previousText = text
                                             combinedArtworks.description = text
+                                        }
+
+                                        onActionRightClicked: {
+                                            console.log("Context menu for add word" + rightClickedWord)
+                                            addWordContextMenu.word = this.rightClickedWord
+                                            addWordContextMenu.popup()
+
                                         }
 
                                         wrapMode: TextEdit.Wrap

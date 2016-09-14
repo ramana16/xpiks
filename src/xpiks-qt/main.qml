@@ -1840,6 +1840,13 @@ ApplicationWindow {
                                                             isActive: rowWrapper.isHighlighted
                                                             onTextChanged: model.editdescription = text
 
+                                                            onActionRightClicked: {
+                                                                console.log("Context menu for add word" + rightClickedWord)
+                                                                addWordContextMenu.word = this.rightClickedWord
+                                                                addWordContextMenu.popup()
+
+                                                            }
+
                                                             Keys.onTabPressed: {
                                                                 if (columnLayout.isWideEnough) {
                                                                     titleTextInput.forceActiveFocus()
@@ -1934,6 +1941,14 @@ ApplicationWindow {
                                                             focus: true
                                                             isActive: rowWrapper.isHighlighted
                                                             onTextChanged: model.edittitle = text
+
+
+                                                            onActionRightClicked: {
+                                                                console.log("Context menu for add word" + rightClickedWord)
+                                                                addWordContextMenu.word = this.rightClickedWord
+                                                                addWordContextMenu.popup()
+
+                                                            }
 
                                                             Keys.onTabPressed: {
                                                                 flv.activateEdit()
