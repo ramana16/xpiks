@@ -86,6 +86,13 @@ int RemoveFromUserDictionaryTest::doTest() {
 
     QThread::sleep(5);
 
+    int userDictWords = spellCheckService->getUserDictWordsNumber();
+
+    VERIFY(userDictWords == 1, "Wrong number of words in user dictionary");
+    VERIFY(!basicKeywordsModel->hasDescriptionSpellError(), "After adding word. Description spell error is still present");
+    VERIFY(!basicKeywordsModel->hasTitleSpellError(), "After adding word. Title spell error is still present");
+    VERIFY(!basicKeywordsModel->hasKeywordsSpellError(), "After adding word. Keywords spell error is still present");
+
     // now clean user dict
 
     spellCheckService->clearUserDictionary();
@@ -104,7 +111,7 @@ int RemoveFromUserDictionaryTest::doTest() {
 
     QThread::sleep(5);
 
-    int userDictWords = spellCheckService->getUserDictWordsNumber();
+    userDictWords = spellCheckService->getUserDictWordsNumber();
 
     VERIFY(userDictWords == 0, "Wrong number of words in user dictionary");
     VERIFY(basicKeywordsModel->hasDescriptionSpellError(), "Description spell error not detected");
