@@ -666,8 +666,8 @@ Item {
 
                     StyledText {
                         id: plainTextText
-                        text: i18.n + qsTr("<u>edit in plain text</u>")
-                        color: plainTextMA.containsMouse ? Colors.linkClickedColor : Colors.labelActiveForeground
+                        text: i18.n + qsTr("Edit in plain text")
+                        color: plainTextMA.containsMouse ? Colors.linkClickedColor : Colors.artworkActiveColor
 
                         MouseArea {
                             id: plainTextMA
@@ -679,7 +679,7 @@ Item {
 
                                 var callbackObject = {
                                     onSuccess: function(text) {
-                                        artItemsModel.plainTextEdit(rowWrapper.getIndex(), text)
+                                        combinedArtworks.plainTextEdit(text)
                                     },
                                     onClose: function() {
                                         flv.activateEdit()
@@ -690,8 +690,8 @@ Item {
                                                     applicationWindow,
                                                     {
                                                         callbackObject: callbackObject,
-                                                        keywordsText: keywordsstring,
-                                                        keywordsModel: filteredArtItemsModel.getKeywordsModel(rowWrapper.delegateIndex)
+                                                        keywordsText: combinedArtworks.getKeywordsString(),
+                                                        keywordsModel: combinedArtworks.getKeywordsModel()
 
                                                     });
                             }
