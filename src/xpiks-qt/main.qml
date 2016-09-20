@@ -1841,11 +1841,14 @@ ApplicationWindow {
                                                             onTextChanged: model.editdescription = text
 
                                                             onActionRightClicked: {
-                                                                console.log("Context menu for add word" + rightClickedWord)
-                                                                addWordContextMenu.word = this.rightClickedWord
-                                                                addWordContextMenu.popup()
+                                                                if (filteredArtItemsModel.hasDescriptionWordSpellError(rowWrapper.delegateIndex, rightClickedWord)){
+                                                                    console.log("Context menu for add word " + rightClickedWord)
+                                                                    addWordContextMenu.word = rightClickedWord
+                                                                    addWordContextMenu.popup()
+                                                                }
 
                                                             }
+
 
                                                             Keys.onTabPressed: {
                                                                 if (columnLayout.isWideEnough) {
@@ -1944,9 +1947,11 @@ ApplicationWindow {
 
 
                                                             onActionRightClicked: {
-                                                                console.log("Context menu for add word" + rightClickedWord)
-                                                                addWordContextMenu.word = this.rightClickedWord
-                                                                addWordContextMenu.popup()
+                                                                if (filteredArtItemsModel.hasTitleWordSpellError(rowWrapper.delegateIndex, rightClickedWord)){
+                                                                    console.log("Context menu for add word " + rightClickedWord)
+                                                                    addWordContextMenu.word = rightClickedWord
+                                                                    addWordContextMenu.popup()
+                                                                }
 
                                                             }
 

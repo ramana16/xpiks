@@ -176,6 +176,9 @@ namespace Models {
         Q_INVOKABLE void spellCheckTitle();
         Q_INVOKABLE void assignFromSelected();
 
+        Q_INVOKABLE bool hasTitleWordSpellError(const QString &word);
+        Q_INVOKABLE bool hasDescriptionWordSpellError(const QString &word);
+
     private:
         void processCombinedEditCommand();
         void enableAllFields();

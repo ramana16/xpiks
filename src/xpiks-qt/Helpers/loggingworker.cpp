@@ -33,25 +33,20 @@ namespace Helpers {
 
     void LoggingWorker::process() {
         Logger &logger = Logger::getInstance();
-        const int secondsToSleep = 1;
+        const int sleepTimeout = 1000;
 
         while (!m_Cancel) {
             logger.flush();
-            QThread::sleep(secondsToSleep);
+            QThread::usleep(sleepTimeout);
         }
-
-        LOG_INFO << "Logging worker stopped";
-        logger.log("Logging is off now");
-        logger.stop();
-        logger.flush();
 
         emit stopped();
     }
 
     void LoggingWorker::cancel() {
         m_Cancel = true;
-        LOG_INFO << "#";
+
         Logger &logger = Logger::getInstance();
-        logger.log("StopMessage");
+        logger.stop();
     }
 }

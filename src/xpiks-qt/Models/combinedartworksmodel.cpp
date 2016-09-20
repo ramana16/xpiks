@@ -297,6 +297,16 @@ namespace Models {
         }
     }
 
+    bool CombinedArtworksModel::hasTitleWordSpellError(const QString &word)
+    {
+        return m_CommonKeywordsModel.hasTitleWordSpellError(word);
+    }
+
+    bool CombinedArtworksModel::hasDescriptionWordSpellError(const QString &word)
+    {
+        return m_CommonKeywordsModel.hasDescriptionWordSpellError(word);
+    }
+
     void CombinedArtworksModel::processCombinedEditCommand() {
         auto &artworksList = getArtworksList();
 

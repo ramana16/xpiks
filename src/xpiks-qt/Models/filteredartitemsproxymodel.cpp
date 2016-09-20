@@ -351,6 +351,35 @@ namespace Models {
         return item;
     }
 
+    bool FilteredArtItemsProxyModel::hasTitleWordSpellError(int index, const QString &word)
+    {
+        if (0 <= index && index < rowCount()) {
+            int originalIndex = getOriginalIndex(index);
+            ArtItemsModel *artItemsModel = getArtItemsModel();
+            ArtworkMetadata *metadata = artItemsModel->getArtwork(originalIndex);
+            if (metadata != NULL) {
+                Common::BasicKeywordsModel *keywordsModel = metadata->getKeywordsModel();
+                return keywordsModel->hasTitleWordSpellError(word);
+            }
+        }
+        return false;
+    }
+
+    bool FilteredArtItemsProxyModel::hasDescriptionWordSpellError(int index, const QString &word)
+    {
+        if (0 <= index && index < rowCount()) {
+            int originalIndex = getOriginalIndex(index);
+            LOG_INFO<<originalIndex;
+            ArtItemsModel *artItemsModel = getArtItemsModel();
+            ArtworkMetadata *metadata = artItemsModel->getArtwork(originalIndex);
+            if (metadata != NULL) {
+                Common::BasicKeywordsModel *keywordsModel = metadata->getKeywordsModel();
+                return keywordsModel->hasDescriptionWordSpellError(word);
+            }
+        }
+        return false;
+    }
+
     void FilteredArtItemsProxyModel::itemSelectedChanged(bool value) {
         int plus = value ? +1 : -1;
 

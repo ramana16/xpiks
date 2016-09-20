@@ -691,6 +691,16 @@ namespace Common {
         return anyError;
     }
 
+    bool BasicKeywordsModel::hasDescriptionWordSpellError(const QString &word)
+    {
+        return m_SpellCheckInfo->hasDescriptionError(word);
+    }
+
+    bool BasicKeywordsModel::hasTitleWordSpellError(const QString &word)
+    {
+        return m_SpellCheckInfo->hasTitleError(word);
+    }
+
     bool BasicKeywordsModel::hasSpellErrors() {
         bool hasErrors = hasDescriptionSpellError() ||
                          hasTitleSpellError() ||

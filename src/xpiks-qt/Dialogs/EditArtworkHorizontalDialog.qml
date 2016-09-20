@@ -298,9 +298,11 @@ Item {
                             onTextChanged: combinedArtworks.title = text
 
                             onActionRightClicked: {
-                                console.log("Context menu for add word" + rightClickedWord)
-                                addWordContextMenu.word = this.rightClickedWord
-                                addWordContextMenu.popup()
+                                if (combinedArtworks.hasTitleWordSpellError(rightClickedWord)) {
+                                    console.log("Context menu for add word " + rightClickedWord)
+                                    addWordContextMenu.word = rightClickedWord
+                                    addWordContextMenu.popup()
+                                }
 
                             }
 
@@ -415,9 +417,11 @@ Item {
                             }
 
                             onActionRightClicked: {
-                                console.log("Context menu for add word" + rightClickedWord)
-                                addWordContextMenu.word = this.rightClickedWord
-                                addWordContextMenu.popup()
+                                if (combinedArtworks.hasDescriptionWordSpellError(rightClickedWord)) {
+                                    console.log("Context menu for add word " + rightClickedWord)
+                                    addWordContextMenu.word = rightClickedWord
+                                    addWordContextMenu.popup()
+                                }
 
                             }
 

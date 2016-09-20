@@ -53,7 +53,7 @@ SOURCES += main.cpp \
     ../../xpiks-qt/Helpers/runguard.cpp \
     ../../xpiks-qt/Helpers/stringhelper.cpp \
     ../../xpiks-qt/Helpers/ziphelper.cpp \
-    ../../xpiks-qt/Helpers/updateservice.cpp \
+    ../../xpiks-qt/Conectivity/updateservice.cpp \
     ../../xpiks-qt/MetadataIO/backupsaverservice.cpp \
     ../../xpiks-qt/MetadataIO/backupsaverworker.cpp \
     ../../xpiks-qt/MetadataIO/metadataiocoordinator.cpp \
@@ -145,7 +145,8 @@ SOURCES += main.cpp \
     ../../xpiks-qt/Conectivity/telemetryworker.cpp \
     addtouserdictionarytest.cpp \
     autodetachvectortest.cpp \
-    removefromuserdictionarytest.cpp
+    removefromuserdictionarytest.cpp \
+    testshelpers.cpp
 
 RESOURCES +=
 
@@ -202,7 +203,7 @@ HEADERS += \
     ../../xpiks-qt/Helpers/runguard.h \
     ../../xpiks-qt/Helpers/stringhelper.h \
     ../../xpiks-qt/Helpers/ziphelper.h \
-    ../../xpiks-qt/Helpers/updateservice.h \
+    ../../xpiks-qt/Conectivity/updateservice.h \
     ../../xpiks-qt/MetadataIO/backupsaverservice.h \
     ../../xpiks-qt/MetadataIO/backupsaverworker.h \
     ../../xpiks-qt/MetadataIO/metadataiocoordinator.h \
@@ -318,7 +319,8 @@ HEADERS += \
     ../../xpiks-qt/Conectivity/telemetryworker.h \
     addtouserdictionarytest.h \
     autodetachvectortest.h \
-    removefromuserdictionarytest.h
+    removefromuserdictionarytest.h \
+    testshelpers.h
 
 INCLUDEPATH += ../../tiny-aes
 INCLUDEPATH += ../../cpp-libface

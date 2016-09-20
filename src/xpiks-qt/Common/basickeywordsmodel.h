@@ -133,6 +133,8 @@ namespace Common {
         bool hasKeywordsSpellError();
         bool hasDescriptionSpellError();
         bool hasTitleSpellError();
+        bool hasDescriptionWordSpellError(const QString &word);
+        bool hasTitleWordSpellError(const QString &word);
 
         bool hasSpellErrors();
         void setSpellStatuses(BasicKeywordsModel *keywordsModel);
