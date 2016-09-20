@@ -71,7 +71,7 @@ Item {
     }
 
     function submitKeywords() {
-        callbackObject.onSuccess(textEdit.text)
+        callbackObject.onSuccess(textEdit.text, spaceSeparator.checked)
         closePopup()
     }
 
@@ -241,6 +241,12 @@ Item {
                 anchors.rightMargin: 20
                 height: 24
                 spacing: 20
+
+                StyledCheckbox{
+                    id: spaceSeparator
+                    text: "Space as separator"
+                    checked: false
+                }
 
                 Item {
                     Layout.fillWidth: true
