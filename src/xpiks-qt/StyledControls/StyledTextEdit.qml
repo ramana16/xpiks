@@ -45,7 +45,7 @@ TextEdit {
         acceptedButtons: Qt.LeftButton | Qt.RightButton
         onClicked: {
             var oldVal = parent.cursorPosition;
-            parent.cursorPosition = parent.positionAt(this.mouseX, this.mouseY);
+            parent.cursorPosition = parent.positionAt(mouseX, mouseY);
 
             if (mouse.button == Qt.RightButton) {
                 parent.selectWord();
@@ -56,13 +56,13 @@ TextEdit {
                 parent.cursorPosition = oldVal;
                 parent.deselect();
                 actionRightClicked();
-            }else {
+            } else {
                 parent.forceActiveFocus();
             }
         }
         onDoubleClicked: {
             if (mouse.button == Qt.LeftButton) {
-                parent.cursorPosition = parent.positionAt(this.mouseX, this.mouseY);
+                parent.cursorPosition = parent.positionAt(mouseX, mouseY);
                 parent.selectWord();
             }
         }

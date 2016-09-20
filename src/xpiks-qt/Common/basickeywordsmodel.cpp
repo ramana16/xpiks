@@ -648,6 +648,7 @@ namespace Common {
 
     bool BasicKeywordsModel::containsKeyword(const QString &searchTerm, Common::SearchFlags searchFlags) {
         QReadLocker readLocker(&m_KeywordsLock);
+
         Q_UNUSED(readLocker);
 
         return containsKeywordUnsafe(searchTerm, searchFlags);
@@ -691,13 +692,11 @@ namespace Common {
         return anyError;
     }
 
-    bool BasicKeywordsModel::hasDescriptionWordSpellError(const QString &word)
-    {
+    bool BasicKeywordsModel::hasDescriptionWordSpellError(const QString &word) {
         return m_SpellCheckInfo->hasDescriptionError(word);
     }
 
-    bool BasicKeywordsModel::hasTitleWordSpellError(const QString &word)
-    {
+    bool BasicKeywordsModel::hasTitleWordSpellError(const QString &word) {
         return m_SpellCheckInfo->hasTitleError(word);
     }
 

@@ -499,7 +499,6 @@ CloseRequested")
                                                 addWordContextMenu.word = rightClickedWord
                                                 addWordContextMenu.popup()
                                             }
-
                                         }
 
                                         Keys.onBacktabPressed: {
@@ -689,7 +688,6 @@ CloseRequested")
                                                 addWordContextMenu.word = rightClickedWord
                                                 addWordContextMenu.popup()
                                             }
-
                                         }
 
                                         wrapMode: TextEdit.Wrap
@@ -894,7 +892,6 @@ CloseRequested")
                                                 addWordContextMenu.popup()
                                             }
                                         }
-
                                     }
 
                                     onTagAdded: {

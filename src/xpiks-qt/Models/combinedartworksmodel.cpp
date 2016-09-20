@@ -307,6 +307,14 @@ namespace Models {
         return m_CommonKeywordsModel.hasDescriptionWordSpellError(word);
     }
 
+    void CombinedArtworksModel::plainTextEdit(const QString &rawKeywords)
+    {
+        QStringList keywords = rawKeywords.trimmed().split(QChar(','), QString::SkipEmptyParts);
+        m_CommonKeywordsModel.setKeywords(keywords);
+        emit keywordsCountChanged();
+        setKeywordsModified(true);
+    }
+
     void CombinedArtworksModel::processCombinedEditCommand() {
         auto &artworksList = getArtworksList();
 
@@ -346,20 +354,25 @@ namespace Models {
 
     void CombinedArtworksModel::assignFromManyArtworks() {
         LOG_DEBUG << "#";
+
         bool anyItemsProcessed = false;
         bool descriptionsDiffer = false;
         bool titleDiffer = false;
-        QString description;
-        QString title;
-        QSet<QString> commonKeywords;
+        QString description, title;
+        QSet<QString> commonKeywords, unitedKeywords;
+        QStringList firstItemKeywords;
+        int firstItemKeywordsCount = 0;
 
         processArtworks([](const MetadataElement &) { return true; },
                         [&](int, ArtworkMetadata *metadata) {
             if (!anyItemsProcessed) {
                 description = metadata->getDescription();
                 title = metadata->getTitle();
+                firstItemKeywords = metadata->getKeywords();
                 // preserve case with List to Set convertion
-                commonKeywords.unite(metadata->getKeywords().toSet());
+                auto firstSet = firstItemKeywords.toSet();
+                commonKeywords.unite(firstSet);
+                firstItemKeywordsCount = firstSet.count();
                 anyItemsProcessed = true;
                 return;
             }
@@ -369,7 +382,14 @@ namespace Models {
             descriptionsDiffer = descriptionsDiffer || description != currDescription;
             titleDiffer = titleDiffer || title != currTitle;
             // preserve case with List to Set convertion
-            commonKeywords.intersect(metadata->getKeywords().toSet());
+            auto currentSet = metadata->getKeywords().toSet();
+            commonKeywords.intersect(currentSet);
+
+            // used to detect if all items have same keywords
+            if ((currentSet.count() == firstItemKeywordsCount) &&
+                    (unitedKeywords.count() <= firstItemKeywordsCount)) {
+                unitedKeywords.unite(currentSet);
+            }
         });
 
         if (!isEmpty()) {
@@ -385,7 +405,12 @@ namespace Models {
             initTitle(title);
 
             if (!areKeywordsModified()) {
-                initKeywords(commonKeywords.toList());
+                if (unitedKeywords.subtract(commonKeywords).isEmpty()) {
+                    // all keywords are the same
+                    initKeywords(firstItemKeywords);
+                } else {
+                    initKeywords(commonKeywords.toList());
+                }
             }
         }
     }

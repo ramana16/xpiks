@@ -128,7 +128,7 @@ namespace Common {
         bool isEmpty();
         bool isTitleEmpty();
         bool isDescriptionEmpty();
-        bool containsKeyword(const QString &searchTerm, Common::SearchFlags searchFlags = Common::SearchFlags::ExactKeywords);
+        bool containsKeyword(const QString &searchTerm, Common::SearchFlags searchFlags=Common::SearchFlags::ExactKeywords);
 
         bool hasKeywordsSpellError();
         bool hasDescriptionSpellError();
@@ -196,10 +196,10 @@ namespace Common {
         void spellCheckRequestReady(Common::SpellCheckFlags flags, int index);
 
     private:
-         void setSpellCheckResultsUnsafe(const std::vector<std::shared_ptr<SpellCheck::SpellCheckQueryItem> > &items);
-         bool isReplacedADuplicateUnsafe(int index, const QString &existingPrev,
-                                         const QString &replacement) const;
-         void emitSpellCheckChanged(int index=-1);
+        void setSpellCheckResultsUnsafe(const std::vector<std::shared_ptr<SpellCheck::SpellCheckQueryItem> > &items);
+        bool isReplacedADuplicateUnsafe(int index, const QString &existingPrev,
+                                        const QString &replacement) const;
+        void emitSpellCheckChanged(int index=-1);
 
     protected:
         virtual QHash<int, QByteArray> roleNames() const;
