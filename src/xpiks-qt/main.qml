@@ -2212,8 +2212,8 @@ ApplicationWindow {
                                                                 if (!containsMouse) { return; }
 
                                                                 var callbackObject = {
-                                                                    onSuccess: function(text) {
-                                                                        artItemsModel.plainTextEdit(rowWrapper.getIndex(), text)
+                                                                    onSuccess: function(text, spaceSeparator) {
+                                                                        artItemsModel.plainTextEdit(rowWrapper.getIndex(), text, spaceSeparator)
                                                                     },
                                                                     onClose: function() {
                                                                         flv.activateEdit()

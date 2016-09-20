@@ -519,14 +519,19 @@ namespace Models {
         }
     }
 
-    void ArtItemsModel::plainTextEdit(int metadataIndex, const QString &rawKeywords) {
+    void ArtItemsModel::plainTextEdit(int metadataIndex, const QString &rawKeywords, bool spaceSeparator) {
         LOG_DEBUG << "Plain text edit for item" << metadataIndex;
         if (0 <= metadataIndex && metadataIndex < getArtworksCount()) {
             ArtworkMetadata *metadata = m_ArtworkList.at(metadataIndex);
-
-            QStringList keywords = rawKeywords.trimmed().split(QChar(','), QString::SkipEmptyParts);
+            QRegExp regExp;
+            if (spaceSeparator == true){
+                regExp = QRegExp("[,\\s]");
+            }else{
+                regExp = QRegExp(",");
+            }
+            QStringList keywords = rawKeywords.trimmed().split(regExp, QString::SkipEmptyParts);
             std::vector<MetadataElement> items;
-            items.emplace_back(metadata, metadataIndex);
+            items.emplace_back( metadata, metadataIndex );
 
             Common::CombinedEditFlags flags = Common::CombinedEditFlags::None;
             Common::SetFlag(flags, Common::CombinedEditFlags::EditKeywords);
