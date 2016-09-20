@@ -25,7 +25,6 @@
 #include <QSize>
 #include "../Common/defines.h"
 #include "../Common/flags.h"
-#include "../Models/settingsmodel.h"
 #include "../Models/artworkmetadata.h"
 #include "../Models/imageartwork.h"
 
@@ -39,14 +38,17 @@ namespace Warnings {
         return result;
     }
 
-    WarningsCheckingWorker::WarningsCheckingWorker(Models::SettingsModel *settingsModel, QObject *parent):
+    WarningsCheckingWorker::WarningsCheckingWorker(AutoComplete::WarningsSettingsModel *warningsSettingsModel, QObject *parent):
         QObject(parent),
-        m_SettingsModel(settingsModel),
+        m_WarningsSettingsModel(warningsSettingsModel),
         m_AllowedFilenameCharacters(".,_-@ "),
         m_MinimumMegapixels(4),
         m_MaximumKeywordsCount(50),
         m_MaximumDescriptionLength(200)
     {
+        if (m_WarningsSettingsModel != NULL) {
+            QObject::connect(m_WarningsSettingsModel, SIGNAL(warningsSettingsUpdated()), this, SLOT(warningsSettingsUpdated()));
+        }
     }
 
     bool WarningsCheckingWorker::initWorker() {
@@ -56,8 +58,6 @@ namespace Warnings {
 
     void WarningsCheckingWorker::processOneItem(std::shared_ptr<WarningsItem> &item) {
         Common::WarningFlags warningsFlags = Common::WarningFlags::None;
-
-        initValuesFromSettings();
 
         if (item->needCheckAll()) {
             warningsFlags |= checkDimensions(item);
@@ -89,10 +89,12 @@ namespace Warnings {
         item->submitWarnings(warningsFlags);
     }
 
-    void WarningsCheckingWorker::initValuesFromSettings() {
-        m_MaximumDescriptionLength = m_SettingsModel->getMaxDescriptionLength();
-        m_MinimumMegapixels = m_SettingsModel->getMinMegapixelCount();
-        m_MaximumKeywordsCount = m_SettingsModel->getMaxKeywordsCount();
+    void WarningsCheckingWorker::warningsSettingsUpdated()
+    {
+       m_AllowedFilenameCharacters = m_WarningsSettingsModel->getAllowedFilenameCharacters();
+       m_MinimumMegapixels = m_WarningsSettingsModel->getMaxKeywordsCount();
+       m_MaximumKeywordsCount = m_WarningsSettingsModel->getMaxKeywordsCount();
+       m_MaximumDescriptionLength = m_WarningsSettingsModel->getMaxDescriptionLength();
     }
 
     Common::WarningFlags WarningsCheckingWorker::checkDimensions(std::shared_ptr<WarningsItem> &wi) const {

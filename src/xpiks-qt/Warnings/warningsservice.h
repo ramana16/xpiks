@@ -27,6 +27,7 @@
 #include "../Common/iservicebase.h"
 #include "../Models/artworkmetadata.h"
 #include "../Common/flags.h"
+#include "../AutoComplete/warningssettingsmodel.h"
 
 namespace Warnings {
     class WarningsCheckingWorker;
@@ -39,6 +40,7 @@ namespace Warnings {
         Q_OBJECT
     public:
         explicit WarningsService(QObject *parent = 0);
+        void initWarningsSettings();
         virtual ~WarningsService() {}
 
     public:
@@ -63,6 +65,7 @@ namespace Warnings {
 
     private:
         WarningsCheckingWorker *m_WarningsWorker;
+        AutoComplete::WarningsSettingsModel m_WarningsSettingsModel;
     };
 }
 

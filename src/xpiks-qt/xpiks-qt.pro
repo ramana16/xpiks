@@ -112,7 +112,8 @@ SOURCES += main.cpp \
     Models/artworksviewmodel.cpp \
     Helpers/keywordshelpers.cpp \
     Conectivity/uploadwatcher.cpp \
-    Conectivity/telemetryworker.cpp
+    Conectivity/telemetryworker.cpp \
+    AutoComplete/warningssettingsmodel.cpp
 
 RESOURCES += qml.qrc
 
@@ -281,7 +282,8 @@ HEADERS += \
     Helpers/keywordshelpers.h \
     Conectivity/uploadwatcher.h \
     Common/iflagsprovider.h \
-    Conectivity/telemetryworker.h
+    Conectivity/telemetryworker.h \
+    AutoComplete/warningssettingsmodel.h
 
 DISTFILES += \
     Components/CloseIcon.qml \
