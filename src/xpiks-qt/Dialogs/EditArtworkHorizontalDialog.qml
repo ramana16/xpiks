@@ -658,6 +658,45 @@ Item {
                             onClicked: clearKeywordsDialog.open()
                         }
                     }
+
+                    StyledText {
+                        text: "|"
+                        verticalAlignment: Text.AlignVCenter
+                    }
+
+                    StyledText {
+                        id: plainTextText
+                        text: i18.n + qsTr("<u>edit in plain text</u>")
+                        color: plainTextMA.containsMouse ? Colors.linkClickedColor : Colors.labelActiveForeground
+
+                        MouseArea {
+                            id: plainTextMA
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                // strange bug with clicking on the keywords field
+                                if (!containsMouse) { return; }
+
+                                var callbackObject = {
+                                    onSuccess: function(text) {
+                                        artItemsModel.plainTextEdit(rowWrapper.getIndex(), text)
+                                    },
+                                    onClose: function() {
+                                        flv.activateEdit()
+                                    }
+                                }
+
+                                Common.launchDialog("Dialogs/PlainTextKeywordsDialog.qml",
+                                                    applicationWindow,
+                                                    {
+                                                        callbackObject: callbackObject,
+                                                        keywordsText: keywordsstring,
+                                                        keywordsModel: filteredArtItemsModel.getKeywordsModel(rowWrapper.delegateIndex)
+
+                                                    });
+                            }
+                        }
+                    }
                 }
 
                 Item {
