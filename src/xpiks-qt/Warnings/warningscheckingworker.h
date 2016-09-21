@@ -28,9 +28,11 @@
 #include "../AutoComplete/warningssettingsmodel.h"
 
 namespace Warnings {
-    class WarningsCheckingWorker: public QObject, public Common::ItemProcessingWorker<WarningsItem>
+    class WarningsCheckingWorker:
+        public QObject, public Common::ItemProcessingWorker<WarningsItem>
     {
-        Q_OBJECT
+    Q_OBJECT
+
     public:
         WarningsCheckingWorker(AutoComplete::WarningsSettingsModel *warningsSettingsModel, QObject *parent=0);
 
@@ -48,6 +50,7 @@ namespace Warnings {
     public slots:
         void process() { doWork(); }
         void cancel() { stopWorking(); }
+
     private slots:
         void warningsSettingsUpdated();
 

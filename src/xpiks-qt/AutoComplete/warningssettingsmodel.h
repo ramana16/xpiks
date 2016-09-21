@@ -9,20 +9,22 @@ namespace AutoComplete {
     class WarningsSettingsModel:
         public Models::AbstractConfigUpdaterModel
     {
-        Q_OBJECT
+    Q_OBJECT
+
     public:
         WarningsSettingsModel();
         void initializeConfigs();
+
         const QString &getAllowedFilenameCharacters() const { return m_AllowedFilenameCharacters; }
-        double getMinMegapixels() const { return  m_MinMegapixels; }
+        double getMinMegapixels() const { return m_MinMegapixels; }
         int getMaxKeywordsCount() const { return m_MaxKeywordsCount; }
         int getMaxDescriptionLength() const { return m_MaxDescriptionLength; }
 
     signals:
         void warningsSettingsUpdated();
 
-
         // AbstractConfigUpdaterModel interface
+
     protected:
         virtual void processRemoteConfig(const QJsonDocument &remoteDocument, bool overwriteLocal);
         virtual bool parseConfig(const QJsonDocument &document);

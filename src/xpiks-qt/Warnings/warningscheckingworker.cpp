@@ -44,9 +44,9 @@ namespace Warnings {
         m_AllowedFilenameCharacters(".,_-@ "),
         m_MinimumMegapixels(4),
         m_MaximumKeywordsCount(50),
-        m_MaximumDescriptionLength(200)
-    {
+        m_MaximumDescriptionLength(200) {
         if (m_WarningsSettingsModel != NULL) {
+            warningsSettingsUpdated();
             QObject::connect(m_WarningsSettingsModel, SIGNAL(warningsSettingsUpdated()), this, SLOT(warningsSettingsUpdated()));
         }
     }
@@ -67,34 +67,34 @@ namespace Warnings {
         } else {
             auto checkingFlags = item->getCheckingFlags();
             switch (checkingFlags) {
-            case Common::WarningsCheckFlags::Description:
-                warningsFlags |= checkDescription(item);
-                break;
-            case Common::WarningsCheckFlags::Keywords:
-                warningsFlags |= checkKeywords(item);
-                warningsFlags |= checkDuplicates(item);
-                break;
-            case Common::WarningsCheckFlags::Title:
-                warningsFlags |= checkTitle(item);
-                break;
-            case Common::WarningsCheckFlags::Spelling:
-                warningsFlags |= checkSpelling(item);
-                break;
-            case Common::WarningsCheckFlags::All:
-                // to make compiler happy
-                break;
+                case Common::WarningsCheckFlags::Description:
+                    warningsFlags |= checkDescription(item);
+                    break;
+                case Common::WarningsCheckFlags::Keywords:
+                    warningsFlags |= checkKeywords(item);
+                    warningsFlags |= checkDuplicates(item);
+                    break;
+                case Common::WarningsCheckFlags::Title:
+                    warningsFlags |= checkTitle(item);
+                    break;
+                case Common::WarningsCheckFlags::Spelling:
+                    warningsFlags |= checkSpelling(item);
+                    break;
+                case Common::WarningsCheckFlags::All:
+                    // to make compiler happy
+                    break;
             }
         }
 
         item->submitWarnings(warningsFlags);
     }
 
-    void WarningsCheckingWorker::warningsSettingsUpdated()
-    {
-       m_AllowedFilenameCharacters = m_WarningsSettingsModel->getAllowedFilenameCharacters();
-       m_MinimumMegapixels = m_WarningsSettingsModel->getMaxKeywordsCount();
-       m_MaximumKeywordsCount = m_WarningsSettingsModel->getMaxKeywordsCount();
-       m_MaximumDescriptionLength = m_WarningsSettingsModel->getMaxDescriptionLength();
+    void WarningsCheckingWorker::warningsSettingsUpdated() {
+        m_AllowedFilenameCharacters = m_WarningsSettingsModel->getAllowedFilenameCharacters();
+        m_MinimumMegapixels = m_WarningsSettingsModel->getMaxKeywordsCount();
+        m_MaximumKeywordsCount = m_WarningsSettingsModel->getMaxKeywordsCount();
+        m_MaximumDescriptionLength = m_WarningsSettingsModel->getMaxDescriptionLength();
+        LOG_DEBUG<<m_MaximumDescriptionLength;
     }
 
     Common::WarningFlags WarningsCheckingWorker::checkDimensions(std::shared_ptr<WarningsItem> &wi) const {
@@ -124,7 +124,7 @@ namespace Warnings {
         for (int i = 0; i < length; ++i) {
             QChar c = filename[i];
             bool isOk = c.isLetter() || c.isDigit() ||
-                    m_AllowedFilenameCharacters.contains(c);
+                        m_AllowedFilenameCharacters.contains(c);
             if (!isOk) {
                 Common::SetFlag(warningsInfo, Common::WarningFlags::FilenameSymbols);
                 break;
@@ -269,7 +269,9 @@ namespace Warnings {
         Models::ArtworkMetadata *item = wi->getCheckableItem();
         Common::BasicKeywordsModel *keywordsModel = item->getKeywordsModel();
 
-        if (keywordsModel->getKeywordsCount() == 0) { return warningsInfo; }
+        if (keywordsModel->getKeywordsCount() == 0) {
+            return warningsInfo;
+        }
 
         const QSet<QString> &keywordsSet = wi->getKeywordsSet();
 
@@ -296,4 +298,3 @@ namespace Warnings {
         return warningsInfo;
     }
 }
-
