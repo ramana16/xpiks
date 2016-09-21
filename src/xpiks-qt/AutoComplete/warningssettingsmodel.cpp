@@ -15,7 +15,11 @@
 
 namespace  AutoComplete {
     WarningsSettingsModel::WarningsSettingsModel():
-        Models::AbstractConfigUpdaterModel(OVERWRITE_WARNINGS_CONFIG)
+        Models::AbstractConfigUpdaterModel(OVERWRITE_WARNINGS_CONFIG),
+        m_AllowedFilenameCharacters(".,_-@ "),
+        m_MinMegapixels(4),
+        m_MaxKeywordsCount(50),
+        m_MaxDescriptionLength(200)
     {}
 
     void WarningsSettingsModel::initializeConfigs() {
