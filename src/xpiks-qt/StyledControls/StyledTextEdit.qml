@@ -33,7 +33,7 @@ TextEdit {
     selectedTextColor: Colors.inputForegroundColor
     selectionColor: Colors.defaultControlColor
     renderType: Text.NativeRendering
-    //selectByMouse: true
+    selectByMouse: true
     cursorVisible: false
     wrapMode: TextEdit.NoWrap
     activeFocusOnPress: true
@@ -42,10 +42,12 @@ TextEdit {
     MouseArea{
 
         anchors.fill: parent
-        acceptedButtons: Qt.LeftButton | Qt.RightButton
+        acceptedButtons: Qt.RightButton
+        propagateComposedEvents: true
+
         onClicked: {
             var oldVal = parent.cursorPosition;
-            parent.cursorPosition = parent.positionAt(mouseX, mouseY);
+            parent.cursorPosition = parent.positionAt(mouse.x, mouse.y);
 
             if (mouse.button == Qt.RightButton) {
                 parent.selectWord();
@@ -56,14 +58,6 @@ TextEdit {
                 parent.cursorPosition = oldVal;
                 parent.deselect();
                 actionRightClicked();
-            } else {
-                parent.forceActiveFocus();
-            }
-        }
-        onDoubleClicked: {
-            if (mouse.button == Qt.LeftButton) {
-                parent.cursorPosition = parent.positionAt(mouseX, mouseY);
-                parent.selectWord();
             }
         }
     }
