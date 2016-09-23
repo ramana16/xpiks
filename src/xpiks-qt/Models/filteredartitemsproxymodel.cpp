@@ -374,7 +374,7 @@ namespace Models {
 
         if (0 <= index && index < rowCount()) {
             int originalIndex = getOriginalIndex(index);
-            LOG_INFO<<originalIndex;
+            LOG_INFO << originalIndex;
             ArtItemsModel *artItemsModel = getArtItemsModel();
             ArtworkMetadata *metadata = artItemsModel->getArtwork(originalIndex);
             if (metadata != NULL) {

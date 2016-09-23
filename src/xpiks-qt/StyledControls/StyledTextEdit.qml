@@ -46,19 +46,61 @@ TextEdit {
         propagateComposedEvents: true
 
         onClicked: {
-            var oldVal = parent.cursorPosition;
-            parent.cursorPosition = parent.positionAt(mouse.x, mouse.y);
 
             if (mouse.button == Qt.RightButton) {
-                parent.selectWord();
-                parent.rightClickedWord = parent.selectedText;
-                console.log(parent.rightClickedWord);
-
-                // get back to initial state
-                parent.cursorPosition = oldVal;
-                parent.deselect();
-                actionRightClicked();
+                var textPosition = positionAt(mouse.x, mouse.y);
+                parent.rightClickedWord = getWordByPosition(textPosition);
+                console.log("Detected word under click: " + parent.rightClickedWord);
+                if (parent.rightClickedWord !== "") {
+                    actionRightClicked();
+                }
             }
+        }
+
+        function getSymbol(position){
+            return getText(position,position+1);
+        }
+
+        function isSeparator(position){
+            var separators = " ,.:;/\\|<>()";
+            return (separators.indexOf(getSymbol(position)) >= 0);
+        }
+
+        function isRightBound(position){
+            if (position >= (length -1 )) {
+                return true;
+            }
+            return !isSeparator(position) && isSeparator(position+1);
+        }
+
+        function getRightBound(position) {
+            var cur = position;
+            while (!isRightBound(cur)){
+                cur++;
+            }
+            return cur + 1;
+        }
+
+        function isLeftBound(position){
+            if ( ( position === 0) ){
+                return true;
+            }
+            return !isSeparator(position) && isSeparator(position-1);
+        }
+
+        function getLeftBound(position) {
+            var cur = position;
+            while (!isLeftBound(cur)){
+                cur--;
+            }
+            return cur;
+        }
+
+        function getWordByPosition(textPosition){
+            var leftBound = getLeftBound(textPosition);
+            var rightBound = getRightBound(textPosition);
+            //console.log("left: " + leftBound + " right: " + rightBound);
+            return getText(leftBound, rightBound);
         }
     }
 }

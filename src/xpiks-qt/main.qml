@@ -1949,7 +1949,6 @@ ApplicationWindow {
                                                                     addWordContextMenu.word = rightClickedWord
                                                                     addWordContextMenu.popup()
                                                                 }
-
                                                             }
 
                                                             Keys.onTabPressed: {
@@ -2081,7 +2080,7 @@ ApplicationWindow {
 
                                                             onActionRightClicked: {
                                                                 if (!iscorrect) {
-                                                                    console.log("Context menu for add word")
+                                                                    console.log("Context menu for add word " + kw.keywordText);
                                                                     addWordContextMenu.word = kw.keywordText;
                                                                     addWordContextMenu.popup()
                                                                 }
