@@ -311,8 +311,8 @@ namespace Models {
     {
         QStringList keywords = rawKeywords.trimmed().split(QChar(','), QString::SkipEmptyParts);
         m_CommonKeywordsModel.setKeywords(keywords);
-        emit keywordsCountChanged();
         setKeywordsModified(true);
+        emit keywordsCountChanged();
     }
 
     void CombinedArtworksModel::processCombinedEditCommand() {

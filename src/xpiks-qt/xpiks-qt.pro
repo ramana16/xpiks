@@ -112,7 +112,11 @@ SOURCES += main.cpp \
     Models/artworksviewmodel.cpp \
     Helpers/keywordshelpers.cpp \
     Conectivity/uploadwatcher.cpp \
-    Conectivity/telemetryworker.cpp
+    Conectivity/telemetryworker.cpp \
+    Conectivity/simplecurlrequest.cpp \
+    Conectivity/curlinithelper.cpp \
+    MetadataIO/exiv2inithelper.cpp \
+    Conectivity/simplecurldownloader.cpp
 
 RESOURCES += qml.qrc
 
@@ -281,7 +285,11 @@ HEADERS += \
     Helpers/keywordshelpers.h \
     Conectivity/uploadwatcher.h \
     Common/iflagsprovider.h \
-    Conectivity/telemetryworker.h
+    Conectivity/telemetryworker.h \
+    Conectivity/simplecurlrequest.h \
+    Conectivity/curlinithelper.h \
+    MetadataIO/exiv2inithelper.h \
+    Conectivity/simplecurldownloader.h
 
 DISTFILES += \
     Components/CloseIcon.qml \

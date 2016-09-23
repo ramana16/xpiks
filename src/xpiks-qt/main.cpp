@@ -56,6 +56,7 @@
 #include "Helpers/globalimageprovider.h"
 #include "Models/uploadinforepository.h"
 #include "Conectivity/ftpcoordinator.h"
+#include "Conectivity/curlinithelper.h"
 #include "Helpers/helpersqmlwrapper.h"
 #include "Encryption/secretsmanager.h"
 #include "Models/artworksrepository.h"
@@ -82,6 +83,7 @@
 #include "Common/version.h"
 #include "Common/defines.h"
 #include "Models/proxysettings.h"
+#include "MetadataIO/exiv2inithelper.h"
 #include "Models/findandreplacemodel.h"
 #include "Models/previewmetadataelement.h"
 
@@ -203,6 +205,14 @@ int main(int argc, char *argv[]) {
         std::cerr << "Xpiks is already running";
         return -1;
     }
+
+    // will call curl_global_init and cleanup
+    Conectivity::CurlInitHelper curlInitHelper;
+    Q_UNUSED(curlInitHelper);
+
+    // will init thread-unsafe XMP toolkit
+    MetadataIO::Exiv2InitHelper exiv2InitHelper;
+    Q_UNUSED(exiv2InitHelper);
 
     const char *highDpiEnvironmentVariable = setHighDpiEnvironmentVariable();
     qRegisterMetaTypeStreamOperators<Models::ProxySettings>("ProxySettings");

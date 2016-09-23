@@ -24,7 +24,6 @@
 
 #include <QObject>
 #include <QString>
-#include <QNetworkReply>
 #include <QJsonDocument>
 #include "../Common/defines.h"
 
@@ -32,7 +31,7 @@ namespace Helpers {
     class RemoteConfig : public QObject {
         Q_OBJECT
     public:
-        RemoteConfig();
+        RemoteConfig(QObject *parent=0);
         virtual ~RemoteConfig();
 
     public:
@@ -43,11 +42,10 @@ namespace Helpers {
         void configArrived();
 
     private slots:
-        void replyReceived(QNetworkReply *networkReply);
+        void requestFinishedHandler(bool success);
 
     private:
         QString m_ConfigUrl;
-        QNetworkAccessManager *m_NetworkManager;
         QJsonDocument m_Config;
     };
 }

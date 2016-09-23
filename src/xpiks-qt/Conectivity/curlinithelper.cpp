@@ -19,34 +19,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef FOTOLIAQUERYENGINE_H
-#define FOTOLIAQUERYENGINE_H
+#include "curlinithelper.h"
+#include <curl/curl.h>
 
-#include <QString>
-#include "suggestionqueryenginebase.h"
+namespace Conectivity {
+    CurlInitHelper::CurlInitHelper() {
+        curl_global_init(CURL_GLOBAL_ALL);
+    }
 
-namespace Suggestion {
-    class FotoliaQueryEngine : public SuggestionQueryEngineBase
-    {
-        Q_OBJECT
-    public:
-        FotoliaQueryEngine(int engineID);
-
-    public:
-        virtual void submitQuery(const QStringList &queryKeywords);
-        virtual QString getName() const { return tr("Fotolia"); }
-
-    private slots:
-        void requestFinishedHandler(bool success);
-
-    private:
-        void parseResponse(const QJsonObject &jsonObject, int count,
-                           std::vector<std::shared_ptr<SuggestionArtwork> > &suggestionArtworks);
-        QUrl buildQuery(const QString &apiKey, const QStringList &queryKeywords) const;
-
-    private:
-        QString m_FotoliaAPIKey;
-    };
+    CurlInitHelper::~CurlInitHelper() {
+        curl_global_cleanup();
+    }
 }
-
-#endif // FOTOLIAQUERYENGINE_H
