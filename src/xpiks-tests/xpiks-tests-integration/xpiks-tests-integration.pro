@@ -146,7 +146,11 @@ SOURCES += main.cpp \
     addtouserdictionarytest.cpp \
     autodetachvectortest.cpp \
     removefromuserdictionarytest.cpp \
-    testshelpers.cpp
+    testshelpers.cpp \
+    ../../xpiks-qt/Conectivity/simplecurlrequest.cpp \
+    ../../xpiks-qt/Conectivity/curlinithelper.cpp \
+    artworkuploaderbasictest.cpp \
+    ../../xpiks-qt/MetadataIO/exiv2inithelper.cpp
 
 RESOURCES +=
 
@@ -320,7 +324,11 @@ HEADERS += \
     addtouserdictionarytest.h \
     autodetachvectortest.h \
     removefromuserdictionarytest.h \
-    testshelpers.h
+    testshelpers.h \
+    ../../xpiks-qt/Conectivity/simplecurlrequest.h \
+    ../../xpiks-qt/Conectivity/curlinithelper.h \
+    artworkuploaderbasictest.h \
+    ../../xpiks-qt/MetadataIO/exiv2inithelper.h
 
 INCLUDEPATH += ../../tiny-aes
 INCLUDEPATH += ../../cpp-libface

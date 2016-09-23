@@ -19,39 +19,47 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SUGGESTIONQUERYENGINE_H
-#define SUGGESTIONQUERYENGINE_H
+#ifndef SimpleCurlRequest_H
+#define SimpleCurlRequest_H
 
 #include <QObject>
+#include <QString>
+#include <QByteArray>
 #include <QStringList>
-#include <QJsonArray>
-#include "suggestionqueryenginebase.h"
 
-namespace Suggestion {
-    class SuggestionArtwork;
-
-    class ShutterstockQueryEngine : public SuggestionQueryEngineBase
+namespace Conectivity {
+    class SimpleCurlRequest : public QObject
     {
         Q_OBJECT
     public:
-        ShutterstockQueryEngine(int engineID);
+        explicit SimpleCurlRequest(const QString &resource, bool verifySSL=false, QObject *parent = 0);
 
     public:
-        virtual void submitQuery(const QStringList &queryKeywords);
-        virtual QString getName() const { return tr("Shutterstock"); }
+        const QByteArray &getResponseData() const { return m_ResponseData; }
+        const QString &getErrorString() const { return m_ErrorString; }
 
-    private slots:
-        void requestFinishedHandler(bool success);
+    public:
+        void dispose() { emit stopped(); }
+        bool sendRequestSync();
+        void setRawHeaders(const QStringList &headers);
+
+    public slots:
+        void process();
+
+    signals:
+        void requestFinished(bool success);
+        void stopped();
 
     private:
-        void parseResponse(const QJsonArray &jsonArray,
-                           std::vector<std::shared_ptr<SuggestionArtwork> > &suggestionArtworks);
-        QUrl buildQuery(const QStringList &queryKeywords) const;
+        bool doRequest();
 
     private:
-        QString m_ClientId;
-        QString m_ClientSecret;
+        QString m_RemoteResource;
+        QStringList m_RawHeaders;
+        QByteArray m_ResponseData;
+        QString m_ErrorString;
+        bool m_VerifySSL;
     };
 }
 
-#endif // SUGGESTIONQUERYENGINE_H
+#endif // SimpleCurlRequest_H

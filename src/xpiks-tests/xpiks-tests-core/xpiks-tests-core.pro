@@ -107,8 +107,6 @@ SOURCES += main.cpp \
     ../../xpiks-qt/SpellCheck/spellchecksuggestionmodel.cpp \
     ../../xpiks-qt/MetadataIO/backupsaverservice.cpp \
     ../../xpiks-qt/MetadataIO/backupsaverworker.cpp \
-    ../../xpiks-qt/Conectivity/telemetryservice.cpp \
-    ../../xpiks-qt/Conectivity/updateservice.cpp \
     ../../xpiks-qt/SpellCheck/spellcheckiteminfo.cpp \
     ../../xpiks-qt/SpellCheck/spellsuggestionsitem.cpp \
     ../../xpiks-qt/Common/basickeywordsmodel.cpp \
@@ -121,7 +119,6 @@ SOURCES += main.cpp \
     ../../xpiks-qt/Helpers/stringhelper.cpp \
     keywordvalidation_tests.cpp \
     artworkrepository_tests.cpp \
-    ../../xpiks-qt/Conectivity/updatescheckerworker.cpp \
     ../../xpiks-qt/MetadataIO/metadataiocoordinator.cpp \
     ../../xpiks-qt/MetadataIO/metadatareadingworker.cpp \
     ../../xpiks-qt/MetadataIO/saverworkerjobitem.cpp \
@@ -134,15 +131,10 @@ SOURCES += main.cpp \
     undoredo_tests.cpp \
     ../../xpiks-qt/Helpers/filterhelpers.cpp \
     artworkfilter_tests.cpp \
-    ../../xpiks-qt/Models/artworkuploader.cpp \
     ../../xpiks-qt/Models/ziparchiver.cpp \
     removefilesfs_tests.cpp \
     ../../xpiks-qt/Helpers/jsonhelper.cpp \
-    ../../xpiks-qt/Helpers/localconfig.cpp \
-    ../../xpiks-qt/Helpers/remoteconfig.cpp \
-    ../../xpiks-qt/AutoComplete/stocksftplistmodel.cpp \
     ../../xpiks-qt/AutoComplete/stringfilterproxymodel.cpp \
-    ../../xpiks-qt/Models/abstractconfigupdatermodel.cpp \
     ../../xpiks-qt/Models/imageartwork.cpp \
     recentdirectories_tests.cpp \
     artitemsmodel_tests.cpp \
@@ -158,8 +150,7 @@ SOURCES += main.cpp \
     deletekeywords_tests.cpp \
     ../../xpiks-qt/Models/deletekeywordsviewmodel.cpp \
     ../../xpiks-qt/Commands/deletekeywordscommand.cpp \
-    ../../xpiks-qt/Conectivity/uploadwatcher.cpp \
-    ../../xpiks-qt/Conectivity/telemetryworker.cpp
+    ../../xpiks-qt/Conectivity/uploadwatcher.cpp
 
 HEADERS += \
     encryption_tests.h \
@@ -207,8 +198,6 @@ HEADERS += \
     ../../xpiks-qt/MetadataIO/backupsaverservice.h \
     ../../xpiks-qt/MetadataIO/backupsaverworker.h \
     ../../xpiks-qt/Conectivity/analyticsuserevent.h \
-    ../../xpiks-qt/Conectivity/telemetryservice.h \
-    ../../xpiks-qt/Conectivity/updateservice.h \
     ../../xpiks-qt/SpellCheck/ispellcheckable.h \
     ../../xpiks-qt/SpellCheck/spellcheckiteminfo.h \
     ../../xpiks-qt/SpellCheck/spellsuggestionsitem.h \
@@ -221,7 +210,6 @@ HEADERS += \
     stringhelpers_tests.h \
     keywordvalidation_tests.h \
     artworkrepository_tests.h \
-    ../../xpiks-qt/Conectivity/updatescheckerworker.h \
     ../../xpiks-qt/Common/itemprocessingworker.h \
     ../../xpiks-qt/MetadataIO/metadataiocoordinator.h \
     ../../xpiks-qt/MetadataIO/metadatareadingworker.h \
@@ -245,17 +233,12 @@ HEADERS += \
     undoredo_tests.h \
     ../../xpiks-qt/Helpers/filterhelpers.h \
     artworkfilter_tests.h \
-    ../../xpiks-qt/Models/artworkuploader.h \
     ../../xpiks-qt/Conectivity/iftpcoordinator.h \
     ../../xpiks-qt/Models/ziparchiver.h \
     removefilesfs_tests.h \
     Mocks/artworksrepositorymock.h \
     ../../xpiks-qt/Helpers/jsonhelper.h \
-    ../../xpiks-qt/Helpers/localconfig.h \
-    ../../xpiks-qt/Helpers/remoteconfig.h \
-    ../../xpiks-qt/AutoComplete/stocksftplistmodel.h \
     ../../xpiks-qt/AutoComplete/stringfilterproxymodel.h \
-    ../../xpiks-qt/Models/abstractconfigupdatermodel.h \
     ../../xpiks-qt/Models/imageartwork.h \
     deleteoldlogstest.h \
     ../../xpiks-qt/Common/hold.h \
@@ -274,6 +257,5 @@ HEADERS += \
     ../../xpiks-qt/Models/deletekeywordsviewmodel.h \
     ../../xpiks-qt/Commands/deletekeywordscommand.h \
     ../../xpiks-qt/Common/iflagsprovider.h \
-    ../../xpiks-qt/Conectivity/uploadwatcher.h \
-    ../../xpiks-qt/Conectivity/telemetryworker.h
+    ../../xpiks-qt/Conectivity/uploadwatcher.h
 

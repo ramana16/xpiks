@@ -19,47 +19,48 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TELEMETRYWORKER_H
-#define TELEMETRYWORKER_H
+#ifndef SIMPLECURLDOWNLOADER_H
+#define SIMPLECURLDOWNLOADER_H
 
 #include <QObject>
-#include "../Common/itemprocessingworker.h"
-#include "analyticsuserevent.h"
-
-class QNetworkReply;
+#include <QString>
+#include <QStringList>
+#include <QTemporaryFile>
 
 namespace Conectivity {
-    class TelemetryWorker : public QObject, public Common::ItemProcessingWorker<AnalyticsUserEvent>
+    class SimpleCurlDownloader : public QObject
     {
         Q_OBJECT
     public:
-        TelemetryWorker(const QString &userAgent, const QString &reportingEndpoint, const QString &interfaceLanguage);
+        explicit SimpleCurlDownloader(const QString &resource, QObject *parent = 0);
+        virtual ~SimpleCurlDownloader();
 
-    protected:
-        virtual bool initWorker();
-        virtual void processOneItem(std::shared_ptr<AnalyticsUserEvent> &item);
+    public:
+        const QString &getErrorString() const { return m_ErrorString; }
+        const QString &getDownloadedPath() const { return m_TempFile.fileName(); }
 
-    private:
-        bool sendOneReport(const QString &resource, const QString &payload);
-
-    protected:
-        virtual void notifyQueueIsEmpty() { emit queueIsEmpty(); }
-        virtual void workerStopped() { emit stopped(); }
+    public:
+        void dispose() { emit stopped(); }
+        bool downloadFileSync();
+        void setRawHeaders(const QStringList &headers);
 
     public slots:
-        void process() { doWork(); }
-        void cancel() { stopWorking(); }
+        void process();
 
     signals:
+        void downloadFinished(bool success);
         void stopped();
-        void queueIsEmpty();
-        void cancelAllQueries();
 
     private:
-        QString m_UserAgentId;
-        QString m_ReportingEndpoint;
-        QString m_InterfaceLanguage;
+        bool doDownloadFile();
+
+    private:
+        QTemporaryFile m_TempFile;
+        QString m_RemoteResource;
+        QStringList m_RawHeaders;
+        QString m_ErrorString;
+        bool m_VerifySSL;
     };
 }
 
-#endif // TELEMETRYWORKER_H
+#endif // SIMPLECURLDOWNLOADER_H

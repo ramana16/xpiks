@@ -19,39 +19,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SUGGESTIONQUERYENGINE_H
-#define SUGGESTIONQUERYENGINE_H
+#ifndef CURLINITHELPER_H
+#define CURLINITHELPER_H
 
-#include <QObject>
-#include <QStringList>
-#include <QJsonArray>
-#include "suggestionqueryenginebase.h"
-
-namespace Suggestion {
-    class SuggestionArtwork;
-
-    class ShutterstockQueryEngine : public SuggestionQueryEngineBase
+namespace Conectivity {
+    class CurlInitHelper
     {
-        Q_OBJECT
     public:
-        ShutterstockQueryEngine(int engineID);
-
-    public:
-        virtual void submitQuery(const QStringList &queryKeywords);
-        virtual QString getName() const { return tr("Shutterstock"); }
-
-    private slots:
-        void requestFinishedHandler(bool success);
-
-    private:
-        void parseResponse(const QJsonArray &jsonArray,
-                           std::vector<std::shared_ptr<SuggestionArtwork> > &suggestionArtworks);
-        QUrl buildQuery(const QStringList &queryKeywords) const;
-
-    private:
-        QString m_ClientId;
-        QString m_ClientSecret;
+        CurlInitHelper();
+        ~CurlInitHelper();
     };
 }
 
-#endif // SUGGESTIONQUERYENGINE_H
+#endif // CURLINITHELPER_H

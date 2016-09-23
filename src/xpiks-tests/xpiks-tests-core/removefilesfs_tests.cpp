@@ -27,11 +27,8 @@
     Models::CombinedArtworksModel combinedModel; \
     commandManagerMock.InjectDependency(&combinedModel);\
     Models::ZipArchiver zipArchive; \
-    commandManagerMock.InjectDependency(&zipArchive);\
-    Models::ArtworkUploader artworkUpload(NULL); \
-    commandManagerMock.InjectDependency(&artworkUpload);\
-    commandManagerMock.generateAndAddArtworks(count);
-
+    commandManagerMock.InjectDependency(&zipArchive); \
+    commandManagerMock.generateAndAddArtworks(10);
 
 void RemoveFilesFsTests::removeArtworksSignals() {
     Mocks::CommandManagerMock commandManagerMock;
@@ -76,8 +73,6 @@ void RemoveFilesFsTests::removeArtworksNumberItems() {
 
     zipArchive.setArtworks(artworksList);
 
-    artworkUpload.setArtworks(artworksList);
-
 // delete
    commandManagerMock.mockDeletion(itemsToDelete);
 
@@ -89,7 +84,6 @@ void RemoveFilesFsTests::removeArtworksNumberItems() {
     QCOMPARE(combinedModel.getArtworksCount(), itemsToAdd - itemsToDelete);
     QCOMPARE(filteredItemsModel.getItemsCount(), itemsToAdd - itemsToDelete);
     QCOMPARE(zipArchive.getItemsCount(), itemsToAdd - itemsToDelete);
-    QCOMPARE(artworkUpload.getItemsCount(), itemsToAdd - itemsToDelete);
 }
 
 void RemoveFilesFsTests::removeArtworksAllItems() {
@@ -111,8 +105,6 @@ void RemoveFilesFsTests::removeArtworksAllItems() {
 
     zipArchive.setArtworks(artworksList);
 
-    artworkUpload.setArtworks(artworksList);
-
 // delete
    commandManagerMock.mockDeletion(itemsToDelete);
 
@@ -124,7 +116,6 @@ void RemoveFilesFsTests::removeArtworksAllItems() {
     QCOMPARE(combinedModel.getArtworksCount(), itemsToAdd - itemsToDelete);
     QCOMPARE(filteredItemsModel.getItemsCount(), itemsToAdd - itemsToDelete);
     QCOMPARE(zipArchive.getItemsCount(), itemsToAdd - itemsToDelete);
-    QCOMPARE(artworkUpload.getItemsCount(), itemsToAdd - itemsToDelete);
 }
 
 void RemoveFilesFsTests::removeVectorSmokeTest() {
