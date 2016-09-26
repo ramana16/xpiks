@@ -291,6 +291,15 @@ Item {
                             focus: true
                             text: combinedArtworks.title
                             onTextChanged: combinedArtworks.title = text
+                            userDictEnabled: true
+
+                            onActionRightClicked: {
+                                if (combinedArtworks.hasTitleWordSpellError(rightClickedWord)) {
+                                    console.log("Context menu for add word " + rightClickedWord)
+                                    addWordContextMenu.word = rightClickedWord
+                                    addWordContextMenu.popup()
+                                }
+                            }
 
                             Keys.onBacktabPressed: {
                                 event.accepted = true
@@ -385,6 +394,7 @@ Item {
                             width: descriptionFlick.width
                             height: descriptionFlick.height
                             focus: true
+                            userDictEnabled: true
                             property string previousText: text
                             property int maximumLength: 280
                             onTextChanged: {
@@ -400,6 +410,14 @@ Item {
 
                                 previousText = text
                                 combinedArtworks.description = text
+                            }
+
+                            onActionRightClicked: {
+                                if (combinedArtworks.hasDescriptionWordSpellError(rightClickedWord)) {
+                                    console.log("Context menu for add word " + rightClickedWord)
+                                    addWordContextMenu.word = rightClickedWord
+                                    addWordContextMenu.popup()
+                                }
                             }
 
                             wrapMode: TextEdit.Wrap

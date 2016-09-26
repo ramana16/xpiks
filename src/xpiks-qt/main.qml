@@ -1836,6 +1836,17 @@ ApplicationWindow {
                                                             focus: true
                                                             isActive: rowWrapper.isHighlighted
                                                             onTextChanged: model.editdescription = text
+                                                            userDictEnabled: true
+
+                                                            onActionRightClicked: {
+                                                                if (filteredArtItemsModel.hasDescriptionWordSpellError(rowWrapper.delegateIndex, rightClickedWord)){
+                                                                    console.log("Context menu for add word " + rightClickedWord)
+                                                                    addWordContextMenu.word = rightClickedWord
+                                                                    addWordContextMenu.popup()
+                                                                }
+
+                                                            }
+
 
                                                             Keys.onTabPressed: {
                                                                 if (columnLayout.isWideEnough) {
@@ -1931,6 +1942,15 @@ ApplicationWindow {
                                                             focus: true
                                                             isActive: rowWrapper.isHighlighted
                                                             onTextChanged: model.edittitle = text
+                                                            userDictEnabled: true
+
+                                                            onActionRightClicked: {
+                                                                if (filteredArtItemsModel.hasTitleWordSpellError(rowWrapper.delegateIndex, rightClickedWord)){
+                                                                    console.log("Context menu for add word " + rightClickedWord)
+                                                                    addWordContextMenu.word = rightClickedWord
+                                                                    addWordContextMenu.popup()
+                                                                }
+                                                            }
 
                                                             Keys.onTabPressed: {
                                                                 flv.activateEdit()
@@ -2061,7 +2081,7 @@ ApplicationWindow {
 
                                                             onActionRightClicked: {
                                                                 if (!iscorrect) {
-                                                                    console.log("Context menu for add word")
+                                                                    console.log("Context menu for add word " + kw.keywordText);
                                                                     addWordContextMenu.word = kw.keywordText;
                                                                     addWordContextMenu.popup()
                                                                 }

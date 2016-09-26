@@ -492,6 +492,15 @@ CloseRequested")
                                         height: titleFlick.height
                                         text: combinedArtworks.title
                                         onTextChanged: combinedArtworks.title = text
+                                        userDictEnabled: true
+
+                                        onActionRightClicked: {
+                                            if (combinedArtworks.hasTitleWordSpellError(rightClickedWord)) {
+                                                console.log("Context menu for add word " + rightClickedWord)
+                                                addWordContextMenu.word = rightClickedWord
+                                                addWordContextMenu.popup()
+                                            }
+                                        }
 
                                         Keys.onBacktabPressed: {
                                             event.accepted = true
@@ -657,6 +666,7 @@ CloseRequested")
                                         height: descriptionFlick.height
                                         text: combinedArtworks.description
                                         focus: true
+                                        userDictEnabled: true
                                         property string previousText: text
                                         property int maximumLength: 280
                                         onTextChanged: {
@@ -672,6 +682,14 @@ CloseRequested")
 
                                             previousText = text
                                             combinedArtworks.description = text
+                                        }
+
+                                        onActionRightClicked: {
+                                            if (combinedArtworks.hasDescriptionWordSpellError(rightClickedWord)) {
+                                                console.log("Context menu for add word " + rightClickedWord)
+                                                addWordContextMenu.word = rightClickedWord
+                                                addWordContextMenu.popup()
+                                            }
                                         }
 
                                         wrapMode: TextEdit.Wrap
@@ -869,6 +887,7 @@ CloseRequested")
                                                                     keywordsModel: keywordsWrapper.keywordsModel
                                                                 })
                                         }
+
                                         onActionRightClicked: {
                                             if (!iscorrect) {
                                                 console.log("Context menu for add word")
@@ -876,7 +895,6 @@ CloseRequested")
                                                 addWordContextMenu.popup()
                                             }
                                         }
-
                                     }
 
                                     onTagAdded: {
