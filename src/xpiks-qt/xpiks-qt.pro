@@ -291,7 +291,8 @@ HEADERS += \
     Conectivity/simplecurlrequest.h \
     Conectivity/curlinithelper.h \
     MetadataIO/exiv2inithelper.h \
-    Conectivity/simplecurldownloader.h
+    Conectivity/simplecurldownloader.h \
+    Conectivity/apimanager.h
 
 DISTFILES += \
     Components/CloseIcon.qml \

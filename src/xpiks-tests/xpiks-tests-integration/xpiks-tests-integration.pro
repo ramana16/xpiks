@@ -332,7 +332,8 @@ HEADERS += \
     ../../xpiks-qt/Conectivity/curlinithelper.h \
     artworkuploaderbasictest.h \
     ../../xpiks-qt/MetadataIO/exiv2inithelper.h \
-    ../../xpiks-qt/AutoComplete/warningssettingsmodel.h
+    ../../xpiks-qt/AutoComplete/warningssettingsmodel.h \
+    ../../xpiks-qt/Conectivity/apimanager.h
 
 INCLUDEPATH += ../../tiny-aes
 INCLUDEPATH += ../../cpp-libface

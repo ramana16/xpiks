@@ -1,9 +1,9 @@
 #include "warningssettingsmodel.h"
+#include "../Conectivity/apimanager.h"
 #include <QStandardPaths>
 #include <QDir>
 
 #define OVERWRITE_WARNINGS_CONFIG false
-#define WARNINGS_SETTINGS_URL "https://ribtoks.github.io/xpiks/api/v1/warnings_settings.json"
 #define LOCAL_WARNINGS_SETTINGS_FILE QLatin1String("warnings_settings.json")
 
 #define OVERWRITE_KEY QLatin1String("overwrite")
@@ -35,7 +35,9 @@ namespace  AutoComplete {
             localConfigPath = LOCAL_WARNINGS_SETTINGS_FILE;
         }
 
-        AbstractConfigUpdaterModel::initializeConfigs(WARNINGS_SETTINGS_URL, localConfigPath);
+        auto &apiManager = Conectivity::ApiManager::getInstance();
+        QString remoteAddress = apiManager.getStocksACSourceAddr();
+        AbstractConfigUpdaterModel::initializeConfigs(remoteAddress, localConfigPath);
 
         const Helpers::LocalConfig &localConfig = getLocalConfig();
         const QJsonDocument &localDocument = localConfig.getConfig();
