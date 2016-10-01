@@ -36,7 +36,7 @@ namespace  AutoComplete {
         }
 
         auto &apiManager = Conectivity::ApiManager::getInstance();
-        QString remoteAddress = apiManager.getStocksACSourceAddr();
+        QString remoteAddress = apiManager.getWarningSettingsAddr();
         AbstractConfigUpdaterModel::initializeConfigs(remoteAddress, localConfigPath);
 
         const Helpers::LocalConfig &localConfig = getLocalConfig();
