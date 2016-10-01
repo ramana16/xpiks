@@ -150,8 +150,6 @@ namespace Warnings {
                 Common::SetFlag(warningsInfo, Common::WarningFlags::TooFewKeywords);
             }
 
-            LOG_DEBUG<<maximumKeywordsCount;
-
             if (keywordsCount > maximumKeywordsCount) {
                 Common::SetFlag(warningsInfo, Common::WarningFlags::TooManyKeywords);
             }
