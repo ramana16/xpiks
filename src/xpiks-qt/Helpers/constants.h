@@ -49,7 +49,7 @@ namespace Constants {
     const char AUTO_FIND_VECTORS[] = "AUTO_FIND_VECTORS";
     const char USE_PROXY[] = "USE_PROXY";
     const char PROXY_HOST[] = "PROXY_HOST_HASH";
-    const char USER_DICT_FILENAME[] = "userdict.dic";
+    const char UPDATES_DIRECTORY[] = "updates";
 
     // different for DEBUG and RELEASE
 
@@ -78,6 +78,9 @@ namespace Constants {
     const char CACHE_IMAGES_AUTOMATICALLY[] = "CACHE_IMAGES_AUTOMATICALLY";
     const char SCROLL_SPEED_SENSIVITY[] = "SCROLL_SPEED_SENSIVITY";
     const char AUTO_DOWNLOAD_UPDATES[] = "AUTO_DOWNLOAD_UPDATES";
+    const char USER_DICT_FILENAME[] = "userdict.dic";
+    const char PATH_TO_UPDATE[] = "PATH_TO_UPDATE";
+    const char AVAILABLE_UPDATE_VERSION[] = "AVAILABLE_UPDATE_VERSION";
 #else
     const char MAX_KEYWORD_COUNT[] = "DEBUG_MAX_KEYWORD_COUNT";
     const char MAX_DESCRIPTION_LENGTH[] = "DEBUG_MAX_DESCRIPTION_LENGTH";
@@ -98,6 +101,8 @@ namespace Constants {
     const char IMAGES_CACHE_INDEX[] = "debug_imagescache.index";
     const char SCROLL_SPEED_SENSIVITY[] = "DEBUG_SCROLL_SPEED_SENSIVITY";
     const char AUTO_DOWNLOAD_UPDATES[] = "DEBUG_AUTO_DOWNLOAD_UPDATES";
+    const char PATH_TO_UPDATE[] = "DEBUG_PATH_TO_UPDATE";
+    const char AVAILABLE_UPDATE_VERSION[] = "DEBUG_AVAILABLE_UPDATE_VERSION";
 
 #ifdef INTEGRATION_TESTS
     const char LIBRARY_FILENAME[] = "xpiks.integration.library";
@@ -106,6 +111,7 @@ namespace Constants {
     const char MASTER_PASSWORD_HASH[] = "INTEGRATION_MASTER_PASSWORD_HASH";
     const char RECENT_DIRECTORIES[] = "INTEGRATION_RECENT_DIRECTORIES";
     const char CACHE_IMAGES_AUTOMATICALLY[] = "INTEGRATION_CACHE_IMAGES_AUTOMATICALLY";
+    const char USER_DICT_FILENAME[] = "userdict_debug_tests.dic";
 #else
     const char LIBRARY_FILENAME[] = "xpiks.debug.library";
     const char UPLOAD_HOSTS[] = "DEBUG_UPLOAD_HOSTS_HASH";
@@ -113,6 +119,7 @@ namespace Constants {
     const char MASTER_PASSWORD_HASH[] = "DEBUG_MASTER_PASSWORD_HASH";
     const char RECENT_DIRECTORIES[] = "DEBUG_RECENT_DIRECTORIES";
     const char CACHE_IMAGES_AUTOMATICALLY[] = "DEBUG_CACHE_IMAGES_AUTOMATICALLY";
+    const char USER_DICT_FILENAME[] = "userdict_debug.dic";
 #endif
 #endif // QT_NO_DEBUG
 }
