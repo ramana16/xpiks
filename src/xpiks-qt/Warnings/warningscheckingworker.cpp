@@ -40,16 +40,7 @@ namespace Warnings {
 
     WarningsCheckingWorker::WarningsCheckingWorker(AutoComplete::WarningsSettingsModel *warningsSettingsModel, QObject *parent):
         QObject(parent),
-        m_WarningsSettingsModel(warningsSettingsModel),
-        m_AllowedFilenameCharacters(".,_-@ "),
-        m_MinimumMegapixels(4),
-        m_MaximumKeywordsCount(50),
-        m_MaximumDescriptionLength(200) {
-        if (m_WarningsSettingsModel != NULL) {
-            warningsSettingsUpdated();
-            QObject::connect(m_WarningsSettingsModel, SIGNAL(warningsSettingsUpdated()), this, SLOT(warningsSettingsUpdated()));
-        }
-    }
+        m_WarningsSettingsModel(warningsSettingsModel) {}
 
     bool WarningsCheckingWorker::initWorker() {
         LOG_DEBUG << "#";
@@ -89,15 +80,17 @@ namespace Warnings {
         item->submitWarnings(warningsFlags);
     }
 
-    void WarningsCheckingWorker::warningsSettingsUpdated() {
-        m_AllowedFilenameCharacters = m_WarningsSettingsModel->getAllowedFilenameCharacters();
-        m_MinimumMegapixels = m_WarningsSettingsModel->getMaxKeywordsCount();
-        m_MaximumKeywordsCount = m_WarningsSettingsModel->getMaxKeywordsCount();
-        m_MaximumDescriptionLength = m_WarningsSettingsModel->getMaxDescriptionLength();
-        LOG_DEBUG<<m_MaximumDescriptionLength;
-    }
-
     Common::WarningFlags WarningsCheckingWorker::checkDimensions(std::shared_ptr<WarningsItem> &wi) const {
+        QString allowedFilenameCharacters;
+        double minimumMegapixels = 0;
+
+        if (m_WarningsSettingsModel != nullptr) {
+            allowedFilenameCharacters = m_WarningsSettingsModel->getAllowedFilenameCharacters();
+            minimumMegapixels = m_WarningsSettingsModel->getMinMegapixels();
+        } else {
+            LOG_WARNING << "m_WarningsSettingsModel is nullptr";
+        }
+
         LOG_INTEGRATION_TESTS << "#";
         Models::ArtworkMetadata *item = wi->getCheckableItem();
         Common::WarningFlags warningsInfo = Common::WarningFlags::None;
@@ -107,7 +100,7 @@ namespace Warnings {
             QSize size = image->getImageSize();
 
             double currentProd = size.width() * size.height() / 1000000.0;
-            if (currentProd < m_MinimumMegapixels) {
+            if (currentProd < minimumMegapixels) {
                 Common::SetFlag(warningsInfo, Common::WarningFlags::SizeLessThanMinimum);
             }
         }
@@ -124,7 +117,7 @@ namespace Warnings {
         for (int i = 0; i < length; ++i) {
             QChar c = filename[i];
             bool isOk = c.isLetter() || c.isDigit() ||
-                        m_AllowedFilenameCharacters.contains(c);
+                        allowedFilenameCharacters.contains(c);
             if (!isOk) {
                 Common::SetFlag(warningsInfo, Common::WarningFlags::FilenameSymbols);
                 break;
@@ -135,6 +128,14 @@ namespace Warnings {
     }
 
     Common::WarningFlags WarningsCheckingWorker::checkKeywords(std::shared_ptr<WarningsItem> &wi) const {
+        int maximumKeywordsCount = 0;
+
+        if (m_WarningsSettingsModel != nullptr) {
+            maximumKeywordsCount = m_WarningsSettingsModel->getMaxKeywordsCount();
+        } else {
+            LOG_WARNING << "m_WarningsSettingsModel is nullptr";
+        }
+
         LOG_INTEGRATION_TESTS << "#";
         Common::WarningFlags warningsInfo = Common::WarningFlags::None;
         Models::ArtworkMetadata *item = wi->getCheckableItem();
@@ -149,7 +150,9 @@ namespace Warnings {
                 Common::SetFlag(warningsInfo, Common::WarningFlags::TooFewKeywords);
             }
 
-            if (keywordsCount > m_MaximumKeywordsCount) {
+            LOG_DEBUG<<maximumKeywordsCount;
+
+            if (keywordsCount > maximumKeywordsCount) {
                 Common::SetFlag(warningsInfo, Common::WarningFlags::TooManyKeywords);
             }
 
@@ -164,6 +167,13 @@ namespace Warnings {
     Common::WarningFlags WarningsCheckingWorker::checkDescription(std::shared_ptr<WarningsItem> &wi) const {
         LOG_INTEGRATION_TESTS << "#";
 
+        int maximumDescriptionLength = 0;
+        if (m_WarningsSettingsModel != 0) {
+            maximumDescriptionLength = m_WarningsSettingsModel->getMaxDescriptionLength();
+        } else {
+            LOG_WARNING << "m_WarningsSettingsModel is nullptr";
+        }
+
         Common::WarningFlags warningsInfo = Common::WarningFlags::None;
         Models::ArtworkMetadata *item = wi->getCheckableItem();
 
@@ -174,7 +184,7 @@ namespace Warnings {
         } else {
             Common::BasicKeywordsModel *keywordsModel = item->getKeywordsModel();
 
-            if (descriptionLength > m_MaximumDescriptionLength) {
+            if (descriptionLength > maximumDescriptionLength) {
                 Common::SetFlag(warningsInfo, Common::WarningFlags::DescriptionTooBig);
             }
 

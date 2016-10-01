@@ -64,6 +64,7 @@ namespace  AutoComplete {
     }
 
     bool WarningsSettingsModel::parseConfig(const QJsonDocument &document) {
+        LOG_DEBUG<<document;
         bool anyError = false;
 
         do {
@@ -127,10 +128,6 @@ namespace  AutoComplete {
         } while (false);
 
         LOG_DEBUG<<anyError;
-
-        if (!anyError) {
-            emit warningsSettingsUpdated();
-        }
 
         return anyError;
     }

@@ -51,9 +51,6 @@ namespace Warnings {
         void process() { doWork(); }
         void cancel() { stopWorking(); }
 
-    private slots:
-        void warningsSettingsUpdated();
-
     signals:
         void stopped();
         void queueIsEmpty();
@@ -68,10 +65,6 @@ namespace Warnings {
 
     private:
         AutoComplete::WarningsSettingsModel *m_WarningsSettingsModel;
-        QString m_AllowedFilenameCharacters;
-        double m_MinimumMegapixels;
-        int m_MaximumKeywordsCount;
-        int m_MaximumDescriptionLength;
     };
 }
 

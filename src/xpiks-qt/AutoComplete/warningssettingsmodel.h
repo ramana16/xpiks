@@ -20,9 +20,6 @@ namespace AutoComplete {
         int getMaxKeywordsCount() const { return m_MaxKeywordsCount; }
         int getMaxDescriptionLength() const { return m_MaxDescriptionLength; }
 
-    signals:
-        void warningsSettingsUpdated();
-
         // AbstractConfigUpdaterModel interface
 
     protected:
