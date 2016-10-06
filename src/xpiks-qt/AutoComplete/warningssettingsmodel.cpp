@@ -129,7 +129,6 @@ namespace  AutoComplete {
             }
 
             m_MinMegapixels = minMPixels.toDouble();
-
             QJsonValue maxKeywordsCount = settingsObject[MAX_KEYWORDS_COUNT];
             if (!maxKeywordsCount.isDouble()) {
                 LOG_WARNING << "MAX_KEYWORDS_COUNT value is not number";
@@ -138,7 +137,6 @@ namespace  AutoComplete {
             }
 
             m_MaxKeywordsCount = maxKeywordsCount.toInt();
-
             QJsonValue maxDescriptionCount = settingsObject[MAX_DESCRIPTION_LENGTH];
             if (!maxDescriptionCount.isDouble()) {
                 LOG_WARNING << "MAX_DESCRIPTION_LENGTH value is not number";
@@ -150,7 +148,6 @@ namespace  AutoComplete {
         } while (false);
 
         LOG_DEBUG<<anyError;
-
         return anyError;
     }
 
