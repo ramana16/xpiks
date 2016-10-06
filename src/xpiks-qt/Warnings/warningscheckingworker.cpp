@@ -40,7 +40,9 @@ namespace Warnings {
 
     WarningsCheckingWorker::WarningsCheckingWorker(AutoComplete::WarningsSettingsModel *warningsSettingsModel, QObject *parent):
         QObject(parent),
-        m_WarningsSettingsModel(warningsSettingsModel) {}
+        m_WarningsSettingsModel(warningsSettingsModel) {
+        Q_ASSERT(m_WarningsSettingsModel != nullptr);
+    }
 
     bool WarningsCheckingWorker::initWorker() {
         LOG_DEBUG << "#";
@@ -81,17 +83,9 @@ namespace Warnings {
     }
 
     Common::WarningFlags WarningsCheckingWorker::checkDimensions(std::shared_ptr<WarningsItem> &wi) const {
-        QString allowedFilenameCharacters;
-        double minimumMegapixels = 0;
-
-        if (m_WarningsSettingsModel != nullptr) {
-            allowedFilenameCharacters = m_WarningsSettingsModel->getAllowedFilenameCharacters();
-            minimumMegapixels = m_WarningsSettingsModel->getMinMegapixels();
-        } else {
-            LOG_WARNING << "m_WarningsSettingsModel is nullptr";
-        }
-
         LOG_INTEGRATION_TESTS << "#";
+        QString allowedFilenameCharacters = m_WarningsSettingsModel->getAllowedFilenameCharacters();
+        double minimumMegapixels = m_WarningsSettingsModel->getMinMegapixels();
         Models::ArtworkMetadata *item = wi->getCheckableItem();
         Common::WarningFlags warningsInfo = Common::WarningFlags::None;
 
@@ -128,15 +122,8 @@ namespace Warnings {
     }
 
     Common::WarningFlags WarningsCheckingWorker::checkKeywords(std::shared_ptr<WarningsItem> &wi) const {
-        int maximumKeywordsCount = 0;
-
-        if (m_WarningsSettingsModel != nullptr) {
-            maximumKeywordsCount = m_WarningsSettingsModel->getMaxKeywordsCount();
-        } else {
-            LOG_WARNING << "m_WarningsSettingsModel is nullptr";
-        }
-
         LOG_INTEGRATION_TESTS << "#";
+        int maximumKeywordsCount = m_WarningsSettingsModel->getMaxKeywordsCount();
         Common::WarningFlags warningsInfo = Common::WarningFlags::None;
         Models::ArtworkMetadata *item = wi->getCheckableItem();
         Common::BasicKeywordsModel *keywordsModel = item->getKeywordsModel();
@@ -164,14 +151,7 @@ namespace Warnings {
 
     Common::WarningFlags WarningsCheckingWorker::checkDescription(std::shared_ptr<WarningsItem> &wi) const {
         LOG_INTEGRATION_TESTS << "#";
-
-        int maximumDescriptionLength = 0;
-        if (m_WarningsSettingsModel != 0) {
-            maximumDescriptionLength = m_WarningsSettingsModel->getMaxDescriptionLength();
-        } else {
-            LOG_WARNING << "m_WarningsSettingsModel is nullptr";
-        }
-
+        int maximumDescriptionLength = m_WarningsSettingsModel->getMaxDescriptionLength();
         Common::WarningFlags warningsInfo = Common::WarningFlags::None;
         Models::ArtworkMetadata *item = wi->getCheckableItem();
 

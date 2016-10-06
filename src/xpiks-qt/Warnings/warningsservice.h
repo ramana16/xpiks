@@ -69,6 +69,9 @@ namespace Warnings {
 #endif
 
     private:
+        void updateWarningsSettings();
+
+    private:
         WarningsCheckingWorker *m_WarningsWorker;
         AutoComplete::WarningsSettingsModel m_WarningsSettingsModel;
     };

@@ -33,7 +33,7 @@ namespace Warnings {
         m_WarningsWorker(NULL) {}
 
     void WarningsService::initWarningsSettings() {
-        m_WarningsSettingsModel.initializeConfigs();
+        QTimer::singleShot(1000, this, SLOT(updateWarningsSettings()));
     }
 
     void WarningsService::startService() {
@@ -134,5 +134,9 @@ namespace Warnings {
 
     void WarningsService::workerStopped() {
         LOG_DEBUG << "#";
+    }
+
+    void WarningsService::updateWarningsSettings() {
+        m_WarningsSettingsModel.initializeConfigs();
     }
 }

@@ -40,6 +40,7 @@
 #include "logger.h"
 #include "../Common/defines.h"
 #include "../Helpers/filenameshelpers.h"
+#include "../Helpers/updatehelpers.h"
 
 #ifdef Q_OS_WIN
 #include <QWinTaskbarButton>
@@ -47,7 +48,9 @@
 #endif
 
 namespace Helpers {
-    HelpersQmlWrapper::HelpersQmlWrapper()
+    HelpersQmlWrapper::HelpersQmlWrapper():
+        m_IsUpdateDownloaded(false),
+        m_HaveUpgradeConsent(false)
     {
 #ifdef Q_OS_WIN
         m_WinTaskbarButtonApplicable = QSysInfo::windowsVersion() >= QSysInfo::WV_WINDOWS7;
@@ -76,6 +79,11 @@ namespace Helpers {
         emit globalBeforeDestruction();
         QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
         m_CommandManager->beforeDestructionCallback();
+
+        if (m_IsUpdateDownloaded && m_HaveUpgradeConsent) {
+            LOG_INFO << "Installing update" << m_PathToUpdate;
+            Helpers::installUpdate(m_PathToUpdate);
+        }
     }
 
     void HelpersQmlWrapper::revealLogFile() {
@@ -166,6 +174,15 @@ namespace Helpers {
         return Helpers::getImagePath(path);
     }
 
+    void HelpersQmlWrapper::setUpgradeConsent() {
+        m_HaveUpgradeConsent = true;
+    }
+
+    void HelpersQmlWrapper::upgradeNow() {
+        setUpgradeConsent();
+        emit upgradeInitiated();
+    }
+
     QObject *HelpersQmlWrapper::getLogsModel() {
         Models::LogsModel *model = m_CommandManager->getLogsModel();
         QQmlEngine::setObjectOwnership(model, QQmlEngine::CppOwnership);
@@ -234,6 +251,11 @@ namespace Helpers {
         QProcess::startDetached("explorer", args);
 #endif
     }
+
+    void HelpersQmlWrapper::updateIsDownloaded(QString pathToUpdate) {
+        m_IsUpdateDownloaded = true;
+        m_PathToUpdate = pathToUpdate;
+        emit updateDownloadedChanged(true);
+        emit updateDownloaded();
+    }
 }
-
-

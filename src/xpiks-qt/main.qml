@@ -231,6 +231,16 @@ ApplicationWindow {
     }
 
     Action {
+        id: upgradeAction
+        text: i18.n + qsTr("&Upgrade")
+        enabled: helpersWrapper.isUpdateDownloaded && (applicationWindow.openedDialogsCount == 0)
+        onTriggered: {
+            helpersWrapper.setUpgradeConsent()
+            closeHandler({accepted: false})
+        }
+    }
+
+    Action {
         id: quitAction
         text: i18.n + qsTr("&Exit")
         shortcut: StandardKey.Quit
@@ -387,6 +397,11 @@ ApplicationWindow {
                         }
                     }
                 }
+            }
+
+            MenuItem {
+                action: upgradeAction
+                visible: helpersWrapper.isUpdateDownloaded
             }
 
             MenuItem { action: openSettingsAction }
@@ -659,6 +674,13 @@ ApplicationWindow {
                                         {callbackObject: callbackObject})
                 }
             }
+
+            MenuItem {
+                text: "Install update"
+                onTriggered: {
+                    Common.launchDialog("Dialogs/InstallUpdateDialog.qml", applicationWindow, {})
+                }
+            }
         }
     }
 
@@ -872,6 +894,34 @@ ApplicationWindow {
                                 applicationWindow, {updateUrl: updateLink},
                                 function(wnd) {wnd.show();});
             applicationWindow.showUpdateLink = true
+        }
+
+        onUpdateDownloaded: {
+            if (applicationWindow.openedDialogsCount == 0) {
+                Common.launchDialog("Dialogs/InstallUpdateDialog.qml", applicationWindow, {})
+            } else {
+                console.debug("Opened dialogs found. Postponing upgrade flow...");
+                upgradeTimer.start()
+            }
+        }
+
+        onUpgradeInitiated: {
+            console.debug("UI:onUpgradeInitiated handler")
+            closeHandler({accepted: false});
+        }
+    }
+
+    Timer {
+        id: upgradeTimer
+        interval: 5000
+        repeat: true
+        running: false
+        triggeredOnStart: false
+        onTriggered: {
+            if (applicationWindow.openedDialogsCount == 0) {
+                upgradeTimer.stop()
+                Common.launchDialog("Dialogs/InstallUpdateDialog.qml", applicationWindow, {})
+            }
         }
     }
 
@@ -2075,6 +2125,7 @@ ApplicationWindow {
                                                                                     {
                                                                                         callbackObject: callbackObject,
                                                                                         previousKeyword: keyword,
+                                                                                        keywordIndex: kw.delegateIndex,
                                                                                         keywordsModel: filteredArtItemsModel.getKeywordsModel(rowWrapper.delegateIndex)
                                                                                     })
                                                             }

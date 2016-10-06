@@ -52,6 +52,8 @@ namespace Conectivity {
     }
 
     void UpdateService::doStartChecking() {
+        LOG_DEBUG << "#";
+
         m_UpdatesCheckerWorker = new UpdatesCheckerWorker(m_SettingsModel, m_PathToUpdate);
         QThread *thread = new QThread();
         m_UpdatesCheckerWorker->moveToThread(thread);
@@ -102,7 +104,7 @@ namespace Conectivity {
 
         saveUpdateInfo();
 
-        emit updateDownloaded();
+        emit updateDownloaded(m_PathToUpdate);
     }
 
     void UpdateService::saveUpdateInfo() const {
