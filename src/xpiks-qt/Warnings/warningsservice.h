@@ -60,6 +60,7 @@ namespace Warnings {
     private slots:
         void workerDestoyed(QObject *object);
         void workerStopped();
+        void updateWarningsSettings();
 
 #ifdef INTEGRATION_TESTS
 
@@ -67,9 +68,6 @@ namespace Warnings {
         void queueIsEmpty();
 
 #endif
-
-    private:
-        void updateWarningsSettings();
 
     private:
         WarningsCheckingWorker *m_WarningsWorker;
