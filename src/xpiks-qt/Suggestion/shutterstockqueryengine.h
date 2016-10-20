@@ -23,29 +23,29 @@
 #define SUGGESTIONQUERYENGINE_H
 
 #include <QObject>
-#include <QNetworkAccessManager>
-#include <QNetworkReply>
 #include <QStringList>
 #include <QJsonArray>
 #include "suggestionqueryenginebase.h"
 
+namespace Models {
+    class SettingsModel;
+}
+
 namespace Suggestion {
-    class KeywordsSuggestor;
-    class LocalLibrary;
     class SuggestionArtwork;
 
     class ShutterstockQueryEngine : public SuggestionQueryEngineBase
     {
         Q_OBJECT
     public:
-        ShutterstockQueryEngine(int engineID);
+        ShutterstockQueryEngine(int engineID, Models::SettingsModel *settingsModel);
 
     public:
         virtual void submitQuery(const QStringList &queryKeywords);
         virtual QString getName() const { return tr("Shutterstock"); }
 
     private slots:
-        void replyReceived(QNetworkReply *networkReply);
+        void requestFinishedHandler(bool success);
 
     private:
         void parseResponse(const QJsonArray &jsonArray,
@@ -53,7 +53,6 @@ namespace Suggestion {
         QUrl buildQuery(const QStringList &queryKeywords) const;
 
     private:
-        QNetworkAccessManager m_NetworkManager;
         QString m_ClientId;
         QString m_ClientSecret;
     };

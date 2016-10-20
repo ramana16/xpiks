@@ -23,20 +23,31 @@
 #define UPDATESCHECKERWORKER_H
 
 #include <QObject>
-#include <QNetworkAccessManager>
-#include <QEventLoop>
+
+namespace Models {
+    class SettingsModel;
+}
 
 namespace Conectivity {
+    struct UpdateCheckResult {
+        QString m_UpdateURL;
+        QString m_Checksum;
+        int m_Version;
+    };
+
     class UpdatesCheckerWorker : public QObject
     {
         Q_OBJECT
     public:
-        UpdatesCheckerWorker();
+        UpdatesCheckerWorker(Models::SettingsModel *settingsModel, const QString &availableUpdatePath);
         virtual ~UpdatesCheckerWorker();
 
     private:
         void initWorker();
         void processOneItem();
+        bool checkForUpdates(UpdateCheckResult &result);
+        bool downloadUpdate(const UpdateCheckResult &updateCheckResult, QString &pathToUpdate);
+        bool checkAvailableUpdate(const UpdateCheckResult &updateCheckResult);
 
     public slots:
         void process();
@@ -44,13 +55,13 @@ namespace Conectivity {
     signals:
         void stopped();
         void updateAvailable(QString updateLink);
+        void updateDownloaded(const QString &updatePath, int version);
         void requestFinished();
 
-    private slots:
-        void replyReceived(QNetworkReply *networkReply);
-
     private:
-        QNetworkAccessManager *m_NetworkManager;
+        Models::SettingsModel *m_SettingsModel;
+        QString m_UpdatesDirectory;
+        QString m_AvailableUpdatePath;
     };
 }
 

@@ -20,9 +20,13 @@
  */
 
 #include "abstractconfigupdatermodel.h"
+#include "../Models/settingsmodel.h"
+#include "../Commands/commandmanager.h"
 
 namespace Models {
-    AbstractConfigUpdaterModel::AbstractConfigUpdaterModel(bool forceOverwrite):
+    AbstractConfigUpdaterModel::AbstractConfigUpdaterModel(bool forceOverwrite, QObject *parent):
+        QObject(parent),
+        m_RemoteConfig(this),
         m_ForceOverwrite(forceOverwrite)
     {
         QObject::connect(&m_RemoteConfig, SIGNAL(configArrived()), this, SLOT(remoteConfigArrived()));
@@ -31,7 +35,12 @@ namespace Models {
     void AbstractConfigUpdaterModel::initializeConfigs(const QString &configUrl, const QString &filePath) {
         LOG_DEBUG << "#";
         m_LocalConfig.initConfig(filePath);
-        m_RemoteConfig.requestInitConfig(configUrl);
+
+        Q_ASSERT(m_CommandManager != NULL);
+        Models::SettingsModel *settingsModel = m_CommandManager->getSettingsModel();
+        ProxySettings *proxySettings = settingsModel->retrieveProxySettings();
+
+        m_RemoteConfig.requestInitConfig(configUrl, proxySettings);
     }
 
     void AbstractConfigUpdaterModel::remoteConfigArrived() {

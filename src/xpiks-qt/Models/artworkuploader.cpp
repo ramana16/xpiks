@@ -45,7 +45,6 @@ namespace Models {
         ArtworksProcessor(parent),
         m_FtpCoordinator(ftpCoordinator),
         m_Percent(0) {
-#ifndef CORE_TESTS
         Conectivity::FtpCoordinator *coordinator = dynamic_cast<Conectivity::FtpCoordinator *>(ftpCoordinator);
         QObject::connect(coordinator, SIGNAL(uploadStarted()), this, SLOT(onUploadStarted()));
         QObject::connect(coordinator, SIGNAL(uploadFinished(bool)), this, SLOT(allFinished(bool)));
@@ -55,15 +54,12 @@ namespace Models {
         QObject::connect(m_TestingCredentialWatcher, SIGNAL(finished()), SLOT(credentialsTestingFinished()));
         QObject::connect(coordinator, SIGNAL(transferFailed(QString, QString)),
                          &m_UploadWatcher, SLOT(reportUploadErrorHandler(QString, QString)));
-#endif
 
         QObject::connect(&m_StocksFtpList, SIGNAL(stocksListUpdated()), this, SLOT(stocksListUpdated()));
     }
 
     ArtworkUploader::~ArtworkUploader() {
-#ifndef CORE_TESTS
         delete m_TestingCredentialWatcher;
-#endif
 
         if (m_FtpCoordinator != NULL) {
             delete m_FtpCoordinator;
@@ -73,11 +69,11 @@ namespace Models {
     void ArtworkUploader::setCommandManager(Commands::CommandManager *commandManager) {
         Common::BaseEntity::setCommandManager(commandManager);
 
-#ifndef CORE_TESTS
         Conectivity::FtpCoordinator *coordinator = dynamic_cast<Conectivity::FtpCoordinator *>(m_FtpCoordinator);
         Q_ASSERT(coordinator != NULL);
         coordinator->setCommandManager(commandManager);
-#endif
+
+        m_StocksFtpList.setCommandManager(commandManager);
     }
 
     void ArtworkUploader::onUploadStarted() {
@@ -96,20 +92,17 @@ namespace Models {
     }
 
     void ArtworkUploader::credentialsTestingFinished() {
-#ifndef CORE_TESTS
         Conectivity::ContextValidationResult result = m_TestingCredentialWatcher->result();
         emit credentialsChecked(result.m_Result, result.m_Host);
-#endif
     }
 
     void ArtworkUploader::uploaderPercentChanged(double percent) {
         m_Percent = (int)(percent);
         LOG_DEBUG << "Overall progress =" << percent;
         updateProgress();
-#ifndef CORE_TESTS
+
         UploadInfoRepository *uploadInfoRepository = m_CommandManager->getUploadInfoRepository();
         uploadInfoRepository->updatePercentages();
-#endif
     }
 
     void ArtworkUploader::stocksListUpdated() {
@@ -119,7 +112,10 @@ namespace Models {
         m_StocksCompletionSource.setStrings(stocks);
     }
 
-#ifndef CORE_TESTS
+    void ArtworkUploader::updateStocksList() {
+        m_StocksFtpList.initializeConfigs();
+    }
+
     void ArtworkUploader::uploadArtworks() { doUploadArtworks(getArtworkList()); }
 
     void ArtworkUploader::checkCredentials(const QString &host, const QString &username,
@@ -139,8 +135,6 @@ namespace Models {
 
         m_TestingCredentialWatcher->setFuture(QtConcurrent::run(Conectivity::isContextValid, context));
     }
-
-#endif
 
     bool ArtworkUploader::needCreateArchives() const {
         bool anyZipNeeded = false;
@@ -182,10 +176,9 @@ namespace Models {
     }
 
     void ArtworkUploader::initializeStocksList() {
-        m_StocksFtpList.initializeConfigs();
+        QTimer::singleShot(1000, this, SLOT(updateStocksList()));
     }
 
-#ifndef CORE_TESTS
     void ArtworkUploader::doUploadArtworks(const QVector<ArtworkMetadata *> &artworkList) {
         int artworksCount = artworkList.length();
 
@@ -203,13 +196,10 @@ namespace Models {
         m_CommandManager->reportUserAction(Conectivity::UserAction::Upload);
     }
 
-#endif
-
     void ArtworkUploader::cancelProcessing() {
         m_FtpCoordinator->cancelUpload();
     }
 
-#ifndef CORE_TESTS
     QString ArtworkUploader::getFtpName(const QString &stockAddress) const {
         const UploadInfoRepository *uploadInfoRepository = m_CommandManager->getUploadInfoRepository();
         auto &infos = uploadInfoRepository->getUploadInfos();
@@ -222,6 +212,4 @@ namespace Models {
 
         return QString();
     }
-
-#endif
 }

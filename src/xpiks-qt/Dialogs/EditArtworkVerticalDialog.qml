@@ -77,8 +77,8 @@ Item {
 
     Connections {
         target: helpersWrapper
-        onGlobalCloseRequested: {
-            console.debug("UI:EditArtworkVerticalDialog # globalCloseRequested")
+        onGlobalBeforeDestruction: {
+            console.debug("UI:EditArtworkVerticalDialog # globalBeforeDestruction")
             closePopup()
         }
     }
@@ -140,7 +140,7 @@ Item {
         Rectangle {
             id: dialogWindow
             width: previewImage.width < fields.width ? 760 : previewImage.width + 40
-            height: parent.height - 30
+            height: parent.height - 10
             color: Colors.selectedImageBackground
             anchors.centerIn: parent
             Component.onCompleted: anchors.centerIn = undefined
@@ -291,6 +291,15 @@ Item {
                             focus: true
                             text: combinedArtworks.title
                             onTextChanged: combinedArtworks.title = text
+                            userDictEnabled: true
+
+                            onActionRightClicked: {
+                                if (combinedArtworks.hasTitleWordSpellError(rightClickedWord)) {
+                                    console.log("Context menu for add word " + rightClickedWord)
+                                    addWordContextMenu.word = rightClickedWord
+                                    addWordContextMenu.popup()
+                                }
+                            }
 
                             Keys.onBacktabPressed: {
                                 event.accepted = true
@@ -385,6 +394,7 @@ Item {
                             width: descriptionFlick.width
                             height: descriptionFlick.height
                             focus: true
+                            userDictEnabled: true
                             property string previousText: text
                             property int maximumLength: 280
                             onTextChanged: {
@@ -400,6 +410,14 @@ Item {
 
                                 previousText = text
                                 combinedArtworks.description = text
+                            }
+
+                            onActionRightClicked: {
+                                if (combinedArtworks.hasDescriptionWordSpellError(rightClickedWord)) {
+                                    console.log("Context menu for add word " + rightClickedWord)
+                                    addWordContextMenu.word = rightClickedWord
+                                    addWordContextMenu.popup()
+                                }
                             }
 
                             wrapMode: TextEdit.Wrap
@@ -524,6 +542,7 @@ Item {
                                                     {
                                                         callbackObject: callbackObject,
                                                         previousKeyword: keyword,
+                                                        keywordIndex: kw.delegateIndex,
                                                         keywordsModel: combinedArtworks.getKeywordsModel()
                                                     })
                             }
@@ -572,97 +591,137 @@ Item {
                     height: 4
                 }
 
-                RowLayout {
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    spacing:5
+                Item {
+                    height: childrenRect.height
+                    width: parent.width
 
-                    StyledText {
-                        text: i18.n + qsTr("Fix spelling")
-                        enabled: dialogWindow.keywordsModel ? dialogWindow.keywordsModel.hasSpellErrors : false
-                        color: enabled ? (fixSpellingMA.pressed ? Colors.linkClickedColor : Colors.artworkActiveColor) : Colors.labelActiveForeground
+                    RowLayout {
+                        anchors.left: parent.left
+                        anchors.leftMargin: 3
+                        anchors.right: parent.right
+                        anchors.rightMargin: 3
+                        spacing: 5
 
-                        MouseArea {
-                            id: fixSpellingMA
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                combinedArtworks.suggestCorrections()
-                                Common.launchDialog("Dialogs/SpellCheckSuggestionsDialog.qml",
-                                                    componentParent,
-                                                    {})
-                            }
-                        }
-                    }
+                        StyledText {
+                            text: i18.n + qsTr("Fix spelling")
+                            enabled: dialogWindow.keywordsModel ? dialogWindow.keywordsModel.hasSpellErrors : false
+                            color: enabled ? (fixSpellingMA.pressed ? Colors.linkClickedColor : Colors.artworkActiveColor) : Colors.labelActiveForeground
 
-                    StyledText {
-                        text: "|"
-                        verticalAlignment: Text.AlignVCenter
-                    }
-
-                    StyledText {
-                        text: i18.n + qsTr("Suggest")
-                        color: enabled ? (suggestKeywordsMA.pressed ? Colors.linkClickedColor : Colors.artworkActiveColor) : Colors.labelActiveForeground
-
-                        MouseArea {
-                            id: suggestKeywordsMA
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                var callbackObject = {
-                                    promoteKeywords: function(keywords) {
-                                        combinedArtworks.pasteKeywords(keywords)
-                                    }
+                            MouseArea {
+                                id: fixSpellingMA
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    combinedArtworks.suggestCorrections()
+                                    Common.launchDialog("Dialogs/SpellCheckSuggestionsDialog.qml",
+                                                        componentParent,
+                                                        {})
                                 }
-
-                                Common.launchDialog("Dialogs/KeywordsSuggestion.qml",
-                                                    componentParent,
-                                                    {callbackObject: callbackObject});
                             }
                         }
-                    }
 
-                    StyledText {
-                        text: "|"
-                        verticalAlignment: Text.AlignVCenter
-                    }
-
-                    StyledText {
-                        text: i18.n + qsTr("Copy")
-                        color: copyKeywordsMA.pressed ? Colors.linkClickedColor : Colors.artworkActiveColor
-
-                        MouseArea {
-                            id: copyKeywordsMA
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: clipboard.setText(combinedArtworks.getKeywordsString())
+                        StyledText {
+                            text: "|"
+                            verticalAlignment: Text.AlignVCenter
                         }
-                    }
 
-                    StyledText {
-                        text: "|"
-                        verticalAlignment: Text.AlignVCenter
-                    }
+                        StyledText {
+                            text: i18.n + qsTr("Suggest")
+                            color: enabled ? (suggestKeywordsMA.pressed ? Colors.linkClickedColor : Colors.artworkActiveColor) : Colors.labelActiveForeground
 
-                    StyledText {
-                        text: i18.n + qsTr("Clear")
-                        color: enabled ? (clearKeywordsMA.pressed ? Colors.linkClickedColor : Colors.artworkActiveColor) : Colors.labelActiveForeground
+                            MouseArea {
+                                id: suggestKeywordsMA
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    var callbackObject = {
+                                        promoteKeywords: function(keywords) {
+                                            combinedArtworks.pasteKeywords(keywords)
+                                        }
+                                    }
 
-                        MouseArea {
-                            id: clearKeywordsMA
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: clearKeywordsDialog.open()
+                                    Common.launchDialog("Dialogs/KeywordsSuggestion.qml",
+                                                        componentParent,
+                                                        {callbackObject: callbackObject});
+                                }
+                            }
                         }
-                    }
 
-                    Item {
-                        Layout.fillWidth: true
+                        StyledText {
+                            text: "|"
+                            verticalAlignment: Text.AlignVCenter
+                        }
+
+                        StyledText {
+                            text: i18.n + qsTr("Copy")
+                            color: copyKeywordsMA.pressed ? Colors.linkClickedColor : Colors.artworkActiveColor
+
+                            MouseArea {
+                                id: copyKeywordsMA
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: clipboard.setText(combinedArtworks.getKeywordsString())
+                            }
+                        }
+
+                        StyledText {
+                            text: "|"
+                            verticalAlignment: Text.AlignVCenter
+                        }
+
+                        StyledText {
+                            text: i18.n + qsTr("Clear")
+                            color: enabled ? (clearKeywordsMA.pressed ? Colors.linkClickedColor : Colors.artworkActiveColor) : Colors.labelActiveForeground
+
+                            MouseArea {
+                                id: clearKeywordsMA
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: clearKeywordsDialog.open()
+                            }
+                        }
+
+                        Item {
+                            Layout.fillWidth: true
+                        }
+
+                        StyledText {
+                            id: plainTextText
+                            text: i18.n + qsTr("<u>edit in plain text</u>")
+                            color: plainTextMA.containsMouse ? Colors.linkClickedColor : Colors.labelActiveForeground
+
+                            MouseArea {
+                                id: plainTextMA
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    // strange bug with clicking on the keywords field
+                                    if (!containsMouse) { return; }
+
+                                    var callbackObject = {
+                                        onSuccess: function(text) {
+                                            combinedArtworks.plainTextEdit(text)
+                                        },
+                                        onClose: function() {
+                                            flv.activateEdit()
+                                        }
+                                    }
+
+                                    Common.launchDialog("Dialogs/PlainTextKeywordsDialog.qml",
+                                                        applicationWindow,
+                                                        {
+                                                            callbackObject: callbackObject,
+                                                            keywordsText: combinedArtworks.getKeywordsString(),
+                                                            keywordsModel: combinedArtworks.getKeywordsModel()
+                                                        });
+                                }
+                            }
+                        }
                     }
                 }
 
                 Item {
-                    Layout.fillHeight: true
+                    height: 10
                 }
 
                 RowLayout {

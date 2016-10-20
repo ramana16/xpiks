@@ -367,6 +367,27 @@ namespace Common {
         return appendedCount;
     }
 
+    bool BasicKeywordsModel::canEditKeywordUnsafe(int index, const QString &replacement) const {
+        bool result = false;
+        LOG_INFO << "index:" << index << "replacement:" << replacement;
+
+        QString sanitized = Helpers::doSanitizeKeyword(replacement);
+        QString existing = m_KeywordsList.at(index);
+        // IMPORTANT: keep track of copy-paste in editKeywordUnsafe()
+        if (existing != sanitized && Helpers::isValidKeyword(sanitized)) {
+            QString lowerCasedNew = sanitized.toLower();
+            QString lowerCasedExisting = existing.toLower();
+
+            if (!m_KeywordsSet.contains(lowerCasedNew)) {
+                result = true;
+            } else if (lowerCasedNew == lowerCasedExisting) {
+                result = true;
+            }
+        }
+
+        return result;
+    }
+
     bool BasicKeywordsModel::editKeywordUnsafe(int index, const QString &replacement) {
         bool result = false;
 
@@ -374,7 +395,7 @@ namespace Common {
         QString sanitized = Helpers::doSanitizeKeyword(replacement);
 
         QString existing = m_KeywordsList.at(index);
-
+        // IMPORTANT: keep track of copy-paste in canEditKeywordUnsafe()
         if (existing != sanitized && Helpers::isValidKeyword(sanitized)) {
             QString lowerCasedNew = sanitized.toLower();
             QString lowerCasedExisting = existing.toLower();
@@ -648,6 +669,7 @@ namespace Common {
 
     bool BasicKeywordsModel::containsKeyword(const QString &searchTerm, Common::SearchFlags searchFlags) {
         QReadLocker readLocker(&m_KeywordsLock);
+
         Q_UNUSED(readLocker);
 
         return containsKeywordUnsafe(searchTerm, searchFlags);
@@ -689,6 +711,14 @@ namespace Common {
         }
 
         return anyError;
+    }
+
+    bool BasicKeywordsModel::hasDescriptionWordSpellError(const QString &word) {
+        return m_SpellCheckInfo->hasDescriptionError(word);
+    }
+
+    bool BasicKeywordsModel::hasTitleWordSpellError(const QString &word) {
+        return m_SpellCheckInfo->hasTitleError(word);
     }
 
     bool BasicKeywordsModel::hasSpellErrors() {
@@ -791,6 +821,14 @@ namespace Common {
         Q_UNUSED(readLocker);
 
         return !canBeAddedUnsafe(keyword.simplified());
+    }
+
+    bool BasicKeywordsModel::canEditKeyword(int index, const QString &replacement) {
+        QReadLocker readLocker(&m_KeywordsLock);
+
+        Q_UNUSED(readLocker);
+
+        return canEditKeywordUnsafe(index, replacement);
     }
 
     QString BasicKeywordsModel::retrieveKeyword(int wordIndex) {

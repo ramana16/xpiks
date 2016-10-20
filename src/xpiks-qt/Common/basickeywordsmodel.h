@@ -103,6 +103,7 @@ namespace Common {
         void takeKeywordAtUnsafe(int index, QString &removedKeyword, bool &wasCorrect);
         void setKeywordsUnsafe(const QStringList &keywordsList);
         int appendKeywordsUnsafe(const QStringList &keywordsList);
+        bool canEditKeywordUnsafe(int index, const QString &replacement) const;
         bool editKeywordUnsafe(int index, const QString &replacement);
         bool replaceKeywordUnsafe(int index, const QString &existing, const QString &replacement);
         bool clearKeywordsUnsafe();
@@ -128,11 +129,13 @@ namespace Common {
         bool isEmpty();
         bool isTitleEmpty();
         bool isDescriptionEmpty();
-        bool containsKeyword(const QString &searchTerm, Common::SearchFlags searchFlags = Common::SearchFlags::ExactKeywords);
+        bool containsKeyword(const QString &searchTerm, Common::SearchFlags searchFlags=Common::SearchFlags::ExactKeywords);
 
         bool hasKeywordsSpellError();
         bool hasDescriptionSpellError();
         bool hasTitleSpellError();
+        bool hasDescriptionWordSpellError(const QString &word);
+        bool hasTitleWordSpellError(const QString &word);
 
         bool hasSpellErrors();
         void setSpellStatuses(BasicKeywordsModel *keywordsModel);
@@ -161,6 +164,7 @@ namespace Common {
 
     public:
         Q_INVOKABLE bool hasKeyword(const QString &keyword);
+        Q_INVOKABLE bool canEditKeyword(int index, const QString &replacement);
 
     public:
         // ISPELLCHECKABLE
@@ -194,10 +198,10 @@ namespace Common {
         void spellCheckRequestReady(Common::SpellCheckFlags flags, int index);
 
     private:
-         void setSpellCheckResultsUnsafe(const std::vector<std::shared_ptr<SpellCheck::SpellCheckQueryItem> > &items);
-         bool isReplacedADuplicateUnsafe(int index, const QString &existingPrev,
-                                         const QString &replacement) const;
-         void emitSpellCheckChanged(int index=-1);
+        void setSpellCheckResultsUnsafe(const std::vector<std::shared_ptr<SpellCheck::SpellCheckQueryItem> > &items);
+        bool isReplacedADuplicateUnsafe(int index, const QString &existingPrev,
+                                        const QString &replacement) const;
+        void emitSpellCheckChanged(int index=-1);
 
     protected:
         virtual QHash<int, QByteArray> roleNames() const;

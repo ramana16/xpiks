@@ -272,8 +272,9 @@ void BasicKeywordsModelTests::editKeywordToAnotherTest() {
     keywords << "keyword1" << "keyword2" << "keyword3";
     basicModel.appendKeywords(keywords);
 
-    QSignalSpy modifiedSpy(&basicModel, SIGNAL(dataChanged(QModelIndex,QModelIndex,QVector<int>)));
+    QSignalSpy modifiedSpy(&basicModel, SIGNAL(dataChanged(QModelIndex, QModelIndex,QVector<int>)));
 
+    QVERIFY(basicModel.canEditKeyword(0, "keyword4"));
     bool editResult = basicModel.editKeyword(0, "keyword4");
     QCOMPARE(editResult, true);
     QCOMPARE(modifiedSpy.count(), 1);
@@ -286,11 +287,27 @@ void BasicKeywordsModelTests::editKeywordToSameTest() {
     keywords << "keyword1" << "keyword2" << "keyword3";
     basicModel.appendKeywords(keywords);
 
-    QSignalSpy modifiedSpy(&basicModel, SIGNAL(dataChanged(QModelIndex,QModelIndex,QVector<int>)));
+    QSignalSpy modifiedSpy(&basicModel, SIGNAL(dataChanged(QModelIndex, QModelIndex,QVector<int>)));
 
+    QVERIFY(!basicModel.canEditKeyword(0, "keyword3"));
     bool editResult = basicModel.editKeyword(0, "keyword3");
     QCOMPARE(editResult, false);
     QCOMPARE(modifiedSpy.count(), 0);
+}
+
+void BasicKeywordsModelTests::editKeywordAnotherCaseTest() {
+    Common::BasicKeywordsModel basicModel(m_FakeHold);
+
+    QStringList keywords;
+    keywords << "Mountain";
+    basicModel.appendKeywords(keywords);
+
+    QSignalSpy modifiedSpy(&basicModel, SIGNAL(dataChanged(QModelIndex, QModelIndex,QVector<int>)));
+
+    bool editResult = basicModel.editKeyword(0, "mountain");
+    QCOMPARE(editResult, true);
+    QCOMPARE(basicModel.getKeywordAt(0), QLatin1String("mountain"));
+    QCOMPARE(modifiedSpy.count(), 1);
 }
 
 void BasicKeywordsModelTests::addRemoveAddUpperCaseWordTest() {
@@ -317,9 +334,11 @@ void BasicKeywordsModelTests::editToUpperCaseTest() {
     keywords << "keyword1" << "keyword2" << "keyword3";
     basicModel.appendKeywords(keywords);
 
+    QVERIFY(basicModel.canEditKeyword(0, "Keyword1"));
     bool editSelfResult = basicModel.editKeyword(0, "Keyword1");
     QCOMPARE(editSelfResult, true);
 
+    QVERIFY(!basicModel.canEditKeyword(1, "Keyword1"));
     bool editOtherResult = basicModel.editKeyword(1, "Keyword1");
     QCOMPARE(editOtherResult, false);
 }

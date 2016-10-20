@@ -112,7 +112,13 @@ SOURCES += main.cpp \
     Models/artworksviewmodel.cpp \
     Helpers/keywordshelpers.cpp \
     Conectivity/uploadwatcher.cpp \
-    Conectivity/telemetryworker.cpp
+    Conectivity/telemetryworker.cpp \
+    Warnings/warningssettingsmodel.cpp \
+    Conectivity/simplecurlrequest.cpp \
+    Conectivity/curlinithelper.cpp \
+    MetadataIO/exiv2inithelper.cpp \
+    Conectivity/simplecurldownloader.cpp \
+    Helpers/updatehelpers.cpp
 
 RESOURCES += qml.qrc
 
@@ -281,7 +287,14 @@ HEADERS += \
     Helpers/keywordshelpers.h \
     Conectivity/uploadwatcher.h \
     Common/iflagsprovider.h \
-    Conectivity/telemetryworker.h
+    Conectivity/telemetryworker.h \
+    Warnings/warningssettingsmodel.h \
+    Conectivity/simplecurlrequest.h \
+    Conectivity/curlinithelper.h \
+    MetadataIO/exiv2inithelper.h \
+    Conectivity/simplecurldownloader.h \
+    Conectivity/apimanager.h \
+    Helpers/updatehelpers.h
 
 DISTFILES += \
     Components/CloseIcon.qml \
@@ -350,7 +363,8 @@ DISTFILES += \
     Dialogs/FindAndReplace.qml \
     Dialogs/ReplacePreview.qml \
     Dialogs/DeleteKeywordsDialog.qml \
-    Dialogs/FailedUploadArtworks.qml
+    Dialogs/FailedUploadArtworks.qml \
+    Dialogs/InstallUpdateDialog.qml
 
 lupdate_only {
 SOURCES += *.qml \

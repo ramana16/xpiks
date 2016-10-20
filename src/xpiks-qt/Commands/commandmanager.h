@@ -106,6 +106,10 @@ namespace AutoComplete {
     class AutoCompleteService;
 }
 
+namespace Helpers {
+    class HelpersQmlWrapper;
+}
+
 namespace Commands {
     class CommandManager : public ICommandManager
     {
@@ -139,6 +143,7 @@ namespace Commands {
             m_ImageCachingService(NULL),
             m_DeleteKeywordsViewModel(NULL),
             m_FindAndReplaceModel(NULL),
+            m_HelpersQmlWrapper(NULL),
             m_AfterInitCalled(false)
         { }
 
@@ -173,6 +178,7 @@ namespace Commands {
         void InjectDependency(QMLExtensions::ImageCachingService *imageCachingService);
         void InjectDependency(Models::FindAndReplaceModel *findAndReplaceModel);
         void InjectDependency(Models::DeleteKeywordsViewModel *deleteKeywordsViewModel);
+        void InjectDependency(Helpers::HelpersQmlWrapper *helpersQmlWrapper);
 
     public:
         virtual std::shared_ptr<Commands::ICommandResult> processCommand(const std::shared_ptr<ICommandBase> &command)
@@ -238,6 +244,7 @@ namespace Commands {
         void cleanupLocalLibraryAsync() const;
         void afterConstructionCallback();
         void beforeDestructionCallback() const;
+        void requestCloseApplication() const;
         void restartSpellChecking();
 #ifndef CORE_TESTS
         void autoCompleteKeyword(const QString &keyword, QObject *notifyObject) const;
@@ -303,6 +310,7 @@ namespace Commands {
         QMLExtensions::ImageCachingService *m_ImageCachingService;
         Models::DeleteKeywordsViewModel *m_DeleteKeywordsViewModel;
         Models::FindAndReplaceModel *m_FindAndReplaceModel;
+        Helpers::HelpersQmlWrapper *m_HelpersQmlWrapper;
 
         QVector<Common::IServiceBase<Common::IBasicArtwork, Common::WarningsCheckFlags> *> m_WarningsCheckers;
         QVector<Helpers::IFileNotAvailableModel*> m_AvailabilityListeners;

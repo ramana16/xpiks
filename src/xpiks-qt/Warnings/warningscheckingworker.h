@@ -26,16 +26,16 @@
 #include "../Common/itemprocessingworker.h"
 #include "warningsitem.h"
 
-namespace Models{
-    class SettingsModel;
-}
-
 namespace Warnings {
-    class WarningsCheckingWorker: public QObject, public Common::ItemProcessingWorker<WarningsItem>
+    class WarningsSettingsModel;
+
+    class WarningsCheckingWorker:
+        public QObject, public Common::ItemProcessingWorker<WarningsItem>
     {
-        Q_OBJECT
+    Q_OBJECT
+
     public:
-        WarningsCheckingWorker(Models::SettingsModel *settingsModel, QObject *parent=0);
+        WarningsCheckingWorker(WarningsSettingsModel *warningsSettingsModel, QObject *parent=0);
 
     protected:
         virtual bool initWorker();
@@ -65,11 +65,7 @@ namespace Warnings {
         Common::WarningFlags checkDuplicates(std::shared_ptr<WarningsItem> &wi) const;
 
     private:
-        Models::SettingsModel *m_SettingsModel;
-        QString m_AllowedFilenameCharacters;
-        double m_MinimumMegapixels;
-        int m_MaximumKeywordsCount;
-        int m_MaximumDescriptionLength;
+        WarningsSettingsModel *m_WarningsSettingsModel;
     };
 }
 

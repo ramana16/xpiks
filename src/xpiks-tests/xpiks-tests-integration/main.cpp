@@ -20,7 +20,10 @@
 #include "../../xpiks-qt/Models/uploadinforepository.h"
 #include "../../xpiks-qt/Conectivity/ftpcoordinator.h"
 #include "../../xpiks-qt/Models/findandreplacemodel.h"
+#include "../../xpiks-qt/Conectivity/curlinithelper.h"
+#include "../../xpiks-qt/MetadataIO/exiv2inithelper.h"
 #include "../../xpiks-qt/Helpers/helpersqmlwrapper.h"
+#include "../../xpiks-qt/Conectivity/updateservice.h"
 #include "../../xpiks-qt/Encryption/secretsmanager.h"
 #include "../../xpiks-qt/Models/artworksrepository.h"
 #include "../../xpiks-qt/QMLExtensions/colorsmodel.h"
@@ -34,7 +37,6 @@
 #include "../../xpiks-qt/Plugins/pluginmanager.h"
 #include "../../xpiks-qt/Helpers/loggingworker.h"
 #include "../../xpiks-qt/Models/languagesmodel.h"
-#include "../../xpiks-qt/Conectivity/updateservice.h"
 #include "../../xpiks-qt/Models/artitemsmodel.h"
 #include "../../xpiks-qt/Models/settingsmodel.h"
 #include "../../xpiks-qt/Helpers/appsettings.h"
@@ -66,6 +68,7 @@
 #include "addtouserdictionarytest.h"
 #include "autodetachvectortest.h"
 #include "removefromuserdictionarytest.h"
+#include "artworkuploaderbasictest.h"
 
 #if defined(WITH_LOGS)
 #undef WITH_LOGS
@@ -77,6 +80,13 @@
 
 int main(int argc, char *argv[]) {
     std::cout << "Started integration tests" << std::endl;
+
+    // will call curl_global_init and cleanup
+    Conectivity::CurlInitHelper curlInitHelper;
+    Q_UNUSED(curlInitHelper);
+
+    MetadataIO::Exiv2InitHelper exiv2InitHelper;
+    Q_UNUSED(exiv2InitHelper);
 
     QCoreApplication app(argc, argv);
 
@@ -174,6 +184,8 @@ int main(int argc, char *argv[]) {
 
     commandManager.ensureDependenciesInjected();
 
+    keywordsSuggestor.initSuggestionEngines();
+
     secretsManager.setMasterPasswordHash(appSettings.value(Constants::MASTER_PASSWORD_HASH, "").toString());
     uploadInfoRepository.initFromString(appSettings.value(Constants::UPLOAD_HOSTS, "").toString());
     recentDirectorieModel.deserializeFromSettings(appSettings.value(Constants::RECENT_DIRECTORIES, "").toString());
@@ -208,6 +220,7 @@ int main(int argc, char *argv[]) {
     integrationTests.append(new AddToUserDictionaryTest(&commandManager));
     integrationTests.append(new AutoDetachVectorTest(&commandManager));
     integrationTests.append(new RemoveFromUserDictionaryTest(&commandManager));
+    integrationTests.append(new ArtworkUploaderBasicTest(&commandManager));
 
     qDebug("\n");
     int succeededTestsCount = 0, failedTestsCount = 0;

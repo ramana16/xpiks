@@ -41,7 +41,7 @@ ApplicationWindow {
     height: appSettings.getAppHeight(725)
     minimumHeight: 725
     minimumWidth: 930
-    title: i18.n + qsTr("Xpiks")
+    title: i18.n + (debug ? "Xpiks (Devel)" : qsTr("Xpiks"))
     property int openedDialogsCount: 0
     property bool showUpdateLink: false
     property bool needToCenter: true
@@ -49,7 +49,7 @@ ApplicationWindow {
     property bool initializedColors: false
     property var spellCheckService: helpersWrapper.getSpellCheckerService()
 
-    onBeforeRendering: {
+    onVisibleChanged: {
         if (!initializedColors) {
             initializedColors = true
 
@@ -58,9 +58,7 @@ ApplicationWindow {
 
             Colors.applyTheme(settingsModel.selectedThemeIndex)
         }
-    }
 
-    onVisibleChanged: {
         if (needToCenter) {
             needToCenter = false
             applicationWindow.x = appSettings.getAppPosX((Screen.width - applicationWindow.width) / 2)
@@ -233,6 +231,16 @@ ApplicationWindow {
     }
 
     Action {
+        id: upgradeAction
+        text: i18.n + qsTr("&Upgrade")
+        enabled: helpersWrapper.isUpdateDownloaded && (applicationWindow.openedDialogsCount == 0)
+        onTriggered: {
+            helpersWrapper.setUpgradeConsent()
+            closeHandler({accepted: false})
+        }
+    }
+
+    Action {
         id: quitAction
         text: i18.n + qsTr("&Exit")
         shortcut: StandardKey.Quit
@@ -389,6 +397,11 @@ ApplicationWindow {
                         }
                     }
                 }
+            }
+
+            MenuItem {
+                action: upgradeAction
+                visible: helpersWrapper.isUpdateDownloaded
             }
 
             MenuItem { action: openSettingsAction }
@@ -661,6 +674,13 @@ ApplicationWindow {
                                         {callbackObject: callbackObject})
                 }
             }
+
+            MenuItem {
+                text: "Install update"
+                onTriggered: {
+                    Common.launchDialog("Dialogs/InstallUpdateDialog.qml", applicationWindow, {})
+                }
+            }
         }
     }
 
@@ -835,7 +855,6 @@ ApplicationWindow {
         text: i18.n + originalText
     }
 
-
     Connections {
         target: artItemsModel
 
@@ -875,6 +894,34 @@ ApplicationWindow {
                                 applicationWindow, {updateUrl: updateLink},
                                 function(wnd) {wnd.show();});
             applicationWindow.showUpdateLink = true
+        }
+
+        onUpdateDownloaded: {
+            if (applicationWindow.openedDialogsCount == 0) {
+                Common.launchDialog("Dialogs/InstallUpdateDialog.qml", applicationWindow, {})
+            } else {
+                console.debug("Opened dialogs found. Postponing upgrade flow...");
+                upgradeTimer.start()
+            }
+        }
+
+        onUpgradeInitiated: {
+            console.debug("UI:onUpgradeInitiated handler")
+            closeHandler({accepted: false});
+        }
+    }
+
+    Timer {
+        id: upgradeTimer
+        interval: 5000
+        repeat: true
+        running: false
+        triggeredOnStart: false
+        onTriggered: {
+            if (applicationWindow.openedDialogsCount == 0) {
+                upgradeTimer.stop()
+                Common.launchDialog("Dialogs/InstallUpdateDialog.qml", applicationWindow, {})
+            }
         }
     }
 
@@ -1839,6 +1886,17 @@ ApplicationWindow {
                                                             focus: true
                                                             isActive: rowWrapper.isHighlighted
                                                             onTextChanged: model.editdescription = text
+                                                            userDictEnabled: true
+
+                                                            onActionRightClicked: {
+                                                                if (filteredArtItemsModel.hasDescriptionWordSpellError(rowWrapper.delegateIndex, rightClickedWord)){
+                                                                    console.log("Context menu for add word " + rightClickedWord)
+                                                                    addWordContextMenu.word = rightClickedWord
+                                                                    addWordContextMenu.popup()
+                                                                }
+
+                                                            }
+
 
                                                             Keys.onTabPressed: {
                                                                 if (columnLayout.isWideEnough) {
@@ -1934,6 +1992,15 @@ ApplicationWindow {
                                                             focus: true
                                                             isActive: rowWrapper.isHighlighted
                                                             onTextChanged: model.edittitle = text
+                                                            userDictEnabled: true
+
+                                                            onActionRightClicked: {
+                                                                if (filteredArtItemsModel.hasTitleWordSpellError(rowWrapper.delegateIndex, rightClickedWord)){
+                                                                    console.log("Context menu for add word " + rightClickedWord)
+                                                                    addWordContextMenu.word = rightClickedWord
+                                                                    addWordContextMenu.popup()
+                                                                }
+                                                            }
 
                                                             Keys.onTabPressed: {
                                                                 flv.activateEdit()
@@ -2058,13 +2125,14 @@ ApplicationWindow {
                                                                                     {
                                                                                         callbackObject: callbackObject,
                                                                                         previousKeyword: keyword,
+                                                                                        keywordIndex: kw.delegateIndex,
                                                                                         keywordsModel: filteredArtItemsModel.getKeywordsModel(rowWrapper.delegateIndex)
                                                                                     })
                                                             }
 
                                                             onActionRightClicked: {
                                                                 if (!iscorrect) {
-                                                                    console.log("Context menu for add word")
+                                                                    console.log("Context menu for add word " + kw.keywordText);
                                                                     addWordContextMenu.word = kw.keywordText;
                                                                     addWordContextMenu.popup()
                                                                 }

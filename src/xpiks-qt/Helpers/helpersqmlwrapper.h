@@ -24,6 +24,7 @@
 
 #include <QObject>
 #include <QString>
+#include "../Common/baseentity.h"
 
 namespace Commands {
     class CommandManager;
@@ -35,12 +36,13 @@ class QWinTaskbarButton;
 #endif
 
 namespace Helpers {
-    class HelpersQmlWrapper : public QObject
+    class HelpersQmlWrapper : public QObject, public Common::BaseEntity
     {
         Q_OBJECT
         Q_PROPERTY(bool pluginsAvailable READ getPluginsAvailable CONSTANT)
+        Q_PROPERTY(bool isUpdateDownloaded READ getIsUpdateDownloaded NOTIFY updateDownloadedChanged)
     public:
-        HelpersQmlWrapper(Commands::CommandManager *commandManager);
+        HelpersQmlWrapper();
 
     public:
         Q_INVOKABLE bool isKeywordValid(const QString &keyword) const;
@@ -59,6 +61,11 @@ namespace Helpers {
         Q_INVOKABLE void revealArtworkFile(const QString &path);
         Q_INVOKABLE bool isVector(const QString &path) const;
         Q_INVOKABLE QString toImagePath(const QString &path) const;
+        Q_INVOKABLE void setUpgradeConsent();
+        Q_INVOKABLE void upgradeNow();
+
+    public:
+        void requestCloseApplication() { emit globalCloseRequested(); }
 
     public:
         Q_INVOKABLE QObject *getLogsModel();
@@ -72,20 +79,31 @@ namespace Helpers {
 
     public:
         bool getPluginsAvailable() const;
+        bool getIsUpdateDownloaded() const { return m_IsUpdateDownloaded; }
+        bool getUpgradeConsent() const { return m_HaveUpgradeConsent; }
 
    private:
         void revealFile(const QString &path);
 
+    public slots:
+        void updateIsDownloaded(QString pathToUpdate);
+
     signals:
         void globalCloseRequested();
+        void globalBeforeDestruction();
         void updateAvailable(QString updateLink);
+        void updateDownloaded();
+        void updateDownloadedChanged(bool value);
+        void upgradeInitiated();
 
     private:
-        Commands::CommandManager *m_CommandManager;
 #ifdef Q_OS_WIN
         QWinTaskbarButton *m_TaskbarButton;
         bool m_WinTaskbarButtonApplicable;
 #endif
+        bool m_IsUpdateDownloaded;
+        bool m_HaveUpgradeConsent;
+        QString m_PathToUpdate;
     };
 }
 

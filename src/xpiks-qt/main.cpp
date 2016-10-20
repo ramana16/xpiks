@@ -56,6 +56,7 @@
 #include "Helpers/globalimageprovider.h"
 #include "Models/uploadinforepository.h"
 #include "Conectivity/ftpcoordinator.h"
+#include "Conectivity/curlinithelper.h"
 #include "Helpers/helpersqmlwrapper.h"
 #include "Encryption/secretsmanager.h"
 #include "Models/artworksrepository.h"
@@ -82,6 +83,7 @@
 #include "Common/version.h"
 #include "Common/defines.h"
 #include "Models/proxysettings.h"
+#include "MetadataIO/exiv2inithelper.h"
 #include "Models/findandreplacemodel.h"
 #include "Models/previewmetadataelement.h"
 
@@ -204,6 +206,14 @@ int main(int argc, char *argv[]) {
         return -1;
     }
 
+    // will call curl_global_init and cleanup
+    Conectivity::CurlInitHelper curlInitHelper;
+    Q_UNUSED(curlInitHelper);
+
+    // will init thread-unsafe XMP toolkit
+    MetadataIO::Exiv2InitHelper exiv2InitHelper;
+    Q_UNUSED(exiv2InitHelper);
+
     const char *highDpiEnvironmentVariable = setHighDpiEnvironmentVariable();
     qRegisterMetaTypeStreamOperators<Models::ProxySettings>("ProxySettings");
     qRegisterMetaType<Common::SpellCheckFlags>("Common::SpellCheckFlags");
@@ -303,6 +313,7 @@ int main(int argc, char *argv[]) {
     MetadataIO::BackupSaverService metadataSaverService;
     Warnings::WarningsModel warningsModel;
     warningsModel.setSourceModel(&artItemsModel);
+    warningsModel.setWarningsSettingsModel(warningsService.getWarningsSettingsModel());
     Models::LanguagesModel languagesModel;
     AutoComplete::AutoCompleteModel autoCompleteModel;
     AutoComplete::AutoCompleteService autoCompleteService(&autoCompleteModel);
@@ -324,6 +335,8 @@ int main(int argc, char *argv[]) {
     Plugins::PluginManager pluginManager;
     Plugins::PluginsWithActionsModel pluginsWithActions;
     pluginsWithActions.setSourceModel(&pluginManager);
+
+    Helpers::HelpersQmlWrapper helpersQmlWrapper;
 
     LOG_INFO << "Models created";
 
@@ -356,8 +369,11 @@ int main(int argc, char *argv[]) {
     commandManager.InjectDependency(&imageCachingService);
     commandManager.InjectDependency(&replaceModel);
     commandManager.InjectDependency(&deleteKeywordsModel);
+    commandManager.InjectDependency(&helpersQmlWrapper);
 
     commandManager.ensureDependenciesInjected();
+
+    keywordsSuggestor.initSuggestionEngines();
 
     // other initializations
     secretsManager.setMasterPasswordHash(appSettings.value(Constants::MASTER_PASSWORD_HASH, "").toString());
@@ -378,10 +394,6 @@ int main(int argc, char *argv[]) {
     Helpers::GlobalImageProvider *globalProvider = new Helpers::GlobalImageProvider(QQmlImageProviderBase::Image);
     QMLExtensions::CachingImageProvider *cachingProvider = new QMLExtensions::CachingImageProvider(QQmlImageProviderBase::Image);
     cachingProvider->setImageCachingService(&imageCachingService);
-
-    Helpers::HelpersQmlWrapper helpersQmlWrapper(&commandManager);
-    QObject::connect(&updateService, SIGNAL(updateAvailable(QString)),
-                     &helpersQmlWrapper, SIGNAL(updateAvailable(QString)));
 
     QQmlContext *rootContext = engine.rootContext();
     rootContext->setContextProperty("artItemsModel", &artItemsModel);

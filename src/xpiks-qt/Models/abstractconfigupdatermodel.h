@@ -28,13 +28,14 @@
 #include "../Helpers/remoteconfig.h"
 #include "../Helpers/localconfig.h"
 #include "../Helpers/jsonhelper.h"
+#include "../Common/baseentity.h"
 
 namespace Models {
-    class AbstractConfigUpdaterModel: public QObject, public Helpers::CompareValuesJson
+    class AbstractConfigUpdaterModel: public QObject, public Helpers::CompareValuesJson, public Common::BaseEntity
     {
         Q_OBJECT
     public:
-        AbstractConfigUpdaterModel(bool forceOverwrite);
+        AbstractConfigUpdaterModel(bool forceOverwrite, QObject *parent=nullptr);
         virtual ~AbstractConfigUpdaterModel() {}
 
     public:

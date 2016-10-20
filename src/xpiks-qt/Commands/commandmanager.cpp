@@ -52,12 +52,10 @@
 #include "../Models/languagesmodel.h"
 #include "../AutoComplete/autocompleteservice.h"
 #include "../Helpers/deletelogshelper.h"
-#ifndef CORE_TESTS
-#include <exiv2/xmp.hpp>
-#endif
 #include "../QMLExtensions/imagecachingservice.h"
 #include "../Models/findandreplacemodel.h"
 #include "../Models/deletekeywordsviewmodel.h"
+#include "../Helpers/helpersqmlwrapper.h"
 
 void Commands::CommandManager::InjectDependency(Models::ArtworksRepository *artworkRepository) {
     Q_ASSERT(artworkRepository != NULL); m_ArtworksRepository = artworkRepository;
@@ -193,6 +191,11 @@ void Commands::CommandManager::InjectDependency(Models::DeleteKeywordsViewModel 
     m_DeleteKeywordsViewModel->setCommandManager(this);
 }
 
+void Commands::CommandManager::InjectDependency(Helpers::HelpersQmlWrapper *helpersQmlWrapper) {
+    Q_ASSERT(helpersQmlWrapper != NULL); m_HelpersQmlWrapper = helpersQmlWrapper;
+    m_HelpersQmlWrapper->setCommandManager(this);
+}
+
 std::shared_ptr<Commands::ICommandResult> Commands::CommandManager::processCommand(const std::shared_ptr<ICommandBase> &command)
 #ifndef CORE_TESTS
 const
@@ -269,6 +272,14 @@ void Commands::CommandManager::connectEntitiesSignalsSlots() const {
         QObject::connect(m_SpellCheckerService, SIGNAL(userDictCleared()),
                          m_CombinedArtworksModel, SLOT(userDictClearedHandler()));
     }
+
+    if (m_HelpersQmlWrapper != NULL && m_UpdateService != NULL) {
+        QObject::connect(m_UpdateService, SIGNAL(updateAvailable(QString)),
+                         m_HelpersQmlWrapper, SIGNAL(updateAvailable(QString)));
+
+        QObject::connect(m_UpdateService, SIGNAL(updateDownloaded(QString)),
+                         m_HelpersQmlWrapper, SLOT(updateIsDownloaded(QString)));
+    }
 }
 
 void Commands::CommandManager::ensureDependenciesInjected() {
@@ -300,6 +311,10 @@ void Commands::CommandManager::ensureDependenciesInjected() {
     Q_ASSERT(m_ImageCachingService != NULL);
     Q_ASSERT(m_FindAndReplaceModel != NULL);
     Q_ASSERT(m_DeleteKeywordsViewModel != NULL);
+
+#ifndef INTEGRATION_TESTS
+    Q_ASSERT(m_HelpersQmlWrapper != NULL);
+#endif
 }
 
 void Commands::CommandManager::recodePasswords(const QString &oldMasterPassword,
@@ -600,9 +615,13 @@ void Commands::CommandManager::saveArtworksBackups(const QVector<Models::Artwork
 }
 
 void Commands::CommandManager::reportUserAction(Conectivity::UserAction userAction) const {
+#ifndef CORE_TESTS
     if (m_TelemetryService) {
         m_TelemetryService->reportAction(userAction);
     }
+#else
+    Q_UNUSED(userAction);
+#endif
 }
 
 void Commands::CommandManager::cleanupLocalLibraryAsync() const {
@@ -629,33 +648,27 @@ void Commands::CommandManager::afterConstructionCallback() {
 
     QCoreApplication::processEvents();
 
+#ifndef CORE_TESTS
     const QString reportingEndpoint =
         QLatin1String(
             "cc39a47f60e1ed812e2403b33678dd1c529f1cc43f66494998ec478a4d13496269a3dfa01f882941766dba246c76b12b2a0308e20afd84371c41cf513260f8eb8b71f8c472cafb1abf712c071938ec0791bbf769ab9625c3b64827f511fa3fbb");
     QString endpoint = Encryption::decodeText(reportingEndpoint, "reporting");
     m_TelemetryService->setEndpoint(endpoint);
 
-#ifndef CORE_TESTS
 #ifdef WITH_PLUGINS
     m_PluginManager->loadPlugins();
-#endif
 #endif
 
     m_TelemetryService->startReporting();
     m_UpdateService->startChecking();
     m_ArtworkUploader->initializeStocksList();
+    m_WarningsService->initWarningsSettings();
+#endif
 
 #ifdef Q_OS_MAC
     if (m_SettingsModel->getUseExifTool()) {
         QCoreApplication::processEvents();
         m_MetadataIOCoordinator->autoDiscoverExiftool();
-    }
-
-#endif
-
-#ifndef CORE_TESTS
-    if (!Exiv2::XmpParser::initialize()) {
-        LOG_WARNING << "Failed to initialize XMP toolkit!";
     }
 
 #endif
@@ -689,21 +702,23 @@ void Commands::CommandManager::beforeDestructionCallback() const {
     m_MetadataSaverService->stopSaving();
     m_AutoCompleteService->stopService();
 
-#ifndef CORE_TESTS
-    Exiv2::XmpParser::terminate();
-#endif
-
 #ifdef WITH_PLUGINS
     m_PluginManager->unloadPlugins();
 #endif
 
+#ifndef CORE_TESTS
     // we have a second for important stuff
     m_TelemetryService->reportAction(Conectivity::UserAction::Close);
     m_TelemetryService->stopReporting();
 
-#ifndef CORE_TESTS
     m_LogsModel->stopLogging();
 #endif
+}
+
+void Commands::CommandManager::requestCloseApplication() const {
+    if (m_HelpersQmlWrapper != NULL) {
+        m_HelpersQmlWrapper->requestCloseApplication();
+    }
 }
 
 void Commands::CommandManager::restartSpellChecking() {

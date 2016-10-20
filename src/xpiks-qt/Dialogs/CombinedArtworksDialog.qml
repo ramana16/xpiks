@@ -54,7 +54,7 @@ Item {
 
     Connections {
         target: helpersWrapper
-        onGlobalCloseRequested: {
+        onGlobalBeforeDestruction: {
             console.debug("UI:CombinedArtworksDialog # global
 CloseRequested")
             closePopup()
@@ -148,7 +148,7 @@ CloseRequested")
         Rectangle {
             id: dialogWindow
             width: 730
-            height: Qt.platform.os === "windows" ? 665 : 655
+            height: Qt.platform.os === "windows" ? 685 : 675
             color: Colors.selectedImageBackground
             anchors.centerIn: parent
             Component.onCompleted: anchors.centerIn = undefined
@@ -492,6 +492,15 @@ CloseRequested")
                                         height: titleFlick.height
                                         text: combinedArtworks.title
                                         onTextChanged: combinedArtworks.title = text
+                                        userDictEnabled: true
+
+                                        onActionRightClicked: {
+                                            if (combinedArtworks.hasTitleWordSpellError(rightClickedWord)) {
+                                                console.log("Context menu for add word " + rightClickedWord)
+                                                addWordContextMenu.word = rightClickedWord
+                                                addWordContextMenu.popup()
+                                            }
+                                        }
 
                                         Keys.onBacktabPressed: {
                                             event.accepted = true
@@ -657,6 +666,7 @@ CloseRequested")
                                         height: descriptionFlick.height
                                         text: combinedArtworks.description
                                         focus: true
+                                        userDictEnabled: true
                                         property string previousText: text
                                         property int maximumLength: 280
                                         onTextChanged: {
@@ -672,6 +682,14 @@ CloseRequested")
 
                                             previousText = text
                                             combinedArtworks.description = text
+                                        }
+
+                                        onActionRightClicked: {
+                                            if (combinedArtworks.hasDescriptionWordSpellError(rightClickedWord)) {
+                                                console.log("Context menu for add word " + rightClickedWord)
+                                                addWordContextMenu.word = rightClickedWord
+                                                addWordContextMenu.popup()
+                                            }
                                         }
 
                                         wrapMode: TextEdit.Wrap
@@ -732,7 +750,7 @@ CloseRequested")
                 Item {
                     anchors.left: parent.left
                     anchors.right: parent.right
-                    height: Qt.platform.os === 'windows' ? 208 : 205
+                    height: Qt.platform.os === 'windows' ? 228 : 225
 
                     Item {
                         id: checkboxPane
@@ -866,9 +884,11 @@ CloseRequested")
                                                                 {
                                                                     callbackObject: callbackObject,
                                                                     previousKeyword: keyword,
+                                                                    keywordIndex: kw.delegateIndex,
                                                                     keywordsModel: keywordsWrapper.keywordsModel
                                                                 })
                                         }
+
                                         onActionRightClicked: {
                                             if (!iscorrect) {
                                                 console.log("Context menu for add word")
@@ -876,7 +896,6 @@ CloseRequested")
                                                 addWordContextMenu.popup()
                                             }
                                         }
-
                                     }
 
                                     onTagAdded: {
@@ -922,21 +941,50 @@ CloseRequested")
                                 anchors.right: parent.right
                                 height: childrenRect.height
 
-                                StyledCheckbox {
-                                    anchors.left: parent.left
-                                    anchors.top: parent.top
-                                    id: appendKeywordsCheckbox
-                                    text: i18.n + qsTr("Only append new keywords")
-                                    labelColor: Colors.labelActiveForeground
-                                    onClicked: combinedArtworks.appendKeywords = checked
-                                    Component.onCompleted: appendKeywordsCheckbox.checked = combinedArtworks.appendKeywords
-                                }
-
                                 RowLayout {
                                     anchors.top: parent.top
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: 3
                                     anchors.right: parent.right
                                     anchors.rightMargin: 3
                                     spacing: 5
+
+                                    StyledText {
+                                        id: plainTextText
+                                        text: i18.n + qsTr("<u>edit in plain text</u>")
+                                        color: plainTextMA.containsMouse ? Colors.linkClickedColor : Colors.labelActiveForeground
+
+                                        MouseArea {
+                                            id: plainTextMA
+                                            anchors.fill: parent
+                                            cursorShape: Qt.PointingHandCursor
+                                            onClicked: {
+                                                // strange bug with clicking on the keywords field
+                                                if (!containsMouse) { return; }
+
+                                                var callbackObject = {
+                                                    onSuccess: function(text) {
+                                                        combinedArtworks.plainTextEdit(text)
+                                                    },
+                                                    onClose: function() {
+                                                        flv.activateEdit()
+                                                    }
+                                                }
+
+                                                Common.launchDialog("Dialogs/PlainTextKeywordsDialog.qml",
+                                                                    applicationWindow,
+                                                                    {
+                                                                        callbackObject: callbackObject,
+                                                                        keywordsText: combinedArtworks.getKeywordsString(),
+                                                                        keywordsModel: combinedArtworks.getKeywordsModel()
+                                                                    });
+                                            }
+                                        }
+                                    }
+
+                                    Item {
+                                        Layout.fillWidth: true
+                                    }
 
                                     StyledText {
                                         text: i18.n + qsTr("Fix spelling")
@@ -1024,6 +1072,18 @@ CloseRequested")
                                         }
                                     }
                                 }
+                            }
+
+                            Item {
+                                height: 3
+                            }
+
+                            StyledCheckbox {
+                                id: appendKeywordsCheckbox
+                                text: i18.n + qsTr("Only append new keywords")
+                                labelColor: Colors.labelActiveForeground
+                                onClicked: combinedArtworks.appendKeywords = checked
+                                Component.onCompleted: appendKeywordsCheckbox.checked = combinedArtworks.appendKeywords
                             }
 
                             Item {
