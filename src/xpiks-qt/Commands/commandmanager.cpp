@@ -513,7 +513,7 @@ void Commands::CommandManager::submitForSpellCheck(const QVector<Models::Artwork
 
         for (int i = 0; i < count; ++i) {
             Models::ArtworkMetadata *metadata = items.at(i);
-            itemsToSubmit << metadata->getKeywordsModel();
+            itemsToSubmit << metadata->getBasicModel();
         }
 
         this->submitForSpellCheck(itemsToSubmit);
@@ -533,7 +533,7 @@ void Commands::CommandManager::submitItemForSpellCheck(Common::BasicKeywordsMode
     }
 }
 
-void Commands::CommandManager::setupSpellCheckSuggestions(Common::BasicKeywordsModel *item, int index, Common::SuggestionFlags flags) {
+void Commands::CommandManager::setupSpellCheckSuggestions(Common::BasicMetadataModel *item, int index, Common::SuggestionFlags flags) {
     Q_ASSERT(item != NULL);
     if (m_SpellCheckSuggestionModel) {
         m_SpellCheckSuggestionModel->setupModel(item, index, flags);

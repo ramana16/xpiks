@@ -32,7 +32,7 @@
 #include <memory>
 #include <vector>
 #include "artworksviewmodel.h"
-#include "../Common/basickeywordsmodel.h"
+#include "../Common/basicmetadatamodel.h"
 #include "../Common/flags.h"
 #include "../SpellCheck/spellcheckiteminfo.h"
 #include "../Common/hold.h"
@@ -144,7 +144,7 @@ namespace Models {
         void generateAboutToBeRemoved();
 
 #ifdef INTEGRATION_TESTS
-        Common::BasicKeywordsModel *getBasicKeywordsModel() { return &m_CommonKeywordsModel; }
+        Common::BasicMetadataModel *getBasicMetadataModel() { return &m_CommonKeywordsModel; }
 #endif
 
 #ifdef CORE_TESTS
@@ -162,7 +162,7 @@ namespace Models {
         Q_INVOKABLE void clearKeywords();
 
         Q_INVOKABLE QString getKeywordsString() { return m_CommonKeywordsModel.getKeywordsString(); }
-        Q_INVOKABLE QObject *getKeywordsModel() {
+        Q_INVOKABLE QObject *getBasicModel() {
             QObject *item = &m_CommonKeywordsModel;
             QQmlEngine::setObjectOwnership(item, QQmlEngine::CppOwnership);
 
@@ -203,7 +203,7 @@ namespace Models {
 
     private:
         Common::Hold m_HoldPlaceholder;
-        Common::BasicKeywordsModel m_CommonKeywordsModel;
+        Common::BasicMetadataModel m_CommonKeywordsModel;
         SpellCheck::SpellCheckItemInfo m_SpellCheckInfo;
         Common::CombinedEditFlags m_EditFlags;
         int m_ModifiedFlags;

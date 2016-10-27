@@ -54,7 +54,7 @@ int SpellCheckCombinedModelTest::doTest() {
     QThread::sleep(1);
 
     Models::CombinedArtworksModel *combinedModel = m_CommandManager->getCombinedArtworksModel();
-    Common::BasicKeywordsModel *basicModel = combinedModel->getBasicKeywordsModel();
+    auto *basicModel = combinedModel->getBasicMetadataModel();
     QObject::connect(basicModel, SIGNAL(spellCheckErrorsChanged()),
                      &waiter, SIGNAL(finished()));
 
