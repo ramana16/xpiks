@@ -86,7 +86,8 @@
 #include "MetadataIO/exiv2inithelper.h"
 #include "Models/findandreplacemodel.h"
 #include "Models/previewmetadataelement.h"
-
+#include "PresetKeywords/presetkeywordsmodel.h"
+#include "PresetKeywords/presetkeywordsmodelconfig.h"
 void myMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg) {
     Q_UNUSED(context);
 
@@ -296,6 +297,8 @@ int main(int argc, char *argv[]) {
     Models::ArtItemsModel artItemsModel;
     Models::CombinedArtworksModel combinedArtworksModel;
     Models::UploadInfoRepository uploadInfoRepository;
+    Preset::PresetKeywordsModel presetModel;
+    Preset::PresetKeywordsModelConfig presetModelConfig;
     Warnings::WarningsService warningsService;
     Models::SettingsModel settingsModel;
     settingsModel.readAllValues();
@@ -370,7 +373,8 @@ int main(int argc, char *argv[]) {
     commandManager.InjectDependency(&replaceModel);
     commandManager.InjectDependency(&deleteKeywordsModel);
     commandManager.InjectDependency(&helpersQmlWrapper);
-
+    commandManager.InjectDependency(&presetModel);
+    commandManager.InjectDependency(&presetModelConfig);
     commandManager.ensureDependenciesInjected();
 
     keywordsSuggestor.initSuggestionEngines();
@@ -386,6 +390,7 @@ int main(int argc, char *argv[]) {
     languagesModel.loadLanguages();
 
     telemetryService.setInterfaceLanguage(languagesModel.getCurrentLanguage());
+    presetModelConfig.initializeConfigs();
 
     qmlRegisterType<Helpers::ClipboardHelper>("xpiks", 1, 0, "ClipboardHelper");
     qmlRegisterType<QMLExtensions::TriangleElement>("xpiks", 1, 0, "TriangleElement");
@@ -416,6 +421,7 @@ int main(int argc, char *argv[]) {
     rootContext->setContextProperty("Colors", &colorsModel);
     rootContext->setContextProperty("acSource", &autoCompleteModel);
     rootContext->setContextProperty("replaceModel", &replaceModel);
+    rootContext->setContextProperty("presetsModel", &presetModel);
 
 #ifdef QT_DEBUG
     QVariant isDebug(true);

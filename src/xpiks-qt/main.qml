@@ -489,6 +489,14 @@ ApplicationWindow {
                     openUploadDialog(true)
                 }
             }
+
+            MenuItem {
+                text: i18.n + qsTr("&Presets")
+                onTriggered: {
+                    console.info("Presets triggered")
+                    Common.launchDialog("Dialogs/PresetEditDialog.qml", applicationWindow, {})
+                }
+            }
         }
 
         Menu {
@@ -695,12 +703,61 @@ ApplicationWindow {
     }
 
     Menu {
-        id: addWordContextMenu
+        id: wordRightClickMenu
         property string word
+        property var presets
+        property int artworkIndex
+        property bool showAddToDict : true
+        property bool showExpandPreset : false
 
         MenuItem {
-            text: qsTr("Add to dictionary")
-            onTriggered: spellCheckService.addWordToUserDictionary(addWordContextMenu.word);
+            visible: wordRightClickMenu.showAddToDict
+            text: i18.n + qsTr("Add to dictionary")
+            onTriggered: spellCheckService.addWordToUserDictionary(wordRightClickMenu.word);
+        }
+
+
+        Instantiator {
+            active: wordRightClickMenu.showExpandPreset
+            model: wordRightClickMenu.presets
+            onObjectAdded: wordRightClickMenu.insertItem( index, object )
+            onObjectRemoved: wordRightClickMenu.removeItem( object )
+            delegate: MenuItem {
+                text: i18.n + qsTr("Expand as preset \"%1\"").arg(modelData)
+                onTriggered: {
+                    filteredArtItemsModel.replaceFromPreset(wordRightClickMenu.artworkIndex, wordRightClickMenu.word, modelData);
+                }
+
+            }
+        }
+    }
+
+
+    Menu {
+        id: presetsMenu
+        property int maxSize : 2
+        property int artworkIndex : 0
+
+        Instantiator {
+            model: presetsModel
+            onObjectAdded:{
+                if (index <= presetsMenu.maxSize) {
+                    presetsMenu.insertItem( index, object )
+                }
+            }
+            onObjectRemoved: presetsMenu.removeItem( object )
+            delegate: MenuItem {
+                text: i18.n + qsTr("Expand as preset \"%1\"").arg(name)
+                onTriggered: {
+                    filteredArtItemsModel.appendFromPreset(presetsMenu.artworkIndex, index);
+                }
+
+            }
+        }
+
+        MenuItem {
+            visible:  presetsInstantiator.count >= presetsMenu.maxSize
+            text: i18.n + qsTr("More ....")
         }
     }
 
@@ -1889,11 +1946,16 @@ ApplicationWindow {
                                                             userDictEnabled: true
 
                                                             onActionRightClicked: {
-                                                                if (filteredArtItemsModel.hasDescriptionWordSpellError(rowWrapper.delegateIndex, rightClickedWord)){
-                                                                    console.log("Context menu for add word " + rightClickedWord)
-                                                                    addWordContextMenu.word = rightClickedWord
-                                                                    addWordContextMenu.popup()
+                                                                console.log("Context menu for add word " + rightClickedWord)
+                                                                var showAddToDict = filteredArtItemsModel.hasDescriptionWordSpellError(rowWrapper.delegateIndex, rightClickedWord)
+                                                                wordRightClickMenu.showAddToDict = showAddToDict
+                                                                wordRightClickMenu.word = rightClickedWord
+                                                                wordRightClickMenu.showExpandPreset = false
+                                                                if (wordRightClickMenu.showAddToDict ||
+                                                                        wordRightClickMenu.showExpandPreset) {
+                                                                    wordRightClickMenu.popup()
                                                                 }
+
 
                                                             }
 
@@ -1995,10 +2057,13 @@ ApplicationWindow {
                                                             userDictEnabled: true
 
                                                             onActionRightClicked: {
-                                                                if (filteredArtItemsModel.hasTitleWordSpellError(rowWrapper.delegateIndex, rightClickedWord)){
-                                                                    console.log("Context menu for add word " + rightClickedWord)
-                                                                    addWordContextMenu.word = rightClickedWord
-                                                                    addWordContextMenu.popup()
+                                                                var showAddToDict = filteredArtItemsModel.hasTitleWordSpellError(rowWrapper.delegateIndex, rightClickedWord)
+                                                                wordRightClickMenu.showAddToDict = showAddToDict
+                                                                wordRightClickMenu.word = rightClickedWord
+                                                                wordRightClickMenu.showExpandPreset = false
+                                                                if (wordRightClickMenu.showAddToDict ||
+                                                                        wordRightClickMenu.showExpandPreset) {
+                                                                    wordRightClickMenu.popup()
                                                                 }
                                                             }
 
@@ -2131,10 +2196,16 @@ ApplicationWindow {
                                                             }
 
                                                             onActionRightClicked: {
-                                                                if (!iscorrect) {
-                                                                    console.log("Context menu for add word " + kw.keywordText);
-                                                                    addWordContextMenu.word = kw.keywordText;
-                                                                    addWordContextMenu.popup()
+                                                                wordRightClickMenu.showAddToDict = !iscorrect
+                                                                var keyword = kw.keywordText
+                                                                wordRightClickMenu.word = keyword
+                                                                var presets = presetsModel.getFilteredPresets(keyword)
+                                                                wordRightClickMenu.showExpandPreset = (presets.length !== 0 )
+                                                                wordRightClickMenu.presets = presets
+                                                                wordRightClickMenu.artworkIndex =  rowWrapper.delegateIndex
+                                                                if (wordRightClickMenu.showAddToDict ||
+                                                                        wordRightClickMenu.showExpandPreset) {
+                                                                    wordRightClickMenu.popup()
                                                                 }
                                                             }
                                                         }
@@ -2175,6 +2246,11 @@ ApplicationWindow {
                                                         onEditActivated: {
                                                             wrappersScope.updateCurrentIndex()
                                                             flv.activateEdit()
+                                                        }
+
+                                                        onClickedInsideRight: {
+                                                            presetsMenu.artworkIndex = rowWrapper.delegateIndex;
+                                                            presetsMenu.popup()
                                                         }
                                                     }
 

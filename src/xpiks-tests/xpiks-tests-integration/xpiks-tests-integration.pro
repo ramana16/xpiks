@@ -154,7 +154,9 @@ SOURCES += main.cpp \
     artworkuploaderbasictest.cpp \
     ../../xpiks-qt/MetadataIO/exiv2inithelper.cpp \
     ../../xpiks-qt/Warnings/warningssettingsmodel.cpp \
-    ../../xpiks-qt/Helpers/updatehelpers.cpp
+    ../../xpiks-qt/Helpers/updatehelpers.cpp \
+    ../../xpiks-qt/PresetKeywords/presetkeywordsmodel.cpp \
+    ../../xpiks-qt/PresetKeywords/presetkeywordsmodelconfig.cpp
 
 RESOURCES +=
 
@@ -337,7 +339,9 @@ HEADERS += \
     ../../xpiks-qt/MetadataIO/exiv2inithelper.h \
     ../../xpiks-qt/Warnings/warningssettingsmodel.h \
     ../../xpiks-qt/Conectivity/apimanager.h \
-    ../../xpiks-qt/Helpers/updatehelpers.h
+    ../../xpiks-qt/Helpers/updatehelpers.h \
+    ../../xpiks-qt/PresetKeywords/presetkeywordsmodel.h \
+    ../../xpiks-qt/PresetKeywords/presetkeywordsmodelconfig.h
 
 INCLUDEPATH += ../../tiny-aes
 INCLUDEPATH += ../../cpp-libface

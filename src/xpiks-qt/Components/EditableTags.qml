@@ -64,6 +64,7 @@ Flickable {
     signal tabPressed();
     signal editActivated();
     signal clickedInside();
+    signal clickedInsideRight();
 
     signal completionRequested(string prefix);
 
@@ -164,9 +165,15 @@ Flickable {
         anchors.left: parent.left
         anchors.top: parent.top
         width: parent.width
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
         height: flowListView.contentHeight > flowListView.height ? flowListView.contentHeight : flowListView.height
 
         onClicked: {
+            if (mouse.button == Qt.RightButton) {
+                clickedInsideRight()
+                mouse.accepted = true
+                return
+            }
             activateEdit()
             clickedInside()
             mouse.accepted = false

@@ -83,6 +83,63 @@ CloseRequested")
         }
     }
 
+    Menu {
+        id: wordRightClickMenu
+        property string word
+        property var presets
+        property bool showAddToDict : true
+        property bool showExpandPreset : false
+
+        MenuItem {
+            visible: wordRightClickMenu.showAddToDict
+            text: i18.n + qsTr("Add to dictionary")
+            onTriggered: spellCheckService.addWordToUserDictionary(wordRightClickMenu.word);
+        }
+
+
+        Instantiator {
+            active: wordRightClickMenu.showExpandPreset
+            model: wordRightClickMenu.presets
+            onObjectAdded: wordRightClickMenu.insertItem( index, object )
+            onObjectRemoved: wordRightClickMenu.removeItem( object )
+            delegate: MenuItem {
+                text: i18.n + qsTr("Expand as preset \"%1\"").arg(modelData)
+                onTriggered: {
+                    combinedArtworks.replaceFromPreset(wordRightClickMenu.word, modelData);
+                }
+
+            }
+        }
+    }
+
+
+    Menu {
+        id: presetsMenu
+        property int maxSize : 2
+
+        Instantiator {
+            model: presetsModel
+            onObjectAdded:{
+                if (index <= presetsMenu.maxSize) {
+                    presetsMenu.insertItem( index, object )
+                }
+            }
+            onObjectRemoved: presetsMenu.removeItem( object )
+            delegate: MenuItem {
+                text: i18.n + qsTr("Expand as preset \"%1\"").arg(name)
+                onTriggered: {
+                    combinedArtworks.appendFromPreset(index);
+                }
+
+            }
+        }
+
+        MenuItem {
+            visible:  presetsInstantiator.count >= presetsMenu.maxSize
+            text: i18.n + qsTr("More ....")
+        }
+    }
+
     function doRemoveSelectedArtworks() {
         combinedArtworks.removeSelectedArtworks()
     }
@@ -495,10 +552,13 @@ CloseRequested")
                                         userDictEnabled: true
 
                                         onActionRightClicked: {
-                                            if (combinedArtworks.hasTitleWordSpellError(rightClickedWord)) {
-                                                console.log("Context menu for add word " + rightClickedWord)
-                                                addWordContextMenu.word = rightClickedWord
-                                                addWordContextMenu.popup()
+                                            var showAddToDict = combinedArtworks.hasTitleWordSpellError(rightClickedWord)
+                                            wordRightClickMenu.showAddToDict = showAddToDict
+                                            wordRightClickMenu.word = rightClickedWord
+                                            wordRightClickMenu.showExpandPreset = false
+                                            if (wordRightClickMenu.showAddToDict ||
+                                                    wordRightClickMenu.showExpandPreset) {
+                                                wordRightClickMenu.popup()
                                             }
                                         }
 
@@ -685,10 +745,13 @@ CloseRequested")
                                         }
 
                                         onActionRightClicked: {
-                                            if (combinedArtworks.hasDescriptionWordSpellError(rightClickedWord)) {
-                                                console.log("Context menu for add word " + rightClickedWord)
-                                                addWordContextMenu.word = rightClickedWord
-                                                addWordContextMenu.popup()
+                                            var showAddToDict = combinedArtworks.hasTitleWordSpellError(rightClickedWord)
+                                            wordRightClickMenu.showAddToDict = showAddToDict
+                                            wordRightClickMenu.word = rightClickedWord
+                                            wordRightClickMenu.showExpandPreset = false
+                                            if (wordRightClickMenu.showAddToDict ||
+                                                    wordRightClickMenu.showExpandPreset) {
+                                                wordRightClickMenu.popup()
                                             }
                                         }
 
@@ -890,10 +953,16 @@ CloseRequested")
                                         }
 
                                         onActionRightClicked: {
-                                            if (!iscorrect) {
-                                                console.log("Context menu for add word")
-                                                addWordContextMenu.word = kw.keywordText;
-                                                addWordContextMenu.popup()
+                                            var showAddToDict = !iscorrect
+                                            wordRightClickMenu.showAddToDict = showAddToDict
+                                            var keyword = kw.keywordText
+                                            wordRightClickMenu.word = keyword
+                                            var presets = presetsModel.getFilteredPresets(keyword)
+                                            wordRightClickMenu.showExpandPreset = (presets.length !== 0 )
+                                            wordRightClickMenu.presets = presets
+                                            if (wordRightClickMenu.showAddToDict ||
+                                                    wordRightClickMenu.showExpandPreset) {
+                                                wordRightClickMenu.popup()
                                             }
                                         }
                                     }
@@ -923,6 +992,9 @@ CloseRequested")
                                     onCompletionRequested: {
                                         helpersWrapper.autoCompleteKeyword(prefix,
                                                                            keywordsWrapper.keywordsModel)
+                                    }
+                                    onClickedInsideRight: {
+                                        presetsMenu.popup()
                                     }
                                 }
 

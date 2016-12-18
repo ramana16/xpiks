@@ -386,6 +386,65 @@ namespace Models {
         return result;
     }
 
+    void FilteredArtItemsProxyModel::appendFromPreset(int index, int presetIndex)
+    {
+        if (0 <= index && index < rowCount()) {
+            int originalIndex = getOriginalIndex(index);
+            LOG_INFO << originalIndex;
+            auto presetModel = m_CommandManager->getPresetModel();
+            QStringList keywords = presetModel->getKeywords(presetIndex);
+            ArtItemsModel *artItemsModel = getArtItemsModel();
+            ArtworkMetadata *metadata = artItemsModel->getArtwork(originalIndex);
+
+            if (metadata != NULL) {
+                auto *keywordsModel = metadata->getBasicModel();
+                keywordsModel->changeFromPreset(keywords);
+            }
+        }
+    }
+
+    void FilteredArtItemsProxyModel::replaceFromPreset(int index, const QString & keywordsName, int presetIndex)
+    {
+        if (0 <= index && index < rowCount()) {
+            int originalIndex = getOriginalIndex(index);
+            LOG_INFO << originalIndex;
+            auto presetModel = m_CommandManager->getPresetModel();
+            QString presetName = presetModel->getNameFromIndex(presetIndex);
+            if (presetName == QString()){
+                return;
+            }
+            QStringList keywords = presetModel->getKeywords(presetIndex);
+            ArtItemsModel *artItemsModel = getArtItemsModel();
+            ArtworkMetadata *metadata = artItemsModel->getArtwork(originalIndex);
+
+            if (metadata != NULL) {
+                auto *keywordsModel = metadata->getBasicModel();
+                keywordsModel->changeFromPreset(keywordsName, keywords);
+            }
+        }
+    }
+
+    void FilteredArtItemsProxyModel::replaceFromPreset(int index, const QString & keywordsName, const QString & presetName)
+    {
+        if (0 <= index && index < rowCount()) {
+            int originalIndex = getOriginalIndex(index);
+            LOG_INFO << originalIndex;
+            auto presetModel = m_CommandManager->getPresetModel();
+            int presetIndex =  presetModel->getIndexFromName(presetName);
+            if (presetIndex  < 0){
+                return;
+            }
+            QStringList keywords = presetModel->getKeywords(presetIndex);
+            ArtItemsModel *artItemsModel = getArtItemsModel();
+            ArtworkMetadata *metadata = artItemsModel->getArtwork(originalIndex);
+
+            if (metadata != NULL) {
+                auto *keywordsModel = metadata->getBasicModel();
+                keywordsModel->changeFromPreset(keywordsName, keywords);
+            }
+        }
+    }
+
     void FilteredArtItemsProxyModel::itemSelectedChanged(bool value) {
         int plus = value ? +1 : -1;
 

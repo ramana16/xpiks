@@ -39,8 +39,9 @@ namespace Models {
         Q_ASSERT(m_CommandManager != NULL);
         Models::SettingsModel *settingsModel = m_CommandManager->getSettingsModel();
         ProxySettings *proxySettings = settingsModel->retrieveProxySettings();
-
-        m_RemoteConfig.requestInitConfig(configUrl, proxySettings);
+        if (!configUrl.isEmpty()){
+            m_RemoteConfig.requestInitConfig(configUrl, proxySettings);
+        }
     }
 
     void AbstractConfigUpdaterModel::remoteConfigArrived() {

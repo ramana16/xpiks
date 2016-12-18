@@ -305,6 +305,45 @@ namespace Models {
         return m_CommonKeywordsModel.hasDescriptionWordSpellError(word);
     }
 
+    void CombinedArtworksModel::replaceFromPreset(const QString &keywordsName, int presetIndex)
+    {
+        auto presetModel = m_CommandManager->getPresetModel();
+        QStringList keywords = presetModel->getKeywords(presetIndex);
+        if (keywords.empty()){
+            return;
+        }
+        m_CommonKeywordsModel.changeFromPreset(keywordsName, keywords);
+        emit keywordsCountChanged();
+        setKeywordsModified(true);
+        m_CommandManager->submitItemForSpellCheck(&m_CommonKeywordsModel, Common::SpellCheckFlags::Keywords);
+    }
+
+    void CombinedArtworksModel::replaceFromPreset(const QString &keywordsName, const QString &presetName)
+    {
+        auto presetModel = m_CommandManager->getPresetModel();
+        int presetIndex = presetModel->getIndexFromName(presetName);
+        if (presetIndex < 0){
+            return;
+        }
+        QStringList keywords = presetModel->getKeywords(presetIndex);
+        m_CommonKeywordsModel.changeFromPreset(keywordsName, keywords);
+        emit keywordsCountChanged();
+        setKeywordsModified(true);
+        m_CommandManager->submitItemForSpellCheck(&m_CommonKeywordsModel, Common::SpellCheckFlags::Keywords);
+    }
+
+    void CombinedArtworksModel::appendFromPreset(int presetIndex) {
+        auto presetModel = m_CommandManager->getPresetModel();
+        QStringList keywords = presetModel->getKeywords(presetIndex);
+        if (keywords.empty()){
+            return;
+        }
+        m_CommonKeywordsModel.changeFromPreset(keywords);
+        emit keywordsCountChanged();
+        setKeywordsModified(true);
+        m_CommandManager->submitItemForSpellCheck(&m_CommonKeywordsModel, Common::SpellCheckFlags::Keywords);
+    }
+
     void CombinedArtworksModel::plainTextEdit(const QString &rawKeywords) {
         QStringList keywords = rawKeywords.trimmed().split(QChar(','), QString::SkipEmptyParts);
 

@@ -119,7 +119,9 @@ SOURCES += main.cpp \
     MetadataIO/exiv2inithelper.cpp \
     Conectivity/simplecurldownloader.cpp \
     Helpers/updatehelpers.cpp \
-    Common/basicmetadatamodel.cpp
+    Common/basicmetadatamodel.cpp \
+    PresetKeywords/presetkeywordsmodel.cpp \
+    PresetKeywords/presetkeywordsmodelconfig.cpp
 
 RESOURCES += qml.qrc
 
@@ -296,7 +298,9 @@ HEADERS += \
     Conectivity/simplecurldownloader.h \
     Conectivity/apimanager.h \
     Helpers/updatehelpers.h \
-    Common/basicmetadatamodel.h
+    Common/basicmetadatamodel.h \
+    PresetKeywords/presetkeywordsmodel.h \
+    PresetKeywords/presetkeywordsmodelconfig.h
 
 DISTFILES += \
     Components/CloseIcon.qml \
@@ -366,7 +370,8 @@ DISTFILES += \
     Dialogs/ReplacePreview.qml \
     Dialogs/DeleteKeywordsDialog.qml \
     Dialogs/FailedUploadArtworks.qml \
-    Dialogs/InstallUpdateDialog.qml
+    Dialogs/InstallUpdateDialog.qml \
+    Dialogs/PresetEditDialog.qml
 
 lupdate_only {
 SOURCES += *.qml \

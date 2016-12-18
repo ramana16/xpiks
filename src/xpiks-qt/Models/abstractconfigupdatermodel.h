@@ -40,7 +40,9 @@ namespace Models {
 
     public:
         void initializeConfigs(const QString &configUrl, const QString &filePath);
+        void initializeConfigs(const QString &filePath) {initializeConfigs(QString(), filePath);}
         const Helpers::LocalConfig &getLocalConfig() const { return m_LocalConfig; }
+        Helpers::LocalConfig &getLocalConfig() { return m_LocalConfig; }
 
     private slots:
         void remoteConfigArrived();
