@@ -7,11 +7,11 @@
 #include <QAbstractListModel>
 #include <QVector>
 
-namespace Preset {
+namespace Presets {
 
 struct Preset {
-   std::shared_ptr<Common::BasicKeywordsModel> keys;
-   QString name;
+   std::shared_ptr<Common::BasicKeywordsModel> m_KeywordsModel;
+   QString m_PresetName;
 };
 
 class PresetKeywordsModel:
@@ -24,7 +24,7 @@ Q_OBJECT
         size_t getPresetsCount() const {return m_Presets.size();}
         int getIndexFromName(const QString & presetName);
         QString getNameFromIndex(int index);
-        QStringList getKeywords(int index);
+        bool tryGetPreset(int presetIndex, QStringList &keywords);
 
     public:
        enum PresetKeywords_Roles {
@@ -42,14 +42,13 @@ Q_OBJECT
         Q_INVOKABLE void addItem();
         Q_INVOKABLE void editKeyword(int index, int keywordIndex, const QString &replacement);
         Q_INVOKABLE QString removeKeywordAt(int index, int keywordIndex);
-        Q_INVOKABLE void plainTextEdit(int index, const QString &rawKeywords, bool spaceSeparator);
         Q_INVOKABLE void appendKeyword(int index, const QString &keyword);
         Q_INVOKABLE QObject *getKeywordsModel(int index);
         Q_INVOKABLE void saveToConfig();
-        Q_INVOKABLE void resetModel();
+        Q_INVOKABLE void loadFromConfigModel();
         Q_INVOKABLE QStringList getFilteredPresets(const QString &  word);
     public slots:
-       void presetsUpdated() {LOG_WARNING<<"preset Model"; resetModel();}
+       void onPresetsUpdated() { LOG_INFO << "loading Model"; loadFromConfigModel();}
     private:
         Common::Hold m_HoldPlaceholder;
         QVector<Preset> m_Presets;

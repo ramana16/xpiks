@@ -173,13 +173,13 @@ namespace Common {
         setKeywordsUnsafe(keywordsList);
     }
 
-    bool BasicKeywordsModel::replaceKeywords(const QString &replaceFrom, const QStringList &keywordsList)
+    bool BasicKeywordsModel::expandPreset(const QString &expandFrom, const QStringList &keywordsList)
     {
         QWriteLocker writeLocker(&m_KeywordsLock);
 
         Q_UNUSED(writeLocker);
 
-        return replaceKeywordsUnsafe(replaceFrom, keywordsList);
+        return expandPresetUnsafe(expandFrom, keywordsList);
 
     }
 
@@ -498,17 +498,19 @@ namespace Common {
         return anythingRemoved;
     }
 
-    bool BasicKeywordsModel::replaceKeywordsUnsafe(const QString &replaceFrom, const QStringList &keywordsList) {
+    bool BasicKeywordsModel::expandPresetUnsafe(const QString &expandFrom, const QStringList &keywordsList) {
         int size = m_KeywordsList.size();
         bool result = false;
-        LOG_DEBUG << "tashatasha " << replaceFrom << " " << keywordsList;
+        LOG_DEBUG << "target word " << expandFrom << " " << keywordsList;
 
         for (int i = 0; i < size; ++i) {
-            auto & internal = m_KeywordsList.at(i);
-            if (internal != replaceFrom) {
+            auto &internal = m_KeywordsList.at(i);
+            if (internal != expandFrom) {
                 continue;
             }
-            removeKeywordsAtIndicesUnsafe({i});
+            QVector<int> temp;
+            temp << i;
+            removeKeywordsAtIndicesUnsafe(temp);
             appendKeywordsUnsafe(keywordsList);
             result = true;
             break;

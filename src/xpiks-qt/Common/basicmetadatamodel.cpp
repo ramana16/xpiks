@@ -259,7 +259,7 @@ namespace Common {
 
     void BasicMetadataModel::changeFromPreset(const QString &word, const QStringList & presetList)
     {
-        replaceKeywords(word, presetList);
+        expandPreset(word, presetList);
     }
 
     void BasicMetadataModel::changeFromPreset(const QStringList & presetList)

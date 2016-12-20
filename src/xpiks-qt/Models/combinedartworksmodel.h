@@ -179,8 +179,8 @@ namespace Models {
 
         Q_INVOKABLE bool hasTitleWordSpellError(const QString &word);
         Q_INVOKABLE bool hasDescriptionWordSpellError(const QString &word);
-        Q_INVOKABLE void replaceFromPreset(const QString & keywordsName, int presetIndex);
-        Q_INVOKABLE void replaceFromPreset(const QString & keywordsName, const QString & presetName);
+        Q_INVOKABLE void replaceFromPreset(const QString &keywordsName, int presetIndex);
+        Q_INVOKABLE void replaceFromPreset(const QString &keywordsName, const QString &presetName);
         Q_INVOKABLE void appendFromPreset(int presetIndex);
 
     private:

@@ -88,6 +88,7 @@
 #include "Models/previewmetadataelement.h"
 #include "PresetKeywords/presetkeywordsmodel.h"
 #include "PresetKeywords/presetkeywordsmodelconfig.h"
+
 void myMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg) {
     Q_UNUSED(context);
 
@@ -297,8 +298,8 @@ int main(int argc, char *argv[]) {
     Models::ArtItemsModel artItemsModel;
     Models::CombinedArtworksModel combinedArtworksModel;
     Models::UploadInfoRepository uploadInfoRepository;
-    Preset::PresetKeywordsModel presetModel;
-    Preset::PresetKeywordsModelConfig presetModelConfig;
+    Presets::PresetKeywordsModel presetModel;
+    Presets::PresetKeywordsModelConfig presetModelConfig;
     Warnings::WarningsService warningsService;
     Models::SettingsModel settingsModel;
     settingsModel.readAllValues();

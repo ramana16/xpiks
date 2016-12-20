@@ -4,7 +4,7 @@
 #include "../Models/abstractconfigupdatermodel.h"
 #include "presetkeywordsmodel.h"
 
-namespace  Preset {
+namespace  Presets {
     struct PresetData {
         QStringList keys;
         QString name;

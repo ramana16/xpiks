@@ -46,7 +46,7 @@ Item {
 
     function closePopup(){
         presetEditComponent.destroy();
-        presetsModel.resetModel();
+        presetsModel.loadFromConfigModel();
     }
 
     PropertyAnimation { target: presetEditComponent; property: "opacity";

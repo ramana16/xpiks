@@ -197,16 +197,15 @@ void Commands::CommandManager::InjectDependency(Helpers::HelpersQmlWrapper *help
     m_HelpersQmlWrapper->setCommandManager(this);
 }
 
-void Commands::CommandManager::InjectDependency(Preset::PresetKeywordsModel *presetModel)
-{
-    Q_ASSERT(presetModel != NULL); m_PresetModel = presetModel;
-    m_PresetModel->setCommandManager(this);
+void Commands::CommandManager::InjectDependency(Presets::PresetKeywordsModel *presetModel) {
+    Q_ASSERT(presetModel != NULL); m_PresetsModel = presetModel;
+    m_PresetsModel->setCommandManager(this);
 }
 
-void Commands::CommandManager::InjectDependency(Preset::PresetKeywordsModelConfig *presetModelConfig)
+void Commands::CommandManager::InjectDependency(Presets::PresetKeywordsModelConfig *presetModelConfig)
 {
-    Q_ASSERT(presetModelConfig != NULL); m_PresetModelConfig = presetModelConfig;
-    m_PresetModelConfig->setCommandManager(this);
+    Q_ASSERT(presetModelConfig != NULL); m_PresetsModelConfig = presetModelConfig;
+    m_PresetsModelConfig->setCommandManager(this);
 }
 
 std::shared_ptr<Commands::ICommandResult> Commands::CommandManager::processCommand(const std::shared_ptr<ICommandBase> &command)
@@ -294,8 +293,8 @@ void Commands::CommandManager::connectEntitiesSignalsSlots() const {
                          m_HelpersQmlWrapper, SLOT(updateIsDownloaded(QString)));
     }
 
-    if (m_PresetModel != NULL && m_PresetModelConfig != NULL) {
-        QObject::connect(m_PresetModelConfig, SIGNAL(presetsUpdated()), m_PresetModel, SLOT (presetsUpdated()));
+    if (m_PresetsModel != NULL && m_PresetsModelConfig != NULL) {
+        QObject::connect(m_PresetsModelConfig, SIGNAL(presetsUpdated()), m_PresetsModel, SLOT (onPresetsUpdated()));
     }
 }
 
@@ -328,8 +327,8 @@ void Commands::CommandManager::ensureDependenciesInjected() {
     Q_ASSERT(m_ImageCachingService != NULL);
     Q_ASSERT(m_FindAndReplaceModel != NULL);
     Q_ASSERT(m_DeleteKeywordsViewModel != NULL);
-    Q_ASSERT(m_PresetModel != NULL);
-    Q_ASSERT(m_PresetModelConfig != NULL);
+    Q_ASSERT(m_PresetsModel != NULL);
+    Q_ASSERT(m_PresetsModelConfig != NULL);
 
 #ifndef INTEGRATION_TESTS
     Q_ASSERT(m_HelpersQmlWrapper != NULL);

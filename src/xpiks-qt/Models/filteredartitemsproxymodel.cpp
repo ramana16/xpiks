@@ -390,9 +390,12 @@ namespace Models {
     {
         if (0 <= index && index < rowCount()) {
             int originalIndex = getOriginalIndex(index);
-            LOG_INFO << originalIndex;
+            LOG_INFO << "preset index " << presetIndex << "original index" << originalIndex;
             auto presetModel = m_CommandManager->getPresetModel();
-            QStringList keywords = presetModel->getKeywords(presetIndex);
+            QStringList keywords;
+            if (!presetModel->tryGetPreset(presetIndex, keywords)){
+                return;
+            }
             ArtItemsModel *artItemsModel = getArtItemsModel();
             ArtworkMetadata *metadata = artItemsModel->getArtwork(originalIndex);
 
@@ -410,10 +413,13 @@ namespace Models {
             LOG_INFO << originalIndex;
             auto presetModel = m_CommandManager->getPresetModel();
             QString presetName = presetModel->getNameFromIndex(presetIndex);
-            if (presetName == QString()){
+            if (presetName.isEmpty()){
                 return;
             }
-            QStringList keywords = presetModel->getKeywords(presetIndex);
+            QStringList keywords;
+            if (!presetModel->tryGetPreset(presetIndex, keywords)){
+                return;
+            }
             ArtItemsModel *artItemsModel = getArtItemsModel();
             ArtworkMetadata *metadata = artItemsModel->getArtwork(originalIndex);
 
@@ -434,7 +440,10 @@ namespace Models {
             if (presetIndex  < 0){
                 return;
             }
-            QStringList keywords = presetModel->getKeywords(presetIndex);
+            QStringList keywords;
+            if (!presetModel->tryGetPreset(presetIndex, keywords)){
+                return;
+            }
             ArtItemsModel *artItemsModel = getArtItemsModel();
             ArtworkMetadata *metadata = artItemsModel->getArtwork(originalIndex);
 

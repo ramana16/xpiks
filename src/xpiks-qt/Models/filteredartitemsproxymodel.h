@@ -99,8 +99,8 @@ namespace Models {
 
         Q_INVOKABLE bool hasTitleWordSpellError(int index, const QString &word);
         Q_INVOKABLE bool hasDescriptionWordSpellError(int index, const QString &word);
-        Q_INVOKABLE void replaceFromPreset(int index, const QString & keywordsName, int presetIndex);
-        Q_INVOKABLE void replaceFromPreset(int index, const QString & keywordsName, const QString & presetName);
+        Q_INVOKABLE void replaceFromPreset(int index, const QString &keywordsName, int presetIndex);
+        Q_INVOKABLE void replaceFromPreset(int index, const QString &keywordsName, const QString &presetName);
         Q_INVOKABLE void appendFromPreset(int index, int presetIndex);
 
     public slots:

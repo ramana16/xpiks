@@ -307,9 +307,9 @@ namespace Models {
 
     void CombinedArtworksModel::replaceFromPreset(const QString &keywordsName, int presetIndex)
     {
-        auto presetModel = m_CommandManager->getPresetModel();
-        QStringList keywords = presetModel->getKeywords(presetIndex);
-        if (keywords.empty()){
+        auto *presetModel = m_CommandManager->getPresetModel();
+        QStringList keywords;
+        if (!presetModel->tryGetPreset(presetIndex, keywords)){
             return;
         }
         m_CommonKeywordsModel.changeFromPreset(keywordsName, keywords);
@@ -320,12 +320,13 @@ namespace Models {
 
     void CombinedArtworksModel::replaceFromPreset(const QString &keywordsName, const QString &presetName)
     {
-        auto presetModel = m_CommandManager->getPresetModel();
+        auto *presetModel = m_CommandManager->getPresetModel();
         int presetIndex = presetModel->getIndexFromName(presetName);
         if (presetIndex < 0){
             return;
         }
-        QStringList keywords = presetModel->getKeywords(presetIndex);
+        QStringList keywords;
+        presetModel->tryGetPreset(presetIndex, keywords);
         m_CommonKeywordsModel.changeFromPreset(keywordsName, keywords);
         emit keywordsCountChanged();
         setKeywordsModified(true);
@@ -334,8 +335,8 @@ namespace Models {
 
     void CombinedArtworksModel::appendFromPreset(int presetIndex) {
         auto presetModel = m_CommandManager->getPresetModel();
-        QStringList keywords = presetModel->getKeywords(presetIndex);
-        if (keywords.empty()){
+        QStringList keywords;
+        if (!presetModel->tryGetPreset(presetIndex, keywords)){
             return;
         }
         m_CommonKeywordsModel.changeFromPreset(keywords);

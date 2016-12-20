@@ -5,7 +5,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 
-namespace  Preset {
+namespace  Presets {
 #define PRESETKEYS_KEY QLatin1String("presetkeys")
 #define LOCAL_PRESETKEYWORDS_LIST_FILE "preset_keywords.json"
 
@@ -15,7 +15,6 @@ namespace  Preset {
 
     void PresetKeywordsModelConfig::initializeConfigs() {
         LOG_DEBUG << "#";
-
         QString localConfigPath;
 
         QString appDataPath = XPIKS_USERDATA_PATH;
@@ -41,8 +40,8 @@ namespace  Preset {
         m_PresetData.resize(size);
         for (int i = 0; i < size; i++) {
             auto &item = presets[i];
-            auto &name = item.name;
-            auto &keywordsModel = item.keys;
+            auto &name = item.m_PresetName;
+            auto &keywordsModel = item.m_KeywordsModel;
             auto keywords = keywordsModel->getKeywords();
             m_PresetData[i].keys = keywords;
             m_PresetData[i].name = name;
@@ -52,9 +51,7 @@ namespace  Preset {
     }
 
     bool PresetKeywordsModelConfig::parseConfig(const QJsonDocument &document) {
-#ifdef QT_DEBUG
-        LOG_DEBUG << document;
-#endif
+        LOG_INTEGR_TESTS_OR_DEBUG << document;
         bool anyError = false;
 
         do {
@@ -120,8 +117,9 @@ namespace  Preset {
             QStringList list;
             int size = jsonArray.size();
             list.reserve(size);
-            for (auto &item: jsonArray) {
+            for (auto item: jsonArray) {
                 if (!item.isString()) {
+                    LOG_WARNING << "value is not string";
                     continue;
                 }
 
@@ -131,24 +129,25 @@ namespace  Preset {
         }
     }
 
-    void PresetKeywordsModelConfig::writeToConfig()
-    {
-      QJsonArray jsonArray;
-      for (auto & item : m_PresetData){
-          QJsonObject object;
-          QJsonArray keys;
-          LOG_WARNING << item.name<< " " << item.keys;
-          keys = QJsonArray::fromStringList(item.keys);
-          object.insert(item.name, keys);
-          jsonArray.append(object);
-      }
-      QJsonObject topObject;
-      topObject.insert(PRESETKEYS_KEY, jsonArray);
-      QJsonDocument doc;
-      doc.setObject(topObject);
-      LOG_WARNING << doc;
-      Helpers::LocalConfig &localConfig = getLocalConfig();
-      localConfig.setConfig(doc);
-      localConfig.saveToFile();
+    void PresetKeywordsModelConfig::writeToConfig() {
+        QJsonArray jsonArray;
+
+        for (auto &item : m_PresetData) {
+            QJsonObject object;
+            QJsonArray keys;
+            LOG_WARNING << item.name<< " " << item.keys;
+            keys = QJsonArray::fromStringList(item.keys);
+            object.insert(item.name, keys);
+            jsonArray.append(object);
+        }
+
+        QJsonObject topObject;
+        topObject.insert(PRESETKEYS_KEY, jsonArray);
+        QJsonDocument doc;
+        doc.setObject(topObject);
+        LOG_WARNING << doc;
+        Helpers::LocalConfig &localConfig = getLocalConfig();
+        localConfig.setConfig(doc);
+        localConfig.saveToFile();
     }
 }

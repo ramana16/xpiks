@@ -717,17 +717,22 @@ ApplicationWindow {
         }
 
 
-        Instantiator {
-            active: wordRightClickMenu.showExpandPreset
-            model: wordRightClickMenu.presets
-            onObjectAdded: wordRightClickMenu.insertItem( index, object )
-            onObjectRemoved: wordRightClickMenu.removeItem( object )
-            delegate: MenuItem {
-                text: i18.n + qsTr("Expand as preset \"%1\"").arg(modelData)
-                onTriggered: {
-                    filteredArtItemsModel.replaceFromPreset(wordRightClickMenu.artworkIndex, wordRightClickMenu.word, modelData);
-                }
+        Menu{
+            id : presetSubMenu
+            visible: wordRightClickMenu.showExpandPreset
+            title: "Expand as Presets"
+            Instantiator {
+                id : presetsInstantiator
+                model: wordRightClickMenu.presets
+                onObjectAdded: presetSubMenu.insertItem( index, object )
+                onObjectRemoved: presetSubMenu.removeItem( object )
+                delegate: MenuItem {
+                    text: i18.n + qsTr("\"%1\"").arg(modelData)
+                    onTriggered: {
+                        filteredArtItemsModel.replaceFromPreset(wordRightClickMenu.artworkIndex, wordRightClickMenu.word, modelData);
+                    }
 
+                }
             }
         }
     }
