@@ -79,8 +79,8 @@ namespace Common {
         bool hasDescriptionWordSpellError(const QString &word);
         bool hasTitleWordSpellError(const QString &word);
         virtual bool hasSpellErrors();
-        void changeFromPreset(const QString &word, const QStringList & presetList);
-        void changeFromPreset(const QStringList & presetList);
+        void changeFromPreset(int keywordsIndex, const QStringList &presetList);
+        void changeFromPreset(const QStringList &presetList);
 
     public:
         bool setDescription(const QString &value);

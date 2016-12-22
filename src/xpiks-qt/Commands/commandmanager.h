@@ -183,8 +183,8 @@ namespace Commands {
         void InjectDependency(Models::FindAndReplaceModel *findAndReplaceModel);
         void InjectDependency(Models::DeleteKeywordsViewModel *deleteKeywordsViewModel);
         void InjectDependency(Helpers::HelpersQmlWrapper *helpersQmlWrapper);
-        void InjectDependency(Presets::PresetKeywordsModel *presetModel);
-        void InjectDependency(Presets::PresetKeywordsModelConfig *PresetModelConfig);
+        void InjectDependency(Presets::PresetKeywordsModel *presetsModel);
+        void InjectDependency(Presets::PresetKeywordsModelConfig *presetsModelConfig);
 
     public:
         virtual std::shared_ptr<Commands::ICommandResult> processCommand(const std::shared_ptr<ICommandBase> &command)
@@ -278,8 +278,8 @@ namespace Commands {
         virtual Models::ZipArchiver *getZipArchiver() const { return m_ZipArchiver; }
         virtual Models::DeleteKeywordsViewModel *getDeleteKeywordsModel() const { return m_DeleteKeywordsViewModel; }
         virtual SpellCheck::SpellCheckSuggestionModel *getSpellSuggestionsModel() const { return m_SpellCheckSuggestionModel; }
-        virtual Presets::PresetKeywordsModel *getPresetModel() const { return m_PresetsModel; }
-        virtual Presets::PresetKeywordsModelConfig *getPresetModelConfig() const { return m_PresetsModelConfig; }
+        virtual Presets::PresetKeywordsModel *getPresetsModel() const { return m_PresetsModel; }
+        virtual Presets::PresetKeywordsModelConfig *getpresetsModelConfig() const { return m_PresetsModelConfig; }
 
 #ifdef INTEGRATION_TESTS
         virtual MetadataIO::MetadataIOCoordinator *getMetadataIOCoordinator() const { return m_MetadataIOCoordinator; }

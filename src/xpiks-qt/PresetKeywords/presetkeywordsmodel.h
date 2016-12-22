@@ -6,38 +6,42 @@
 #include "../Common/abstractlistmodel.h"
 #include <QAbstractListModel>
 #include <QVector>
+#include <QSortFilterProxyModel>
 
 namespace Presets {
+    struct Preset {
+        std::shared_ptr<Common::BasicKeywordsModel> m_KeywordsModel;
+        QString m_PresetName;
+        Common::Hold m_HoldPlaceholder;
+    };
 
-struct Preset {
-   std::shared_ptr<Common::BasicKeywordsModel> m_KeywordsModel;
-   QString m_PresetName;
-};
-
-class PresetKeywordsModel:
+    class PresetKeywordsModel:
         public QAbstractListModel,
         public Common::BaseEntity
-{
-Q_OBJECT
+    {
+    Q_OBJECT
+
     public:
-        PresetKeywordsModel(QObject *parent = 0);
-        size_t getPresetsCount() const {return m_Presets.size();}
-        int getIndexFromName(const QString & presetName);
-        QString getNameFromIndex(int index);
+        PresetKeywordsModel(QObject *parent=0);
+        size_t getPresetsCount() const {return m_Presets.size(); }
+        bool tryGetIndexFromName(const QString &presetName, int &result);
+        bool tryGetNameFromIndex(int index, QString &name);
         bool tryGetPreset(int presetIndex, QStringList &keywords);
 
     public:
-       enum PresetKeywords_Roles {
-         NameRole = Qt::UserRole + 1
-       };
+        enum PresetKeywords_Roles {
+            NameRole = Qt::UserRole + 1
+        };
 
-        virtual int rowCount(const QModelIndex & parent = QModelIndex()) const;
-        virtual QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const;
+        virtual int rowCount(const QModelIndex &parent=QModelIndex()) const;
+        virtual QVariant data(const QModelIndex &index, int role=Qt::DisplayRole) const;
         virtual bool setData(const QModelIndex &index, const QVariant &value, int role=Qt::EditRole);
+
     protected:
         virtual QHash<int, QByteArray> roleNames() const;
         virtual void removeInnerItem(int row);
-   public:
+
+    public:
         Q_INVOKABLE void removeItem(int row);
         Q_INVOKABLE void addItem();
         Q_INVOKABLE void editKeyword(int index, int keywordIndex, const QString &replacement);
@@ -46,12 +50,35 @@ Q_OBJECT
         Q_INVOKABLE QObject *getKeywordsModel(int index);
         Q_INVOKABLE void saveToConfig();
         Q_INVOKABLE void loadFromConfigModel();
-        Q_INVOKABLE QStringList getFilteredPresets(const QString &  word);
+
     public slots:
-       void onPresetsUpdated() { LOG_INFO << "loading Model"; loadFromConfigModel();}
+        void onPresetsUpdated() { LOG_INFO << "loading Model"; loadFromConfigModel(); }
+
     private:
-        Common::Hold m_HoldPlaceholder;
         QVector<Preset> m_Presets;
-};
+    };
+
+    class FilteredPresetKeywordsModel:
+        public QSortFilterProxyModel
+    {
+    Q_OBJECT
+    Q_PROPERTY(QString searchTerm READ getSearchTerm WRITE setSearchTerm NOTIFY searchTermChanged)
+    public:
+        Q_INVOKABLE int getOriginalIndex(int index);
+        Q_INVOKABLE int getItemsCount() const { return rowCount(); }
+        Q_INVOKABLE QString getName(int index);
+    public:
+        const QString &getSearchTerm() const;
+        void setSearchTerm(const QString &value);
+    signals:
+        void searchTermChanged(const QString &searchTerm);
+        // QSortFilterProxyModel interface
+    protected:
+        virtual bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const;
+    private:
+        PresetKeywordsModel *getPresetsModel() const;
+    private:
+        QString m_SearchTerm;
+    };
 }
 #endif // PRESETKEYWORDSMODEL_H

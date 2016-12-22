@@ -107,6 +107,7 @@ Item {
         property var presets
         property bool showAddToDict : true
         property bool showExpandPreset : false
+        property int keywordIndex
 
         MenuItem {
             visible: wordRightClickMenu.showAddToDict
@@ -114,21 +115,20 @@ Item {
             onTriggered: spellCheckService.addWordToUserDictionary(wordRightClickMenu.word);
         }
 
-        Menu{
+        Menu {
             id : presetSubMenu
             visible: wordRightClickMenu.showExpandPreset
-            title: "Expand as Presets"
+            title: i18.n + qsTr("Expand as one Preset")
             Instantiator {
                 id : presetsInstantiator
-                model: wordRightClickMenu.presets
+                model: filteredPresetsModel
                 onObjectAdded: presetSubMenu.insertItem( index, object )
                 onObjectRemoved: presetSubMenu.removeItem( object )
                 delegate: MenuItem {
-                    text: i18.n + qsTr("\"%1\"").arg(modelData)
+                    text: i18.n + qsTr("\"%1\"").arg(filteredPresetsModel.getName(index))
                     onTriggered: {
-                        combinedArtworks.replaceFromPreset(wordRightClickMenu.word, modelData);
+                        combinedArtworks.replaceFromPreset(wordRightClickMenu.keywordIndex, filteredPresetsModel.getOriginalIndex(index));
                     }
-
                 }
             }
         }
@@ -137,7 +137,7 @@ Item {
 
     Menu {
         id: presetsMenu
-        property int maxSize : 2
+        property int maxSize : 10
 
         Instantiator {
             model: presetsModel
@@ -620,9 +620,9 @@ Item {
                                 wordRightClickMenu.showAddToDict = showAddToDict
                                 var keyword = kw.keywordText
                                 wordRightClickMenu.word = keyword
-                                var presets = presetsModel.getFilteredPresets(keyword)
-                                wordRightClickMenu.showExpandPreset = (presets.length !== 0 )
-                                wordRightClickMenu.presets = presets
+                                filteredPresetsModel.searchTerm = keyword
+                                wordRightClickMenu.keywordIndex = kw.delegateIndex
+                                wordRightClickMenu.showExpandPreset = (filteredPresetsModel.getItemsCount() !== 0 )
                                 if (wordRightClickMenu.showAddToDict ||
                                         wordRightClickMenu.showExpandPreset) {
                                     wordRightClickMenu.popup()

@@ -27,7 +27,7 @@ namespace  Presets {
     protected:
         virtual bool parseConfig(const QJsonDocument &document);
 
-        virtual void processRemoteConfig(const QJsonDocument &, bool) {}
+        virtual void processRemoteConfig(const QJsonDocument &remoteDocument, bool overwriteLocal);
         // CompareValuesJson interface
 
     public:

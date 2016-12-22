@@ -705,8 +705,8 @@ ApplicationWindow {
     Menu {
         id: wordRightClickMenu
         property string word
-        property var presets
         property int artworkIndex
+        property int keywordIndex
         property bool showAddToDict : true
         property bool showExpandPreset : false
 
@@ -717,19 +717,19 @@ ApplicationWindow {
         }
 
 
-        Menu{
+        Menu {
             id : presetSubMenu
             visible: wordRightClickMenu.showExpandPreset
-            title: "Expand as Presets"
+            title: i18.n + qsTr("Expand as one Preset")
             Instantiator {
                 id : presetsInstantiator
-                model: wordRightClickMenu.presets
+                model: filteredPresetsModel
                 onObjectAdded: presetSubMenu.insertItem( index, object )
                 onObjectRemoved: presetSubMenu.removeItem( object )
                 delegate: MenuItem {
-                    text: i18.n + qsTr("\"%1\"").arg(modelData)
+                    text: i18.n + qsTr("\"%1\"").arg(filteredPresetsModel.getName(index))
                     onTriggered: {
-                        filteredArtItemsModel.replaceFromPreset(wordRightClickMenu.artworkIndex, wordRightClickMenu.word, modelData);
+                        filteredArtItemsModel.replaceFromPreset(wordRightClickMenu.artworkIndex, wordRightClickMenu.word,  filteredPresetsModel.getOriginalIndex(index));
                     }
 
                 }
@@ -740,7 +740,7 @@ ApplicationWindow {
 
     Menu {
         id: presetsMenu
-        property int maxSize : 2
+        property int maxSize : 10
         property int artworkIndex : 0
 
         Instantiator {
@@ -2204,10 +2204,10 @@ ApplicationWindow {
                                                                 wordRightClickMenu.showAddToDict = !iscorrect
                                                                 var keyword = kw.keywordText
                                                                 wordRightClickMenu.word = keyword
-                                                                var presets = presetsModel.getFilteredPresets(keyword)
-                                                                wordRightClickMenu.showExpandPreset = (presets.length !== 0 )
-                                                                wordRightClickMenu.presets = presets
+                                                                filteredPresetsModel.searchTerm = keyword
+                                                                wordRightClickMenu.showExpandPreset = (filteredPresetsModel.getItemsCount() !== 0 )
                                                                 wordRightClickMenu.artworkIndex =  rowWrapper.delegateIndex
+                                                                wordRightClickMenu.keywordIndex = kw.delegateIndex
                                                                 if (wordRightClickMenu.showAddToDict ||
                                                                         wordRightClickMenu.showExpandPreset) {
                                                                     wordRightClickMenu.popup()

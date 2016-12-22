@@ -173,22 +173,17 @@ namespace Common {
         setKeywordsUnsafe(keywordsList);
     }
 
-    bool BasicKeywordsModel::expandPreset(const QString &expandFrom, const QStringList &keywordsList)
-    {
+    bool BasicKeywordsModel::expandPreset(int keywordsIndex, const QStringList &keywordsList) {
         QWriteLocker writeLocker(&m_KeywordsLock);
 
         Q_UNUSED(writeLocker);
-
-        return expandPresetUnsafe(expandFrom, keywordsList);
-
+        return expandPresetUnsafe(keywordsIndex, keywordsList);
     }
-
 
     int BasicKeywordsModel::appendKeywords(const QStringList &keywordsList) {
         QWriteLocker writeLocker(&m_KeywordsLock);
 
         Q_UNUSED(writeLocker);
-
         return appendKeywordsUnsafe(keywordsList);
     }
 
@@ -498,24 +493,21 @@ namespace Common {
         return anythingRemoved;
     }
 
-    bool BasicKeywordsModel::expandPresetUnsafe(const QString &expandFrom, const QStringList &keywordsList) {
+    bool BasicKeywordsModel::expandPresetUnsafe(int keywordsIndex, const QStringList &keywordsList) {
         int size = m_KeywordsList.size();
-        bool result = false;
-        LOG_DEBUG << "target word " << expandFrom << " " << keywordsList;
 
-        for (int i = 0; i < size; ++i) {
-            auto &internal = m_KeywordsList.at(i);
-            if (internal != expandFrom) {
-                continue;
-            }
-            QVector<int> temp;
-            temp << i;
-            removeKeywordsAtIndicesUnsafe(temp);
-            appendKeywordsUnsafe(keywordsList);
-            result = true;
-            break;
+        if (keywordsIndex >= size || keywordsIndex < 0) {
+            return false;
         }
-    return result;
+
+        LOG_DEBUG << "target word index" << keywordsIndex << " " << keywordsList;
+
+        QVector<int> temp;
+        temp << keywordsIndex;
+        removeKeywordsAtIndicesUnsafe(temp);
+        appendKeywordsUnsafe(keywordsList);
+
+        return true;
     }
 
     void BasicKeywordsModel::removeKeywordsAtIndicesUnsafe(const QVector<int> &indices) {

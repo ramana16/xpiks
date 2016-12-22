@@ -298,8 +298,10 @@ int main(int argc, char *argv[]) {
     Models::ArtItemsModel artItemsModel;
     Models::CombinedArtworksModel combinedArtworksModel;
     Models::UploadInfoRepository uploadInfoRepository;
-    Presets::PresetKeywordsModel presetModel;
-    Presets::PresetKeywordsModelConfig presetModelConfig;
+    Presets::PresetKeywordsModel presetsModel;
+    Presets::PresetKeywordsModelConfig presetsModelConfig;
+    Presets::FilteredPresetKeywordsModel filteredPresetsModel;
+    filteredPresetsModel.setSourceModel(&presetsModel);
     Warnings::WarningsService warningsService;
     Models::SettingsModel settingsModel;
     settingsModel.readAllValues();
@@ -374,8 +376,8 @@ int main(int argc, char *argv[]) {
     commandManager.InjectDependency(&replaceModel);
     commandManager.InjectDependency(&deleteKeywordsModel);
     commandManager.InjectDependency(&helpersQmlWrapper);
-    commandManager.InjectDependency(&presetModel);
-    commandManager.InjectDependency(&presetModelConfig);
+    commandManager.InjectDependency(&presetsModel);
+    commandManager.InjectDependency(&presetsModelConfig);
     commandManager.ensureDependenciesInjected();
 
     keywordsSuggestor.initSuggestionEngines();
@@ -391,7 +393,7 @@ int main(int argc, char *argv[]) {
     languagesModel.loadLanguages();
 
     telemetryService.setInterfaceLanguage(languagesModel.getCurrentLanguage());
-    presetModelConfig.initializeConfigs();
+    presetsModelConfig.initializeConfigs();
 
     qmlRegisterType<Helpers::ClipboardHelper>("xpiks", 1, 0, "ClipboardHelper");
     qmlRegisterType<QMLExtensions::TriangleElement>("xpiks", 1, 0, "TriangleElement");
@@ -422,7 +424,8 @@ int main(int argc, char *argv[]) {
     rootContext->setContextProperty("Colors", &colorsModel);
     rootContext->setContextProperty("acSource", &autoCompleteModel);
     rootContext->setContextProperty("replaceModel", &replaceModel);
-    rootContext->setContextProperty("presetsModel", &presetModel);
+    rootContext->setContextProperty("presetsModel", &presetsModel);
+    rootContext->setContextProperty("filteredPresetsModel", &filteredPresetsModel);
 
 #ifdef QT_DEBUG
     QVariant isDebug(true);

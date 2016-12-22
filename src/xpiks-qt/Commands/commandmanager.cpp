@@ -197,14 +197,14 @@ void Commands::CommandManager::InjectDependency(Helpers::HelpersQmlWrapper *help
     m_HelpersQmlWrapper->setCommandManager(this);
 }
 
-void Commands::CommandManager::InjectDependency(Presets::PresetKeywordsModel *presetModel) {
-    Q_ASSERT(presetModel != NULL); m_PresetsModel = presetModel;
+void Commands::CommandManager::InjectDependency(Presets::PresetKeywordsModel *presetsModel) {
+    Q_ASSERT(presetsModel != NULL); m_PresetsModel = presetsModel;
     m_PresetsModel->setCommandManager(this);
 }
 
-void Commands::CommandManager::InjectDependency(Presets::PresetKeywordsModelConfig *presetModelConfig)
+void Commands::CommandManager::InjectDependency(Presets::PresetKeywordsModelConfig *presetsModelConfig)
 {
-    Q_ASSERT(presetModelConfig != NULL); m_PresetsModelConfig = presetModelConfig;
+    Q_ASSERT(presetsModelConfig != NULL); m_PresetsModelConfig = presetsModelConfig;
     m_PresetsModelConfig->setCommandManager(this);
 }
 

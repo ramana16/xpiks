@@ -386,70 +386,41 @@ namespace Models {
         return result;
     }
 
-    void FilteredArtItemsProxyModel::appendFromPreset(int index, int presetIndex)
-    {
+    void FilteredArtItemsProxyModel::appendFromPreset(int index, int presetIndex) {
         if (0 <= index && index < rowCount()) {
             int originalIndex = getOriginalIndex(index);
-            LOG_INFO << "preset index " << presetIndex << "original index" << originalIndex;
-            auto presetModel = m_CommandManager->getPresetModel();
+            LOG_INFO << "preset index" << presetIndex << "original index" << originalIndex;
+            auto *presetsModel = m_CommandManager->getPresetsModel();
             QStringList keywords;
-            if (!presetModel->tryGetPreset(presetIndex, keywords)){
-                return;
-            }
-            ArtItemsModel *artItemsModel = getArtItemsModel();
-            ArtworkMetadata *metadata = artItemsModel->getArtwork(originalIndex);
+            if (presetsModel->tryGetPreset(presetIndex, keywords)) {
+                ArtItemsModel *artItemsModel = getArtItemsModel();
+                ArtworkMetadata *metadata = artItemsModel->getArtwork(originalIndex);
 
-            if (metadata != NULL) {
-                auto *keywordsModel = metadata->getBasicModel();
-                keywordsModel->changeFromPreset(keywords);
+                if (metadata != NULL) {
+                    auto *keywordsModel = metadata->getBasicModel();
+                    keywordsModel->changeFromPreset(keywords);
+                }
             }
         }
     }
 
-    void FilteredArtItemsProxyModel::replaceFromPreset(int index, const QString & keywordsName, int presetIndex)
-    {
+    void FilteredArtItemsProxyModel::replaceFromPreset(int index, int keywordsIndex, int presetIndex) {
         if (0 <= index && index < rowCount()) {
             int originalIndex = getOriginalIndex(index);
             LOG_INFO << originalIndex;
-            auto presetModel = m_CommandManager->getPresetModel();
-            QString presetName = presetModel->getNameFromIndex(presetIndex);
-            if (presetName.isEmpty()){
-                return;
-            }
-            QStringList keywords;
-            if (!presetModel->tryGetPreset(presetIndex, keywords)){
-                return;
-            }
-            ArtItemsModel *artItemsModel = getArtItemsModel();
-            ArtworkMetadata *metadata = artItemsModel->getArtwork(originalIndex);
+            auto *presetsModel = m_CommandManager->getPresetsModel();
+            QString presetName;
+            if (presetsModel->tryGetNameFromIndex(presetIndex, presetName)) {
+                QStringList keywords;
+                if (presetsModel->tryGetPreset(presetIndex, keywords)) {
+                    ArtItemsModel *artItemsModel = getArtItemsModel();
+                    ArtworkMetadata *metadata = artItemsModel->getArtwork(originalIndex);
 
-            if (metadata != NULL) {
-                auto *keywordsModel = metadata->getBasicModel();
-                keywordsModel->changeFromPreset(keywordsName, keywords);
-            }
-        }
-    }
-
-    void FilteredArtItemsProxyModel::replaceFromPreset(int index, const QString & keywordsName, const QString & presetName)
-    {
-        if (0 <= index && index < rowCount()) {
-            int originalIndex = getOriginalIndex(index);
-            LOG_INFO << originalIndex;
-            auto presetModel = m_CommandManager->getPresetModel();
-            int presetIndex =  presetModel->getIndexFromName(presetName);
-            if (presetIndex  < 0){
-                return;
-            }
-            QStringList keywords;
-            if (!presetModel->tryGetPreset(presetIndex, keywords)){
-                return;
-            }
-            ArtItemsModel *artItemsModel = getArtItemsModel();
-            ArtworkMetadata *metadata = artItemsModel->getArtwork(originalIndex);
-
-            if (metadata != NULL) {
-                auto *keywordsModel = metadata->getBasicModel();
-                keywordsModel->changeFromPreset(keywordsName, keywords);
+                    if (metadata != NULL) {
+                        auto *keywordsModel = metadata->getBasicModel();
+                        keywordsModel->changeFromPreset(keywordsIndex, keywords);
+                    }
+                }
             }
         }
     }

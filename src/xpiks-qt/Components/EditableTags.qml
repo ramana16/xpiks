@@ -172,11 +172,11 @@ Flickable {
             if (mouse.button == Qt.RightButton) {
                 clickedInsideRight()
                 mouse.accepted = true
-                return
+            } else {
+                activateEdit()
+                clickedInside()
+                mouse.accepted = false
             }
-            activateEdit()
-            clickedInside()
-            mouse.accepted = false
         }
 
         propagateComposedEvents: true
