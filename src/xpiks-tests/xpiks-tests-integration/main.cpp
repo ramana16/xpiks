@@ -47,6 +47,8 @@
 #include "../../xpiks-qt/Helpers/logger.h"
 #include "../../xpiks-qt/Common/version.h"
 #include "../../xpiks-qt/Common/defines.h"
+#include "../../xpiks-qt/PresetKeywords/presetkeywordsmodel.h"
+#include "../../xpiks-qt/PresetKeywords/presetkeywordsmodelconfig.h"
 
 #include "integrationtestbase.h"
 #include "addfilesbasictest.h"
@@ -124,6 +126,8 @@ int main(int argc, char *argv[]) {
     Models::ArtItemsModel artItemsModel;
     Models::CombinedArtworksModel combinedArtworksModel;
     Models::UploadInfoRepository uploadInfoRepository;
+    KeywordsPreset::PresetKeywordsModel presetsModel;
+    KeywordsPreset::PresetKeywordsModelConfig presetsModelConfig;
     Warnings::WarningsService warningsService;
     Models::SettingsModel settingsModel;
     settingsModel.readAllValues();
@@ -183,6 +187,8 @@ int main(int argc, char *argv[]) {
     commandManager.InjectDependency(&imageCachingService);
     commandManager.InjectDependency(&findAndReplaceModel);
     commandManager.InjectDependency(&deleteKeywordsModel);
+    commandManager.InjectDependency(&presetsModel);
+    commandManager.InjectDependency(&presetsModelConfig);
 
     commandManager.ensureDependenciesInjected();
 
