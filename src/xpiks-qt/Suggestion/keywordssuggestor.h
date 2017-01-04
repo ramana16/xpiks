@@ -46,6 +46,7 @@ namespace Suggestion {
         Q_PROPERTY(int selectedArtworksCount READ getSelectedArtworksCount NOTIFY selectedArtworksCountChanged)
         Q_PROPERTY(int selectedSourceIndex READ getSelectedSourceIndex WRITE setSelectedSourceIndex NOTIFY selectedSourceIndexChanged)
         Q_PROPERTY(QString lastErrorString READ getLastErrorString WRITE setLastErrorString NOTIFY lastErrorStringChanged)
+        Q_PROPERTY(bool isLocalSearch READ getIsLocalSearch NOTIFY isLocalSearchChanged)
 
     public:
         KeywordsSuggestor(LocalLibrary *library, QObject *parent=NULL);
@@ -72,6 +73,7 @@ namespace Suggestion {
         bool getIsInProgress() const { return m_IsInProgress; }
         int getSelectedArtworksCount() const { return m_SelectedArtworksCount; }
         const QString &getLastErrorString() const { return m_LastErrorString; }
+        bool getIsLocalSearch() const { return m_SelectedSourceIndex == m_LocalSearchIndex; }
 
     signals:
         void suggestedKeywordsCountChanged();
@@ -81,6 +83,7 @@ namespace Suggestion {
         void suggestionArrived();
         void selectedArtworksCountChanged();
         void lastErrorStringChanged();
+        void isLocalSearchChanged();
 
     private slots:
         void resultsAvailableHandler();
@@ -99,7 +102,7 @@ namespace Suggestion {
         Q_INVOKABLE QString removeSuggestedKeywordAt(int keywordIndex);
         Q_INVOKABLE QString removeOtherKeywordAt(int keywordIndex);
         Q_INVOKABLE void setArtworkSelected(int index, bool newState);
-        Q_INVOKABLE void searchArtworks(const QString &searchTerm);
+        Q_INVOKABLE void searchArtworks(const QString &searchTerm, int resultsType);
         Q_INVOKABLE void cancelSearch();
         Q_INVOKABLE void close() { clear(); }
         Q_INVOKABLE QStringList getSuggestedKeywords() { return m_SuggestedKeywords.getKeywords(); }
@@ -120,7 +123,8 @@ namespace Suggestion {
     public:
         enum KeywordsSuggestor_Roles {
             UrlRole = Qt::UserRole + 1,
-            IsSelectedRole
+            IsSelectedRole,
+            ExternalUrlRole
         };
 
         virtual int rowCount(const QModelIndex & parent = QModelIndex()) const;
@@ -142,11 +146,12 @@ namespace Suggestion {
         LocalLibrary *m_LocalLibrary;
         QStringList m_QueryEnginesNames;
         QString m_LastErrorString;
-        Common::Hold m_HoldPlaceholder;
+        Common::FakeHold m_HoldPlaceholder;
         Common::BasicKeywordsModel m_SuggestedKeywords;
         Common::BasicKeywordsModel m_AllOtherKeywords;
         int m_SelectedArtworksCount;
         int m_SelectedSourceIndex;
+        int m_LocalSearchIndex;
         volatile bool m_IsInProgress;
     };
 }

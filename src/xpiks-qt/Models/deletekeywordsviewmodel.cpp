@@ -30,8 +30,8 @@
 namespace Models {
     DeleteKeywordsViewModel::DeleteKeywordsViewModel(QObject *parent):
         Models::ArtworksViewModel(parent),
-        m_KeywordsToDeleteModel(m_HoldPlaceholder),
-        m_CommonKeywordsModel(m_HoldPlaceholder),
+        m_KeywordsToDeleteModel(m_HoldForDeleters),
+        m_CommonKeywordsModel(m_HoldForCommon),
         m_CaseSensitive(false)
     {
     }
@@ -81,7 +81,7 @@ namespace Models {
     void DeleteKeywordsViewModel::removeKeywordToDeleteAt(int keywordIndex) {
         LOG_DEBUG << "#";
         QString keyword;
-        if (m_KeywordsToDeleteModel.takeKeywordAt(keywordIndex, keyword)) {
+        if (m_KeywordsToDeleteModel.removeKeywordAt(keywordIndex, keyword)) {
             emit keywordsToDeleteCountChanged();
         }
     }
@@ -101,7 +101,7 @@ namespace Models {
     QString DeleteKeywordsViewModel::removeCommonKeywordAt(int keywordIndex) {
         LOG_DEBUG << "index:" << keywordIndex;
         QString keyword;
-        if (m_CommonKeywordsModel.takeKeywordAt(keywordIndex, keyword)) {
+        if (m_CommonKeywordsModel.removeKeywordAt(keywordIndex, keyword)) {
             emit commonKeywordsCountChanged();
         }
 

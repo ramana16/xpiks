@@ -2,10 +2,8 @@
     <qresource prefix="/">
         <file>main.qml</file>
         <file>Components/CloseIcon.qml</file>
+        <file>Components/CustomTab.qml</file>
         <file>Components/EditableTags.qml</file>
-        <file>Components/LargeRemoveIcon.qml</file>
-        <file>Constants/Themes.js</file>
-        <file>Dialogs/CombinedArtworksDialog.qml</file>
         <file>Dialogs/ExportMetadata.qml</file>
         <file>Dialogs/ImportMetadata.qml</file>
         <file>Dialogs/SettingsWindow.qml</file>
@@ -32,13 +30,10 @@
         <file>StyledControls/StyledBusyIndicator.qml</file>
         <file>StyledControls/StyledTabView.qml</file>
         <file>Components/CustomBorder.qml</file>
-        <file>Dialogs/ArtworkPreview.qml</file>
         <file>StyledControls/StyledBlackButton.qml</file>
         <file>StyledControls/StyledSlider.qml</file>
         <file>Components/KeywordWrapper.qml</file>
         <file>Components/CustomScrollbar.qml</file>
-        <file>Dialogs/EditArtworkHorizontalDialog.qml</file>
-        <file>Dialogs/EditArtworkVerticalDialog.qml</file>
         <file>Dialogs/UpdateWindow.qml</file>
         <file>Dialogs/SpellCheckSuggestionsDialog.qml</file>
         <file>Components/SuggestionWrapper.qml</file>
@@ -69,5 +64,13 @@
         <file>Dialogs/FailedUploadArtworks.qml</file>
         <file>Dialogs/InstallUpdateDialog.qml</file>
         <file>Dialogs/PresetEditDialog.qml</file>
+        <file>StyledControls/StyledMainTabView.qml</file>
+        <file>StackViews/MainGrid.qml</file>
+        <file>StackViews/ArtworkEditView.qml</file>
+        <file>Components/ZoomAmplifier.qml</file>
+        <file>StackViews/WarningsView.qml</file>
+        <file>Components/GlyphButton.qml</file>
+        <file>Components/BackGlyphButton.qml</file>
+        <file>StackViews/CombinedEditView.qml</file>
     </qresource>
 </RCC>

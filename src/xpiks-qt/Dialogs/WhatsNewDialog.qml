@@ -88,7 +88,7 @@ Item {
             id: dialogWindow
             width: 700
             height: 500
-            color: Colors.selectedImageBackground
+            color: Colors.popupBackgroundColor
             anchors.centerIn: parent
             Component.onCompleted: anchors.centerIn = undefined
 
@@ -223,7 +223,7 @@ Item {
 
                 StyledText {
                     text: i18.n + qsTr("Skip")
-                    color: skipMA.pressed ? Colors.linkClickedColor : Colors.labelActiveForeground
+                    color: skipMA.pressed ? Colors.linkClickedColor : Colors.labelInactiveForeground
 
                     MouseArea {
                         id: skipMA

@@ -28,14 +28,13 @@ import "../Components"
 import "../StyledControls"
 import "../Common.js" as Common
 import "../Constants/UIConfig.js" as UIConfig
-import "../Constants/Themes.js" as Themes;
 
 ApplicationWindow {
     id: settingsWindow
     modality: "ApplicationModal"
     title: i18.n + qsTr("Settings")
     width: 550
-    height: 300
+    height: 350
     minimumWidth: width
     maximumWidth: width
     minimumHeight: height
@@ -212,7 +211,7 @@ ApplicationWindow {
     }
 
     Rectangle {
-        color: Colors.selectedImageBackground
+        color: Colors.popupBackgroundColor
         anchors.fill: parent
 
         Component.onCompleted: focus = true
@@ -632,6 +631,7 @@ ApplicationWindow {
 
                         StyledText {
                             text: i18.n + qsTr("(seconds)")
+                            isActive: false
                         }
                     }
 
@@ -682,7 +682,7 @@ ApplicationWindow {
                             Layout.fillWidth: true
                             Layout.maximumWidth: 80
                             enabled: settingsModel.useExifTool
-                            color: Colors.labelActiveForeground
+                            isActive: useExifToolCheckbox.checked
 
                             horizontalAlignment: Text.AlignRight
                             text: i18.n + qsTr("ExifTool path:")
@@ -884,7 +884,7 @@ ApplicationWindow {
 
                         StyledText {
                             text: i18.n + qsTr("(seconds)")
-                            color: Colors.inputBackgroundColor
+                            isActive: false
                         }
                     }
 
@@ -937,6 +937,7 @@ ApplicationWindow {
 
                         StyledText {
                             text: i18.n + qsTr("(takes effect after relaunch)")
+                            isActive: false
                         }
                     }
 

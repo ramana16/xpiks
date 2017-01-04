@@ -73,6 +73,14 @@ namespace Models {
         return row;
     }
 
+    int FilteredArtItemsProxyModel::getDerivedIndex(int originalIndex) {
+        ArtItemsModel *artItemsModel = getArtItemsModel();
+        QModelIndex index = mapFromSource(artItemsModel->index(originalIndex, 0));
+        int row = index.row();
+
+        return row;
+    }
+
     void FilteredArtItemsProxyModel::selectDirectory(int directoryIndex) {
         LOG_DEBUG << "directory index:" << directoryIndex;
 
@@ -398,7 +406,7 @@ namespace Models {
 
                 if (metadata != NULL) {
                     auto *keywordsModel = metadata->getBasicModel();
-                    keywordsModel->changeFromPreset(keywords);
+                    keywordsModel->addFromPreset(keywords);
                 }
             }
         }
@@ -418,7 +426,7 @@ namespace Models {
 
                     if (metadata != NULL) {
                         auto *keywordsModel = metadata->getBasicModel();
-                        keywordsModel->changeFromPreset(keywordsIndex, keywords);
+                        keywordsModel->replaceFromPreset(keywordsIndex, keywords);
                     }
                 }
             }
@@ -581,7 +589,7 @@ namespace Models {
         artItemsModel->forceUnselectAllItems();
         m_SelectedArtworksCount = 0;
         emit selectedArtworksCountChanged();
-        emit allItemsSelectedChanged();
+        emit forceUnselected();
     }
 
     ArtItemsModel *FilteredArtItemsProxyModel::getArtItemsModel() const {

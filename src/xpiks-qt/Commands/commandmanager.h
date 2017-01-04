@@ -183,8 +183,8 @@ namespace Commands {
         void InjectDependency(Models::FindAndReplaceModel *findAndReplaceModel);
         void InjectDependency(Models::DeleteKeywordsViewModel *deleteKeywordsViewModel);
         void InjectDependency(Helpers::HelpersQmlWrapper *helpersQmlWrapper);
-        void InjectDependency(Presets::PresetKeywordsModel *presetsModel);
-        void InjectDependency(Presets::PresetKeywordsModelConfig *presetsModelConfig);
+        void InjectDependency(KeywordsPreset::PresetKeywordsModel *presetsModel);
+        void InjectDependency(KeywordsPreset::PresetKeywordsModelConfig *presetsModelConfig);
 
     public:
         virtual std::shared_ptr<Commands::ICommandResult> processCommand(const std::shared_ptr<ICommandBase> &command)
@@ -278,8 +278,8 @@ namespace Commands {
         virtual Models::ZipArchiver *getZipArchiver() const { return m_ZipArchiver; }
         virtual Models::DeleteKeywordsViewModel *getDeleteKeywordsModel() const { return m_DeleteKeywordsViewModel; }
         virtual SpellCheck::SpellCheckSuggestionModel *getSpellSuggestionsModel() const { return m_SpellCheckSuggestionModel; }
-        virtual Presets::PresetKeywordsModel *getPresetsModel() const { return m_PresetsModel; }
-        virtual Presets::PresetKeywordsModelConfig *getpresetsModelConfig() const { return m_PresetsModelConfig; }
+        virtual KeywordsPreset::PresetKeywordsModel *getPresetsModel() const { return m_PresetsModel; }
+        virtual KeywordsPreset::PresetKeywordsModelConfig *getPresetsModelConfig() const { return m_PresetsModelConfig; }
 
 #ifdef INTEGRATION_TESTS
         virtual MetadataIO::MetadataIOCoordinator *getMetadataIOCoordinator() const { return m_MetadataIOCoordinator; }
@@ -319,8 +319,8 @@ namespace Commands {
         Models::DeleteKeywordsViewModel *m_DeleteKeywordsViewModel;
         Models::FindAndReplaceModel *m_FindAndReplaceModel;
         Helpers::HelpersQmlWrapper *m_HelpersQmlWrapper;
-        Presets::PresetKeywordsModel *m_PresetsModel;
-        Presets::PresetKeywordsModelConfig *m_PresetsModelConfig;
+        KeywordsPreset::PresetKeywordsModel *m_PresetsModel;
+        KeywordsPreset::PresetKeywordsModelConfig *m_PresetsModelConfig;
 
         QVector<Common::IServiceBase<Common::IBasicArtwork, Common::WarningsCheckFlags> *> m_WarningsCheckers;
         QVector<Helpers::IFileNotAvailableModel*> m_AvailabilityListeners;

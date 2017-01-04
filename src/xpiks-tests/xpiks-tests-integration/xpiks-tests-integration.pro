@@ -156,7 +156,9 @@ SOURCES += main.cpp \
     ../../xpiks-qt/Warnings/warningssettingsmodel.cpp \
     ../../xpiks-qt/Helpers/updatehelpers.cpp \
     ../../xpiks-qt/PresetKeywords/presetkeywordsmodel.cpp \
-    ../../xpiks-qt/PresetKeywords/presetkeywordsmodelconfig.cpp
+    ../../xpiks-qt/PresetKeywords/presetkeywordsmodelconfig.cpp \
+    ../../xpiks-qt/Models/artworkproxybase.cpp \
+    plaintextedittest.cpp
 
 RESOURCES +=
 
@@ -341,7 +343,10 @@ HEADERS += \
     ../../xpiks-qt/Conectivity/apimanager.h \
     ../../xpiks-qt/Helpers/updatehelpers.h \
     ../../xpiks-qt/PresetKeywords/presetkeywordsmodel.h \
-    ../../xpiks-qt/PresetKeywords/presetkeywordsmodelconfig.h
+    ../../xpiks-qt/PresetKeywords/presetkeywordsmodelconfig.h \
+    ../../xpiks-qt/Common/imetadataoperator.h \
+    ../../xpiks-qt/Models/artworkproxybase.h \
+    plaintextedittest.h
 
 INCLUDEPATH += ../../tiny-aes
 INCLUDEPATH += ../../cpp-libface

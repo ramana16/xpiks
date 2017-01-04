@@ -108,7 +108,7 @@ Item {
             id: dialogWindow
             width: 700
             height: 580
-            color: Colors.selectedImageBackground
+            color: Colors.popupBackgroundColor
             anchors.centerIn: parent
             Component.onCompleted: anchors.centerIn = undefined
 
@@ -170,6 +170,7 @@ Item {
                                                 sourceSize.height: 150
                                                 fillMode: settingsModel.fitSmallPreview ? Image.PreserveAspectFit : Image.PreserveAspectCrop
                                                 asynchronous: true
+                                                cache: false
                                             }
                                         }
 
@@ -179,6 +180,7 @@ Item {
                                             horizontalAlignment: Text.AlignHCenter
                                             text: basefilename
                                             font.pixelSize: 11
+                                            isActive: false
                                         }
 
                                         Item {
@@ -187,13 +189,12 @@ Item {
                                     }
                                 }
 
-                                Rectangle {
+                                Item {
                                     id: columnRectangle
                                     anchors.left: imageItem.right
                                     anchors.top: parent.top
                                     anchors.right: parent.right
                                     height: (childrenRect.height < 80) ? 100 : (childrenRect.height + 20)
-                                    color: Colors.defaultDarkerColor
 
                                     Column {
                                         id: warningsTextList
@@ -220,7 +221,7 @@ Item {
                                                     width: height
                                                     radius: height/2
                                                     anchors.verticalCenter: parent.verticalCenter
-                                                    color: Colors.labelActiveForeground
+                                                    color: Colors.inactiveControlColor
                                                 }
 
                                                 StyledText {
@@ -235,7 +236,7 @@ Item {
                                 }
 
                                 EditIcon {
-                                    backgroundColor: columnRectangle.color
+                                    backgroundColor: imageWrapper.color
                                     anchors.verticalCenter: parent.verticalCenter
                                     anchors.verticalCenterOffset: -5
                                     anchors.right: parent.right
@@ -265,7 +266,7 @@ Item {
                         StyledText {
                             text: i18.n + qsTr("There are no warnings")
                             anchors.centerIn: parent
-                            color: Colors.selectedArtworkBackground
+                            isActive: false
                         }
                     }
                 }

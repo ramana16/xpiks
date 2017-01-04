@@ -34,13 +34,14 @@ Rectangle {
     property string keywordText
     property bool hasPlusSign: false
     property alias itemHeight: tagTextRect.height
+    property alias closeIconDisabledColor: closeIcon.disabledColor
 
     signal removeClicked();
     signal actionDoubleClicked();
     signal actionRightClicked();
     signal spellSuggestionRequested();
 
-    color: isHighlighted ? Colors.inputForegroundColor : Colors.labelInactiveForeground
+    color: isHighlighted ? Colors.inputForegroundColor : Colors.inactiveKeywordBackground
 
     width: childrenRect.width
     height: childrenRect.height
@@ -62,7 +63,7 @@ Rectangle {
                 anchors.bottom: parent.bottom
                 verticalAlignment: Text.AlignVCenter
                 text: itemWrapper.keywordText
-                color: itemWrapper.isHighlighted ? Colors.defaultControlColor : Colors.inputForegroundColor
+                color: itemWrapper.isHighlighted ? Colors.inactiveControlColor : Colors.inactiveKeywordForeground
                 font.pixelSize: UIConfig.fontPixelSize * settingsModel.keywordSizeScale
             }
 
@@ -87,6 +88,7 @@ Rectangle {
             width: height
 
             CloseIcon {
+                id: closeIcon
                 isPlus: itemWrapper.hasPlusSign
                 width: 14*settingsModel.keywordSizeScale
                 height: 14*settingsModel.keywordSizeScale

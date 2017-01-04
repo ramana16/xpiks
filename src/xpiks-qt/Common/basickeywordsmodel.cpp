@@ -122,7 +122,7 @@ namespace Common {
         return appendKeywordUnsafe(keyword);
     }
 
-    bool BasicKeywordsModel::takeKeywordAt(int index, QString &removedKeyword) {
+    bool BasicKeywordsModel::removeKeywordAt(int index, QString &removedKeyword) {
         bool wasCorrect = false, result = false;
 
         m_KeywordsLock.lockForWrite();
@@ -143,7 +143,7 @@ namespace Common {
         return result;
     }
 
-    bool BasicKeywordsModel::takeLastKeyword(QString &removedKeyword) {
+    bool BasicKeywordsModel::removeLastKeyword(QString &removedKeyword) {
         bool wasCorrect = false, result = false;
 
         m_KeywordsLock.lockForWrite();
@@ -501,10 +501,15 @@ namespace Common {
         }
 
         LOG_DEBUG << "target word index" << keywordsIndex << " " << keywordsList;
+        QString removedKeyword;
+        bool wasCorrect = false;
 
-        QVector<int> temp;
-        temp << keywordsIndex;
-        removeKeywordsAtIndicesUnsafe(temp);
+        beginRemoveRows(QModelIndex(), keywordsIndex, keywordsIndex);
+        this->takeKeywordAtUnsafe(keywordsIndex, removedKeyword, wasCorrect);
+        endRemoveRows();
+        Q_UNUSED(removedKeyword);
+        Q_UNUSED(wasCorrect);
+
         appendKeywordsUnsafe(keywordsList);
 
         return true;

@@ -33,7 +33,7 @@
 namespace Models {
     class ArtworksViewModel:
             public Common::AbstractListModel,
-            public Common::BaseEntity,
+            public virtual Common::BaseEntity,
             public Helpers::IFileNotAvailableModel
     {
         Q_OBJECT
@@ -42,7 +42,8 @@ namespace Models {
 
         enum ArtworksViewModel_Roles {
             FilepathRole = Qt::UserRole + 1,
-            IsSelectedRole
+            IsSelectedRole,
+            HasVectorAttachedRole
         };
 
     public:

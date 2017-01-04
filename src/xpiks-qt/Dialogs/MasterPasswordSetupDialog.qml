@@ -144,7 +144,7 @@ Item {
             id: dialogWindow
             width: 360
             height: 220
-            color: Colors.selectedImageBackground
+            color: Colors.popupBackgroundColor
             anchors.centerIn: parent
             Component.onCompleted: anchors.centerIn = undefined
 
@@ -165,7 +165,6 @@ Item {
                         Layout.preferredWidth: 130
                         horizontalAlignment: Text.AlignRight
                         text: i18.n + qsTr("Current Master Password:")
-                        color: Colors.labelActiveForeground
                     }
 
                     Rectangle {

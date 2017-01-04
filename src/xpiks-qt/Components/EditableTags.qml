@@ -39,6 +39,7 @@ Flickable {
     flickableDirection: Flickable.VerticalFlick
     rightMargin: 10
     interactive: false
+    property bool populateAnimationEnabled: true
     clip: true
 
     property int scrollStep: 10
@@ -64,7 +65,7 @@ Flickable {
     signal tabPressed();
     signal editActivated();
     signal clickedInside();
-    signal clickedInsideRight();
+    signal rightClickedInside();
 
     signal completionRequested(string prefix);
 
@@ -170,7 +171,7 @@ Flickable {
 
         onClicked: {
             if (mouse.button == Qt.RightButton) {
-                clickedInsideRight()
+                rightClickedInside()
                 mouse.accepted = true
             } else {
                 activateEdit()
@@ -190,7 +191,7 @@ Flickable {
 
             var shift = wheel.angleDelta.y
 
-            if (shift < -epsilon) {
+            if (shift < -epsilon) { // bottom/left
                 var maxScrollPos = flowListView.contentHeight - flowListView.height
                 if (Math.abs(flowListView.contentY - maxScrollPos) > scrollStep) {
                     scrollDown()
@@ -198,7 +199,7 @@ Flickable {
                     scrollToBottom()
                     wheel.accepted = false
                 }
-            } else if (shift > epsilon) {
+            } else if (shift > epsilon) { // up/right
                 if (flowListView.contentY > scrollStep) {
                     scrollUp()
                 } else {
@@ -225,6 +226,7 @@ Flickable {
         }*/
 
         populate: Transition {
+            enabled: flowListView.populateAnimationEnabled
             NumberAnimation { properties: "x,y"; from: 200; duration: 100; easing.type: Easing.OutBounce }
         }
 

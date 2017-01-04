@@ -4,10 +4,10 @@
 #include "../Models/abstractconfigupdatermodel.h"
 #include "presetkeywordsmodel.h"
 
-namespace  Presets {
+namespace  KeywordsPreset {
     struct PresetData {
-        QStringList keys;
-        QString name;
+        QStringList m_Keys;
+        QString m_Name;
     };
 
     class PresetKeywordsModelConfig:
@@ -19,7 +19,7 @@ namespace  Presets {
     public:
         PresetKeywordsModelConfig(QObject *parent=0);
         void initializeConfigs();
-        void saveFromModel(const QVector<Preset> &presets);
+        void saveFromModel(const std::vector<Preset> &presets);
 
     public:
         // AbstractConfigUpdaterModel interface

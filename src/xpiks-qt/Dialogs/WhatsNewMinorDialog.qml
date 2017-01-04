@@ -82,7 +82,7 @@ Item {
             id: dialogWindow
             width: 600
             height: 700
-            color: Colors.selectedImageBackground
+            color: Colors.popupBackgroundColor
             anchors.centerIn: parent
             Component.onCompleted: anchors.centerIn = undefined
 
@@ -106,7 +106,7 @@ Item {
                 anchors.topMargin: 10
                 anchors.bottom: footer.top
                 anchors.bottomMargin: 20
-                color: Colors.defaultControlColor
+                color: Colors.popupDarkInputBackground
 
                 StyledScrollView {
                     id: scrollView
@@ -116,7 +116,7 @@ Item {
                     StyledTextEdit {
                         id: textEdit
                         text: whatsNewMinorComponent.whatsNewText
-                        selectionColor: Colors.selectedImageBackground
+                        selectionColor: Colors.inputBackgroundColor
                         readOnly: true
                     }
                 }

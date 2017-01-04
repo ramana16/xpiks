@@ -126,7 +126,7 @@ Item {
             id: dialogWindow
             width: 630
             height: Qt.platform.os == "windows" ? 470 : (Qt.platform.os == "linux" ? 475 : 460)
-            color: Colors.selectedImageBackground
+            color: Colors.popupBackgroundColor
             anchors.centerIn: parent
             Component.onCompleted: anchors.centerIn = undefined
 
@@ -198,7 +198,7 @@ Item {
                                         id: sourceWrapper
                                         property variant myData: model
                                         property int delegateIndex: index
-                                        color: ListView.isCurrentItem ? Colors.itemsSourceSelected : Colors.defaultDarkColor
+                                        color: ListView.isCurrentItem ? Colors.selectedArtworkBackground : Colors.defaultDarkColor
                                         width: parent.width - 10
                                         anchors.left: parent.left
                                         anchors.leftMargin: 5
@@ -218,7 +218,6 @@ Item {
                                                 Layout.fillWidth: true
                                                 anchors.verticalCenter: parent.verticalCenter
                                                 height: 31
-                                                color: Colors.defaultLightGrayColor
                                                 text: name
                                                 font.bold: true
 
@@ -226,8 +225,6 @@ Item {
                                                     if(activeFocus) {
                                                         //TODO:
                                                         presetNamesListView.currentIndex = delegateIndex;
-                                                        console.log("OKI DOKI" + presetNamesListView.currentIndex);
-
                                                     }
                                                     name = text;
                                                 }

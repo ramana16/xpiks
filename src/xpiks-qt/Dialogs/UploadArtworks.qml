@@ -203,7 +203,7 @@ Item {
             id: dialogWindow
             width: 630
             height: Qt.platform.os == "windows" ? 470 : (Qt.platform.os == "linux" ? 475 : 460)
-            color: Colors.selectedImageBackground
+            color: Colors.popupBackgroundColor
             anchors.centerIn: parent
             Component.onCompleted: anchors.centerIn = undefined
 
@@ -307,7 +307,8 @@ Item {
                                         id: sourceWrapper
                                         property variant myData: model
                                         property int delegateIndex: index
-                                        color: ListView.isCurrentItem ? Colors.itemsSourceSelected : Colors.defaultDarkColor
+                                        property bool isSelected: ListView.isCurrentItem
+                                        color: isSelected ? Colors.selectedArtworkBackground : Colors.defaultDarkColor
                                         width: parent.width - 10
                                         anchors.left: parent.left
                                         anchors.leftMargin: 5
@@ -354,10 +355,9 @@ Item {
                                                 Layout.fillWidth: true
                                                 anchors.verticalCenter: parent.verticalCenter
                                                 height: 31
-                                                color: Colors.defaultLightGrayColor
                                                 text: title
                                                 elide: Text.ElideMiddle
-                                                font.bold: true
+                                                font.bold: sourceWrapper.isSelected
                                             }
 
                                             StyledText {
@@ -373,6 +373,7 @@ Item {
                                                 height: 14
                                                 anchors.verticalCenterOffset: 1
                                                 isActive: false
+                                                disabledColor: Colors.closeIconInactiveColor
 
                                                 onItemClicked: {
                                                     confirmRemoveItemDialog.itemIndex = sourceWrapper.delegateIndex
@@ -393,30 +394,20 @@ Item {
                         Rectangle {
                             color: Colors.defaultControlColor
                             height: 40
-                            Layout.fillWidth: true
+                            anchors.left: parent.left
+                            anchors.right: parent.right
 
-                            RowLayout {
-                                anchors.fill: parent
-                                anchors.bottomMargin: 5
-                                anchors.topMargin: 5
-                                spacing: 0
-
-                                Item {
-                                    width: 10
-                                }
-
-                                StyledAddHostButton {
-                                    Layout.fillWidth: true
-                                    text: i18.n + qsTr("Add FTP host")
-                                    onClicked: {
-                                        uploadInfos.addItem()
-                                        uploadHostsListView.currentIndex = uploadHostsListView.count - 1
-                                        tabView.getTab(0).titleFocusRequested()
-                                    }
-                                }
-
-                                Item {
-                                    width: 10
+                            StyledAddHostButton {
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.leftMargin: 10
+                                anchors.rightMargin: 10
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: i18.n + qsTr("Add FTP host")
+                                onClicked: {
+                                    uploadInfos.addItem()
+                                    uploadHostsListView.currentIndex = uploadHostsListView.count - 1
+                                    tabView.getTab(0).titleFocusRequested()
                                 }
                             }
                         }
@@ -490,7 +481,6 @@ Item {
 
                                     StyledText {
                                         text: i18.n + qsTr("Title:")
-                                        color: Colors.labelActiveForeground
                                     }
 
                                     Rectangle {
@@ -598,7 +588,6 @@ Item {
 
                                     StyledText {
                                         text: i18.n + qsTr("Host:")
-                                        color: Colors.labelActiveForeground
                                     }
 
                                     Rectangle {
@@ -633,7 +622,6 @@ Item {
 
                                     StyledText {
                                         text: i18.n + qsTr("Username:")
-                                        color: Colors.labelActiveForeground
                                     }
 
                                     Rectangle {
@@ -667,7 +655,6 @@ Item {
 
                                     StyledText {
                                         text: i18.n + qsTr("Password:")
-                                        color: Colors.labelActiveForeground
                                     }
 
                                     Rectangle {
@@ -836,7 +823,7 @@ Item {
                         Rectangle {
                             id: overlayRectangle
                             anchors.fill: parent
-                            color: Colors.selectedImageBackground
+                            color: Colors.selectedArtworkBackground
                             opacity: 0.6
                             visible: (uploadInfos.infosCount === 0) || artworkUploader.inProgress
                         }

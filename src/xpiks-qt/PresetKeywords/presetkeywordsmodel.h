@@ -5,12 +5,18 @@
 #include "../Common/baseentity.h"
 #include "../Common/abstractlistmodel.h"
 #include <QAbstractListModel>
-#include <QVector>
 #include <QSortFilterProxyModel>
 
-namespace Presets {
+namespace KeywordsPreset {
     struct Preset {
-        std::shared_ptr<Common::BasicKeywordsModel> m_KeywordsModel;
+        using Model = Common::BasicKeywordsModel;
+        using ModelPtr = std::shared_ptr<Model>;
+        Preset() = default;
+        Preset(QString name):
+            m_KeywordsModel(new Model(m_HoldPlaceholder)),
+            m_PresetName(name)
+        {}
+        ModelPtr m_KeywordsModel;
         QString m_PresetName;
         Common::Hold m_HoldPlaceholder;
     };
@@ -23,7 +29,7 @@ namespace Presets {
 
     public:
         PresetKeywordsModel(QObject *parent=0);
-        size_t getPresetsCount() const {return m_Presets.size(); }
+        size_t getPresetsCount() const {return m_PresetsList.size(); }
         bool tryGetIndexFromName(const QString &presetName, int &result);
         bool tryGetNameFromIndex(int index, QString &name);
         bool tryGetPreset(int presetIndex, QStringList &keywords);
@@ -55,7 +61,7 @@ namespace Presets {
         void onPresetsUpdated() { LOG_INFO << "loading Model"; loadFromConfigModel(); }
 
     private:
-        QVector<Preset> m_Presets;
+        std::vector<Preset> m_PresetsList;
     };
 
     class FilteredPresetKeywordsModel:

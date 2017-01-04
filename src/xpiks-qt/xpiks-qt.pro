@@ -121,7 +121,10 @@ SOURCES += main.cpp \
     Helpers/updatehelpers.cpp \
     Common/basicmetadatamodel.cpp \
     PresetKeywords/presetkeywordsmodel.cpp \
-    PresetKeywords/presetkeywordsmodelconfig.cpp
+    PresetKeywords/presetkeywordsmodelconfig.cpp \
+    QMLExtensions/folderelement.cpp \
+    Models/artworkproxymodel.cpp \
+    Models/artworkproxybase.cpp
 
 RESOURCES += qml.qrc
 
@@ -300,19 +303,21 @@ HEADERS += \
     Helpers/updatehelpers.h \
     Common/basicmetadatamodel.h \
     PresetKeywords/presetkeywordsmodel.h \
-    PresetKeywords/presetkeywordsmodelconfig.h
+    PresetKeywords/presetkeywordsmodelconfig.h \
+    QMLExtensions/folderelement.h \
+    Models/artworkproxymodel.h \
+    Models/artworkproxybase.h \
+    Common/imetadataoperator.h
 
 DISTFILES += \
     Components/CloseIcon.qml \
     Components/EditableTags.qml \
-    Components/LargeRemoveIcon.qml \
     StyledControls/SimpleProgressBar.qml \
     StyledControls/StyledButton.qml \
     StyledControls/StyledCheckbox.qml \
     StyledControls/StyledScrollView.qml \
     StyledControls/StyledText.qml \
     StyledControls/StyledTextInput.qml \
-    Dialogs/CombinedArtworksDialog.qml \
     Dialogs/ExportMetadata.qml \
     Dialogs/ImportMetadata.qml \
     Dialogs/SettingsWindow.qml \
@@ -333,13 +338,10 @@ DISTFILES += \
     StyledControls/StyledBusyIndicator.qml \
     StyledControls/StyledTabView.qml \
     Components/CustomBorder.qml \
-    Dialogs/ArtworkPreview.qml \
     StyledControls/StyledBlackButton.qml \
     StyledControls/StyledSlider.qml \
     Components/KeywordWrapper.qml \
     Components/CustomScrollbar.qml \
-    Dialogs/EditArtworkVerticalDialog.qml \
-    Dialogs/EditArtworkHorizontalDialog.qml \
     Dialogs/UpdateWindow.qml \
     Dialogs/SpellCheckSuggestionsDialog.qml \
     Components/SuggestionWrapper.qml \
@@ -353,7 +355,6 @@ DISTFILES += \
     Constants/UIConfig.js \
     Components/SelectedIcon.qml \
     Components/CustomComboBox.qml \
-    Constants/Themes.js \
     Components/CompletionBox.qml \
     Components/EditIcon.qml \
     uncrustify.cfg \
@@ -371,7 +372,16 @@ DISTFILES += \
     Dialogs/DeleteKeywordsDialog.qml \
     Dialogs/FailedUploadArtworks.qml \
     Dialogs/InstallUpdateDialog.qml \
-    Dialogs/PresetEditDialog.qml
+    Dialogs/PresetEditDialog.qml \
+    StyledControls/StyledMainTabView.qml \
+    Components/CustomTab.qml \
+    StackViews/MainGrid.qml \
+    StackViews/ArtworkEditView.qml \
+    Components/ZoomAmplifier.qml \
+    StackViews/WarningsView.qml \
+    Components/GlyphButton.qml \
+    Components/BackGlyphButton.qml \
+    StackViews/CombinedEditView.qml
 
 lupdate_only {
 SOURCES += *.qml \

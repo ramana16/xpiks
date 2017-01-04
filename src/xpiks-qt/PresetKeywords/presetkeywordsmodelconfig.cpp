@@ -6,7 +6,7 @@
 #include <QJsonArray>
 #include "../Conectivity/apimanager.h"
 
-namespace  Presets {
+namespace  KeywordsPreset {
 #define OVERWRITE_KEY QLatin1String("overwrite")
 #define PRESETKEYS_KEY QLatin1String("presetkeys")
 #define LOCAL_PRESETKEYWORDS_LIST_FILE "preset_keywords.json"
@@ -34,7 +34,7 @@ namespace  Presets {
         emit presetsUpdated();
     }
 
-    void PresetKeywordsModelConfig::saveFromModel(const QVector<Preset> &presets) {
+    void PresetKeywordsModelConfig::saveFromModel(const std::vector<Preset> &presets) {
         int size = presets.size();
 
         m_PresetData.resize(size);
@@ -43,8 +43,8 @@ namespace  Presets {
             auto &name = item.m_PresetName;
             auto &keywordsModel = item.m_KeywordsModel;
             auto keywords = keywordsModel->getKeywords();
-            m_PresetData[i].keys = keywords;
-            m_PresetData[i].name = name;
+            m_PresetData[i].m_Keys = keywords;
+            m_PresetData[i].m_Name = name;
         }
 
         writeToConfig();
@@ -104,6 +104,7 @@ namespace  Presets {
     }
 
     int PresetKeywordsModelConfig::operator ()(const QJsonObject &val1, const QJsonObject &val2) {
+        // values are always considered equal. This may lead to loss of local changes.
         Q_UNUSED(val1);
         Q_UNUSED(val2);
         return 0;
@@ -157,9 +158,9 @@ namespace  Presets {
         for (auto &item : m_PresetData) {
             QJsonObject object;
             QJsonArray keys;
-            LOG_WARNING << item.name<< " " << item.keys;
-            keys = QJsonArray::fromStringList(item.keys);
-            object.insert(item.name, keys);
+            LOG_WARNING << item.m_Name<< " " << item.m_Keys;
+            keys = QJsonArray::fromStringList(item.m_Keys);
+            object.insert(item.m_Name, keys);
             jsonArray.append(object);
         }
 

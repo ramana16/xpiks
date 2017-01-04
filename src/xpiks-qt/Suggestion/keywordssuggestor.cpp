@@ -41,6 +41,7 @@ namespace Suggestion {
         m_AllOtherKeywords(m_HoldPlaceholder, this),
         m_SelectedArtworksCount(0),
         m_SelectedSourceIndex(0),
+        m_LocalSearchIndex(-1),
         m_IsInProgress(false)
     {
         setLastErrorString(tr("No results found"));
@@ -60,6 +61,7 @@ namespace Suggestion {
         m_QueryEngines.append(new GettyQueryEngine(id++, settingsModel));
         m_QueryEngines.append(new FotoliaQueryEngine(id++, settingsModel));
         m_QueryEngines.append(new LocalLibraryQueryEngine(id++, m_LocalLibrary));
+        m_LocalSearchIndex = m_QueryEngines.length() - 1;
 
         int length = m_QueryEngines.length();
         for (int i = 0; i < length; ++i) {
@@ -112,6 +114,7 @@ namespace Suggestion {
                 LOG_INFO << "Selected query source index:" << value;
                 m_SelectedSourceIndex = value;
                 emit selectedSourceIndexChanged();
+                emit isLocalSearchChanged();
             }
         }
     }
@@ -151,7 +154,7 @@ namespace Suggestion {
         LOG_INFO << "Index:" << keywordIndex;
 
         QString keyword;
-        if (m_SuggestedKeywords.takeKeywordAt(keywordIndex, keyword)) {
+        if (m_SuggestedKeywords.removeKeywordAt(keywordIndex, keyword)) {
             emit suggestedKeywordsCountChanged();
             LOG_INFO << "Removed:" << keyword;
         }
@@ -163,7 +166,7 @@ namespace Suggestion {
         LOG_INFO << "Index:" << keywordIndex;
 
         QString keyword;
-        if (m_AllOtherKeywords.takeKeywordAt(keywordIndex, keyword)) {
+        if (m_AllOtherKeywords.removeKeywordAt(keywordIndex, keyword)) {
             emit otherKeywordsCountChanged();
             LOG_INFO << "Removed:" << keyword;
         }
@@ -188,8 +191,8 @@ namespace Suggestion {
         updateSuggestedKeywords();
     }
 
-    void KeywordsSuggestor::searchArtworks(const QString &searchTerm) {
-        LOG_DEBUG << searchTerm;
+    void KeywordsSuggestor::searchArtworks(const QString &searchTerm, int resultsType) {
+        LOG_INFO << "[" << searchTerm << "], search type:" << resultsType;
 
         if (!m_IsInProgress && !searchTerm.trimmed().isEmpty()) {
             setInProgress();
@@ -197,7 +200,7 @@ namespace Suggestion {
             QStringList searchTerms = searchTerm.split(QChar::Space, QString::SkipEmptyParts);
 
             SuggestionQueryEngineBase *engine = m_QueryEngines.at(m_SelectedSourceIndex);
-            engine->submitQuery(searchTerms);
+            engine->submitQuery(searchTerms, (QueryResultsType)resultsType);
 
             if (dynamic_cast<LocalLibraryQueryEngine*>(engine) == NULL) {
                 m_CommandManager->reportUserAction(Conectivity::UserAction::SuggestionRemote);
@@ -229,6 +232,8 @@ namespace Suggestion {
             return suggestionArtwork->getUrl();
         case IsSelectedRole:
             return suggestionArtwork->getIsSelected();
+        case ExternalUrlRole:
+            return suggestionArtwork->getExternalUrl();
         default:
             return QVariant();
         }
@@ -238,6 +243,7 @@ namespace Suggestion {
         QHash<int, QByteArray> roles;
         roles[UrlRole] = "url";
         roles[IsSelectedRole] = "isselected";
+        roles[ExternalUrlRole] = "externalurl";
         return roles;
     }
 

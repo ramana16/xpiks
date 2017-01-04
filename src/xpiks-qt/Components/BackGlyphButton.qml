@@ -20,50 +20,38 @@
  */
 
 import QtQuick 2.2
+import QtQuick.Controls 1.1
+import xpiks 1.0
 import "../Constants"
+import "../StyledControls"
 
-Item {
-    id: item
-    signal itemClicked();
+GlyphButton {
+    id: buttonBack
+    width: 100
+    glyphVisible: true
+    leftShift: -5
+    glyphMargin: 12
+    glyph: Item {
+        width: childrenRect.width
+        height: 14
 
-    Item {
-        anchors.fill: parent
-
-        Rectangle {
-            color: Colors.defaultLightGrayColor
-            width: parent.width - 2
-            height: 8
-            border.width: 4
-            border.color: color
-            radius: 4
-            transformOrigin: Item.Center
-            rotation: 45
-            anchors.centerIn: parent
+        TriangleElement {
+            id: triangle
+            isVertical: true
+            isFlipped: true
+            width: 7
+            height: 14
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+            color: buttonBack.textColor
         }
 
         Rectangle {
-            color: Colors.defaultLightGrayColor
-            width: parent.width - 2
-            height: 8
-            radius: 4
-            border.width: 4
-            border.color: color
-            transformOrigin: Item.Center
-            rotation: 135
-            anchors.centerIn: parent
-        }
-
-        scale: mouseArea.pressed ? 0.8 : 1
-
-        MouseArea {
-            id: mouseArea
-            anchors.fill: parent
-            hoverEnabled: true
-            preventStealing: true
-            onClicked: {
-                itemClicked()
-            }
+            anchors.left: triangle.right
+            anchors.verticalCenter: parent.verticalCenter
+            color: buttonBack.textColor
+            width: 6
+            height: 6
         }
     }
 }
-
