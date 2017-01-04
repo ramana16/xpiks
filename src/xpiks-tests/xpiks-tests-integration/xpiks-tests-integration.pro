@@ -158,7 +158,8 @@ SOURCES += main.cpp \
     ../../xpiks-qt/PresetKeywords/presetkeywordsmodel.cpp \
     ../../xpiks-qt/PresetKeywords/presetkeywordsmodelconfig.cpp \
     ../../xpiks-qt/Models/artworkproxybase.cpp \
-    plaintextedittest.cpp
+    plaintextedittest.cpp \
+    fixspellingmarksmodifiedtest.cpp
 
 RESOURCES +=
 
@@ -247,7 +248,6 @@ HEADERS += \
     ../../xpiks-qt/Plugins/pluginwrapper.h \
     ../../xpiks-qt/Plugins/uiprovider.h \
     ../../xpiks-qt/Plugins/xpiksplugininterface.h \
-    ../../xpiks-qt/SpellCheck/ispellcheckable.h \
     ../../xpiks-qt/SpellCheck/spellcheckerrorshighlighter.h \
     ../../xpiks-qt/SpellCheck/spellcheckerservice.h \
     ../../xpiks-qt/SpellCheck/spellcheckitem.h \
@@ -346,7 +346,8 @@ HEADERS += \
     ../../xpiks-qt/PresetKeywords/presetkeywordsmodelconfig.h \
     ../../xpiks-qt/Common/imetadataoperator.h \
     ../../xpiks-qt/Models/artworkproxybase.h \
-    plaintextedittest.h
+    plaintextedittest.h \
+    fixspellingmarksmodifiedtest.h
 
 INCLUDEPATH += ../../tiny-aes
 INCLUDEPATH += ../../cpp-libface

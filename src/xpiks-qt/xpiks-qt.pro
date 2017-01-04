@@ -203,7 +203,6 @@ HEADERS += \
     SpellCheck/spellcheckitem.h \
     SpellCheck/spellcheckworker.h \
     SpellCheck/spellchecksuggestionmodel.h \
-    SpellCheck/ispellcheckable.h \
     SpellCheck/spellcheckerrorshighlighter.h \
     SpellCheck/spellcheckiteminfo.h \
     MetadataIO/backupsaverworker.h \

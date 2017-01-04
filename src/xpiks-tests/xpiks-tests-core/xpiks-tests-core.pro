@@ -203,7 +203,6 @@ HEADERS += \
     ../../xpiks-qt/MetadataIO/backupsaverservice.h \
     ../../xpiks-qt/MetadataIO/backupsaverworker.h \
     ../../xpiks-qt/Conectivity/analyticsuserevent.h \
-    ../../xpiks-qt/SpellCheck/ispellcheckable.h \
     ../../xpiks-qt/SpellCheck/spellcheckiteminfo.h \
     ../../xpiks-qt/SpellCheck/spellsuggestionsitem.h \
     ../../xpiks-qt/SpellCheck/spellcheckerrorshighlighter.h \

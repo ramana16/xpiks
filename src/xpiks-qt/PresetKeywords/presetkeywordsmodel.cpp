@@ -104,10 +104,9 @@ namespace  KeywordsPreset {
         }
     }
 
-    void PresetKeywordsModel::saveToConfig() {
-        auto *presetConfig = m_CommandManager->getPresetsModelConfig();
-
+    void PresetKeywordsModel::saveToConfig() {        
 #ifndef CORE_TESTS
+        auto *presetConfig = m_CommandManager->getPresetsModelConfig();
         presetConfig->saveFromModel(m_PresetsList);
 #endif
     }
