@@ -121,9 +121,27 @@ Rectangle {
                 delegate: MenuItem {
                     text: i18.n + qsTr("\"%1\"").arg(filteredPresetsModel.getName(index))
                     onTriggered: {
-                        filteredArtItemsModel.replaceFromPreset(wordRightClickMenu.artworkIndex, wordRightClickMenu.word, filteredPresetsModel.getOriginalIndex(index));
+                        artworkProxy.replaceFromPreset(wordRightClickMenu.word);
                     }
                 }
+            }
+        }
+    }
+
+    Menu {
+        id: presetsMenu
+        Instantiator {
+            model: presetsModel
+            onObjectAdded:{
+                presetsMenu.insertItem( index, object )
+            }
+            onObjectRemoved: presetsMenu.removeItem( object )
+            delegate: MenuItem {
+                text: i18.n + qsTr("Expand as preset \"%1\"").arg(name)
+                onTriggered: {
+                    artworkProxy.appendFromPreset(index);
+                }
+
             }
         }
     }
@@ -774,6 +792,10 @@ Rectangle {
                                 onCompletionRequested: {
                                     helpersWrapper.autoCompleteKeyword(prefix,
                                                                        artworkProxy.getBasicModel())
+                                }
+
+                                onRightClickedInside: {
+                                    presetsMenu.popup()
                                 }
                             }
 

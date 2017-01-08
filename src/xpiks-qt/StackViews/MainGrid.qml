@@ -93,6 +93,25 @@ ColumnLayout {
         }
     }
 
+    Menu {
+        id: presetsMenu
+        property int artworkIndex
+        Instantiator {
+            model: filteredPresetsModel
+            onObjectAdded:{
+                presetsMenu.insertItem( index, object )
+            }
+            onObjectRemoved: presetsMenu.removeItem( object )
+            delegate: MenuItem {
+                text: i18.n + qsTr("Expand as preset \"%1\"").arg(name)
+                onTriggered: {
+                    filteredArtItemsModel.appendFromPreset(presetsMenu.artworkIndex, filteredPresetsModel.getOriginalIndex(index));
+                }
+
+            }
+        }
+    }
+
     function closeAutoComplete() {
         if (typeof workflowHost.autoCompleteBox !== "undefined") {
             workflowHost.autoCompleteBox.closePopup()
@@ -1195,6 +1214,11 @@ ColumnLayout {
                                                 onEditActivated: {
                                                     wrappersScope.updateCurrentIndex()
                                                     flv.activateEdit()
+                                                }
+
+                                                onRightClickedInside: {
+                                                    presetsMenu.artworkIndex = rowWrapper.delegateIndex
+                                                    presetsMenu.popup()
                                                 }
                                             }
 

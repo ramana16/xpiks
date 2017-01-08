@@ -283,12 +283,12 @@ namespace Common {
         return result;
     }
 
-    void BasicMetadataModel::replaceFromPreset(int keywordsIndex, const QStringList &presetList) {
-        expandPreset(keywordsIndex, presetList);
+    bool BasicMetadataModel::replaceFromPreset(int keywordsIndex, const QStringList &presetList) {
+        return expandPreset(keywordsIndex, presetList);
     }
 
-    void BasicMetadataModel::addFromPreset(const QStringList &presetList) {
-        appendKeywords(presetList);
+    bool BasicMetadataModel::addFromPreset(const QStringList &presetList) {
+        return appendKeywords(presetList) != 0;
     }
 
     bool BasicMetadataModel::setDescription(const QString &value) {

@@ -83,8 +83,8 @@ namespace Common {
         bool hasDescriptionWordSpellError(const QString &word);
         bool hasTitleWordSpellError(const QString &word);
         virtual bool hasSpellErrors();
-        void replaceFromPreset(int keywordsIndex, const QStringList &presetList);
-        void addFromPreset(const QStringList &presetList);
+        bool replaceFromPreset(int keywordsIndex, const QStringList &presetList);
+        bool addFromPreset(const QStringList &presetList);
 
     public:
         // IMetadataOperator

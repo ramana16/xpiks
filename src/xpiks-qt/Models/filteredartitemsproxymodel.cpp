@@ -404,8 +404,9 @@ namespace Models {
                 ArtworkMetadata *metadata = artItemsModel->getArtwork(originalIndex);
 
                 if (metadata != NULL) {
+                    metadata->addFromPreset(keywords);
                     auto *keywordsModel = metadata->getBasicModel();
-                    keywordsModel->addFromPreset(keywords);
+                    m_CommandManager->submitItemForSpellCheck(keywordsModel);
                 }
             }
         }
@@ -424,8 +425,9 @@ namespace Models {
                     ArtworkMetadata *metadata = artItemsModel->getArtwork(originalIndex);
 
                     if (metadata != NULL) {
+                        metadata->replaceFromPreset(keywordsIndex, keywords);
                         auto *keywordsModel = metadata->getBasicModel();
-                        keywordsModel->replaceFromPreset(keywordsIndex, keywords);
+                        m_CommandManager->submitItemForSpellCheck(keywordsModel);
                     }
                 }
             }
