@@ -18,8 +18,8 @@ int PresetTests::doTest() {
 
     typedef KeywordsPreset::PresetData PresetData;
     QVector<PresetData> presetDataVector;
-    presetDataVector.push_back({QStringList() << "key1" << "key2", "name1"});
-    presetDataVector.push_back({QStringList() << "key3" << "key4", "name2"});
+    presetDataVector.push_back({QStringList() << QString("key1") << QString("key2"), QString("name1")});
+    presetDataVector.push_back({QStringList() << QString("key3") << QString("key4"), QString("name2")});
     presetKeywordsModelConfig->initialize(presetDataVector);
 
     presetKeywordsModel->removeKeywordAt(0,0);
