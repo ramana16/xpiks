@@ -30,9 +30,9 @@ int PresetTests::doTest() {
     presetKeywordsModel->saveToConfig();
 
     QVector<PresetData> goldPresetDataVector;
-    goldPresetDataVector.push_back({QStringList() << "key2", "name1"});
-    goldPresetDataVector.push_back({QStringList() << "key3" << "key4" << "key5", "name2"});
-    goldPresetDataVector.push_back({QStringList() << "key6", "name3"});
+    goldPresetDataVector.push_back({QStringList() << QString("key2"), QString("name1")});
+    goldPresetDataVector.push_back({QStringList() << QString("key3") << QString("key4") << QString("key5"), QString("name2")});
+    goldPresetDataVector.push_back({QStringList() << QString("key6"), QString("name3")});
 
     QThread::sleep(1);
 
