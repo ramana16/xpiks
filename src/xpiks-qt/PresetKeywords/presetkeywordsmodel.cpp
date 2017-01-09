@@ -40,7 +40,7 @@ namespace  KeywordsPreset {
         return true;
     }
 
-    void PresetKeywordsModel::setName(int presetIndex, QString &name)
+    void PresetKeywordsModel::setName(int presetIndex, const QString &name)
     {
         if (presetIndex < 0 || presetIndex >= m_PresetsList.size()) {
             return;
