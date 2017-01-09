@@ -40,6 +40,15 @@ namespace  KeywordsPreset {
         return true;
     }
 
+    void PresetKeywordsModel::setName(int presetIndex, QString &name)
+    {
+        if (presetIndex < 0 || presetIndex >= m_PresetsList.size()) {
+            return;
+        }
+
+        m_PresetsList[presetIndex].m_PresetName = name;
+    }
+
     void PresetKeywordsModel::removeItem(int row) {
         if (row < 0 || row >= getPresetsCount()){
             return;
@@ -112,6 +121,7 @@ namespace  KeywordsPreset {
     }
 
     void PresetKeywordsModel::loadFromConfigModel() {
+#ifndef CORE_TESTS
         beginResetModel();
         auto *presetConfig = m_CommandManager->getPresetsModelConfig();
         auto &presetData = presetConfig->m_PresetData;
@@ -134,6 +144,7 @@ namespace  KeywordsPreset {
         }
 
         endResetModel();
+#endif
     }
 
     int PresetKeywordsModel::rowCount(const QModelIndex &parent) const {

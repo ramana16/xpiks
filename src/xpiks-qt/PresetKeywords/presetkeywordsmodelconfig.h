@@ -33,6 +33,10 @@ namespace  KeywordsPreset {
     public:
         virtual int operator ()(const QJsonObject &val1, const QJsonObject &val2);
 
+    public:
+        void initialize(const QVector<PresetData> &presetData);
+        const QVector<PresetData> & getPresetData();
+
     signals:
         void presetsUpdated();
 

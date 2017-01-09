@@ -36,6 +36,7 @@ namespace  KeywordsPreset {
 
     void PresetKeywordsModelConfig::saveFromModel(const std::vector<Preset> &presets) {
         int size = presets.size();
+        LOG_INTEGR_TESTS_OR_DEBUG << size;
 
         m_PresetData.resize(size);
         for (int i = 0; i < size; i++) {
@@ -46,8 +47,9 @@ namespace  KeywordsPreset {
             m_PresetData[i].m_Keys = keywords;
             m_PresetData[i].m_Name = name;
         }
-
+#ifndef INTEGRATION_TESTS
         writeToConfig();
+#endif
     }
 
     bool PresetKeywordsModelConfig::parseConfig(const QJsonDocument &document) {
@@ -173,5 +175,14 @@ namespace  KeywordsPreset {
         Helpers::LocalConfig &localConfig = getLocalConfig();
         localConfig.setConfig(doc);
         localConfig.saveToFile();
+    }
+
+    void PresetKeywordsModelConfig::initialize(const QVector<PresetData> &presetData){
+        m_PresetData = presetData;
+        emit presetsUpdated();
+    }
+
+    const QVector<PresetData> & PresetKeywordsModelConfig::getPresetData(){
+        return m_PresetData;
     }
 }

@@ -2,10 +2,17 @@
 #define PRESETTESTS_H
 
 
-class PresetTests
+#include <QObject>
+#include <QtTest/QtTest>
+
+class PresetTests: public QObject
 {
-public:
-    PresetTests();
+    Q_OBJECT
+private slots:
+    void expandFromPresetTrivial();
+    void expandFromPresetWithDublicates();
+    void appendFromPresetTrivial();
+    void appendFromPresetWithDublicates();
 };
 
 #endif // PRESETTESTS_H

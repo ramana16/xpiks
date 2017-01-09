@@ -33,6 +33,7 @@ namespace KeywordsPreset {
         bool tryGetIndexFromName(const QString &presetName, int &result);
         bool tryGetNameFromIndex(int index, QString &name);
         bool tryGetPreset(int presetIndex, QStringList &keywords);
+        void setName(int presetIndex, QString &name);
 
     public:
         enum PresetKeywords_Roles {
