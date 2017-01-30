@@ -413,6 +413,14 @@ ApplicationWindow {
             enabled: applicationWindow.openedDialogsCount == 0
 
             MenuItem {
+                text: i18.n + qsTr("&User dictionary")
+                onTriggered: {
+                    console.info("User dictionary triggered")
+                    Common.launchDialog("Dialogs/UserDictionary.qml", applicationWindow, {})
+                }
+            }
+
+            MenuItem {
                 text: i18.n + qsTr("&Presets")
                 onTriggered: {
                     console.info("Presets triggered")

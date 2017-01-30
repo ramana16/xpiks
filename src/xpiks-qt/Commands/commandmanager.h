@@ -87,6 +87,7 @@ namespace MetadataIO {
 namespace SpellCheck {
     class SpellCheckerService;
     class SpellCheckSuggestionModel;
+    class SpellCheckUserDict;
 }
 
 namespace Conectivity {
@@ -186,6 +187,7 @@ namespace Commands {
         void InjectDependency(Models::RecentDirectoriesModel *recentDirectories);
         void InjectDependency(SpellCheck::SpellCheckerService *spellCheckerService);
         void InjectDependency(SpellCheck::SpellCheckSuggestionModel *spellCheckSuggestionModel);
+        void InjectDependency(SpellCheck::SpellCheckUserDict *spellCheckUserDict);
         void InjectDependency(MetadataIO::BackupSaverService *backupSaverService);
         void InjectDependency(Conectivity::TelemetryService *telemetryService);
         void InjectDependency(Conectivity::UpdateService *updateService);
@@ -337,6 +339,7 @@ namespace Commands {
         Models::RecentDirectoriesModel *m_RecentDirectories;
         SpellCheck::SpellCheckerService *m_SpellCheckerService;
         SpellCheck::SpellCheckSuggestionModel *m_SpellCheckSuggestionModel;
+        SpellCheck::SpellCheckUserDict *m_SpellCheckUserDict;
         MetadataIO::BackupSaverService *m_MetadataSaverService;
         Conectivity::TelemetryService *m_TelemetryService;
         Conectivity::UpdateService *m_UpdateService;

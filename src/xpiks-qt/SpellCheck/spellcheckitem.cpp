@@ -213,14 +213,23 @@ namespace SpellCheck {
         emit resultsReady(m_SpellCheckFlags, index);
     }
 
-    AddWordToUserDictItem::AddWordToUserDictItem(const QString &keyword):
+    AddWordsToUserDictItem::AddWordsToUserDictItem(const QString &keyword):
         m_ClearFlag(false)
     {
         Helpers::splitText(keyword, m_KeywordsToAdd);
         m_KeywordsToAdd.removeDuplicates();
     }
 
-    AddWordToUserDictItem::AddWordToUserDictItem(bool clearFlag):
+    AddWordsToUserDictItem::AddWordsToUserDictItem(bool clearFlag):
         m_ClearFlag(clearFlag)
     { }
+
+    AddWordsToUserDictItem::AddWordsToUserDictItem(const QStringList &keywords):
+        m_ClearFlag(true)
+    {
+        for (auto & keyword : keywords) {
+            Helpers::splitText(keyword, m_KeywordsToAdd);
+        }
+        m_KeywordsToAdd.removeDuplicates();
+    }
 }

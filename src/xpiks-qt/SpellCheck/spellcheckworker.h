@@ -53,7 +53,7 @@ namespace SpellCheck {
     private:
         void processSeparatorItem(std::shared_ptr<SpellCheckSeparatorItem> &item);
         void processQueryItem(std::shared_ptr<SpellCheckItem> &item);
-        void processChangeUserDict(std::shared_ptr<AddWordToUserDictItem> &item);
+        void processChangeUserDict(std::shared_ptr<AddWordsToUserDictItem> &item);
 
     protected:
         virtual void notifyQueueIsEmpty() override { emit queueIsEmpty(); }
@@ -67,7 +67,7 @@ namespace SpellCheck {
         void stopped();
         void queueIsEmpty();
         void wordsNumberChanged(int number);
-        void userDictUpdate(const QStringList &keywords);
+        void userDictUpdate(const QStringList &keywords, bool overwritten);
         void userDictCleared();
 
 #ifdef INTEGRATION_TESTS
@@ -84,7 +84,7 @@ namespace SpellCheck {
         void findSuggestions(const QString &word);
         void initUserDictionary();
         void cleanUserDict();
-        void addWordToUserDict(const QStringList &words);
+        void changeUserDict(const QStringList &words, bool overwrite);
         void signalUserDictWordsCount();
 
     private:

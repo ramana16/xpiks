@@ -67,8 +67,8 @@ namespace SpellCheck {
         // user dict
         QObject::connect(m_SpellCheckWorker, SIGNAL(wordsNumberChanged(int)),
                          this, SLOT(wordsNumberChangedHandler(int)));
-        QObject::connect(m_SpellCheckWorker, SIGNAL(userDictUpdate(QStringList)),
-                         this, SIGNAL(userDictUpdate(QStringList)));
+        QObject::connect(m_SpellCheckWorker, SIGNAL(userDictUpdate(QStringList, bool)),
+                         this, SIGNAL(userDictUpdate(QStringList, bool)));
         QObject::connect(m_SpellCheckWorker, SIGNAL(userDictCleared()),
                          this, SIGNAL(userDictCleared()));
 
@@ -200,6 +200,12 @@ namespace SpellCheck {
     }
 #endif
 
+    void SpellCheckerService::updateUserDictionary(const QStringList &words)
+    {
+        LOG_INFO << words;
+        m_SpellCheckWorker->submitItem(std::shared_ptr<ISpellCheckItem>(new AddWordsToUserDictItem(words)));
+    }
+
     void SpellCheckerService::cancelCurrentBatch() {
         LOG_DEBUG << "#";
 
@@ -222,12 +228,12 @@ namespace SpellCheck {
 
     void SpellCheckerService::addWordToUserDictionary(const QString &word) {
         LOG_INFO << word;
-        m_SpellCheckWorker->submitItem(std::shared_ptr<ISpellCheckItem>(new AddWordToUserDictItem(word)));
+        m_SpellCheckWorker->submitItem(std::shared_ptr<ISpellCheckItem>(new AddWordsToUserDictItem(word)));
     }
 
     void SpellCheckerService::clearUserDictionary() {
         LOG_DEBUG << "#";
-        m_SpellCheckWorker->submitItem(std::shared_ptr<ISpellCheckItem>(new AddWordToUserDictItem(true)));
+        m_SpellCheckWorker->submitItem(std::shared_ptr<ISpellCheckItem>(new AddWordsToUserDictItem(true)));
     }
 
     void SpellCheckerService::workerFinished() {

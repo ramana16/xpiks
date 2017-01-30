@@ -39,6 +39,7 @@
 #include "../SpellCheck/spellcheckerservice.h"
 #include "../Models/settingsmodel.h"
 #include "../SpellCheck/spellchecksuggestionmodel.h"
+#include "../SpellCheck/spellcheckuserdict.h"
 #include "../MetadataIO/backupsaverservice.h"
 #include "../Conectivity/telemetryservice.h"
 #include "../Conectivity/updateservice.h"
@@ -140,6 +141,12 @@ void Commands::CommandManager::InjectDependency(SpellCheck::SpellCheckerService 
 void Commands::CommandManager::InjectDependency(SpellCheck::SpellCheckSuggestionModel *spellCheckSuggestionModel) {
     Q_ASSERT(spellCheckSuggestionModel != NULL); m_SpellCheckSuggestionModel = spellCheckSuggestionModel;
     m_SpellCheckSuggestionModel->setCommandManager(this);
+}
+
+void Commands::CommandManager::InjectDependency(SpellCheck::SpellCheckUserDict *spellCheckUserDict)
+{
+    Q_ASSERT(spellCheckUserDict != NULL); m_SpellCheckUserDict = spellCheckUserDict;
+    m_SpellCheckUserDict->setCommandManager(this);
 }
 
 void Commands::CommandManager::InjectDependency(MetadataIO::BackupSaverService *backupSaverService) {
@@ -301,15 +308,15 @@ void Commands::CommandManager::connectEntitiesSignalsSlots() const {
     }
 
     if (m_SpellCheckerService != NULL && m_ArtItemsModel != NULL) {
-        QObject::connect(m_SpellCheckerService, SIGNAL(userDictUpdate(QStringList)),
-                         m_ArtItemsModel, SLOT(userDictUpdateHandler(QStringList)));
+        QObject::connect(m_SpellCheckerService, SIGNAL(userDictUpdate(QStringList, bool)),
+                         m_ArtItemsModel, SLOT(userDictUpdateHandler(QStringList, bool)));
         QObject::connect(m_SpellCheckerService, SIGNAL(userDictCleared()),
                          m_ArtItemsModel, SLOT(userDictClearedHandler()));
     }
 
     if (m_SpellCheckerService != NULL && m_CombinedArtworksModel != NULL) {
-        QObject::connect(m_SpellCheckerService, SIGNAL(userDictUpdate(QStringList)),
-                         m_CombinedArtworksModel, SLOT(userDictUpdateHandler(QStringList)));
+        QObject::connect(m_SpellCheckerService, SIGNAL(userDictUpdate(QStringList, bool)),
+                         m_CombinedArtworksModel, SLOT(userDictUpdateHandler(QStringList, bool)));
         QObject::connect(m_SpellCheckerService, SIGNAL(userDictCleared()),
                          m_CombinedArtworksModel, SLOT(userDictClearedHandler()));
     }
@@ -320,8 +327,8 @@ void Commands::CommandManager::connectEntitiesSignalsSlots() const {
     }
 
     if (m_SpellCheckerService != NULL && m_ArtworkProxyModel != NULL) {
-        QObject::connect(m_SpellCheckerService, SIGNAL(userDictUpdate(QStringList)),
-                         m_ArtworkProxyModel, SLOT(userDictUpdateHandler(QStringList)));
+        QObject::connect(m_SpellCheckerService, SIGNAL(userDictUpdate(QStringList, bool)),
+                         m_ArtworkProxyModel, SLOT(userDictUpdateHandler(QStringList, bool)));
         QObject::connect(m_SpellCheckerService, SIGNAL(userDictCleared()),
                          m_ArtworkProxyModel, SLOT(userDictClearedHandler()));
     }
@@ -336,6 +343,13 @@ void Commands::CommandManager::connectEntitiesSignalsSlots() const {
 
     if (m_PresetsModel != NULL && m_PresetsModelConfig != NULL) {
         QObject::connect(m_PresetsModelConfig, SIGNAL(presetsUpdated()), m_PresetsModel, SLOT (onPresetsUpdated()));
+    }
+
+    if (m_SpellCheckerService != NULL && m_SpellCheckUserDict != NULL) {
+        QObject::connect(m_SpellCheckerService, SIGNAL(userDictUpdate(QStringList, bool)),
+                         m_SpellCheckUserDict, SLOT(userDictUpdateHandler(QStringList, bool)));
+        QObject::connect(m_SpellCheckerService, SIGNAL(userDictCleared()),
+                         m_SpellCheckUserDict, SLOT(userDictClearedHandler()));
     }
 }
 
@@ -378,6 +392,7 @@ void Commands::CommandManager::ensureDependenciesInjected() {
     Q_ASSERT(m_UIManager != NULL);
     Q_ASSERT(m_QuickBuffer != NULL);
 #endif
+    Q_ASSERT(m_SpellCheckUserDict != NULL);
 
 #ifndef INTEGRATION_TESTS
     Q_ASSERT(m_HelpersQmlWrapper != NULL);

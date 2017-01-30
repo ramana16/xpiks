@@ -131,13 +131,14 @@ namespace SpellCheck {
         volatile bool m_OnlyOneKeyword;
     };
 
-    class AddWordToUserDictItem:
+    class AddWordsToUserDictItem:
         public ISpellCheckItem
     {
     public:
-        AddWordToUserDictItem(const QString &keyword);
-        AddWordToUserDictItem(bool clearFlag);
-        virtual ~AddWordToUserDictItem() {}
+        AddWordsToUserDictItem(const QString &keyword);
+        AddWordsToUserDictItem(bool clearFlag);
+        AddWordsToUserDictItem(const QStringList &keywords);
+        virtual ~AddWordsToUserDictItem() {}
 
     public:
         const QStringList &getKeywordsToAdd() const { return m_KeywordsToAdd; }
