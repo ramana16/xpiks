@@ -5,7 +5,7 @@
 #include "Mocks/artworkmetadatamock.h"
 
 void ArtworkMetadataTests::initializeOverwriteTest() {
-    Mocks::ArtworkMetadataMock metadata("file.jpg");
+    Mocks::ArtworkMetadataMock metadata("file.jpg", 0);
 
     QString title = "Artwork Special Title";
     QString description = "Artwork Special Description";
@@ -31,7 +31,7 @@ void ArtworkMetadataTests::initializeOverwriteTest() {
 }
 
 void ArtworkMetadataTests::initializeNoOverwriteButEmptyTest() {
-    Mocks::ArtworkMetadataMock metadata("file.jpg");
+    Mocks::ArtworkMetadataMock metadata("file.jpg", 0);
 
     QString title = "Artwork Special Title";
     QString description = "Artwork Special Description";
@@ -57,7 +57,7 @@ void ArtworkMetadataTests::initializeNoOverwriteButEmptyTest() {
 }
 
 void ArtworkMetadataTests::initializeNoOverwriteNotEmptyTest() {
-    Mocks::ArtworkMetadataMock metadata("file.jpg");
+    Mocks::ArtworkMetadataMock metadata("file.jpg", 0);
 
 
     metadata.setDescription("Test Description");
@@ -87,7 +87,7 @@ void ArtworkMetadataTests::initializeNoOverwriteNotEmptyTest() {
 }
 
 void ArtworkMetadataTests::initializeNoOverwriteTest() {
-    Mocks::ArtworkMetadataMock metadata("file.jpg");
+    Mocks::ArtworkMetadataMock metadata("file.jpg", 0);
 
     metadata.setDescription("Existing Description");
     metadata.setTitle("Existing Title");
@@ -117,7 +117,7 @@ void ArtworkMetadataTests::initializeNoOverwriteTest() {
 }
 
 void ArtworkMetadataTests::initializeOverwriteWithEmptyTest() {
-    Mocks::ArtworkMetadataMock metadata("file.jpg");
+    Mocks::ArtworkMetadataMock metadata("file.jpg", 0);
 
     metadata.setDescription("Existing Description");
     metadata.setTitle("Existing Title");
@@ -140,7 +140,7 @@ void ArtworkMetadataTests::initializeOverwriteWithEmptyTest() {
 
 void ArtworkMetadataTests::freshObjectTest() {
     QString filepath = "/path/to/my/file.jpg";
-    Mocks::ArtworkMetadataMock metadata(filepath);
+    Mocks::ArtworkMetadataMock metadata(filepath, 0);
 
     QCOMPARE(metadata.getFilepath(), filepath);
     QCOMPARE(metadata.isInitialized(), false);
@@ -152,7 +152,7 @@ void ArtworkMetadataTests::freshObjectTest() {
 }
 
 void ArtworkMetadataTests::markModifiedShouldEmitSignalTest() {
-     Mocks::ArtworkMetadataMock metadata("file.jpg");
+     Mocks::ArtworkMetadataMock metadata("file.jpg", 0);
 
      QSignalSpy modifiedSpy(&metadata, SIGNAL(modifiedChanged(bool)));
 
@@ -164,7 +164,7 @@ void ArtworkMetadataTests::markModifiedShouldEmitSignalTest() {
 }
 
 void ArtworkMetadataTests::modifiedIsNotMarkedModifiedAgainTest() {
-    Mocks::ArtworkMetadataMock metadata("file.jpg");
+    Mocks::ArtworkMetadataMock metadata("file.jpg", 0);
     metadata.markModified();
 
     QSignalSpy modifiedSpy(&metadata, SIGNAL(modifiedChanged(bool)));
@@ -175,7 +175,7 @@ void ArtworkMetadataTests::modifiedIsNotMarkedModifiedAgainTest() {
 }
 
 void ArtworkMetadataTests::setDescriptionEmitsModifiedTest() {
-    Mocks::ArtworkMetadataMock metadata("file.jpg");
+    Mocks::ArtworkMetadataMock metadata("file.jpg", 0);
 
     QSignalSpy modifiedSpy(&metadata, SIGNAL(modifiedChanged(bool)));
 
@@ -187,7 +187,7 @@ void ArtworkMetadataTests::setDescriptionEmitsModifiedTest() {
 }
 
 void ArtworkMetadataTests::setTitleEmitsModifiedTest() {
-    Mocks::ArtworkMetadataMock metadata("file.jpg");
+    Mocks::ArtworkMetadataMock metadata("file.jpg", 0);
 
     QSignalSpy modifiedSpy(&metadata, SIGNAL(modifiedChanged(bool)));
 
@@ -199,7 +199,7 @@ void ArtworkMetadataTests::setTitleEmitsModifiedTest() {
 }
 
 void ArtworkMetadataTests::addNewKeywordsEmitsModifiedTest() {
-    Mocks::ArtworkMetadataMock metadata("file.jpg");
+    Mocks::ArtworkMetadataMock metadata("file.jpg", 0);
 
     QSignalSpy modifiedSpy(&metadata, SIGNAL(modifiedChanged(bool)));
     QSignalSpy addedSpy(metadata.getBasicModel(), SIGNAL(rowsInserted(QModelIndex,int,int)));
@@ -219,7 +219,7 @@ void ArtworkMetadataTests::addNewKeywordsEmitsModifiedTest() {
 }
 
 void ArtworkMetadataTests::addExistingKeywordsDoesNotEmitModifiedTest() {
-    Mocks::ArtworkMetadataMock metadata("file.jpg");
+    Mocks::ArtworkMetadataMock metadata("file.jpg", 0);
     int addedCount = metadata.appendKeywords(QStringList() << "keyword1" << "keyword2");
 
     QCOMPARE(addedCount, 2);
@@ -236,7 +236,7 @@ void ArtworkMetadataTests::addExistingKeywordsDoesNotEmitModifiedTest() {
 }
 
 void ArtworkMetadataTests::addOneNewKeywordEmitsModifiedTest() {
-    Mocks::ArtworkMetadataMock metadata("file.jpg");
+    Mocks::ArtworkMetadataMock metadata("file.jpg", 0);
 
     QSignalSpy modifiedSpy(&metadata, SIGNAL(modifiedChanged(bool)));
     QSignalSpy addedSpy(metadata.getBasicModel(), SIGNAL(rowsInserted(QModelIndex,int,int)));
@@ -255,7 +255,7 @@ void ArtworkMetadataTests::addOneNewKeywordEmitsModifiedTest() {
 }
 
 void ArtworkMetadataTests::addOneExistingKeywordDoesNotEmitModifiedTest() {
-    Mocks::ArtworkMetadataMock metadata("file.jpg");
+    Mocks::ArtworkMetadataMock metadata("file.jpg", 0);
     bool added = metadata.appendKeyword("keyword2");
 
     QCOMPARE(added, true);
@@ -272,7 +272,7 @@ void ArtworkMetadataTests::addOneExistingKeywordDoesNotEmitModifiedTest() {
 }
 
 void ArtworkMetadataTests::removeKeywordFromEmptyTest() {
-    Mocks::ArtworkMetadataMock metadata("file.jpg");
+    Mocks::ArtworkMetadataMock metadata("file.jpg", 0);
     QSignalSpy modifiedSpy(&metadata, SIGNAL(modifiedChanged(bool)));
     QSignalSpy removedSpy(metadata.getBasicModel(), SIGNAL(rowsRemoved(QModelIndex,int,int)));
 
@@ -285,7 +285,7 @@ void ArtworkMetadataTests::removeKeywordFromEmptyTest() {
 }
 
 void ArtworkMetadataTests::removeLastKeywordFromEmptyTest() {
-    Mocks::ArtworkMetadataMock metadata("file.jpg");
+    Mocks::ArtworkMetadataMock metadata("file.jpg", 0);
     QSignalSpy modifiedSpy(&metadata, SIGNAL(modifiedChanged(bool)));
     QSignalSpy removedSpy(metadata.getBasicModel(), SIGNAL(rowsRemoved(QModelIndex,int,int)));
 
@@ -298,7 +298,7 @@ void ArtworkMetadataTests::removeLastKeywordFromEmptyTest() {
 }
 
 void ArtworkMetadataTests::removeActualKeywordTest() {
-    Mocks::ArtworkMetadataMock metadata("file.jpg");
+    Mocks::ArtworkMetadataMock metadata("file.jpg", 0);
     QSignalSpy modifiedSpy(&metadata, SIGNAL(modifiedChanged(bool)));
     QSignalSpy removedSpy(metadata.getBasicModel(), SIGNAL(rowsRemoved(QModelIndex,int,int)));
 
@@ -320,7 +320,7 @@ void ArtworkMetadataTests::removeActualKeywordTest() {
 }
 
 void ArtworkMetadataTests::removeLastActualKeywordTest() {
-    Mocks::ArtworkMetadataMock metadata("file.jpg");
+    Mocks::ArtworkMetadataMock metadata("file.jpg", 0);
     QSignalSpy modifiedSpy(&metadata, SIGNAL(modifiedChanged(bool)));
     QSignalSpy removedSpy(metadata.getBasicModel(), SIGNAL(rowsRemoved(QModelIndex,int,int)));
 
@@ -342,7 +342,7 @@ void ArtworkMetadataTests::removeLastActualKeywordTest() {
 }
 
 void ArtworkMetadataTests::editKeywordToAnotherEmitsModifiedTest() {
-    Mocks::ArtworkMetadataMock metadata("file.jpg");
+    Mocks::ArtworkMetadataMock metadata("file.jpg", 0);
 
     QSignalSpy modifiedSpy(&metadata, SIGNAL(modifiedChanged(bool)));
 
@@ -356,7 +356,7 @@ void ArtworkMetadataTests::editKeywordToAnotherEmitsModifiedTest() {
 }
 
 void ArtworkMetadataTests::editKeywordToExistingDoesNotEmitModifiedTest() {
-    Mocks::ArtworkMetadataMock metadata("file.jpg");
+    Mocks::ArtworkMetadataMock metadata("file.jpg", 0);
     metadata.appendKeywords(QStringList() << "keyword1" << "keyword2");
 
     QSignalSpy modifiedSpy(&metadata, SIGNAL(modifiedChanged(bool)));
@@ -368,7 +368,7 @@ void ArtworkMetadataTests::editKeywordToExistingDoesNotEmitModifiedTest() {
 }
 
 void ArtworkMetadataTests::misEditOfKeywordDoesNothingTest() {
-    Mocks::ArtworkMetadataMock metadata("file.jpg");
+    Mocks::ArtworkMetadataMock metadata("file.jpg", 0);
     metadata.appendKeywords(QStringList() << "keyword1" << "keyword2");
 
     QSignalSpy modifiedSpy(&metadata, SIGNAL(modifiedChanged(bool)));
@@ -390,7 +390,7 @@ void ArtworkMetadataTests::isInDirectoryTest() {
 #endif
 
     QFileInfo info(dir + filename);
-    Mocks::ArtworkMetadataMock metadata(info.absoluteFilePath());
+    Mocks::ArtworkMetadataMock metadata(info.absoluteFilePath(), 0);
     qDebug() << QDir(dir).absolutePath();
     QVERIFY(metadata.isInDirectory(QDir(dir).absolutePath()));
     QVERIFY(metadata.isInDirectory(QDir(alsoDir).absolutePath()));
@@ -411,7 +411,7 @@ void ArtworkMetadataTests::isNotInParentsDirectoryTest() {
 #endif
 
     QFileInfo info(dir + filename);
-    Mocks::ArtworkMetadataMock metadata(info.absoluteFilePath());
+    Mocks::ArtworkMetadataMock metadata(info.absoluteFilePath(), 0);
 
     QVERIFY(!metadata.isInDirectory(QDir(notADir1).absolutePath()));
     QVERIFY(!metadata.isInDirectory(QDir(notADir2).absolutePath()));
@@ -429,7 +429,7 @@ void ArtworkMetadataTests::isNotInOtherDirectoryTest() {
 #endif
 
     QFileInfo info(dir + filename);
-    Mocks::ArtworkMetadataMock metadata(info.absoluteFilePath());
+    Mocks::ArtworkMetadataMock metadata(info.absoluteFilePath(), 0);
     QVERIFY(!metadata.isInDirectory(QDir(otherDir).absolutePath()));
 }
 
@@ -444,12 +444,12 @@ void ArtworkMetadataTests::isNotInEmptyDirectoryTest() {
 #endif
 
     QFileInfo info(dir + filename);
-    Mocks::ArtworkMetadataMock metadata(info.absoluteFilePath());
+    Mocks::ArtworkMetadataMock metadata(info.absoluteFilePath(), 0);
     QVERIFY(!metadata.isInDirectory(QDir(otherDir).absolutePath()));
 }
 
 void ArtworkMetadataTests::clearKeywordsMarksAsModifiedTest() {
-    Mocks::ArtworkMetadataMock metadata("file.jpg");
+    Mocks::ArtworkMetadataMock metadata("file.jpg", 0);
     metadata.appendKeywords(QStringList() << "keyword1" << "keyword2");
     metadata.resetModified();
 
@@ -458,7 +458,7 @@ void ArtworkMetadataTests::clearKeywordsMarksAsModifiedTest() {
 }
 
 void ArtworkMetadataTests::clearEmptyKeywordsDoesNotMarkModifiedTest() {
-    Mocks::ArtworkMetadataMock metadata("file.jpg");
+    Mocks::ArtworkMetadataMock metadata("file.jpg", 0);
     QVERIFY(!metadata.isModified());
 
     metadata.clearKeywords();
@@ -466,7 +466,7 @@ void ArtworkMetadataTests::clearEmptyKeywordsDoesNotMarkModifiedTest() {
 }
 
 void ArtworkMetadataTests::removeKeywordsMarksModifiedTest() {
-    Mocks::ArtworkMetadataMock metadata("file.jpg");
+    Mocks::ArtworkMetadataMock metadata("file.jpg", 0);
     metadata.appendKeywords(QStringList() << "keyword1" << "keyword2");
     metadata.resetModified();
 

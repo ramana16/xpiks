@@ -23,8 +23,8 @@
 #include "../Common/defines.h"
 
 namespace Models {
-    ImageArtwork::ImageArtwork(const QString &filepath, qint64 ID):
-        ArtworkMetadata(filepath, ID),
+    ImageArtwork::ImageArtwork(const QString &filepath, qint64 ID, qint64 folderID):
+        ArtworkMetadata(filepath, ID, folderID),
         m_ImageFlags(0)
     {
     }

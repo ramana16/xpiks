@@ -62,6 +62,7 @@ namespace Models {
         int getNewFilesCount(const QStringList &items) const;
         int getArtworksSourcesCount() const { return m_DirectoriesList.length(); }
         bool canPurgeUnavailableFiles() const { return m_UnavailableFiles.size() == m_LastUnavailableFilesCount; }
+        bool isSelected(qint64 folderID) const;
 
     signals:
         void artworksSourcesCountChanged();
@@ -82,7 +83,7 @@ namespace Models {
         void onAvailabilityTimer();
 
     public:
-        bool accountFile(const QString &filepath);
+        bool accountFile(const QString &filepath, qint64 & folderID);
         void accountVector(const QString &vectorPath);
         bool removeFile(const QString &filepath, const QString &fileDirectory);
         void removeVector(const QString &vectorPath);
@@ -98,8 +99,8 @@ namespace Models {
     public:
         const QString &getDirectory(int index) const { return m_DirectoriesList[index]; }
 #ifdef CORE_TESTS
-        int getFilesCountForDirectory(const QString &directory) const { return m_DirectoriesHash[directory]; }
-        int getFilesCountForDirectory(int index) const { return m_DirectoriesHash[m_DirectoriesList[index]]; }
+        int getFilesCountForDirectory(const QString &directory) const { return m_DirectoriesHash[directory].cnt; }
+        int getFilesCountForDirectory(int index) const { return m_DirectoriesHash[m_DirectoriesList[index]].cnt; }
 #endif
         bool isFileUnavailable(const QString &filepath) const;
 
@@ -110,13 +111,18 @@ namespace Models {
     public:
         virtual int rowCount(const QModelIndex & parent = QModelIndex()) const override;
         virtual QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const override;
+    public:
+        Q_INVOKABLE void setSelected(int row);
 
     protected:
         virtual QHash<int, QByteArray> roleNames() const override;
 
     protected:
         virtual void removeInnerItem(int index) override {
-            QString directoryToRemove = m_DirectoriesList.takeAt(index);
+            QString directoryToRemove = m_DirectoriesList.at(index);
+            bool selected = m_DirectoriesHash[directoryToRemove].selected;
+            setSelectedUnsafe(index, false, selected);
+            m_DirectoriesList.takeAt(index);
             m_DirectoriesSelectedHash.remove(directoryToRemove);
             m_DirectoriesHash.remove(directoryToRemove);
             emit artworksSourcesCountChanged();
@@ -125,8 +131,21 @@ namespace Models {
         virtual bool checkFileExists(const QString &filename, QString &directory) const;
 
     private:
+        void setSelectedUnsafe(int row, bool new_value, bool old_value);
+    private:
+        struct Dir
+        {
+            qint64 id = 0;
+            int cnt = 0;
+            bool selected = true;
+            Dir (qint64  id_, int cnt_, bool selected_):
+                id(id_), cnt(cnt_), selected(selected_)
+            {}
+            Dir() = default;
+        };
+
         QStringList m_DirectoriesList;
-        QHash<QString, int> m_DirectoriesHash;
+        QHash<QString, Dir> m_DirectoriesHash;
         QSet<QString> m_FilesSet;
         QHash<QString, int> m_DirectoriesSelectedHash;
         QFileSystemWatcher m_FilesWatcher;

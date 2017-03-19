@@ -3,7 +3,7 @@
 #include "../../xpiks-qt/Helpers/filterhelpers.h"
 
 void ArtworkFilterTests::searchImageVectorTest() {
-    Mocks::ArtworkMetadataMock metadata("/path/to/file.jpg");
+    Mocks::ArtworkMetadataMock metadata("/path/to/file.jpg", 0);
     QVERIFY(Helpers::hasSearchMatch("x:image", &metadata, flagsAnyTermWithFilepath()));
     QVERIFY(!Helpers::hasSearchMatch("x:vector", &metadata, flagsAnyTermWithFilepath()));
 
@@ -13,7 +13,7 @@ void ArtworkFilterTests::searchImageVectorTest() {
 }
 
 void ArtworkFilterTests::searchByKeywordsTest() {
-    Mocks::ArtworkMetadataMock metadata("/path/to/file.jpg");
+    Mocks::ArtworkMetadataMock metadata("/path/to/file.jpg", 0);
     metadata.setKeywords(QStringList() << "keyword" << "another" << "test");
     QVERIFY(Helpers::hasSearchMatch("keyw TSTS", &metadata, flagsAnyTermWithFilepath()));
     QVERIFY(!Helpers::hasSearchMatch("!keyw", &metadata, flagsAnyTermWithFilepath()));
@@ -24,7 +24,7 @@ void ArtworkFilterTests::searchByKeywordsTest() {
 }
 
 void ArtworkFilterTests::searchByTitleTest() {
-    Mocks::ArtworkMetadataMock metadata("/path/to/file.jpg");
+    Mocks::ArtworkMetadataMock metadata("/path/to/file.jpg", 0);
     metadata.setTitle("my long title here");
     QVERIFY(Helpers::hasSearchMatch("tit", &metadata, flagsAnyTermWithFilepath()));
     QVERIFY(!Helpers::hasSearchMatch("!tit", &metadata, flagsAnyTermWithFilepath()));
@@ -36,7 +36,7 @@ void ArtworkFilterTests::searchByTitleTest() {
 }
 
 void ArtworkFilterTests::searchByDescriptionTest() {
-    Mocks::ArtworkMetadataMock metadata("/path/to/file.jpg");
+    Mocks::ArtworkMetadataMock metadata("/path/to/file.jpg", 0);
     metadata.setDescription("my long desciption john");
     QVERIFY(Helpers::hasSearchMatch("o", &metadata, flagsAnyTermWithFilepath()));
     QVERIFY(!Helpers::hasSearchMatch("!o", &metadata, flagsAnyTermWithFilepath()));
@@ -48,13 +48,13 @@ void ArtworkFilterTests::searchByDescriptionTest() {
 }
 
 void ArtworkFilterTests::searchByFilepathTest() {
-    Mocks::ArtworkMetadataMock metadata("/path/to/file.jpg");
+    Mocks::ArtworkMetadataMock metadata("/path/to/file.jpg", 0);
     QVERIFY(Helpers::hasSearchMatch("file.jpg", &metadata, flagsAnyTermWithFilepath()));
     QVERIFY(!Helpers::hasSearchMatch("file.jpg", &metadata, flagsAllTermsWithoutFilepath()));
 }
 
 void ArtworkFilterTests::strictSearchTest() {
-    Mocks::ArtworkMetadataMock metadata("/path/to/file.jpg");
+    Mocks::ArtworkMetadataMock metadata("/path/to/file.jpg", 0);
     metadata.setKeywords(QStringList() << "keyword" << "ano!ther" << "test" << "k");
     QVERIFY(Helpers::hasSearchMatch("keyw", &metadata, flagsAnyTermWithFilepath()));
     QVERIFY(!Helpers::hasSearchMatch("!keyw", &metadata, flagsAnyTermWithFilepath()));
@@ -68,7 +68,7 @@ void ArtworkFilterTests::strictSearchTest() {
 }
 
 void ArtworkFilterTests::searchWithSpaceTest() {
-    Mocks::ArtworkMetadataMock metadata("/path/to/file.jpg");
+    Mocks::ArtworkMetadataMock metadata("/path/to/file.jpg", 0);
 
     metadata.setTitle("A vector here");
     metadata.setDescription("Vector there");
@@ -81,7 +81,7 @@ void ArtworkFilterTests::searchWithSpaceTest() {
 }
 
 void ArtworkFilterTests::caseSensitiveKeywordSearchTest() {
-    Mocks::ArtworkMetadataMock metadata("/path/to/file.jpg");
+    Mocks::ArtworkMetadataMock metadata("/path/to/file.jpg", 0);
     metadata.setKeywords(QStringList() << "keYwOrd" << "keYword");
 
     auto flags = Common::SearchFlags::Keywords | Common::SearchFlags::CaseSensitive;
@@ -91,7 +91,7 @@ void ArtworkFilterTests::caseSensitiveKeywordSearchTest() {
 }
 
 void ArtworkFilterTests::cantFindWithFilterDescriptionTest() {
-    Mocks::ArtworkMetadataMock metadata("/path/to/file.jpg");
+    Mocks::ArtworkMetadataMock metadata("/path/to/file.jpg", 0);
     metadata.setDescription("token between here");
     metadata.setKeywords(QStringList() << "some keyword" << "another stuff");
 
@@ -102,7 +102,7 @@ void ArtworkFilterTests::cantFindWithFilterDescriptionTest() {
 }
 
 void ArtworkFilterTests::cantFindWithFilterTitleTest() {
-    Mocks::ArtworkMetadataMock metadata("/path/to/file.jpg");
+    Mocks::ArtworkMetadataMock metadata("/path/to/file.jpg", 0);
     metadata.setTitle("token between here");
     metadata.setKeywords(QStringList() << "some keyword" << "another stuff");
 
@@ -113,7 +113,7 @@ void ArtworkFilterTests::cantFindWithFilterTitleTest() {
 }
 
 void ArtworkFilterTests::cantFindWithFilterKeywordsTest() {
-    Mocks::ArtworkMetadataMock metadata("/path/to/file.jpg");
+    Mocks::ArtworkMetadataMock metadata("/path/to/file.jpg", 0);
     metadata.setDescription("another keyword in description");
     metadata.setTitle("token between here");
     metadata.setKeywords(QStringList() << "some keyword" << "another stuff");
@@ -125,7 +125,7 @@ void ArtworkFilterTests::cantFindWithFilterKeywordsTest() {
 }
 
 void ArtworkFilterTests::cantFindWithFilterSpecialTest() {
-    Mocks::ArtworkMetadataMock metadata("/path/to/file.jpg");
+    Mocks::ArtworkMetadataMock metadata("/path/to/file.jpg", 0);
     metadata.setDescription("another keyword in description");
     metadata.setTitle("token between here");
     metadata.setKeywords(QStringList() << "some keyword" << "another stuff");

@@ -70,10 +70,9 @@ namespace Models {
 #endif
     }
 
-    ArtworkMetadata *ArtItemsModel::createMetadata(const QString &filepath) {
+    ArtworkMetadata *ArtItemsModel::createMetadata(const QString &filepath, qint64 folderID) {
         int id = m_LastID++;
-
-        return new ImageArtwork(filepath, id);
+        return new ImageArtwork(filepath, id, folderID);
     }
 
     void ArtItemsModel::deleteAllItems() {

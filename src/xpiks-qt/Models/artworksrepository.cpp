@@ -27,7 +27,15 @@
 #include "../Common/defines.h"
 #include "../Helpers/indiceshelper.h"
 #include "../Commands/commandmanager.h"
+#include "../Models/filteredartitemsproxymodel.h"
 
+namespace {
+    qint64 genNextID()
+    {
+        static qint64 id = 0;
+        return id++;
+    }
+}
 namespace Models {
     ArtworksRepository::ArtworksRepository(QObject *parent) :
         AbstractListModel(parent),
@@ -53,7 +61,7 @@ namespace Models {
 
         for (int i = 0; i < count; ++i) {
             const QString &directory = m_DirectoriesList[i];
-            if (m_DirectoriesHash[directory] == 0) {
+            if (m_DirectoriesHash[directory].cnt == 0) {
                 indicesToRemove.append(i);
             }
         }
@@ -139,7 +147,20 @@ namespace Models {
         return count;
     }
 
-    bool ArtworksRepository::accountFile(const QString &filepath) {
+    bool ArtworksRepository::isSelected(qint64 folderID) const {
+        bool result = false;
+
+        for (const auto &element: m_DirectoriesHash) {
+            if (element.id == folderID) {
+                result = element.selected;
+                break;
+            }
+        }
+
+        return result;
+    }
+
+    bool ArtworksRepository::accountFile(const QString &filepath, qint64 & folderID) {
         bool wasModified = false;
         QString absolutePath;
 
@@ -147,13 +168,14 @@ namespace Models {
                 !m_FilesSet.contains(filepath)) {
 
             int occurances = 0;
-            QHash<QString, int>::iterator dirHashIterator = m_DirectoriesHash.find(absolutePath);
+            QHash<QString, Dir>::iterator dirHashIterator = m_DirectoriesHash.find(absolutePath);
 
             if (dirHashIterator == m_DirectoriesHash.end()) {
-                LOG_INFO << "Adding new directory" << absolutePath << "with index" << m_DirectoriesList.length();
+                int id = genNextID();
+                LOG_INFO << "Adding new directory" << absolutePath << "with index" << m_DirectoriesList.length() << "and id " << id;
                 m_DirectoriesList.append(absolutePath);
                 m_DirectoriesSelectedHash.insert(absolutePath, 0);
-                dirHashIterator = m_DirectoriesHash.insert(absolutePath, 0);
+                dirHashIterator = m_DirectoriesHash.insert(absolutePath, {id, 0, true});
                 emit artworksSourcesCountChanged();
 #ifdef CORE_TESTS
                 if (m_CommandManager != nullptr)
@@ -162,14 +184,16 @@ namespace Models {
                     m_CommandManager->addToRecentDirectories(absolutePath);
                 }
             } else {
-                occurances = dirHashIterator.value();
+                occurances = dirHashIterator->cnt;
             }
 
             // watchFilePath(filepath);
             m_FilesSet.insert(filepath);
-            dirHashIterator.value() = occurances + 1;
+            dirHashIterator->cnt = occurances + 1;
             wasModified = true;
         }
+
+        folderID = m_DirectoriesHash[absolutePath].id;
 
         return wasModified;
     }
@@ -182,10 +206,10 @@ namespace Models {
         bool result = false;
 
         if (m_FilesSet.contains(filepath) && m_DirectoriesHash.contains(fileDirectory)) {
-            int occurances = m_DirectoriesHash[fileDirectory] - 1;
+            int occurances = m_DirectoriesHash[fileDirectory].cnt - 1;
             int selectedCount = m_DirectoriesSelectedHash[fileDirectory] - 1;
 
-            m_DirectoriesHash[fileDirectory] = occurances;
+            m_DirectoriesHash[fileDirectory].cnt = occurances;
             m_DirectoriesSelectedHash[fileDirectory] = selectedCount;
             m_FilesWatcher.removePath(filepath);
             m_FilesSet.remove(filepath);
@@ -295,11 +319,77 @@ namespace Models {
         case PathRole:
             return dir.dirName();
         case UsedImagesCountRole:
-            return QVariant(m_DirectoriesHash[directory]);
+            return QVariant(m_DirectoriesHash[directory].cnt);
         case IsSelectedRole:
-            return m_DirectoriesSelectedHash[directory] > 0;
+            return m_DirectoriesHash[directory].selected;
         default:
             return QVariant();
+        }
+    }
+
+    void ArtworksRepository::setSelected(int row) {
+        LOG_DEBUG << row;
+        if (row < 0 || row >= m_DirectoriesList.count()) {
+            return;
+        }
+
+        const QString &directory = m_DirectoriesList.at(row);
+
+        bool old_value = m_DirectoriesHash[directory].selected;
+        bool new_value = !old_value;
+        setSelectedUnsafe(row, new_value, old_value);
+    }
+
+    void ArtworksRepository::setSelectedUnsafe(int row, bool new_value, bool old_value) {
+        bool changed = false;
+        int selected_count = 0;
+
+        if (old_value == new_value)
+        {
+            return;
+        }
+
+        for (const auto &current_directory : m_DirectoriesList) {
+            selected_count += m_DirectoriesHash[current_directory].selected;
+        }
+
+        auto update_function = [&](int index, bool new_val) -> void {
+                                   auto &directory = m_DirectoriesList[index];
+                                   bool old_val = m_DirectoriesHash[directory].selected;
+
+                                   if (new_val != old_val) {
+                                       m_DirectoriesHash[directory].selected = new_val;
+                                       QModelIndex changed_index = this->index(index);
+                                       changed = true;
+                                       emit dataChanged(changed_index, changed_index, QVector<int>() << IsSelectedRole);
+                                   }
+                               };
+        int size = m_DirectoriesList.size();
+        bool deselect_all = (size != 1) && (selected_count == size);
+        bool select_all = (old_value == true) && (size != 1) && (selected_count == 1);
+
+        if (deselect_all) {
+            for (int i = 0; i < size; i++) {
+                if (i == row) {
+                    continue;
+                }
+
+                update_function(i, false);
+            }
+        } else if (select_all) {
+            for (int i = 0; i < size; i++) {
+                update_function(i, true);
+            }
+        } else {
+            update_function(row, new_value);
+        }
+
+        if (changed) {
+            auto *filteredArtItemsModel = m_CommandManager->getFilteredArtItemsModel();
+            if (filteredArtItemsModel != NULL)
+            {
+                filteredArtItemsModel->updateFilter();
+            }
         }
     }
 

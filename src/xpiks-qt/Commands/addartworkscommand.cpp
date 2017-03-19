@@ -109,9 +109,10 @@ std::shared_ptr<Commands::ICommandResult> Commands::AddArtworksCommand::execute(
 
         for (int i = 0; i < count; ++i) {
             const QString &filename = m_FilePathes[i];
+            qint64 folderID = 0;
 
-            if (artworksRepository->accountFile(filename)) {
-                Models::ArtworkMetadata *metadata = artItemsModel->createMetadata(filename);
+            if (artworksRepository->accountFile(filename, folderID)) {
+                Models::ArtworkMetadata *metadata = artItemsModel->createMetadata(filename, folderID);
                 commandManager->connectArtworkSignals(metadata);
 
                 LOG_INTEGRATION_TESTS << "Added file:" << filename;

@@ -9,8 +9,8 @@
 #endif
 
 void ConectivityHelpersTests::generateMixedFilepathesTest() {
-    Mocks::ArtworkMetadataMock metadataWithoutVector(FIX_PATH("/path/to/picture.jpg"));
-    Mocks::ArtworkMetadataMock metadataWithVector(FIX_PATH("/completely/another/path/to/picture.jpg"));
+    Mocks::ArtworkMetadataMock metadataWithoutVector(FIX_PATH("/path/to/picture.jpg"), 0);
+    Mocks::ArtworkMetadataMock metadataWithVector(FIX_PATH("/completely/another/path/to/picture.jpg"), 0);
     metadataWithVector.attachVector(FIX_PATH("/completely/another/path/to/picture.eps"));
     QVector<Models::ArtworkMetadata*> items;
     items << &metadataWithoutVector << &metadataWithVector;
@@ -31,8 +31,8 @@ void ConectivityHelpersTests::generateMixedFilepathesTest() {
 }
 
 void ConectivityHelpersTests::generateWithoutVectorsTest() {
-    Mocks::ArtworkMetadataMock metadata1(FIX_PATH("/path/to/picture.jpg"));
-    Mocks::ArtworkMetadataMock metadata2(FIX_PATH("/completely/another/path/to/picture.jpg"));
+    Mocks::ArtworkMetadataMock metadata1(FIX_PATH("/path/to/picture.jpg"), 0);
+    Mocks::ArtworkMetadataMock metadata2(FIX_PATH("/completely/another/path/to/picture.jpg"), 0);
     QVector<Models::ArtworkMetadata*> items;
     items << &metadata1 << &metadata2;
 
@@ -51,9 +51,9 @@ void ConectivityHelpersTests::generateWithoutVectorsTest() {
 }
 
 void ConectivityHelpersTests::generateWithVectorsTest() {
-    Mocks::ArtworkMetadataMock metadataWithVector1(FIX_PATH("/path/to/picture.jpg"));
+    Mocks::ArtworkMetadataMock metadataWithVector1(FIX_PATH("/path/to/picture.jpg"), 0);
     metadataWithVector1.attachVector(FIX_PATH("/path/to/picture.eps"));
-    Mocks::ArtworkMetadataMock metadataWithVector2(FIX_PATH("/completely/another/path/to/picture.jpg"));
+    Mocks::ArtworkMetadataMock metadataWithVector2(FIX_PATH("/completely/another/path/to/picture.jpg"), 0);
     metadataWithVector2.attachVector(FIX_PATH("/completely/another/path/to/picture.eps"));
     QVector<Models::ArtworkMetadata*> items;
     items << &metadataWithVector1 << &metadataWithVector2;

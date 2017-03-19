@@ -15,8 +15,8 @@ namespace Mocks {
         ArtItemsModelMock() {}
 
     public:
-        virtual Models::ArtworkMetadata *createMetadata(const QString &filepath) {
-            ArtworkMetadataMock *metadata = new ArtworkMetadataMock(filepath);
+        virtual Models::ArtworkMetadata *createMetadata(const QString &filepath, qint64 folderID) {
+            ArtworkMetadataMock *metadata = new ArtworkMetadataMock(filepath, folderID);
             metadata->initialize("Test title", "Test description",
                                  QStringList() << "keyword1" << "keyword2" << "keyword3");
             return metadata;
