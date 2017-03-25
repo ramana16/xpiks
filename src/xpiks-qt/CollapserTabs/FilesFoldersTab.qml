@@ -111,7 +111,7 @@ ColumnLayout {
                     MouseArea {
                         anchors.fill: parent
                         onClicked: {
-                            artworkRepository.setSelected(sourceWrapper.delegateIndex)
+                            artworkRepository.setDirSelected(sourceWrapper.delegateIndex)
                         }
                     }
 

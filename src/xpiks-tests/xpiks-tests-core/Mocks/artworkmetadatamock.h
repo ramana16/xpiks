@@ -7,7 +7,7 @@
 namespace Mocks {
     class ArtworkMetadataMock : public Models::ImageArtwork {
     public:
-        ArtworkMetadataMock(const QString &filepath, qint64 folderID):
+        ArtworkMetadataMock(const QString &filepath, qint64 folderID = 0):
             Models::ImageArtwork(filepath, 0, folderID)
         {
         }

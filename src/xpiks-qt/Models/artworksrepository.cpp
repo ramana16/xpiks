@@ -29,17 +29,11 @@
 #include "../Commands/commandmanager.h"
 #include "../Models/filteredartitemsproxymodel.h"
 
-namespace {
-    qint64 genNextID()
-    {
-        static qint64 id = 0;
-        return id++;
-    }
-}
 namespace Models {
     ArtworksRepository::ArtworksRepository(QObject *parent) :
         AbstractListModel(parent),
-        m_LastUnavailableFilesCount(0)
+        m_LastUnavailableFilesCount(0),
+        m_NextID(0)
     {
         QObject::connect(&m_FilesWatcher, SIGNAL(fileChanged(const QString &)),
                      this, SLOT(checkFileUnavailable(const QString &)));
@@ -61,7 +55,8 @@ namespace Models {
 
         for (int i = 0; i < count; ++i) {
             const QString &directory = m_DirectoriesList[i];
-            if (m_DirectoriesHash[directory].cnt == 0) {
+            int filesCount = m_DirectoriesHash[directory].m_FilesCnt;
+            if ( filesCount == 0) {
                 indicesToRemove.append(i);
             }
         }
@@ -147,12 +142,12 @@ namespace Models {
         return count;
     }
 
-    bool ArtworksRepository::isSelected(qint64 folderID) const {
+    bool ArtworksRepository::isDirSelected(qint64 directoryID) const {
         bool result = false;
 
         for (const auto &element: m_DirectoriesHash) {
-            if (element.id == folderID) {
-                result = element.selected;
+            if (element.m_Id == directoryID) {
+                result = element.m_Selected;
                 break;
             }
         }
@@ -160,7 +155,7 @@ namespace Models {
         return result;
     }
 
-    bool ArtworksRepository::accountFile(const QString &filepath, qint64 & folderID) {
+    bool ArtworksRepository::accountFile(const QString &filepath, qint64 & directoryID) {
         bool wasModified = false;
         QString absolutePath;
 
@@ -168,10 +163,10 @@ namespace Models {
                 !m_FilesSet.contains(filepath)) {
 
             int occurances = 0;
-            QHash<QString, Dir>::iterator dirHashIterator = m_DirectoriesHash.find(absolutePath);
+            QHash<QString, RepoDir>::iterator dirHashIterator = m_DirectoriesHash.find(absolutePath);
 
             if (dirHashIterator == m_DirectoriesHash.end()) {
-                int id = genNextID();
+                int id = m_NextID++;
                 LOG_INFO << "Adding new directory" << absolutePath << "with index" << m_DirectoriesList.length() << "and id " << id;
                 m_DirectoriesList.append(absolutePath);
                 m_DirectoriesSelectedHash.insert(absolutePath, 0);
@@ -184,16 +179,16 @@ namespace Models {
                     m_CommandManager->addToRecentDirectories(absolutePath);
                 }
             } else {
-                occurances = dirHashIterator->cnt;
+                occurances = dirHashIterator->m_FilesCnt;
             }
 
             // watchFilePath(filepath);
             m_FilesSet.insert(filepath);
-            dirHashIterator->cnt = occurances + 1;
+            dirHashIterator->m_FilesCnt = occurances + 1;
             wasModified = true;
         }
 
-        folderID = m_DirectoriesHash[absolutePath].id;
+        directoryID = m_DirectoriesHash[absolutePath].m_Id;
 
         return wasModified;
     }
@@ -206,10 +201,10 @@ namespace Models {
         bool result = false;
 
         if (m_FilesSet.contains(filepath) && m_DirectoriesHash.contains(fileDirectory)) {
-            int occurances = m_DirectoriesHash[fileDirectory].cnt - 1;
+            int occurances = m_DirectoriesHash[fileDirectory].m_FilesCnt - 1;
             int selectedCount = m_DirectoriesSelectedHash[fileDirectory] - 1;
 
-            m_DirectoriesHash[fileDirectory].cnt = occurances;
+            m_DirectoriesHash[fileDirectory].m_FilesCnt = occurances;
             m_DirectoriesSelectedHash[fileDirectory] = selectedCount;
             m_FilesWatcher.removePath(filepath);
             m_FilesSet.remove(filepath);
@@ -319,75 +314,77 @@ namespace Models {
         case PathRole:
             return dir.dirName();
         case UsedImagesCountRole:
-            return QVariant(m_DirectoriesHash[directory].cnt);
+            return QVariant(m_DirectoriesHash[directory].m_FilesCnt);
         case IsSelectedRole:
-            return m_DirectoriesHash[directory].selected;
+            return m_DirectoriesHash[directory].m_Selected;
         default:
             return QVariant();
         }
     }
 
-    void ArtworksRepository::setSelected(int row) {
-        LOG_DEBUG << row;
+    void ArtworksRepository::setDirSelected(int row) {
+
         if (row < 0 || row >= m_DirectoriesList.count()) {
             return;
         }
 
         const QString &directory = m_DirectoriesList.at(row);
 
-        bool old_value = m_DirectoriesHash[directory].selected;
+        bool old_value = m_DirectoriesHash[directory].m_Selected;
         bool new_value = !old_value;
         setSelectedUnsafe(row, new_value, old_value);
     }
 
-    void ArtworksRepository::setSelectedUnsafe(int row, bool new_value, bool old_value) {
+    bool ArtworksRepository::updateSelectedState(int index, bool newValue) {
         bool changed = false;
-        int selected_count = 0;
+        auto &directory = m_DirectoriesList[index];
+        bool oldValue = m_DirectoriesHash[directory].m_Selected;
 
-        if (old_value == new_value)
-        {
+        if (newValue != oldValue) {
+            m_DirectoriesHash[directory].m_Selected = newValue;
+            QModelIndex changedIndex = this->index(index);
+            changed = true;
+            emit dataChanged(changedIndex, changedIndex, QVector<int>() << IsSelectedRole);
+        }
+
+        return changed;
+    }
+
+    void ArtworksRepository::setSelectedUnsafe(int row, bool newValue, bool oldValue) {
+        bool anySelectionChanged = false;
+        int selectedCount = 0;
+
+        if (oldValue == newValue) {
             return;
         }
 
-        for (const auto &current_directory : m_DirectoriesList) {
-            selected_count += m_DirectoriesHash[current_directory].selected;
+        for (const auto &currentDirectory : m_DirectoriesList) {
+            selectedCount += m_DirectoriesHash[currentDirectory].m_Selected ? 1 : 0;
         }
 
-        auto update_function = [&](int index, bool new_val) -> void {
-                                   auto &directory = m_DirectoriesList[index];
-                                   bool old_val = m_DirectoriesHash[directory].selected;
-
-                                   if (new_val != old_val) {
-                                       m_DirectoriesHash[directory].selected = new_val;
-                                       QModelIndex changed_index = this->index(index);
-                                       changed = true;
-                                       emit dataChanged(changed_index, changed_index, QVector<int>() << IsSelectedRole);
-                                   }
-                               };
         int size = m_DirectoriesList.size();
-        bool deselect_all = (size != 1) && (selected_count == size);
-        bool select_all = (old_value == true) && (size != 1) && (selected_count == 1);
+        bool deselectAll = (size != 1) && (selectedCount == size);
+        bool selectAll = (oldValue == true) && (size != 1) && (selectedCount == 1);
 
-        if (deselect_all) {
+        if (deselectAll) {
             for (int i = 0; i < size; i++) {
                 if (i == row) {
                     continue;
                 }
 
-                update_function(i, false);
+                anySelectionChanged |= updateSelectedState(i, false);
             }
-        } else if (select_all) {
+        } else if (selectAll) {
             for (int i = 0; i < size; i++) {
-                update_function(i, true);
+                anySelectionChanged |= updateSelectedState(i, true);
             }
         } else {
-            update_function(row, new_value);
+            anySelectionChanged = updateSelectedState(row, newValue);
         }
 
-        if (changed) {
+        if (anySelectionChanged) {
             auto *filteredArtItemsModel = m_CommandManager->getFilteredArtItemsModel();
-            if (filteredArtItemsModel != NULL)
-            {
+            if (filteredArtItemsModel != NULL) {
                 filteredArtItemsModel->updateFilter();
             }
         }

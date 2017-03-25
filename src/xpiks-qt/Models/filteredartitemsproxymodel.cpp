@@ -646,7 +646,6 @@ namespace Models {
     bool FilteredArtItemsProxyModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const {
         Q_UNUSED(sourceParent);
 
-
         ArtItemsModel *artItemsModel = getArtItemsModel();
         ArtworkMetadata *metadata = artItemsModel->getArtwork(sourceRow);
 
@@ -654,18 +653,15 @@ namespace Models {
 
         if (metadata != NULL) {
             ArtworksRepository *repository = m_CommandManager->getArtworksRepository();
-            if (repository != NULL)
-            {
-                qint64 folderID = metadata->getFolderID();
-                hasMatch = repository->isSelected(folderID);
+            Q_ASSERT(repository != NULL);
+            qint64 directoryID = metadata->getdirectoryID();
+            bool directoryIsSelected = repository->isDirSelected(directoryID);
+            bool searchHit = true;
+            if (!m_SearchTerm.trimmed().isEmpty()) {
+                searchHit = Helpers::hasSearchMatch(m_SearchTerm, metadata, m_SearchFlags);
             }
-            if (hasMatch) {
-                if (m_SearchTerm.trimmed().isEmpty()) {
-                    hasMatch = true;
-                } else {
-                    hasMatch = Helpers::hasSearchMatch(m_SearchTerm, metadata, m_SearchFlags);
-                }
-            }
+
+            hasMatch = directoryIsSelected && searchHit;
         }
 
         return hasMatch;

@@ -77,7 +77,7 @@ namespace Models {
         };
 
     public:
-        virtual ArtworkMetadata *createMetadata(const QString &filepath, qint64 folderID);
+        virtual ArtworkMetadata *createMetadata(const QString &filepath, qint64 directoryID);
         void deleteAllItems();
 
     public:
@@ -89,7 +89,7 @@ namespace Models {
         Q_INVOKABLE void updateAllItems();
         virtual bool removeUnavailableItems() override;
         void generateAboutToBeRemoved();
-        qint64 getFolderID() const { return m_FolderID; }
+        qint64 getdirectoryID() const { return m_directoryID; }
 
     public:
         /*Q_INVOKABLE*/ void removeArtworksDirectory(int index);
@@ -232,7 +232,7 @@ namespace Models {
         std::deque<ArtworkMetadata *> m_DestroyedList;
 #endif
         qint64 m_LastID;
-        qint64 m_FolderID;
+        qint64 m_directoryID;
     };
 }
 
