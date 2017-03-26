@@ -176,7 +176,7 @@ namespace Models {
         virtual QString getTitle() override { return m_MetadataModel.getTitle(); }
 
    public:
-        virtual qint64 getdirectoryID() const { return m_directoryID; }
+        virtual qint64 getdirectoryID() const { return m_DirectoryID; }
 
     public:
         void markModified();
@@ -218,7 +218,7 @@ namespace Models {
         QTimer m_BackupTimer;
         int m_BackupTimerDelay;
         qint64 m_ID;
-        qint64 m_directoryID;
+        qint64 m_DirectoryID;
         volatile int m_MetadataFlags;
         volatile Common::WarningFlags m_WarningsFlags;
         volatile bool m_IsLockedForEditing;

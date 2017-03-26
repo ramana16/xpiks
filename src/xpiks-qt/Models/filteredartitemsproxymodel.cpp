@@ -657,11 +657,14 @@ namespace Models {
             qint64 directoryID = metadata->getdirectoryID();
             bool directoryIsSelected = repository->isDirSelected(directoryID);
             bool searchHit = true;
-            if (!m_SearchTerm.trimmed().isEmpty()) {
-                searchHit = Helpers::hasSearchMatch(m_SearchTerm, metadata, m_SearchFlags);
-            }
+            hasMatch = directoryIsSelected;
+            if (hasMatch) {
+                if (!m_SearchTerm.trimmed().isEmpty()) {
+                    searchHit = Helpers::hasSearchMatch(m_SearchTerm, metadata, m_SearchFlags);
+                }
 
-            hasMatch = directoryIsSelected && searchHit;
+                hasMatch = searchHit;
+            }
         }
 
         return hasMatch;

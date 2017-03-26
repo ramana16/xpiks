@@ -40,7 +40,7 @@ namespace Models {
         m_ArtworkFilepath(filepath),
         m_BackupTimerDelay(0),
         m_ID(ID),
-        m_directoryID(directoryID),
+        m_DirectoryID(directoryID),
         m_MetadataFlags(0),
         m_WarningsFlags(Common::WarningFlags::None),
         m_IsLockedForEditing(false)

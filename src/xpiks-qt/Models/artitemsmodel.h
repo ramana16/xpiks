@@ -89,7 +89,6 @@ namespace Models {
         Q_INVOKABLE void updateAllItems();
         virtual bool removeUnavailableItems() override;
         void generateAboutToBeRemoved();
-        qint64 getdirectoryID() const { return m_directoryID; }
 
     public:
         /*Q_INVOKABLE*/ void removeArtworksDirectory(int index);
@@ -232,7 +231,6 @@ namespace Models {
         std::deque<ArtworkMetadata *> m_DestroyedList;
 #endif
         qint64 m_LastID;
-        qint64 m_directoryID;
     };
 }
 

@@ -101,8 +101,8 @@ namespace Models {
     public:
         const QString &getDirectory(int index) const { return m_DirectoriesList[index]; }
 #ifdef CORE_TESTS
-        int getFilesCountForDirectory(const QString &directory) const { return m_DirectoriesHash[directory].m_FilesCnt; }
-        int getFilesCountForDirectory(int index) const { return m_DirectoriesHash[m_DirectoriesList[index]].m_FilesCnt; }
+        int getFilesCountForDirectory(const QString &directory) const { return m_DirectoriesHash[directory].m_FilesCount; }
+        int getFilesCountForDirectory(int index) const { return m_DirectoriesHash[m_DirectoriesList[index]].m_FilesCount; }
 #endif
         bool isFileUnavailable(const QString &filepath) const;
 
@@ -122,7 +122,7 @@ namespace Models {
     protected:
         virtual void removeInnerItem(int index) override {
             QString directoryToRemove = m_DirectoriesList.at(index);
-            bool old_select = m_DirectoriesHash[directoryToRemove].m_Selected;
+            bool old_select = m_DirectoriesHash[directoryToRemove].m_IsSelected;
             bool new_select = false; // unselect folder to be deleted
             setSelectedUnsafe(index, new_select, old_select);
             m_DirectoriesList.takeAt(index);
@@ -134,19 +134,19 @@ namespace Models {
         virtual bool checkFileExists(const QString &filename, QString &directory) const;
 
     private:
-        bool updateSelectedState(int index, bool newValue);
+        bool setSelectedState(int index, bool newValue);
         void setSelectedUnsafe(int row, bool newValue, bool oldValue);
     private:
         struct RepoDir
         {
             RepoDir (qint64  id, int cnt, bool selected):
-                m_Id(id), m_FilesCnt(cnt), m_Selected(selected)
+                m_Id(id), m_FilesCount(cnt), m_IsSelected(selected)
             {}
             RepoDir() = default;
 
             qint64 m_Id = 0;
-            int m_FilesCnt = 0;
-            bool m_Selected = true;
+            int m_FilesCount = 0;
+            bool m_IsSelected = true;
         };
 
         QStringList m_DirectoriesList;
