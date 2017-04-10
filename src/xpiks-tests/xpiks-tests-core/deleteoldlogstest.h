@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <QtTest/QtTest>
-#include "../../xpiks-qt/Helpers/deletelogshelper.h"
+#include "../../xpiks-qt/Maintenance/logscleanupjobitem.h"
 
 class DeleteOldLogsTest: public QObject
 {
@@ -17,14 +17,14 @@ private slots:
     void deleteCombinedTest();
 
 private:
-    QVector<Helpers::FileInfoHolder> createTooManyLogs(int logsCount);
-    QVector<Helpers::FileInfoHolder> createOldLogs(int logsCount, int startDay);
-    QVector<Helpers::FileInfoHolder> createBigLogs(int logsCount);
-    QVector<Helpers::FileInfoHolder> createLogs(int freshLogsCount, int oldLogsCount, int largeLogsCount);
+    QVector<Maintenance::FileInfoHolder> createTooManyLogs(int logsCount);
+    QVector<Maintenance::FileInfoHolder> createOldLogs(int logsCount, int startDay);
+    QVector<Maintenance::FileInfoHolder> createBigLogs(int logsCount);
+    QVector<Maintenance::FileInfoHolder> createLogs(int freshLogsCount, int oldLogsCount, int largeLogsCount);
 
 private:
-    QVector<Helpers::FileInfoHolder> m_Logs;
-    QVector<Helpers::FileInfoHolder> m_LogsToDelete;
+    QVector<Maintenance::FileInfoHolder> m_Logs;
+    QVector<Maintenance::FileInfoHolder> m_LogsToDelete;
     int m_TotalSizeB;
 };
 

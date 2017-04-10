@@ -37,6 +37,13 @@ SOURCES += main.cpp \
     ../../xpiks-qt/Conectivity/ftphelpers.cpp \
     ../../xpiks-qt/Conectivity/ftpuploaderworker.cpp \
     ../../xpiks-qt/Conectivity/telemetryservice.cpp \
+    ../../xpiks-qt/Maintenance/maintenanceservice.cpp \
+    ../../xpiks-qt/Maintenance/maintenanceworker.cpp \
+    ../../xpiks-qt/Maintenance/logscleanupjobitem.cpp \
+    ../../xpiks-qt/Maintenance/updatescleanupjobitem.cpp \
+    ../../xpiks-qt/Maintenance/launchexiftooljobitem.cpp \
+    ../../xpiks-qt/Maintenance/initializedictionariesjobitem.cpp \
+    ../../xpiks-qt/Maintenance/addtolibraryjobitem.cpp \
     ../../xpiks-qt/Conectivity/testconnection.cpp \
     ../../xpiks-qt/Conectivity/updatescheckerworker.cpp \
     ../../xpiks-qt/Encryption/aes-qt.cpp \
@@ -215,6 +222,13 @@ HEADERS += \
     ../../xpiks-qt/Conectivity/ftpuploaderworker.h \
     ../../xpiks-qt/Conectivity/iftpcoordinator.h \
     ../../xpiks-qt/Conectivity/telemetryservice.h \
+    ../../xpiks-qt/Maintenance/maintenanceservice.h \
+    ../../xpiks-qt/Maintenance/maintenanceworker.h \
+    ../../xpiks-qt/Maintenance/logscleanupjobitem.h \
+    ../../xpiks-qt/Maintenance/updatescleanupjobitem.h \
+    ../../xpiks-qt/Maintenance/launchexiftooljobitem.h \
+    ../../xpiks-qt/Maintenance/initializedictionariesjobitem.h \
+    ../../xpiks-qt/Maintenance/addtolibraryjobitem.h \
     ../../xpiks-qt/Conectivity/testconnection.h \
     ../../xpiks-qt/Conectivity/updatescheckerworker.h \
     ../../xpiks-qt/Conectivity/uploadbatch.h \

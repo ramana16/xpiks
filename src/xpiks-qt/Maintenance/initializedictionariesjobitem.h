@@ -19,13 +19,28 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef UPDATEHELPERS_H
-#define UPDATEHELPERS_H
+#ifndef INITIALIZEDICTIONARIESJOBITEM_H
+#define INITIALIZEDICTIONARIESJOBITEM_H
 
-#include <QString>
+#include "imaintenanceitem.h"
 
-namespace Helpers {
-    void installUpdate(const QString &updatePath);
+namespace Translation {
+    class TranslationManager;
 }
 
-#endif // UPDATEHELPERS_H
+namespace Maintenance {
+    class InitializeDictionariesJobItem : public IMaintenanceItem
+    {
+    public:
+        InitializeDictionariesJobItem(Translation::TranslationManager *translationManager);
+
+    public:
+        void doInitializeDictionaries();
+        void processJob() override;
+
+    private:
+        Translation::TranslationManager *m_TranslationManager;
+    };
+}
+
+#endif // INITIALIZEDICTIONARIESJOBITEM_H

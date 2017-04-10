@@ -19,13 +19,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef UPDATEHELPERS_H
-#define UPDATEHELPERS_H
+#include "../Common/defines.h"
+#include "../MetadataIO/metadataiocoordinator.h"
+#include "launchexiftooljobitem.h"
 
-#include <QString>
+namespace Maintenance {
+    LaunchExiftoolJobItem::LaunchExiftoolJobItem(const QString &settingsExiftoolPath,
+                                                 MetadataIO::MetadataIOCoordinator *coordinator):
+        m_SettingsExiftoolPath(settingsExiftoolPath),
+        m_MetadataIOCoordinator(coordinator)
+    {
 
-namespace Helpers {
-    void installUpdate(const QString &updatePath);
+    }
+
+    void LaunchExiftoolJobItem::processJob() {
+        LOG_DEBUG << "#";
+        doLaunchExiftool();
+    }
+
+    void LaunchExiftoolJobItem::doLaunchExiftool() {
+        m_MetadataIOCoordinator->tryToLaunchExiftool(m_SettingsExiftoolPath);
+        m_MetadataIOCoordinator->exiftoolDiscoveryFinished();
+    }
 }
-
-#endif // UPDATEHELPERS_H

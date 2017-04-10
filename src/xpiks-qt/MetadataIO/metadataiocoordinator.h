@@ -24,7 +24,6 @@
 
 #include <QObject>
 #include <QVector>
-#include <QFutureWatcher>
 #include "../Common/baseentity.h"
 #include "../Common/defines.h"
 
@@ -57,7 +56,6 @@ namespace MetadataIO {
     private slots:
         void readingWorkerFinished(bool success);
         void writingWorkerFinished(bool success);
-        void exiftoolDiscoveryFinished();
 
     public:
         bool getExiftoolNotFound() const { return m_ExiftoolNotFound; }
@@ -95,6 +93,8 @@ namespace MetadataIO {
         void writeMetadataExiv2(const QVector<Models::ArtworkMetadata*> &artworksToWrite);
 #endif
         void autoDiscoverExiftool();
+        void exiftoolDiscoveryFinished();
+        void tryToLaunchExiftool(const QString &settingsExiftoolPath);
         Q_INVOKABLE void discardReading();
         Q_INVOKABLE void continueReading(bool ignoreBackups);
         Q_INVOKABLE void continueWithoutReading();
@@ -103,12 +103,10 @@ namespace MetadataIO {
         void initializeImport(int itemsCount);
         void readingFinishedHandler(bool ignoreBackups);
         void afterImportHandler(const QVector<Models::ArtworkMetadata*> &itemsToRead, bool ignoreBackups);
-        void tryToLaunchExiftool(const QString &settingsExiftoolPath);
 
     private:
         IMetadataReader *m_ReadingWorker;
         IMetadataWriter *m_WritingWorker;
-        QFutureWatcher<void> *m_ExiftoolDiscoveryFuture;
         QString m_RecommendedExiftoolPath;
         int m_ProcessingItemsCount;
         volatile bool m_IsImportInProgress;

@@ -51,7 +51,6 @@
 #include "../Warnings/warningsservice.h"
 #include "../Models/languagesmodel.h"
 #include "../AutoComplete/autocompleteservice.h"
-#include "../Helpers/deletelogshelper.h"
 #include "../QMLExtensions/imagecachingservice.h"
 #include "../Models/findandreplacemodel.h"
 #include "../Models/deletekeywordsviewmodel.h"
@@ -65,6 +64,7 @@
 #include "../QuickBuffer/quickbuffer.h"
 #include "../QuickBuffer/currenteditableartwork.h"
 #include "../QuickBuffer/currenteditableproxyartwork.h"
+#include "../Maintenance/maintenanceservice.h"
 
 void Commands::CommandManager::InjectDependency(Models::ArtworksRepository *artworkRepository) {
     Q_ASSERT(artworkRepository != NULL); m_ArtworksRepository = artworkRepository;
@@ -170,6 +170,7 @@ void Commands::CommandManager::InjectDependency(MetadataIO::MetadataIOCoordinato
 
 void Commands::CommandManager::InjectDependency(Suggestion::LocalLibrary *localLibrary) {
     Q_ASSERT(localLibrary != NULL); m_LocalLibrary = localLibrary;
+    m_LocalLibrary->setCommandManager(this);
 }
 
 void Commands::CommandManager::InjectDependency(Plugins::PluginManager *pluginManager) {
@@ -240,6 +241,10 @@ void Commands::CommandManager::InjectDependency(Models::ArtworkProxyModel *artwo
 void Commands::CommandManager::InjectDependency(QuickBuffer::QuickBuffer *quickBuffer) {
     Q_ASSERT(quickBuffer != NULL); m_QuickBuffer = quickBuffer;
     m_QuickBuffer->setCommandManager(this);
+}
+
+void Commands::CommandManager::InjectDependency(Maintenance::MaintenanceService *maintenanceService) {
+    Q_ASSERT(maintenanceService != NULL); m_MaintenanceService = maintenanceService;
 }
 
 std::shared_ptr<Commands::ICommandResult> Commands::CommandManager::processCommand(const std::shared_ptr<ICommandBase> &command)
@@ -401,6 +406,7 @@ void Commands::CommandManager::ensureDependenciesInjected() {
     Q_ASSERT(m_TranslationManager != NULL);
     Q_ASSERT(m_ArtworkProxyModel != NULL);
     Q_ASSERT(m_QuickBuffer != NULL);
+    Q_ASSERT(m_MaintenanceService != NULL);
 
 #if !defined(INTEGRATION_TESTS) && !defined(CORE_TESTS)
     Q_ASSERT(m_UIManager != NULL);
@@ -785,6 +791,8 @@ void Commands::CommandManager::afterConstructionCallback() {
 
     m_AfterInitCalled = true;
 
+    m_MaintenanceService->startService();
+
 #ifndef CORE_TESTS
     m_ImageCachingService->startService();
 #endif
@@ -827,9 +835,11 @@ void Commands::CommandManager::afterConstructionCallback() {
 #endif
 
 #if !defined(CORE_TESTS) && !defined(INTEGRATION_TESTS)
-    Helpers::performCleanLogsAsync();
-    Helpers::cleanupUpdateArtifactsAsync();
+    m_MaintenanceService->cleanupLogs();
+    m_MaintenanceService->addUpdatesCleanupTask();
 #endif
+
+    m_LocalLibrary->loadLibraryAsync();
 }
 
 void Commands::CommandManager::beforeDestructionCallback() const {
@@ -866,6 +876,8 @@ void Commands::CommandManager::beforeDestructionCallback() const {
 
     m_LogsModel->stopLogging();
 #endif
+
+    m_MaintenanceService->stopService();
 }
 
 void Commands::CommandManager::requestCloseApplication() const {

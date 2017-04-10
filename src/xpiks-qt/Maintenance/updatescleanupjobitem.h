@@ -19,13 +19,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef UPDATEHELPERS_H
-#define UPDATEHELPERS_H
+#ifndef UPDATESCLEANUPJOBITEM_H
+#define UPDATESCLEANUPJOBITEM_H
 
-#include <QString>
+#include "imaintenanceitem.h"
 
-namespace Helpers {
-    void installUpdate(const QString &updatePath);
+namespace Maintenance {
+    class UpdatesCleanupJobItem: public IMaintenanceItem
+    {
+    public:
+        UpdatesCleanupJobItem();
+
+    public:
+        void doCleanUpdateArtifacts();
+        void processJob() override;
+    };
 }
 
-#endif // UPDATEHELPERS_H
+#endif // UPDATESCLEANUPJOBITEM_H

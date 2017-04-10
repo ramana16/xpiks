@@ -1,37 +1,49 @@
-#include "deletelogshelper.h"
+/*
+ * This file is a part of Xpiks - cross platform application for
+ * keywording and uploading images for microstocks
+ * Copyright (C) 2014-2017 Taras Kushnir <kushnirTV@gmail.com>
+ *
+ * Xpiks is distributed under the GNU General Public License, version 3.0
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 #include <QDirIterator>
-#include <QFileInfo>
-#include <QtConcurrent>
-#include <QVector>
-#include <algorithm>
 #include "../Helpers/logger.h"
-#include "../Common/defines.h"
+#include "logscleanupjobitem.h"
 
-namespace Helpers {
-    void cleanLogsLogic(const QString &logsDir);
-    QDateTime getDateFromName(const QString &name);
-    void deleteLogsFilesFromList(const QVector<FileInfoHolder> &files);
-    void deleteLogFile(const QString &fileNameFull);
-    qint64 findLogFiles(const QString &logsDir, QVector<FileInfoHolder> &logFiles);
-
+namespace Maintenance {
     bool operator <(const FileInfoHolder &arg1, const FileInfoHolder &arg2) {
         return arg1.m_AgeDays < arg2.m_AgeDays ||
                 ((arg1.m_AgeDays == arg2.m_AgeDays) && (arg1.m_SizeBytes < arg2.m_SizeBytes));
     }
 
-    void performCleanLogsAsync() {
-#ifdef WITH_LOGS
+    LogsCleanupJobItem::LogsCleanupJobItem()
+    {
         QString appDataPath = XPIKS_USERDATA_PATH;
-        QString logFileDir = QDir::cleanPath(appDataPath + QDir::separator() + "logs");
-        QtConcurrent::run(cleanLogsLogic, logFileDir);
-#endif
+        m_LogFileDir = QDir::cleanPath(appDataPath + QDir::separator() + "logs");
     }
 
-    void cleanLogsLogic(const QString &logsDir) {
+    void LogsCleanupJobItem::processJob() {
         LOG_DEBUG << "#";
+        doCleanLogs();
+    }
+
+    void LogsCleanupJobItem::doCleanLogs() {
         QVector<FileInfoHolder> logFiles;
 
-        qint64 overallSizeBytes = findLogFiles(logsDir, logFiles);
+        qint64 overallSizeBytes = findLogFiles(m_LogFileDir, logFiles);
         std::sort(logFiles.begin(), logFiles.end());
 
         QVector<FileInfoHolder> filesToDelete;
@@ -41,7 +53,7 @@ namespace Helpers {
     }
 
     // logFiles vector is supposed to be sorted by age and then by size
-    void getFilesToDelete(const QVector<FileInfoHolder> &logFiles, qint64 overallSizeBytes,
+    void LogsCleanupJobItem::getFilesToDelete(const QVector<FileInfoHolder> &logFiles, qint64 overallSizeBytes,
                           QVector<FileInfoHolder> &filesToDelete) {
         int size = logFiles.size();
 
@@ -65,7 +77,7 @@ namespace Helpers {
         }
     }
 
-    qint64 findLogFiles(const QString &logsDir, QVector<FileInfoHolder> &logFiles) {
+    qint64 LogsCleanupJobItem::findLogFiles(const QString &logsDir, QVector<FileInfoHolder> &logFiles) {
         Helpers::Logger &logger = Helpers::Logger::getInstance();
         QString logFilePath = logger.getLogFilePath();
         QDirIterator it(logsDir, QStringList() << "xpiks-qt-*.log", QDir::Files);
@@ -99,7 +111,7 @@ namespace Helpers {
         return logsSizeBytes;
     }
 
-    void deleteLogsFilesFromList(const QVector<FileInfoHolder> &files) {
+    void LogsCleanupJobItem::deleteLogsFilesFromList(const QVector<FileInfoHolder> &files) {
         LOG_INFO << files.size() << "logs to delete";
         int size = files.size();
 
@@ -108,7 +120,7 @@ namespace Helpers {
         }
     }
 
-    void deleteLogFile(const QString &fileNameFull) {
+    void LogsCleanupJobItem::deleteLogFile(const QString &fileNameFull) {
         QFile file(fileNameFull);
 
         if (file.exists()) {
@@ -127,7 +139,7 @@ namespace Helpers {
         }
     }
 
-    QDateTime getDateFromName(const QString &name) {
+    QDateTime LogsCleanupJobItem::getDateFromName(const QString &name) {
         QString createDateStr = name.mid(9, 8);
         return QDateTime::fromString(createDateStr, "ddMMyyyy");
     }

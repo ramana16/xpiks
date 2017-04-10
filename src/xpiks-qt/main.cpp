@@ -97,6 +97,7 @@
 #include "Models/previewmetadataelement.h"
 #include "KeywordsPresets/presetkeywordsmodel.h"
 #include "KeywordsPresets/presetkeywordsmodelconfig.h"
+#include "Maintenance/maintenanceservice.h"
 
 void myMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg) {
     Q_UNUSED(context);
@@ -298,8 +299,6 @@ int main(int argc, char *argv[]) {
         qunsetenv(highDpiEnvironmentVariable);
     }
 
-    localLibrary.loadLibraryAsync();
-
     QString userId = settingsModel.getUserAgentId();
     userId.remove(QRegExp("[{}-]."));
 
@@ -341,6 +340,7 @@ int main(int argc, char *argv[]) {
     Translation::TranslationService translationService(translationManager);
     Models::UIManager uiManager;
     QuickBuffer::QuickBuffer quickBuffer;
+    Maintenance::MaintenanceService maintenanceService;
 
     Conectivity::UpdateService updateService(&settingsModel);
 
@@ -399,6 +399,7 @@ int main(int argc, char *argv[]) {
     commandManager.InjectDependency(&uiManager);
     commandManager.InjectDependency(&artworkProxyModel);
     commandManager.InjectDependency(&quickBuffer);
+    commandManager.InjectDependency(&maintenanceService);
 
     userDictEditModel.setCommandManager(&commandManager);
     autoCompleteModel.setCommandManager(&commandManager);

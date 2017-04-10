@@ -31,7 +31,7 @@
 #include <QDateTime>
 #include <QMutex>
 #include <QDataStream>
-#include <QFutureWatcher>
+#include "../Common/baseentity.h"
 #include "libraryloaderworker.h"
 
 namespace Models {
@@ -61,7 +61,7 @@ namespace Suggestion {
     QDataStream &operator<<(QDataStream &out, const LocalArtworkData &v);
     QDataStream &operator>>(QDataStream &in, LocalArtworkData &v);
 
-    class LocalLibrary : public QObject
+    class LocalLibrary : public QObject, public Common::BaseEntity
     {
         Q_OBJECT
     public:
@@ -71,25 +71,21 @@ namespace Suggestion {
     public:
         void setLibraryPath(const QString &filename) { m_Filename = filename; }
         void addToLibrary(const QVector<Models::ArtworkMetadata *> artworksList);
+        void doAddToLibrary(const QVector<Models::ArtworkMetadata *> artworksList);
         void swap(QHash<QString, LocalArtworkData> &hash);
         void saveToFile();
         void loadLibraryAsync();
+        void saveLibraryAsync();
         void searchArtworks(const QStringList &query,
                             std::vector<std::shared_ptr<SuggestionArtwork> > &searchResults,
                             size_t maxResults);
         void cleanupLocalLibraryAsync();
         void cleanupTrash();
 
-    private slots:
-        void artworksAdded();
-
     private:
-        void saveLibraryAsync();
         void performAsync(Suggestion::LibraryLoaderWorker::LoadOption option);
-        void doAddToLibrary(const QVector<Models::ArtworkMetadata *> artworksList);
 
     private:
-        QFutureWatcher<void> *m_FutureWatcher;
         QHash<QString, LocalArtworkData> m_LocalArtworks;
         QMutex m_Mutex;
         QString m_Filename;

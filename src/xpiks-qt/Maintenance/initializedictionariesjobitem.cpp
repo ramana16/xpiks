@@ -19,13 +19,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef UPDATEHELPERS_H
-#define UPDATEHELPERS_H
+#include "../Common/defines.h"
+#include "../Translation/translationmanager.h"
+#include "initializedictionariesjobitem.h"
 
-#include <QString>
+namespace Maintenance {
+    InitializeDictionariesJobItem::InitializeDictionariesJobItem(Translation::TranslationManager *translationManager):
+        m_TranslationManager(translationManager)
+    {
+        Q_ASSERT(translationManager != NULL);
+    }
 
-namespace Helpers {
-    void installUpdate(const QString &updatePath);
+    void InitializeDictionariesJobItem::processJob() {
+        LOG_DEBUG << "#";
+        doInitializeDictionaries();
+    }
+
+    void InitializeDictionariesJobItem::doInitializeDictionaries() {
+        m_TranslationManager->doInitializeDictionaries();
+        m_TranslationManager->initializationFinished();
+    }
 }
-
-#endif // UPDATEHELPERS_H

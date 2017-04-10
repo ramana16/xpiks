@@ -25,13 +25,13 @@
 #include <QFile>
 #include <QTextStream>
 #include <QDirIterator>
-#include <QtConcurrent>
 #include "../Common/defines.h"
 #include "translationquery.h"
 #include "translationservice.h"
 #include "../Commands/commandmanager.h"
 #include "../Models/settingsmodel.h"
 #include "../Helpers/constants.h"
+#include "../Maintenance/maintenanceservice.h"
 
 #define SHORT_TRANSLATION_SYMBOLS 500
 #define BOOKNAME QLatin1String("bookname")
@@ -82,14 +82,12 @@ namespace Translation {
     {
         m_TranslateTimer.setSingleShot(true);
         QObject::connect(&m_TranslateTimer, SIGNAL(timeout()), this, SLOT(updateTranslationTimer()));
-
-        QObject::connect(&m_InitializationWatcher, SIGNAL(finished()), this, SLOT(initializationFinished()));
     }
 
     void TranslationManager::initializeDictionaries() {
         LOG_DEBUG << "#";
-        QFuture<void> initializeFuture = QtConcurrent::run(this, &TranslationManager::doInitializeDictionaries);
-        m_InitializationWatcher.setFuture(initializeFuture);
+        Maintenance::MaintenanceService *maintenanceService = m_CommandManager->getMaintenanceService();
+        maintenanceService->addInitializeDictionariesTask(this);
     }
 
     void TranslationManager::setQuery(const QString &value) {

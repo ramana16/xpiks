@@ -125,6 +125,10 @@ namespace QuickBuffer {
     class QuickBuffer;
 }
 
+namespace Maintenance {
+    class MaintenanceService;
+}
+
 namespace Commands {
     class CommandManager : public ICommandManager
     {
@@ -167,6 +171,7 @@ namespace Commands {
             m_UIManager(NULL),
             m_ArtworkProxyModel(NULL),
             m_QuickBuffer(NULL),
+            m_MaintenanceService(NULL),
             m_AfterInitCalled(false),
             m_LastCommandID(0)
         { }
@@ -211,6 +216,7 @@ namespace Commands {
         void InjectDependency(Models::UIManager *uiManager);
         void InjectDependency(Models::ArtworkProxyModel *artworkProxy);
         void InjectDependency(QuickBuffer::QuickBuffer *quickBuffer);
+        void InjectDependency(Maintenance::MaintenanceService *maintenanceService);
 
     private:
         int generateNextCommandID() { int id = m_LastCommandID++; return id; }
@@ -321,6 +327,7 @@ namespace Commands {
         virtual QuickBuffer::QuickBuffer *getQuickBuffer() const { return m_QuickBuffer; }
         virtual Models::RecentDirectoriesModel *getRecentDirectories() const { return m_RecentDirectories; }
         virtual Models::RecentFilesModel *getRecentFiles() const { return m_RecentFiles; }
+        virtual Maintenance::MaintenanceService *getMaintenanceService() const { return m_MaintenanceService; }
 
 #ifdef INTEGRATION_TESTS
         virtual Translation::TranslationManager *getTranslationManager() const { return m_TranslationManager; }
@@ -369,6 +376,7 @@ namespace Commands {
         Models::UIManager *m_UIManager;
         Models::ArtworkProxyModel *m_ArtworkProxyModel;
         QuickBuffer::QuickBuffer *m_QuickBuffer;
+        Maintenance::MaintenanceService *m_MaintenanceService;
 
         QVector<Common::IServiceBase<Common::IBasicArtwork, Common::WarningsCheckFlags> *> m_WarningsCheckers;
         QVector<Helpers::IFileNotAvailableModel*> m_AvailabilityListeners;

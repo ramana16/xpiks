@@ -19,13 +19,26 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef UPDATEHELPERS_H
-#define UPDATEHELPERS_H
+#include "../Common/defines.h"
+#include "../Suggestion/locallibrary.h"
+#include "addtolibraryjobitem.h"
 
-#include <QString>
+namespace Maintenance {
+    AddToLibraryJobItem::AddToLibraryJobItem(const QVector<Models::ArtworkMetadata *> artworksList, Suggestion::LocalLibrary *localLibrary):
+        m_ArtworksList(artworksList),
+        m_LocalLibrary(localLibrary)
+    {
+        Q_ASSERT(localLibrary != NULL);
+        Q_ASSERT(!artworksList.isEmpty());
+    }
 
-namespace Helpers {
-    void installUpdate(const QString &updatePath);
+    void AddToLibraryJobItem::processJob() {
+        LOG_DEBUG << "#";
+        doAddToLibrary();
+    }
+
+    void AddToLibraryJobItem::doAddToLibrary() {
+        m_LocalLibrary->doAddToLibrary(m_ArtworksList);
+        m_LocalLibrary->saveLibraryAsync();
+    }
 }
-
-#endif // UPDATEHELPERS_H

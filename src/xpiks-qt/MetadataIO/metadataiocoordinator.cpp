@@ -21,8 +21,6 @@
 
 #include "metadataiocoordinator.h"
 #include <QHash>
-#include <QFutureWatcher>
-#include <QtConcurrent>
 #include <QFileInfo>
 #include <QProcess>
 #include <QImageReader>
@@ -37,6 +35,7 @@
 #include "../Models/settingsmodel.h"
 #include "../Common/defines.h"
 #include "../Models/imageartwork.h"
+#include "../Maintenance/maintenanceservice.h"
 #include "readingorchestrator.h"
 #include "writingorchestrator.h"
 
@@ -71,10 +70,6 @@ namespace MetadataIO {
         m_HasErrors(false),
         m_ExiftoolNotFound(false)
     {
-        m_ExiftoolDiscoveryFuture = new QFutureWatcher<void>(this);
-        QObject::connect(m_ExiftoolDiscoveryFuture, SIGNAL(finished()),
-                         this, SLOT(exiftoolDiscoveryFinished()));
-
         LOG_INFO << "Supported image formats:" << QImageReader::supportedImageFormats();
     }
 
@@ -198,9 +193,8 @@ namespace MetadataIO {
         LOG_DEBUG << "#";
         Models::SettingsModel *settingsModel = m_CommandManager->getSettingsModel();
         QString existingExiftoolPath = settingsModel->getExifToolPath();
-        m_ExiftoolDiscoveryFuture->setFuture(QtConcurrent::run(this,
-                                                               &MetadataIOCoordinator::tryToLaunchExiftool,
-                                                               existingExiftoolPath));
+        Maintenance::MaintenanceService *maintenanceService = m_CommandManager->getMaintenanceService();
+        maintenanceService->addLaunchExiftoolTask(existingExiftoolPath, this);
     }
 
     void MetadataIOCoordinator::discardReading() {
@@ -353,4 +347,3 @@ namespace MetadataIO {
         m_RecommendedExiftoolPath = exiftoolPath;
     }
 }
-

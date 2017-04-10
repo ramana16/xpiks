@@ -19,13 +19,33 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef UPDATEHELPERS_H
-#define UPDATEHELPERS_H
+#ifndef MAINTENANCEWORKER_H
+#define MAINTENANCEWORKER_H
 
-#include <QString>
+#include "../Common/itemprocessingworker.h"
+#include "imaintenanceitem.h"
 
-namespace Helpers {
-    void installUpdate(const QString &updatePath);
+namespace Maintenance {
+    class MaintenanceWorker: public QObject, public Common::ItemProcessingWorker<IMaintenanceItem>
+    {
+        Q_OBJECT
+    public:
+        MaintenanceWorker() {}
+
+    protected:
+        virtual bool initWorker() override;
+        virtual void processOneItem(std::shared_ptr<IMaintenanceItem> &item) override;
+        virtual void notifyQueueIsEmpty() override { emit queueIsEmpty(); }
+        virtual void workerStopped() override { emit stopped(); }
+
+    public slots:
+        void process() { doWork(); }
+        void cancel() { stopWorking(); }
+
+    signals:
+        void stopped();
+        void queueIsEmpty();
+    };
 }
 
-#endif // UPDATEHELPERS_H
+#endif // MAINTENANCEWORKER_H

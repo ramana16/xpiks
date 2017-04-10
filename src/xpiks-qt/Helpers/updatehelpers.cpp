@@ -25,9 +25,6 @@
 #include <QDir>
 #include <QCoreApplication>
 #include <QFileInfo>
-#include <QDirIterator>
-#include <QFile>
-#include <QtConcurrent>
 #include "../Common/defines.h"
 
 #ifdef Q_OS_OSX
@@ -84,29 +81,6 @@ void launchWindowsInstaller(const QString &pathToUpdate) {
     QProcess::startDetached(ministallerPath, arguments);
 }
 
-void cleanupUpdateArtifacts() {
-    QString appDirPath = QCoreApplication::applicationDirPath();
-    QDirIterator dirIt(appDirPath, QStringList() << "*.bak", QDir::Files, QDirIterator::Subdirectories);
-    int count = 0;
-
-    while (dirIt.hasNext()) {
-        QString filePath = dirIt.next();
-        QFile backedUpFile(filePath);
-
-        if (backedUpFile.remove()) {
-            LOG_INFO << "Removed prev update leftover:" << filePath;
-        } else {
-            LOG_WARNING << "Failed to remove leftover:" << filePath;
-        }
-
-        count++;
-    }
-
-    if (count == 0) {
-        LOG_DEBUG << "No leftovers found";
-    }
-}
-
 #endif
 
 namespace Helpers {
@@ -115,12 +89,6 @@ namespace Helpers {
         launchOSXdmg(updatePath);
 #elif defined(Q_OS_WIN)
         launchWindowsInstaller(updatePath);
-#endif
-    }
-
-    void cleanupUpdateArtifactsAsync() {
-#ifdef Q_OS_WIN
-        QtConcurrent::run(cleanupUpdateArtifacts);
 #endif
     }
 }

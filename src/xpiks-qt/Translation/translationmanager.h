@@ -26,7 +26,6 @@
 #include <QString>
 #include <QTimer>
 #include <QVector>
-#include <QFutureWatcher>
 #include "../Common/baseentity.h"
 
 namespace Translation {
@@ -71,9 +70,10 @@ namespace Translation {
         void setQuery(const QString &value);
         void setSelectedDictionaryIndex(int value);
         QStringList getDictionariesDescriptions() const;
+        void doInitializeDictionaries();
+        void initializationFinished();
 
     private:
-        void doInitializeDictionaries();
         bool acquireDictionary(const QString &anyDictFilePath);
         bool hasAllNeededComponents(const QString &anyDictFilePath) const;
 
@@ -95,10 +95,8 @@ namespace Translation {
 
     private slots:
         void updateTranslationTimer();
-        void initializationFinished();
 
     private:
-        QFutureWatcher<void> m_InitializationWatcher;
         QStringList m_AllowedSuffixes;
         QVector<DictionaryInfo> m_DictionariesList;
         QTimer m_TranslateTimer;

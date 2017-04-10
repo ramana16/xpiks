@@ -108,7 +108,6 @@ SOURCES += main.cpp \
     QMLExtensions/imagecachingworker.cpp \
     QMLExtensions/imagecachingservice.cpp \
     QMLExtensions/cachingimageprovider.cpp \
-    Helpers/deletelogshelper.cpp \
     Commands/findandreplacecommand.cpp \
     Helpers/metadatahighlighter.cpp \
     Models/findandreplacemodel.cpp \
@@ -143,7 +142,14 @@ SOURCES += main.cpp \
     SpellCheck/userdicteditmodel.cpp \
     QMLExtensions/tabsmodel.cpp \
     Models/recentitemsmodel.cpp \
-    Models/recentfilesmodel.cpp
+    Models/recentfilesmodel.cpp \
+    Maintenance/maintenanceworker.cpp \
+    Maintenance/maintenanceservice.cpp \
+    Maintenance/logscleanupjobitem.cpp \
+    Maintenance/updatescleanupjobitem.cpp \
+    Maintenance/launchexiftooljobitem.cpp \
+    Maintenance/initializedictionariesjobitem.cpp \
+    Maintenance/addtolibraryjobitem.cpp
 
 RESOURCES += qml.qrc
 
@@ -297,7 +303,6 @@ HEADERS += \
     QMLExtensions/imagecacherequest.h \
     QMLExtensions/imagecachingservice.h \
     QMLExtensions/cachingimageprovider.h \
-    Helpers/deletelogshelper.h \
     Commands/findandreplacecommand.h \
     Models/metadataelement.h \
     Models/previewmetadataelement.h \
@@ -339,7 +344,15 @@ HEADERS += \
     SpellCheck/userdicteditmodel.h \
     QMLExtensions/tabsmodel.h \
     Models/recentitemsmodel.h \
-    Models/recentfilesmodel.h
+    Models/recentfilesmodel.h \
+    Maintenance/maintenanceworker.h \
+    Maintenance/maintenanceservice.h \
+    Maintenance/imaintenanceitem.h \
+    Maintenance/logscleanupjobitem.h \
+    Maintenance/updatescleanupjobitem.h \
+    Maintenance/launchexiftooljobitem.h \
+    Maintenance/initializedictionariesjobitem.h \
+    Maintenance/addtolibraryjobitem.h
 
 DISTFILES += \
     Components/CloseIcon.qml \

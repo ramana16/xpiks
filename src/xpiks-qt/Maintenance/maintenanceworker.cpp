@@ -19,13 +19,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef UPDATEHELPERS_H
-#define UPDATEHELPERS_H
+#include <QThread>
+#include "maintenanceworker.h"
 
-#include <QString>
+#define MAINTENANCE_SLEEP 5
 
-namespace Helpers {
-    void installUpdate(const QString &updatePath);
+namespace Maintenance {
+    bool MaintenanceWorker::initWorker() {
+        LOG_DEBUG << "#";
+        return true;
+    }
+
+    void MaintenanceWorker::processOneItem(std::shared_ptr<IMaintenanceItem> &item) {
+        item->processJob();
+
+        QThread::sleep(MAINTENANCE_SLEEP);
+    }
 }
-
-#endif // UPDATEHELPERS_H

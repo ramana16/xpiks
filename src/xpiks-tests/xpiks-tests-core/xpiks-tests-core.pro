@@ -20,6 +20,7 @@ win32:QT += winextras
 INCLUDEPATH += ../../../vendors/tiny-aes
 win32:INCLUDEPATH += ../../xpiks-qt/Encryption
 INCLUDEPATH += "../../../vendors/hunspell-1.6.0/src"
+INCLUDEPATH += "../../../vendors/ssdll/src/ssdll"
 DEFINES += HUNSPELL_STATIC
 DEFINES += CORE_TESTS
 
@@ -29,6 +30,7 @@ DEFINES += QT_NO_CAST_TO_ASCII \
 
 LIBS += -L"$$PWD/../../../libs/"
 LIBS += -lhunspell
+LIBS += -lssdll
 
 macx {
     #INCLUDEPATH += "../quazip"
@@ -101,6 +103,17 @@ SOURCES += main.cpp \
     ../../xpiks-qt/Models/recentdirectoriesmodel.cpp \
     ../../xpiks-qt/Models/recentfilesmodel.cpp \
     ../../xpiks-qt/Helpers/keywordshelpers.cpp \
+    ../../xpiks-qt/Maintenance/maintenanceservice.cpp \
+    ../../xpiks-qt/Maintenance/maintenanceworker.cpp \
+    ../../xpiks-qt/Maintenance/logscleanupjobitem.cpp \
+    ../../xpiks-qt/Maintenance/updatescleanupjobitem.cpp \
+    ../../xpiks-qt/Maintenance/launchexiftooljobitem.cpp \
+    ../../xpiks-qt/Maintenance/initializedictionariesjobitem.cpp \
+    ../../xpiks-qt/Maintenance/addtolibraryjobitem.cpp \
+    ../../xpiks-qt/Translation/translationmanager.cpp \
+    ../../xpiks-qt/Translation/translationquery.cpp \
+    ../../xpiks-qt/Translation/translationservice.cpp \
+    ../../xpiks-qt/Translation/translationworker.cpp \
     ../../xpiks-qt/SpellCheck/spellcheckerservice.cpp \
     ../../xpiks-qt/SpellCheck/spellcheckitem.cpp \
     ../../xpiks-qt/SpellCheck/spellcheckworker.cpp \
@@ -144,7 +157,6 @@ SOURCES += main.cpp \
     ../../xpiks-qt/Common/flags.cpp \
     fixspelling_tests.cpp \
     deleteoldlogstest.cpp \
-    ../../xpiks-qt/Helpers/deletelogshelper.cpp \
     ../../xpiks-qt/Models/findandreplacemodel.cpp \
     replacepreview_tests.cpp \
     replace_tests.cpp \
@@ -210,6 +222,17 @@ HEADERS += \
     ../../xpiks-qt/Models/recentfilesmodel.h \
     ../../xpiks-qt/Helpers/keywordshelpers.h \
     ../../xpiks-qt/Common/flags.h \
+    ../../xpiks-qt/Maintenance/maintenanceservice.h \
+    ../../xpiks-qt/Maintenance/maintenanceworker.h \
+    ../../xpiks-qt/Maintenance/logscleanupjobitem.h \
+    ../../xpiks-qt/Maintenance/updatescleanupjobitem.h \
+    ../../xpiks-qt/Maintenance/launchexiftooljobitem.h \
+    ../../xpiks-qt/Maintenance/initializedictionariesjobitem.h \
+    ../../xpiks-qt/Maintenance/addtolibraryjobitem.h \
+    ../../xpiks-qt/Translation/translationmanager.h \
+    ../../xpiks-qt/Translation/translationquery.h \
+    ../../xpiks-qt/Translation/translationservice.h \
+    ../../xpiks-qt/Translation/translationworker.h \
     ../../xpiks-qt/SpellCheck/spellcheckerservice.h \
     ../../xpiks-qt/SpellCheck/spellcheckitem.h \
     ../../xpiks-qt/SpellCheck/spellcheckworker.h \
@@ -267,7 +290,6 @@ HEADERS += \
     artitemsmodel_tests.h \
     fixspelling_tests.h \
     Mocks/spellcheckservicemock.h \
-    ../../xpiks-qt/Helpers/deletelogshelper.h \
     ../../xpiks-qt/Models/findandreplacemodel.h \
     replacepreview_tests.h \
     replace_tests.h \

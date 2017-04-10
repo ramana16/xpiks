@@ -19,13 +19,34 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef UPDATEHELPERS_H
-#define UPDATEHELPERS_H
+#ifndef ADDTOLIBRARYJOBITEM_H
+#define ADDTOLIBRARYJOBITEM_H
 
-#include <QString>
+#include <QVector>
+#include "imaintenanceitem.h"
 
-namespace Helpers {
-    void installUpdate(const QString &updatePath);
+namespace Models {
+    class ArtworkMetadata;
 }
 
-#endif // UPDATEHELPERS_H
+namespace Suggestion {
+    class LocalLibrary;
+}
+
+namespace Maintenance {
+    class AddToLibraryJobItem : public IMaintenanceItem
+    {
+    public:
+        AddToLibraryJobItem(const QVector<Models::ArtworkMetadata *> artworksList, Suggestion::LocalLibrary *localLibrary);
+
+    public:
+        void doAddToLibrary();
+        void processJob() override;
+
+    private:
+        QVector<Models::ArtworkMetadata *> m_ArtworksList;
+        Suggestion::LocalLibrary *m_LocalLibrary;
+    };
+}
+
+#endif // ADDTOLIBRARYJOBITEM_H

@@ -19,13 +19,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef UPDATEHELPERS_H
-#define UPDATEHELPERS_H
+#ifndef MAINTENANCEITEM_H
+#define MAINTENANCEITEM_H
 
-#include <QString>
-
-namespace Helpers {
-    void installUpdate(const QString &updatePath);
+namespace Maintenance {
+    class IMaintenanceItem
+    {
+    public:
+        virtual ~IMaintenanceItem() {}
+        virtual void processJob() = 0;
+    };
 }
 
-#endif // UPDATEHELPERS_H
+#endif // MAINTENANCEITEM_H

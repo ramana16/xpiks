@@ -22,8 +22,6 @@
 #include <QtAlgorithms>
 #include <QFile>
 #include <QDataStream>
-#include <QtConcurrent>
-#include <QFutureWatcher>
 #include "locallibrary.h"
 #include "../Models/artworkmetadata.h"
 #include "libraryloaderworker.h"
@@ -31,6 +29,9 @@
 #include "../Common/defines.h"
 #include "../Common/basickeywordsmodel.h"
 #include "../Models/imageartwork.h"
+#include "../Maintenance/maintenanceservice.h"
+#include "../Maintenance/addtolibraryjobitem.h"
+#include "../Commands/commandmanager.h"
 
 namespace Suggestion {
     QDataStream &operator<<(QDataStream &out, const LocalArtworkData &v) {
@@ -45,21 +46,19 @@ namespace Suggestion {
 
     LocalLibrary::LocalLibrary():
         QObject(),
-        m_FutureWatcher(NULL)
+        Common::BaseEntity()
     {
-        m_FutureWatcher = new QFutureWatcher<void>(this);
-        QObject::connect(m_FutureWatcher, SIGNAL(finished()), this, SLOT(artworksAdded()));
     }
 
     LocalLibrary::~LocalLibrary() {
-        delete m_FutureWatcher;
     }
 
     void LocalLibrary::addToLibrary(const QVector<Models::ArtworkMetadata *> artworksList) {
         // adding to library will be complicated in future
         // so always do it in the background
 #ifndef INTEGRATION_TESTS
-        m_FutureWatcher->setFuture(QtConcurrent::run(this, &LocalLibrary::doAddToLibrary, artworksList));
+        Maintenance::MaintenanceService *maintenanceService = m_CommandManager->getMaintenanceService();
+        maintenanceService->addToLibraryTask(artworksList, this);
 #else
         doAddToLibrary(artworksList);
 #endif
@@ -84,7 +83,7 @@ namespace Suggestion {
 
             file.close();
 
-            LOG_DEBUG << "saved to" << m_Filename;
+            LOG_INFO << "saved to" << m_Filename;
         }
     }
 
@@ -95,7 +94,7 @@ namespace Suggestion {
     void LocalLibrary::searchArtworks(const QStringList &query,
                                       std::vector<std::shared_ptr<SuggestionArtwork> > &searchResults,
                                       size_t maxResults) {
-        LOG_DEBUG << "max results" << maxResults;
+        LOG_INFO << "max results" << maxResults;
         QMutexLocker locker(&m_Mutex);
 
         QHashIterator<QString, LocalArtworkData> i(m_LocalArtworks);
@@ -182,16 +181,12 @@ namespace Suggestion {
         LOG_INFO << itemsToRemove.count() << "item(s) removed.";
     }
 
-    void LocalLibrary::artworksAdded() {
-        saveLibraryAsync();
-    }
-
     void LocalLibrary::saveLibraryAsync() {
         performAsync(LibraryLoaderWorker::Save);
     }
 
     void LocalLibrary::performAsync(LibraryLoaderWorker::LoadOption option) {
-        LOG_DEBUG << option;
+        LOG_INFO << option;
         LibraryLoaderWorker *worker = new LibraryLoaderWorker(this, m_Filename, option);
         QThread *thread = new QThread();
         worker->moveToThread(thread);
@@ -208,7 +203,7 @@ namespace Suggestion {
     void LocalLibrary::doAddToLibrary(const QVector<Models::ArtworkMetadata *> artworksList) {
         int length = artworksList.length();
 
-        LOG_DEBUG << length << "file(s)";
+        LOG_INFO << length << "file(s)";
 
         QMutexLocker locker(&m_Mutex);
 
