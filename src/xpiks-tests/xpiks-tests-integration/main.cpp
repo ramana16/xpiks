@@ -129,8 +129,6 @@ int main(int argc, char *argv[]) {
     Models::LogsModel logsModel(&colorsModel);
     logsModel.startLogging();
 
-    localLibrary.loadLibraryAsync();
-
     Models::ArtworksRepository artworkRepository;
     Models::ArtItemsModel artItemsModel;
     Models::CombinedArtworksModel combinedArtworksModel;

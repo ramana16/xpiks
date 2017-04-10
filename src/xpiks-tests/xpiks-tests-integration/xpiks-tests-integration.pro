@@ -95,7 +95,6 @@ SOURCES += main.cpp \
     ../../xpiks-qt/SpellCheck/spellcheckworker.cpp \
     ../../xpiks-qt/SpellCheck/spellsuggestionsitem.cpp \
     ../../xpiks-qt/Suggestion/keywordssuggestor.cpp \
-    ../../xpiks-qt/Suggestion/libraryloaderworker.cpp \
     ../../xpiks-qt/Suggestion/libraryqueryworker.cpp \
     ../../xpiks-qt/Suggestion/locallibrary.cpp \
     ../../xpiks-qt/UndoRedo/addartworksitem.cpp \
@@ -185,7 +184,8 @@ SOURCES += main.cpp \
     ../../xpiks-qt/SpellCheck/userdicteditmodel.cpp \
     userdictedittest.cpp \
     weirdnamesreadtest.cpp \
-    ../../xpiks-qt/QMLExtensions/tabsmodel.cpp
+    ../../xpiks-qt/QMLExtensions/tabsmodel.cpp \
+    ../../xpiks-qt/Maintenance/locallibraryloadsaveitem.cpp
 
 RESOURCES +=
 
@@ -291,7 +291,6 @@ HEADERS += \
     ../../xpiks-qt/SpellCheck/spellcheckworker.h \
     ../../xpiks-qt/SpellCheck/spellsuggestionsitem.h \
     ../../xpiks-qt/Suggestion/keywordssuggestor.h \
-    ../../xpiks-qt/Suggestion/libraryloaderworker.h \
     ../../xpiks-qt/Suggestion/libraryqueryworker.h \
     ../../xpiks-qt/Suggestion/locallibrary.h \
     ../../xpiks-qt/Suggestion/suggestionartwork.h \
@@ -401,7 +400,8 @@ HEADERS += \
     ../../xpiks-qt/SpellCheck/userdicteditmodel.h \
     userdictedittest.h \
     weirdnamesreadtest.h \
-    ../../xpiks-qt/QMLExtensions/tabsmodel.h
+    ../../xpiks-qt/QMLExtensions/tabsmodel.h \
+    ../../xpiks-qt/Maintenance/locallibraryloadsaveitem.h
 
 INCLUDEPATH += ../../../vendors/tiny-aes
 INCLUDEPATH += ../../../vendors/cpp-libface

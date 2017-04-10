@@ -139,7 +139,6 @@ SOURCES += main.cpp \
     ../../xpiks-qt/MetadataIO/metadatareadingworker.cpp \
     ../../xpiks-qt/MetadataIO/saverworkerjobitem.cpp \
     ../../xpiks-qt/Suggestion/locallibrary.cpp \
-    ../../xpiks-qt/Suggestion/libraryloaderworker.cpp \
     ../../xpiks-qt/MetadataIO/metadatawritingworker.cpp \
     filteredmodel_tests.cpp \
     conectivityhelpers_tests.cpp \
@@ -178,7 +177,8 @@ SOURCES += main.cpp \
     ../../xpiks-qt/QuickBuffer/quickbuffer.cpp \
     ../../xpiks-qt/Models/artworkproxymodel.cpp \
     ../../xpiks-qt/Models/uimanager.cpp \
-    ../../xpiks-qt/QMLExtensions/tabsmodel.cpp
+    ../../xpiks-qt/QMLExtensions/tabsmodel.cpp \
+    ../../xpiks-qt/Maintenance/locallibraryloadsaveitem.cpp
 
 HEADERS += \
     encryption_tests.h \
@@ -258,7 +258,6 @@ HEADERS += \
     ../../xpiks-qt/MetadataIO/metadatareadingworker.h \
     ../../xpiks-qt/MetadataIO/saverworkerjobitem.h \
     ../../xpiks-qt/Suggestion/locallibrary.h \
-    ../../xpiks-qt/Suggestion/libraryloaderworker.h \
     ../../xpiks-qt/MetadataIO/metadatawritingworker.h \
     filteredmodel_tests.h \
     ../../xpiks-qt/Common/baseentity.h \
@@ -315,5 +314,6 @@ HEADERS += \
     ../../xpiks-qt/Models/artworkproxymodel.h \
     ../../xpiks-qt/Models/uimanager.h \
     ../../xpiks-qt/KeywordsPresets/ipresetsmanager.h \
-    ../../xpiks-qt/QMLExtensions/tabsmodel.h
+    ../../xpiks-qt/QMLExtensions/tabsmodel.h \
+    ../../xpiks-qt/Maintenance/locallibraryloadsaveitem.h
 
