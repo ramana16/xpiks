@@ -30,6 +30,7 @@ namespace Maintenance {
         m_LocalLibrary(localLibrary),
         m_LoadOption(option)
     {        
+        Q_ASSERT(localLibrary != nullptr);
     }
 
     void LocalLibraryLoadSaveItem::processJob() {
