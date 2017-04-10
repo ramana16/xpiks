@@ -41,12 +41,13 @@ namespace Models {
         Q_PROPERTY(bool withLogs READ getWithLogs CONSTANT)
 
     public:
-        LogsModel(QMLExtensions::ColorsModel *colorsModel, QObject *parent=NULL);
+        LogsModel(QObject *parent=NULL);
         virtual ~LogsModel();
 
     public:
         void startLogging();
         void stopLogging();
+        void InjectDependency(QMLExtensions::ColorsModel *colorsModel);
 
     public:
         Q_INVOKABLE QString getAllLogsText(bool moreLogs=false);

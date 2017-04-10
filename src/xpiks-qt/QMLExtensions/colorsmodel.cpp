@@ -246,8 +246,12 @@ namespace QMLExtensions {
         ColorsMap m_ColorsMap;
     };
 
-    ColorsModel::ColorsModel(QObject *parent) : QObject(parent)
+    ColorsModel::ColorsModel(QObject *parent) :
+        QObject(parent)
     {
+    }
+
+    void ColorsModel::initializeBuiltInThemes() {
         registerTheme(std::shared_ptr<ColorsProvider>(new HashMapColorsProvider(createBlackTheme())));
         registerTheme(std::shared_ptr<ColorsProvider>(new HashMapColorsProvider(createSlateGrayTheme())));
         applyTheme(0);

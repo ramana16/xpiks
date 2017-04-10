@@ -288,8 +288,6 @@ namespace Models {
 
         setArtworkEditRightPaneWidth(intValue(artworkEditRightPaneWidth, DEFAULT_ARTWORK_EDIT_RIGHT_PANE_WIDTH));
         setSelectedDictIndex(intValue(translatorSelectedDictIndex, DEFAULT_SELECTED_DICT_INDEX));
-
-        sync();
     }
 
     void SettingsModel::resetToDefault() {

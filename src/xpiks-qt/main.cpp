@@ -419,6 +419,9 @@ int main(int argc, char *argv[]) {
     languagesModel.initFirstLanguage();
     languagesModel.loadLanguages();
 
+    colorsModel.initializeBuiltInThemes();
+    logsModel.InjectDependency(&colorsModel);
+
     telemetryService.setInterfaceLanguage(languagesModel.getCurrentLanguage());
     colorsModel.applyTheme(settingsModel.getSelectedThemeIndex());
 

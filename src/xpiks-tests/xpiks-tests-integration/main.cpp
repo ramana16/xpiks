@@ -125,9 +125,10 @@ int main(int argc, char *argv[]) {
         std::cerr << "AppDataPath is empty!" << std::endl;
     }
 
-    QMLExtensions::ColorsModel colorsModel;
-    Models::LogsModel logsModel(&colorsModel);
+    Models::LogsModel logsModel;
     logsModel.startLogging();
+
+    QMLExtensions::ColorsModel colorsModel;
 
     Models::ArtworksRepository artworkRepository;
     Models::ArtItemsModel artItemsModel;

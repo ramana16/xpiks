@@ -145,6 +145,7 @@ namespace QMLExtensions {
 
     public:
         explicit ColorsModel(QObject *parent = 0);
+        void initializeBuiltInThemes();
 
         const std::shared_ptr<ColorsProvider> &getFallbackTheme();
         QColor getColor(const std::string &colorName, const std::shared_ptr<ColorsProvider> &theme,

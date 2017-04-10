@@ -35,10 +35,10 @@
 
 namespace Models {
 
-    LogsModel::LogsModel(QMLExtensions::ColorsModel *colorsModel, QObject *parent) :
+    LogsModel::LogsModel(QObject *parent) :
         QObject(parent),
         m_LoggingWorker(new Helpers::LoggingWorker()),
-        m_ColorsModel(colorsModel)
+        m_ColorsModel(nullptr)
     {
 #ifdef WITH_LOGS
         m_WithLogs = true;
@@ -67,6 +67,10 @@ namespace Models {
         m_LoggingWorker->cancel();
     }
 
+    void LogsModel::InjectDependency(QMLExtensions::ColorsModel *colorsModel) {
+        m_ColorsModel = colorsModel;
+    }
+
     QString LogsModel::getAllLogsText(bool moreLogs) {
         QString result;
 #ifdef WITH_LOGS
@@ -91,7 +95,11 @@ namespace Models {
     }
 
     void LogsModel::initLogHighlighting(QQuickTextDocument *document) {
-        Helpers::LogHighlighter *highlighter = new Helpers::LogHighlighter(m_ColorsModel, document->textDocument());
-        Q_UNUSED(highlighter);
+        Q_ASSERT(m_ColorsModel != nullptr);
+
+        if (m_ColorsModel != nullptr) {
+            Helpers::LogHighlighter *highlighter = new Helpers::LogHighlighter(m_ColorsModel, document->textDocument());
+            Q_UNUSED(highlighter);
+        }
     }
 }

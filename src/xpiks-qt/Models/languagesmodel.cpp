@@ -72,8 +72,11 @@ namespace Models {
             app->installTranslator(m_XpiksTranslator);
         } else {
             selectedLocale = "en_US";
-            settingsModel->setSelectedLocale(selectedLocale);
-            settingsModel->saveLocale();
+
+            if (selectedLocale != settingsModel->getSelectedLocale()) {
+                settingsModel->setSelectedLocale(selectedLocale);
+                settingsModel->saveLocale();
+            }
 
             xpiksTranslatorPath = languagesDir.filePath(QLatin1String("xpiks_en_US.qm"));
             if (m_XpiksTranslator->load(xpiksTranslatorPath)) {
