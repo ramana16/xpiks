@@ -48,7 +48,7 @@ namespace Maintenance {
 
     public:
         void doCleanLogs();
-        void processJob() override;
+        virtual void processJob() override;
 
 #ifdef CORE_TESTS
     public:

@@ -38,7 +38,7 @@ namespace Maintenance {
 
     public:
         void doLaunchExiftool();
-        void processJob() override;
+        virtual void processJob() override;
 
     private:
         const QString m_SettingsExiftoolPath;

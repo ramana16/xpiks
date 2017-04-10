@@ -779,7 +779,7 @@ void Commands::CommandManager::reportUserAction(Conectivity::UserAction userActi
 
 void Commands::CommandManager::cleanupLocalLibraryAsync() const {
     if (m_LocalLibrary) {
-        m_LocalLibrary->cleanupLocalLibraryAsync();
+        m_MaintenanceService->cleanupLocalLibrary(m_LocalLibrary);
     }
 }
 
@@ -839,7 +839,7 @@ void Commands::CommandManager::afterConstructionCallback() {
     m_MaintenanceService->cleanupUpdatesArtifacts();
 #endif
 
-    m_LocalLibrary->loadLibraryAsync();
+    m_MaintenanceService->loadLocalLibrary(m_LocalLibrary);
 }
 
 void Commands::CommandManager::beforeDestructionCallback() const {

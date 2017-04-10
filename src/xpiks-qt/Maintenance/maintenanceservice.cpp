@@ -28,6 +28,7 @@
 #include "launchexiftooljobitem.h"
 #include "initializedictionariesjobitem.h"
 #include "addtolibraryjobitem.h"
+#include "locallibraryloadsaveitem.h"
 
 namespace Maintenance {
     MaintenanceService::MaintenanceService():
@@ -63,15 +64,6 @@ namespace Maintenance {
         thread->start(QThread::LowPriority);
     }
 
-    void MaintenanceService::addLogsCleanupTask() {
-#ifdef WITH_LOGS
-        LOG_DEBUG << "#";
-        Q_ASSERT(m_MaintenanceWorker);
-        std::shared_ptr<IMaintenanceItem> jobItem(new LogsCleanupJobItem());
-        m_MaintenanceWorker->submitItem(jobItem);
-#endif
-    }
-
     void MaintenanceService::cleanupUpdatesArtifacts() {
 #ifdef Q_OS_WIN
         LOG_DEBUG << "#";
@@ -99,11 +91,31 @@ namespace Maintenance {
         LOG_DEBUG << "#";
         Q_ASSERT(m_MaintenanceWorker);
         std::shared_ptr<IMaintenanceItem> jobItem(new AddToLibraryJobItem(artworksList, localLibrary));
-        m_MaintenanceWorker->submitItem(jobItem);
+        m_MaintenanceWorker->submitFirst(jobItem);
     }
 
     void MaintenanceService::cleanupLogs() {
-        addLogsCleanupTask();
+#ifdef WITH_LOGS
+        LOG_DEBUG << "#";
+        Q_ASSERT(m_MaintenanceWorker);
+        std::shared_ptr<IMaintenanceItem> jobItem(new LogsCleanupJobItem());
+        m_MaintenanceWorker->submitItem(jobItem);
+#endif
+    }
+
+    void MaintenanceService::loadLocalLibrary(Suggestion::LocalLibrary *localLibrary) {
+        std::shared_ptr<IMaintenanceItem> jobItem(new LocalLibraryLoadSaveItem(localLibrary, LocalLibraryLoadSaveItem::Load));
+        m_MaintenanceWorker->submitFirst(jobItem);
+    }
+
+    void MaintenanceService::saveLocalLibrary(Suggestion::LocalLibrary *localLibrary) {
+        std::shared_ptr<IMaintenanceItem> jobItem(new LocalLibraryLoadSaveItem(localLibrary, LocalLibraryLoadSaveItem::Save));
+        m_MaintenanceWorker->submitFirst(jobItem);
+    }
+
+    void MaintenanceService::cleanupLocalLibrary(Suggestion::LocalLibrary *localLibrary) {
+        std::shared_ptr<IMaintenanceItem> jobItem(new LocalLibraryLoadSaveItem(localLibrary, LocalLibraryLoadSaveItem::Clean));
+        m_MaintenanceWorker->submitFirst(jobItem);
     }
 
     void MaintenanceService::stopService() {

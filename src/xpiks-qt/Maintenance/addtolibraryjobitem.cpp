@@ -39,6 +39,6 @@ namespace Maintenance {
 
     void AddToLibraryJobItem::doAddToLibrary() {
         m_LocalLibrary->doAddToLibrary(m_ArtworksList);
-        m_LocalLibrary->saveLibraryAsync();
+        m_LocalLibrary->saveToFile();
     }
 }

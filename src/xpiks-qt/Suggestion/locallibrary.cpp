@@ -24,7 +24,6 @@
 #include <QDataStream>
 #include "locallibrary.h"
 #include "../Models/artworkmetadata.h"
-#include "libraryloaderworker.h"
 #include "suggestionartwork.h"
 #include "../Common/defines.h"
 #include "../Common/basickeywordsmodel.h"
@@ -85,10 +84,6 @@ namespace Suggestion {
 
             LOG_INFO << "saved to" << m_Filename;
         }
-    }
-
-    void LocalLibrary::loadLibraryAsync() {
-        performAsync(LibraryLoaderWorker::Load);
     }
 
     void LocalLibrary::searchArtworks(const QStringList &query,
@@ -181,25 +176,6 @@ namespace Suggestion {
         LOG_INFO << itemsToRemove.count() << "item(s) removed.";
     }
 
-    void LocalLibrary::saveLibraryAsync() {
-        performAsync(LibraryLoaderWorker::Save);
-    }
-
-    void LocalLibrary::performAsync(LibraryLoaderWorker::LoadOption option) {
-        LOG_INFO << option;
-        LibraryLoaderWorker *worker = new LibraryLoaderWorker(this, m_Filename, option);
-        QThread *thread = new QThread();
-        worker->moveToThread(thread);
-
-        QObject::connect(thread, SIGNAL(started()), worker, SLOT(process()));
-        QObject::connect(worker, SIGNAL(stopped()), thread, SLOT(quit()));
-
-        QObject::connect(worker, SIGNAL(stopped()), worker, SLOT(deleteLater()));
-        QObject::connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
-
-        thread->start();
-    }
-
     void LocalLibrary::doAddToLibrary(const QVector<Models::ArtworkMetadata *> artworksList) {
         int length = artworksList.length();
 
@@ -233,9 +209,5 @@ namespace Suggestion {
         }
 
         LOG_INFO << length << "item(s) updated or added";
-    }
-
-    void LocalLibrary::cleanupLocalLibraryAsync() {
-        performAsync(LibraryLoaderWorker::Clean);
     }
 }

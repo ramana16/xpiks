@@ -49,7 +49,6 @@ SOURCES += main.cpp \
     Models/recentdirectoriesmodel.cpp \
     Suggestion/locallibrary.cpp \
     Suggestion/libraryqueryworker.cpp \
-    Suggestion/libraryloaderworker.cpp \
     Conectivity/updateservice.cpp \
     SpellCheck/spellcheckerservice.cpp \
     SpellCheck/spellcheckitem.cpp \
@@ -149,7 +148,8 @@ SOURCES += main.cpp \
     Maintenance/updatescleanupjobitem.cpp \
     Maintenance/launchexiftooljobitem.cpp \
     Maintenance/initializedictionariesjobitem.cpp \
-    Maintenance/addtolibraryjobitem.cpp
+    Maintenance/addtolibraryjobitem.cpp \
+    Maintenance/locallibraryloadsaveitem.cpp
 
 RESOURCES += qml.qrc
 
@@ -220,7 +220,6 @@ HEADERS += \
     Common/version.h \
     Suggestion/locallibrary.h \
     Suggestion/libraryqueryworker.h \
-    Suggestion/libraryloaderworker.h \
     Conectivity/updateservice.h \
     SpellCheck/spellcheckerservice.h \
     SpellCheck/spellcheckitem.h \
@@ -352,7 +351,8 @@ HEADERS += \
     Maintenance/updatescleanupjobitem.h \
     Maintenance/launchexiftooljobitem.h \
     Maintenance/initializedictionariesjobitem.h \
-    Maintenance/addtolibraryjobitem.h
+    Maintenance/addtolibraryjobitem.h \
+    Maintenance/locallibraryloadsaveitem.h
 
 DISTFILES += \
     Components/CloseIcon.qml \

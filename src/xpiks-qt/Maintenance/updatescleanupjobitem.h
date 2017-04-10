@@ -32,7 +32,7 @@ namespace Maintenance {
 
     public:
         void doCleanUpdateArtifacts();
-        void processJob() override;
+        virtual void processJob() override;
     };
 }
 

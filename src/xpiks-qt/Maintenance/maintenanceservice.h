@@ -54,12 +54,14 @@ namespace Maintenance {
         void stopService();
 
     public:
-        void addLogsCleanupTask();
         void cleanupUpdatesArtifacts();
         void launchExiftool(const QString &settingsExiftoolPath, MetadataIO::MetadataIOCoordinator *coordinator);
         void initializeDictionaries(Translation::TranslationManager *translationManager);
         void addArtworksToLibrary(const QVector<Models::ArtworkMetadata *> artworksList, Suggestion::LocalLibrary *localLibrary);
         void cleanupLogs();
+        void loadLocalLibrary(Suggestion::LocalLibrary *localLibrary);
+        void saveLocalLibrary(Suggestion::LocalLibrary *localLibrary);
+        void cleanupLocalLibrary(Suggestion::LocalLibrary *localLibrary);
 
     private slots:
         void workerFinished();

@@ -41,7 +41,7 @@ namespace Maintenance {
 
     public:
         void doAddToLibrary();
-        void processJob() override;
+        virtual void processJob() override;
 
     private:
         QVector<Models::ArtworkMetadata *> m_ArtworksList;

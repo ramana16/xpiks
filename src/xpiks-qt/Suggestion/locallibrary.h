@@ -32,7 +32,7 @@
 #include <QMutex>
 #include <QDataStream>
 #include "../Common/baseentity.h"
-#include "libraryloaderworker.h"
+#include "../Maintenance/locallibraryloadsaveitem.h"
 #include "../Maintenance/addtolibraryjobitem.h"
 
 namespace Models {
@@ -70,23 +70,22 @@ namespace Suggestion {
         virtual ~LocalLibrary();
 
     public:
+        const QString &getLibraryPath() const { return m_Filename; }
         void setLibraryPath(const QString &filename) { m_Filename = filename; }
         void addToLibrary(const QVector<Models::ArtworkMetadata *> artworksList);
         void swap(QHash<QString, LocalArtworkData> &hash);
         void saveToFile();
-        void loadLibraryAsync();
-        void saveLibraryAsync();
         void searchArtworks(const QStringList &query,
                             std::vector<std::shared_ptr<SuggestionArtwork> > &searchResults,
                             size_t maxResults);
-        void cleanupLocalLibraryAsync();
         void cleanupTrash();
 
     private:
-        void performAsync(Suggestion::LibraryLoaderWorker::LoadOption option);
         void doAddToLibrary(const QVector<Models::ArtworkMetadata *> artworksList);
 
+    private:
         friend class Maintenance::AddToLibraryJobItem;
+        friend class Maintenance::LocalLibraryLoadSaveItem;
 
     private:
         QHash<QString, LocalArtworkData> m_LocalArtworks;

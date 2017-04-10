@@ -36,7 +36,7 @@ namespace Maintenance {
 
     public:
         void doInitializeDictionaries();
-        void processJob() override;
+        virtual void processJob() override;
 
     private:
         Translation::TranslationManager *m_TranslationManager;
