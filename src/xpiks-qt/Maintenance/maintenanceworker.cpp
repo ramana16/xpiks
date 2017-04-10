@@ -22,7 +22,7 @@
 #include <QThread>
 #include "maintenanceworker.h"
 
-#define MAINTENANCE_SLEEP 5
+#define MAINTENANCE_SLEEP 1
 
 namespace Maintenance {
     bool MaintenanceWorker::initWorker() {
@@ -33,6 +33,7 @@ namespace Maintenance {
     void MaintenanceWorker::processOneItem(std::shared_ptr<IMaintenanceItem> &item) {
         item->processJob();
 
+        // make this thread more non-intrusive
         QThread::sleep(MAINTENANCE_SLEEP);
     }
 }

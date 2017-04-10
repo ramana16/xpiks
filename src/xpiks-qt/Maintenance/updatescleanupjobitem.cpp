@@ -29,7 +29,6 @@
 namespace Maintenance {
     UpdatesCleanupJobItem::UpdatesCleanupJobItem()
     {
-
     }
 
     void UpdatesCleanupJobItem::processJob() {

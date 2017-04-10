@@ -194,7 +194,7 @@ namespace MetadataIO {
         Models::SettingsModel *settingsModel = m_CommandManager->getSettingsModel();
         QString existingExiftoolPath = settingsModel->getExifToolPath();
         Maintenance::MaintenanceService *maintenanceService = m_CommandManager->getMaintenanceService();
-        maintenanceService->addLaunchExiftoolTask(existingExiftoolPath, this);
+        maintenanceService->launchExiftool(existingExiftoolPath, this);
     }
 
     void MetadataIOCoordinator::discardReading() {

@@ -836,7 +836,7 @@ void Commands::CommandManager::afterConstructionCallback() {
 
 #if !defined(CORE_TESTS) && !defined(INTEGRATION_TESTS)
     m_MaintenanceService->cleanupLogs();
-    m_MaintenanceService->addUpdatesCleanupTask();
+    m_MaintenanceService->cleanupUpdatesArtifacts();
 #endif
 
     m_LocalLibrary->loadLibraryAsync();

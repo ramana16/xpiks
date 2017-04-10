@@ -33,6 +33,7 @@
 #include <QDataStream>
 #include "../Common/baseentity.h"
 #include "libraryloaderworker.h"
+#include "../Maintenance/addtolibraryjobitem.h"
 
 namespace Models {
     class ArtworkMetadata;
@@ -71,7 +72,6 @@ namespace Suggestion {
     public:
         void setLibraryPath(const QString &filename) { m_Filename = filename; }
         void addToLibrary(const QVector<Models::ArtworkMetadata *> artworksList);
-        void doAddToLibrary(const QVector<Models::ArtworkMetadata *> artworksList);
         void swap(QHash<QString, LocalArtworkData> &hash);
         void saveToFile();
         void loadLibraryAsync();
@@ -84,6 +84,9 @@ namespace Suggestion {
 
     private:
         void performAsync(Suggestion::LibraryLoaderWorker::LoadOption option);
+        void doAddToLibrary(const QVector<Models::ArtworkMetadata *> artworksList);
+
+        friend class Maintenance::AddToLibraryJobItem;
 
     private:
         QHash<QString, LocalArtworkData> m_LocalArtworks;

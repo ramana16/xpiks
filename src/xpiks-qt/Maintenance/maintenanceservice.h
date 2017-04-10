@@ -52,12 +52,13 @@ namespace Maintenance {
     public:
         void startService();
         void stopService();
-        void addLogsCleanupTask();
-        void addUpdatesCleanupTask();
-        void addLaunchExiftoolTask(const QString &settingsExiftoolPath, MetadataIO::MetadataIOCoordinator *coordinator);
-        void addInitializeDictionariesTask(Translation::TranslationManager *translationManager);
-        void addToLibraryTask(const QVector<Models::ArtworkMetadata *> artworksList, Suggestion::LocalLibrary *localLibrary);
 
+    public:
+        void addLogsCleanupTask();
+        void cleanupUpdatesArtifacts();
+        void launchExiftool(const QString &settingsExiftoolPath, MetadataIO::MetadataIOCoordinator *coordinator);
+        void initializeDictionaries(Translation::TranslationManager *translationManager);
+        void addArtworksToLibrary(const QVector<Models::ArtworkMetadata *> artworksList, Suggestion::LocalLibrary *localLibrary);
         void cleanupLogs();
 
     private slots:

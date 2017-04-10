@@ -58,7 +58,7 @@ namespace Suggestion {
         // so always do it in the background
 #ifndef INTEGRATION_TESTS
         Maintenance::MaintenanceService *maintenanceService = m_CommandManager->getMaintenanceService();
-        maintenanceService->addToLibraryTask(artworksList, this);
+        maintenanceService->addArtworksToLibrary(artworksList, this);
 #else
         doAddToLibrary(artworksList);
 #endif

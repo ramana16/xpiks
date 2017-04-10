@@ -29,7 +29,7 @@ namespace Maintenance {
         m_SettingsExiftoolPath(settingsExiftoolPath),
         m_MetadataIOCoordinator(coordinator)
     {
-
+        Q_ASSERT(coordinator != nullptr);
     }
 
     void LaunchExiftoolJobItem::processJob() {

@@ -87,7 +87,7 @@ namespace Translation {
     void TranslationManager::initializeDictionaries() {
         LOG_DEBUG << "#";
         Maintenance::MaintenanceService *maintenanceService = m_CommandManager->getMaintenanceService();
-        maintenanceService->addInitializeDictionariesTask(this);
+        maintenanceService->initializeDictionaries(this);
     }
 
     void TranslationManager::setQuery(const QString &value) {

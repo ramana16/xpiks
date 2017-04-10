@@ -72,7 +72,7 @@ namespace Maintenance {
 #endif
     }
 
-    void MaintenanceService::addUpdatesCleanupTask() {
+    void MaintenanceService::cleanupUpdatesArtifacts() {
 #ifdef Q_OS_WIN
         LOG_DEBUG << "#";
         Q_ASSERT(m_MaintenanceWorker);
@@ -81,21 +81,21 @@ namespace Maintenance {
 #endif
     }
 
-    void MaintenanceService::addLaunchExiftoolTask(const QString &settingsExiftoolPath, MetadataIO::MetadataIOCoordinator *coordinator) {
+    void MaintenanceService::launchExiftool(const QString &settingsExiftoolPath, MetadataIO::MetadataIOCoordinator *coordinator) {
         LOG_DEBUG << "#";
         Q_ASSERT(m_MaintenanceWorker);
         std::shared_ptr<IMaintenanceItem> jobItem(new LaunchExiftoolJobItem(settingsExiftoolPath, coordinator));
         m_MaintenanceWorker->submitItem(jobItem);
     }
 
-    void MaintenanceService::addInitializeDictionariesTask(Translation::TranslationManager *translationManager) {
+    void MaintenanceService::initializeDictionaries(Translation::TranslationManager *translationManager) {
         LOG_DEBUG << "#";
         Q_ASSERT(m_MaintenanceWorker);
         std::shared_ptr<IMaintenanceItem> jobItem(new InitializeDictionariesJobItem(translationManager));
         m_MaintenanceWorker->submitFirst(jobItem);
     }
 
-    void MaintenanceService::addToLibraryTask(const QVector<Models::ArtworkMetadata *> artworksList, Suggestion::LocalLibrary *localLibrary) {
+    void MaintenanceService::addArtworksToLibrary(const QVector<Models::ArtworkMetadata *> artworksList, Suggestion::LocalLibrary *localLibrary) {
         LOG_DEBUG << "#";
         Q_ASSERT(m_MaintenanceWorker);
         std::shared_ptr<IMaintenanceItem> jobItem(new AddToLibraryJobItem(artworksList, localLibrary));
