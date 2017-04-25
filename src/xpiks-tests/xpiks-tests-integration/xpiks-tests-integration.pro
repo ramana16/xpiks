@@ -44,6 +44,7 @@ SOURCES += main.cpp \
     ../../xpiks-qt/Maintenance/launchexiftooljobitem.cpp \
     ../../xpiks-qt/Maintenance/initializedictionariesjobitem.cpp \
     ../../xpiks-qt/Maintenance/addtolibraryjobitem.cpp \
+    ../../xpiks-qt/Maintenance/movesettingsjobitem.cpp \
     ../../xpiks-qt/Conectivity/testconnection.cpp \
     ../../xpiks-qt/Conectivity/updatescheckerworker.cpp \
     ../../xpiks-qt/Encryption/aes-qt.cpp \
@@ -229,6 +230,7 @@ HEADERS += \
     ../../xpiks-qt/Maintenance/launchexiftooljobitem.h \
     ../../xpiks-qt/Maintenance/initializedictionariesjobitem.h \
     ../../xpiks-qt/Maintenance/addtolibraryjobitem.h \
+    ../../xpiks-qt/Maintenance/movesettingsjobitem.h \
     ../../xpiks-qt/Conectivity/testconnection.h \
     ../../xpiks-qt/Conectivity/updatescheckerworker.h \
     ../../xpiks-qt/Conectivity/uploadbatch.h \

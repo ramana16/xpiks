@@ -28,5 +28,11 @@ namespace Models {
         RecentItemsModel(MAX_RECENT_DIRECTORIES)
     {
     }
+
+    void RecentDirectoriesModel::doUpdateRecentItems(const QString &serialized) {
+        beginResetModel();
+        deserializeFromSettings(serialized);
+        endResetModel();
+    }
 }
 

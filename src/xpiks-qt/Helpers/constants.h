@@ -57,9 +57,6 @@ namespace Constants {
 
 #ifdef QT_NO_DEBUG
     const char UPLOAD_HOSTS[] = "UPLOAD_HOSTS_HASH";
-    const char MAX_KEYWORD_COUNT[] = "MAX_KEYWORD_COUNT";
-    const char MAX_DESCRIPTION_LENGTH[] = "MAX_DESCRIPTION_LENGTH";
-    const char MIN_MEGAPIXEL_COUNT[] = "MIN_MEGAPIXEL_COUNT";
     const char USE_MASTER_PASSWORD[] = "USE_MASTER_PASSWORD";
     const char MASTER_PASSWORD_HASH[] = "MASTER_PASSWORD_HASH";
     const char ONE_UPLOAD_SECONDS_TIMEMOUT[] = "ONE_UPLOAD_SECONDS_TIMEMOUT";
@@ -89,9 +86,6 @@ namespace Constants {
     const char TRANSLATOR_DIR[] = "dictionaries";
     const char PLUGINS_DIR[] = "XpiksPlugins";
 #else
-    const char MAX_KEYWORD_COUNT[] = "DEBUG_MAX_KEYWORD_COUNT";
-    const char MAX_DESCRIPTION_LENGTH[] = "DEBUG_MAX_DESCRIPTION_LENGTH";
-    const char MIN_MEGAPIXEL_COUNT[] = "DEBUG_MIN_MEGAPIXEL_COUNT";
     const char ONE_UPLOAD_SECONDS_TIMEMOUT[] = "DEBUG_ONE_UPLOAD_SECONDS_TIMEMOUT";
     const char USE_CONFIRMATION_DIALOGS[] = "DEBUG_USE_CONFIRMATION_DIALOGS";
     const char MAX_PARALLEL_UPLOADS[] = "DEBUG_MAX_PARALLEL_UPLOADS";
@@ -136,6 +130,8 @@ namespace Constants {
 #endif
 #endif // QT_NO_DEBUG
 
+    const char settingsVersion[] = "settingsVersion";
+
     const char pathToExifTool[] = "pathToExifTool";
     const char saveBackups[] = "saveBackups";
     const char keywordSizeScale[] = "keywordSizeScale";
@@ -155,9 +151,6 @@ namespace Constants {
     const char useProxy[] = "useProxy";
     const char proxyHost[] = "proxyHostHash";
     const char uploadHosts[] = "uploadHostsHash";
-    const char maxKeywordCount[] = "maxKeywordCount";
-    const char maxDescriptionLength[] = "maxDescriptionLength";
-    const char minMegapixelCount[] = "minMegapixelCount";
     const char useMasterPassword[] = "useMasterPassword";
     const char masterPasswordHash[] = "masterPasswordHash";
     const char oneUploadSecondsTimeout[] = "oneUploadSecondsTimeout";

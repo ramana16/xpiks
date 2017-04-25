@@ -311,7 +311,7 @@ int main(int argc, char *argv[]) {
     KeywordsPresets::FilteredPresetKeywordsModel filteredPresetsModel;
     filteredPresetsModel.setSourceModel(&presetsModel);
     Warnings::WarningsService warningsService;
-    settingsModel.readAllValues();
+    settingsModel.retrieveAllValues();
     Encryption::SecretsManager secretsManager;
     UndoRedo::UndoRedoManager undoRedoManager;
     Models::ZipArchiver zipArchiver;

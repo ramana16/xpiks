@@ -110,6 +110,7 @@ SOURCES += main.cpp \
     ../../xpiks-qt/Maintenance/launchexiftooljobitem.cpp \
     ../../xpiks-qt/Maintenance/initializedictionariesjobitem.cpp \
     ../../xpiks-qt/Maintenance/addtolibraryjobitem.cpp \
+    ../../xpiks-qt/Maintenance/movesettingsjobitem.cpp \
     ../../xpiks-qt/Translation/translationmanager.cpp \
     ../../xpiks-qt/Translation/translationquery.cpp \
     ../../xpiks-qt/Translation/translationservice.cpp \
@@ -229,6 +230,7 @@ HEADERS += \
     ../../xpiks-qt/Maintenance/launchexiftooljobitem.h \
     ../../xpiks-qt/Maintenance/initializedictionariesjobitem.h \
     ../../xpiks-qt/Maintenance/addtolibraryjobitem.h \
+    ../../xpiks-qt/Maintenance/movesettingsjobitem.h \
     ../../xpiks-qt/Translation/translationmanager.h \
     ../../xpiks-qt/Translation/translationquery.h \
     ../../xpiks-qt/Translation/translationservice.h \

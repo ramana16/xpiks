@@ -149,7 +149,8 @@ SOURCES += main.cpp \
     Maintenance/launchexiftooljobitem.cpp \
     Maintenance/initializedictionariesjobitem.cpp \
     Maintenance/addtolibraryjobitem.cpp \
-    Maintenance/locallibraryloadsaveitem.cpp
+    Maintenance/locallibraryloadsaveitem.cpp \
+    Maintenance/movesettingsjobitem.cpp
 
 RESOURCES += qml.qrc
 
@@ -352,7 +353,8 @@ HEADERS += \
     Maintenance/launchexiftooljobitem.h \
     Maintenance/initializedictionariesjobitem.h \
     Maintenance/addtolibraryjobitem.h \
-    Maintenance/locallibraryloadsaveitem.h
+    Maintenance/locallibraryloadsaveitem.h \
+    Maintenance/movesettingsjobitem.h
 
 DISTFILES += \
     Components/CloseIcon.qml \

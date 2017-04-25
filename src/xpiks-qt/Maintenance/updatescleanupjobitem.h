@@ -31,8 +31,10 @@ namespace Maintenance {
         UpdatesCleanupJobItem();
 
     public:
-        void doCleanUpdateArtifacts();
         virtual void processJob() override;
+
+    public:
+        void doCleanUpdateArtifacts();
     };
 }
 

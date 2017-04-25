@@ -139,7 +139,7 @@ int main(int argc, char *argv[]) {
     Warnings::WarningsService warningsService;
     Models::SettingsModel settingsModel;
     settingsModel.initializeConfigs();
-    settingsModel.readAllValues();
+    settingsModel.retrieveAllValues();
     Encryption::SecretsManager secretsManager;
     UndoRedo::UndoRedoManager undoRedoManager;
     Models::ZipArchiver zipArchiver;

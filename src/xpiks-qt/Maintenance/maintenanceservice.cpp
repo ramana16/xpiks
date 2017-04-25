@@ -29,6 +29,7 @@
 #include "initializedictionariesjobitem.h"
 #include "addtolibraryjobitem.h"
 #include "locallibraryloadsaveitem.h"
+#include "movesettingsjobitem.h"
 
 namespace Maintenance {
     MaintenanceService::MaintenanceService():
@@ -64,10 +65,18 @@ namespace Maintenance {
         thread->start(QThread::LowPriority);
     }
 
+    void MaintenanceService::stopService() {
+        LOG_DEBUG << "#";
+        if (m_MaintenanceWorker != NULL) {
+            m_MaintenanceWorker->stopWorking();
+        } else {
+            LOG_WARNING << "MaintenanceWorker is NULL";
+        }
+    }
+
     void MaintenanceService::cleanupUpdatesArtifacts() {
 #ifdef Q_OS_WIN
         LOG_DEBUG << "#";
-        Q_ASSERT(m_MaintenanceWorker);
         std::shared_ptr<IMaintenanceItem> jobItem(new UpdatesCleanupJobItem());
         m_MaintenanceWorker->submitItem(jobItem);
 #endif
@@ -75,21 +84,18 @@ namespace Maintenance {
 
     void MaintenanceService::launchExiftool(const QString &settingsExiftoolPath, MetadataIO::MetadataIOCoordinator *coordinator) {
         LOG_DEBUG << "#";
-        Q_ASSERT(m_MaintenanceWorker);
         std::shared_ptr<IMaintenanceItem> jobItem(new LaunchExiftoolJobItem(settingsExiftoolPath, coordinator));
         m_MaintenanceWorker->submitItem(jobItem);
     }
 
     void MaintenanceService::initializeDictionaries(Translation::TranslationManager *translationManager) {
         LOG_DEBUG << "#";
-        Q_ASSERT(m_MaintenanceWorker);
         std::shared_ptr<IMaintenanceItem> jobItem(new InitializeDictionariesJobItem(translationManager));
         m_MaintenanceWorker->submitFirst(jobItem);
     }
 
     void MaintenanceService::addArtworksToLibrary(const QVector<Models::ArtworkMetadata *> artworksList, Suggestion::LocalLibrary *localLibrary) {
         LOG_DEBUG << "#";
-        Q_ASSERT(m_MaintenanceWorker);
         std::shared_ptr<IMaintenanceItem> jobItem(new AddToLibraryJobItem(artworksList, localLibrary));
         m_MaintenanceWorker->submitFirst(jobItem);
     }
@@ -97,7 +103,6 @@ namespace Maintenance {
     void MaintenanceService::cleanupLogs() {
 #ifdef WITH_LOGS
         LOG_DEBUG << "#";
-        Q_ASSERT(m_MaintenanceWorker);
         std::shared_ptr<IMaintenanceItem> jobItem(new LogsCleanupJobItem());
         m_MaintenanceWorker->submitItem(jobItem);
 #endif
@@ -118,13 +123,9 @@ namespace Maintenance {
         m_MaintenanceWorker->submitFirst(jobItem);
     }
 
-    void MaintenanceService::stopService() {
-        LOG_DEBUG << "#";
-        if (m_MaintenanceWorker != NULL) {
-            m_MaintenanceWorker->stopWorking();
-        } else {
-            LOG_WARNING << "MaintenanceWorker is NULL";
-        }
+    void MaintenanceService::moveSettings(Models::SettingsModel *settingsModel) {
+        std::shared_ptr<IMaintenanceItem> jobItem(new MoveSettingsJobItem(settingsModel));
+        m_MaintenanceWorker->submitFirst(jobItem);
     }
 
     void MaintenanceService::workerFinished() {

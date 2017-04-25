@@ -368,6 +368,18 @@ void Commands::CommandManager::connectEntitiesSignalsSlots() const {
         QObject::connect(m_UndoRedoManager, SIGNAL(actionUndone(int)), m_PluginManager, SLOT(onLastActionUndone(int)));
     }
 #endif
+
+    // needed for Setting Moving task because QAbstractListModel is not thread safe
+
+    if (m_SettingsModel != NULL && m_RecentDirectories != NULL) {
+        QObject::connect(m_SettingsModel, SIGNAL(recentDirectoriesUpdateRequested(const QString &)),
+                         m_RecentDirectories, SLOT(updateRecentItems(const QString &)));
+    }
+
+    if (m_SettingsModel != NULL && m_RecentFiles != NULL) {
+        QObject::connect(m_SettingsModel, SIGNAL(recentFilesUpdateRequested(const QString &)),
+                         m_RecentFiles, SLOT(updateRecentItems(const QString &)));
+    }
 }
 
 void Commands::CommandManager::ensureDependenciesInjected() {
@@ -834,12 +846,18 @@ void Commands::CommandManager::afterConstructionCallback() {
     openInitialFiles();
 #endif
 
+    executeMaintenanceJobs();
+}
+
+void Commands::CommandManager::executeMaintenanceJobs() {
+    m_MaintenanceService->loadLocalLibrary(m_LocalLibrary);
+
+    m_MaintenanceService->moveSettings(m_SettingsModel);
+
 #if !defined(CORE_TESTS) && !defined(INTEGRATION_TESTS)
     m_MaintenanceService->cleanupLogs();
     m_MaintenanceService->cleanupUpdatesArtifacts();
 #endif
-
-    m_MaintenanceService->loadLocalLibrary(m_LocalLibrary);
 }
 
 void Commands::CommandManager::beforeDestructionCallback() const {

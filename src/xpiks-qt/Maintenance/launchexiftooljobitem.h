@@ -37,8 +37,10 @@ namespace Maintenance {
         LaunchExiftoolJobItem(const QString &settingsExiftoolPath, MetadataIO::MetadataIOCoordinator *coordinator);
 
     public:
-        void doLaunchExiftool();
         virtual void processJob() override;
+
+    private:
+        void doLaunchExiftool();
 
     private:
         const QString m_SettingsExiftoolPath;

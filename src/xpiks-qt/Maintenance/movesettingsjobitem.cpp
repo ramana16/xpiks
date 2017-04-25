@@ -19,30 +19,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef INITIALIZEDICTIONARIESJOBITEM_H
-#define INITIALIZEDICTIONARIESJOBITEM_H
-
-#include "imaintenanceitem.h"
-
-namespace Translation {
-    class TranslationManager;
-}
+#include "../Common/defines.h"
+#include "../Models/settingsmodel.h"
+#include "movesettingsjobitem.h"
 
 namespace Maintenance {
-    class InitializeDictionariesJobItem : public IMaintenanceItem
+    MoveSettingsJobItem::MoveSettingsJobItem(Models::SettingsModel *settingsModel):
+        m_SettingsModel(settingsModel)
     {
-    public:
-        InitializeDictionariesJobItem(Translation::TranslationManager *translationManager);
+        Q_ASSERT(settingsModel != NULL);
+    }
 
-    public:
-        virtual void processJob() override;
+    void MoveSettingsJobItem::processJob() {
+        LOG_DEBUG << "#";
+        doMoveSettings();
+    }
 
-    private:
-        void doInitializeDictionaries();
-
-    private:
-        Translation::TranslationManager *m_TranslationManager;
-    };
+    void MoveSettingsJobItem::doMoveSettings() {
+        m_SettingsModel->doMoveSettings();
+    }
 }
-
-#endif // INITIALIZEDICTIONARIESJOBITEM_H

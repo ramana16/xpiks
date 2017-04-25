@@ -40,6 +40,10 @@ namespace Translation {
     class TranslationManager;
 }
 
+namespace Models {
+    class SettingsModel;
+}
+
 namespace Maintenance {
     class MaintenanceWorker;
 
@@ -62,6 +66,7 @@ namespace Maintenance {
         void loadLocalLibrary(Suggestion::LocalLibrary *localLibrary);
         void saveLocalLibrary(Suggestion::LocalLibrary *localLibrary);
         void cleanupLocalLibrary(Suggestion::LocalLibrary *localLibrary);
+        void moveSettings(Models::SettingsModel *settingsModel);
 
     private slots:
         void workerFinished();

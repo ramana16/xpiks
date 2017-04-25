@@ -28,4 +28,10 @@ namespace Models {
         RecentItemsModel(MAX_RECENT_FILES)
     {
     }
+
+    void RecentFilesModel::doUpdateRecentItems(const QString &serialized) {
+        beginResetModel();
+        deserializeFromSettings(serialized);
+        endResetModel();
+    }
 }

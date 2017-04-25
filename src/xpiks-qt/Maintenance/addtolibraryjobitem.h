@@ -40,8 +40,10 @@ namespace Maintenance {
         AddToLibraryJobItem(const QVector<Models::ArtworkMetadata *> artworksList, Suggestion::LocalLibrary *localLibrary);
 
     public:
-        void doAddToLibrary();
         virtual void processJob() override;
+
+    private:
+        void doAddToLibrary();
 
     private:
         QVector<Models::ArtworkMetadata *> m_ArtworksList;

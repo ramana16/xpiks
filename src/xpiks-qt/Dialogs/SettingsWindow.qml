@@ -1226,7 +1226,7 @@ ApplicationWindow {
                 text: i18.n + qsTr("Close")
                 width: 100
                 onClicked: {
-                    settingsModel.readAllValues()
+                    settingsModel.retrieveAllValues()
                     closeSettings()
                 }
             }

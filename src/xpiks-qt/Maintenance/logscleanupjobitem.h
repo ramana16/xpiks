@@ -47,7 +47,6 @@ namespace Maintenance {
         LogsCleanupJobItem();
 
     public:
-        void doCleanLogs();
         virtual void processJob() override;
 
 #ifdef CORE_TESTS
@@ -59,10 +58,11 @@ namespace Maintenance {
                               QVector<FileInfoHolder> &filesToDelete);
 
     private:
-        QDateTime getDateFromName(const QString &name);
+        void doCleanLogs();
+        qint64 findLogFiles(const QString &logsDir, QVector<FileInfoHolder> &logFiles);
         void deleteLogsFilesFromList(const QVector<FileInfoHolder> &files);
         void deleteLogFile(const QString &fileNameFull);
-        qint64 findLogFiles(const QString &logsDir, QVector<FileInfoHolder> &logFiles);
+        QDateTime getDateFromName(const QString &name);
 
     private:
         QString m_LogFileDir;

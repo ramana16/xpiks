@@ -228,7 +228,7 @@ ApplicationWindow {
         text: i18.n + qsTr("&Settings")
         shortcut: StandardKey.Preferences
         onTriggered: {
-            settingsModel.readAllValues()
+            settingsModel.retrieveAllValues()
             Common.launchDialog("Dialogs/SettingsWindow.qml",
                                 applicationWindow, {},
                                 function(wnd) {wnd.show();});

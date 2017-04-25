@@ -286,6 +286,11 @@ namespace Commands {
         void reportUserAction(Conectivity::UserAction userAction) const;
         void cleanupLocalLibraryAsync() const;
         void afterConstructionCallback();
+
+    private:
+        void executeMaintenanceJobs();
+
+    public:
         void beforeDestructionCallback() const;
         void requestCloseApplication() const;
         void restartSpellChecking();

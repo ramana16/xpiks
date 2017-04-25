@@ -105,4 +105,8 @@ namespace Models {
         if (role == Qt::DisplayRole) { return m_RecentItems.at(index.row()); }
         return QVariant();
     }
+
+    void RecentItemsModel::updateRecentItems(const QString &serialized) {
+        doUpdateRecentItems(serialized);
+    }
 }

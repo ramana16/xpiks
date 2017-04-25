@@ -28,6 +28,7 @@
 #include <QCoreApplication>
 #include <QDir>
 #include <QJsonObject>
+#include <QSettings>
 #include "../Common/baseentity.h"
 #include "../Common/version.h"
 #include "../Models/proxysettings.h"
@@ -94,10 +95,18 @@ namespace Models {
         void saveLocale();
         void initializeConfigs();
         void syncronizeSettings() { sync(); }
+        void doMoveSettings();
+
+    private:
+        void moveSetting(QSettings *settingsQSettings, const QString &oldKey, const char* newKey, int type);
+        void moveProxyHostSetting(QSettings *settingsQSettings);
+        void wipeOldSettings(QSettings *settingsQSettings);
+        void moveSettingsFromQSettingsToJson();
 
     public:
         ProxySettings *retrieveProxySettings();
         bool getIsTelemetryEnabled() const { return boolValue(Constants::userStatistics, true); }
+        int getSettingsVersion() const { return intValue(Constants::settingsVersion); }
 
     public:
         Q_INVOKABLE void resetAllValues();
@@ -105,7 +114,7 @@ namespace Models {
         Q_INVOKABLE void clearMasterPasswordSettings();
         Q_INVOKABLE void resetExifTool();
         Q_INVOKABLE void resetDictPath();
-        Q_INVOKABLE void readAllValues();
+        Q_INVOKABLE void retrieveAllValues();
         Q_INVOKABLE void raiseMasterPasswordSignal() { emit mustUseMasterPasswordChanged(m_MustUseMasterPassword); }
         Q_INVOKABLE void saveProxySetting(const QString &address, const QString &user, const QString &password, const QString &port);
         Q_INVOKABLE void saveArtworkEditUISettings();
@@ -330,6 +339,8 @@ namespace Models {
     signals:
         void settingsReset();
         void settingsUpdated();
+        void recentDirectoriesUpdateRequested(const QString &serialized);
+        void recentFilesUpdateRequested(const QString &serialized);
         void exifToolPathChanged(QString exifToolPath);
         void uploadTimeoutChanged(int uploadTimeout);
         void mustUseMasterPasswordChanged(bool mustUseMasterPassword);
