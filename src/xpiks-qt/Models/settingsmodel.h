@@ -95,12 +95,12 @@ namespace Models {
         void saveLocale();
         void initializeConfigs();
         void syncronizeSettings() { sync(); }
-        void doMoveSettings();
+        void migrateSettings();
 
     private:
-        void moveSetting(QSettings *settingsQSettings, const QString &oldKey, const char* newKey, int type);
-        void moveProxyHostSetting(QSettings *settingsQSettings);
-        void wipeOldSettings(QSettings *settingsQSettings);
+        void moveSetting(QSettings &settingsQSettings, const QString &oldKey, const char* newKey, int type);
+        void moveProxyHostSetting(QSettings &settingsQSettings);
+        void wipeOldSettings(QSettings &settingsQSettings);
         void moveSettingsFromQSettingsToJson();
 
     public:
@@ -157,15 +157,15 @@ namespace Models {
         QString getTermsAndConditionsText() const;
 
     public:
-        Q_INVOKABLE QString getRecentDirectories() { return stringValue(Constants::recentDirectories); }
-        Q_INVOKABLE QString getRecentFiles() { return stringValue(Constants::recentFiles); }
-        Q_INVOKABLE QString getUserAgentId() { return stringValue(Constants::userAgentId); }
-        Q_INVOKABLE QString getPathToUpdate() { return stringValue(Constants::pathToUpdate); }
-        Q_INVOKABLE QString getUploadHosts() { return stringValue(Constants::uploadHosts); }
-        Q_INVOKABLE QString getMasterPasswordHash() { return stringValue(Constants::masterPasswordHash); }
-        Q_INVOKABLE QString getDictPath() { return stringValue(Constants::dictPath); }
-        Q_INVOKABLE bool getMustUseConfirmationDialogs() { return boolValue(Constants::useConfirmationDialogs, true); }
-        Q_INVOKABLE int getAvailableUpdateVersion() { return intValue(Constants::availableUpdateVersion); }
+        QString getRecentDirectories() const { return stringValue(Constants::recentDirectories); }
+        QString getRecentFiles() const { return stringValue(Constants::recentFiles); }
+        QString getUserAgentId() const { return stringValue(Constants::userAgentId); }
+        QString getPathToUpdate() const { return stringValue(Constants::pathToUpdate); }
+        QString getUploadHosts() const { return stringValue(Constants::uploadHosts); }
+        QString getMasterPasswordHash() const { return stringValue(Constants::masterPasswordHash); }
+        QString getDictPath() const { return stringValue(Constants::dictPath); }
+        bool getMustUseConfirmationDialogs() const { return boolValue(Constants::useConfirmationDialogs, true); }
+        int getAvailableUpdateVersion() const { return intValue(Constants::availableUpdateVersion); }
 
     public:
         Q_INVOKABLE bool needToShowWhatsNew() {
@@ -339,8 +339,8 @@ namespace Models {
     signals:
         void settingsReset();
         void settingsUpdated();
-        void recentDirectoriesUpdateRequested(const QString &serialized);
-        void recentFilesUpdateRequested(const QString &serialized);
+        void recentDirectoriesUpdated(const QString &serialized);
+        void recentFilesUpdated(const QString &serialized);
         void exifToolPathChanged(QString exifToolPath);
         void uploadTimeoutChanged(int uploadTimeout);
         void mustUseMasterPasswordChanged(bool mustUseMasterPassword);

@@ -30,9 +30,6 @@ namespace Models {
         Q_OBJECT
     public:
         RecentDirectoriesModel();
-
-    private:
-        virtual void doUpdateRecentItems(const QString &serialized) override;
     };
 }
 

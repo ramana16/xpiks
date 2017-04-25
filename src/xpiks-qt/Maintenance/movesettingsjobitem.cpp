@@ -36,6 +36,6 @@ namespace Maintenance {
     }
 
     void MoveSettingsJobItem::doMoveSettings() {
-        m_SettingsModel->doMoveSettings();
+        m_SettingsModel->migrateSettings();
     }
 }

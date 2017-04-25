@@ -231,6 +231,7 @@ int main(int argc, char *argv[]) {
     initQSettings();
     Models::SettingsModel settingsModel;
     settingsModel.initializeConfigs();
+    settingsModel.retrieveAllValues();
     ensureUserIdExists(&settingsModel);
 
     Suggestion::LocalLibrary localLibrary;
@@ -311,7 +312,6 @@ int main(int argc, char *argv[]) {
     KeywordsPresets::FilteredPresetKeywordsModel filteredPresetsModel;
     filteredPresetsModel.setSourceModel(&presetsModel);
     Warnings::WarningsService warningsService;
-    settingsModel.retrieveAllValues();
     Encryption::SecretsManager secretsManager;
     UndoRedo::UndoRedoManager undoRedoManager;
     Models::ZipArchiver zipArchiver;

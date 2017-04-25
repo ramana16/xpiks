@@ -135,7 +135,7 @@ namespace Models {
         }
     }
 
-    void SettingsModel::doMoveSettings() {
+    void SettingsModel::migrateSettings() {
         int settingsVersion = getSettingsVersion();
 
         if (settingsVersion < CURRENT_SETTINGS_VERSION) {
@@ -143,39 +143,36 @@ namespace Models {
         }
     }
 
-    void SettingsModel::moveSetting(QSettings *oldSettings, const QString &oldKey, const char *newKey, int type) {
-        Q_ASSERT(oldSettings != NULL);
-
-        if (!oldSettings->contains(oldKey)) {
+    void SettingsModel::moveSetting(QSettings &oldSettings, const QString &oldKey, const char *newKey, int type) {
+        if (!oldSettings.contains(oldKey)) {
             LOG_WARNING << oldKey << "key is missing";
             return;
         }
 
-        auto oldValue = oldSettings->value(oldKey);
-        oldValue.convert(type);
-        auto newValue = QJsonValue::fromVariant(oldValue);
-
-        setValue(newKey, newValue);
+        auto oldValue = oldSettings.value(oldKey);
+        if (oldValue.convert(type)) {
+            auto newValue = QJsonValue::fromVariant(oldValue);
+            setValue(newKey, newValue);
+        } else {
+            LOG_WARNING <<"Failed to convert value in key" << oldKey;
+        }
     }
 
-    void SettingsModel::moveProxyHostSetting(QSettings *oldSettings) {
-        Q_ASSERT(oldSettings != NULL);
-
+    void SettingsModel::moveProxyHostSetting(QSettings &oldSettings) {
         QString oldKey = QLatin1String(Constants::PROXY_HOST);
 
-        if (!oldSettings->contains(oldKey)) {
+        if (!oldSettings.contains(oldKey)) {
             LOG_WARNING << "PROXY_HOST key is missing";
             return;
         }
 
-        QVariant qvalue = oldSettings->value(oldKey);
+        QVariant qvalue = oldSettings.value(oldKey);
         ProxySettings proxySettings = qvalue.value<ProxySettings>();
         setValue(Constants::proxyHost, serializeProxyForSettings(proxySettings));
     }
 
-    void SettingsModel::wipeOldSettings(QSettings *oldSettings) {
-        Q_ASSERT(oldSettings != NULL);
-        oldSettings->clear();
+    void SettingsModel::wipeOldSettings(QSettings &oldSettings) {
+        oldSettings.clear();
     }
 
     void SettingsModel::moveSettingsFromQSettingsToJson() {
@@ -183,9 +180,9 @@ namespace Models {
 
         using namespace Constants;
 
-        QSettings *oldSettings = new QSettings(QSettings::UserScope,
-                                                       QCoreApplication::instance()->organizationName(),
-                                                       QCoreApplication::instance()->applicationName());
+        QSettings oldSettings(QSettings::UserScope,
+                              QCoreApplication::instance()->organizationName(),
+                              QCoreApplication::instance()->applicationName());
 
         moveSetting(oldSettings, PATH_TO_EXIFTOOL, pathToExifTool, QMetaType::QString);
         moveSetting(oldSettings, SAVE_BACKUPS, saveBackups, QMetaType::QMetaType::Bool);
@@ -235,8 +232,9 @@ namespace Models {
         Models::UploadInfoRepository *uploadInfoRepository = m_CommandManager->getUploadInfoRepository();
         secretsManager->setMasterPasswordHash(getMasterPasswordHash());
         uploadInfoRepository->initFromString(getUploadHosts());
-        emit recentDirectoriesUpdateRequested(getRecentDirectories());
-        emit recentFilesUpdateRequested(getRecentFiles());
+
+        emit recentDirectoriesUpdated(getRecentDirectories());
+        emit recentFilesUpdated(getRecentFiles());
 
         setValue(settingsVersion, CURRENT_SETTINGS_VERSION);
         sync();

@@ -106,7 +106,12 @@ namespace Models {
         return QVariant();
     }
 
-    void RecentItemsModel::updateRecentItems(const QString &serialized) {
-        doUpdateRecentItems(serialized);
+    void RecentItemsModel::onRecentItemsUpdated(const QString &serialized) {
+        LOG_DEBUG << "#";
+        beginResetModel();
+        {
+            deserializeFromSettings(serialized);
+        }
+        endResetModel();
     }
 }

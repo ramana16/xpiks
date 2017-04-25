@@ -372,13 +372,13 @@ void Commands::CommandManager::connectEntitiesSignalsSlots() const {
     // needed for Setting Moving task because QAbstractListModel is not thread safe
 
     if (m_SettingsModel != NULL && m_RecentDirectories != NULL) {
-        QObject::connect(m_SettingsModel, SIGNAL(recentDirectoriesUpdateRequested(const QString &)),
-                         m_RecentDirectories, SLOT(updateRecentItems(const QString &)));
+        QObject::connect(m_SettingsModel, SIGNAL(recentDirectoriesUpdated(const QString &)),
+                         m_RecentDirectories, SLOT(onRecentItemsUpdated(const QString &)));
     }
 
     if (m_SettingsModel != NULL && m_RecentFiles != NULL) {
-        QObject::connect(m_SettingsModel, SIGNAL(recentFilesUpdateRequested(const QString &)),
-                         m_RecentFiles, SLOT(updateRecentItems(const QString &)));
+        QObject::connect(m_SettingsModel, SIGNAL(recentFilesUpdated(const QString &)),
+                         m_RecentFiles, SLOT(onRecentItemsUpdated(const QString &)));
     }
 }
 

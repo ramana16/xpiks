@@ -44,10 +44,22 @@ ApplicationWindow {
     signal dialogDestruction();
     signal refreshProxy();
 
-    onClosing: dialogDestruction();
+    onClosing: {
+        saveSettings()
+        dialogDestruction();
+    }
 
     function closeSettings() {
         settingsWindow.close()
+    }
+
+    function saveSettings() {
+        settingsModel.keywordSizeScale = uxTab.sizeSliderValue
+        settingsModel.scrollSpeedScale = uxTab.scrollSpeedScale
+        settingsModel.selectedThemeIndex = uxTab.themeIndex
+        settingsModel.userStatistics = secTab.useStatistics
+        settingsModel.saveAllValues()
+        Colors.applyTheme(settingsModel.selectedThemeIndex)
     }
 
     function onCancelMP(firstTime) {
@@ -1205,28 +1217,10 @@ ApplicationWindow {
             }
 
             StyledButton {
-                text: i18.n + qsTr("Save")
-                width: 100
-                onClicked: {
-                    settingsModel.keywordSizeScale = uxTab.sizeSliderValue
-                    settingsModel.scrollSpeedScale = uxTab.scrollSpeedScale
-                    settingsModel.selectedThemeIndex = uxTab.themeIndex
-                    settingsModel.userStatistics = secTab.useStatistics
-                    settingsModel.saveAllValues()
-                    closeSettings()
-                    Colors.applyTheme(settingsModel.selectedThemeIndex)
-                }
-            }
-
-            Item {
-                width: 20
-            }
-
-            StyledButton {
                 text: i18.n + qsTr("Close")
                 width: 100
                 onClicked: {
-                    settingsModel.retrieveAllValues()
+                    saveSettings()
                     closeSettings()
                 }
             }

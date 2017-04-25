@@ -59,10 +59,7 @@ namespace Models {
         virtual QHash<int, QByteArray> roleNames() const override { return QAbstractListModel::roleNames(); }
 
     public slots:
-        void updateRecentItems(const QString &serialized);
-
-    protected:
-        virtual void doUpdateRecentItems(const QString &serialized) = 0;
+        void onRecentItemsUpdated(const QString &serialized);
 
     private:
         QSet<QString> m_ItemsSet;
