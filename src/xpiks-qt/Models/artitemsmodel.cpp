@@ -543,6 +543,9 @@ namespace Models {
         if (0 <= metadataIndex && metadataIndex < getArtworksCount()) {
             ArtworkMetadata *metadata = m_ArtworkList.at(metadataIndex);
             if (metadata->editKeyword(keywordIndex, replacement)) {
+                QModelIndex index = this->index(metadataIndex);
+                emit dataChanged(index, index, QVector<int>() << IsModifiedRole << KeywordsCountRole);
+
                 auto *keywordsModel = metadata->getBasicModel();
                 m_CommandManager->submitKeywordForSpellCheck(keywordsModel, keywordIndex);
                 m_CommandManager->submitKeywordsForWarningsCheck(metadata);
