@@ -234,27 +234,6 @@ Item {
                                         }
                                     }
                                 }
-
-                                EditIcon {
-                                    backgroundColor: imageWrapper.color
-                                    anchors.verticalCenter: parent.verticalCenter
-                                    anchors.verticalCenterOffset: -5
-                                    anchors.right: parent.right
-                                    anchors.rightMargin: 10
-                                    enabled: !isRestricted && warningsListView.count > 0
-                                    visible: enabled
-
-                                    onActionInvoked: {
-                                        var index = warningsModel.getOriginalIndex(imageWrapper.delegateIndex);
-                                        Common.launchItemEditing(index, componentParent,
-                                                                 {
-                                                                     applyCallback: function() {
-                                                                         console.log("UI:WarningsDialog # Rechecking [" + imageWrapper.delegateIndex + "] item")
-                                                                         warningsDescriptions.model = warningsModel.describeWarnings(imageWrapper.delegateIndex)
-                                                                     }
-                                                                 })
-                                    }
-                                }
                             }
                         }
                     }
