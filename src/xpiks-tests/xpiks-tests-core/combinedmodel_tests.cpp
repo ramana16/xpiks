@@ -122,6 +122,27 @@ void CombinedModelTests::combineAllDifferentItemsTest() {
     freeArtworks(items);
 }
 
+void CombinedModelTests::combineAllManyDifferentItemsTest() {
+    Models::CombinedArtworksModel combinedModel;
+    combinedModel.setCommandManager(&m_CommandManagerMock);
+
+    std::vector<Models::MetadataElement> items;
+    items.push_back(createArtworkMetadata("Description1", "title1", QStringList() << "Keyword1" << "keyword2", 0));
+    items.push_back(createArtworkMetadata("Description2", "title2", QStringList() << "Keyword3" << "keyword4" << "keyword5", 1));
+
+    int size = (int)items.size();
+
+    combinedModel.setArtworks(items);
+
+    QCOMPARE(combinedModel.getArtworksCount(), size);
+    QVERIFY(combinedModel.getDescription().isEmpty());
+    QVERIFY(combinedModel.getTitle().isEmpty());
+    QCOMPARE(combinedModel.getKeywordsCount(), 0);
+    QCOMPARE(combinedModel.areKeywordsModified(), false);
+
+    freeArtworks(items);
+}
+
 void CombinedModelTests::combineCommonInKeywordsTest() {
     Models::CombinedArtworksModel combinedModel;
     combinedModel.setCommandManager(&m_CommandManagerMock);
@@ -131,6 +152,30 @@ void CombinedModelTests::combineCommonInKeywordsTest() {
     std::vector<Models::MetadataElement> items;
     items.push_back(createArtworkMetadata("Description1", "title1", QStringList() << "Keyword1" << commonKeyword, 0));
     items.push_back(createArtworkMetadata("Description2", "title2", QStringList() << "Keyword2" << commonKeyword, 1));
+    items.push_back(createArtworkMetadata("Description3", "title3", QStringList() << "Keyword3" << commonKeyword, 2));
+
+    int size = (int)items.size();
+    combinedModel.setArtworks(items);
+
+    QCOMPARE(combinedModel.getArtworksCount(), size);
+    QVERIFY(combinedModel.getDescription().isEmpty());
+    QVERIFY(combinedModel.getTitle().isEmpty());
+    QCOMPARE(combinedModel.getKeywordsCount(), 1);
+    QCOMPARE(combinedModel.getKeywords()[0], commonKeyword);
+    QCOMPARE(combinedModel.areKeywordsModified(), false);
+
+    freeArtworks(items);
+}
+
+void CombinedModelTests::combineCommonInManyKeywordsTest() {
+    Models::CombinedArtworksModel combinedModel;
+    combinedModel.setCommandManager(&m_CommandManagerMock);
+
+    QString commonKeyword = "a common keyword";
+
+    std::vector<Models::MetadataElement> items;
+    items.push_back(createArtworkMetadata("Description1", "title1", QStringList() << "Keyword1" << "keyword12" << commonKeyword, 0));
+    items.push_back(createArtworkMetadata("Description2", "title2", QStringList() << "Keyword2" << "keyword22" << "keyword23" << commonKeyword, 1));
     items.push_back(createArtworkMetadata("Description3", "title3", QStringList() << "Keyword3" << commonKeyword, 2));
 
     int size = (int)items.size();

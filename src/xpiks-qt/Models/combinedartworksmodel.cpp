@@ -339,6 +339,7 @@ namespace Models {
         bool anyItemsProcessed = false;
         bool descriptionsDiffer = false;
         bool titleDiffer = false;
+        bool anyDifferent = false;
         QString description, title;
         QSet<QString> commonKeywords, unitedKeywords;
         QStringList firstItemKeywords;
@@ -370,6 +371,8 @@ namespace Models {
             if ((currentSet.count() == firstItemKeywordsCount) &&
                 (unitedKeywords.count() <= firstItemKeywordsCount)) {
                 unitedKeywords.unite(currentSet);
+            } else {
+                anyDifferent = true;
             }
         });
 
@@ -386,7 +389,7 @@ namespace Models {
             initTitle(title);
 
             if (!areKeywordsModified()) {
-                if (unitedKeywords.subtract(commonKeywords).isEmpty()) {
+                if ((!anyDifferent) && unitedKeywords.subtract(commonKeywords).isEmpty()) {
                     // all keywords are the same
                     initKeywords(firstItemKeywords);
                 } else {
