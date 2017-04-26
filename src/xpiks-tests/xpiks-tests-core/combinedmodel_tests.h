@@ -15,11 +15,12 @@ private slots:
     void combineSeveralSameItemsTest();
     void combineAllDifferentItemsTest();
     void combineAllManyDifferentItemsTest();
+    void combineAllManyLastDifferentItemsTest();
     void combineCommonInKeywordsTest();
     void combineCommonInManyKeywordsTest();
     void combineCommonInTitleTest();
     void combineCommonInDescriptionTest();
-    void editSeveralWithSameKeywordsTest();\
+    void editSeveralWithSameKeywordsTest();
     void recombineAfterRemoveDifferentTest();
     void recombineAfterRemoveAllButOneTest();
     void recombineAfterChangesTest();
