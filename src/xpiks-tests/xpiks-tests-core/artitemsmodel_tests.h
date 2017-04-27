@@ -19,6 +19,17 @@ private slots:
     void plainTextEditToSeveralKeywordsTest();
     void plainTextEditToAlmostEmptyTest();
     void plainTextEditToMixedTest();
+    // smoke tests for modified state
+    void appendKeywordEmitsModifiedTest();
+    void removeKeywordEmitsModifiedTest();
+    void removeLastKeywordEmitsModifiedTest();
+    void plainTextEditEmitsModifiedTest();
+    void keywordEditEmitsModifiedTest();
+    void pasteKeywordsEmitsModifiedTest();
+    void addSuggestedEmitsModifiedTest();
+    void fillFromQuickBufferEmitsModifiedTest();
+    void addPresetEmitsModifiedTest();
+    void proxyModelExitEmitsModifiedTest();
 };
 
 #endif // ARTITEMSMODELTESTS_H

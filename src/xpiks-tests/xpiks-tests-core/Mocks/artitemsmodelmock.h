@@ -12,7 +12,7 @@ namespace Mocks {
     class ArtItemsModelMock : public Models::ArtItemsModel
     {
     public:
-        ArtItemsModelMock() {}
+        ArtItemsModelMock(): m_BlockUpdates(true) {}
 
     public:
         virtual Models::ArtworkMetadata *createMetadata(const QString &filepath, qint64 directoryID) {
@@ -21,13 +21,14 @@ namespace Mocks {
                                  QStringList() << "keyword1" << "keyword2" << "keyword3");
             return metadata;
         }
+        void setUpdatesBlocked(bool value) { m_BlockUpdates = value; }
 
         ArtworkMetadataMock *getMockArtwork(int index) const { return dynamic_cast<ArtworkMetadataMock*>(getArtwork(index)); }
 
         void removeAll() { this->removeArtworks(QVector<QPair<int, int> >() << qMakePair(0, rowCount() - 1)); }
 
-        virtual void updateItemsAtIndices(const QVector<int> &indices) {  Q_UNUSED(indices); /* DO NOTHING */ }
-        virtual void updateItemsInRanges(const QVector<QPair<int, int> > &ranges) { Q_UNUSED(ranges); /* DO NOTHING */ }
+        virtual void updateItemsAtIndices(const QVector<int> &indices) {  if (!m_BlockUpdates) { Models::ArtItemsModel::updateItemsAtIndices(indices); } }
+        virtual void updateItemsInRanges(const QVector<QPair<int, int> > &ranges) { if (!m_BlockUpdates) { Models::ArtItemsModel::updateItemsInRanges(ranges); } }
 
         void foreachArtwork(std::function<void (int index, ArtworkMetadataMock *metadata)> action) {
             int size = getArtworksCount();
@@ -36,6 +37,9 @@ namespace Mocks {
                 action(i, item);
             }
         }
+
+    private:
+        bool m_BlockUpdates;
     };
 }
 
