@@ -191,6 +191,7 @@ namespace Models {
         clearSetting(oldSettings, APP_WINDOW_Y);
         clearSetting(oldSettings, AUTO_FIND_VECTORS);
         clearSetting(oldSettings, USE_PROXY);
+        clearSetting(oldSettings, PROXY_HOST);
         clearSetting(oldSettings, UPLOAD_HOSTS);
         clearSetting(oldSettings, USE_MASTER_PASSWORD);
         clearSetting(oldSettings, MASTER_PASSWORD_HASH);
