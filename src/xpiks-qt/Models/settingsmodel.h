@@ -101,6 +101,7 @@ namespace Models {
         void moveSetting(QSettings &settingsQSettings, const QString &oldKey, const char* newKey, int type);
         void moveProxyHostSetting(QSettings &settingsQSettings);
         void wipeOldSettings(QSettings &settingsQSettings);
+        void clearSetting(QSettings &oldSettings, const char* settingName);
         void moveSettingsFromQSettingsToJson();
 
     public:

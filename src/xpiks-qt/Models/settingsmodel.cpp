@@ -174,45 +174,49 @@ namespace Models {
     void SettingsModel::wipeOldSettings(QSettings &oldSettings) {
         using namespace Constants;
 
-        oldSettings.remove(PATH_TO_EXIFTOOL);
-        oldSettings.remove(SAVE_BACKUPS);
-        oldSettings.remove(KEYWORD_SIZE_SCALE);
-        oldSettings.remove(DISMISS_DURATION);
-        oldSettings.remove(FIT_SMALL_PREVIEW);
-        oldSettings.remove(SEARCH_USING_AND);
-        oldSettings.remove(SEARCH_BY_FILEPATH);
-        oldSettings.remove(DICT_PATH);
-        oldSettings.remove(USER_STATISTICS);
-        oldSettings.remove(CHECK_FOR_UPDATES);
-        oldSettings.remove(NUMBER_OF_LAUNCHES);
-        oldSettings.remove(APP_WINDOW_WIDTH);
-        oldSettings.remove(APP_WINDOW_HEIGHT);
-        oldSettings.remove(APP_WINDOW_X);
-        oldSettings.remove(APP_WINDOW_Y);
-        oldSettings.remove(AUTO_FIND_VECTORS);
-        oldSettings.remove(USE_PROXY);
-        oldSettings.remove(UPLOAD_HOSTS);
-        oldSettings.remove(USE_MASTER_PASSWORD);
-        oldSettings.remove(MASTER_PASSWORD_HASH);
-        oldSettings.remove(ONE_UPLOAD_SECONDS_TIMEMOUT);
-        oldSettings.remove(USE_CONFIRMATION_DIALOGS);
-        oldSettings.remove(RECENT_DIRECTORIES);
-        oldSettings.remove(RECENT_FILES);
-        oldSettings.remove(MAX_PARALLEL_UPLOADS);
-        oldSettings.remove(USE_SPELL_CHECK);
-        oldSettings.remove(USER_AGENT_ID);
-        oldSettings.remove(INSTALLED_VERSION);
-        oldSettings.remove(USER_CONSENT);
-        oldSettings.remove(SELECTED_LOCALE);
-        oldSettings.remove(SELECTED_THEME_INDEX);
-        oldSettings.remove(USE_AUTO_COMPLETE);
-        oldSettings.remove(USE_EXIFTOOL);
-        oldSettings.remove(CACHE_IMAGES_AUTOMATICALLY);
-        oldSettings.remove(SCROLL_SPEED_SENSIVITY);
-        oldSettings.remove(AUTO_DOWNLOAD_UPDATES);
-        oldSettings.remove(AVAILABLE_UPDATE_VERSION);
-        oldSettings.remove(ARTWORK_EDIT_RIGHT_PANE_WIDTH);
-        oldSettings.remove(TRANSLATOR_SELECTED_DICT_INDEX);
+        clearSetting(oldSettings, PATH_TO_EXIFTOOL);
+        clearSetting(oldSettings, SAVE_BACKUPS);
+        clearSetting(oldSettings, KEYWORD_SIZE_SCALE);
+        clearSetting(oldSettings, DISMISS_DURATION);
+        clearSetting(oldSettings, FIT_SMALL_PREVIEW);
+        clearSetting(oldSettings, SEARCH_USING_AND);
+        clearSetting(oldSettings, SEARCH_BY_FILEPATH);
+        clearSetting(oldSettings, DICT_PATH);
+        clearSetting(oldSettings, USER_STATISTICS);
+        clearSetting(oldSettings, CHECK_FOR_UPDATES);
+        clearSetting(oldSettings, NUMBER_OF_LAUNCHES);
+        clearSetting(oldSettings, APP_WINDOW_WIDTH);
+        clearSetting(oldSettings, APP_WINDOW_HEIGHT);
+        clearSetting(oldSettings, APP_WINDOW_X);
+        clearSetting(oldSettings, APP_WINDOW_Y);
+        clearSetting(oldSettings, AUTO_FIND_VECTORS);
+        clearSetting(oldSettings, USE_PROXY);
+        clearSetting(oldSettings, UPLOAD_HOSTS);
+        clearSetting(oldSettings, USE_MASTER_PASSWORD);
+        clearSetting(oldSettings, MASTER_PASSWORD_HASH);
+        clearSetting(oldSettings, ONE_UPLOAD_SECONDS_TIMEMOUT);
+        clearSetting(oldSettings, USE_CONFIRMATION_DIALOGS);
+        clearSetting(oldSettings, RECENT_DIRECTORIES);
+        clearSetting(oldSettings, RECENT_FILES);
+        clearSetting(oldSettings, MAX_PARALLEL_UPLOADS);
+        clearSetting(oldSettings, USE_SPELL_CHECK);
+        clearSetting(oldSettings, USER_AGENT_ID);
+        clearSetting(oldSettings, INSTALLED_VERSION);
+        clearSetting(oldSettings, USER_CONSENT);
+        clearSetting(oldSettings, SELECTED_LOCALE);
+        clearSetting(oldSettings, SELECTED_THEME_INDEX);
+        clearSetting(oldSettings, USE_AUTO_COMPLETE);
+        clearSetting(oldSettings, USE_EXIFTOOL);
+        clearSetting(oldSettings, CACHE_IMAGES_AUTOMATICALLY);
+        clearSetting(oldSettings, SCROLL_SPEED_SENSIVITY);
+        clearSetting(oldSettings, AUTO_DOWNLOAD_UPDATES);
+        clearSetting(oldSettings, AVAILABLE_UPDATE_VERSION);
+        clearSetting(oldSettings, ARTWORK_EDIT_RIGHT_PANE_WIDTH);
+        clearSetting(oldSettings, TRANSLATOR_SELECTED_DICT_INDEX);
+    }
+
+    void SettingsModel::clearSetting(QSettings &oldSettings, const char *settingName) {
+        oldSettings.remove(QLatin1String(settingName));
     }
 
     void SettingsModel::moveSettingsFromQSettingsToJson() {
