@@ -172,7 +172,47 @@ namespace Models {
     }
 
     void SettingsModel::wipeOldSettings(QSettings &oldSettings) {
-        oldSettings.clear();
+        using namespace Constants;
+
+        oldSettings.remove(PATH_TO_EXIFTOOL);
+        oldSettings.remove(SAVE_BACKUPS);
+        oldSettings.remove(KEYWORD_SIZE_SCALE);
+        oldSettings.remove(DISMISS_DURATION);
+        oldSettings.remove(FIT_SMALL_PREVIEW);
+        oldSettings.remove(SEARCH_USING_AND);
+        oldSettings.remove(SEARCH_BY_FILEPATH);
+        oldSettings.remove(DICT_PATH);
+        oldSettings.remove(USER_STATISTICS);
+        oldSettings.remove(CHECK_FOR_UPDATES);
+        oldSettings.remove(NUMBER_OF_LAUNCHES);
+        oldSettings.remove(APP_WINDOW_WIDTH);
+        oldSettings.remove(APP_WINDOW_HEIGHT);
+        oldSettings.remove(APP_WINDOW_X);
+        oldSettings.remove(APP_WINDOW_Y);
+        oldSettings.remove(AUTO_FIND_VECTORS);
+        oldSettings.remove(USE_PROXY);
+        oldSettings.remove(UPLOAD_HOSTS);
+        oldSettings.remove(USE_MASTER_PASSWORD);
+        oldSettings.remove(MASTER_PASSWORD_HASH);
+        oldSettings.remove(ONE_UPLOAD_SECONDS_TIMEMOUT);
+        oldSettings.remove(USE_CONFIRMATION_DIALOGS);
+        oldSettings.remove(RECENT_DIRECTORIES);
+        oldSettings.remove(RECENT_FILES);
+        oldSettings.remove(MAX_PARALLEL_UPLOADS);
+        oldSettings.remove(USE_SPELL_CHECK);
+        oldSettings.remove(USER_AGENT_ID);
+        oldSettings.remove(INSTALLED_VERSION);
+        oldSettings.remove(USER_CONSENT);
+        oldSettings.remove(SELECTED_LOCALE);
+        oldSettings.remove(SELECTED_THEME_INDEX);
+        oldSettings.remove(USE_AUTO_COMPLETE);
+        oldSettings.remove(USE_EXIFTOOL);
+        oldSettings.remove(CACHE_IMAGES_AUTOMATICALLY);
+        oldSettings.remove(SCROLL_SPEED_SENSIVITY);
+        oldSettings.remove(AUTO_DOWNLOAD_UPDATES);
+        oldSettings.remove(AVAILABLE_UPDATE_VERSION);
+        oldSettings.remove(ARTWORK_EDIT_RIGHT_PANE_WIDTH);
+        oldSettings.remove(TRANSLATOR_SELECTED_DICT_INDEX);
     }
 
     void SettingsModel::moveSettingsFromQSettingsToJson() {
