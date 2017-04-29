@@ -28,6 +28,8 @@ copy /Y ..\..\..\libs\face.dll .
 copy /Y ..\..\..\libs\libexpat.dll .
 copy /Y ..\..\..\libs\z.dll .
 
+copy /Y ..\..\..\..\ministaller\src\ministaller.exe .
+
 del *.obj
 del *.cpp
 del *.lib
