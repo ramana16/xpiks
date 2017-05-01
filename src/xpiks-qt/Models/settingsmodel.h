@@ -88,7 +88,7 @@ namespace Models {
 
     public:
         explicit SettingsModel(QObject *parent = 0);
-        virtual ~SettingsModel() { sync(); }
+        virtual ~SettingsModel() { }
 
     public:
         void saveExiftool();

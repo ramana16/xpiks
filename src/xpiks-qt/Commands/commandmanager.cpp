@@ -896,6 +896,8 @@ void Commands::CommandManager::beforeDestructionCallback() const {
 #endif
 
     m_MaintenanceService->stopService();
+
+    m_SettingsModel->syncronizeSettings();
 }
 
 void Commands::CommandManager::requestCloseApplication() const {

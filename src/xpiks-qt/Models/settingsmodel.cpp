@@ -30,10 +30,13 @@
 #else
 #  define DEFAULT_EXIFTOOL "exiftool"
 #endif
+
 #ifdef QT_DEBUG
-#define SETTINGS_FILE "debug_settings.json"
-#elif INTEGRATION_TESTS
-#define SETTINGS_FILE "integration_settings.json"
+    #ifdef INTEGRATION_TESTS
+        #define SETTINGS_FILE "integration_settings.json"
+    #else
+        #define SETTINGS_FILE "debug_settings.json"
+    #endif
 #else
 #define SETTINGS_FILE "settings.json"
 #endif
