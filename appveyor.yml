@@ -10,10 +10,12 @@ environment:
   QTDIR: C:\Qt\5.6\msvc2015_64
   QT_FATAL_WARNINGS: true
   matrix:
-    - XPIKS_BINARY: true
-    - CORE_TESTS: true
     - INTEGRATION_TESTS: true
 
+#    - XPIKS_BINARY: true
+#    - CORE_TESTS: true
+
+      
 branches:
   # blacklist
   except:
@@ -109,4 +111,6 @@ test_script:
   - cmd: 'echo %cd%'
   - if defined CORE_TESTS %configuration%\xpiks-tests-core.exe
   - if defined INTEGRATION_TESTS %configuration%\xpiks-tests-integration.exe
+  - if defined INTEGRATION_TESTS dir
+  - if defined INTEGRATION_TESTS dir %configuration%
   - ps: Get-ChildItem .\*.dmp | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
