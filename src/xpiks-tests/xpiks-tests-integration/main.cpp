@@ -84,6 +84,8 @@
 #include "weirdnamesreadtest.h"
 
 #ifdef Q_OS_WIN
+#include "MiniDump.h"
+
 #include <tchar.h>
 #include <stdio.h>
 #include "StackWalker.h"
@@ -164,12 +166,14 @@ static LONG __stdcall CrashHandlerExceptionFilter(EXCEPTION_POINTERS* pExPtrs)
   StackWalkerToConsole sw;  // output to console
   sw.ShowCallstack(GetCurrentThread(), pExPtrs->ContextRecord);
 
+  MiniDump miniDump;
+  miniDump.Create(L"xpiks-qt.minidump", MiniDump::kInfoLevelLarge, true);
+
   return EXCEPTION_CONTINUE_SEARCH;
 }
 
 static void InitUnhandledExceptionFilter()
 {
-
   if (s_bUnhandledExeptionFilterSet == FALSE)
   {
     // set global exception handler (for handling all unhandled exceptions)
