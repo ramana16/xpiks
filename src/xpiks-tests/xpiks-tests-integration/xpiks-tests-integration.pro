@@ -1,5 +1,6 @@
 TEMPLATE = app
 TARGET = xpiks-tests-integration
+DEFINES += APPNAME=xpiks-tests-integration
 
 QMAKE_MAC_SDK = macosx10.11
 

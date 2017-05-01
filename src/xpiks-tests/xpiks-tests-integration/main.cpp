@@ -157,6 +157,10 @@ static BOOL PreventSetUnhandledExceptionFilter()
 // This function determines whether we need data sections of the given module
 //
 
+
+#define STRINGIZE_(x) #x
+#define STRINGIZE(x) STRINGIZE_(x)
+
 bool IsDataSectionNeeded( const WCHAR* pModuleName ) {
     // Check parameters
 
@@ -176,7 +180,7 @@ bool IsDataSectionNeeded( const WCHAR* pModuleName ) {
     // Compare the name with the list of known names and decide
 
     // Note: For this to work, the executable name must be "mididump.exe"
-    if( wcsicmp( szFileName, L"xpiks-qt" ) == 0 )
+    if( wcsicmp( szFileName, _T(STRINGIZE(APPNAME)) ) == 0 )
     {
         return true;
     }
@@ -200,7 +204,6 @@ BOOL CALLBACK MyMiniDumpCallback(
 )
 {
     BOOL bRet = FALSE;
-
 
     // Check parameters
 
@@ -282,7 +285,7 @@ void CreateMiniDump( EXCEPTION_POINTERS* pep )
 {
     // Open the file
 
-    HANDLE hFile = CreateFile( _T("xpiks-qt.dmp"), GENERIC_READ | GENERIC_WRITE,
+    HANDLE hFile = CreateFile( _T(STRINGIZE(APPNAME))_T(".dmp"), GENERIC_READ | GENERIC_WRITE,
                                0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL );
 
     if( ( hFile != NULL ) && ( hFile != INVALID_HANDLE_VALUE ) )
@@ -324,6 +327,9 @@ void CreateMiniDump( EXCEPTION_POINTERS* pep )
     {
         _tprintf( _T("CreateFile failed. Error: %u \n"), GetLastError() );
     }
+
+    fflush(stdout);
+    fflush(stderr);
 }
 
 static BOOL s_bUnhandledExeptionFilterSet = FALSE;
