@@ -109,4 +109,4 @@ test_script:
   - cmd: 'echo %cd%'
   - if defined CORE_TESTS %configuration%\xpiks-tests-core.exe
   - if defined INTEGRATION_TESTS %configuration%\xpiks-tests-integration.exe
-  - ps: Get-ChildItem %configuration%\*.dmp | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
+  - ps: Get-ChildItem -Path "%configuration%\*.dmp" | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
