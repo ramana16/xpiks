@@ -215,7 +215,7 @@ MiniDump::~MiniDump()
 {
 }
 
-bool MiniDump::Create(const wchar_t *inPath, InfoLevel inLevel, bool inSuspendOtherThreads, bool inResumeOtherThreads) const {
+bool MiniDump::Create(const wchar_t *inPath, InfoLevel inLevel, bool inSuspendOtherThreads) const {
 	if (!inPath)	return false;
 
 	// Set up the list of parameters we want to pass to the newly-created thread.  Note
@@ -249,13 +249,17 @@ bool MiniDump::Create(const wchar_t *inPath, InfoLevel inLevel, bool inSuspendOt
 		::CloseHandle( hThread );
 
 		// If we suspended other threads, now is the time to wake them up
-        if (inSuspendOtherThreads && inResumeOtherThreads) {
+        if (inSuspendOtherThreads) {
 			EnumerateThreads( ::ResumeThread, threadId );
 		}
 
 		return code != 0;
 	}
     return false;
+}
+
+void MiniDump::suspendThreads() const {
+    EnumerateThreads( ::SuspendThread, -1 );
 }
 
 void MiniDump::resumeThreads() const {

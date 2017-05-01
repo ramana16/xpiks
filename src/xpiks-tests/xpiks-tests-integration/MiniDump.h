@@ -41,11 +41,11 @@ public:
 	MiniDump();
 	virtual ~MiniDump();
 
-	bool Create( const wchar_t *inPath,
-				InfoLevel inLevel = kInfoLevelMedium,
-                bool inSuspendOtherThreads = false,
-                bool inResumeOtherThreads = false) const;
+    bool Create(const wchar_t *inPath,
+                InfoLevel inLevel = kInfoLevelMedium,
+                bool inSuspendOtherThreads = false) const;
 
+    void suspendThreads() const;
     void resumeThreads() const;
 
 private:
