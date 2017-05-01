@@ -98,6 +98,8 @@ echo '
            set toolbar visible of container window to false
            set statusbar visible of container window to false
            set the bounds of container window to {480, 300, 980, 570}
+           set statusbar visible of container window to false
+           set position of every item to {600, 400}
            set viewOptions to the icon view options of container window
            set arrangement of viewOptions to not arranged
            set icon size of viewOptions to 128
@@ -121,6 +123,8 @@ hdiutil detach "${DEVICE}"
 # now make the final image a compressed disk image
 echo "Creating compressed image"
 hdiutil convert "${DMG_TMP}" -format UDZO -imagekey zlib-level=9 -o "${DMG_FINAL}"
+
+shasum "${DMG_FINAL}"
 
 # clean up
 rm -rf "${DMG_TMP}"
