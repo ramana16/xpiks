@@ -35,6 +35,9 @@ Item {
     property var callbackObject
     anchors.fill: parent
 
+    signal dialogDestruction();
+    Component.onDestruction: dialogDestruction();
+
     function closePopup() {
         proxySetupComponent.destroy()
     }

@@ -44,6 +44,9 @@ Item {
 
     Keys.onEscapePressed: closePopup()
 
+    signal dialogDestruction();
+    Component.onDestruction: dialogDestruction();
+
     function closePopup() {
         presetEditComponent.destroy();
     }

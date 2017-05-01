@@ -38,6 +38,9 @@ Item {
     property var artworkUploader: helpersWrapper.getArtworkUploader()
     property var uploadWatcher: artworkUploader.getUploadWatcher()
 
+    signal dialogDestruction();
+    Component.onDestruction: dialogDestruction();
+
     function closePopup() {
         failedUploadsComponent.destroy();
     }

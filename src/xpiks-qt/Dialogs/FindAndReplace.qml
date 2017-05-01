@@ -42,6 +42,10 @@ Item {
 
     Keys.onEscapePressed: closePopup()
 
+
+    signal dialogDestruction();
+    Component.onDestruction: dialogDestruction();
+
     Connections {
         target: replaceModel
         onReplaceSucceeded: closePopup()
