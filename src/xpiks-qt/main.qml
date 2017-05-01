@@ -359,6 +359,21 @@ ApplicationWindow {
         enabled: (applicationWindow.openedDialogsCount == 0)
     }
 
+    Action {
+        id: showLogsAction
+        shortcut: "Shift+Ctrl+L"
+        enabled: applicationWindow.openedDialogsCount == 0
+        onTriggered: {
+            var logsModel = helpersWrapper.getLogsModel()
+            var allText = logsModel.getAllLogsText()
+            Common.launchDialog("Dialogs/LogsDialog.qml",
+                                applicationWindow,
+                                {
+                                    logText: allText
+                                });
+        }
+    }
+
     menuBar: MenuBar {
         Menu {
             title: i18.n + qsTr("&File")
@@ -428,10 +443,10 @@ ApplicationWindow {
 
         Menu {
             title: i18.n + qsTr("&Edit")
-            enabled: applicationWindow.actionsEnabled
 
             MenuItem {
                 text: i18.n + qsTr("&Presets")
+                enabled: (applicationWindow.openedDialogsCount == 0)
                 onTriggered: {
                     console.info("Presets triggered")
                     Common.launchDialog("Dialogs/PresetsEditDialog.qml", applicationWindow, {})
@@ -440,6 +455,7 @@ ApplicationWindow {
 
             MenuItem {
                 text: i18.n + qsTr("&Invert selection")
+                enabled: (artworkRepository.artworksSourcesCount > 0) && applicationWindow.actionsEnabled
                 onTriggered: {
                     console.info("Invert selection triggered")
                     if (filteredArtItemsModel.getItemsCount() > 0) {
@@ -450,6 +466,7 @@ ApplicationWindow {
 
             MenuItem {
                 text: i18.n + qsTr("&Sort by filename")
+                enabled: (artworkRepository.artworksSourcesCount > 0) && applicationWindow.actionsEnabled
                 checkable: true
                 onToggled: {
                     console.info("Sort by filename")
@@ -466,7 +483,7 @@ ApplicationWindow {
 
             MenuItem {
                 text: i18.n + qsTr("&Delete keywords from selected")
-                enabled: filteredArtItemsModel.selectedArtworksCount > 0
+                enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
                 onTriggered: {
                     console.info("Delete keywords from selected triggered")
                     filteredArtItemsModel.deleteKeywordsFromSelected()
@@ -476,7 +493,7 @@ ApplicationWindow {
 
             MenuItem {
                 text: i18.n + qsTr("&Fix spelling in selected")
-                enabled: filteredArtItemsModel.selectedArtworksCount > 0
+                enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
                 onTriggered: {
                     console.info("Fix spelling in selected triggered")
                     filteredArtItemsModel.suggestCorrectionsForSelected()
@@ -488,7 +505,7 @@ ApplicationWindow {
 
             MenuItem {
                 text: i18.n + qsTr("&Remove metadata from selected")
-                enabled: filteredArtItemsModel.selectedArtworksCount > 0
+                enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
                 onTriggered: {
                     console.info("Remove metadata from selected triggered")
                     removeMetadataDialog.open()
@@ -497,7 +514,7 @@ ApplicationWindow {
 
             MenuItem {
                 text: i18.n + qsTr("&Detach vectors from selected")
-                enabled: filteredArtItemsModel.selectedArtworksCount > 0
+                enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
                 onTriggered: {
                     console.info("Detach vectors from selected triggered")
                     filteredArtItemsModel.detachVectorFromSelected()
@@ -506,6 +523,7 @@ ApplicationWindow {
 
             MenuItem {
                 text: i18.n + qsTr("&Manage upload hosts")
+                enabled: (applicationWindow.openedDialogsCount == 0)
                 onTriggered: {
                     console.info("Manage upload hosts triggered")
                     openUploadDialog(true)
@@ -584,7 +602,7 @@ ApplicationWindow {
 
             MenuItem {
                 text: i18.n + qsTr("&Zip selected artworks")
-                enabled: filteredArtItemsModel.selectedArtworksCount > 0
+                enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
                 onTriggered: {
                     console.info("Zip archives triggered")
 
@@ -597,7 +615,7 @@ ApplicationWindow {
 
             MenuItem {
                 text: i18.n + qsTr("&Import metadata from selected")
-                enabled: filteredArtItemsModel.selectedArtworksCount > 0
+                enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
                 onTriggered: {
                     console.info("Reimport archives triggered")
                     filteredArtItemsModel.reimportMetadataForSelected()
@@ -606,7 +624,7 @@ ApplicationWindow {
 
             MenuItem {
                 text: i18.n + qsTr("&Overwrite metadata in selected")
-                enabled: filteredArtItemsModel.selectedArtworksCount > 0
+                enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
                 onTriggered: {
                     console.info("Overwrite metadata triggered")
                     Common.launchDialog("Dialogs/ExportMetadata.qml", applicationWindow, {overwriteAll: true})
@@ -635,15 +653,7 @@ ApplicationWindow {
 
                 MenuItem {
                     text: i18.n + qsTr("Show logs")
-                    onTriggered: {
-                        var logsModel = helpersWrapper.getLogsModel()
-                        var allText = logsModel.getAllLogsText()
-                        Common.launchDialog("Dialogs/LogsDialog.qml",
-                                            applicationWindow,
-                                            {
-                                                logText: allText
-                                            });
-                    }
+                    action: showLogsAction
                 }
             }
         }
