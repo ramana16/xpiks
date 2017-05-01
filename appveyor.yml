@@ -110,7 +110,6 @@ before_test:
 test_script:
   - cmd: 'echo %cd%'
   - if defined CORE_TESTS %configuration%\xpiks-tests-core.exe
-  - if defined INTEGRATION_TESTS %configuration%\xpiks-tests-integration.exe
-  - if defined INTEGRATION_TESTS dir
-  - if defined INTEGRATION_TESTS dir %configuration%
+  - if defined INTEGRATION_TESTS %configuration%\xpiks-tests-integration.exe && exit 0
   - ps: Get-ChildItem .\*.dmp | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
+      
