@@ -163,13 +163,15 @@ static LONG __stdcall CrashHandlerExceptionFilter(EXCEPTION_POINTERS* pExPtrs)
   }
 #endif
 
+  MiniDump miniDump;
+  miniDump.Create(L"xpiks-qt.minidump", MiniDump::kInfoLevelLarge, true, false);
+
   StackWalkerToConsole sw;  // output to console
   sw.ShowCallstack(GetCurrentThread(), pExPtrs->ContextRecord);
 
-  MiniDump miniDump;
-  miniDump.Create(L"xpiks-qt.minidump", MiniDump::kInfoLevelLarge, true);
+  miniDump.resumeThreads();
 
-  return EXCEPTION_CONTINUE_SEARCH;
+  return EXCEPTION_EXECUTE_HANDLER;
 }
 
 static void InitUnhandledExceptionFilter()

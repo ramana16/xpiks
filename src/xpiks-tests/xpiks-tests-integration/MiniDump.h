@@ -43,7 +43,10 @@ public:
 
 	bool Create( const wchar_t *inPath,
 				InfoLevel inLevel = kInfoLevelMedium,
-				bool inSuspendOtherThreads = false ) const;
+                bool inSuspendOtherThreads = false,
+                bool inResumeOtherThreads = false) const;
+
+    void resumeThreads() const;
 
 private:
 	std::wstring mProcessNameWithoutExtension;

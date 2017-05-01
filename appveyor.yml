@@ -109,4 +109,4 @@ test_script:
   - cmd: 'echo %cd%'
   - if defined CORE_TESTS %configuration%\xpiks-tests-core.exe
   - if defined INTEGRATION_TESTS %configuration%\xpiks-tests-integration.exe
-  - cmd: 'if exists xpiks-qt.minidump appveyor PushArtifact xpiks-qt.minidump'
+  - if defined INTEGRATION_TESTS if exists xpiks-qt.minidump appveyor PushArtifact xpiks-qt.minidump
