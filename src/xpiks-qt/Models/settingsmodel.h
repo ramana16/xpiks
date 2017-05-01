@@ -602,7 +602,6 @@ namespace Models {
         void deserializeProxyFromSettings(const QString &serialized);
 
     private:
-        QMutex m_SettingsSyncLock;
         Helpers::LocalConfig m_Config;
         QJsonObject m_SettingsJson;
         QString m_ExifToolPath;

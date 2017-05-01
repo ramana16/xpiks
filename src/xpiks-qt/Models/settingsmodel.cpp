@@ -291,8 +291,6 @@ namespace Models {
     }
 
     void SettingsModel::sync() {
-        QMutexLocker locker(&m_SettingsSyncLock);
-
         LOG_DEBUG << "Syncing settings";
 
         QJsonDocument doc;

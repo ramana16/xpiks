@@ -458,6 +458,13 @@ win32 {
         EXE_DIR = release
         LIBS += -llibcurl
     }
+
+    # StackWalker stuff
+    LIBS += -lAdvapi32
+    HEADERS += StackWalker.h
+    SOURCES += StackWalker.cpp
+    DEFINES += _UNICODE \
+               _MBCS
 }
 
 linux-g++-64 {

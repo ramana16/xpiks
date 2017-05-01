@@ -83,6 +83,106 @@
 #include "userdictedittest.h"
 #include "weirdnamesreadtest.h"
 
+#ifdef Q_OS_WIN
+#include <tchar.h>
+#include <stdio.h>
+#include "StackWalker.h"
+
+#if _MSC_VER < 1400
+#define strcpy_s(dst, len, src) strcpy(dst, src)
+#define strncpy_s(dst, len, src, maxLen) strncpy(dst, len, src)
+#define strcat_s(dst, len, src) strcat(dst, src)
+#define _snprintf_s _snprintf
+#define _tcscat_s _tcscat
+#endif
+
+// Specialized stackwalker-output classes
+// Console (printf):
+class StackWalkerToConsole : public StackWalker
+{
+protected:
+  virtual void OnOutput(LPCSTR szText)
+  {
+    printf("%s", szText);
+  }
+};
+
+#if defined _M_X64 || defined _M_IX86
+static BOOL PreventSetUnhandledExceptionFilter()
+{
+  HMODULE hKernel32 = LoadLibrary(_T("kernel32.dll"));
+  if (hKernel32 == NULL) return FALSE;
+  void *pOrgEntry = GetProcAddress(hKernel32, "SetUnhandledExceptionFilter");
+  if (pOrgEntry == NULL) return FALSE;
+
+#ifdef _M_IX86
+  // Code for x86:
+  // 33 C0                xor         eax,eax
+  // C2 04 00             ret         4
+  unsigned char szExecute[] = { 0x33, 0xC0, 0xC2, 0x04, 0x00 };
+#elif _M_X64
+  // 33 C0                xor         eax,eax
+  // C3                   ret
+  unsigned char szExecute[] = { 0x33, 0xC0, 0xC3 };
+#else
+#error "The following code only works for x86 and x64!"
+#endif
+
+  DWORD dwOldProtect = 0;
+  BOOL bProt = VirtualProtect(pOrgEntry, sizeof(szExecute),
+    PAGE_EXECUTE_READWRITE, &dwOldProtect);
+
+  SIZE_T bytesWritten = 0;
+  BOOL bRet = WriteProcessMemory(GetCurrentProcess(),
+    pOrgEntry, szExecute, sizeof(szExecute), &bytesWritten);
+
+  if ( (bProt != FALSE) && (dwOldProtect != PAGE_EXECUTE_READWRITE))
+  {
+    DWORD dwBuf;
+    VirtualProtect(pOrgEntry, sizeof(szExecute), dwOldProtect, &dwBuf);
+  }
+  return bRet;
+}
+#endif
+
+static BOOL s_bUnhandledExeptionFilterSet = FALSE;
+static LONG __stdcall CrashHandlerExceptionFilter(EXCEPTION_POINTERS* pExPtrs)
+{
+#ifdef _M_IX86
+  if (pExPtrs->ExceptionRecord->ExceptionCode == EXCEPTION_STACK_OVERFLOW)
+  {
+    static char MyStack[1024*128];  // be sure that we have enought space...
+    // it assumes that DS and SS are the same!!! (this is the case for Win32)
+    // change the stack only if the selectors are the same (this is the case for Win32)
+    //__asm push offset MyStack[1024*128];
+    //__asm pop esp;
+  __asm mov eax,offset MyStack[1024*128];
+  __asm mov esp,eax;
+  }
+#endif
+
+  StackWalkerToConsole sw;  // output to console
+  sw.ShowCallstack(GetCurrentThread(), pExPtrs->ContextRecord);
+
+  return EXCEPTION_CONTINUE_SEARCH;
+}
+
+static void InitUnhandledExceptionFilter()
+{
+
+  if (s_bUnhandledExeptionFilterSet == FALSE)
+  {
+    // set global exception handler (for handling all unhandled exceptions)
+    SetUnhandledExceptionFilter(CrashHandlerExceptionFilter);
+#if defined _M_X64 || defined _M_IX86
+    PreventSetUnhandledExceptionFilter();
+#endif
+    s_bUnhandledExeptionFilterSet = TRUE;
+  }
+}
+
+#endif // Q_OS_WIN
+
 #if defined(WITH_LOGS)
 #undef WITH_LOGS
 #endif
@@ -92,6 +192,10 @@
 #endif
 
 int main(int argc, char *argv[]) {
+#ifdef Q_OS_WIN
+    InitUnhandledExceptionFilter();
+#endif
+
     std::cout << "Started integration tests" << std::endl;
 
     // will call curl_global_init and cleanup
@@ -108,6 +212,10 @@ int main(int argc, char *argv[]) {
     qSetMessagePattern("%{time hh:mm:ss.zzz} %{type} T#%{threadid} %{function} - %{message}");
     qRegisterMetaType<Common::SpellCheckFlags>("Common::SpellCheckFlags");
     qRegisterMetaTypeStreamOperators<Suggestion::LocalArtworkData>("LocalArtworkData");
+
+    Models::SettingsModel settingsModel;
+    settingsModel.initializeConfigs();
+    settingsModel.retrieveAllValues();
 
     Suggestion::LocalLibrary localLibrary;
 
@@ -137,9 +245,6 @@ int main(int argc, char *argv[]) {
     KeywordsPresets::PresetKeywordsModel presetsModel;
     KeywordsPresets::PresetKeywordsModelConfig presetsModelConfig;
     Warnings::WarningsService warningsService;
-    Models::SettingsModel settingsModel;
-    settingsModel.initializeConfigs();
-    settingsModel.retrieveAllValues();
     Encryption::SecretsManager secretsManager;
     UndoRedo::UndoRedoManager undoRedoManager;
     Models::ZipArchiver zipArchiver;
