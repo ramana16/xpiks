@@ -100,6 +100,31 @@ void CombinedModelTests::combineSeveralSameItemsTest() {
     freeArtworks(items);
 }
 
+void CombinedModelTests::combineSeveralWithEmptyTest() {
+    Models::CombinedArtworksModel combinedModel;
+    combinedModel.setCommandManager(&m_CommandManagerMock);
+
+    const QString commonKeyword = "Keyword1";
+
+    std::vector<Models::MetadataElement> items;
+    items.push_back(createArtworkMetadata("Description1", "title1", QStringList() << commonKeyword << "keyword2", 0));
+    items.push_back(createArtworkMetadata("Description2", "title2", QStringList(), 1));
+    items.push_back(createArtworkMetadata("Description3", "title3", QStringList() << commonKeyword, 2));
+
+    int size = (int)items.size();
+
+    combinedModel.setArtworks(items);
+
+    QCOMPARE(combinedModel.getArtworksCount(), size);
+    QVERIFY(combinedModel.getDescription().isEmpty());
+    QVERIFY(combinedModel.getTitle().isEmpty());
+    QCOMPARE(combinedModel.getKeywordsCount(), 1);
+    QCOMPARE(combinedModel.getKeywords()[0], commonKeyword);
+    QCOMPARE(combinedModel.areKeywordsModified(), false);
+
+    freeArtworks(items);
+}
+
 void CombinedModelTests::combineAllDifferentItemsTest() {
     Models::CombinedArtworksModel combinedModel;
     combinedModel.setCommandManager(&m_CommandManagerMock);
