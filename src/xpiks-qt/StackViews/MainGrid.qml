@@ -1177,7 +1177,11 @@ ColumnLayout {
                                                                 artItemsModel.editKeyword(rowWrapper.getIndex(), kw.delegateIndex, replacement)
                                                             },
                                                             onClose: function() {
-                                                                flv.activateEdit()
+                                                                try {
+                                                                    flv.activateEdit()
+                                                                } catch (error) {
+                                                                    console.warn(error)
+                                                                }
                                                             }
                                                         }
 
@@ -1290,7 +1294,11 @@ ColumnLayout {
                                                                 artItemsModel.plainTextEdit(rowWrapper.getIndex(), text, spaceIsSeparator)
                                                             },
                                                             onClose: function() {
-                                                                flv.activateEdit()
+                                                                try {
+                                                                    flv.activateEdit()
+                                                                } catch (error) {
+                                                                    console.warn(error)
+                                                                }
                                                             }
                                                         }
 
