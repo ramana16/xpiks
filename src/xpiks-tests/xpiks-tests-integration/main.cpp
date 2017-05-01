@@ -349,7 +349,7 @@ static LONG __stdcall CrashHandlerExceptionFilter(EXCEPTION_POINTERS* pExPtrs)
   }
 
   {
-
+      CreateMiniDump(pExPtrs);
   }
 
   return EXCEPTION_EXECUTE_HANDLER;
