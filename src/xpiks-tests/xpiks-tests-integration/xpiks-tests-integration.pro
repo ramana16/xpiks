@@ -460,11 +460,9 @@ win32 {
     }
 
     # StackWalker stuff
-    LIBS += -lAdvapi32
-    HEADERS += StackWalker.h \
-               MiniDump.h
-    SOURCES += StackWalker.cpp \
-               MiniDump.cpp
+    LIBS += -lAdvapi32 -lDbgHelp
+    HEADERS += StackWalker.h
+    SOURCES += StackWalker.cpp
     DEFINES += _UNICODE \
                _MBCS
 }

@@ -84,11 +84,16 @@
 #include "weirdnamesreadtest.h"
 
 #ifdef Q_OS_WIN
-#include "MiniDump.h"
-
 #include <tchar.h>
 #include <stdio.h>
 #include "StackWalker.h"
+
+// minidump
+#include <windows.h>
+//#include <tchar.h>
+#include <dbghelp.h>
+//#include <stdio.h>
+#include <crtdbg.h>
 
 #if _MSC_VER < 1400
 #define strcpy_s(dst, len, src) strcpy(dst, src)
@@ -147,6 +152,180 @@ static BOOL PreventSetUnhandledExceptionFilter()
 }
 #endif
 
+
+///////////////////////////////////////////////////////////////////////////////
+// This function determines whether we need data sections of the given module
+//
+
+bool IsDataSectionNeeded( const WCHAR* pModuleName ) {
+    // Check parameters
+
+    if( pModuleName == 0 )
+    {
+        _ASSERTE( _T("Parameter is null.") );
+        return false;
+    }
+
+    // Extract the module name
+
+    WCHAR szFileName[_MAX_FNAME] = L"";
+
+    _wsplitpath( pModuleName, NULL, NULL, szFileName, NULL );
+
+
+    // Compare the name with the list of known names and decide
+
+    // Note: For this to work, the executable name must be "mididump.exe"
+    if( wcsicmp( szFileName, L"xpiks-qt" ) == 0 )
+    {
+        return true;
+    }
+    else if( wcsicmp( szFileName, L"ntdll" ) == 0 )
+    {
+        return true;
+    }
+
+    // Complete
+
+    return false;
+
+}
+
+
+
+BOOL CALLBACK MyMiniDumpCallback(
+    PVOID                            pParam,
+    const PMINIDUMP_CALLBACK_INPUT   pInput,
+    PMINIDUMP_CALLBACK_OUTPUT        pOutput
+)
+{
+    BOOL bRet = FALSE;
+
+
+    // Check parameters
+
+    if( pInput == 0 )
+        return FALSE;
+
+    if( pOutput == 0 )
+        return FALSE;
+
+
+    // Process the callbacks
+
+    switch( pInput->CallbackType )
+    {
+        case IncludeModuleCallback:
+        {
+            // Include the module into the dump
+            bRet = TRUE;
+        }
+        break;
+
+        case IncludeThreadCallback:
+        {
+            // Include the thread into the dump
+            bRet = TRUE;
+        }
+        break;
+
+        case ModuleCallback:
+        {
+            // Are data sections available for this module ?
+
+            if( pOutput->ModuleWriteFlags & ModuleWriteDataSeg )
+            {
+                // Yes, they are, but do we need them?
+
+                if( !IsDataSectionNeeded( pInput->Module.FullPath ) )
+                {
+                    wprintf( L"Excluding module data sections: %s \n", pInput->Module.FullPath );
+
+                    pOutput->ModuleWriteFlags &= (~ModuleWriteDataSeg);
+                }
+            }
+
+            bRet = TRUE;
+        }
+        break;
+
+        case ThreadCallback:
+        {
+            // Include all thread information into the minidump
+            bRet = TRUE;
+        }
+        break;
+
+        case ThreadExCallback:
+        {
+            // Include this information
+            bRet = TRUE;
+        }
+        break;
+
+        case MemoryCallback:
+        {
+            // We do not include any information here -> return FALSE
+            bRet = FALSE;
+        }
+        break;
+
+        case CancelCallback:
+            break;
+    }
+
+    return bRet;
+
+}
+
+void CreateMiniDump( EXCEPTION_POINTERS* pep )
+{
+    // Open the file
+
+    HANDLE hFile = CreateFile( _T("xpiks-qt.dmp"), GENERIC_READ | GENERIC_WRITE,
+                               0, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL );
+
+    if( ( hFile != NULL ) && ( hFile != INVALID_HANDLE_VALUE ) )
+    {
+        // Create the minidump
+
+        MINIDUMP_EXCEPTION_INFORMATION mdei;
+
+        mdei.ThreadId           = GetCurrentThreadId();
+        mdei.ExceptionPointers  = pep;
+        mdei.ClientPointers     = FALSE;
+
+        MINIDUMP_CALLBACK_INFORMATION mci;
+
+        mci.CallbackRoutine     = (MINIDUMP_CALLBACK_ROUTINE)MyMiniDumpCallback;
+        mci.CallbackParam       = 0;
+
+        MINIDUMP_TYPE mdt       = (MINIDUMP_TYPE)(MiniDumpWithPrivateReadWriteMemory |
+                                                  MiniDumpWithDataSegs |
+                                                  MiniDumpWithHandleData |
+                                                  MiniDumpWithFullMemoryInfo |
+                                                  MiniDumpWithThreadInfo |
+                                                  MiniDumpWithUnloadedModules );
+
+        BOOL rv = MiniDumpWriteDump( GetCurrentProcess(), GetCurrentProcessId(),
+                                     hFile, mdt, (pep != 0) ? &mdei : 0, 0, &mci );
+
+        if( !rv )
+            _tprintf( _T("MiniDumpWriteDump failed. Error: %u \n"), GetLastError() );
+        else
+            _tprintf( _T("Minidump created.\n") );
+
+        // Close the file
+
+        CloseHandle( hFile );
+
+    }
+    else
+    {
+        _tprintf( _T("CreateFile failed. Error: %u \n"), GetLastError() );
+    }
+}
+
 static BOOL s_bUnhandledExeptionFilterSet = FALSE;
 static LONG __stdcall CrashHandlerExceptionFilter(EXCEPTION_POINTERS* pExPtrs)
 {
@@ -163,16 +342,15 @@ static LONG __stdcall CrashHandlerExceptionFilter(EXCEPTION_POINTERS* pExPtrs)
   }
 #endif
 
-  MiniDump miniDump;
-
-  miniDump.suspendThreads();
   {
       StackWalkerToConsole sw;  // output to console
       sw.ShowCallstack(GetCurrentThread(), pExPtrs->ContextRecord);
-
-      miniDump.Create(L"xpiks-qt.minidump", MiniDump::kInfoLevelSmall, false);
+      fflush(stdout);
   }
-  miniDump.resumeThreads();
+
+  {
+
+  }
 
   return EXCEPTION_EXECUTE_HANDLER;
 }
@@ -188,6 +366,14 @@ static void InitUnhandledExceptionFilter()
 #endif
     s_bUnhandledExeptionFilterSet = TRUE;
   }
+}
+
+LONG WINAPI ExpFilter(EXCEPTION_POINTERS* pExp, DWORD dwExpCode)
+{
+  //StackWalker sw;  // output to default (Debug-Window)
+  StackWalkerToConsole sw;  // output to the console
+  sw.ShowCallstack(GetCurrentThread(), pExp->ContextRecord);
+  return EXCEPTION_EXECUTE_HANDLER;
 }
 
 #endif // Q_OS_WIN
