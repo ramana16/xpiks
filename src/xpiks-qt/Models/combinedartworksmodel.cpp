@@ -363,16 +363,20 @@ namespace Models {
             QString currTitle = metadata->getTitle();
             descriptionsDiffer = descriptionsDiffer || description != currDescription;
             titleDiffer = titleDiffer || title != currTitle;
+
             // preserve case with List to Set convertion
             auto currentSet = metadata->getKeywords().toSet();
-            commonKeywords.intersect(currentSet);
 
-            // used to detect if all items have same keywords
-            if ((currentSet.count() == firstItemKeywordsCount) &&
-                (unitedKeywords.count() <= firstItemKeywordsCount)) {
-                unitedKeywords.unite(currentSet);
-            } else {
-                anyDifferent = true;
+            if (!currentSet.isEmpty()) {
+                commonKeywords.intersect(currentSet);
+
+                // used to detect if all items have same keywords
+                if ((currentSet.count() == firstItemKeywordsCount) &&
+                    (unitedKeywords.count() <= firstItemKeywordsCount)) {
+                    unitedKeywords.unite(currentSet);
+                } else {
+                    anyDifferent = true;
+                }
             }
         });
 
