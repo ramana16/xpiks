@@ -452,7 +452,12 @@ INCLUDEPATH += ../../vendors/cpp-libface
 INCLUDEPATH += ../../vendors/ssdll/src/ssdll
 INCLUDEPATH += ../../vendors/hunspell-1.6.0/src
 
-LIBS += -L"$$PWD/../../libs/"
+CONFIG(debug, debug|release)  {
+    LIBS += -L"$$PWD/../../libs/debug"
+} else {
+    LIBS += -L"$$PWD/../../libs/release"
+}
+
 LIBS += -lhunspell
 LIBS += -lcurl
 LIBS += -lface
@@ -539,6 +544,7 @@ win32 {
 
     appveyor {
         DEFINES += WITH_LOGS
+        LIBS += -L"$$PWD/../../libs"
 
         copytranslations.commands = echo "Skip translations"
         create_ac_sources.commands = $(MKDIR) \"$$shell_path($$OUT_PWD/$$EXE_DIR/ac_sources)\"
@@ -556,6 +562,7 @@ win32 {
 
 travis-ci {
     message("for Travis CI")
+    LIBS += -L"$$PWD/../../libs"
     LIBS -= -lz
     LIBS += /usr/lib/x86_64-linux-gnu/libz.so
     DEFINES += TRAVIS_CI

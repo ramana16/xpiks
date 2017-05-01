@@ -410,7 +410,11 @@ INCLUDEPATH += ../../../vendors/cpp-libface
 INCLUDEPATH += ../../../vendors/ssdll/src/ssdll
 INCLUDEPATH += ../../../vendors/hunspell-1.6.0/src
 
-LIBS += -L"$$PWD/../../../libs/"
+CONFIG(debug, debug|release)  {
+    LIBS += -L"$$PWD/../../../libs/debug"
+} else {
+    LIBS += -L"$$PWD/../../../libs/release"
+}
 LIBS += -lhunspell
 LIBS += -lz
 LIBS += -lcurl
@@ -478,6 +482,7 @@ linux-g++-64 {
 travis-ci {
     message("for Travis CI")
     INCLUDEPATH += "../../../vendors/quazip"
+    LIBS += -L"$$PWD/../../../libs"
     LIBS -= -lz
     LIBS += /usr/lib/x86_64-linux-gnu/libz.so
     LIBS += -lexiv2
@@ -486,5 +491,5 @@ travis-ci {
 
 appveyor {
     message("for Appveyor")
-    DEFINES += APPVEYOR
+    LIBS += -L"$$PWD/../../../libs"
 }

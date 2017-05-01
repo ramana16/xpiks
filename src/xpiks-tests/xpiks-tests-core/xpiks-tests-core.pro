@@ -28,7 +28,11 @@ DEFINES += QT_NO_CAST_TO_ASCII \
            QT_RESTRICTED_CAST_FROM_ASCII \
            QT_NO_CAST_FROM_BYTEARRAY
 
-LIBS += -L"$$PWD/../../../libs/"
+CONFIG(debug, debug|release)  {
+    LIBS += -L"$$PWD/../../../libs/debug"
+} else {
+    LIBS += -L"$$PWD/../../../libs/release"
+}
 LIBS += -lhunspell
 LIBS += -lssdll
 
@@ -48,6 +52,12 @@ win32 {
 travis-ci {
     message("for Travis CI")
     DEFINES += TRAVIS_CI
+    LIBS += -L"$$PWD/../../../libs"
+}
+
+appveyor {
+    LIBS += -L"$$PWD/../../../libs"
+    DEFINES += APPVEYOR
 }
 
 linux-g++-64 {
