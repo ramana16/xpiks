@@ -368,14 +368,6 @@ static void InitUnhandledExceptionFilter()
   }
 }
 
-LONG WINAPI ExpFilter(EXCEPTION_POINTERS* pExp, DWORD dwExpCode)
-{
-  //StackWalker sw;  // output to default (Debug-Window)
-  StackWalkerToConsole sw;  // output to the console
-  sw.ShowCallstack(GetCurrentThread(), pExp->ContextRecord);
-  return EXCEPTION_EXECUTE_HANDLER;
-}
-
 #endif // Q_OS_WIN
 
 #if defined(WITH_LOGS)
@@ -392,6 +384,7 @@ int main(int argc, char *argv[]) {
 #endif
 
     std::cout << "Started integration tests" << std::endl;
+    std::cout << "Current working directory:" << QDir::currentPath().toStdString() << std::endl;
 
     // will call curl_global_init and cleanup
     Conectivity::CurlInitHelper curlInitHelper;
