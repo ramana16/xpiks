@@ -123,6 +123,13 @@ namespace Models {
         Q_INVOKABLE void saveSelectedDictionaryIndex();
 
     private:
+        void doRetrieveAllValues();
+        void doMoveSettingsFromQSettingsToJson();
+        void doResetToDefault();
+        void doSaveAllValues();
+        void afterSaveHandler();
+
+    private:
         inline void setValue(const char *key, const QJsonValue &value) {
             m_SettingsJson.insert(QLatin1String(key), value);
         }
@@ -602,6 +609,7 @@ namespace Models {
         void deserializeProxyFromSettings(const QString &serialized);
 
     private:
+        QMutex m_SettingsMutex;
         Helpers::LocalConfig m_Config;
         QJsonObject m_SettingsJson;
         QString m_ExifToolPath;

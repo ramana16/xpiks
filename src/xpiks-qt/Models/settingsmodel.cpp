@@ -226,56 +226,13 @@ namespace Models {
     void SettingsModel::moveSettingsFromQSettingsToJson() {
         LOG_DEBUG << "#";
 
-        using namespace Constants;
+        {
+            QMutexLocker locker(&m_SettingsMutex);
+            Q_UNUSED(locker);
 
-        QSettings oldSettings(QSettings::UserScope,
-                              QCoreApplication::instance()->organizationName(),
-                              QCoreApplication::instance()->applicationName());
+            doMoveSettingsFromQSettingsToJson();
+        }
 
-        moveSetting(oldSettings, PATH_TO_EXIFTOOL, pathToExifTool, QMetaType::QString);
-        moveSetting(oldSettings, SAVE_BACKUPS, saveBackups, QMetaType::QMetaType::Bool);
-        moveSetting(oldSettings, KEYWORD_SIZE_SCALE, keywordSizeScale, QMetaType::Double);
-        moveSetting(oldSettings, DISMISS_DURATION, dismissDuration, QMetaType::Int);
-        moveSetting(oldSettings, FIT_SMALL_PREVIEW, fitSmallPreview, QMetaType::Bool);
-        moveSetting(oldSettings, SEARCH_USING_AND, searchUsingAnd, QMetaType::Bool);
-        moveSetting(oldSettings, SEARCH_BY_FILEPATH, searchByFilepath, QMetaType::Bool);
-        moveSetting(oldSettings, DICT_PATH, dictPath, QMetaType::QString);
-        moveSetting(oldSettings, USER_STATISTICS, userStatistics, QMetaType::Bool);
-        moveSetting(oldSettings, CHECK_FOR_UPDATES, checkForUpdates, QMetaType::Bool);
-        moveSetting(oldSettings, NUMBER_OF_LAUNCHES, numberOfLaunches, QMetaType::Int);
-        //moveSetting(oldSettings, APP_WINDOW_WIDTH, appWindowWidth, QMetaType::Int);
-        //moveSetting(oldSettings, APP_WINDOW_HEIGHT, appWindowHeight, QMetaType::Int);
-        //moveSetting(oldSettings, APP_WINDOW_X, appWindowX, QMetaType::Int);
-        //moveSetting(oldSettings, APP_WINDOW_Y, appWindowY, QMetaType::Int);
-        moveSetting(oldSettings, AUTO_FIND_VECTORS, autoFindVectors, QMetaType::Bool);
-        moveSetting(oldSettings, USE_PROXY, useProxy, QMetaType::Bool);
-        moveProxyHostSetting(oldSettings);
-        moveSetting(oldSettings, UPLOAD_HOSTS, uploadHosts, QMetaType::QString);
-        moveSetting(oldSettings, USE_MASTER_PASSWORD, useMasterPassword, QMetaType::Bool);
-        moveSetting(oldSettings, MASTER_PASSWORD_HASH, masterPasswordHash, QMetaType::QString);
-        moveSetting(oldSettings, ONE_UPLOAD_SECONDS_TIMEMOUT, oneUploadSecondsTimeout, QMetaType::Int);
-        moveSetting(oldSettings, USE_CONFIRMATION_DIALOGS, useConfirmationDialogs, QMetaType::Bool);
-        moveSetting(oldSettings, RECENT_DIRECTORIES, recentDirectories, QMetaType::QString);
-        moveSetting(oldSettings, RECENT_FILES, recentFiles, QMetaType::QString);
-        moveSetting(oldSettings, MAX_PARALLEL_UPLOADS, maxParallelUploads, QMetaType::Int);
-        moveSetting(oldSettings, USE_SPELL_CHECK, useSpellCheck, QMetaType::Bool);
-        moveSetting(oldSettings, USER_AGENT_ID, userAgentId, QMetaType::QString);
-        moveSetting(oldSettings, INSTALLED_VERSION, installedVersion, QMetaType::Int);
-        moveSetting(oldSettings, USER_CONSENT, userConsent, QMetaType::Bool);
-        moveSetting(oldSettings, SELECTED_LOCALE, selectedLocale, QMetaType::QString);
-        moveSetting(oldSettings, SELECTED_THEME_INDEX, selectedThemeIndex, QMetaType::Int);
-        moveSetting(oldSettings, USE_AUTO_COMPLETE, useAutoComplete, QMetaType::Bool);
-        moveSetting(oldSettings, USE_EXIFTOOL, useExifTool, QMetaType::Bool);
-        moveSetting(oldSettings, CACHE_IMAGES_AUTOMATICALLY, cacheImagesAutomatically, QMetaType::Bool);
-        moveSetting(oldSettings, SCROLL_SPEED_SENSIVITY, scrollSpeedSensivity, QMetaType::Double);
-        moveSetting(oldSettings, AUTO_DOWNLOAD_UPDATES, autoDownloadUpdates, QMetaType::Bool);
-        moveSetting(oldSettings, PATH_TO_UPDATE, pathToUpdate, QMetaType::QString);
-        moveSetting(oldSettings, AVAILABLE_UPDATE_VERSION, availableUpdateVersion, QMetaType::Int);
-        moveSetting(oldSettings, ARTWORK_EDIT_RIGHT_PANE_WIDTH, artworkEditRightPaneWidth, QMetaType::Int);
-        moveSetting(oldSettings, TRANSLATOR_SELECTED_DICT_INDEX, translatorSelectedDictIndex, QMetaType::Int);
-
-        // apply imported settings
-        retrieveAllValues();
         Encryption::SecretsManager *secretsManager = m_CommandManager->getSecretsManager();
         Models::UploadInfoRepository *uploadInfoRepository = m_CommandManager->getUploadInfoRepository();
         secretsManager->setMasterPasswordHash(getMasterPasswordHash());
@@ -283,11 +240,6 @@ namespace Models {
 
         emit recentDirectoriesUpdated(getRecentDirectories());
         emit recentFilesUpdated(getRecentFiles());
-
-        setValue(settingsVersion, CURRENT_SETTINGS_VERSION);
-        sync();
-
-        wipeOldSettings(oldSettings);
     }
 
     void SettingsModel::sync() {
@@ -308,6 +260,8 @@ namespace Models {
 
     void SettingsModel::saveLocale() {
         LOG_DEBUG << "#";
+        QMutexLocker locker(&m_SettingsMutex);
+        Q_UNUSED(locker);
         setValue(Constants::selectedLocale, m_SelectedLocale);
         sync();
     }
@@ -333,65 +287,29 @@ namespace Models {
 
     void SettingsModel::resetAllValues() {
         LOG_DEBUG << "#";
-        resetToDefault();
-        saveAllValues();
+
+        {
+            QMutexLocker locker(&m_SettingsMutex);
+            Q_UNUSED(locker);
+
+            doResetToDefault();
+            doSaveAllValues();
+        }
+
         emit settingsReset();
+        afterSaveHandler();
     }
 
     void SettingsModel::saveAllValues() {
         LOG_INFO << "#";
 
-        using namespace Constants;
-
-        setValue(pathToExifTool, m_ExifToolPath);
-        setValue(dictPath, m_DictPath);
-        setValue(oneUploadSecondsTimeout, m_UploadTimeout);
-        setValue(useMasterPassword, m_MustUseMasterPassword);
-        setValue(useConfirmationDialogs, m_MustUseConfirmations);
-        setValue(saveBackups, m_SaveBackups);
-        setValue(keywordSizeScale, m_KeywordSizeScale);
-        setValue(dismissDuration, m_DismissDuration);
-        setValue(maxParallelUploads, m_MaxParallelUploads);
-        setValue(fitSmallPreview, m_FitSmallPreview);
-        setValue(searchUsingAnd, m_SearchUsingAnd);
-        setValue(searchByFilepath, m_SearchByFilepath);
-        setValue(scrollSpeedSensivity, m_ScrollSpeedScale);
-        setValue(useSpellCheck, m_UseSpellCheck);
-        setValue(userStatistics, m_UserStatistics);
-        setValue(checkForUpdates, m_CheckForUpdates);
-        setValue(autoDownloadUpdates, m_AutoDownloadUpdates);
-        setValue(autoFindVectors, m_AutoFindVectors);
-        setValue(selectedThemeIndex, m_SelectedThemeIndex);
-        setValue(useAutoComplete, m_UseAutoComplete);
-        setValue(useExifTool, m_UseExifTool);
-        setValue(useProxy, m_UseProxy);
-        setValue(proxyHost, serializeProxyForSettings(m_ProxySettings));
-        setValue(cacheImagesAutomatically, m_AutoCacheImages);
-        setValue(artworkEditRightPaneWidth, m_ArtworkEditRightPaneWidth);
-        setValue(verboseUpload, m_VerboseUpload);
-
-        if (!m_MustUseMasterPassword) {
-            setValue(masterPasswordHash, "");
+        {
+            QMutexLocker locker(&m_SettingsMutex);
+            Q_UNUSED(locker);
+            doSaveAllValues();
         }
 
-        emit keywordSizeScaleChanged(m_KeywordSizeScale);
-
-#if defined(Q_OS_LINUX)
-        if (m_DictsPathChanged) {
-            // TODO: check if need to restart depending on path
-            m_CommandManager->restartSpellChecking();
-            m_DictsPathChanged = false;
-        }
-#endif
-
-#ifdef Q_OS_MAC
-        if (m_UseExifTool) {
-            m_CommandManager->autoDiscoverExiftool();
-        }
-#endif
-
-        sync();
-        emit settingsUpdated();
+        afterSaveHandler();
     }
 
     void SettingsModel::clearMasterPasswordSettings() {
@@ -412,86 +330,17 @@ namespace Models {
     void SettingsModel::retrieveAllValues() {
         LOG_INFO << "#";
 
-        using namespace Constants;
+        QMutexLocker locker(&m_SettingsMutex);
+        Q_UNUSED(locker);
 
-        setExifToolPath(stringValue(pathToExifTool, DEFAULT_EXIFTOOL));
-        setDictionaryPath(stringValue(dictPath, DEFAULT_DICT_PATH));
-        setUploadTimeout(intValue(oneUploadSecondsTimeout, DEFAULT_UPLOAD_TIMEOUT));
-        setMustUseMasterPassword(boolValue(useMasterPassword, DEFAULT_USE_MASTERPASSWORD));
-        setMustUseConfirmations(boolValue(useConfirmationDialogs, DEFAULT_USE_CONFIRMATIONS));
-        setSaveBackups(boolValue(saveBackups, DEFAULT_SAVE_BACKUPS));
-        setKeywordSizeScale(doubleValue(keywordSizeScale, DEFAULT_KEYWORD_SIZE_SCALE));
-        setDismissDuration(intValue(dismissDuration, DEFAULT_DISMISS_DURATION));
-        setMaxParallelUploads(intValue(maxParallelUploads, DEFAULT_MAX_PARALLEL_UPLOADS));
-        setFitSmallPreview(boolValue(fitSmallPreview, DEFAULT_FIT_SMALL_PREVIEW));
-        setSearchUsingAnd(boolValue(searchUsingAnd, DEFAULT_SEARCH_USING_AND));
-        setSearchByFilepath(boolValue(searchByFilepath, DEFAULT_SEARCH_BY_FILEPATH));
-        setScrollSpeedScale(doubleValue(scrollSpeedSensivity, DEFAULT_SCROLL_SPEED_SCALE));
-        setUseSpellCheck(boolValue(useSpellCheck, DEFAULT_USE_SPELL_CHECK));
-        setUserStatistics(boolValue(userStatistics, DEFAULT_COLLECT_USER_STATISTICS));
-        setCheckForUpdates(boolValue(checkForUpdates, DEFAULT_CHECK_FOR_UPDATES));
-        setAutoDownloadUpdates(boolValue(autoDownloadUpdates, DEFAULT_AUTO_DOWNLOAD_UPDATES));
-        setAutoFindVectors(boolValue(autoFindVectors, DEFAULT_AUTO_FIND_VECTORS));
-        setSelectedLocale(stringValue(selectedLocale, DEFAULT_LOCALE));
-        setSelectedThemeIndex(intValue(selectedThemeIndex, DEFAULT_SELECTED_THEME_INDEX));
-        setUseAutoComplete(boolValue(useAutoComplete, DEFAULT_USE_AUTO_COMPLETE));
-        setUseExifTool(boolValue(useExifTool, DEFAULT_USE_EXIFTOOL));
-        setUseProxy(boolValue(useProxy, DEFAULT_USE_PROXY));
-        setVerboseUpload(boolValue(verboseUpload, DEFAULT_VERBOSE_UPLOAD));
-
-        deserializeProxyFromSettings(stringValue(proxyHost, DEFAULT_PROXY_HOST));
-
-        setAutoCacheImages(boolValue(cacheImagesAutomatically, DEFAULT_AUTO_CACHE_IMAGES));
-
-        setArtworkEditRightPaneWidth(intValue(artworkEditRightPaneWidth, DEFAULT_ARTWORK_EDIT_RIGHT_PANE_WIDTH));
-        setSelectedDictIndex(intValue(translatorSelectedDictIndex, DEFAULT_SELECTED_DICT_INDEX));
+        doRetrieveAllValues();
     }
 
     void SettingsModel::resetToDefault() {
-        LOG_INFO << "#";
-
-        setExifToolPath(DEFAULT_EXIFTOOL);
-        setDictionaryPath(DEFAULT_DICT_PATH);
-        setUploadTimeout(DEFAULT_UPLOAD_TIMEOUT);
-        setMustUseMasterPassword(DEFAULT_USE_MASTERPASSWORD);
-        setMustUseConfirmations(DEFAULT_USE_CONFIRMATIONS);
-        setSaveBackups(DEFAULT_SAVE_BACKUPS);
-        setKeywordSizeScale(DEFAULT_KEYWORD_SIZE_SCALE);
-        setDismissDuration(DEFAULT_DISMISS_DURATION);
-        setMaxParallelUploads(DEFAULT_MAX_PARALLEL_UPLOADS);
-        setFitSmallPreview(DEFAULT_FIT_SMALL_PREVIEW);
-        setSearchUsingAnd(DEFAULT_SEARCH_USING_AND);
-        setSearchByFilepath(DEFAULT_SEARCH_BY_FILEPATH);
-        setScrollSpeedScale(DEFAULT_SCROLL_SPEED_SCALE);
-        setUseSpellCheck(DEFAULT_USE_SPELL_CHECK);
-        setUserStatistics(DEFAULT_COLLECT_USER_STATISTICS);
-        setCheckForUpdates(DEFAULT_CHECK_FOR_UPDATES);
-        setAutoDownloadUpdates(DEFAULT_AUTO_DOWNLOAD_UPDATES);
-        setAutoFindVectors(DEFAULT_AUTO_FIND_VECTORS);
-        setSelectedLocale(DEFAULT_LOCALE);
-        setSelectedThemeIndex(DEFAULT_SELECTED_THEME_INDEX);
-        setUseAutoComplete(DEFAULT_USE_AUTO_COMPLETE);
-        setUseExifTool(DEFAULT_USE_EXIFTOOL);
-        setUseProxy(DEFAULT_USE_PROXY);
-        resetProxySetting();
-        setAutoCacheImages(DEFAULT_AUTO_CACHE_IMAGES);
-        setArtworkEditRightPaneWidth(DEFAULT_ARTWORK_EDIT_RIGHT_PANE_WIDTH);
-        setSelectedDictIndex(DEFAULT_SELECTED_DICT_INDEX);
-        setVerboseUpload(DEFAULT_VERBOSE_UPLOAD);
-
-#if defined(QT_DEBUG)
-        setValue(Constants::userConsent, DEFAULT_HAVE_USER_CONSENT);
-        setValue(Constants::installedVersion, 0);
-#endif
-
-        // resetting position in settings is pretty useless because
-        // we will overwrite them on Xpiks exit. But anyway for the future...
-        setValue(Constants::appWindowHeight, DEFAULT_APP_HEIGHT);
-        setValue(Constants::appWindowWidth, DEFAULT_APP_WIDTH);
-        setValue(Constants::appWindowX, DEFAULT_APP_POSITION);
-        setValue(Constants::appWindowY, DEFAULT_APP_POSITION);
-
-        sync();
+        LOG_DEBUG << "#";
+        QMutexLocker locker(&m_SettingsMutex);
+        Q_UNUSED(locker);
+        doResetToDefault();
     }
 
     int ensureInBounds(int value, int boundA, int boundB) {
@@ -568,8 +417,212 @@ namespace Models {
     }
 
     void SettingsModel::saveSelectedDictionaryIndex() {
+        QMutexLocker locker(&m_SettingsMutex);
+        Q_UNUSED(locker);
         setValue(Constants::translatorSelectedDictIndex, m_SelectedDictIndex);
         sync();
+    }
+
+    void SettingsModel::doRetrieveAllValues() {
+        using namespace Constants;
+
+        setExifToolPath(stringValue(pathToExifTool, DEFAULT_EXIFTOOL));
+        setDictionaryPath(stringValue(dictPath, DEFAULT_DICT_PATH));
+        setUploadTimeout(intValue(oneUploadSecondsTimeout, DEFAULT_UPLOAD_TIMEOUT));
+        setMustUseMasterPassword(boolValue(useMasterPassword, DEFAULT_USE_MASTERPASSWORD));
+        setMustUseConfirmations(boolValue(useConfirmationDialogs, DEFAULT_USE_CONFIRMATIONS));
+        setSaveBackups(boolValue(saveBackups, DEFAULT_SAVE_BACKUPS));
+        setKeywordSizeScale(doubleValue(keywordSizeScale, DEFAULT_KEYWORD_SIZE_SCALE));
+        setDismissDuration(intValue(dismissDuration, DEFAULT_DISMISS_DURATION));
+        setMaxParallelUploads(intValue(maxParallelUploads, DEFAULT_MAX_PARALLEL_UPLOADS));
+        setFitSmallPreview(boolValue(fitSmallPreview, DEFAULT_FIT_SMALL_PREVIEW));
+        setSearchUsingAnd(boolValue(searchUsingAnd, DEFAULT_SEARCH_USING_AND));
+        setSearchByFilepath(boolValue(searchByFilepath, DEFAULT_SEARCH_BY_FILEPATH));
+        setScrollSpeedScale(doubleValue(scrollSpeedSensivity, DEFAULT_SCROLL_SPEED_SCALE));
+        setUseSpellCheck(boolValue(useSpellCheck, DEFAULT_USE_SPELL_CHECK));
+        setUserStatistics(boolValue(userStatistics, DEFAULT_COLLECT_USER_STATISTICS));
+        setCheckForUpdates(boolValue(checkForUpdates, DEFAULT_CHECK_FOR_UPDATES));
+        setAutoDownloadUpdates(boolValue(autoDownloadUpdates, DEFAULT_AUTO_DOWNLOAD_UPDATES));
+        setAutoFindVectors(boolValue(autoFindVectors, DEFAULT_AUTO_FIND_VECTORS));
+        setSelectedLocale(stringValue(selectedLocale, DEFAULT_LOCALE));
+        setSelectedThemeIndex(intValue(selectedThemeIndex, DEFAULT_SELECTED_THEME_INDEX));
+        setUseAutoComplete(boolValue(useAutoComplete, DEFAULT_USE_AUTO_COMPLETE));
+        setUseExifTool(boolValue(useExifTool, DEFAULT_USE_EXIFTOOL));
+        setUseProxy(boolValue(useProxy, DEFAULT_USE_PROXY));
+        setVerboseUpload(boolValue(verboseUpload, DEFAULT_VERBOSE_UPLOAD));
+
+        deserializeProxyFromSettings(stringValue(proxyHost, DEFAULT_PROXY_HOST));
+
+        setAutoCacheImages(boolValue(cacheImagesAutomatically, DEFAULT_AUTO_CACHE_IMAGES));
+
+        setArtworkEditRightPaneWidth(intValue(artworkEditRightPaneWidth, DEFAULT_ARTWORK_EDIT_RIGHT_PANE_WIDTH));
+        setSelectedDictIndex(intValue(translatorSelectedDictIndex, DEFAULT_SELECTED_DICT_INDEX));
+    }
+
+    void SettingsModel::doMoveSettingsFromQSettingsToJson() {
+        LOG_DEBUG << "#";
+
+        using namespace Constants;
+
+        QSettings oldSettings(QSettings::UserScope,
+                              QCoreApplication::instance()->organizationName(),
+                              QCoreApplication::instance()->applicationName());
+
+        moveSetting(oldSettings, PATH_TO_EXIFTOOL, pathToExifTool, QMetaType::QString);
+        moveSetting(oldSettings, SAVE_BACKUPS, saveBackups, QMetaType::QMetaType::Bool);
+        moveSetting(oldSettings, KEYWORD_SIZE_SCALE, keywordSizeScale, QMetaType::Double);
+        moveSetting(oldSettings, DISMISS_DURATION, dismissDuration, QMetaType::Int);
+        moveSetting(oldSettings, FIT_SMALL_PREVIEW, fitSmallPreview, QMetaType::Bool);
+        moveSetting(oldSettings, SEARCH_USING_AND, searchUsingAnd, QMetaType::Bool);
+        moveSetting(oldSettings, SEARCH_BY_FILEPATH, searchByFilepath, QMetaType::Bool);
+        moveSetting(oldSettings, DICT_PATH, dictPath, QMetaType::QString);
+        moveSetting(oldSettings, USER_STATISTICS, userStatistics, QMetaType::Bool);
+        moveSetting(oldSettings, CHECK_FOR_UPDATES, checkForUpdates, QMetaType::Bool);
+        moveSetting(oldSettings, NUMBER_OF_LAUNCHES, numberOfLaunches, QMetaType::Int);
+        //moveSetting(oldSettings, APP_WINDOW_WIDTH, appWindowWidth, QMetaType::Int);
+        //moveSetting(oldSettings, APP_WINDOW_HEIGHT, appWindowHeight, QMetaType::Int);
+        //moveSetting(oldSettings, APP_WINDOW_X, appWindowX, QMetaType::Int);
+        //moveSetting(oldSettings, APP_WINDOW_Y, appWindowY, QMetaType::Int);
+        moveSetting(oldSettings, AUTO_FIND_VECTORS, autoFindVectors, QMetaType::Bool);
+        moveSetting(oldSettings, USE_PROXY, useProxy, QMetaType::Bool);
+        moveProxyHostSetting(oldSettings);
+        moveSetting(oldSettings, UPLOAD_HOSTS, uploadHosts, QMetaType::QString);
+        moveSetting(oldSettings, USE_MASTER_PASSWORD, useMasterPassword, QMetaType::Bool);
+        moveSetting(oldSettings, MASTER_PASSWORD_HASH, masterPasswordHash, QMetaType::QString);
+        moveSetting(oldSettings, ONE_UPLOAD_SECONDS_TIMEMOUT, oneUploadSecondsTimeout, QMetaType::Int);
+        moveSetting(oldSettings, USE_CONFIRMATION_DIALOGS, useConfirmationDialogs, QMetaType::Bool);
+        moveSetting(oldSettings, RECENT_DIRECTORIES, recentDirectories, QMetaType::QString);
+        moveSetting(oldSettings, RECENT_FILES, recentFiles, QMetaType::QString);
+        moveSetting(oldSettings, MAX_PARALLEL_UPLOADS, maxParallelUploads, QMetaType::Int);
+        moveSetting(oldSettings, USE_SPELL_CHECK, useSpellCheck, QMetaType::Bool);
+        moveSetting(oldSettings, USER_AGENT_ID, userAgentId, QMetaType::QString);
+        moveSetting(oldSettings, INSTALLED_VERSION, installedVersion, QMetaType::Int);
+        moveSetting(oldSettings, USER_CONSENT, userConsent, QMetaType::Bool);
+        moveSetting(oldSettings, SELECTED_LOCALE, selectedLocale, QMetaType::QString);
+        moveSetting(oldSettings, SELECTED_THEME_INDEX, selectedThemeIndex, QMetaType::Int);
+        moveSetting(oldSettings, USE_AUTO_COMPLETE, useAutoComplete, QMetaType::Bool);
+        moveSetting(oldSettings, USE_EXIFTOOL, useExifTool, QMetaType::Bool);
+        moveSetting(oldSettings, CACHE_IMAGES_AUTOMATICALLY, cacheImagesAutomatically, QMetaType::Bool);
+        moveSetting(oldSettings, SCROLL_SPEED_SENSIVITY, scrollSpeedSensivity, QMetaType::Double);
+        moveSetting(oldSettings, AUTO_DOWNLOAD_UPDATES, autoDownloadUpdates, QMetaType::Bool);
+        moveSetting(oldSettings, PATH_TO_UPDATE, pathToUpdate, QMetaType::QString);
+        moveSetting(oldSettings, AVAILABLE_UPDATE_VERSION, availableUpdateVersion, QMetaType::Int);
+        moveSetting(oldSettings, ARTWORK_EDIT_RIGHT_PANE_WIDTH, artworkEditRightPaneWidth, QMetaType::Int);
+        moveSetting(oldSettings, TRANSLATOR_SELECTED_DICT_INDEX, translatorSelectedDictIndex, QMetaType::Int);
+
+        // apply imported settings
+        doRetrieveAllValues();
+
+        setValue(settingsVersion, CURRENT_SETTINGS_VERSION);
+        sync();
+
+        wipeOldSettings(oldSettings);
+    }
+
+    void SettingsModel::doResetToDefault() {
+        LOG_DEBUG << "#";
+
+        setExifToolPath(DEFAULT_EXIFTOOL);
+        setDictionaryPath(DEFAULT_DICT_PATH);
+        setUploadTimeout(DEFAULT_UPLOAD_TIMEOUT);
+        setMustUseMasterPassword(DEFAULT_USE_MASTERPASSWORD);
+        setMustUseConfirmations(DEFAULT_USE_CONFIRMATIONS);
+        setSaveBackups(DEFAULT_SAVE_BACKUPS);
+        setKeywordSizeScale(DEFAULT_KEYWORD_SIZE_SCALE);
+        setDismissDuration(DEFAULT_DISMISS_DURATION);
+        setMaxParallelUploads(DEFAULT_MAX_PARALLEL_UPLOADS);
+        setFitSmallPreview(DEFAULT_FIT_SMALL_PREVIEW);
+        setSearchUsingAnd(DEFAULT_SEARCH_USING_AND);
+        setSearchByFilepath(DEFAULT_SEARCH_BY_FILEPATH);
+        setScrollSpeedScale(DEFAULT_SCROLL_SPEED_SCALE);
+        setUseSpellCheck(DEFAULT_USE_SPELL_CHECK);
+        setUserStatistics(DEFAULT_COLLECT_USER_STATISTICS);
+        setCheckForUpdates(DEFAULT_CHECK_FOR_UPDATES);
+        setAutoDownloadUpdates(DEFAULT_AUTO_DOWNLOAD_UPDATES);
+        setAutoFindVectors(DEFAULT_AUTO_FIND_VECTORS);
+        setSelectedLocale(DEFAULT_LOCALE);
+        setSelectedThemeIndex(DEFAULT_SELECTED_THEME_INDEX);
+        setUseAutoComplete(DEFAULT_USE_AUTO_COMPLETE);
+        setUseExifTool(DEFAULT_USE_EXIFTOOL);
+        setUseProxy(DEFAULT_USE_PROXY);
+        resetProxySetting();
+        setAutoCacheImages(DEFAULT_AUTO_CACHE_IMAGES);
+        setArtworkEditRightPaneWidth(DEFAULT_ARTWORK_EDIT_RIGHT_PANE_WIDTH);
+        setSelectedDictIndex(DEFAULT_SELECTED_DICT_INDEX);
+        setVerboseUpload(DEFAULT_VERBOSE_UPLOAD);
+
+#if defined(QT_DEBUG)
+        setValue(Constants::userConsent, DEFAULT_HAVE_USER_CONSENT);
+        setValue(Constants::installedVersion, 0);
+#endif
+
+        // resetting position in settings is pretty useless because
+        // we will overwrite them on Xpiks exit. But anyway for the future...
+        setValue(Constants::appWindowHeight, DEFAULT_APP_HEIGHT);
+        setValue(Constants::appWindowWidth, DEFAULT_APP_WIDTH);
+        setValue(Constants::appWindowX, DEFAULT_APP_POSITION);
+        setValue(Constants::appWindowY, DEFAULT_APP_POSITION);
+
+        sync();
+    }
+
+    void SettingsModel::doSaveAllValues() {
+        LOG_DEBUG << "#";
+        using namespace Constants;
+
+        setValue(pathToExifTool, m_ExifToolPath);
+        setValue(dictPath, m_DictPath);
+        setValue(oneUploadSecondsTimeout, m_UploadTimeout);
+        setValue(useMasterPassword, m_MustUseMasterPassword);
+        setValue(useConfirmationDialogs, m_MustUseConfirmations);
+        setValue(saveBackups, m_SaveBackups);
+        setValue(keywordSizeScale, m_KeywordSizeScale);
+        setValue(dismissDuration, m_DismissDuration);
+        setValue(maxParallelUploads, m_MaxParallelUploads);
+        setValue(fitSmallPreview, m_FitSmallPreview);
+        setValue(searchUsingAnd, m_SearchUsingAnd);
+        setValue(searchByFilepath, m_SearchByFilepath);
+        setValue(scrollSpeedSensivity, m_ScrollSpeedScale);
+        setValue(useSpellCheck, m_UseSpellCheck);
+        setValue(userStatistics, m_UserStatistics);
+        setValue(checkForUpdates, m_CheckForUpdates);
+        setValue(autoDownloadUpdates, m_AutoDownloadUpdates);
+        setValue(autoFindVectors, m_AutoFindVectors);
+        setValue(selectedThemeIndex, m_SelectedThemeIndex);
+        setValue(useAutoComplete, m_UseAutoComplete);
+        setValue(useExifTool, m_UseExifTool);
+        setValue(useProxy, m_UseProxy);
+        setValue(proxyHost, serializeProxyForSettings(m_ProxySettings));
+        setValue(cacheImagesAutomatically, m_AutoCacheImages);
+        setValue(artworkEditRightPaneWidth, m_ArtworkEditRightPaneWidth);
+        setValue(verboseUpload, m_VerboseUpload);
+
+        if (!m_MustUseMasterPassword) {
+            setValue(masterPasswordHash, "");
+        }
+
+        sync();
+    }
+
+    void SettingsModel::afterSaveHandler() {
+        LOG_DEBUG << "#";
+
+#if defined(Q_OS_LINUX)
+        if (m_DictsPathChanged) {
+            // TODO: check if need to restart depending on path
+            m_CommandManager->restartSpellChecking();
+            m_DictsPathChanged = false;
+        }
+#endif
+
+#ifdef Q_OS_MAC
+        if (m_UseExifTool) {
+            m_CommandManager->autoDiscoverExiftool();
+        }
+#endif
+
+        emit keywordSizeScaleChanged(m_KeywordSizeScale);
+        emit settingsUpdated();
     }
 
     QString SettingsModel::getWhatsNewText() const {
