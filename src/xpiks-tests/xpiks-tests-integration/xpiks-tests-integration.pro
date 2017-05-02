@@ -499,6 +499,6 @@ travis-ci {
 
 appveyor {
     message("for Appveyor")
-    DEFINES += APPVEYOR
+    #DEFINES += APPVEYOR
     LIBS += -L"$$PWD/../../../libs"
 }
