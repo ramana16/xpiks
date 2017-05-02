@@ -113,8 +113,12 @@ test_script:
       {
           & cmd /c '%configuration%\xpiks-tests-integration.exe 2>&1 && exit 0 || exit 1'
           $testsExitCode = $LastExitCode
-          Write-Host $testsExitCode
           Get-ChildItem .\*.dmp | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
-          exit $testsExitCode
+          if ($testsExitCode -eq 0) {
+              Write-Output "Tests Succeeded"
+          } else {
+              Write-Output "Tests Failed!"
+              exit $testsExitCode
+          }
       }
       
