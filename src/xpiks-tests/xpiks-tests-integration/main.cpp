@@ -390,7 +390,7 @@ int main(int argc, char *argv[]) {
 #endif
 
     std::cout << "Started integration tests" << std::endl;
-    std::cout << "Current working directory:" << QDir::currentPath().toStdString() << std::endl;
+    std::cout << "Current working directory: " << QDir::currentPath().toStdString() << std::endl;
 
     // will call curl_global_init and cleanup
     Conectivity::CurlInitHelper curlInitHelper;
@@ -593,10 +593,9 @@ int main(int argc, char *argv[]) {
 
     qDeleteAll(integrationTests);
 
-    commandManager.beforeDestructionCallback();
-
     qInfo() << "--------------------------";
     qInfo() << "Integration Tests Results:" << succeededTestsCount << "succeeded," << failedTestsCount << "failed";
+    qInfo() << "Tests return code" << result;
 
     if (!failedTests.empty()) {
         qInfo() << "FAILED TESTS:" << failedTests.join(", ");
@@ -604,10 +603,14 @@ int main(int argc, char *argv[]) {
 
     qInfo() << "--------------------------";
 
+    commandManager.beforeDestructionCallback();
+
     // for the logs to appear
     app.processEvents();
 
     QThread::sleep(1);
+
+    std::cout << "Integration tests finished" << std::endl;
 
     return result;
 }
