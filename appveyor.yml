@@ -111,9 +111,8 @@ test_script:
   - ps: |
       if (Test-Path env:INTEGRATION_TESTS)
       {
-          & $env:configuration\xpiks-tests-integration.exe *>&1 | %{ "$_" }
+          & cmd /c '%configuration%\xpiks-tests-integration.exe *>&1'
           $testsExitCode = $lastexitcode
-          Write-Host $testsExitCode
           Get-ChildItem .\*.dmp | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
           exit $testsExitCode
       }
