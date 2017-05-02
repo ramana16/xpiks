@@ -36,8 +36,6 @@ Item {
     anchors.fill: parent
 
     property variant componentParent
-    signal dialogDestruction();
-    Component.onDestruction: dialogDestruction();
 
     Component.onCompleted: {
     }
