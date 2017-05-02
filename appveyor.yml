@@ -114,6 +114,8 @@ test_script:
       if (Test-Path env:INTEGRATION_TESTS)
       {
           & $env:configuration\xpiks-tests-integration.exe
+          $testsExitCode = $lastexitcode
           Get-ChildItem .\*.dmp | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
+          exit $testsExitCode
       }
       
