@@ -113,7 +113,7 @@ test_script:
   - ps: |
       if (Test-Path env:INTEGRATION_TESTS)
       {
-          $env:configuration\xpiks-tests-integration.exe
+          & $env:configuration\xpiks-tests-integration.exe
           Get-ChildItem .\*.dmp | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
       }
       
