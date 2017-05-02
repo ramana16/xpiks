@@ -26,7 +26,7 @@ popd
 
 echo "Copying libraries..."
 
-LIBS_PATH="../../libs"
+LIBS_PATH="../../libs/release"
 
 cp "$LIBS_PATH/libssdll.1.0.0.dylib" "$BUILD_DIR/xpiks-qt.app/Contents/Frameworks/"
 cp "$LIBS_PATH/libface.1.0.0.dylib" "$BUILD_DIR/xpiks-qt.app/Contents/Frameworks/"
