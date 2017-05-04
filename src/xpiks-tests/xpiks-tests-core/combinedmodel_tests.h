@@ -13,6 +13,8 @@ private slots:
     void trivialCombineNoItemsTest();
     void trivialcombineOneItemTest();
     void combineSeveralSameItemsTest();
+    void combineSeveralWithEmptyFirstTest();
+    void combineSeveralWithEmptyManyTest();
     void combineSeveralWithEmptyTest();
     void combineAllDifferentItemsTest();
     void combineAllManyDifferentItemsTest();
