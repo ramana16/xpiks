@@ -427,8 +427,8 @@ namespace Models {
                 }
             }
 
-            bool shouldBreak = found;
-            return shouldBreak;
+            bool shouldContinue = !found;
+            return shouldContinue;
         });
 
         if (found) {

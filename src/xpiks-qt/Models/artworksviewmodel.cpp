@@ -140,13 +140,13 @@ namespace Models {
                                             std::function<bool (int, ArtworkMetadata *)> action) const {
         LOG_DEBUG << "#";
         int index = 0;
-        bool shouldBreak = false;
+        bool canContinue = false;
 
         for (auto &item: m_ArtworksList) {
             if (pred(item)) {
-                shouldBreak = action(index, item.getOrigin());
+                canContinue = action(index, item.getOrigin());
 
-                if (shouldBreak) { break; }
+                if (!canContinue) { break; }
             }
 
             index++;
