@@ -11,11 +11,12 @@ class CombinedModelTests : public QObject {
 private slots:
     void initTestCase();
     void trivialCombineNoItemsTest();
-    void trivialcombineOneItemTest();
+    void trivialCombineOneItemTest();
     void combineSeveralSameItemsTest();
     void combineSeveralWithEmptyFirstTest();
     void combineSeveralWithEmptyManyTest();
     void combineSeveralWithEmptyTest();
+    void combineSeveralEmptyTest();
     void combineAllDifferentItemsTest();
     void combineAllManyDifferentItemsTest();
     void combineAllManyLastDifferentItemsTest();

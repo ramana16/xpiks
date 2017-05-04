@@ -50,7 +50,7 @@ void CombinedModelTests::trivialCombineNoItemsTest() {
     QCOMPARE(combinedModel.getChangeKeywords(), true);
 }
 
-void CombinedModelTests::trivialcombineOneItemTest() {
+void CombinedModelTests::trivialCombineOneItemTest() {
     Models::CombinedArtworksModel combinedModel;
     combinedModel.setCommandManager(&m_CommandManagerMock);
 
@@ -168,6 +168,31 @@ void CombinedModelTests::combineSeveralWithEmptyTest() {
     QVERIFY(combinedModel.getTitle().isEmpty());
     QCOMPARE(combinedModel.getKeywordsCount(), 1);
     QCOMPARE(combinedModel.getKeywords()[0], commonKeyword);
+    QCOMPARE(combinedModel.areKeywordsModified(), false);
+
+    freeArtworks(items);
+}
+
+void CombinedModelTests::combineSeveralEmptyTest() {
+    Models::CombinedArtworksModel combinedModel;
+    combinedModel.setCommandManager(&m_CommandManagerMock);
+
+    const QString title = "title";
+    const QString description = "description";
+
+    std::vector<Models::MetadataElement> items;
+    items.push_back(createArtworkMetadata(description, title, QStringList(), 0));
+    items.push_back(createArtworkMetadata("", "", QStringList(), 1));
+    items.push_back(createArtworkMetadata("", "", QStringList(), 2);
+
+    int size = (int)items.size();
+
+    combinedModel.setArtworks(items);
+
+    QCOMPARE(combinedModel.getArtworksCount(), size);
+    QCOMPARE(combinedModel.getTitle(), title);
+    QCOMPARE(combinedModel.getDescription(), description);
+    QCOMPARE(combinedModel.getKeywordsCount(), 0);
     QCOMPARE(combinedModel.areKeywordsModified(), false);
 
     freeArtworks(items);
