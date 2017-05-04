@@ -136,6 +136,23 @@ namespace Models {
         }
     }
 
+    void ArtworksViewModel::processArtworksEx(std::function<bool (const MetadataElement &)> pred,
+                                            std::function<bool (int, ArtworkMetadata *)> action) const {
+        LOG_DEBUG << "#";
+        int index = 0;
+        bool shouldBreak = false;
+
+        for (auto &item: m_ArtworksList) {
+            if (pred(item)) {
+                shouldBreak = action(index, item.getOrigin());
+
+                if (shouldBreak) { break; }
+            }
+
+            index++;
+        }
+    }
+
     int ArtworksViewModel::rowCount(const QModelIndex &parent) const {
         Q_UNUSED(parent);
         return (int)m_ArtworksList.size();

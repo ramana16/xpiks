@@ -70,6 +70,8 @@ namespace Models {
         virtual void doResetModel();
         void processArtworks(std::function<bool (const MetadataElement &)> pred,
                              std::function<void (int, ArtworkMetadata *)> action) const;
+        void processArtworksEx(std::function<bool (const MetadataElement &)> pred,
+                             std::function<bool (int, ArtworkMetadata *)> action) const;
 
 #ifdef CORE_TESTS
     public:

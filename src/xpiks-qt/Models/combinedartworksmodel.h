@@ -194,6 +194,7 @@ namespace Models {
         void assignFromOneArtwork();
         void assignFromManyArtworks();
         void recombineArtworks(std::function<bool (const MetadataElement &)> pred);
+        bool findNonEmptyData(std::function<bool (const MetadataElement &)> pred, int &index, ArtworkMetadata *&artworkMetadata);
 
     public slots:
         void spellCheckErrorsChangedHandler();
