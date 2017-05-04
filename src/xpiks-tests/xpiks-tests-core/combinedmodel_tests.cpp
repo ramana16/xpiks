@@ -183,7 +183,7 @@ void CombinedModelTests::combineSeveralEmptyTest() {
     std::vector<Models::MetadataElement> items;
     items.push_back(createArtworkMetadata(description, title, QStringList(), 0));
     items.push_back(createArtworkMetadata("", "", QStringList(), 1));
-    items.push_back(createArtworkMetadata("", "", QStringList(), 2);
+    items.push_back(createArtworkMetadata("", "", QStringList(), 2));
 
     int size = (int)items.size();
 
