@@ -362,8 +362,8 @@ namespace Models {
 
             QString currDescription = metadata->getDescription();
             QString currTitle = metadata->getTitle();
-            descriptionsDiffer = descriptionsDiffer || description != currDescription;
-            titleDiffer = titleDiffer || title != currTitle;
+            descriptionsDiffer = descriptionsDiffer || ((!currDescription.isEmpty()) && (description != currDescription));
+            titleDiffer = titleDiffer || ((!currTitle.isEmpty()) && (title != currTitle));
 
             // preserve case with List to Set convertion
             auto currentSet = metadata->getKeywords().toSet();
@@ -435,7 +435,7 @@ namespace Models {
             LOG_INFO << "Found artwork with non-empty keywords at" << nonEmptyKeywordsIndex;
             artworkMetadata = nonEmptyKeywordsMetadata;
             index = nonEmptyKeywordsIndex;
-        } else if (foundOther){
+        } else if (foundOther) {
             LOG_INFO << "Found artwork with non-empty other data at" << nonEmptyOtherIndex;
             artworkMetadata = nonEmptyOtherMetadata;
             index = nonEmptyOtherIndex;
