@@ -405,16 +405,26 @@ namespace Models {
     }
 
     bool CombinedArtworksModel::findNonEmptyData(std::function<bool (const MetadataElement &)> pred, int &index,  ArtworkMetadata *&artworkMetadata) {
-        bool found = false;
-        int nonEmptyIndex = -1;
-        ArtworkMetadata *nonEmptyMetadata = nullptr;
+        bool found = false, foundOther = false;
+        int nonEmptyKeywordsIndex = -1, nonEmptyOtherIndex = -1;
+        ArtworkMetadata *nonEmptyKeywordsMetadata = nullptr;
+        ArtworkMetadata *nonEmptyOtherMetadata = nullptr;
 
-        processArtworks(pred,
+        processArtworksEx(pred,
                         [&](int index, ArtworkMetadata *metadata) -> bool {
             if (!metadata->areKeywordsEmpty()) {
-                nonEmptyMetadata = metadata;
-                nonEmptyIndex = index;
+                nonEmptyKeywordsIndex = index;
+                nonEmptyKeywordsMetadata = metadata;
                 found = true;
+            } else {
+                if (!foundOther) {
+                    if (!metadata->getDescription().trimmed().isEmpty() ||
+                            !metadata->getTitle().trimmed().isEmpty()) {
+                        nonEmptyOtherIndex = index;
+                        nonEmptyOtherMetadata = metadata;
+                        foundOther = true;
+                    }
+                }
             }
 
             bool shouldBreak = found;
@@ -422,12 +432,18 @@ namespace Models {
         });
 
         if (found) {
-            LOG_INFO << "Found artwork with non-empty keywords at" << nonEmptyIndex;
-            artworkMetadata = nonEmptyMetadata;
-            index = nonEmptyIndex;
+            LOG_INFO << "Found artwork with non-empty keywords at" << nonEmptyKeywordsIndex;
+            artworkMetadata = nonEmptyKeywordsMetadata;
+            index = nonEmptyKeywordsIndex;
+        } else if (foundOther){
+            LOG_INFO << "Found artwork with non-empty other data at" << nonEmptyOtherIndex;
+            artworkMetadata = nonEmptyOtherMetadata;
+            index = nonEmptyOtherIndex;
+        } else {
+            LOG_WARNING << "All artworks seem to be blank";
         }
 
-        return found;
+        return found || foundOther;
     }
 
     void CombinedArtworksModel::spellCheckErrorsChangedHandler() {
