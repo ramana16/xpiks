@@ -47,7 +47,8 @@ ApplicationWindow {
     property bool needToCenter: true
     property bool listLayout: true
     property var spellCheckService: helpersWrapper.getSpellCheckerService()
-    property bool leftSideCollapsed: false
+    property bool leftSideCollapsed: false    
+    property bool actionsEnabled: mainStackView.areActionsAllowed && (openedDialogsCount == 0)
 
     onVisibleChanged: {
         if (needToCenter) {
