@@ -6,6 +6,8 @@ APPDIR_NAME="Xpiks"
 
 STAGING_DIR="./linux_deploy"
 
+DEPLOY_TOOL=linuxdeployqt
+
 echo "------------------------------"
 
 # clear out any old data
@@ -22,25 +24,43 @@ cp -v ./$APP_NAME $STAGING_DIR/
 
 cp -v -r ../xpiks-qt/deps/* $STAGING_DIR/
 rm -v $STAGING_DIR/translations/*.ts
-cp -v ../xpiks-qt/debian/xpiks.desktop $STAGING_DIR
+#cp -v ../xpiks-qt/debian/xpiks.desktop $STAGING_DIR
 cp -v ../xpiks-qt/debian/xpiks.png $STAGING_DIR
+
+cat << EOF > "$STAGING_DIR/$APP_NAME.desktop"
+[Desktop Entry]
+Type=Application
+Name=$APP_NAME
+GenericName=Xpiks
+Exec=./AppRun %F
+Icon=xpiks
+Comment=Cross-platform (X) Photo Keywording Software
+Terminal=true
+StartupNotify=true
+Encoding=UTF-8
+Categories=Graphics;Photography;
+EOF
+
+chmod +x "$STAGING_DIR/$APP_NAME.desktop"
 
 pushd $STAGING_DIR
 
 echo "Working in directory: $(pwd)"
 
-LD_LIBRARY_PATH=../../../libs/release:$LD_LIBRARY_PATH linuxdeployqt $APP_NAME -executable=$APP_NAME -verbose=3 -bundle-non-qt-libs -qmldir=../../ -qmldir=../../Components/ -qmldir=../../Constants/ -qmldir=../../Dialogs/ -qmldir=../../StyledControls/ -qmldir=../../StackViews/ -qmldir=../../CollapserTabs/
+DEPLOY_COMMAND="$DEPLOY_TOOL $APP_NAME -verbose=3 -bundle-non-qt-libs -no-strip -qmldir=../../ -qmldir=../../Components/ -qmldir=../../Constants/ -qmldir=../../Dialogs/ -qmldir=../../StyledControls/ -qmldir=../../StackViews/ -qmldir=../../CollapserTabs/"
+
+LD_LIBRARY_PATH=../../../libs/release:$LD_LIBRARY_PATH $DEPLOY_COMMAND
 
 APP_IMG_LIB_PATH=./lib
 
-cp -v --preserve=links --no-dereference ../../../libs/release/* $APP_IMG_LIB_PATH/
+#cp -v --preserve=links --no-dereference ../../../libs/release/* $APP_IMG_LIB_PATH/
 
 # The following are assumed to be part of the base system
 
 rm -f $APP_IMG_LIB_PATH/libcom_err.so.2 || true
 rm -f $APP_IMG_LIB_PATH/libcrypt.so.1 || true
 rm -f $APP_IMG_LIB_PATH/libdl.so.2 || true
-rm -f $APP_IMG_LIB_PATH/libexpat.so.1 || true
+# rm -f $APP_IMG_LIB_PATH/libexpat.so.1 || true # needed for xpiks
 rm -f $APP_IMG_LIB_PATH/libfontconfig.so.1 || true
 rm -f $APP_IMG_LIB_PATH/libgcc_s.so.1 || true
 rm -f $APP_IMG_LIB_PATH/libglib-2.0.so.0 || true
@@ -77,18 +97,17 @@ rm -f $APP_IMG_LIB_PATH/libz.so.1 || true
 # Delete potentially dangerous libraries
 rm -f $APP_IMG_LIB_PATH/libstdc* $APP_IMG_LIB_PATH/libgobject* $APP_IMG_LIB_PATH/libc.so.* || true
 
-rm -f ./usr/lib/libdbus-1.so.3 || true
+rm -f $APP_IMG_LIB_PATH/libdbus-1.so.3 || true
 
 # Fix the "libGL error" messages
-rm -f usr/lib/libGL.so.* || true
-rm -f usr/lib/libdrm.so.* || true
+rm -f $APP_IMG_LIB_PATH/libGL.so.* || true
+rm -f $APP_IMG_LIB_PATH/libdrm.so.* || true
 
-echo -e "\n\n"
-echo "------------------------------"
+echo -e "\n\n------------------------------"
 echo "Generating AppImage"
-echo "------------------------------"
+echo -e "------------------------------\n\n"
 
-LD_LIBRARY_PATH=../../../libs/release:$LD_LIBRARY_PATH linuxdeployqt $APP_NAME -executable=$APP_NAME -verbose=0 -bundle-non-qt-libs -qmldir=../../ -qmldir=../../Components/ -qmldir=../../Constants/ -qmldir=../../Dialogs/ -qmldir=../../StyledControls/ -qmldir=../../StackViews/ -qmldir=../../CollapserTabs/ -appimage
+LD_LIBRARY_PATH=../../../libs/release:$LD_LIBRARY_PATH $DEPLOY_COMMAND -appimage
 
 popd
 # staging
