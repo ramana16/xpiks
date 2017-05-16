@@ -12,7 +12,7 @@ echo "------------------------------"
 echo "Clear old data"
 rm -v -rf "${STAGING_DIR}"
 
-export PATH=¨~/bin:~/Qt5.6.2/5.6/gcc_64/bin:$PATH¨
+export PATH="~/bin:~/Qt5.6.2/5.6/gcc_64/bin:${PATH}"
 
 pushd ../build-xpiks-qt-*Release
 
@@ -27,7 +27,7 @@ cp -v ../xpiks-qt/debian/xpiks.png $STAGING_DIR
 
 pushd $STAGING_DIR
 
-echo ¨Working in directory: $(pwd)¨
+echo "Working in directory: $(pwd)"
 
 LD_LIBRARY_PATH=../../../libs/release:$LD_LIBRARY_PATH linuxdeployqt $APP_NAME -executable=$APP_NAME -verbose=3 -bundle-non-qt-libs -qmldir=../../ -qmldir=../../Components/ -qmldir=../../Constants/ -qmldir=../../Dialogs/ -qmldir=../../StyledControls/ -qmldir=../../StackViews/ -qmldir=../../CollapserTabs/
 
