@@ -10,13 +10,13 @@ DEPLOY_TOOL=linuxdeployqt
 
 echo "------------------------------"
 
+pushd ../build-xpiks-qt-*Release
+
 # clear out any old data
 echo "Wiping old data"
 rm -v -rf "${STAGING_DIR}"
 
 export PATH=~/bin:~/Qt5.6.2/5.6/gcc_64/bin:$PATH
-
-pushd ../build-xpiks-qt-*Release
 
 mkdir -p $STAGING_DIR
 
