@@ -6,11 +6,13 @@ APPDIR_NAME="Xpiks"
 
 STAGING_DIR="./linux_deploy"
 
+APP_PROFILE=Debug
+LIBS_PROFILE=debug
 DEPLOY_TOOL=linuxdeployqt
 
 echo "------------------------------"
 
-pushd ../build-xpiks-qt-*Release
+pushd ../build-xpiks-qt-*${APP_PROFILE}
 
 # clear out any old data
 echo "Wiping old data"
@@ -49,11 +51,11 @@ echo "Working in directory: $(pwd)"
 
 DEPLOY_COMMAND="$DEPLOY_TOOL $APP_NAME -verbose=3 -bundle-non-qt-libs -no-strip -qmldir=../../ -qmldir=../../Components/ -qmldir=../../Constants/ -qmldir=../../Dialogs/ -qmldir=../../StyledControls/ -qmldir=../../StackViews/ -qmldir=../../CollapserTabs/"
 
-LD_LIBRARY_PATH=../../../libs/release:$LD_LIBRARY_PATH $DEPLOY_COMMAND
+LD_LIBRARY_PATH=../../../libs/$LIBS_PROFILE:$LD_LIBRARY_PATH $DEPLOY_COMMAND
 
 APP_IMG_LIB_PATH=./lib
 
-#cp -v --preserve=links --no-dereference ../../../libs/release/* $APP_IMG_LIB_PATH/
+cp -v --preserve=links --no-dereference ../../../libs/release/* $APP_IMG_LIB_PATH/
 
 # The following are assumed to be part of the base system
 
@@ -107,7 +109,7 @@ echo -e "\n\n------------------------------"
 echo "Generating AppImage"
 echo -e "------------------------------\n\n"
 
-LD_LIBRARY_PATH=../../../libs/release:$LD_LIBRARY_PATH $DEPLOY_COMMAND -appimage
+LD_LIBRARY_PATH=../../../libs/$LIBS_PROFILE:$LD_LIBRARY_PATH $DEPLOY_COMMAND -appimage
 
 popd
 # staging
