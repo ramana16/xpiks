@@ -6,8 +6,8 @@ APPDIR_NAME="Xpiks"
 
 STAGING_DIR="./linux_deploy"
 
-APP_PROFILE=Debug
-LIBS_PROFILE=debug
+APP_PROFILE=Release
+LIBS_PROFILE=release
 DEPLOY_TOOL=linuxdeployqt
 
 echo "------------------------------"
@@ -25,7 +25,7 @@ mkdir -p $STAGING_DIR
 cp -v ./$APP_NAME $STAGING_DIR/
 
 cp -v -r ../xpiks-qt/deps/* $STAGING_DIR/
-rm -v $STAGING_DIR/translations/*.ts
+cp -v $STAGING_DIR/translations/xpiks*.ts
 #cp -v ../xpiks-qt/debian/xpiks.desktop $STAGING_DIR
 cp -v ../xpiks-qt/debian/xpiks.png $STAGING_DIR
 
