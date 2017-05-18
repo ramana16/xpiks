@@ -25,7 +25,9 @@ mkdir -p $STAGING_DIR
 cp -v ./$APP_NAME $STAGING_DIR/
 
 cp -v -r ../xpiks-qt/deps/* $STAGING_DIR/
-cp -v -r ../xpiks-qt/translations $STAGING_DIR/
+# remove string files, keep .qm files
+rm -v $STAGING_DIR/translations/*.ts
+# do not copy .desktop file, autogenerate one
 #cp -v ../xpiks-qt/debian/xpiks.desktop $STAGING_DIR
 cp -v ../xpiks-qt/debian/xpiks.png $STAGING_DIR
 
