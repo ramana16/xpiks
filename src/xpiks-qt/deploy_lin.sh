@@ -4,11 +4,12 @@ APP_NAME=xpiks-qt
 VERSION="1.4.2"
 APPDIR_NAME="Xpiks"
 
-STAGING_DIR="./linux_deploy"
+STAGING_DIR="./xpiks-qt.AppDir"
+
+DEPLOY_TOOL=linuxdeployqt
 
 APP_PROFILE=Release
 LIBS_PROFILE=release
-DEPLOY_TOOL=linuxdeployqt
 
 echo "------------------------------"
 
@@ -18,16 +19,14 @@ pushd ../build-xpiks-qt-*${APP_PROFILE}
 echo "Wiping old data"
 rm -v -rf "${STAGING_DIR}"
 
-export PATH=~/bin:~/Qt5.6.2/5.6/gcc_64/bin:$PATH
-
 mkdir -p $STAGING_DIR
+
+export PATH=~/bin:~/Qt5.6.2/5.6/gcc_64/bin:$PATH
 
 cp -v ./$APP_NAME $STAGING_DIR/
 
 cp -v -r ../xpiks-qt/deps/* $STAGING_DIR/
-# remove string files, keep .qm files
 rm -v $STAGING_DIR/translations/*.ts
-# do not copy .desktop file, autogenerate one
 #cp -v ../xpiks-qt/debian/xpiks.desktop $STAGING_DIR
 cp -v ../xpiks-qt/debian/xpiks.png $STAGING_DIR
 
@@ -47,17 +46,20 @@ EOF
 
 chmod +x "$STAGING_DIR/$APP_NAME.desktop"
 
-pushd $STAGING_DIR
+mkdir $STAGING_DIR/ac_sources
+mv $STAGING_DIR/en_wordlist.tsv $STAGING_DIR/ac_sources/
 
 echo "Working in directory: $(pwd)"
 
-DEPLOY_COMMAND="$DEPLOY_TOOL $APP_NAME -verbose=3 -bundle-non-qt-libs -no-strip -qmldir=../../ -qmldir=../../Components/ -qmldir=../../Constants/ -qmldir=../../Dialogs/ -qmldir=../../StyledControls/ -qmldir=../../StackViews/ -qmldir=../../CollapserTabs/"
+SRC_ROOT=../xpiks-qt/
 
-LD_LIBRARY_PATH=../../../libs/$LIBS_PROFILE:$LD_LIBRARY_PATH $DEPLOY_COMMAND
+DEPLOY_COMMAND="$DEPLOY_TOOL $STAGING_DIR/$APP_NAME -verbose=3 -no-strip -qmldir=$SRC_ROOT -qmldir=$SRC_ROOT/Components/ -qmldir=$SRC_ROOT/Constants/ -qmldir=$SRC_ROOT/Dialogs/ -qmldir=$SRC_ROOT/StyledControls/ -qmldir=$SRC_ROOT/StackViews/ -qmldir=$SRC_ROOT/CollapserTabs/"
 
-APP_IMG_LIB_PATH=./lib
+LD_LIBRARY_PATH=../../libs/$LIBS_PROFILE:$LD_LIBRARY_PATH $DEPLOY_COMMAND -bundle-non-qt-libs 
 
-cp -v --preserve=links --no-dereference ../../../libs/release/* $APP_IMG_LIB_PATH/
+APP_IMG_LIB_PATH=$STAGING_DIR/lib
+
+cp -v --preserve=links --no-dereference ../../libs/$LIBS_PROFILE/* $APP_IMG_LIB_PATH/
 
 # The following are assumed to be part of the base system
 
@@ -111,10 +113,9 @@ echo -e "\n\n------------------------------"
 echo "Generating AppImage"
 echo -e "------------------------------\n\n"
 
-LD_LIBRARY_PATH=../../../libs/$LIBS_PROFILE:$LD_LIBRARY_PATH $DEPLOY_COMMAND -appimage
+rm -v *.AppImage
 
-popd
-# staging
+LD_LIBRARY_PATH=../../libs/$LIBS_PROFILE:$LD_LIBRARY_PATH $DEPLOY_COMMAND -appimage
 
 popd
 # build-Release
