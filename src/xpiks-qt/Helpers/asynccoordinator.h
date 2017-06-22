@@ -67,7 +67,6 @@ namespace Helpers {
         AsyncCoordinatorStartParams(AsyncCoordinator *coordinator):
             m_Coordinator(coordinator)
         {
-            Q_ASSERT(m_Coordinator != nullptr);
         }
 
     public:
@@ -79,12 +78,35 @@ namespace Helpers {
         AsyncCoordinatorLocker(AsyncCoordinator *coordinator):
             m_Coordinator(coordinator)
         {
-            Q_ASSERT(m_Coordinator != nullptr);
-            m_Coordinator->aboutToBegin();
+            if (m_Coordinator != nullptr) {
+                m_Coordinator->aboutToBegin();
+            }
         }
 
         virtual ~AsyncCoordinatorLocker() {
-            m_Coordinator->justEnded();
+            // if (m_Coordinator != nullptr) {
+            //     m_Coordinator.justEnded();
+            // }
+        }
+
+    private:
+        AsyncCoordinator *m_Coordinator;
+    };
+
+    class AsyncCoordinatorUnlocker {
+    public:
+        AsyncCoordinatorUnlocker(AsyncCoordinator *coordinator):
+            m_Coordinator(coordinator)
+        {
+            // if (m_Coordinator != nullptr) {
+            //     m_Coordinator.aboutToBegin();
+            // }
+        }
+
+        virtual ~AsyncCoordinatorUnlocker() {
+            if (m_Coordinator != nullptr) {
+                m_Coordinator->justEnded();
+            }
         }
 
     private:

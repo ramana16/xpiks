@@ -43,7 +43,11 @@ namespace SpellCheck {
             return;
         }
 
-        m_SpellCheckWorker = new SpellCheckWorker(m_SettingsModel);
+        auto coordinatorParams = std::dynamic_pointer_cast<Helpers::AsyncCoordinatorStartParams>(params);
+        Q_ASSERT(coordinatorParams != nullptr);
+        m_SpellCheckWorker = new SpellCheckWorker(coordinatorParams->m_Coordinator, m_SettingsModel);
+        Helpers::AsyncCoordinatorLocker locker(coordinatorParams->m_Coordinator);
+        Q_UNUSED(locker);
 
         QThread *thread = new QThread();
         m_SpellCheckWorker->moveToThread(thread);

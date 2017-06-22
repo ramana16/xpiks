@@ -33,6 +33,7 @@
 #include "../Common/defines.h"
 #include "../Helpers/constants.h"
 #include "imagecacherequest.h"
+#include "../Helpers/asynccoordinator.h"
 
 namespace QMLExtensions {
     QString getPathHash(const QString &path) {
@@ -49,8 +50,9 @@ namespace QMLExtensions {
         return in;
     }
 
-    ImageCachingWorker::ImageCachingWorker(QObject *parent):
+    ImageCachingWorker::ImageCachingWorker(Helpers::AsyncCoordinator *initCoordinator, QObject *parent):
         QObject(parent),
+        m_InitCoordinator(initCoordinator),
         m_ProcessedItemsCount(0),
         m_Scale(1.0)
     {
@@ -58,6 +60,9 @@ namespace QMLExtensions {
 
     bool ImageCachingWorker::initWorker() {
         LOG_DEBUG << "#";
+
+        Helpers::AsyncCoordinatorUnlocker unlocker(m_InitCoordinator);
+        Q_UNUSED(unlocker);
 
         m_ProcessedItemsCount = 0;
         QString appDataPath = XPIKS_USERDATA_PATH;

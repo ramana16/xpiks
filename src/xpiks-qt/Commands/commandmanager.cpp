@@ -65,6 +65,7 @@
 #include "../QuickBuffer/currenteditableartwork.h"
 #include "../QuickBuffer/currenteditableproxyartwork.h"
 #include "../Maintenance/maintenanceservice.h"
+#include "../Helpers/asynccoordinator.h"
 
 void Commands::CommandManager::InjectDependency(Models::ArtworksRepository *artworkRepository) {
     Q_ASSERT(artworkRepository != NULL); m_ArtworksRepository = artworkRepository;
@@ -803,17 +804,19 @@ void Commands::CommandManager::afterConstructionCallback() {
 
     m_AfterInitCalled = true;
     std::shared_ptr<Common::ServiceStartParams> emptyParams;
+    std::shared_ptr<Common::ServiceStartParams> coordinatorParams(
+                new Helpers::AsyncCoordinatorStartParams(&m_InitCoordinator));
 
     m_MaintenanceService->startService();
 
 #ifndef CORE_TESTS
-    m_ImageCachingService->startService();
+    m_ImageCachingService->startService(coordinatorParams);
 #endif
-    m_SpellCheckerService->startService(emptyParams);
+    m_SpellCheckerService->startService(coordinatorParams);
     m_WarningsService->startService(emptyParams);
     m_MetadataSaverService->startSaving();
-    m_AutoCompleteService->startService(emptyParams);
-    m_TranslationService->startService(emptyParams);
+    m_AutoCompleteService->startService(coordinatorParams);
+    m_TranslationService->startService(coordinatorParams);
 
     QCoreApplication::processEvents();
 

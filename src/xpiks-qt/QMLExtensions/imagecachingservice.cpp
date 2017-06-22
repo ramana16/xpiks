@@ -25,6 +25,7 @@
 #include "imagecachingworker.h"
 #include "imagecacherequest.h"
 #include "../Models/artworkmetadata.h"
+#include "../Helpers/asynccoordinator.h"
 
 namespace QMLExtensions {
     ImageCachingService::ImageCachingService(QObject *parent) :
@@ -35,8 +36,14 @@ namespace QMLExtensions {
     {
     }
 
-    void ImageCachingService::startService() {
-        m_CachingWorker = new ImageCachingWorker();
+    void ImageCachingService::startService(const std::shared_ptr<Common::ServiceStartParams> &params) {
+        auto coordinatorParams = std::dynamic_pointer_cast<Helpers::AsyncCoordinatorStartParams>(params);
+
+        Helpers::AsyncCoordinatorLocker locker(coordinatorParams->m_Coordinator);
+        Q_UNUSED(locker);
+
+
+        m_CachingWorker = new ImageCachingWorker(coordinatorParams->m_Coordinator);
 
         QThread *thread = new QThread();
         m_CachingWorker->moveToThread(thread);

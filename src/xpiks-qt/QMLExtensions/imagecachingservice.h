@@ -25,6 +25,7 @@
 #include <QObject>
 #include <QString>
 #include <QVector>
+#include "../Common/iservicebase.h"
 
 namespace Models {
     class ArtworkMetadata;
@@ -42,7 +43,7 @@ namespace QMLExtensions {
         explicit ImageCachingService(QObject *parent = 0);
 
     public:
-        void startService();
+        void startService(const std::shared_ptr<Common::ServiceStartParams> &params);
         void stopService();
 
     public:

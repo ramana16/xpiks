@@ -30,6 +30,10 @@
 #include <QReadWriteLock>
 #include "imagecacherequest.h"
 
+namespace Helpers {
+    class AsyncCoordinator;
+}
+
 namespace QMLExtensions {
     struct CachedImage {
         QDateTime m_LastModified;
@@ -47,7 +51,7 @@ namespace QMLExtensions {
     {
         Q_OBJECT
     public:
-        ImageCachingWorker(QObject *parent=0);
+        ImageCachingWorker(Helpers::AsyncCoordinator *initCoordinator, QObject *parent=0);
 
     protected:
         virtual bool initWorker() override;
@@ -79,6 +83,7 @@ namespace QMLExtensions {
         bool isProcessed(std::shared_ptr<ImageCacheRequest> &item);
 
     private:
+        Helpers::AsyncCoordinator *m_InitCoordinator;
         volatile int m_ProcessedItemsCount;
         qreal m_Scale;
         QString m_ImagesCacheDir;

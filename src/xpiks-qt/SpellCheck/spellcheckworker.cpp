@@ -37,8 +37,9 @@
 #define EN_HUNSPELL_AFF "en_US.aff"
 
 namespace SpellCheck {
-    SpellCheckWorker::SpellCheckWorker(Models::SettingsModel *settingsModel, QObject *parent):
+    SpellCheckWorker::SpellCheckWorker(Helpers::AsyncCoordinator *initCoordinator, Models::SettingsModel *settingsModel, QObject *parent):
         QObject(parent),
+        m_InitCoordinator(initCoordinator),
         m_SettingsModel(settingsModel),
         m_Hunspell(NULL),
         m_Codec(NULL),
@@ -57,6 +58,9 @@ namespace SpellCheck {
 
     bool SpellCheckWorker::initWorker() {
         LOG_INFO << "#";
+
+        Helpers::AsyncCoordinatorUnlocker unlocker(m_InitCoordinator);
+        Q_UNUSED(unlocker);
 
         QString resourcesPath;
         QString affPath;
