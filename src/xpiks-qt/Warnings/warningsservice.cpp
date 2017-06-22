@@ -36,7 +36,7 @@ namespace Warnings {
         QTimer::singleShot(1000, this, SLOT(updateWarningsSettings()));
     }
 
-    void WarningsService::startService() {
+    void WarningsService::startService(const std::shared_ptr<Common::ServiceStartParams> &params) {
         m_WarningsWorker = new WarningsCheckingWorker(&m_WarningsSettingsModel);
 
         QThread *thread = new QThread();

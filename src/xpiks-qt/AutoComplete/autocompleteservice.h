@@ -39,7 +39,7 @@ namespace AutoComplete {
         AutoCompleteService(AutoCompleteModel *autoCompleteModel, QObject *parent = 0);
         virtual ~AutoCompleteService();
 
-        virtual void startService() override;
+        virtual void startService(const std::shared_ptr<Common::ServiceStartParams> &params) override;
         virtual void stopService() override;
 
         virtual bool isAvailable() const override { return true; }

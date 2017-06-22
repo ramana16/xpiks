@@ -139,6 +139,7 @@ SOURCES += main.cpp \
     QuickBuffer/currenteditableproxyartwork.cpp \
     QuickBuffer/quickbuffer.cpp \
     SpellCheck/userdicteditmodel.cpp \
+    Helpers/asynccoordinator.cpp \
     QMLExtensions/tabsmodel.cpp \
     Models/recentitemsmodel.cpp \
     Models/recentfilesmodel.cpp \
@@ -342,6 +343,7 @@ HEADERS += \
     QuickBuffer/quickbuffer.h \
     KeywordsPresets/ipresetsmanager.h \
     SpellCheck/userdicteditmodel.h \
+    Helpers/asynccoordinator.h \
     QMLExtensions/tabsmodel.h \
     Models/recentitemsmodel.h \
     Models/recentfilesmodel.h \

@@ -33,7 +33,7 @@ namespace Translation {
     {
     }
 
-    void TranslationService::startService() {
+    void TranslationService::startService(const std::shared_ptr<Common::ServiceStartParams> &params) {
         if (m_TranslationWorker != nullptr) {
             LOG_WARNING << "Attempt to start running worker";
             return;
@@ -121,7 +121,7 @@ namespace Translation {
 
         if (m_RestartRequired) {
             LOG_INFO << "Restarting worker...";
-            startService();
+            startService(std::shared_ptr<Common::ServiceStartParams>());
             m_RestartRequired = false;
         }
     }

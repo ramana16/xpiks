@@ -802,17 +802,18 @@ void Commands::CommandManager::afterConstructionCallback() {
     }
 
     m_AfterInitCalled = true;
+    std::shared_ptr<Common::ServiceStartParams> emptyParams;
 
     m_MaintenanceService->startService();
 
 #ifndef CORE_TESTS
     m_ImageCachingService->startService();
 #endif
-    m_SpellCheckerService->startService();
-    m_WarningsService->startService();
+    m_SpellCheckerService->startService(emptyParams);
+    m_WarningsService->startService(emptyParams);
     m_MetadataSaverService->startSaving();
-    m_AutoCompleteService->startService();
-    m_TranslationService->startService();
+    m_AutoCompleteService->startService(emptyParams);
+    m_TranslationService->startService(emptyParams);
 
     QCoreApplication::processEvents();
 

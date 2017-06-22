@@ -38,7 +38,7 @@ namespace Translation {
         explicit TranslationService(TranslationManager &manager, QObject *parent = 0);
         virtual ~TranslationService() {}
 
-        virtual void startService() override;
+        virtual void startService(const std::shared_ptr<Common::ServiceStartParams> &params) override;
         virtual void stopService() override;
 
         virtual bool isAvailable() const override { return true; }

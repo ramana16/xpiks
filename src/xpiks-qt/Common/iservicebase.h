@@ -23,14 +23,20 @@
 #define ISERVICEBASE_H
 
 #include <QVector>
+#include <memory>
 
 namespace Common {
+    class ServiceStartParams {
+    public:
+        virtual ~ServiceStartParams() {}
+    };
+
     template<typename T, typename FlagsType=int>
     class IServiceBase {
     public:
         virtual ~IServiceBase() {}
 
-        virtual void startService() = 0;
+        virtual void startService(const std::shared_ptr<ServiceStartParams> &params) = 0;
         virtual void stopService() = 0;
 
         // if service is provided via plugin it can be turned off

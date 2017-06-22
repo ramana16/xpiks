@@ -39,6 +39,7 @@
 #include "../Models/metadataelement.h"
 #include "../KeywordsPresets/presetkeywordsmodel.h"
 #include "../KeywordsPresets/presetkeywordsmodelconfig.h"
+#include "../Helpers/asynccoordinator.h"
 
 namespace Encryption {
     class SecretsManager;
@@ -344,6 +345,7 @@ namespace Commands {
 #endif
 
     private:
+        Helpers::AsyncCoordinator m_InitCoordinator;
         Models::ArtworksRepository *m_ArtworksRepository;
         Models::ArtItemsModel *m_ArtItemsModel;
         Models::FilteredArtItemsProxyModel *m_FilteredItemsModel;

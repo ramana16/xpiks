@@ -59,6 +59,7 @@ namespace Models {
         Q_ASSERT(!configUrl.isEmpty());
         m_RemoteConfig.requestInitConfig(configUrl, proxySettings);
     }
+
     void AbstractConfigUpdaterModel::initLocalConfig(const QString &filePath){
         m_LocalConfig.initConfig(filePath);
         const QJsonDocument &localDocument = m_LocalConfig.getConfig();
