@@ -25,6 +25,7 @@
 #include "completionquery.h"
 #include "../Common/flags.h"
 #include "../Common/basickeywordsmodel.h"
+#include "../Helpers/asynccoordinator.h"
 
 namespace AutoComplete {
     AutoCompleteService::AutoCompleteService(AutoCompleteModel *autoCompleteModel, QObject *parent):
@@ -44,7 +45,14 @@ namespace AutoComplete {
             return;
         }
 
-        m_AutoCompleteWorker = new AutoCompleteWorker();
+        auto coordinatorParams = std::dynamic_pointer_cast<Helpers::AsyncCoordinatorStartParams>(params);
+        Helpers::AsyncCoordinator *coordinator = nullptr;
+        if (coordinatorParams) { coordinator = coordinatorParams->m_Coordinator; }
+
+        Helpers::AsyncCoordinatorLocker locker(coordinator);
+        Q_UNUSED(locker);
+
+        m_AutoCompleteWorker = new AutoCompleteWorker(coordinator);
 
         QThread *thread = new QThread();
         m_AutoCompleteWorker->moveToThread(thread);

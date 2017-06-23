@@ -42,7 +42,6 @@ namespace QMLExtensions {
         Helpers::AsyncCoordinatorLocker locker(coordinatorParams->m_Coordinator);
         Q_UNUSED(locker);
 
-
         m_CachingWorker = new ImageCachingWorker(coordinatorParams->m_Coordinator);
 
         QThread *thread = new QThread();

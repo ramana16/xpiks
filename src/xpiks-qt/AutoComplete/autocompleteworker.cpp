@@ -27,12 +27,14 @@
 #include <include/types.hpp>
 #include <string>
 #include <QStringList>
+#include "../Helpers/asynccoordinator.h"
 
 #define FREQUENCY_TABLE_FILENAME "en_wordlist.tsv"
 
 namespace AutoComplete {
-    AutoCompleteWorker::AutoCompleteWorker(QObject *parent) :
+    AutoCompleteWorker::AutoCompleteWorker(Helpers::AsyncCoordinator *initCoordinator, QObject *parent) :
         QObject(parent),
+        m_InitCoordinator(initCoordinator),
         m_Soufleur(NULL),
         m_CompletionsCount(8)
     {
@@ -47,7 +49,11 @@ namespace AutoComplete {
     }
 
     bool AutoCompleteWorker::initWorker() {
-        LOG_INFO << "#";
+        LOG_INFO << "#";        
+
+        Helpers::AsyncCoordinatorUnlocker unlocker(m_InitCoordinator);
+        Q_UNUSED(unlocker);
+
         bool importResult = false;
 
         QString resourcesPath;

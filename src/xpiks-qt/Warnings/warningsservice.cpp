@@ -37,6 +37,7 @@ namespace Warnings {
     }
 
     void WarningsService::startService(const std::shared_ptr<Common::ServiceStartParams> &params) {
+        Q_UNUSED(params);
         m_WarningsWorker = new WarningsCheckingWorker(&m_WarningsSettingsModel);
 
         QThread *thread = new QThread();
