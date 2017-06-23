@@ -130,8 +130,8 @@ namespace AutoComplete {
         Common::BasicKeywordsModel *basicKeywordsModel = qobject_cast<Common::BasicKeywordsModel*>(notifyObject);
         Q_ASSERT(basicKeywordsModel != NULL);
 
-        QObject::connect(query.get(), SIGNAL(completionsAvailable()), basicKeywordsModel, SIGNAL(completionsAvailable()));
-        QObject::connect(query.get(), SIGNAL(completionsAvailable()), m_AutoCompleteModel, SLOT(completionsArrived()));
+        QObject::connect(query.get(), &CompletionQuery::completionsAvailable, basicKeywordsModel, &Common::BasicKeywordsModel::completionsAvailable);
+        QObject::connect(query.get(), &CompletionQuery::completionsAvailable, m_AutoCompleteModel, &AutoCompleteModel::completionsArrived);
 
         m_AutoCompleteWorker->submitItem(query);
     }

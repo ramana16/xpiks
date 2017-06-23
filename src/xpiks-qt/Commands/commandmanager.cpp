@@ -333,11 +333,6 @@ void Commands::CommandManager::connectEntitiesSignalsSlots() const {
                          m_FilteredItemsModel, &Models::FilteredArtItemsProxyModel::onSelectedArtworksRemoved);
     }
 
-    if (m_SettingsModel != NULL && m_TelemetryService != NULL) {
-        QObject::connect(m_SettingsModel, &Models::SettingsModel::userStatisticsChanged,
-                         m_TelemetryService, &Conectivity::TelemetryService::changeReporting);
-    }
-
     if (m_SettingsModel != NULL && m_FilteredItemsModel != NULL) {
         QObject::connect(m_SettingsModel, &Models::SettingsModel::settingsUpdated,
                          m_FilteredItemsModel, &Models::FilteredArtItemsProxyModel::onSettingsUpdated);
@@ -358,10 +353,30 @@ void Commands::CommandManager::connectEntitiesSignalsSlots() const {
                          m_ArtItemsModel, &Models::ArtItemsModel::onUndoStackEmpty);
     }
 
+#ifndef CORE_TESTS
+    if (m_SettingsModel != NULL && m_TelemetryService != NULL) {
+        QObject::connect(m_SettingsModel, &Models::SettingsModel::userStatisticsChanged,
+                         m_TelemetryService, &Conectivity::TelemetryService::changeReporting);
+    }
+
     if (m_LanguagesModel != NULL && m_KeywordsSuggestor != NULL) {
         QObject::connect(m_LanguagesModel, &Models::LanguagesModel::languageChanged,
                          m_KeywordsSuggestor, &Suggestion::KeywordsSuggestor::onLanguageChanged);
     }
+
+    if (m_HelpersQmlWrapper != NULL && m_UpdateService != NULL) {
+        QObject::connect(m_UpdateService, &Conectivity::UpdateService::updateAvailable,
+                         m_HelpersQmlWrapper, &Helpers::HelpersQmlWrapper::updateAvailable);
+
+        QObject::connect(m_UpdateService, &Conectivity::UpdateService::updateDownloaded,
+                         m_HelpersQmlWrapper, &Helpers::HelpersQmlWrapper::updateIsDownloaded);
+    }
+
+    if (m_PresetsModel != NULL && m_PresetsModelConfig != NULL) {
+        QObject::connect(m_PresetsModelConfig, &KeywordsPresets::PresetKeywordsModelConfig::presetsUpdated,
+                         m_PresetsModel, &KeywordsPresets::PresetKeywordsModel::onPresetsUpdated);
+    }
+#endif
 
     if (m_SpellCheckerService != NULL && m_ArtItemsModel != NULL) {
         QObject::connect(m_SpellCheckerService, &SpellCheck::SpellCheckerService::userDictUpdate,
@@ -394,19 +409,6 @@ void Commands::CommandManager::connectEntitiesSignalsSlots() const {
                          m_QuickBuffer, &QuickBuffer::QuickBuffer::userDictUpdateHandler);
         QObject::connect(m_SpellCheckerService, &SpellCheck::SpellCheckerService::userDictCleared,
                          m_QuickBuffer, &QuickBuffer::QuickBuffer::userDictClearedHandler);
-    }
-
-    if (m_HelpersQmlWrapper != NULL && m_UpdateService != NULL) {
-        QObject::connect(m_UpdateService, &Conectivity::UpdateService::updateAvailable,
-                         m_HelpersQmlWrapper, &Helpers::HelpersQmlWrapper::updateAvailable);
-
-        QObject::connect(m_UpdateService, &Conectivity::UpdateService::updateDownloaded,
-                         m_HelpersQmlWrapper, &Helpers::HelpersQmlWrapper::updateIsDownloaded);
-    }
-
-    if (m_PresetsModel != NULL && m_PresetsModelConfig != NULL) {
-        QObject::connect(m_PresetsModelConfig, &KeywordsPresets::PresetKeywordsModelConfig::presetsUpdated,
-                         m_PresetsModel, &KeywordsPresets::PresetKeywordsModel::onPresetsUpdated);
     }
 
 #ifdef WITH_PLUGINS
