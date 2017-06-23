@@ -33,13 +33,13 @@ namespace Models {
         m_ActiveTabs.setSourceModel(&m_TabsModel);
         m_InactiveTabs.setSourceModel(&m_TabsModel);
 
-        QObject::connect(&m_TabsModel, SIGNAL(tabRemoved()), &m_ActiveTabs, SLOT(onInvalidateRequired()));
-        QObject::connect(&m_TabsModel, SIGNAL(cacheRebuilt()), &m_ActiveTabs, SLOT(onInvalidateRequired()));
+        QObject::connect(&m_TabsModel, &QMLExtensions::TabsModel::tabRemoved, &m_ActiveTabs, &QMLExtensions::ActiveTabsModel::onInvalidateRequired);
+        QObject::connect(&m_TabsModel, &QMLExtensions::TabsModel::cacheRebuilt, &m_ActiveTabs, &QMLExtensions::ActiveTabsModel::onInvalidateRequired);
 
-        QObject::connect(&m_TabsModel, SIGNAL(tabRemoved()), &m_InactiveTabs, SLOT(onInvalidateRequired()));
-        QObject::connect(&m_TabsModel, SIGNAL(cacheRebuilt()), &m_InactiveTabs, SLOT(onInvalidateRequired()));
+        QObject::connect(&m_TabsModel, &QMLExtensions::TabsModel::tabRemoved, &m_InactiveTabs, &QMLExtensions::InactiveTabsModel::onInvalidateRequired);
+        QObject::connect(&m_TabsModel, &QMLExtensions::TabsModel::cacheRebuilt, &m_InactiveTabs, &QMLExtensions::InactiveTabsModel::onInvalidateRequired);
 
-        QObject::connect(&m_InactiveTabs, SIGNAL(tabOpened(int)), &m_ActiveTabs, SLOT(onInactiveTabOpened(int)));
+        QObject::connect(&m_InactiveTabs, &QMLExtensions::InactiveTabsModel::tabOpened, &m_ActiveTabs, &QMLExtensions::ActiveTabsModel::onInactiveTabOpened);
     }
 
     void UIManager::registerCurrentItem(std::shared_ptr<QuickBuffer::ICurrentEditable> &currentItem) {

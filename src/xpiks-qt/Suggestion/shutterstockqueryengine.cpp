@@ -69,9 +69,9 @@ namespace Suggestion {
         QObject::connect(request, &Conectivity::SimpleCurlRequest::stopped, thread, &QThread::quit);
 
         QObject::connect(request, &Conectivity::SimpleCurlRequest::stopped, request, &Conectivity::SimpleCurlRequest::deleteLater);
-        QObject::connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+        QObject::connect(thread, &QThread::finished, thread, &QThread::deleteLater);
 
-        QObject::connect(request, SIGNAL(requestFinished(bool)), this, SLOT(requestFinishedHandler(bool)));
+        QObject::connect(request, &Conectivity::SimpleCurlRequest::requestFinished, this, &ShutterstockQueryEngine::requestFinishedHandler);
 
         thread->start();
     }

@@ -66,8 +66,8 @@ namespace Plugins {
         QObject *object = component.create(context);
 
         if (object != NULL) {
-            QObject::connect(object, SIGNAL(destroyed(QObject*)),
-                             this, SLOT(windowDestroyed(QObject*)));
+            QObject::connect(object, &QObject::destroyed,
+                             this, &UIProvider::windowDestroyed);
 
             QQuickWindow *window = qobject_cast<QQuickWindow*>(object);
             if (window != NULL) {

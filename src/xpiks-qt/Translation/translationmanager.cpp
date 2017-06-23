@@ -82,7 +82,7 @@ namespace Translation {
         m_HasMore(false)
     {
         m_TranslateTimer.setSingleShot(true);
-        QObject::connect(&m_TranslateTimer, SIGNAL(timeout()), this, SLOT(updateTranslationTimer()));
+        QObject::connect(&m_TranslateTimer, &QTimer::timeout, this, &TranslationManager::updateTranslationTimer);
     }
 
     void TranslationManager::initializeDictionaries(Helpers::AsyncCoordinator *initCoordinator) {
