@@ -23,6 +23,7 @@
 #include <QThread>
 #include "translationworker.h"
 #include "translationquery.h"
+#include "../Helpers/asynccoordinator.h"
 
 namespace Translation {
     TranslationService::TranslationService(TranslationManager &manager, QObject *parent) :
@@ -39,7 +40,14 @@ namespace Translation {
             return;
         }
 
-        m_TranslationWorker = new TranslationWorker();
+        auto coordinatorParams = std::dynamic_pointer_cast<Helpers::AsyncCoordinatorStartParams>(params);
+        Helpers::AsyncCoordinator *coordinator = nullptr;
+        if (coordinatorParams) { coordinator = coordinatorParams->m_Coordinator; }
+
+        Helpers::AsyncCoordinatorLocker locker(coordinator);
+        Q_UNUSED(locker);
+
+        m_TranslationWorker = new TranslationWorker(coordinator);
 
         QThread *thread = new QThread();
         m_TranslationWorker->moveToThread(thread);

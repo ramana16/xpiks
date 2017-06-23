@@ -29,6 +29,10 @@
 
 class LookupDictionary;
 
+namespace Helpers {
+    class AsyncCoordinator;
+}
+
 namespace Translation {
     class TranslationWorker :
             public QObject,
@@ -36,7 +40,7 @@ namespace Translation {
     {
         Q_OBJECT
     public:
-        explicit TranslationWorker(QObject *parent = 0);
+        explicit TranslationWorker(Helpers::AsyncCoordinator *initCoordinator, QObject *parent = 0);
         virtual ~TranslationWorker();
 
     public:
@@ -63,6 +67,7 @@ namespace Translation {
 
     private:
         std::unique_ptr<LookupDictionary> m_LookupDictionary;
+        Helpers::AsyncCoordinator *m_InitCoordinator;
     };
 }
 

@@ -23,10 +23,12 @@
 #include <lookupdictionary.h>
 #include <string>
 #include "../Common/defines.h"
+#include "../Helpers/asynccoordinator.h"
 
 namespace Translation {
-    TranslationWorker::TranslationWorker(QObject *parent) :
-        QObject(parent)
+    TranslationWorker::TranslationWorker(Helpers::AsyncCoordinator *initCoordinator, QObject *parent) :
+        QObject(parent),
+        m_InitCoordinator(initCoordinator)
     {
     }
 
@@ -49,7 +51,11 @@ namespace Translation {
     }
 
     bool TranslationWorker::initWorker() {
-        LOG_DEBUG << "#";
+        LOG_DEBUG << "#";        
+
+        Helpers::AsyncCoordinatorUnlocker unlocker(m_InitCoordinator);
+        Q_UNUSED(unlocker);
+
         m_LookupDictionary.reset(new LookupDictionary());
 
         return true;

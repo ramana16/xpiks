@@ -67,6 +67,54 @@
 #include "../Maintenance/maintenanceservice.h"
 #include "../Helpers/asynccoordinator.h"
 
+Commands::CommandManager::CommandManager():
+    QObject(),
+    m_ArtworksRepository(NULL),
+    m_ArtItemsModel(NULL),
+    m_FilteredItemsModel(NULL),
+    m_CombinedArtworksModel(NULL),
+    m_ArtworkUploader(NULL),
+    m_UploadInfoRepository(NULL),
+    m_WarningsService(NULL),
+    m_SecretsManager(NULL),
+    m_UndoRedoManager(NULL),
+    m_ZipArchiver(NULL),
+    m_KeywordsSuggestor(NULL),
+    m_SettingsModel(NULL),
+    m_RecentDirectories(NULL),
+    m_RecentFiles(NULL),
+    m_SpellCheckerService(NULL),
+    m_SpellCheckSuggestionModel(NULL),
+    m_MetadataSaverService(NULL),
+    m_TelemetryService(NULL),
+    m_UpdateService(NULL),
+    m_LogsModel(NULL),
+    m_LocalLibrary(NULL),
+    m_MetadataIOCoordinator(NULL),
+    m_PluginManager(NULL),
+    m_LanguagesModel(NULL),
+    m_ColorsModel(NULL),
+    m_AutoCompleteService(NULL),
+    m_ImageCachingService(NULL),
+    m_DeleteKeywordsViewModel(NULL),
+    m_FindAndReplaceModel(NULL),
+    m_HelpersQmlWrapper(NULL),
+    m_PresetsModel(NULL),
+    m_PresetsModelConfig(NULL),
+    m_TranslationService(NULL),
+    m_TranslationManager(NULL),
+    m_UIManager(NULL),
+    m_ArtworkProxyModel(NULL),
+    m_QuickBuffer(NULL),
+    m_MaintenanceService(NULL),
+    m_ServicesInitialized(false),
+    m_AfterInitCalled(false),
+    m_LastCommandID(0)
+{
+    QObject::connect(&m_InitCoordinator, &Helpers::AsyncCoordinator::statusReported,
+                     this, &Commands::CommandManager::servicesInitialized);
+}
+
 void Commands::CommandManager::InjectDependency(Models::ArtworksRepository *artworkRepository) {
     Q_ASSERT(artworkRepository != NULL); m_ArtworksRepository = artworkRepository;
     m_ArtworksRepository->setCommandManager(this);
@@ -802,6 +850,10 @@ void Commands::CommandManager::afterConstructionCallback() {
         return;
     }
 
+    const int waitSeconds = 5;
+    Helpers::AsyncCoordinatorStarter defferedStarter(&m_InitCoordinator, waitSeconds);
+    Q_UNUSED(defferedStarter);
+
     m_AfterInitCalled = true;
     std::shared_ptr<Common::ServiceStartParams> emptyParams;
     std::shared_ptr<Common::ServiceStartParams> coordinatorParams(
@@ -827,16 +879,12 @@ void Commands::CommandManager::afterConstructionCallback() {
     QString endpoint = Encryption::decodeText(reportingEndpoint, "reporting");
     m_TelemetryService->setEndpoint(endpoint);
 
-#ifdef WITH_PLUGINS
-    m_PluginManager->loadPlugins();
-#endif
-
     m_TelemetryService->startReporting();
     m_UpdateService->startChecking();
-    m_ArtworkUploader->initializeStocksList();
+    m_ArtworkUploader->initializeStocksList(&m_InitCoordinator);
     m_WarningsService->initWarningsSettings();
-    m_TranslationManager->initializeDictionaries();
-    m_PresetsModelConfig->initializeConfigs();
+    m_TranslationManager->initializeDictionaries(&m_InitCoordinator);
+    m_PresetsModelConfig->initializeConfigs(&m_InitCoordinator);
 #endif
 
 #ifdef Q_OS_MAC
@@ -846,11 +894,21 @@ void Commands::CommandManager::afterConstructionCallback() {
     }
 #endif
 
+    executeMaintenanceJobs();
+}
+
+void Commands::CommandManager::afterInnerServicesInitialized() {
+    LOG_DEBUG << "#";
+
+#ifndef CORE_TESTS
+#ifdef WITH_PLUGINS
+    m_PluginManager->loadPlugins();
+#endif
+#endif
+
 #ifdef QT_DEBUG
     openInitialFiles();
 #endif
-
-    executeMaintenanceJobs();
 }
 
 void Commands::CommandManager::executeMaintenanceJobs() {
@@ -963,6 +1021,22 @@ void Commands::CommandManager::cleanup() {
     m_SpellCheckerService->clearUserDictionary();
 }
 #endif
+
+void Commands::CommandManager::servicesInitialized(int status) {
+    LOG_DEBUG << "#";
+    Q_ASSERT(m_ServicesInitialized == false);
+
+    Helpers::AsyncCoordinator::CoordinationStatus coordStatus = (Helpers::AsyncCoordinator::CoordinationStatus)status;
+
+    if (m_ServicesInitialized == false) {
+        m_ServicesInitialized = true;
+
+        if (coordStatus == Helpers::AsyncCoordinator::AllDone ||
+                coordStatus == Helpers::AsyncCoordinator::Timeout) {
+            this->afterInnerServicesInitialized();
+        }
+    }
+}
 
 void Commands::CommandManager::registerCurrentItem(const Models::MetadataElement &metadataElement) {
     if (m_UIManager != nullptr) {

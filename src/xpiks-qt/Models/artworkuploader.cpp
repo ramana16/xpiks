@@ -35,6 +35,7 @@
 #include "../Conectivity/uploadcontext.h"
 #include "../Models/imageartwork.h"
 #include "../Conectivity/ftphelpers.h"
+#include "../Helpers/asynccoordinator.h"
 
 #ifndef CORE_TESTS
 #include "../Conectivity/ftpcoordinator.h"
@@ -113,6 +114,10 @@ namespace Models {
     }
 
     void ArtworkUploader::updateStocksList() {
+        auto &initCoordinator = m_CommandManager->getInitCoordinator();
+        Helpers::AsyncCoordinatorUnlocker unlocker(&initCoordinator);
+        Q_UNUSED(unlocker);
+
         m_StocksFtpList.initializeConfigs();
     }
 
@@ -176,7 +181,10 @@ namespace Models {
         return needCreate;
     }
 
-    void ArtworkUploader::initializeStocksList() {
+    void ArtworkUploader::initializeStocksList(Helpers::AsyncCoordinator *initCoordinator) {
+        Helpers::AsyncCoordinatorLocker locker(initCoordinator);
+        Q_UNUSED(locker);
+
         QTimer::singleShot(1000, this, SLOT(updateStocksList()));
     }
 

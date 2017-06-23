@@ -88,9 +88,9 @@ namespace Maintenance {
         m_MaintenanceWorker->submitItem(jobItem);
     }
 
-    void MaintenanceService::initializeDictionaries(Translation::TranslationManager *translationManager) {
+    void MaintenanceService::initializeDictionaries(Translation::TranslationManager *translationManager, Helpers::AsyncCoordinator *initCoordinator) {
         LOG_DEBUG << "#";
-        std::shared_ptr<IMaintenanceItem> jobItem(new InitializeDictionariesJobItem(translationManager));
+        std::shared_ptr<IMaintenanceItem> jobItem(new InitializeDictionariesJobItem(translationManager, initCoordinator));
         m_MaintenanceWorker->submitFirst(jobItem);
     }
 

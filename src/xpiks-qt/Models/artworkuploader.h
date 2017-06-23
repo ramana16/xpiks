@@ -43,6 +43,10 @@ namespace Commands {
     class CommandManager;
 }
 
+namespace Helpers {
+    class AsyncCoordinator;
+}
+
 namespace Models {
     class ArtworkMetadata;
 
@@ -92,7 +96,7 @@ namespace Models {
             return model;
         }
 
-        void initializeStocksList();
+        void initializeStocksList(Helpers::AsyncCoordinator *initCoordinator);
 
     private:
         void doUploadArtworks(const QVector<ArtworkMetadata *> &artworkList);

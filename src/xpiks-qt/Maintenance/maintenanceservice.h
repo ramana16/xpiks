@@ -44,6 +44,10 @@ namespace Models {
     class SettingsModel;
 }
 
+namespace Helpers {
+    class AsyncCoordinator;
+}
+
 namespace Maintenance {
     class MaintenanceWorker;
 
@@ -60,7 +64,7 @@ namespace Maintenance {
     public:
         void cleanupUpdatesArtifacts();
         void launchExiftool(const QString &settingsExiftoolPath, MetadataIO::MetadataIOCoordinator *coordinator);
-        void initializeDictionaries(Translation::TranslationManager *translationManager);
+        void initializeDictionaries(Translation::TranslationManager *translationManager, Helpers::AsyncCoordinator *initCoordinator);
         void addArtworksToLibrary(const QVector<Models::ArtworkMetadata *> artworksList, Suggestion::LocalLibrary *localLibrary);
         void cleanupLogs();
         void loadLocalLibrary(Suggestion::LocalLibrary *localLibrary);

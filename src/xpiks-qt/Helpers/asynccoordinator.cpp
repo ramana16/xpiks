@@ -56,7 +56,7 @@ namespace Helpers {
 
     void AsyncCoordinator::reportStatus(AsyncCoordinator::CoordinationStatus status) {
         if (0 == m_StatusReported.fetchAndStoreOrdered(1)) {
-            emit statusReported(status);
+            emit statusReported((int)status);
         }
     }
 }
