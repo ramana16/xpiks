@@ -28,7 +28,7 @@ namespace Helpers {
         m_StatusReported(0)
     {
         m_Timer.setSingleShot(true);
-        QObject::connect(&m_Timer, SIGNAL(timeout()), this, SLOT(onTimeout()));
+        QObject::connect(&m_Timer, &QTimer::timeout, this, &AsyncCoordinator::onTimeout);
     }
 
     void AsyncCoordinator::allBegun(int timeoutSeconds) {

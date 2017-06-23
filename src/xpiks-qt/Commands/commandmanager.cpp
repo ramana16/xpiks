@@ -321,113 +321,116 @@ void Commands::CommandManager::recordHistoryItem(std::unique_ptr<UndoRedo::IHist
 
 void Commands::CommandManager::connectEntitiesSignalsSlots() const {
     if (m_SecretsManager != NULL && m_UploadInfoRepository != NULL) {
-        QObject::connect(m_SecretsManager, SIGNAL(beforeMasterPasswordChange(QString, QString)),
-                         m_UploadInfoRepository, SLOT(onBeforeMasterPasswordChanged(QString, QString)));
+        QObject::connect(m_SecretsManager, &Encryption::SecretsManager::beforeMasterPasswordChange,
+                         m_UploadInfoRepository, &Models::UploadInfoRepository::onBeforeMasterPasswordChanged);
 
-        QObject::connect(m_SecretsManager, SIGNAL(afterMasterPasswordReset()),
-                         m_UploadInfoRepository, SLOT(onAfterMasterPasswordReset()));
+        QObject::connect(m_SecretsManager, &Encryption::SecretsManager::afterMasterPasswordReset,
+                         m_UploadInfoRepository, &Models::UploadInfoRepository::onAfterMasterPasswordReset);
     }
 
     if (m_ArtItemsModel != NULL && m_FilteredItemsModel != NULL) {
-        QObject::connect(m_ArtItemsModel, SIGNAL(selectedArtworksRemoved(int)),
-                         m_FilteredItemsModel, SLOT(onSelectedArtworksRemoved(int)));
+        QObject::connect(m_ArtItemsModel, &Models::ArtItemsModel::selectedArtworksRemoved,
+                         m_FilteredItemsModel, &Models::FilteredArtItemsProxyModel::onSelectedArtworksRemoved);
     }
 
     if (m_SettingsModel != NULL && m_TelemetryService != NULL) {
-        QObject::connect(m_SettingsModel, SIGNAL(userStatisticsChanged(bool)),
-                         m_TelemetryService, SLOT(changeReporting(bool)));
+        QObject::connect(m_SettingsModel, &Models::SettingsModel::userStatisticsChanged,
+                         m_TelemetryService, &Conectivity::TelemetryService::changeReporting);
     }
 
     if (m_SettingsModel != NULL && m_FilteredItemsModel != NULL) {
-        QObject::connect(m_SettingsModel, SIGNAL(settingsUpdated()),
-                         m_FilteredItemsModel, SLOT(onSettingsUpdated()));
+        QObject::connect(m_SettingsModel, &Models::SettingsModel::settingsUpdated,
+                         m_FilteredItemsModel, &Models::FilteredArtItemsProxyModel::onSettingsUpdated);
     }
 
     if (m_SpellCheckerService != NULL && m_FilteredItemsModel != NULL) {
-        QObject::connect(m_SpellCheckerService, SIGNAL(serviceAvailable(bool)),
-                         m_FilteredItemsModel, SLOT(onSpellCheckerAvailable(bool)));
+        QObject::connect(m_SpellCheckerService, &SpellCheck::SpellCheckerService::serviceAvailable,
+                         m_FilteredItemsModel, &Models::FilteredArtItemsProxyModel::onSpellCheckerAvailable);
     }
 
     if (m_ArtworksRepository != NULL && m_ArtItemsModel != NULL) {
-        QObject::connect(m_ArtworksRepository, SIGNAL(filesUnavailable()),
-                         m_ArtItemsModel, SLOT(onFilesUnavailableHandler()));
+        QObject::connect(m_ArtworksRepository, &Models::ArtworksRepository::filesUnavailable,
+                         m_ArtItemsModel, &Models::ArtItemsModel::onFilesUnavailableHandler);
     }
 
     if (m_ArtItemsModel != NULL && m_UndoRedoManager != NULL) {
-        QObject::connect(m_UndoRedoManager, SIGNAL(undoStackEmpty()),
-                         m_ArtItemsModel, SLOT(onUndoStackEmpty()));
+        QObject::connect(m_UndoRedoManager, &UndoRedo::UndoRedoManager::undoStackEmpty,
+                         m_ArtItemsModel, &Models::ArtItemsModel::onUndoStackEmpty);
     }
 
     if (m_LanguagesModel != NULL && m_KeywordsSuggestor != NULL) {
-        QObject::connect(m_LanguagesModel, SIGNAL(languageChanged()),
-                         m_KeywordsSuggestor, SLOT(onLanguageChanged()));
+        QObject::connect(m_LanguagesModel, &Models::LanguagesModel::languageChanged,
+                         m_KeywordsSuggestor, &Suggestion::KeywordsSuggestor::onLanguageChanged);
     }
 
     if (m_SpellCheckerService != NULL && m_ArtItemsModel != NULL) {
-        QObject::connect(m_SpellCheckerService, SIGNAL(userDictUpdate(QStringList, bool)),
-                         m_ArtItemsModel, SLOT(userDictUpdateHandler(QStringList, bool)));
-        QObject::connect(m_SpellCheckerService, SIGNAL(userDictCleared()),
-                         m_ArtItemsModel, SLOT(userDictClearedHandler()));
+        QObject::connect(m_SpellCheckerService, &SpellCheck::SpellCheckerService::userDictUpdate,
+                         m_ArtItemsModel, &Models::ArtItemsModel::userDictUpdateHandler);
+        QObject::connect(m_SpellCheckerService, &SpellCheck::SpellCheckerService::userDictCleared,
+                         m_ArtItemsModel, &Models::ArtItemsModel::userDictClearedHandler);
     }
 
     if (m_SpellCheckerService != NULL && m_CombinedArtworksModel != NULL) {
-        QObject::connect(m_SpellCheckerService, SIGNAL(userDictUpdate(QStringList, bool)),
-                         m_CombinedArtworksModel, SLOT(userDictUpdateHandler(QStringList, bool)));
-        QObject::connect(m_SpellCheckerService, SIGNAL(userDictCleared()),
-                         m_CombinedArtworksModel, SLOT(userDictClearedHandler()));
+        QObject::connect(m_SpellCheckerService, &SpellCheck::SpellCheckerService::userDictUpdate,
+                         m_CombinedArtworksModel, &Models::CombinedArtworksModel::userDictUpdateHandler);
+        QObject::connect(m_SpellCheckerService, &SpellCheck::SpellCheckerService::userDictCleared,
+                         m_CombinedArtworksModel, &Models::CombinedArtworksModel::userDictClearedHandler);
     }
 
     if (m_ArtItemsModel != NULL && m_ArtworkProxyModel != NULL) {
-        QObject::connect(m_ArtItemsModel, SIGNAL(fileWithIndexUnavailable(int)),
-                         m_ArtworkProxyModel, SLOT(itemUnavailableHandler(int)));
+        QObject::connect(m_ArtItemsModel, &Models::ArtItemsModel::fileWithIndexUnavailable,
+                         m_ArtworkProxyModel, &Models::ArtworkProxyModel::itemUnavailableHandler);
     }
 
     if (m_SpellCheckerService != NULL && m_ArtworkProxyModel != NULL) {
-        QObject::connect(m_SpellCheckerService, SIGNAL(userDictUpdate(QStringList, bool)),
-                         m_ArtworkProxyModel, SLOT(userDictUpdateHandler(QStringList, bool)));
-        QObject::connect(m_SpellCheckerService, SIGNAL(userDictCleared()),
-                         m_ArtworkProxyModel, SLOT(userDictClearedHandler()));
+        QObject::connect(m_SpellCheckerService, &SpellCheck::SpellCheckerService::userDictUpdate,
+                         m_ArtworkProxyModel, &Models::ArtworkProxyModel::userDictUpdateHandler);
+        QObject::connect(m_SpellCheckerService, &SpellCheck::SpellCheckerService::userDictCleared,
+                         m_ArtworkProxyModel, &Models::ArtworkProxyModel::userDictClearedHandler);
     }
 
     if (m_SpellCheckerService != NULL && m_QuickBuffer != NULL) {
-        QObject::connect(m_SpellCheckerService, SIGNAL(userDictUpdate(QStringList, bool)),
-                         m_QuickBuffer, SLOT(userDictUpdateHandler(QStringList, bool)));
-        QObject::connect(m_SpellCheckerService, SIGNAL(userDictCleared()),
-                         m_QuickBuffer, SLOT(userDictClearedHandler()));
+        QObject::connect(m_SpellCheckerService, &SpellCheck::SpellCheckerService::userDictUpdate,
+                         m_QuickBuffer, &QuickBuffer::QuickBuffer::userDictUpdateHandler);
+        QObject::connect(m_SpellCheckerService, &SpellCheck::SpellCheckerService::userDictCleared,
+                         m_QuickBuffer, &QuickBuffer::QuickBuffer::userDictClearedHandler);
     }
 
     if (m_HelpersQmlWrapper != NULL && m_UpdateService != NULL) {
-        QObject::connect(m_UpdateService, SIGNAL(updateAvailable(QString)),
-                         m_HelpersQmlWrapper, SIGNAL(updateAvailable(QString)));
+        QObject::connect(m_UpdateService, &Conectivity::UpdateService::updateAvailable,
+                         m_HelpersQmlWrapper, &Helpers::HelpersQmlWrapper::updateAvailable);
 
-        QObject::connect(m_UpdateService, SIGNAL(updateDownloaded(QString)),
-                         m_HelpersQmlWrapper, SLOT(updateIsDownloaded(QString)));
+        QObject::connect(m_UpdateService, &Conectivity::UpdateService::updateDownloaded,
+                         m_HelpersQmlWrapper, &Helpers::HelpersQmlWrapper::updateIsDownloaded);
     }
 
     if (m_PresetsModel != NULL && m_PresetsModelConfig != NULL) {
-        QObject::connect(m_PresetsModelConfig, SIGNAL(presetsUpdated()), m_PresetsModel, SLOT (onPresetsUpdated()));
+        QObject::connect(m_PresetsModelConfig, &KeywordsPresets::PresetKeywordsModelConfig::presetsUpdated,
+                         m_PresetsModel, &KeywordsPresets::PresetKeywordsModel::onPresetsUpdated);
     }
 
 #ifdef WITH_PLUGINS
     if (m_PluginManager != NULL && m_UIManager != NULL) {
-        QObject::connect(m_UIManager, SIGNAL(currentEditableChanged()), m_PluginManager, SLOT(onCurrentEditableChanged()));
+        QObject::connect(m_UIManager, &Models::UIManager::currentEditableChanged,
+                         m_PluginManager, &Plugins::PluginManager::onCurrentEditableChanged);
     }
 
     if (m_PluginManager != NULL && m_UndoRedoManager) {
-        QObject::connect(m_UndoRedoManager, SIGNAL(actionUndone(int)), m_PluginManager, SLOT(onLastActionUndone(int)));
+        QObject::connect(m_UndoRedoManager, &UndoRedo::UndoRedoManager::actionUndone,
+                         m_PluginManager, &Plugins::PluginManager::onLastActionUndone);
     }
 #endif
 
     // needed for Setting Moving task because QAbstractListModel is not thread safe
 
     if (m_SettingsModel != NULL && m_RecentDirectories != NULL) {
-        QObject::connect(m_SettingsModel, SIGNAL(recentDirectoriesUpdated(const QString &)),
-                         m_RecentDirectories, SLOT(onRecentItemsUpdated(const QString &)));
+        QObject::connect(m_SettingsModel, &Models::SettingsModel::recentDirectoriesUpdated,
+                         m_RecentDirectories, &Models::RecentDirectoriesModel::onRecentItemsUpdated);
     }
 
     if (m_SettingsModel != NULL && m_RecentFiles != NULL) {
-        QObject::connect(m_SettingsModel, SIGNAL(recentFilesUpdated(const QString &)),
-                         m_RecentFiles, SLOT(onRecentItemsUpdated(const QString &)));
+        QObject::connect(m_SettingsModel, &Models::SettingsModel::recentFilesUpdated,
+                         m_RecentFiles, &Models::RecentFilesModel::onRecentItemsUpdated);
     }
 }
 
@@ -544,14 +547,14 @@ void Commands::CommandManager::connectArtworkSignals(Models::ArtworkMetadata *me
     {
         LOG_INTEGRATION_TESTS << "Connecting to ArtItemsModel...";
 
-        QObject::connect(metadata, SIGNAL(modifiedChanged(bool)),
-                         m_ArtItemsModel, SLOT(itemModifiedChanged(bool)));
+        QObject::connect(metadata, &Models::ArtworkMetadata::modifiedChanged,
+                         m_ArtItemsModel, &Models::ArtItemsModel::itemModifiedChanged);
 
-        QObject::connect(metadata, SIGNAL(spellCheckErrorsChanged()),
-                         m_ArtItemsModel, SLOT(spellCheckErrorsChanged()));
+        QObject::connect(metadata, &Models::ArtworkMetadata::spellCheckErrorsChanged,
+                         m_ArtItemsModel, &Models::ArtItemsModel::spellCheckErrorsChanged);
 
-        QObject::connect(metadata, SIGNAL(backupRequired()),
-                         m_ArtItemsModel, SLOT(artworkBackupRequested()));
+        QObject::connect(metadata, &Models::ArtworkMetadata::backupRequired,
+                         m_ArtItemsModel, &Models::ArtItemsModel::artworkBackupRequested);
     }
 
 #if defined(CORE_TESTS) || defined(INTEGRATION_TESTS)
@@ -562,12 +565,14 @@ void Commands::CommandManager::connectArtworkSignals(Models::ArtworkMetadata *me
     {
         LOG_INTEGRATION_TESTS << "Connecting to FilteredItemsModel...";
 
-        QObject::connect(metadata, SIGNAL(selectedChanged(bool)),
-                         m_FilteredItemsModel, SLOT(itemSelectedChanged(bool)));
+        QObject::connect(metadata, &Models::ArtworkMetadata::selectedChanged,
+                         m_FilteredItemsModel, &Models::FilteredArtItemsProxyModel::itemSelectedChanged);
     }
 }
 
 void Commands::CommandManager::disconnectArtworkSignals(Models::ArtworkMetadata *metadata) const {
+    bool disconnectStatus = false;
+
 #if defined(CORE_TESTS) || defined(INTEGRATION_TESTS)
     if (m_ArtItemsModel)
 #else
@@ -575,8 +580,10 @@ void Commands::CommandManager::disconnectArtworkSignals(Models::ArtworkMetadata 
 #endif
     {
         LOG_INTEGRATION_TESTS << "Disconnecting from ArtItemsModel...";
-        QObject::disconnect(metadata, 0, m_ArtItemsModel, 0);
-        QObject::disconnect(m_ArtItemsModel, 0, metadata, 0);
+        disconnectStatus = QObject::disconnect(metadata, 0, m_ArtItemsModel, 0);
+        Q_ASSERT(disconnectStatus == true);
+        disconnectStatus = QObject::disconnect(m_ArtItemsModel, 0, metadata, 0);
+        Q_ASSERT(disconnectStatus == true);
     }
 
 #if defined(CORE_TESTS) || defined(INTEGRATION_TESTS)
@@ -586,8 +593,10 @@ void Commands::CommandManager::disconnectArtworkSignals(Models::ArtworkMetadata 
 #endif
     {
         LOG_INTEGRATION_TESTS << "Disconnecting from FilteredItemsModel...";
-        QObject::disconnect(metadata, 0, m_FilteredItemsModel, 0);
-        QObject::disconnect(m_FilteredItemsModel, 0, metadata, 0);
+        disconnectStatus = QObject::disconnect(metadata, 0, m_FilteredItemsModel, 0);
+        Q_ASSERT(disconnectStatus == true);
+        disconnectStatus = QObject::disconnect(m_FilteredItemsModel, 0, metadata, 0);
+        Q_ASSERT(disconnectStatus == true);
     }
 }
 

@@ -832,8 +832,8 @@ namespace Common {
     }
 
     void BasicKeywordsModel::connectSignals(SpellCheck::SpellCheckItem *item) {
-        QObject::connect(item, SIGNAL(resultsReady(Common::SpellCheckFlags, int)),
-                         this, SLOT(spellCheckRequestReady(Common::SpellCheckFlags, int)));
+        QObject::connect(item, &SpellCheck::SpellCheckItem::resultsReady,
+                         this, &BasicKeywordsModel::spellCheckRequestReady);
     }
 
     void BasicKeywordsModel::spellCheckRequestReady(Common::SpellCheckFlags flags, int index) {

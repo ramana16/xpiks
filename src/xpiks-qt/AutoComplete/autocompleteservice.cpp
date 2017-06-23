@@ -57,20 +57,20 @@ namespace AutoComplete {
         QThread *thread = new QThread();
         m_AutoCompleteWorker->moveToThread(thread);
 
-        QObject::connect(thread, SIGNAL(started()), m_AutoCompleteWorker, SLOT(process()));
-        QObject::connect(m_AutoCompleteWorker, SIGNAL(stopped()), thread, SLOT(quit()));
+        QObject::connect(thread, &QThread::started, m_AutoCompleteWorker, &AutoCompleteWorker::process);
+        QObject::connect(m_AutoCompleteWorker, &AutoCompleteWorker::stopped, thread, &QThread::quit);
 
-        QObject::connect(m_AutoCompleteWorker, SIGNAL(stopped()), m_AutoCompleteWorker, SLOT(deleteLater()));
-        QObject::connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+        QObject::connect(m_AutoCompleteWorker, &AutoCompleteWorker::stopped, m_AutoCompleteWorker, &AutoCompleteWorker::deleteLater);
+        QObject::connect(thread, &QThread::finished, thread, &QThread::deleteLater);
 
-        QObject::connect(this, SIGNAL(cancelAutoCompletion()),
-                         m_AutoCompleteWorker, SLOT(cancel()));
+        QObject::connect(this, &AutoCompleteService::cancelAutoCompletion,
+                         m_AutoCompleteWorker, &AutoCompleteWorker::cancel);
 
-        QObject::connect(m_AutoCompleteWorker, SIGNAL(stopped()),
-                         this, SLOT(workerFinished()));
+        QObject::connect(m_AutoCompleteWorker, &AutoCompleteWorker::stopped,
+                         this, &AutoCompleteService::workerFinished);
 
-        QObject::connect(m_AutoCompleteWorker, SIGNAL(destroyed(QObject*)),
-                         this, SLOT(workerDestroyed(QObject*)));
+        QObject::connect(m_AutoCompleteWorker, &AutoCompleteWorker::destroyed,
+                         this, &AutoCompleteService::workerDestroyed);
 
         LOG_DEBUG << "starting thread...";
         thread->start();
