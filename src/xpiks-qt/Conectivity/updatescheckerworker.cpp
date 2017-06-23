@@ -204,8 +204,8 @@ namespace Conectivity {
         bool success = false;
 
         Conectivity::SimpleCurlDownloader downloader(updateCheckResult.m_UpdateURL);
-        QObject::connect(this, SIGNAL(cancelRequested()),
-                         &downloader, SIGNAL(cancelRequested()));
+        QObject::connect(this, &UpdatesCheckerWorker::cancelRequested,
+                         &downloader, &Conectivity::SimpleCurlDownloader::cancelRequested);
 
         Models::ProxySettings *proxySettings = m_SettingsModel->retrieveProxySettings();
         downloader.setProxySettings(proxySettings);

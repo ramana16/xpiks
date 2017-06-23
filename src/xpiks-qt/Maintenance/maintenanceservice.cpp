@@ -50,16 +50,16 @@ namespace Maintenance {
         QThread *thread = new QThread();
         m_MaintenanceWorker->moveToThread(thread);
 
-        QObject::connect(thread, SIGNAL(started()), m_MaintenanceWorker, SLOT(process()));
-        QObject::connect(m_MaintenanceWorker, SIGNAL(stopped()), thread, SLOT(quit()));
+        QObject::connect(thread, &QThread::started, m_MaintenanceWorker, &MaintenanceWorker::process);
+        QObject::connect(m_MaintenanceWorker, &MaintenanceWorker::stopped, thread, &QThread::quit);
 
-        QObject::connect(m_MaintenanceWorker, SIGNAL(stopped()), m_MaintenanceWorker, SLOT(deleteLater()));
-        QObject::connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+        QObject::connect(m_MaintenanceWorker, &MaintenanceWorker::stopped, m_MaintenanceWorker, &MaintenanceWorker::deleteLater);
+        QObject::connect(thread, &QThread::finished, thread, &QThread::deleteLater);
 
-        QObject::connect(m_MaintenanceWorker, SIGNAL(stopped()),
-                         this, SLOT(workerFinished()));
-        QObject::connect(m_MaintenanceWorker, SIGNAL(destroyed(QObject *)),
-                         this, SLOT(workerDestroyed(QObject *)));
+        QObject::connect(m_MaintenanceWorker, &MaintenanceWorker::stopped,
+                         this, &MaintenanceService::workerFinished);
+        QObject::connect(m_MaintenanceWorker, &MaintenanceWorker::destroyed,
+                         this, &MaintenanceService::workerDestroyed);
 
         LOG_DEBUG << "starting low priority thread...";
         thread->start(QThread::LowPriority);

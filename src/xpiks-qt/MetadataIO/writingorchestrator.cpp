@@ -78,13 +78,13 @@ namespace MetadataIO {
             QThread *thread = new QThread();
             worker->moveToThread(thread);
 
-            QObject::connect(thread, SIGNAL(started()), worker, SLOT(process()));
-            QObject::connect(worker, SIGNAL(stopped()), thread, SLOT(quit()));
+            QObject::connect(thread, &QThread::started, worker, &Exiv2WritingWorker::process);
+            QObject::connect(worker, &Exiv2WritingWorker::stopped, thread, &QThread::quit);
 
-            QObject::connect(worker, SIGNAL(stopped()), worker, SLOT(deleteLater()));
-            QObject::connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+            QObject::connect(worker, &Exiv2WritingWorker::stopped, worker, &Exiv2WritingWorker::deleteLater);
+            QObject::connect(thread, &QThread::finished, thread, &QThread::deleteLater);
 
-            QObject::connect(worker, SIGNAL(finished(bool)), this, SLOT(onWorkerFinished(bool)));
+            QObject::connect(worker, &Exiv2WritingWorker::finished, this, &WritingOrchestrator::onWorkerFinished);
 
             thread->start();
 
