@@ -66,12 +66,11 @@ namespace Conectivity {
         CurlFtpUploader ftpUploader(m_UploadBatch);
 
         //QObject::connect(&ftpUploader, SIGNAL(uploadStarted()), this, SIGNAL(uploadStarted()));
-        QObject::connect(&ftpUploader, SIGNAL(uploadFinished(bool)), this, SIGNAL(uploadFinished(bool)));
-        QObject::connect(&ftpUploader, SIGNAL(progressChanged(double, double)), this, SIGNAL(progressChanged(double, double)));
-        QObject::connect(&ftpUploader, SIGNAL(progressChanged(double, double)), this, SLOT(progressChangedHandler(double,double)));
-        QObject::connect(this, SIGNAL(workerCancelled()), &ftpUploader, SLOT(cancel()));
-        QObject::connect(&ftpUploader, SIGNAL(transferFailed(QString, QString)),
-                         this, SIGNAL(transferFailed(QString, QString)));
+        QObject::connect(&ftpUploader, &CurlFtpUploader::uploadFinished, this, &FtpUploaderWorker::uploadFinished);
+        QObject::connect(&ftpUploader, &CurlFtpUploader::progressChanged, this, &FtpUploaderWorker::progressChanged);
+        QObject::connect(&ftpUploader, &CurlFtpUploader::progressChanged, this, &FtpUploaderWorker::progressChangedHandler);
+        QObject::connect(this, &FtpUploaderWorker::workerCancelled, &ftpUploader, &CurlFtpUploader::cancel);
+        QObject::connect(&ftpUploader, &CurlFtpUploader::transferFailed, this, &FtpUploaderWorker::transferFailed);
 
         ftpUploader.uploadBatch();
         // in order to deliver 100% progressChanged() signal

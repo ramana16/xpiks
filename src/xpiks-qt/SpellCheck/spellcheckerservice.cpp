@@ -54,30 +54,30 @@ namespace SpellCheck {
         QThread *thread = new QThread();
         m_SpellCheckWorker->moveToThread(thread);
 
-        QObject::connect(thread, SIGNAL(started()), m_SpellCheckWorker, SLOT(process()));
-        QObject::connect(m_SpellCheckWorker, SIGNAL(stopped()), thread, SLOT(quit()));
+        QObject::connect(thread, &QThread::started, m_SpellCheckWorker, &SpellCheckWorker::process);
+        QObject::connect(m_SpellCheckWorker, &SpellCheckWorker::stopped, thread, &QThread::quit);
 
-        QObject::connect(m_SpellCheckWorker, SIGNAL(stopped()), m_SpellCheckWorker, SLOT(deleteLater()));
-        QObject::connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+        QObject::connect(m_SpellCheckWorker, &SpellCheckWorker::stopped, m_SpellCheckWorker, &SpellCheckWorker::deleteLater);
+        QObject::connect(thread, &QThread::finished, thread, &QThread::deleteLater);
 
-        QObject::connect(this, SIGNAL(cancelSpellChecking()),
-                         m_SpellCheckWorker, SLOT(cancel()));
+        QObject::connect(this, &SpellCheckerService::cancelSpellChecking,
+                         m_SpellCheckWorker, &SpellCheckWorker::cancel);
 
-        QObject::connect(m_SpellCheckWorker, SIGNAL(queueIsEmpty()),
-                         this, SIGNAL(spellCheckQueueIsEmpty()));
+        QObject::connect(m_SpellCheckWorker, &SpellCheckWorker::queueIsEmpty,
+                         this, &SpellCheckerService::spellCheckQueueIsEmpty);
 
-        QObject::connect(m_SpellCheckWorker, SIGNAL(stopped()),
-                         this, SLOT(workerFinished()));
-        QObject::connect(m_SpellCheckWorker, SIGNAL(destroyed(QObject *)),
-                         this, SLOT(workerDestroyed(QObject *)));
+        QObject::connect(m_SpellCheckWorker, &SpellCheckWorker::stopped,
+                         this, &SpellCheckerService::workerFinished);
+        QObject::connect(m_SpellCheckWorker, &SpellCheckWorker::destroyed,
+                         this, &SpellCheckerService::workerDestroyed);
 
         // user dict
-        QObject::connect(m_SpellCheckWorker, SIGNAL(wordsNumberChanged(int)),
-                         this, SLOT(wordsNumberChangedHandler(int)));
-        QObject::connect(m_SpellCheckWorker, SIGNAL(userDictUpdate(QStringList, bool)),
-                         this, SIGNAL(userDictUpdate(QStringList, bool)));
-        QObject::connect(m_SpellCheckWorker, SIGNAL(userDictCleared()),
-                         this, SIGNAL(userDictCleared()));
+        QObject::connect(m_SpellCheckWorker, &SpellCheckWorker::wordsNumberChanged,
+                         this, &SpellCheckerService::wordsNumberChangedHandler);
+        QObject::connect(m_SpellCheckWorker, &SpellCheckWorker::userDictUpdate,
+                         this, &SpellCheckerService::userDictUpdate);
+        QObject::connect(m_SpellCheckWorker, &SpellCheckWorker::userDictCleared,
+                         this, &SpellCheckerService::userDictCleared);
 
         LOG_DEBUG << "starting thread...";
         thread->start();

@@ -47,16 +47,16 @@ namespace Models {
         m_FtpCoordinator(ftpCoordinator),
         m_Percent(0) {
         Conectivity::FtpCoordinator *coordinator = dynamic_cast<Conectivity::FtpCoordinator *>(ftpCoordinator);
-        QObject::connect(coordinator, SIGNAL(uploadStarted()), this, SLOT(onUploadStarted()));
-        QObject::connect(coordinator, SIGNAL(uploadFinished(bool)), this, SLOT(allFinished(bool)));
-        QObject::connect(coordinator, SIGNAL(overallProgressChanged(double)), this, SLOT(uploaderPercentChanged(double)));
+        QObject::connect(coordinator, &Conectivity::FtpCoordinator::uploadStarted, this, &ArtworkUploader::onUploadStarted);
+        QObject::connect(coordinator, &Conectivity::FtpCoordinator::uploadFinished, this, &ArtworkUploader::allFinished);
+        QObject::connect(coordinator, &Conectivity::FtpCoordinator::overallProgressChanged, this, &ArtworkUploader::uploaderPercentChanged);
 
         m_TestingCredentialWatcher = new QFutureWatcher<Conectivity::ContextValidationResult>(this);
         QObject::connect(m_TestingCredentialWatcher, SIGNAL(finished()), SLOT(credentialsTestingFinished()));
-        QObject::connect(coordinator, SIGNAL(transferFailed(QString, QString)),
-                         &m_UploadWatcher, SLOT(reportUploadErrorHandler(QString, QString)));
+        QObject::connect(coordinator, &Conectivity::FtpCoordinator::transferFailed,
+                         &m_UploadWatcher, &Conectivity::UploadWatcher::reportUploadErrorHandler);
 
-        QObject::connect(&m_StocksFtpList, SIGNAL(stocksListUpdated()), this, SLOT(stocksListUpdated()));
+        QObject::connect(&m_StocksFtpList, &AutoComplete::StocksFtpListModel::stocksListUpdated, this, &ArtworkUploader::stocksListUpdated);
     }
 
     ArtworkUploader::~ArtworkUploader() {

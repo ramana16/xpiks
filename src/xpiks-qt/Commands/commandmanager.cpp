@@ -583,9 +583,9 @@ void Commands::CommandManager::disconnectArtworkSignals(Models::ArtworkMetadata 
     {
         LOG_INTEGRATION_TESTS << "Disconnecting from ArtItemsModel...";
         disconnectStatus = QObject::disconnect(metadata, 0, m_ArtItemsModel, 0);
-        Q_ASSERT(disconnectStatus == true);
+        if (disconnectStatus == false) { LOG_WARNING << "Disconnect returned false"; }
         disconnectStatus = QObject::disconnect(m_ArtItemsModel, 0, metadata, 0);
-        Q_ASSERT(disconnectStatus == true);
+        if (disconnectStatus == false) { LOG_WARNING << "Disconnect returned false"; }
     }
 
 #if defined(CORE_TESTS) || defined(INTEGRATION_TESTS)
@@ -596,9 +596,9 @@ void Commands::CommandManager::disconnectArtworkSignals(Models::ArtworkMetadata 
     {
         LOG_INTEGRATION_TESTS << "Disconnecting from FilteredItemsModel...";
         disconnectStatus = QObject::disconnect(metadata, 0, m_FilteredItemsModel, 0);
-        Q_ASSERT(disconnectStatus == true);
+        if (disconnectStatus == false) { LOG_WARNING << "Disconnect returned false"; }
         disconnectStatus = QObject::disconnect(m_FilteredItemsModel, 0, metadata, 0);
-        Q_ASSERT(disconnectStatus == true);
+        if (disconnectStatus == false) { LOG_WARNING << "Disconnect returned false"; }
     }
 }
 

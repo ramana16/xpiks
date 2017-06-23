@@ -40,14 +40,14 @@ namespace Models {
         m_ModifiedFlags(0) {
         m_CommonKeywordsModel.setSpellCheckInfo(&m_SpellCheckInfo);
 
-        QObject::connect(&m_CommonKeywordsModel, SIGNAL(spellCheckErrorsChanged()),
-                         this, SLOT(spellCheckErrorsChangedHandler()));
+        QObject::connect(&m_CommonKeywordsModel, &Common::BasicMetadataModel::spellCheckErrorsChanged,
+                         this, &CombinedArtworksModel::spellCheckErrorsChangedHandler);
 
-        QObject::connect(&m_CommonKeywordsModel, SIGNAL(completionsAvailable()),
-                         this, SIGNAL(completionsAvailable()));
+        QObject::connect(&m_CommonKeywordsModel, &Common::BasicMetadataModel::completionsAvailable,
+                         this, &CombinedArtworksModel::completionsAvailable);
 
-        QObject::connect(&m_CommonKeywordsModel, SIGNAL(afterSpellingErrorsFixed()),
-                         this, SLOT(spellCheckErrorsFixedHandler()));
+        QObject::connect(&m_CommonKeywordsModel, &Common::BasicMetadataModel::afterSpellingErrorsFixed,
+                         this, &CombinedArtworksModel::spellCheckErrorsFixedHandler);
     }
 
     void CombinedArtworksModel::setArtworks(std::vector<MetadataElement> &artworks) {

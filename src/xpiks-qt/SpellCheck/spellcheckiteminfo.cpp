@@ -95,19 +95,19 @@ namespace SpellCheck {
                                                              Common::BasicKeywordsModel *basicKeywordsModel) {
         // is freed by the document
         SpellCheckErrorsHighlighter *highlighter = new SpellCheckErrorsHighlighter(document, colorsModel, &m_DescriptionErrors);
-        QObject::connect(basicKeywordsModel, SIGNAL(spellCheckResultsReady()),
-                         highlighter, SLOT(rehighlight()));
-        QObject::connect(colorsModel, SIGNAL(themeChanged()),
-                         highlighter, SLOT(rehighlight()));
+        QObject::connect(basicKeywordsModel, &Common::BasicKeywordsModel::spellCheckResultsReady,
+                         highlighter, &SpellCheckErrorsHighlighter::rehighlight);
+        QObject::connect(colorsModel, &QMLExtensions::ColorsModel::themeChanged,
+                         highlighter, &SpellCheckErrorsHighlighter::rehighlight);
     }
 
     void SpellCheckItemInfo::createHighlighterForTitle(QTextDocument *document, QMLExtensions::ColorsModel *colorsModel,
                                                        Common::BasicKeywordsModel *basicKeywordsModel) {
         // is freed by the document
         SpellCheckErrorsHighlighter *highlighter = new SpellCheckErrorsHighlighter(document, colorsModel, &m_TitleErrors);
-        QObject::connect(basicKeywordsModel, SIGNAL(spellCheckResultsReady()),
-                         highlighter, SLOT(rehighlight()));
-        QObject::connect(colorsModel, SIGNAL(themeChanged()),
-                         highlighter, SLOT(rehighlight()));
+        QObject::connect(basicKeywordsModel, &Common::BasicKeywordsModel::spellCheckResultsReady,
+                         highlighter, &SpellCheckErrorsHighlighter::rehighlight);
+        QObject::connect(colorsModel, &QMLExtensions::ColorsModel::themeChanged,
+                         highlighter, &SpellCheckErrorsHighlighter::rehighlight);
     }
 }

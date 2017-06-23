@@ -47,11 +47,11 @@ namespace QMLExtensions {
         QThread *thread = new QThread();
         m_CachingWorker->moveToThread(thread);
 
-        QObject::connect(thread, SIGNAL(started()), m_CachingWorker, SLOT(process()));
-        QObject::connect(m_CachingWorker, SIGNAL(stopped()), thread, SLOT(quit()));
+        QObject::connect(thread, &QThread::started, m_CachingWorker, &ImageCachingWorker::process);
+        QObject::connect(m_CachingWorker, &ImageCachingWorker::stopped, thread, &QThread::quit);
 
-        QObject::connect(m_CachingWorker, SIGNAL(stopped()), m_CachingWorker, SLOT(deleteLater()));
-        QObject::connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+        QObject::connect(m_CachingWorker, &ImageCachingWorker::stopped, m_CachingWorker, &ImageCachingWorker::deleteLater);
+        QObject::connect(thread, &QThread::finished, thread, &QThread::deleteLater);
 
         LOG_DEBUG << "starting low priority thread...";
         thread->start(QThread::LowPriority);

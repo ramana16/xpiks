@@ -203,11 +203,11 @@ namespace Warnings {
     void WarningsModel::setSourceModel(QAbstractItemModel *sourceModel) {
         QSortFilterProxyModel::setSourceModel(sourceModel);
 
-        QObject::connect(sourceModel, SIGNAL(rowsRemoved(QModelIndex,int,int)),
-                         this, SLOT(sourceRowsRemoved(QModelIndex,int,int)));
-        QObject::connect(sourceModel, SIGNAL(rowsInserted(QModelIndex,int,int)),
-                         this, SLOT(sourceRowsInserted(QModelIndex,int,int)));
-        QObject::connect(sourceModel, SIGNAL(modelReset()),
-                         this, SLOT(sourceModelReset()));
+        QObject::connect(sourceModel, &QAbstractItemModel::rowsRemoved,
+                         this, &WarningsModel::sourceRowsRemoved);
+        QObject::connect(sourceModel, &QAbstractItemModel::rowsInserted,
+                         this, &WarningsModel::sourceRowsInserted);
+        QObject::connect(sourceModel, &QAbstractItemModel::modelReset,
+                         this, &WarningsModel::sourceModelReset);
     }
 }

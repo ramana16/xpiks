@@ -34,14 +34,14 @@ namespace QuickBuffer {
     {        
         m_BasicModel.setSpellCheckInfo(&m_SpellCheckInfo);
 
-        QObject::connect(&m_BasicModel, SIGNAL(spellCheckErrorsChanged()),
-                         this, SLOT(spellCheckErrorsChangedHandler()));
+        QObject::connect(&m_BasicModel, &Common::BasicMetadataModel::spellCheckErrorsChanged,
+                         this, &QuickBuffer::spellCheckErrorsChangedHandler);
 
 //        QObject::connect(&m_BasicModel, SIGNAL(completionsAvailable()),
 //                         this, SIGNAL(completionsAvailable()));
 
-        QObject::connect(&m_BasicModel, SIGNAL(afterSpellingErrorsFixed()),
-                         this, SLOT(afterSpellingErrorsFixedHandler()));
+        QObject::connect(&m_BasicModel, &Common::BasicMetadataModel::afterSpellingErrorsFixed,
+                         this, &QuickBuffer::afterSpellingErrorsFixedHandler);
     }
 
     QuickBuffer::~QuickBuffer() {

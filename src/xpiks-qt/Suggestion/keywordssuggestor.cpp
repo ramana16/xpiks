@@ -74,11 +74,11 @@ namespace Suggestion {
             SuggestionQueryEngineBase *engine = m_QueryEngines.at(i);
             m_QueryEnginesNames.append(engine->getName());
 
-            QObject::connect(engine, SIGNAL(resultsAvailable()),
-                             this, SLOT(resultsAvailableHandler()));
+            QObject::connect(engine, &SuggestionQueryEngineBase::resultsAvailable,
+                             this, &KeywordsSuggestor::resultsAvailableHandler);
 
-            QObject::connect(engine, SIGNAL(errorReceived(QString)),
-                             this, SLOT(errorsReceivedHandler(QString)));
+            QObject::connect(engine, &SuggestionQueryEngineBase::errorReceived,
+                             this, &KeywordsSuggestor::errorsReceivedHandler);
         }
     }
 

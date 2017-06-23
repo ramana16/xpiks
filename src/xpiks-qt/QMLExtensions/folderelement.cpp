@@ -40,7 +40,7 @@ namespace QMLExtensions {
         m_Geometry.setDrawingMode(GL_LINES);
         m_Geometry.setLineWidth(m_Thickness * m_Scale);
 
-        QObject::connect(this, SIGNAL(windowChanged(QQuickWindow*)), this, SLOT(windowChangedHandler(QQuickWindow*)));
+        QObject::connect(this, &FolderElement::windowChanged, this, &FolderElement::windowChangedHandler);
     }
 
     void FolderElement::setColor(const QColor &color) {
