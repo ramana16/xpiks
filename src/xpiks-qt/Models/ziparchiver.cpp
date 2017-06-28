@@ -36,8 +36,8 @@
 namespace Models {
     ZipArchiver::ZipArchiver() {
         m_ArchiveCreator = new QFutureWatcher<QStringList>(this);
-        connect(m_ArchiveCreator, SIGNAL(resultReadyAt(int)), SLOT(archiveCreated(int)));
-        connect(m_ArchiveCreator, SIGNAL(finished()), SLOT(allFinished()));
+        QObject::connect(m_ArchiveCreator, SIGNAL(resultReadyAt(int)), SLOT(archiveCreated(int)));
+        QObject::connect(m_ArchiveCreator, SIGNAL(finished()), SLOT(allFinished()));
     }
 
     int ZipArchiver::getItemsCount() const {

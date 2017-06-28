@@ -54,11 +54,11 @@ namespace Models {
         QThread *loggingThread = new QThread();
         m_LoggingWorker->moveToThread(loggingThread);
 
-        QObject::connect(loggingThread, SIGNAL(started()), m_LoggingWorker, SLOT(process()));
-        QObject::connect(m_LoggingWorker, SIGNAL(stopped()), loggingThread, SLOT(quit()));
+        QObject::connect(loggingThread, &QThread::started, m_LoggingWorker, &Helpers::LoggingWorker::process);
+        QObject::connect(m_LoggingWorker, &Helpers::LoggingWorker::stopped, loggingThread, &QThread::quit);
 
-        QObject::connect(m_LoggingWorker, SIGNAL(stopped()), m_LoggingWorker, SLOT(deleteLater()));
-        QObject::connect(loggingThread, SIGNAL(finished()), loggingThread, SLOT(deleteLater()));
+        QObject::connect(m_LoggingWorker, &Helpers::LoggingWorker::stopped, m_LoggingWorker, &Helpers::LoggingWorker::deleteLater);
+        QObject::connect(loggingThread, &QThread::finished, loggingThread, &QThread::deleteLater);
 
         loggingThread->start();
     }

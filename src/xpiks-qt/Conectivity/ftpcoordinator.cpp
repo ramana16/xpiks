@@ -77,19 +77,19 @@ namespace Conectivity {
                                                               batches.at(i), uploadInfos.at(i));
             QThread *thread = new QThread();
             worker->moveToThread(thread);
-            QObject::connect(thread, SIGNAL(started()), worker, SLOT(process()));
-            QObject::connect(worker, SIGNAL(stopped()), thread, SLOT(quit()));
+            QObject::connect(thread, &QThread::started, worker, &FtpUploaderWorker::process);
+            QObject::connect(worker, &FtpUploaderWorker::stopped, thread, &QThread::quit);
 
-            QObject::connect(worker, SIGNAL(stopped()), worker, SLOT(deleteLater()));
-            QObject::connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+            QObject::connect(worker, &FtpUploaderWorker::stopped, worker, &FtpUploaderWorker::deleteLater);
+            QObject::connect(thread, &QThread::finished, thread, &QThread::deleteLater);
 
             //QObject::connect(worker, SIGNAL(uploadStarted()), this, SIGNAL(uploadStarted()));
-            QObject::connect(worker, SIGNAL(uploadFinished(bool)), this, SLOT(workerFinished(bool)));
-            QObject::connect(this, SIGNAL(cancelAll()), worker, SIGNAL(workerCancelled()));
-            QObject::connect(worker, SIGNAL(progressChanged(double,double)),
-                             this, SLOT(workerProgressChanged(double,double)));
-            QObject::connect(worker, SIGNAL(transferFailed(QString, QString)),
-                             this, SIGNAL(transferFailed(QString, QString)));
+            QObject::connect(worker, &FtpUploaderWorker::uploadFinished, this, &FtpCoordinator::workerFinished);
+            QObject::connect(this, &FtpCoordinator::cancelAll, worker, &FtpUploaderWorker::workerCancelled);
+            QObject::connect(worker, &FtpUploaderWorker::progressChanged,
+                             this, &FtpCoordinator::workerProgressChanged);
+            QObject::connect(worker, &FtpUploaderWorker::transferFailed,
+                             this, &FtpCoordinator::transferFailed);
 
             thread->start();
         }

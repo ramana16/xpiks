@@ -35,12 +35,12 @@ namespace Models {
         m_LastUnavailableFilesCount(0),
         m_LastID(0)
     {
-        QObject::connect(&m_FilesWatcher, SIGNAL(fileChanged(const QString &)),
-                     this, SLOT(checkFileUnavailable(const QString &)));
+        QObject::connect(&m_FilesWatcher, &QFileSystemWatcher::fileChanged,
+                     this, &ArtworksRepository::checkFileUnavailable);
 
         m_Timer.setInterval(4000); //4 sec
         m_Timer.setSingleShot(true); //single shot
-        QObject::connect(&m_Timer, SIGNAL(timeout()), this, SLOT(onAvailabilityTimer()));
+        QObject::connect(&m_Timer, &QTimer::timeout, this, &ArtworksRepository::onAvailabilityTimer);
     }
 
     void ArtworksRepository::updateCountsForExistingDirectories() {

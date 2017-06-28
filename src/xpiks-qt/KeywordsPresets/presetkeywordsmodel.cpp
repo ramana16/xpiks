@@ -29,7 +29,7 @@ namespace KeywordsPresets {
         Common::BaseEntity()
     {
         m_SavingTimer.setSingleShot(true);
-        QObject::connect(&m_SavingTimer, SIGNAL(timeout()), this, SLOT(onSavingTimerTriggered()));
+        QObject::connect(&m_SavingTimer, &QTimer::timeout, this, &PresetKeywordsModel::onSavingTimerTriggered);
     }
 
     PresetKeywordsModel::~PresetKeywordsModel() {

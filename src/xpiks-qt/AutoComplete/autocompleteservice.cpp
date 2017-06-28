@@ -25,6 +25,7 @@
 #include "completionquery.h"
 #include "../Common/flags.h"
 #include "../Common/basickeywordsmodel.h"
+#include "../Helpers/asynccoordinator.h"
 
 namespace AutoComplete {
     AutoCompleteService::AutoCompleteService(AutoCompleteModel *autoCompleteModel, QObject *parent):
@@ -44,25 +45,32 @@ namespace AutoComplete {
             return;
         }
 
-        m_AutoCompleteWorker = new AutoCompleteWorker();
+        auto coordinatorParams = std::dynamic_pointer_cast<Helpers::AsyncCoordinatorStartParams>(params);
+        Helpers::AsyncCoordinator *coordinator = nullptr;
+        if (coordinatorParams) { coordinator = coordinatorParams->m_Coordinator; }
+
+        Helpers::AsyncCoordinatorLocker locker(coordinator);
+        Q_UNUSED(locker);
+
+        m_AutoCompleteWorker = new AutoCompleteWorker(coordinator);
 
         QThread *thread = new QThread();
         m_AutoCompleteWorker->moveToThread(thread);
 
-        QObject::connect(thread, SIGNAL(started()), m_AutoCompleteWorker, SLOT(process()));
-        QObject::connect(m_AutoCompleteWorker, SIGNAL(stopped()), thread, SLOT(quit()));
+        QObject::connect(thread, &QThread::started, m_AutoCompleteWorker, &AutoCompleteWorker::process);
+        QObject::connect(m_AutoCompleteWorker, &AutoCompleteWorker::stopped, thread, &QThread::quit);
 
-        QObject::connect(m_AutoCompleteWorker, SIGNAL(stopped()), m_AutoCompleteWorker, SLOT(deleteLater()));
-        QObject::connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+        QObject::connect(m_AutoCompleteWorker, &AutoCompleteWorker::stopped, m_AutoCompleteWorker, &AutoCompleteWorker::deleteLater);
+        QObject::connect(thread, &QThread::finished, thread, &QThread::deleteLater);
 
-        QObject::connect(this, SIGNAL(cancelAutoCompletion()),
-                         m_AutoCompleteWorker, SLOT(cancel()));
+        QObject::connect(this, &AutoCompleteService::cancelAutoCompletion,
+                         m_AutoCompleteWorker, &AutoCompleteWorker::cancel);
 
-        QObject::connect(m_AutoCompleteWorker, SIGNAL(stopped()),
-                         this, SLOT(workerFinished()));
+        QObject::connect(m_AutoCompleteWorker, &AutoCompleteWorker::stopped,
+                         this, &AutoCompleteService::workerFinished);
 
-        QObject::connect(m_AutoCompleteWorker, SIGNAL(destroyed(QObject*)),
-                         this, SLOT(workerDestroyed(QObject*)));
+        QObject::connect(m_AutoCompleteWorker, &AutoCompleteWorker::destroyed,
+                         this, &AutoCompleteService::workerDestroyed);
 
         LOG_DEBUG << "starting thread...";
         thread->start();
@@ -122,8 +130,8 @@ namespace AutoComplete {
         Common::BasicKeywordsModel *basicKeywordsModel = qobject_cast<Common::BasicKeywordsModel*>(notifyObject);
         Q_ASSERT(basicKeywordsModel != NULL);
 
-        QObject::connect(query.get(), SIGNAL(completionsAvailable()), basicKeywordsModel, SIGNAL(completionsAvailable()));
-        QObject::connect(query.get(), SIGNAL(completionsAvailable()), m_AutoCompleteModel, SLOT(completionsArrived()));
+        QObject::connect(query.get(), &CompletionQuery::completionsAvailable, basicKeywordsModel, &Common::BasicKeywordsModel::completionsAvailable);
+        QObject::connect(query.get(), &CompletionQuery::completionsAvailable, m_AutoCompleteModel, &AutoCompleteModel::completionsArrived);
 
         m_AutoCompleteWorker->submitItem(query);
     }

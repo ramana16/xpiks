@@ -48,7 +48,7 @@ namespace Helpers {
         void cancel();
 
     signals:
-        void statusReported(CoordinationStatus status);
+        void statusReported(int status);
 
     private slots:
         void onTimeout();
@@ -111,6 +111,25 @@ namespace Helpers {
 
     private:
         AsyncCoordinator *m_Coordinator;
+    };
+
+    class AsyncCoordinatorStarter {
+    public:
+        AsyncCoordinatorStarter(AsyncCoordinator *coordinator, int timeout):
+            m_Coordinator(coordinator),
+            m_Timeout(timeout)
+        {
+        }
+
+        virtual ~AsyncCoordinatorStarter() {
+            if (m_Coordinator != nullptr) {
+                m_Coordinator->allBegun(m_Timeout);
+            }
+        }
+
+    private:
+        AsyncCoordinator *m_Coordinator;
+        int m_Timeout;
     };
 }
 

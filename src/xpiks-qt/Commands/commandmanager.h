@@ -22,6 +22,7 @@
 #ifndef COMMANDMANAGER_H
 #define COMMANDMANAGER_H
 
+#include <QObject>
 #include <QStringList>
 #include <QList>
 #include <QUrl>
@@ -131,52 +132,11 @@ namespace Maintenance {
 }
 
 namespace Commands {
-    class CommandManager : public ICommandManager
+    class CommandManager : public QObject, public ICommandManager
     {
+        Q_OBJECT
     public:
-        CommandManager():
-            m_ArtworksRepository(NULL),
-            m_ArtItemsModel(NULL),
-            m_FilteredItemsModel(NULL),
-            m_CombinedArtworksModel(NULL),
-            m_ArtworkUploader(NULL),
-            m_UploadInfoRepository(NULL),
-            m_WarningsService(NULL),
-            m_SecretsManager(NULL),
-            m_UndoRedoManager(NULL),
-            m_ZipArchiver(NULL),
-            m_KeywordsSuggestor(NULL),
-            m_SettingsModel(NULL),
-            m_RecentDirectories(NULL),
-            m_RecentFiles(NULL),
-            m_SpellCheckerService(NULL),
-            m_SpellCheckSuggestionModel(NULL),
-            m_MetadataSaverService(NULL),
-            m_TelemetryService(NULL),
-            m_UpdateService(NULL),
-            m_LogsModel(NULL),
-            m_LocalLibrary(NULL),
-            m_MetadataIOCoordinator(NULL),
-            m_PluginManager(NULL),
-            m_LanguagesModel(NULL),
-            m_ColorsModel(NULL),
-            m_AutoCompleteService(NULL),
-            m_ImageCachingService(NULL),
-            m_DeleteKeywordsViewModel(NULL),
-            m_FindAndReplaceModel(NULL),
-            m_HelpersQmlWrapper(NULL),
-            m_PresetsModel(NULL),
-            m_PresetsModelConfig(NULL),
-            m_TranslationService(NULL),
-            m_TranslationManager(NULL),
-            m_UIManager(NULL),
-            m_ArtworkProxyModel(NULL),
-            m_QuickBuffer(NULL),
-            m_MaintenanceService(NULL),
-            m_AfterInitCalled(false),
-            m_LastCommandID(0)
-        { }
-
+        CommandManager();
         virtual ~CommandManager() {}
 
     public:
@@ -289,6 +249,7 @@ namespace Commands {
         void afterConstructionCallback();
 
     private:
+        void afterInnerServicesInitialized();
         void executeMaintenanceJobs();
 
     public:
@@ -303,6 +264,9 @@ namespace Commands {
         void cleanup();
 #endif
 
+    private slots:
+        void servicesInitialized(int status);
+
     public:
         void registerCurrentItem(const Models::MetadataElement &metadataElement);
         void registerCurrentItem(Models::ArtworkProxyBase *artworkProxy) const;
@@ -310,6 +274,7 @@ namespace Commands {
 
     public:
         // methods for getters
+        Helpers::AsyncCoordinator &getInitCoordinator() { return m_InitCoordinator; }
         virtual Models::ArtworksRepository *getArtworksRepository() const { return m_ArtworksRepository; }
         virtual Models::ArtItemsModel *getArtItemsModel() const { return m_ArtItemsModel; }
         virtual Encryption::SecretsManager *getSecretsManager() const { return m_SecretsManager; }
@@ -391,6 +356,7 @@ namespace Commands {
         QList<QUrl> m_InitialFilesToOpen;
 #endif
 
+        volatile bool m_ServicesInitialized;
         volatile bool m_AfterInitCalled;
         volatile int m_LastCommandID;
     };

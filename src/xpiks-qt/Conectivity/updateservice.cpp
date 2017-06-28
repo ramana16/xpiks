@@ -60,22 +60,22 @@ namespace Conectivity {
         QThread *thread = new QThread();
         m_UpdatesCheckerWorker->moveToThread(thread);
 
-        QObject::connect(thread, SIGNAL(started()), m_UpdatesCheckerWorker, SLOT(process()));
-        QObject::connect(m_UpdatesCheckerWorker, SIGNAL(stopped()), thread, SLOT(quit()));
+        QObject::connect(thread, &QThread::started, m_UpdatesCheckerWorker, &UpdatesCheckerWorker::process);
+        QObject::connect(m_UpdatesCheckerWorker, &UpdatesCheckerWorker::stopped, thread, &QThread::quit);
 
-        QObject::connect(m_UpdatesCheckerWorker, SIGNAL(stopped()), m_UpdatesCheckerWorker, SLOT(deleteLater()));
-        QObject::connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+        QObject::connect(m_UpdatesCheckerWorker, &UpdatesCheckerWorker::stopped, m_UpdatesCheckerWorker, &UpdatesCheckerWorker::deleteLater);
+        QObject::connect(thread, &QThread::finished, thread, &QThread::deleteLater);
 
-        QObject::connect(this, SIGNAL(cancelRequested()),
-                         m_UpdatesCheckerWorker, SIGNAL(cancelRequested()));
+        QObject::connect(this, &UpdateService::cancelRequested,
+                         m_UpdatesCheckerWorker, &UpdatesCheckerWorker::cancelRequested);
 
-        QObject::connect(m_UpdatesCheckerWorker, SIGNAL(updateAvailable(QString)),
-                         this, SIGNAL(updateAvailable(QString)));
-        QObject::connect(m_UpdatesCheckerWorker, SIGNAL(updateDownloaded(QString, int)),
-                         this, SLOT(updateDownloadedHandler(QString, int)));
+        QObject::connect(m_UpdatesCheckerWorker, &UpdatesCheckerWorker::updateAvailable,
+                         this, &UpdateService::updateAvailable);
+        QObject::connect(m_UpdatesCheckerWorker, &UpdatesCheckerWorker::updateDownloaded,
+                         this, &UpdateService::updateDownloadedHandler);
 
-        QObject::connect(m_UpdatesCheckerWorker, SIGNAL(stopped()),
-                         this, SLOT(workerFinished()));
+        QObject::connect(m_UpdatesCheckerWorker, &UpdatesCheckerWorker::stopped,
+                         this, &UpdateService::workerFinished);
 
         thread->start();
     }

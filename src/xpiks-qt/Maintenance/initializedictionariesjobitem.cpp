@@ -22,16 +22,22 @@
 #include "../Common/defines.h"
 #include "../Translation/translationmanager.h"
 #include "initializedictionariesjobitem.h"
+#include "../Helpers/asynccoordinator.h"
 
 namespace Maintenance {
-    InitializeDictionariesJobItem::InitializeDictionariesJobItem(Translation::TranslationManager *translationManager):
-        m_TranslationManager(translationManager)
+    InitializeDictionariesJobItem::InitializeDictionariesJobItem(Translation::TranslationManager *translationManager, Helpers::AsyncCoordinator *initCoordinator):
+        m_TranslationManager(translationManager),
+        m_InitCoordinator(initCoordinator)
     {
         Q_ASSERT(translationManager != NULL);
     }
 
     void InitializeDictionariesJobItem::processJob() {
         LOG_DEBUG << "#";
+
+        Helpers::AsyncCoordinatorUnlocker unlocker(m_InitCoordinator);
+        Q_UNUSED(unlocker);
+
         doInitializeDictionaries();
     }
 

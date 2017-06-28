@@ -32,6 +32,7 @@
 #include "../Models/settingsmodel.h"
 #include "../Helpers/constants.h"
 #include "../Maintenance/maintenanceservice.h"
+#include "../Helpers/asynccoordinator.h"
 
 #define SHORT_TRANSLATION_SYMBOLS 500
 #define BOOKNAME QLatin1String("bookname")
@@ -81,13 +82,17 @@ namespace Translation {
         m_HasMore(false)
     {
         m_TranslateTimer.setSingleShot(true);
-        QObject::connect(&m_TranslateTimer, SIGNAL(timeout()), this, SLOT(updateTranslationTimer()));
+        QObject::connect(&m_TranslateTimer, &QTimer::timeout, this, &TranslationManager::updateTranslationTimer);
     }
 
-    void TranslationManager::initializeDictionaries() {
+    void TranslationManager::initializeDictionaries(Helpers::AsyncCoordinator *initCoordinator) {
         LOG_DEBUG << "#";
+
+        Helpers::AsyncCoordinatorLocker locker(initCoordinator);
+        Q_UNUSED(locker);
+
         Maintenance::MaintenanceService *maintenanceService = m_CommandManager->getMaintenanceService();
-        maintenanceService->initializeDictionaries(this);
+        maintenanceService->initializeDictionaries(this, initCoordinator);
     }
 
     void TranslationManager::setQuery(const QString &value) {

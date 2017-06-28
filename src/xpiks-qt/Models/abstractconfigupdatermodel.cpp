@@ -29,7 +29,7 @@ namespace Models {
         m_RemoteConfig(this),
         m_ForceOverwrite(forceOverwrite)
     {
-        QObject::connect(&m_RemoteConfig, SIGNAL(configArrived()), this, SLOT(remoteConfigArrived()));
+        QObject::connect(&m_RemoteConfig, &Helpers::RemoteConfig::configArrived, this, &AbstractConfigUpdaterModel::remoteConfigArrived);
     }
 
     void AbstractConfigUpdaterModel::initializeConfigs(const QString &configUrl, const QString &filePath) {

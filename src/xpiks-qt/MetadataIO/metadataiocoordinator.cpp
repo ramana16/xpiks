@@ -120,15 +120,15 @@ namespace MetadataIO {
         QThread *thread = new QThread();
         readingWorker->moveToThread(thread);
 
-        QObject::connect(thread, SIGNAL(started()), readingWorker, SLOT(process()));
-        QObject::connect(readingWorker, SIGNAL(stopped()), thread, SLOT(quit()));
+        QObject::connect(thread, &QThread::started, readingWorker, &MetadataReadingWorker::process);
+        QObject::connect(readingWorker, &MetadataReadingWorker::stopped, thread, &QThread::quit);
 
-        QObject::connect(readingWorker, SIGNAL(stopped()), readingWorker, SLOT(deleteLater()));
-        QObject::connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+        QObject::connect(readingWorker, &MetadataReadingWorker::stopped, readingWorker, &MetadataReadingWorker::deleteLater);
+        QObject::connect(thread, &QThread::finished, thread, &QThread::deleteLater);
 
-        QObject::connect(readingWorker, SIGNAL(finished(bool)), this, SLOT(readingWorkerFinished(bool)));
-        QObject::connect(this, SIGNAL(metadataReadingFinished()), readingWorker, SIGNAL(stopped()));
-        QObject::connect(this, SIGNAL(discardReadingSignal()), readingWorker, SLOT(cancel()));
+        QObject::connect(readingWorker, &MetadataReadingWorker::finished, this, &MetadataIOCoordinator::readingWorkerFinished);
+        QObject::connect(this, &MetadataIOCoordinator::metadataReadingFinished, readingWorker, &MetadataReadingWorker::stopped);
+        QObject::connect(this, &MetadataIOCoordinator::discardReadingSignal, readingWorker, &MetadataReadingWorker::cancel);
 
         initializeImport(artworksToRead.count());
 
@@ -143,9 +143,9 @@ namespace MetadataIO {
                                                   const QVector<QPair<int, int> > &rangesToUpdate) {
         ReadingOrchestrator *readingOrchestrator = new ReadingOrchestrator(artworksToRead, rangesToUpdate);
 
-        QObject::connect(readingOrchestrator, SIGNAL(allFinished(bool)), this, SLOT(readingWorkerFinished(bool)));
-        QObject::connect(this, SIGNAL(metadataReadingFinished()), readingOrchestrator, SLOT(dismiss()));
-        QObject::connect(this, SIGNAL(discardReadingSignal()), readingOrchestrator, SLOT(dismiss()));
+        QObject::connect(readingOrchestrator, &ReadingOrchestrator::allFinished, this, &MetadataIOCoordinator::readingWorkerFinished);
+        QObject::connect(this, &MetadataIOCoordinator::metadataReadingFinished, readingOrchestrator, &ReadingOrchestrator::dismiss);
+        QObject::connect(this, &MetadataIOCoordinator::discardReadingSignal, readingOrchestrator, &ReadingOrchestrator::dismiss);
 
         initializeImport(artworksToRead.count());
         m_ReadingWorker = readingOrchestrator;
@@ -161,14 +161,14 @@ namespace MetadataIO {
         QThread *thread = new QThread();
         writingWorker->moveToThread(thread);
 
-        QObject::connect(thread, SIGNAL(started()), writingWorker, SLOT(process()));
-        QObject::connect(writingWorker, SIGNAL(stopped()), thread, SLOT(quit()));
+        QObject::connect(thread, &QThread::started, writingWorker, &MetadataWritingWorker::process);
+        QObject::connect(writingWorker, &MetadataWritingWorker::stopped, thread, &QThread::quit);
 
-        QObject::connect(writingWorker, SIGNAL(stopped()), writingWorker, SLOT(deleteLater()));
-        QObject::connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+        QObject::connect(writingWorker, &MetadataWritingWorker::stopped, writingWorker, &MetadataWritingWorker::deleteLater);
+        QObject::connect(thread, &QThread::finished, thread, &QThread::deleteLater);
 
-        QObject::connect(writingWorker, SIGNAL(finished(bool)), this, SLOT(writingWorkerFinished(bool)));
-        QObject::connect(this, SIGNAL(metadataWritingFinished()), writingWorker, SIGNAL(stopped()));
+        QObject::connect(writingWorker, &MetadataWritingWorker::finished, this, &MetadataIOCoordinator::writingWorkerFinished);
+        QObject::connect(this, &MetadataIOCoordinator::metadataWritingFinished, writingWorker, &MetadataWritingWorker::stopped);
         setProcessingItemsCount(artworksToWrite.length());
 
         LOG_DEBUG << "Starting thread...";
@@ -180,8 +180,8 @@ namespace MetadataIO {
     void MetadataIOCoordinator::writeMetadataExiv2(const QVector<Models::ArtworkMetadata *> &artworksToWrite) {
         WritingOrchestrator *writingOrchestrator = new WritingOrchestrator(artworksToWrite);
 
-        QObject::connect(writingOrchestrator, SIGNAL(allFinished(bool)), this, SLOT(writingWorkerFinished(bool)));
-        QObject::connect(this, SIGNAL(metadataWritingFinished()), writingOrchestrator, SLOT(dismiss()));
+        QObject::connect(writingOrchestrator, &WritingOrchestrator::allFinished, this, &MetadataIOCoordinator::writingWorkerFinished);
+        QObject::connect(this, &MetadataIOCoordinator::metadataWritingFinished, writingOrchestrator, &WritingOrchestrator::dismiss);
 
         m_WritingWorker = writingOrchestrator;
 

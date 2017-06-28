@@ -48,8 +48,8 @@ namespace Models {
         m_MetadataModel.setSpellCheckInfo(&m_SpellCheckInfo);
         m_BackupTimer.setSingleShot(true);
 
-        QObject::connect(&m_BackupTimer, SIGNAL(timeout()), this, SLOT(backupTimerTriggered()));
-        QObject::connect(&m_MetadataModel, SIGNAL(spellCheckErrorsChanged()), this, SIGNAL(spellCheckErrorsChanged()));
+        QObject::connect(&m_BackupTimer, &QTimer::timeout, this, &ArtworkMetadata::backupTimerTriggered);
+        QObject::connect(&m_MetadataModel, &Common::BasicMetadataModel::spellCheckErrorsChanged, this, &ArtworkMetadata::spellCheckErrorsChanged);
     }
 
     ArtworkMetadata::~ArtworkMetadata() {

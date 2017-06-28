@@ -493,9 +493,9 @@ int main(int argc, char *argv[]) {
     imageCachingService.setScale(window->effectiveDevicePixelRatio());
 
     QScreen *screen = window->screen();
-    QObject::connect(window, SIGNAL(screenChanged(QScreen*)), &imageCachingService, SLOT(screenChangedHandler(QScreen*)));
-    QObject::connect(screen, SIGNAL(logicalDotsPerInchChanged(qreal)), &imageCachingService, SLOT(dpiChanged(qreal)));
-    QObject::connect(screen, SIGNAL(physicalDotsPerInchChanged(qreal)), &imageCachingService, SLOT(dpiChanged(qreal)));
+    QObject::connect(window, &QQuickWindow::screenChanged, &imageCachingService, &QMLExtensions::ImageCachingService::screenChangedHandler);
+    QObject::connect(screen, &QScreen::logicalDotsPerInchChanged, &imageCachingService, &QMLExtensions::ImageCachingService::dpiChanged);
+    QObject::connect(screen, &QScreen::physicalDotsPerInchChanged, &imageCachingService, &QMLExtensions::ImageCachingService::dpiChanged);
 
     uiProvider->setRoot(window->contentItem());
     uiProvider->setUIManager(&uiManager);

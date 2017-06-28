@@ -42,8 +42,8 @@ namespace Plugins {
     void UIProvider::openWindow(const QUrl &rcPath, const QHash<QString, QObject *> &contextModels) const {
         QQmlComponent component(m_QmlEngine);
 
-        QObject::connect(&component, SIGNAL(statusChanged(QQmlComponent::Status)),
-                         this, SLOT(viewStatusChanged(QQmlComponent::Status)));
+        QObject::connect(&component, &QQmlComponent::statusChanged,
+                         this, &UIProvider::viewStatusChanged);
 
         component.loadUrl(rcPath, QQmlComponent::PreferSynchronous);
 
@@ -54,8 +54,8 @@ namespace Plugins {
 
         LOG_DEBUG << "Creating a new window";
         QQmlContext *context = new QQmlContext(m_QmlEngine);
-        QObject::connect(context, SIGNAL(destroyed(QObject*)),
-                         this, SLOT(contextDestroyed(QObject*)));
+        QObject::connect(context, &QQmlContext::destroyed,
+                         this, &UIProvider::contextDestroyed);
 
         QHashIterator<QString, QObject*> i(contextModels);
         while (i.hasNext()) {
@@ -66,8 +66,8 @@ namespace Plugins {
         QObject *object = component.create(context);
 
         if (object != NULL) {
-            QObject::connect(object, SIGNAL(destroyed(QObject*)),
-                             this, SLOT(windowDestroyed(QObject*)));
+            QObject::connect(object, &QObject::destroyed,
+                             this, &UIProvider::windowDestroyed);
 
             QQuickWindow *window = qobject_cast<QQuickWindow*>(object);
             if (window != NULL) {

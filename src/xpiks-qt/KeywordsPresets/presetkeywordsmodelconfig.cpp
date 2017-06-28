@@ -26,6 +26,7 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include "../Conectivity/apimanager.h"
+#include "../Helpers/asynccoordinator.h"
 
 namespace KeywordsPresets {
 #define OVERWRITE_KEY QLatin1String("overwrite")
@@ -41,8 +42,13 @@ namespace KeywordsPresets {
         Models::AbstractConfigUpdaterModel(OVERWRITE_PRESETS_CONFIG, parent)
     {}
 
-    void PresetKeywordsModelConfig::initializeConfigs() {
+    void PresetKeywordsModelConfig::initializeConfigs(Helpers::AsyncCoordinator *initCoordinator) {
         LOG_DEBUG << "#";
+
+        Helpers::AsyncCoordinatorLocker locker(initCoordinator);
+        Helpers::AsyncCoordinatorUnlocker unlocker(initCoordinator);
+        Q_UNUSED(locker); Q_UNUSED(unlocker);
+
         QString localConfigPath;
 
         QString appDataPath = XPIKS_USERDATA_PATH;

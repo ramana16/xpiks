@@ -28,6 +28,10 @@
 #include <QVector>
 #include "../Common/baseentity.h"
 
+namespace Helpers {
+    class AsyncCoordinator;
+}
+
 namespace Translation {
     struct DictionaryInfo {
         QString m_FullIfoPath;
@@ -66,7 +70,7 @@ namespace Translation {
         int getSelectedDictionaryIndex() const { return m_SelectedDictionaryIndex; }
 
     public:
-        void initializeDictionaries();
+        void initializeDictionaries(Helpers::AsyncCoordinator *initCoordinator);
         void setQuery(const QString &value);
         void setSelectedDictionaryIndex(int value);
         QStringList getDictionariesDescriptions() const;

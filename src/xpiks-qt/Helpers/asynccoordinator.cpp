@@ -28,7 +28,7 @@ namespace Helpers {
         m_StatusReported(0)
     {
         m_Timer.setSingleShot(true);
-        QObject::connect(&m_Timer, SIGNAL(timeout()), this, SLOT(onTimeout()));
+        QObject::connect(&m_Timer, &QTimer::timeout, this, &AsyncCoordinator::onTimeout);
     }
 
     void AsyncCoordinator::allBegun(int timeoutSeconds) {
@@ -56,7 +56,7 @@ namespace Helpers {
 
     void AsyncCoordinator::reportStatus(AsyncCoordinator::CoordinationStatus status) {
         if (0 == m_StatusReported.fetchAndStoreOrdered(1)) {
-            emit statusReported(status);
+            emit statusReported((int)status);
         }
     }
 }

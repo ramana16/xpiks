@@ -187,6 +187,7 @@ SOURCES += main.cpp \
     userdictedittest.cpp \
     weirdnamesreadtest.cpp \
     ../../xpiks-qt/QMLExtensions/tabsmodel.cpp \
+    ../../xpiks-qt/Helpers/asynccoordinator.cpp \
     ../../xpiks-qt/Maintenance/locallibraryloadsaveitem.cpp
 
 RESOURCES +=
@@ -404,6 +405,7 @@ HEADERS += \
     userdictedittest.h \
     weirdnamesreadtest.h \
     ../../xpiks-qt/QMLExtensions/tabsmodel.h \
+    ../../xpiks-qt/Helpers/asynccoordinator.h \
     ../../xpiks-qt/Maintenance/locallibraryloadsaveitem.h
 
 INCLUDEPATH += ../../../vendors/tiny-aes

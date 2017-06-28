@@ -307,9 +307,9 @@ namespace Conectivity {
         curlHandle = curl_easy_init();
 
         CurlProgressReporter progressReporter(curlHandle);
-        QObject::connect(&progressReporter, SIGNAL(progressChanged(double)),
-                         this, SLOT(reportCurrentFileProgress(double)));
-        QObject::connect(this, SIGNAL(cancelCurrentUpload()), &progressReporter, SLOT(cancelHandler()));
+        QObject::connect(&progressReporter, &CurlProgressReporter::progressChanged,
+                         this, &CurlFtpUploader::reportCurrentFileProgress);
+        QObject::connect(this, &CurlFtpUploader::cancelCurrentUpload, &progressReporter, &CurlProgressReporter::cancelHandler);
 
         // temporary do not emit started signal: not used
         //emit uploadStarted();

@@ -64,13 +64,13 @@ namespace Conectivity {
         QThread *thread = new QThread();
         m_TelemetryWorker->moveToThread(thread);
 
-        QObject::connect(thread, SIGNAL(started()), m_TelemetryWorker, SLOT(process()));
-        QObject::connect(m_TelemetryWorker, SIGNAL(stopped()), thread, SLOT(quit()));
+        QObject::connect(thread, &QThread::started, m_TelemetryWorker, &TelemetryWorker::process);
+        QObject::connect(m_TelemetryWorker, &TelemetryWorker::stopped, thread, &QThread::quit);
 
-        QObject::connect(m_TelemetryWorker, SIGNAL(stopped()), m_TelemetryWorker, SLOT(deleteLater()));
-        QObject::connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+        QObject::connect(m_TelemetryWorker, &TelemetryWorker::stopped, m_TelemetryWorker, &TelemetryWorker::deleteLater);
+        QObject::connect(thread, &QThread::finished, thread, &QThread::deleteLater);
 
-        QObject::connect(this, SIGNAL(cancelAllQueries()), m_TelemetryWorker, SIGNAL(cancelAllQueries()));
+        QObject::connect(this, &TelemetryService::cancelAllQueries, m_TelemetryWorker, &TelemetryWorker::cancelAllQueries);
 
         thread->start();
     }

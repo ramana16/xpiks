@@ -196,9 +196,8 @@ namespace MetadataIO {
 
     void MetadataWritingWorker::initWorker() {
         m_ExiftoolProcess = new QProcess(this);
-
-        QObject::connect(m_ExiftoolProcess, SIGNAL(finished(int,QProcess::ExitStatus)),
-                         this, SLOT(innerProcessFinished(int,QProcess::ExitStatus)));
+        QObject::connect(m_ExiftoolProcess, static_cast<void (QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished),
+                         this, &MetadataWritingWorker::innerProcessFinished);
     }
 
     QStringList MetadataWritingWorker::createArgumentsList(const QString &jsonFilePath) {

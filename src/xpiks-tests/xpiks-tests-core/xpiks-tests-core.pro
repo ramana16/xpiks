@@ -189,6 +189,7 @@ SOURCES += main.cpp \
     ../../xpiks-qt/Models/artworkproxymodel.cpp \
     ../../xpiks-qt/Models/uimanager.cpp \
     ../../xpiks-qt/QMLExtensions/tabsmodel.cpp \
+    ../../xpiks-qt/Helpers/asynccoordinator.cpp \
     ../../xpiks-qt/Maintenance/locallibraryloadsaveitem.cpp
 
 HEADERS += \
@@ -327,5 +328,6 @@ HEADERS += \
     ../../xpiks-qt/Models/uimanager.h \
     ../../xpiks-qt/KeywordsPresets/ipresetsmanager.h \
     ../../xpiks-qt/QMLExtensions/tabsmodel.h \
+    ../../xpiks-qt/Helpers/asynccoordinator.h \
     ../../xpiks-qt/Maintenance/locallibraryloadsaveitem.h
 

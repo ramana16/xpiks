@@ -23,6 +23,7 @@
 #include <QThread>
 #include "translationworker.h"
 #include "translationquery.h"
+#include "../Helpers/asynccoordinator.h"
 
 namespace Translation {
     TranslationService::TranslationService(TranslationManager &manager, QObject *parent) :
@@ -39,22 +40,29 @@ namespace Translation {
             return;
         }
 
-        m_TranslationWorker = new TranslationWorker();
+        auto coordinatorParams = std::dynamic_pointer_cast<Helpers::AsyncCoordinatorStartParams>(params);
+        Helpers::AsyncCoordinator *coordinator = nullptr;
+        if (coordinatorParams) { coordinator = coordinatorParams->m_Coordinator; }
+
+        Helpers::AsyncCoordinatorLocker locker(coordinator);
+        Q_UNUSED(locker);
+
+        m_TranslationWorker = new TranslationWorker(coordinator);
 
         QThread *thread = new QThread();
         m_TranslationWorker->moveToThread(thread);
 
-        QObject::connect(thread, SIGNAL(started()), m_TranslationWorker, SLOT(process()));
-        QObject::connect(m_TranslationWorker, SIGNAL(stopped()), thread, SLOT(quit()));
+        QObject::connect(thread, &QThread::started, m_TranslationWorker, &TranslationWorker::process);
+        QObject::connect(m_TranslationWorker, &TranslationWorker::stopped, thread, &QThread::quit);
 
-        QObject::connect(m_TranslationWorker, SIGNAL(stopped()), m_TranslationWorker, SLOT(deleteLater()));
-        QObject::connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+        QObject::connect(m_TranslationWorker, &TranslationWorker::stopped, m_TranslationWorker, &TranslationWorker::deleteLater);
+        QObject::connect(thread, &QThread::finished, thread, &QThread::deleteLater);
 
-        QObject::connect(m_TranslationWorker, SIGNAL(stopped()),
-                         this, SLOT(workerFinished()));
+        QObject::connect(m_TranslationWorker, &TranslationWorker::stopped,
+                         this, &TranslationService::workerFinished);
 
-        QObject::connect(m_TranslationWorker, SIGNAL(destroyed(QObject*)),
-                         this, SLOT(workerDestroyed(QObject*)));
+        QObject::connect(m_TranslationWorker, &TranslationWorker::destroyed,
+                         this, &TranslationService::workerDestroyed);
 
         LOG_DEBUG << "starting thread...";
         thread->start();
@@ -105,7 +113,7 @@ namespace Translation {
 
         std::shared_ptr<TranslationQuery> query(new TranslationQuery(wordToTranslate),
                                                 [](TranslationQuery *tq) { tq->deleteLater(); });
-        QObject::connect(query.get(), SIGNAL(translationAvailable()), &m_TranslationManager, SLOT(translationArrived()));
+        QObject::connect(query.get(), &TranslationQuery::translationAvailable, &m_TranslationManager, &TranslationManager::translationArrived);
 
         m_TranslationWorker->submitItem(query);
     }

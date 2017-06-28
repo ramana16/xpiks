@@ -39,17 +39,17 @@ namespace MetadataIO {
         QThread *thread = new QThread();
         m_BackupWorker->moveToThread(thread);
 
-        QObject::connect(thread, SIGNAL(started()), m_BackupWorker, SLOT(process()));
-        QObject::connect(m_BackupWorker, SIGNAL(stopped()), thread, SLOT(quit()));
+        QObject::connect(thread, &QThread::started, m_BackupWorker, &BackupSaverWorker::process);
+        QObject::connect(m_BackupWorker, &BackupSaverWorker::stopped, thread, &QThread::quit);
 
-        QObject::connect(m_BackupWorker, SIGNAL(stopped()), m_BackupWorker, SLOT(deleteLater()));
-        QObject::connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+        QObject::connect(m_BackupWorker, &BackupSaverWorker::stopped, m_BackupWorker, &BackupSaverWorker::deleteLater);
+        QObject::connect(thread, &QThread::finished, thread, &QThread::deleteLater);
 
-        QObject::connect(this, SIGNAL(cancelSaving()),
-                         m_BackupWorker, SLOT(cancel()));
+        QObject::connect(this, &BackupSaverService::cancelSaving,
+                         m_BackupWorker, &BackupSaverWorker::cancel);
 
-        QObject::connect(m_BackupWorker, SIGNAL(stopped()),
-                         this, SLOT(workerFinished()));
+        QObject::connect(m_BackupWorker, &BackupSaverWorker::stopped,
+                         this, &BackupSaverService::workerFinished);
 
         thread->start();
     }

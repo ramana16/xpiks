@@ -158,7 +158,7 @@ namespace Conectivity {
         }
 
         SimpleProgressReporter progressReporter(curl_handle);
-        QObject::connect(this, SIGNAL(cancelRequested()), &progressReporter, SLOT(cancelHandler()));
+        QObject::connect(this, &SimpleCurlDownloader::cancelRequested, &progressReporter, &SimpleProgressReporter::cancelHandler);
 
         std::string resourceString = m_RemoteResource.toStdString();
         const char *url = resourceString.data();

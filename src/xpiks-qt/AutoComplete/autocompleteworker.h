@@ -27,6 +27,10 @@
 #include "completionquery.h"
 #include <src/libfaceapi.hpp>
 
+namespace Helpers {
+    class AsyncCoordinator;
+}
+
 namespace AutoComplete {
     class AutoCompleteWorker :
             public QObject,
@@ -34,7 +38,7 @@ namespace AutoComplete {
     {
         Q_OBJECT
     public:
-        explicit AutoCompleteWorker(QObject *parent = 0);
+        explicit AutoCompleteWorker(Helpers::AsyncCoordinator *initCoordinator, QObject *parent = 0);
         virtual ~AutoCompleteWorker();
 
     protected:
@@ -54,6 +58,7 @@ namespace AutoComplete {
         void queueIsEmpty();
 
     private:
+        Helpers::AsyncCoordinator *m_InitCoordinator;
         Souffleur *m_Soufleur;
         const int m_CompletionsCount;
     };

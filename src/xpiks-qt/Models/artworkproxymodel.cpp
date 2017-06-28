@@ -202,14 +202,14 @@ namespace Models {
         m_ArtworkOriginalIndex = originalIndex;
 
         auto *keywordsModel = metadata->getBasicModel();
-        QObject::connect(keywordsModel, SIGNAL(spellCheckErrorsChanged()),
-                         this, SLOT(spellCheckErrorsChangedHandler()));
+        QObject::connect(keywordsModel, &Common::BasicMetadataModel::spellCheckErrorsChanged,
+                         this, &ArtworkProxyModel::spellCheckErrorsChangedHandler);
 
-        QObject::connect(keywordsModel, SIGNAL(completionsAvailable()),
-                         this, SIGNAL(completionsAvailable()));
+        QObject::connect(keywordsModel, &Common::BasicMetadataModel::completionsAvailable,
+                         this, &ArtworkProxyModel::completionsAvailable);
 
-        QObject::connect(keywordsModel, SIGNAL(afterSpellingErrorsFixed()),
-                         this, SLOT(afterSpellingErrorsFixedHandler()));
+        QObject::connect(keywordsModel, &Common::BasicMetadataModel::afterSpellingErrorsFixed,
+                         this, &ArtworkProxyModel::afterSpellingErrorsFixedHandler);
 
         emit descriptionChanged();
         emit titleChanged();

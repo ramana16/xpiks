@@ -94,7 +94,6 @@ namespace SpellCheck {
         void wordsNumberChangedHandler(int number);
 
     private:
-        std::shared_ptr<Common::ServiceStartParams> m_StartParams;
         SpellCheckWorker *m_SpellCheckWorker;
         Models::SettingsModel *m_SettingsModel;
         volatile bool m_RestartRequired;

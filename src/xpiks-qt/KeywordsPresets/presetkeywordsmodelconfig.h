@@ -25,6 +25,10 @@
 #include "../Models/abstractconfigupdatermodel.h"
 #include "presetkeywordsmodel.h"
 
+namespace Helpers {
+    class AsyncCoordinator;
+}
+
 namespace KeywordsPresets {
     struct PresetData {
         QStringList m_Keywords;
@@ -39,7 +43,7 @@ namespace KeywordsPresets {
 
     public:
         PresetKeywordsModelConfig(QObject *parent=0);
-        void initializeConfigs();
+        void initializeConfigs(Helpers::AsyncCoordinator *initCoordinator);
         void saveFromModel(const std::vector<PresetModel *> &presets);
 
     public:

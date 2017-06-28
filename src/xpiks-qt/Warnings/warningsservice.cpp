@@ -37,26 +37,27 @@ namespace Warnings {
     }
 
     void WarningsService::startService(const std::shared_ptr<Common::ServiceStartParams> &params) {
+        Q_UNUSED(params);
         m_WarningsWorker = new WarningsCheckingWorker(&m_WarningsSettingsModel);
 
         QThread *thread = new QThread();
         m_WarningsWorker->moveToThread(thread);
 
-        QObject::connect(thread, SIGNAL(started()), m_WarningsWorker, SLOT(process()));
-        QObject::connect(m_WarningsWorker, SIGNAL(stopped()), thread, SLOT(quit()));
+        QObject::connect(thread, &QThread::started, m_WarningsWorker, &WarningsCheckingWorker::process);
+        QObject::connect(m_WarningsWorker, &WarningsCheckingWorker::stopped, thread, &QThread::quit);
 
-        QObject::connect(m_WarningsWorker, SIGNAL(stopped()), m_WarningsWorker, SLOT(deleteLater()));
-        QObject::connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
+        QObject::connect(m_WarningsWorker, &WarningsCheckingWorker::stopped, m_WarningsWorker, &WarningsCheckingWorker::deleteLater);
+        QObject::connect(thread, &QThread::finished, thread, &QThread::deleteLater);
 
-        QObject::connect(m_WarningsWorker, SIGNAL(destroyed(QObject *)),
-                         this, SLOT(workerDestoyed(QObject *)));
+        QObject::connect(m_WarningsWorker, &WarningsCheckingWorker::destroyed,
+                         this, &WarningsService::workerDestoyed);
 
-        QObject::connect(m_WarningsWorker, SIGNAL(stopped()),
-                         this, SLOT(workerStopped()));
+        QObject::connect(m_WarningsWorker, &WarningsCheckingWorker::stopped,
+                         this, &WarningsService::workerStopped);
 
 #ifdef INTEGRATION_TESTS
-        QObject::connect(m_WarningsWorker, SIGNAL(queueIsEmpty()),
-                         this, SIGNAL(queueIsEmpty()));
+        QObject::connect(m_WarningsWorker, &WarningsCheckingWorker::queueIsEmpty,
+                         this, &WarningsService::queueIsEmpty);
 #endif
 
         LOG_INFO << "Starting worker";
