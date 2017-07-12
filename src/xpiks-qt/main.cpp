@@ -346,7 +346,7 @@ int main(int argc, char *argv[]) {
 
     MetadataIO::MetadataIOCoordinator metadataIOCoordinator;
 
-#if defined(QT_NO_DEBUG) && !defined(TELEMETRY_DISABLED)
+#if defined(QT_NO_DEBUG)
     const bool telemetryEnabled = settingsModel.getIsTelemetryEnabled();
 #else
     const bool telemetryEnabled = false;
