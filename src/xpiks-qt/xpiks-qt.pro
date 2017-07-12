@@ -578,14 +578,14 @@ linux-g++-64 {
     LIBS += -L/lib/x86_64-linux-gnu/
     BUILDNO = $$system($$PWD/buildno.sh)
 
-    #DEFINES += TELEMETRY_DISABLED
-
     UNAME = $$system(cat /proc/version | tr -d \'()\')
+    
     contains( UNAME, Debian|Ubuntu ) {
         message("distribution : Debian")
         LIBS -= -lquazip
 	LIBS += -lquazip5
     }
+    
     contains( UNAME, SUSE ) {
         message("distribution : SUSE")
     }
