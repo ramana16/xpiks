@@ -36,7 +36,8 @@ namespace Plugins {
     enum struct PluginNotificationFlags: int {
         None = 0,
         CurrentEditbleChanged = 1 << 0,
-        ActionUndone = 1 << 1
+        ActionUndone = 1 << 1,
+        PresetsUpdated = 1 << 2
     };
 
     class XpiksPluginInterface {

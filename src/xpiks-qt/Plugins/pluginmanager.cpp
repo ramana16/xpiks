@@ -132,20 +132,33 @@ namespace Plugins {
     void PluginManager::onCurrentEditableChanged() {
         LOG_DEBUG << "#";
         size_t size = m_PluginsList.size();
+        QVariant empty;
 
         for (size_t i = 0; i < size; ++i) {
             std::shared_ptr<PluginWrapper> &wrapper = m_PluginsList.at(i);
-            wrapper->notifyPlugin(PluginNotificationFlags::CurrentEditbleChanged, QVariant(), nullptr);
+            wrapper->notifyPlugin(PluginNotificationFlags::CurrentEditbleChanged, empty, nullptr);
         }
     }
 
     void PluginManager::onLastActionUndone(int commandID) {
         LOG_DEBUG << "#";
         size_t size = m_PluginsList.size();
+        QVariant commandVariant = QVariant::fromValue(commandID);
 
         for (size_t i = 0; i < size; ++i) {
             std::shared_ptr<PluginWrapper> &wrapper = m_PluginsList.at(i);
-            wrapper->notifyPlugin(PluginNotificationFlags::ActionUndone, QVariant::fromValue(commandID), nullptr);
+            wrapper->notifyPlugin(PluginNotificationFlags::ActionUndone, commandVariant, nullptr);
+        }
+    }
+
+    void PluginManager::onPresetsUpdated() {
+        LOG_DEBUG << "#";
+        size_t size = m_PluginsList.size();
+        QVariant empty;
+
+        for (size_t i = 0; i < size; ++i) {
+            std::shared_ptr<PluginWrapper> &wrapper = m_PluginsList.at(i);
+            wrapper->notifyPlugin(PluginNotificationFlags::PresetsUpdated, empty, nullptr);
         }
     }
 

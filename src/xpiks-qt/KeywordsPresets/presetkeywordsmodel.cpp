@@ -148,9 +148,38 @@ namespace KeywordsPresets {
         }
     }
 
+    void PresetKeywordsModel::addOrUpdatePreset(const QString &name, const QStringList &keywords, bool &isAdded) {
+        LOG_INFO << name;
+
+        int existingIndex = -1;
+        if (!tryFindPresetByFullName(name, false, existingIndex)) {
+            int lastIndex = getPresetsCount();
+
+            beginInsertRows(QModelIndex(), lastIndex, lastIndex);
+            m_PresetsList.push_back(new PresetModel(name, keywords));
+            endInsertRows();
+
+            isAdded = true;
+        } else {
+            PresetModel *preset = m_PresetsList.at(existingIndex);
+            Q_ASSERT(preset != nullptr);
+            preset->m_KeywordsModel.setKeywords(keywords);
+
+            QModelIndex indexToUpdate = this->index(existingIndex);
+            emit dataChanged(indexToUpdate, indexToUpdate, QVector<int>() << KeywordsCountRole << KeywordsStringRole);
+
+            isAdded = false;
+        }
+    }
+
     void PresetKeywordsModel::requestBackup() {
         LOG_DEBUG << "#";
         m_SavingTimer.start(2000);
+    }
+
+    void PresetKeywordsModel::triggerPresetsUpdated() {
+        LOG_DEBUG << "#";
+        emit presetsUpdated();
     }
 
     bool PresetKeywordsModel::tryFindPresetByFullName(const QString &name, bool caseSensitive, int &index) {

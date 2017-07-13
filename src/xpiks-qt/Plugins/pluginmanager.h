@@ -63,6 +63,7 @@ namespace Plugins {
     public slots:
         void onCurrentEditableChanged();
         void onLastActionUndone(int commandID);
+        void onPresetsUpdated();
 
     public:
         Q_INVOKABLE QObject *getPluginActions(int index) const;

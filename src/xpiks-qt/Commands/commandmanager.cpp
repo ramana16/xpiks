@@ -421,6 +421,11 @@ void Commands::CommandManager::connectEntitiesSignalsSlots() const {
         QObject::connect(m_UndoRedoManager, &UndoRedo::UndoRedoManager::actionUndone,
                          m_PluginManager, &Plugins::PluginManager::onLastActionUndone);
     }
+
+    if (m_PluginManager != NULL && m_PresetsModel != NULL) {
+        QObject::connect(m_PresetsModel, &KeywordsPresets::PresetKeywordsModel::presetsUpdated,
+                         m_PluginManager, &Plugins::PluginManager::onPresetsUpdated);
+    }
 #endif
 
     // needed for Setting Moving task because QAbstractListModel is not thread safe
