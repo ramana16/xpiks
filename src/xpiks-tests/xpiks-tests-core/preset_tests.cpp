@@ -169,3 +169,23 @@ void PresetTests::findPresetWithLongNamesByNameTest() {
     QVERIFY(presetKeywordsModel.tryFindSinglePresetByName("Young woman", false, index)); QCOMPARE(index, 0);
     QVERIFY(presetKeywordsModel.tryFindSinglePresetByName("old Woman", false, index)); QCOMPARE(index, 1);
 }
+
+void PresetTests::addPresetKeywordsWithDuplicatesTest() {
+    const int itemsToGenerate = 5;
+    DECLARE_MODELS_AND_GENERATE(itemsToGenerate);
+
+    bool isAdded = false;
+    int index = 0;
+    presetKeywordsModel.addOrUpdatePreset("bike", QStringList() << "downhill" << "slope" <<
+                                          "uphill", "slope", isAdded, index);
+
+    QVERIFY(isAdded == true);
+    QStringList keywords;
+    bool found = presetKeywordsModel.tryGetPreset(index, keywords);
+    QVERIFY(found);
+
+    QStringList expectedKeywords;
+    expectedKeywords << "downhill" << "slope" << "uphill";
+
+    QCOMPARE(keywords, expectedKeywords);
+}

@@ -148,7 +148,7 @@ namespace KeywordsPresets {
         }
     }
 
-    void PresetKeywordsModel::addOrUpdatePreset(const QString &name, const QStringList &keywords, bool &isAdded) {
+    void PresetKeywordsModel::addOrUpdatePreset(const QString &name, const QStringList &keywords, int &index, bool &isAdded) {
         LOG_INFO << name;
 
         int existingIndex = -1;
@@ -159,6 +159,7 @@ namespace KeywordsPresets {
             m_PresetsList.push_back(new PresetModel(name, keywords));
             endInsertRows();
 
+            index = lastIndex;
             isAdded = true;
         } else {
             PresetModel *preset = m_PresetsList.at(existingIndex);
@@ -168,6 +169,7 @@ namespace KeywordsPresets {
             QModelIndex indexToUpdate = this->index(existingIndex);
             emit dataChanged(indexToUpdate, indexToUpdate, QVector<int>() << KeywordsCountRole << KeywordsStringRole);
 
+            index = existingIndex;
             isAdded = false;
         }
     }
