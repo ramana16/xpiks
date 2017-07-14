@@ -28,6 +28,16 @@ void BasicKeywordsModelTests::simpleAddKeywordTest() {
     QCOMPARE(addedArguments.at(2).toInt(), 0);
 }
 
+void BasicKeywordsModelTests::simpleSetKeywordsTest() {
+    Common::BasicMetadataModel basicModel(m_FakeHold);
+
+    basicModel.setKeywords(QStringList() << "downhill" << "slope" << "uphill" << "slope");
+    QCOMPARE(basicModel.getKeywordsCount(), 3);
+    QStringList expectedKeywords;
+    expectedKeywords << "downhill" << "slope" << "uphill";
+    QCOMPARE(basicModel.getKeywords(), expectedKeywords);
+}
+
 void BasicKeywordsModelTests::addExistingKeywordTest() {
     Common::BasicMetadataModel basicModel(m_FakeHold);
 

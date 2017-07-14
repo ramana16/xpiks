@@ -10,6 +10,7 @@ class BasicKeywordsModelTests: public QObject
 private slots:
     void constructEmptyTest();
     void simpleAddKeywordTest();
+    void simpleSetKeywordsTest();
     void addExistingKeywordTest();
     void addSeveralKeywordsTest();
     void removeExistingKeywordTest();
