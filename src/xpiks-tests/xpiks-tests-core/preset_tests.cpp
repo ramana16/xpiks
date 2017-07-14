@@ -177,7 +177,7 @@ void PresetTests::addPresetKeywordsWithDuplicatesTest() {
     bool isAdded = false;
     int index = 0;
     presetKeywordsModel.addOrUpdatePreset("bike", QStringList() << "downhill" << "slope" <<
-                                          "uphill", "slope", index, isAdded);
+                                          "uphill" << "slope", index, isAdded);
 
     QVERIFY(isAdded == true);
     QStringList keywords;
