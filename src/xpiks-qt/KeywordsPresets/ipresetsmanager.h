@@ -35,7 +35,7 @@ namespace KeywordsPresets {
         virtual bool tryFindSinglePresetByName(const QString &name, bool strictMatch, int &index) = 0;
         virtual void findPresetsByName(const QString &name, QVector<QPair<int, QString> > &results) = 0;
         virtual void findOrRegisterPreset(const QString &name, const QStringList &keywords, int &index) = 0;
-        virtual void addOrUpdatePreset(const QString &name, const QStringList &keywords int &index, bool &isAdded) = 0;
+        virtual void addOrUpdatePreset(const QString &name, const QStringList &keywords, int &index, bool &isAdded) = 0;
         virtual void requestBackup() = 0;
         virtual void triggerPresetsUpdated() = 0;
     };
