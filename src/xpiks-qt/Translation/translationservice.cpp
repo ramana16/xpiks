@@ -86,7 +86,7 @@ namespace Translation {
         Q_UNUSED(item);
     }
 
-    void TranslationService::submitItem(QString *item, int flags) {
+    void TranslationService::submitItem(QString *item, Common::flag_t flags) {
         Q_UNUSED(flags);
         this->submitItem(item);
     }

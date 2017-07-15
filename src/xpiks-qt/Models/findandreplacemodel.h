@@ -51,7 +51,7 @@ namespace Models {
         virtual ~FindAndReplaceModel() {}
 
     public:
-        virtual int getFlags() const override { return (int)m_Flags; }
+        virtual Common::flag_t getFlags() const override { return (Common::flag_t)m_Flags; }
         const QString &getReplaceFrom() const{ return m_ReplaceFrom; }
         const QString &getReplaceTo() const { return m_ReplaceTo; }
         int getArtworksCount() const { return (int)m_ArtworksList.size(); }

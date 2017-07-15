@@ -217,7 +217,7 @@ namespace Models {
         int m_BackupTimerDelay;
         qint64 m_ID;
         qint64 m_DirectoryID;
-        volatile int m_MetadataFlags;
+        volatile Common::flag_t m_MetadataFlags;
         volatile Common::WarningFlags m_WarningsFlags;
         volatile bool m_IsLockedForEditing;
     };

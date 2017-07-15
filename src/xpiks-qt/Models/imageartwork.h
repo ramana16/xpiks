@@ -59,7 +59,7 @@ namespace Models {
         QSize m_ImageSize;
         QString m_AttachedVector;
         QDateTime m_DateTimeOriginal;
-        volatile int m_ImageFlags;
+        volatile Common::flag_t m_ImageFlags;
     };
 }
 

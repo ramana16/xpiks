@@ -46,7 +46,7 @@ namespace Translation {
 
     protected:
         virtual void submitItem(QString *item) override;
-        virtual void submitItem(QString *item, int flags) override;
+        virtual void submitItem(QString *item, Common::flag_t flags) override;
         virtual void submitItems(const QVector<QString*> &items) override;
 
     public:

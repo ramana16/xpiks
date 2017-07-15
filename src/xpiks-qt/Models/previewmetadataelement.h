@@ -75,7 +75,7 @@ namespace Models {
         void setHasKeywordsMatch(bool value) { setHasKeywordsMatchFlag(value); }
 
     private:
-        int m_Flags;
+        Common::flag_t m_Flags;
     };
 }
 

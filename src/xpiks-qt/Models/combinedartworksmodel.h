@@ -228,7 +228,7 @@ namespace Models {
         Common::BasicMetadataModel m_CommonKeywordsModel;
         SpellCheck::SpellCheckItemInfo m_SpellCheckInfo;
         Common::CombinedEditFlags m_EditFlags;
-        int m_ModifiedFlags;
+        Common::flag_t m_ModifiedFlags;
     };
 }
 

@@ -26,6 +26,8 @@
 #include <QObject>
 
 namespace Common {
+    typedef uint32_t flag_t;
+
     template<typename FlagType>
     struct enable_bitmask_operators {
         static constexpr bool enable=false;
@@ -46,7 +48,7 @@ namespace Common {
         return a;
     }
 
-    enum struct CombinedEditFlags: int {
+    enum struct CombinedEditFlags: flag_t {
         None = 0,
         EditTitle = 1 << 0,
         EditDescription = 1 << 1,
@@ -56,7 +58,7 @@ namespace Common {
         EditEverything = EditTitle | EditDescription | EditKeywords
     };
 
-    enum struct SuggestionFlags: int {
+    enum struct SuggestionFlags: flag_t {
         None = 0,
         Title = 1 << 0,
         Description = 1 << 1,
@@ -64,21 +66,21 @@ namespace Common {
         All = Title | Description | Keywords
     };
 
-    enum struct SpellCheckFlags: int {
+    enum struct SpellCheckFlags: flag_t {
         Title = 1 << 0,
         Description = 1 << 1,
         Keywords = 1 << 2,
         All = Title | Description | Keywords
     };
 
-    enum struct KeywordReplaceResult: int {
+    enum struct KeywordReplaceResult: flag_t {
         Succeeded = 0,
         FailedIndex = 1,
         FailedDuplicate = 2,
         Unknown = 1 << 20
     };
 
-    enum struct SearchFlags: int {
+    enum struct SearchFlags: flag_t {
         None = 0,
         CaseSensitive = 1 << 0,
         Description = 1 << 1,
@@ -111,7 +113,7 @@ namespace Common {
     };
 #endif
 
-    enum struct WarningFlags: int {
+    enum struct WarningFlags: flag_t {
         None = 0,
         SizeLessThanMinimum = 1 << 0,
         NoKeywords = 1 << 1,
@@ -173,62 +175,62 @@ namespace Common {
     const char *warningsFlagToString(WarningsCheckFlags flags);
 
     template<typename FlagType>
-    bool HasFlag(int value, FlagType flag) {
-        int intFlag = static_cast<int>(flag);
+    bool HasFlag(flag_t value, FlagType flag) {
+        flag_t intFlag = static_cast<flag_t>(flag);
         bool result = (value & intFlag) == intFlag;
         return result;
     }
 
     template<typename FlagType>
     bool HasFlag(FlagType value, FlagType flag) {
-        int intValue = static_cast<int>(value);
-        int intFlag = static_cast<int>(flag);
+        flag_t intValue = static_cast<flag_t>(value);
+        flag_t intFlag = static_cast<flag_t>(flag);
         bool result = (intValue & intFlag) == intFlag;
         return result;
     }
 
     template<typename FlagType>
-    void SetFlag(int &value, FlagType flag) {
-        value |= static_cast<int>(flag);
+    void SetFlag(flag_t &value, FlagType flag) {
+        value |= static_cast<flag_t>(flag);
     }
 
     template<typename FlagType>
     void SetFlag(FlagType &value, FlagType flag) {
-        value = static_cast<FlagType>(static_cast<int>(value) | static_cast<int>(flag));
+        value = static_cast<FlagType>(static_cast<flag_t>(value) | static_cast<flag_t>(flag));
     }
 
     template<typename FlagType>
-    void SetFlag(volatile int &value, FlagType flag) {
-        value |= static_cast<int>(flag);
+    void SetFlag(volatile flag_t &value, FlagType flag) {
+        value |= static_cast<flag_t>(flag);
     }
 
     template<typename FlagType>
     void SetFlag(volatile FlagType &value, FlagType flag) {
-        value = static_cast<FlagType>(static_cast<int>(value) | static_cast<int>(flag));
+        value = static_cast<FlagType>(static_cast<flag_t>(value) | static_cast<flag_t>(flag));
     }
 
     template<typename FlagType>
-    void UnsetFlag(int &value, FlagType flag) {
-        value &= ~(static_cast<int>(flag));
+    void UnsetFlag(flag_t &value, FlagType flag) {
+        value &= ~(static_cast<flag_t>(flag));
     }
 
     template<typename FlagType>
     void UnsetFlag(FlagType &value, FlagType flag) {
-        value = static_cast<FlagType>(static_cast<int>(value) & (~(static_cast<int>(flag))));
+        value = static_cast<FlagType>(static_cast<flag_t>(value) & (~(static_cast<flag_t>(flag))));
     }
 
     template<typename FlagType>
-    void UnsetFlag(volatile int &value, FlagType flag) {
-        value &= ~(static_cast<int>(flag));
+    void UnsetFlag(volatile flag_t &value, FlagType flag) {
+        value &= ~(static_cast<flag_t>(flag));
     }
 
     template<typename FlagType>
     void UnsetFlag(volatile FlagType &value, FlagType flag) {
-        value = static_cast<FlagType>(static_cast<int>(value) & (~(static_cast<int>(flag))));
+        value = static_cast<FlagType>(static_cast<flag_t>(value) & (~(static_cast<flag_t>(flag))));
     }
 
     template<typename FlagType>
-    void ApplyFlag(int &value, bool applySwitch, FlagType flag) {
+    void ApplyFlag(flag_t &value, bool applySwitch, FlagType flag) {
         if (applySwitch) {
             SetFlag(value, flag);
         } else {
@@ -246,7 +248,7 @@ namespace Common {
     }
 
     template<typename FlagType>
-    void ApplyFlag(volatile int &value, bool applySwitch, FlagType flag) {
+    void ApplyFlag(volatile flag_t &value, bool applySwitch, FlagType flag) {
         if (applySwitch) {
             SetFlag(value, flag);
         } else {

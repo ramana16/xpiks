@@ -96,7 +96,7 @@ namespace AutoComplete {
         Q_UNUSED(item);
     }
 
-    void AutoCompleteService::submitItem(QString *item, int flags) {
+    void AutoCompleteService::submitItem(QString *item, Common::flag_t flags) {
         Q_UNUSED(flags);
         this->submitItem(item);
     }

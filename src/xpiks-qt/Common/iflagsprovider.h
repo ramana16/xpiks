@@ -22,12 +22,14 @@
 #ifndef IFLAGSPROVIDER_H
 #define IFLAGSPROVIDER_H
 
+#include "flags.h"
+
 namespace Common {
     class IFlagsProvider {
     public:
         virtual ~IFlagsProvider() {}
 
-        virtual int getFlags() const = 0;
+        virtual Common::flag_t getFlags() const = 0;
     };
 }
 

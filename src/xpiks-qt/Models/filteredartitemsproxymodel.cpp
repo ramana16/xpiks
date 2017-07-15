@@ -448,8 +448,8 @@ namespace Models {
     }
 
     void FilteredArtItemsProxyModel::suggestCorrectionsForSelected() const {
-        auto flags = 0;
         using namespace Common;
+        flag_t flags = 0;
         Common::SetFlag(flags, SuggestionFlags::Description);
         Common::SetFlag(flags, SuggestionFlags::Title);
         Common::SetFlag(flags, SuggestionFlags::Keywords);

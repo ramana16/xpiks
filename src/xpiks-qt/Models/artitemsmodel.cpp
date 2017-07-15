@@ -297,7 +297,7 @@ namespace Models {
     void ArtItemsModel::suggestCorrections(int metadataIndex) {
         if (0 <= metadataIndex && metadataIndex < getArtworksCount()) {
             using namespace Common;
-            auto flags = 0;
+            Common::flag_t flags = 0;
             Common::SetFlag(flags, SuggestionFlags::Description);
             Common::SetFlag(flags, SuggestionFlags::Title);
             Common::SetFlag(flags, SuggestionFlags::Keywords);

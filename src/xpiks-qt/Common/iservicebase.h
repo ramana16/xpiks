@@ -24,6 +24,7 @@
 
 #include <QVector>
 #include <memory>
+#include "../Common/flags.h"
 
 namespace Common {
     class ServiceStartParams {
@@ -31,7 +32,7 @@ namespace Common {
         virtual ~ServiceStartParams() {}
     };
 
-    template<typename T, typename FlagsType=int>
+    template<typename T, typename FlagsType=Common::flag_t>
     class IServiceBase {
     public:
         virtual ~IServiceBase() {}
