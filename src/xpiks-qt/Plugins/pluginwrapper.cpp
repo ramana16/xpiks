@@ -92,10 +92,12 @@ namespace Plugins {
         }
     }
 
-    void PluginWrapper::notifyPlugin(PluginNotificationFlags flag, const QVariant &data, void *pointer) {
+    void PluginWrapper::notifyPlugin(uint32_t flag, const QVariant &data, void *pointer) {
         if (m_IsEnabled) {
-            if ((int)flag & (int)m_NotificationFlags) {
+            if ((flag & m_NotificationFlags) != 0) {
                 m_PluginInterface->onPropertyChanged(flag, data, pointer);
+            } else {
+                LOG_DEBUG << "Plugin" << m_PrettyName << "is not subscribed to" << flag;
             }
         } else {
             LOG_DEBUG << "Plugin" << m_PrettyName << "is disabled";

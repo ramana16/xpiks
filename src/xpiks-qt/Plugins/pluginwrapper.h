@@ -24,6 +24,7 @@
 
 #include <QObject>
 #include <QString>
+#include <cstdint>
 #include "pluginactionsmodel.h"
 #include "sandboxeddependencies.h"
 #include "iuiprovider.h"
@@ -54,12 +55,12 @@ namespace Plugins {
         void triggerActionSafe(int actionID) const;
         void finalizePlugin();
 
-        void notifyPlugin(PluginNotificationFlags flag, const QVariant &data, void *pointer);
+        void notifyPlugin(uint32_t flag, const QVariant &data, void *pointer);
 
     private:
         XpiksPluginInterface *m_PluginInterface;
         PluginActionsModel m_ActionsModel;
-        PluginNotificationFlags m_NotificationFlags;
+        uint32_t m_NotificationFlags;
         UIProviderSafe m_UIProviderSafe;
         int m_PluginID;
         bool m_IsEnabled;

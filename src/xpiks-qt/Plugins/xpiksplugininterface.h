@@ -25,6 +25,7 @@
 #include <QString>
 #include <QtPlugin>
 #include <QVector>
+#include <cstdint>
 #include "../Commands/icommandmanager.h"
 #include "../UndoRedo/iundoredomanager.h"
 #include "ipluginaction.h"
@@ -33,11 +34,11 @@
 #include "../KeywordsPresets/ipresetsmanager.h"
 
 namespace Plugins {
-    enum struct PluginNotificationFlags: int {
-        None = 0,
-        CurrentEditbleChanged = 1 << 0,
-        ActionUndone = 1 << 1,
-        PresetsUpdated = 1 << 2
+    enum PluginNotificationFlags {
+        NotifyFlagNone = 0,
+        NotifyFlagCurrentEditableChanged = 1 << 0,
+        NotifyFlagActionUndone = 1 << 1,
+        NotifyFlagPresetsUpdated = 1 << 2
     };
 
     class XpiksPluginInterface {
@@ -64,8 +65,8 @@ namespace Plugins {
         // notification handlers
     public:
         // properties of which plugin wants to be notified
-        virtual PluginNotificationFlags getDesiredNotificationFlags() const = 0;
-        virtual void onPropertyChanged(PluginNotificationFlags flag, const QVariant &data, void *pointer) = 0;
+        virtual uint32_t getDesiredNotificationFlags() const = 0;
+        virtual void onPropertyChanged(uint32_t flag, const QVariant &data, void *pointer) = 0;
 
     public:
         virtual void injectCommandManager(Commands::ICommandManager *commandManager) = 0;
