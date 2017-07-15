@@ -196,6 +196,8 @@ namespace Plugins {
             plugin->injectPresetsManager(m_CommandManager->getPresetsModel());
 
             plugin->initializePlugin();
+            // TODO: check this in config in future
+            plugin->enablePlugin();
         }
         catch(...) {
             LOG_WARNING << "Fail initializing plugin with ID:" << pluginID;
