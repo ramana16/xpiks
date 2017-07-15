@@ -136,7 +136,7 @@ namespace Plugins {
 
         for (size_t i = 0; i < size; ++i) {
             std::shared_ptr<PluginWrapper> &wrapper = m_PluginsList.at(i);
-            wrapper->notifyPlugin(NotifyFlagCurrentEditableChanged, empty, nullptr);
+            wrapper->notifyPlugin(Plugins::PluginNotificationFlags::CurrentEditableChanged, empty, nullptr);
         }
     }
 
@@ -147,7 +147,7 @@ namespace Plugins {
 
         for (size_t i = 0; i < size; ++i) {
             std::shared_ptr<PluginWrapper> &wrapper = m_PluginsList.at(i);
-            wrapper->notifyPlugin(NotifyFlagActionUndone, commandVariant, nullptr);
+            wrapper->notifyPlugin(Plugins::PluginNotificationFlags::ActionUndone, commandVariant, nullptr);
         }
     }
 
@@ -158,7 +158,7 @@ namespace Plugins {
 
         for (size_t i = 0; i < size; ++i) {
             std::shared_ptr<PluginWrapper> &wrapper = m_PluginsList.at(i);
-            wrapper->notifyPlugin(NotifyFlagPresetsUpdated, empty, nullptr);
+            wrapper->notifyPlugin(Plugins::PluginNotificationFlags::PresetsUpdated, empty, nullptr);
         }
     }
 

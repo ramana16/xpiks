@@ -32,13 +32,14 @@
 #include "iuiprovider.h"
 #include "../Common/iartworkssource.h"
 #include "../KeywordsPresets/ipresetsmanager.h"
+#include "../Common/flags.h"
 
 namespace Plugins {
-    enum PluginNotificationFlags {
-        NotifyFlagNone = 0,
-        NotifyFlagCurrentEditableChanged = 1 << 0,
-        NotifyFlagActionUndone = 1 << 1,
-        NotifyFlagPresetsUpdated = 1 << 2
+    enum struct PluginNotificationFlags: Common::flag_t {
+        None = 0,
+        CurrentEditableChanged = 1 << 0,
+        ActionUndone = 1 << 1,
+        PresetsUpdated = 1 << 2
     };
 
     class XpiksPluginInterface {
@@ -65,8 +66,8 @@ namespace Plugins {
         // notification handlers
     public:
         // properties of which plugin wants to be notified
-        virtual uint32_t getDesiredNotificationFlags() const = 0;
-        virtual void onPropertyChanged(uint32_t flag, const QVariant &data, void *pointer) = 0;
+        virtual Common::flag_t getDesiredNotificationFlags() const = 0;
+        virtual void onPropertyChanged(PluginNotificationFlags flag, const QVariant &data, void *pointer) = 0;
 
     public:
         virtual void injectCommandManager(Commands::ICommandManager *commandManager) = 0;
