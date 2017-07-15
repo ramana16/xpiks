@@ -179,16 +179,16 @@ namespace Models {
     public:
         Q_INVOKABLE bool needToShowWhatsNew() {
             int lastVersion = intValue(Constants::installedVersion, 0);
-            int installedMajorPart = lastVersion / 10;
-            int currentMajorPart = XPIKS_VERSION_INT / 10;
+            int installedMajorPart = lastVersion / XPIKS_VERSION_MAJOR_DIVISOR;
+            int currentMajorPart = XPIKS_VERSION_INT / XPIKS_VERSION_MAJOR_DIVISOR;
             bool result = currentMajorPart > installedMajorPart;
             return result;
         }
 
         Q_INVOKABLE bool needToShowTextWhatsNew() {
             int lastVersion = intValue(Constants::installedVersion, 0);
-            int installedMajorPart = lastVersion / 10;
-            int currentMajorPart = XPIKS_VERSION_INT / 10;
+            int installedMajorPart = lastVersion / XPIKS_VERSION_MAJOR_DIVISOR;
+            int currentMajorPart = XPIKS_VERSION_INT / XPIKS_VERSION_MAJOR_DIVISOR;
             bool result = (currentMajorPart == installedMajorPart) &&
                     (XPIKS_VERSION_INT > lastVersion);
             return result;
