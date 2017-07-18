@@ -24,7 +24,7 @@
 #include "ipluginaction.h"
 
 namespace Plugins {
-    PluginActionsModel::PluginActionsModel(const QVector<IPluginAction*> &actions, int pluginID, QObject *parent) :
+    PluginActionsModel::PluginActionsModel(const std::vector<std::shared_ptr<IPluginAction> > &actions, int pluginID, QObject *parent) :
         QAbstractListModel(parent),
         m_PluginActions(actions),
         m_PluginID(pluginID)
@@ -33,14 +33,14 @@ namespace Plugins {
 
     int PluginActionsModel::rowCount(const QModelIndex &parent) const {
         Q_UNUSED(parent);
-        return m_PluginActions.length();
+        return (int)m_PluginActions.size();
     }
 
     QVariant PluginActionsModel::data(const QModelIndex &index, int role) const {
         int row = index.row();
-        if (row < 0 || row >= m_PluginActions.length()) { return QVariant(); }
+        if (row < 0 || row >= (int)m_PluginActions.size()) { return QVariant(); }
 
-        IPluginAction *action = m_PluginActions.at(row);
+        auto &action = m_PluginActions.at(row);
 
         switch (role) {
             case ActionNameRole:
@@ -55,7 +55,7 @@ namespace Plugins {
     }
 
     QHash<int, QByteArray> PluginActionsModel::roleNames() const {
-        QHash<int, QByteArray> roles;
+        QHash<int, QByteArray> roles = QAbstractListModel::roleNames();
         roles[ActionNameRole] = "aname";
         roles[ActionCodeRole] = "acode";
         roles[PluginIDRole] = "pluginID";

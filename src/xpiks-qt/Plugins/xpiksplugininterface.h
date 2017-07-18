@@ -26,6 +26,8 @@
 #include <QtPlugin>
 #include <QVector>
 #include <cstdint>
+#include <vector>
+#include <memory>
 #include "../Commands/icommandmanager.h"
 #include "../UndoRedo/iundoredomanager.h"
 #include "ipluginaction.h"
@@ -53,7 +55,7 @@ namespace Plugins {
 
         // actions routines
     public:
-        virtual const QVector<IPluginAction*> &getExportedActions() const = 0;
+        virtual const std::vector<std::shared_ptr<IPluginAction> > &getExportedActions() const = 0;
         virtual bool executeAction(int actionID) = 0;
 
         // general routines

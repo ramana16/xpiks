@@ -23,7 +23,8 @@
 #define PLUGINACTIONSMODEL_H
 
 #include <QAbstractListModel>
-#include <QVector>
+#include <vector>
+#include <memory>
 
 namespace Plugins {
     class IPluginAction;
@@ -32,7 +33,7 @@ namespace Plugins {
     {
         Q_OBJECT
     public:
-        PluginActionsModel(const QVector<IPluginAction *> &actions, int pluginID, QObject *parent=0);
+        PluginActionsModel(const std::vector<std::shared_ptr<IPluginAction> > &actions, int pluginID, QObject *parent=0);
 
     public:
         enum PluginActionsModel_Roles {
@@ -42,7 +43,7 @@ namespace Plugins {
         };
 
     public:
-        int size() const { return m_PluginActions.length(); }
+        int size() const { return (int)m_PluginActions.size(); }
 
         // QAbstractItemModel interface
     public:
@@ -51,7 +52,7 @@ namespace Plugins {
         virtual QHash<int, QByteArray> roleNames() const override;
 
     private:
-        QVector<IPluginAction *> m_PluginActions;
+        std::vector<std::shared_ptr<IPluginAction> > m_PluginActions;
         int m_PluginID;
     };
 }
