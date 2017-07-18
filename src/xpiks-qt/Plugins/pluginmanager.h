@@ -95,6 +95,10 @@ namespace Plugins {
         PluginsWithActionsModel(QObject *parent = 0):
             QSortFilterProxyModel(parent)
         {}
+
+    public:
+        Q_INVOKABLE int getOriginalIndex(int index);
+
     protected:
         virtual bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const;
     };

@@ -40,6 +40,7 @@ namespace Plugins {
     }
 
     PluginManager::~PluginManager() {
+        LOG_DEBUG << "#";
     }
 
     bool PluginManager::getPluginsDir(QDir &pluginsDir) {
@@ -245,6 +246,13 @@ namespace Plugins {
         roles[PluginIDRole] = "pluginID";
         roles[IsEnabledRole] = "enabled";
         return roles;
+    }
+
+    int PluginsWithActionsModel::getOriginalIndex(int index) {
+        QModelIndex originalIndex = mapToSource(this->index(index, 0));
+        int row = originalIndex.row();
+
+        return row;
     }
 
     bool PluginsWithActionsModel::filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const {

@@ -22,6 +22,7 @@
 #include "pluginactionsmodel.h"
 #include <QHash>
 #include "ipluginaction.h"
+#include "../Common/defines.h"
 
 namespace Plugins {
     PluginActionsModel::PluginActionsModel(const std::vector<std::shared_ptr<IPluginAction> > &actions, int pluginID, QObject *parent) :
@@ -29,6 +30,7 @@ namespace Plugins {
         m_PluginActions(actions),
         m_PluginID(pluginID)
     {
+        LOG_INFO << "initialized" << m_PluginActions.size() << "action(s)";
     }
 
     int PluginActionsModel::rowCount(const QModelIndex &parent) const {

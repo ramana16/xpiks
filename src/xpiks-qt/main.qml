@@ -571,7 +571,8 @@ ApplicationWindow {
                         id: pluginActionsMenu
                         title: model.prettyname
                         enabled: model.enabled
-                        property var actionsModel: pluginManager.getPluginActions(index)
+                        property int originalIndex: pluginsWithActions.getOriginalIndex(index)
+                        property var actionsModel: pluginManager.getPluginActions(originalIndex)
 
                         Instantiator {
                             model: actionsModel
