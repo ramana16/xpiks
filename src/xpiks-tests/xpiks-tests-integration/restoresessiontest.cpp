@@ -79,6 +79,7 @@ int RestoreSessionTest::doTest() {
     artworksRepository->resetEverything();
     artItemsModel->deleteAllItems();
     //artItemsModel->fakeDeleteAllItems();
+    LOG_DEBUG << "###########";
 
     int restoredCount = m_CommandManager->restoreSessionForTest();
     VERIFY(addedCount == restoredCount, "Failed to properly restore");

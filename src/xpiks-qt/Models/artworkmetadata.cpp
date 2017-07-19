@@ -60,7 +60,7 @@ namespace Models {
 
     bool ArtworkMetadata::initialize(const QString &title,
                                      const QString &description, const QStringList &rawKeywords, bool overwrite) {
-        LOG_INTEGRATION_TESTS << title << description << rawKeywords << overwrite;
+        LOG_INTEGRATION_TESTS << "#" << m_ID << title << description << rawKeywords << overwrite;
 
         bool anythingModified = false;
 
