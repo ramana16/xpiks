@@ -53,7 +53,7 @@ namespace MetadataIO {
     class SessionSnapshot {
     public:
         SessionSnapshot(const std::deque<Models::ArtworkMetadata *> &artworksList) {
-            LOG_DEBUG << "#";
+            LOG_DEBUG << "Creating snapshot of" << artworksList.size() << "artwork(s)";
 
             m_Snapshot.reserve(artworksList.size());
             for (const auto &artwork: artworksList) {
@@ -71,6 +71,7 @@ namespace MetadataIO {
     class ArtworksSnapshot {
     public:
         ArtworksSnapshot(const QVector<Models::ArtworkMetadata *> &artworks) {
+            LOG_DEBUG << "Creating snapshot of" << artworks.size() << "artwork(s)";
             m_ArtworksSnapshot.reserve(artworks.size());
             for (auto &item: artworks) {
                 m_ArtworksSnapshot.emplace_back(new Models::ArtworkMetadataLocker(item));
@@ -78,6 +79,7 @@ namespace MetadataIO {
         }
 
         ArtworksSnapshot(const std::deque<Models::ArtworkMetadata *> &artworks) {
+            LOG_DEBUG << "Creating snapshot of" << artworks.size() << "artwork(s)";
             m_ArtworksSnapshot.reserve(artworks.size());
             for (auto &item: artworks) {
                 m_ArtworksSnapshot.emplace_back(new Models::ArtworkMetadataLocker(item));
