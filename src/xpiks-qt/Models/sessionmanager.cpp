@@ -115,7 +115,7 @@ namespace Models {
             return;
         }
 
-        const QJsonArray &filesArray = value(OPENED_FILES).toArray();
+        QJsonArray filesArray = value(OPENED_FILES).toArray();
 
         if (filesArray.isEmpty()) {
             LOG_DEBUG << "The session is empty";
@@ -125,7 +125,7 @@ namespace Models {
         m_Filenames.reserve(filesArray.size());
         m_Vectors.reserve(filesArray.size());
 
-        for (auto &item: filesArray) {
+        for (const auto &item: filesArray) {
             QJsonObject obj = item.toObject();
             QString filePath = obj.value(FILE_KEY).toString().trimmed();
 

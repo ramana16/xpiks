@@ -980,7 +980,8 @@ int Commands::CommandManager::restoreReadSession() {
 int Commands::CommandManager::restoreSession() {
     readSession();
 
-    return afterReadSession();
+    int filesRead = restoreReadSession();
+    return filesRead;
 }
 #endif
 
