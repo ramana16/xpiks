@@ -45,7 +45,7 @@ namespace Warnings {
 
         ~WarningsItem() {
             if (m_CheckableItem->release()) {
-                LOG_WARNING << "Item could have been removed";
+                LOG_WARNING << "Item #" << m_CheckableItem->getItemID() << "could have been removed";
             }
         }
 

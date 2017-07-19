@@ -42,7 +42,7 @@ namespace QuickBuffer {
 
     CurrentEditableArtwork::~CurrentEditableArtwork() {
         if (m_ArtworkMetadata->release()) {
-            LOG_WARNING << "Item could have been removed";
+            LOG_WARNING << "Item #" << m_ArtworkMetadata->getItemID() << "could have been removed";
         }
     }
 
