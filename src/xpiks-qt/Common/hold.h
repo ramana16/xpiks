@@ -35,7 +35,7 @@ namespace Common {
 
     public:
         virtual void acquire() { int prev = m_RefCount.fetchAndAddOrdered(1); Q_ASSERT(prev > 0); }
-        virtual bool release() { return m_RefCount.fetchAndSubOrdered(1) == 1; }
+        virtual bool release() { int prev = m_RefCount.fetchAndSubOrdered(1); Q_ASSERT(prev >= 0); return prev == 1; }
         virtual int get() { return m_RefCount.load(); }
 
     private:
