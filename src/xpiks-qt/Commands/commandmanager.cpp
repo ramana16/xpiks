@@ -993,7 +993,7 @@ void Commands::CommandManager::saveSession() const {
         return;
     }
 
-    auto artworkList = m_ArtItemsModel->getArtworkList();
+    auto &artworkList = m_ArtItemsModel->getArtworkList();
     MetadataIO::SessionSnapshot sessionSnapshot(artworkList);
     auto &snapshot = sessionSnapshot.getSnapshot();
 

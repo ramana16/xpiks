@@ -38,11 +38,11 @@ namespace MetadataIO {
     template <typename T>
     class ArtworksSnapshotBase {
     public:
-        ArtworksSnapshotBase(T &artworksList) {
+        ArtworksSnapshotBase(const T &artworksList) {
             LOG_DEBUG << "#";
 
             m_Snapshot.reserve(artworksList.size());
-            for (auto artwork: artworksList) {
+            for (const auto &artwork: artworksList) {
                 m_Snapshot.emplace_back(new MetadataIO::ArtworkMetadataSnapshot(artwork));
             }
         }

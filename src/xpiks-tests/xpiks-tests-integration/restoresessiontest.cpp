@@ -39,12 +39,15 @@ void RestoreSessionTest::setup() {
 
     settingsModel->setSaveSession(true);
     settingsModel->setUseSpellCheck(false);
+    settingsModel->setAutoFindVectors(true);
 }
 
 int RestoreSessionTest::doTest() {
     Models::ArtItemsModel *artItemsModel = m_CommandManager->getArtItemsModel();
     Models::SessionManager *sessionManager = m_CommandManager->getSessionManager();
+    VERIFY(sessionManager->filesCount() == 0, "Session is not cleared");
     Models::ArtworksRepository *artworksRepository = m_CommandManager->getArtworksRepository();
+
     QList<QUrl> files;
     files << getFilePathForTest("images-for-tests/pixmap/img_0007.jpg")
           << getFilePathForTest("images-for-tests/pixmap/seagull-for-clear.jpg")
@@ -57,8 +60,6 @@ int RestoreSessionTest::doTest() {
     SignalWaiter waiter;
     QObject::connect(ioCoordinator, SIGNAL(metadataReadingFinished()), &waiter, SIGNAL(finished()));
 
-    VERIFY(sessionManager->filesCount() == 0, "Session is not cleared");
-
     int addedCount = artItemsModel->addLocalArtworks(files);
     VERIFY(addedCount == files.length(), "Failed to add file");
     ioCoordinator->continueReading(true);
@@ -68,16 +69,17 @@ int RestoreSessionTest::doTest() {
     }
     VERIFY(!ioCoordinator->getHasErrors(), "Errors in IO Coordinator while reading");
 
-    sleepWait(10, [=]() {
-        return sessionManager->filesCount() == files.length();
+    sleepWait(10, [&]() {
+        return sessionManager->filesCount() > files.length();
     });
 
-    MetadataIO::SessionSnapshot oldArtworksSnapshot(artItemsModel->m_ArtworkList);
-    artItemsModel->m_ArtworkList.clear();
+    MetadataIO::SessionSnapshot oldArtworksSnapshot(artItemsModel->getArtworkList());
 
+    artItemsModel->deleteAllItems();
     artworksRepository->resetEverything();
-    addedCount = m_CommandManager->restoreSessionForTest();
-    VERIFY(addedCount == files.length(), "Failed to add file");
+
+    int restoredCount = m_CommandManager->restoreSessionForTest();
+    VERIFY(addedCount == restoredCount, "Failed to properly restore");
     ioCoordinator->continueReading(true);
 
     if (!waiter.wait(20)) {
@@ -85,7 +87,7 @@ int RestoreSessionTest::doTest() {
     }
     VERIFY(!ioCoordinator->getHasErrors(), "Errors in IO Coordinator while reading");
 
-    MetadataIO::SessionSnapshot newArtworksSnapshot(artItemsModel->m_ArtworkList);
+    MetadataIO::SessionSnapshot newArtworksSnapshot(artItemsModel->getArtworkList());
     auto &oldArtworksList = oldArtworksSnapshot.getSnapshot();
     auto &newArtworksList = newArtworksSnapshot.getSnapshot();
 
@@ -110,6 +112,7 @@ int RestoreSessionTest::doTest() {
     // -------------------------------------
     // TODO: move below code away (maybe to perf tests)
 
+    /*
     sessionManager->clearSession();
 
     QUrl path = getFilePathForTest("images-for-tests/pixmap/img_0007.jpg");
@@ -135,6 +138,7 @@ int RestoreSessionTest::doTest() {
     VERIFY(sessionManager->filesCount() == 10000, "Session initialization failed");
 
     //qDeleteAll(metadataVector);
+    */
 
     return 0;
 }

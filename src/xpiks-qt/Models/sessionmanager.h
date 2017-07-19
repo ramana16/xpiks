@@ -48,6 +48,8 @@ namespace Models {
         void initialize();
         void saveToFile(std::vector<std::shared_ptr<MetadataIO::ArtworkMetadataSnapshot> > &snapshot);
         void readSessionFromFile();
+
+    public:
         const QStringList &getFilenames() const { return m_Filenames; }
         const QStringList &getVectors() const { return m_Vectors; }
 

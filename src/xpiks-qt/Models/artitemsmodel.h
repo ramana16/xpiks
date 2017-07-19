@@ -226,11 +226,7 @@ namespace Models {
     public:
         const std::deque<ArtworkMetadata *> &getArtworkList() const { return m_ArtworkList; }
 
-#ifdef INTEGRATION_TESTS
-    public:
-#else
     private:
-#endif
         std::deque<ArtworkMetadata *> m_ArtworkList;
         std::deque<ArtworkMetadata *> m_FinalizationList;
 #ifdef QT_DEBUG
