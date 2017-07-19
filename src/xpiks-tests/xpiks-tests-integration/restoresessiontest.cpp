@@ -77,9 +77,8 @@ int RestoreSessionTest::doTest() {
     MetadataIO::ArtworksSnapshot oldArtworksSnapshot(artItemsModel->getArtworkList());
 
     artworksRepository->resetEverything();
-    artItemsModel->deleteAllItems();
-    //artItemsModel->fakeDeleteAllItems();
-    LOG_DEBUG << "###########";
+    artItemsModel->fakeDeleteAllItems();
+    LOG_DEBUG << "About to restore...";
 
     int restoredCount = m_CommandManager->restoreSessionForTest();
     VERIFY(addedCount == restoredCount, "Failed to properly restore");
@@ -99,8 +98,9 @@ int RestoreSessionTest::doTest() {
 
     for (size_t i = 0; i < newArtworksList.size(); i++) {
         auto oldItem = oldArtworksList.at(i)->getArtworkMetadata();
-        auto newItem = oldArtworksList.at(i)->getArtworkMetadata();
+        auto newItem = newArtworksList.at(i)->getArtworkMetadata();
 
+        VERIFY(oldItem->getItemID() != newItem->getItemID(), "Comparing same IDs");
         VERIFY(oldItem->getFilepath() == newItem->getFilepath(), "Filepaths don't match");
         VERIFY(oldItem->getTitle() == newItem->getTitle(), "Titles don't match");
         VERIFY(oldItem->getDescription() == newItem->getDescription(), "Descriptions don't match");
