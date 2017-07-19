@@ -99,7 +99,7 @@ namespace Models {
 #endif
                 metadata->deleteLater();
             } else {
-                LOG_WARNING << "Metadata #" << metadata->getItemID() << " at index" << i << "is locked. Postponing destruction...";
+                LOG_WARNING << "Metadata #" << metadata->getItemID() << "at index" << i << "is locked. Postponing destruction...";
 
                 metadata->disconnect();
                 auto *metadataModel = metadata->getBasicModel();
