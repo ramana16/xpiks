@@ -429,9 +429,13 @@ ApplicationWindow {
                 MenuItem {
                     text: i18.n + qsTr("Save session")
                     checkable: true
-                    checked: settingsModel.saveSession
+
                     onCheckedChanged: {
-                        settingsModel.saveSessionSetting(checked);
+                        settingsModel.updateSaveSession(checked);
+                    }
+
+                    Component.onCompleted: {
+                        checked = settingsModel.saveSession
                     }
                 }
             }

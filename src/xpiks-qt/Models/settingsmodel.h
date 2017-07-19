@@ -122,7 +122,7 @@ namespace Models {
         Q_INVOKABLE void saveProxySetting(const QString &address, const QString &user, const QString &password, const QString &port);
         Q_INVOKABLE void saveArtworkEditUISettings();
         Q_INVOKABLE void saveSelectedDictionaryIndex();
-        Q_INVOKABLE void saveSessionSetting(bool saveSession);
+        Q_INVOKABLE void updateSaveSession(bool value);
 
     private:
         void doRetrieveAllValues();
