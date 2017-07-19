@@ -466,7 +466,7 @@ int main(int argc, char *argv[]) {
     Translation::TranslationService translationService(translationManager);
     Models::ArtworkProxyModel artworkProxy;
     Models::SessionManager sessionManager;
-    sessionManager.setPath();
+    sessionManager.initialize();
     // intentional memory leak to beat spellcheck lock stuff
     QuickBuffer::QuickBuffer quickBuffer;
     Maintenance::MaintenanceService maintenanceService;

@@ -136,7 +136,7 @@ namespace Models {
         virtual bool checkFileExists(const QString &filename, QString &directory) const;
 
     private:
-        bool setDirectorySelected(int index, bool value);
+        bool setDirectorySelected(size_t index, bool value);
         bool changeSelectedState(int row, bool newValue, bool oldValue);
         bool unselectAllDirectories() { return setAllSelected(false); }
         bool selectAllDirectories() { return setAllSelected(true); }

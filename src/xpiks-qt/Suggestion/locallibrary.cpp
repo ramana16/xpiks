@@ -53,6 +53,7 @@ namespace Suggestion {
     }
 
     void LocalLibrary::addToLibrary(std::unique_ptr<MetadataIO::LibrarySnapshot> &artworksSnapshot) {
+        LOG_DEBUG << "#";
         // adding to library will be complicated in future
         // so always do it in the background
 #ifndef INTEGRATION_TESTS
@@ -177,15 +178,15 @@ namespace Suggestion {
     }
 
     void LocalLibrary::doAddToLibrary(std::unique_ptr<MetadataIO::LibrarySnapshot> &artworksSnapshot) {
-        auto artworksList = artworksSnapshot->getSnapshot();
+        auto &artworksList = artworksSnapshot->getSnapshot();
 
-        int length = artworksList.size();
+        const size_t length = artworksList.size();
 
         LOG_INFO << length << "file(s)";
 
         QMutexLocker locker(&m_Mutex);
 
-        for (int i = 0; i < length; ++i) {
+        for (size_t i = 0; i < length; ++i) {
             Models::ArtworkMetadata *metadata = artworksList.at(i)->getArtworkMetadata();
             const QString &filepath = metadata->getFilepath();
             QFileInfo fi(filepath);

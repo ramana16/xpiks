@@ -51,12 +51,12 @@ namespace Models {
         LOG_DEBUG << "#";
         size_t count = m_DirectoriesList.size();
         QVector<int> indicesToRemove;
-        indicesToRemove.reserve(count);
+        indicesToRemove.reserve((int)count);
 
         for (size_t i = 0; i < count; ++i) {
             auto &directory = m_DirectoriesList[i];
             if (directory.m_FilesCount == 0) {
-                indicesToRemove.append(i);
+                indicesToRemove.append((int)i);
             }
         }
 
@@ -341,7 +341,7 @@ namespace Models {
         }
     }
 
-    bool ArtworksRepository::setDirectorySelected(int index, bool value) {
+    bool ArtworksRepository::setDirectorySelected(size_t index, bool value) {
         auto &directory = m_DirectoriesList[index];
         bool changed = directory.m_IsSelected != value;
         directory.m_IsSelected = value;
@@ -354,14 +354,14 @@ namespace Models {
 
         bool anySelectionChanged = false;
 
-        const int count = m_DirectoriesList.size();
+        const size_t count = m_DirectoriesList.size();
         if (count == 1) {
             Q_ASSERT(row == 0);
             anySelectionChanged = setDirectorySelected(row, true);
             return anySelectionChanged;
         }
 
-        const int selectedCount = retrieveSelectedDirsCount();
+        const size_t selectedCount = retrieveSelectedDirsCount();
         const bool allAreSelected = selectedCount == count;
         const bool wasSelected = (oldValue == true);
         const bool onlyOneSelected = (selectedCount == 1);
@@ -384,9 +384,9 @@ namespace Models {
 
     bool ArtworksRepository::setAllSelected(bool value) {
         bool anyChange = false;
-        int size = m_DirectoriesList.size();
+        size_t size = m_DirectoriesList.size();
 
-        for (int i = 0; i < size; i++) {
+        for (size_t i = 0; i < size; i++) {
             if (setDirectorySelected(i, value)) {
                 anyChange = true;
             }

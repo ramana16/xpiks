@@ -427,15 +427,17 @@ namespace Models {
     }
 
     void SettingsModel::saveSessionSetting(bool saveSession) {
-        if (m_SaveSession == saveSession)
+        if (m_SaveSession == saveSession) {
             return;
+        }
 
         m_SaveSession = saveSession;
         emit saveSessionChanged(saveSession);
 
-        setValue(Constants::saveSession, m_SaveSession);
+        setValue(Constants::saveSession, saveSession);
         sync();
-        if (m_SaveSession) {
+
+        if (saveSession) {
             m_CommandManager->saveSession();
         }
     }

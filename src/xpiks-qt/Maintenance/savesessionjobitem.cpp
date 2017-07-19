@@ -36,7 +36,7 @@ namespace Maintenance {
     }
 
     void SaveSessionJobItem::doSaveSession() {
-        auto snapshot = m_SessionSnapshot->getSnapshot();
+        auto &snapshot = m_SessionSnapshot->getSnapshot();
         m_SessionManager->saveToFile(snapshot);
     }
 }

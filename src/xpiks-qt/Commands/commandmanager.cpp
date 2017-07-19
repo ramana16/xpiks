@@ -925,7 +925,7 @@ void Commands::CommandManager::afterInnerServicesInitialized() {
 #endif
 #endif
 
-    afterReadSession();
+    restoreReadSession();
 }
 
 void Commands::CommandManager::executeMaintenanceJobs() {
@@ -947,22 +947,22 @@ void Commands::CommandManager::readSession() {
         return;
     }
 
-    m_SessionManager->restoreFromFile();
+    m_SessionManager->readSessionFromFile();
 }
 
-int Commands::CommandManager::afterReadSession() {
+int Commands::CommandManager::restoreReadSession() {
     LOG_DEBUG << "#";
 
     if (!m_SettingsModel->getSaveSession()) {
         return 0;
     }
 
-    bool autoFindVectors = m_SettingsModel->getAutoFindVectors();
-    auto filenames = m_SessionManager->getFilenames();
-    auto vectors = m_SessionManager->getVectors();
+    const bool autoFindVectors = m_SettingsModel->getAutoFindVectors();
+    auto &filenames = m_SessionManager->getFilenames();
+    auto &vectors = m_SessionManager->getVectors();
 
     if (filenames.empty()) {
-        LOG_WARNING << "Session was empty";
+        LOG_INFO << "Session was empty";
         return 0;
     }
 
@@ -971,6 +971,8 @@ int Commands::CommandManager::afterReadSession() {
     std::shared_ptr<Commands::AddArtworksCommandResult> addArtworksResult = std::dynamic_pointer_cast<Commands::AddArtworksCommandResult>(result);
 
     int newFilesCount = addArtworksResult->m_NewFilesAdded;
+    LOG_INFO << newFilesCount << "file(s) restored from session";
+
     return newFilesCount;
 }
 
@@ -992,7 +994,7 @@ void Commands::CommandManager::saveSession() const {
 
     auto artworkList = m_ArtItemsModel->getArtworkList();
     MetadataIO::SessionSnapshot sessionSnapshot(artworkList);
-    auto snapshot = sessionSnapshot.getSnapshot();
+    auto &snapshot = sessionSnapshot.getSnapshot();
 
     m_SessionManager->saveToFile(snapshot);
 }

@@ -88,8 +88,8 @@ int RestoreSessionTest::doTest() {
     VERIFY(!ioCoordinator->getHasErrors(), "Errors in IO Coordinator while reading");
 
     MetadataIO::SessionSnapshot newArtworksSnapshot(artItemsModel->m_ArtworkList);
-    auto oldArtworksList = oldArtworksSnapshot.getSnapshot();
-    auto newArtworksList = newArtworksSnapshot.getSnapshot();
+    auto &oldArtworksList = oldArtworksSnapshot.getSnapshot();
+    auto &newArtworksList = newArtworksSnapshot.getSnapshot();
 
     VERIFY(oldArtworksList.size() == newArtworksList.size(), "Old and new snapshots have different number of items");
     for (size_t i = 0; i < newArtworksList.size(); i++) {
@@ -114,7 +114,7 @@ int RestoreSessionTest::doTest() {
     QString pathString = path.toLocalFile();
     std::deque<Models::ArtworkMetadata *> metadataVector(10000, new Models::ArtworkMetadata(pathString, 0, 0));
     MetadataIO::SessionSnapshot sessionSnapshot(metadataVector);
-    auto snapshot = sessionSnapshot.getSnapshot();
+    auto &snapshot = sessionSnapshot.getSnapshot();
 
     sessionManager->saveToFile(snapshot);
 
@@ -123,7 +123,7 @@ int RestoreSessionTest::doTest() {
 
     QTime timer;
     timer.start();
-    sessionManager->restoreFromFile();
+    sessionManager->readSessionFromFile();
     VERIFY(timer.elapsed() < 1000, "Session parsing is slow");
     VERIFY(sessionManager->filesCount() == 10000, "Session initialization failed");
 

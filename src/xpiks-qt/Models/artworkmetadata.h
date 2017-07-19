@@ -232,6 +232,7 @@ namespace Models {
                 m_ArtworkMetadata->acquire();
             }
         }
+
         virtual ~ArtworkMetadataLocker() {
             if (m_ArtworkMetadata != nullptr) {
                 m_ArtworkMetadata->release();

@@ -52,5 +52,10 @@ namespace Helpers {
             LOG_WARNING << "Opening file" << m_FilePath << "failed";
         }
     }
+
+    void LocalConfig::dropConfig() {
+        m_Config = QJsonDocument();
+        Q_ASSERT(m_Config.isEmpty());
+    }
 }
 

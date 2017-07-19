@@ -43,21 +43,19 @@ namespace MetadataIO {
 
             m_Snapshot.reserve(artworksList.size());
             for (auto artwork: artworksList) {
-                auto *snapshot = new MetadataIO::ArtworkMetadataSnapshot(artwork);
-                m_Snapshot.push_back(snapshot);
+                m_Snapshot.emplace_back(new MetadataIO::ArtworkMetadataSnapshot(artwork));
             }
         }
+
         virtual ~ArtworksSnapshotBase() {
             LOG_DEBUG << "#";
-
-            qDeleteAll(m_Snapshot);
         }
 
     public:
-        std::vector<MetadataIO::ArtworkMetadataSnapshot *> &getSnapshot() { return m_Snapshot; }
+        std::vector<std::shared_ptr<MetadataIO::ArtworkMetadataSnapshot> > &getSnapshot() { return m_Snapshot; }
 
     private:
-        std::vector<MetadataIO::ArtworkMetadataSnapshot *> m_Snapshot;
+        std::vector<std::shared_ptr<MetadataIO::ArtworkMetadataSnapshot> > m_Snapshot;
     };
 
     typedef ArtworksSnapshotBase<std::deque<Models::ArtworkMetadata *>> SessionSnapshot;

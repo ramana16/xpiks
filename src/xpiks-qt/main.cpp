@@ -341,7 +341,7 @@ int main(int argc, char *argv[]) {
     Translation::TranslationService translationService(translationManager);
     Models::UIManager uiManager;
     Models::SessionManager sessionManager;
-    sessionManager.setPath();
+    sessionManager.initialize();
     QuickBuffer::QuickBuffer quickBuffer;
     Maintenance::MaintenanceService maintenanceService;
 

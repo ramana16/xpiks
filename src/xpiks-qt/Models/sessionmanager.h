@@ -24,6 +24,7 @@
 
 #include <QJsonObject>
 #include <QMutex>
+#include <memory>
 #include "../Helpers/localconfig.h"
 #include "../Common/baseentity.h"
 
@@ -44,11 +45,11 @@ namespace Models {
         virtual ~SessionManager() {}
 
     public:
-        void setPath();
-        void saveToFile(std::vector<MetadataIO::ArtworkMetadataSnapshot *> &snapshot);
-        void restoreFromFile();
-        const QStringList &getFilenames() { return m_Filenames; }
-        const QStringList &getVectors() { return m_Vectors; }
+        void initialize();
+        void saveToFile(std::vector<std::shared_ptr<MetadataIO::ArtworkMetadataSnapshot> > &snapshot);
+        void readSessionFromFile();
+        const QStringList &getFilenames() const { return m_Filenames; }
+        const QStringList &getVectors() const { return m_Vectors; }
 
 #ifdef INTEGRATION_TESTS
         int filesCount() const;
@@ -66,7 +67,7 @@ namespace Models {
         inline QJsonValue value(const char *key, const QJsonValue &defaultValue = QJsonValue()) const {
             QJsonValue value = m_SessionJson.value(QLatin1String(key));
 
-            if (value.isUndefined()) {
+            if (value.isUndefined() || value.isNull()) {
                 return defaultValue;
             }
 

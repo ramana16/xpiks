@@ -27,7 +27,7 @@
 #include <QFile>
 #include "../Common/defines.h"
 
-namespace Helpers {    
+namespace Helpers {
     class LocalConfig {
     public:
         LocalConfig();
@@ -39,10 +39,28 @@ namespace Helpers {
         void setPath(const QString filePath) { m_FilePath = filePath; }
         void initConfig(const QString &configPath);
         void saveToFile();
+        void dropConfig();
 
     private:
         QString m_FilePath;
         QJsonDocument m_Config;
+    };
+
+    class LocalConfigDropper {
+    public:
+        LocalConfigDropper(LocalConfig *config):
+            m_Config(config)
+        {
+        }
+
+        virtual ~LocalConfigDropper() {
+            if (m_Config != nullptr) {
+                m_Config->dropConfig();
+            }
+        }
+
+    private:
+        LocalConfig *m_Config;
     };
 }
 

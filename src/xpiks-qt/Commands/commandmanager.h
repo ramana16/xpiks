@@ -251,7 +251,8 @@ namespace Commands {
         void afterInnerServicesInitialized();
         void executeMaintenanceJobs();
         void readSession();
-        int afterReadSession();
+        int restoreReadSession();
+
     public:
 #ifdef INTEGRATION_TESTS
         int restoreSession();

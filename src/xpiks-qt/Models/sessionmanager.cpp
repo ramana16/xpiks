@@ -49,7 +49,7 @@ namespace Models {
     {
     }
 
-    void SessionManager::setPath() {
+    void SessionManager::initialize() {
         LOG_DEBUG << "#";
 
         QString appDataPath = XPIKS_USERDATA_PATH;
@@ -63,12 +63,12 @@ namespace Models {
         m_Config.setPath(m_LocalConfigPath);
     }
 
-    void SessionManager::saveToFile(std::vector<MetadataIO::ArtworkMetadataSnapshot *> &snapshot) {
-        LOG_INFO << snapshot.size() << "images";
+    void SessionManager::saveToFile(std::vector<std::shared_ptr<MetadataIO::ArtworkMetadataSnapshot> > &snapshot) {
+        LOG_INFO << snapshot.size() << "artwork(s)";
 
         QJsonArray filesList;
 
-        for (auto item: snapshot) {
+        for (auto &item: snapshot) {
             Models::ArtworkMetadata *metadata = item->getArtworkMetadata();
             QJsonObject jsonObject;
 
@@ -91,17 +91,21 @@ namespace Models {
 
         m_Config.setConfig(doc);
 
-        m_Mutex.lock();
-        m_Config.saveToFile();
-        m_Mutex.unlock();
+        Helpers::LocalConfigDropper dropper(&m_Config);
+        Q_UNUSED(dropper);
 
-        m_Config.setConfig(QJsonDocument());
+        QMutexLocker locker(&m_Mutex);
+        Q_UNUSED(locker);
+
+        m_Config.saveToFile();
     }
 
-    void SessionManager::restoreFromFile() {
+    void SessionManager::readSessionFromFile() {
         LOG_DEBUG << "#";
 
         m_Config.initConfig(m_LocalConfigPath);
+        Helpers::LocalConfigDropper dropper(&m_Config);
+        Q_UNUSED(dropper);
 
         QJsonDocument &doc = m_Config.getConfig();
         if (doc.isObject()) {
@@ -121,21 +125,21 @@ namespace Models {
         m_Filenames.reserve(filesArray.size());
         m_Vectors.reserve(filesArray.size());
 
-        for (auto item: filesArray) {
-            const QJsonObject &obj = item.toObject();
-            const QString &filePath = obj.value(FILE_KEY).toString();
+        for (auto &item: filesArray) {
+            QJsonObject obj = item.toObject();
+            QString filePath = obj.value(FILE_KEY).toString().trimmed();
+
             if (filePath.isEmpty()) {
                 continue;
             }
+
             m_Filenames.append(filePath);
 
-            const QString &vectorPath = obj.value(VECTOR_KEY).toString();
+            QString vectorPath = obj.value(VECTOR_KEY).toString().trimmed();
             if (!vectorPath.isEmpty()) {
                 m_Vectors.append(vectorPath);
             }
         }
-
-        m_Config.setConfig(QJsonDocument());
     }
 
 #ifdef INTEGRATION_TESTS
