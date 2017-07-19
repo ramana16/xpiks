@@ -78,9 +78,14 @@ namespace Models {
         LOG_DEBUG << "#";
         // should be called only from beforeDestruction() !
         // will not cause sync issues on shutdown if no items
-        beginResetModel();
         std::deque<ArtworkMetadata *> artworksToDestroy;
-        artworksToDestroy.swap(m_ArtworkList);
+
+        beginResetModel();
+        {
+            artworksToDestroy.swap(m_ArtworkList);
+            m_ArtworkList.clear();
+        }
+        endResetModel();
 
         size_t size = artworksToDestroy.size();
         for (size_t i = 0; i < size; ++i) {
@@ -103,11 +108,21 @@ namespace Models {
 
                 m_FinalizationList.push_back(metadata);
             }
-        }
+        }        
+    }
 
-        m_ArtworkList.clear();
+#ifdef INTEGRATION_TESTS
+    void ArtItemsModel::fakeDeleteAllItems() {
+        LOG_DEBUG << "#";
+
+        beginResetModel();
+        {
+            m_DestroyedList.swap(m_ArtworkList);
+            m_ArtworkList.clear();
+        }
         endResetModel();
     }
+#endif
 
     int ArtItemsModel::getModifiedArtworksCount() {
         int modifiedCount = 0;

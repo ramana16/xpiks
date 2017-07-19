@@ -78,6 +78,9 @@ namespace Models {
     public:
         virtual ArtworkMetadata *createMetadata(const QString &filepath, qint64 directoryID);
         void deleteAllItems();
+#ifdef INTEGRATION_TESTS
+        void fakeDeleteAllItems();
+#endif
 
     public:
         int getModifiedArtworksCount();

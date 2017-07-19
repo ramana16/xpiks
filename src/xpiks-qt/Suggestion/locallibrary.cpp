@@ -52,7 +52,7 @@ namespace Suggestion {
     LocalLibrary::~LocalLibrary() {
     }
 
-    void LocalLibrary::addToLibrary(std::unique_ptr<MetadataIO::LibrarySnapshot> &artworksSnapshot) {
+    void LocalLibrary::addToLibrary(std::unique_ptr<MetadataIO::ArtworksSnapshot> &artworksSnapshot) {
         LOG_DEBUG << "#";
         // adding to library will be complicated in future
         // so always do it in the background
@@ -177,7 +177,7 @@ namespace Suggestion {
         LOG_INFO << itemsToRemove.count() << "item(s) removed.";
     }
 
-    void LocalLibrary::doAddToLibrary(std::unique_ptr<MetadataIO::LibrarySnapshot> &artworksSnapshot) {
+    void LocalLibrary::doAddToLibrary(std::unique_ptr<MetadataIO::ArtworksSnapshot> &artworksSnapshot) {
         auto &artworksList = artworksSnapshot->getSnapshot();
 
         const size_t length = artworksList.size();

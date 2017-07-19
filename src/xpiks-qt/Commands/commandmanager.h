@@ -214,7 +214,7 @@ namespace Commands {
         void readMetadata(const QVector<Models::ArtworkMetadata*> &artworks,
                           const QVector<QPair<int, int> > &rangesToUpdate) const;
         void writeMetadata(const QVector<Models::ArtworkMetadata*> &artworks, bool useBackups) const;
-        void addToLibrary(std::unique_ptr<MetadataIO::LibrarySnapshot> &artworksSnapshot) const;
+        void addToLibrary(std::unique_ptr<MetadataIO::ArtworksSnapshot> &artworksSnapshot) const;
         void updateArtworks(const QVector<int> &indices) const;
         void updateArtworks(const QVector<QPair<int, int> > &rangesToUpdate) const;
         void addToRecentDirectories(const QString &path) const;

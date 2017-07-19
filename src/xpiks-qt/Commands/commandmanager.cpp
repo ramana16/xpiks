@@ -658,7 +658,7 @@ void Commands::CommandManager::writeMetadata(const QVector<Models::ArtworkMetada
 #endif
 }
 
-void Commands::CommandManager::addToLibrary(std::unique_ptr<MetadataIO::LibrarySnapshot> &artworksSnapshot) const {
+void Commands::CommandManager::addToLibrary(std::unique_ptr<MetadataIO::ArtworksSnapshot> &artworksSnapshot) const {
     if (m_LocalLibrary) {
         m_LocalLibrary->addToLibrary(artworksSnapshot);
     }
@@ -957,7 +957,8 @@ int Commands::CommandManager::restoreReadSession() {
         return 0;
     }
 
-    const bool autoFindVectors = m_SettingsModel->getAutoFindVectors();
+    // we should have saved all vectors from that session
+    const bool autoFindVectors = false;
     auto &filenames = m_SessionManager->getFilenames();
     auto &vectors = m_SessionManager->getVectors();
 

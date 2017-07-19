@@ -73,7 +73,7 @@ namespace Suggestion {
     public:
         const QString &getLibraryPath() const { return m_Filename; }
         void setLibraryPath(const QString &filename) { m_Filename = filename; }
-        void addToLibrary(std::unique_ptr<MetadataIO::LibrarySnapshot> &artworksSnapshot);
+        void addToLibrary(std::unique_ptr<MetadataIO::ArtworksSnapshot> &artworksSnapshot);
         void swap(QHash<QString, LocalArtworkData> &hash);
         void saveToFile();
         void searchArtworks(const QStringList &query,
@@ -82,7 +82,7 @@ namespace Suggestion {
         void cleanupTrash();
 
     private:
-        void doAddToLibrary(std::unique_ptr<MetadataIO::LibrarySnapshot> &artworksSnapshot);
+        void doAddToLibrary(std::unique_ptr<MetadataIO::ArtworksSnapshot> &artworksSnapshot);
 
     private:
         friend class Maintenance::AddToLibraryJobItem;

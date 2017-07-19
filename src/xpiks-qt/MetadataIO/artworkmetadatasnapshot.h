@@ -50,20 +50,15 @@ namespace MetadataIO {
         QString m_VectorPath;
     };
 
-    template <typename T>
-    class SessionSnapshotBase {
+    class SessionSnapshot {
     public:
-        SessionSnapshotBase(const T &artworksList) {
+        SessionSnapshot(const std::deque<Models::ArtworkMetadata *> &artworksList) {
             LOG_DEBUG << "#";
 
             m_Snapshot.reserve(artworksList.size());
             for (const auto &artwork: artworksList) {
                 m_Snapshot.emplace_back(new MetadataIO::ArtworkSessionSnapshot(artwork));
             }
-        }
-
-        virtual ~SessionSnapshotBase() {
-            LOG_DEBUG << "#";
         }
 
     public:
@@ -73,18 +68,16 @@ namespace MetadataIO {
         std::vector<std::shared_ptr<MetadataIO::ArtworkSessionSnapshot> > m_Snapshot;
     };
 
-    typedef SessionSnapshotBase<std::deque<Models::ArtworkMetadata *>> SessionSnapshot;
-
-    class LibrarySnapshot {
+    class ArtworksSnapshot {
     public:
-        LibrarySnapshot(const QVector<Models::ArtworkMetadata *> &artworks) {
+        ArtworksSnapshot(const QVector<Models::ArtworkMetadata *> &artworks) {
             m_ArtworksSnapshot.reserve(artworks.size());
             for (auto &item: artworks) {
                 m_ArtworksSnapshot.emplace_back(new Models::ArtworkMetadataLocker(item));
             }
         }
 
-        LibrarySnapshot(const std::deque<Models::ArtworkMetadata *> &artworks) {
+        ArtworksSnapshot(const std::deque<Models::ArtworkMetadata *> &artworks) {
             m_ArtworksSnapshot.reserve(artworks.size());
             for (auto &item: artworks) {
                 m_ArtworksSnapshot.emplace_back(new Models::ArtworkMetadataLocker(item));

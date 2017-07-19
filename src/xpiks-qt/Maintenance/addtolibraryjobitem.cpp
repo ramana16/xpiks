@@ -24,7 +24,7 @@
 #include "addtolibraryjobitem.h"
 
 namespace Maintenance {
-    AddToLibraryJobItem::AddToLibraryJobItem(std::unique_ptr<MetadataIO::LibrarySnapshot> &artworksSnapshot, Suggestion::LocalLibrary *localLibrary):
+    AddToLibraryJobItem::AddToLibraryJobItem(std::unique_ptr<MetadataIO::ArtworksSnapshot> &artworksSnapshot, Suggestion::LocalLibrary *localLibrary):
         m_ArtworksSnapshot(std::move(artworksSnapshot)),
         m_LocalLibrary(localLibrary)
     {

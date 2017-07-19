@@ -95,7 +95,7 @@ namespace Maintenance {
         m_MaintenanceWorker->submitFirst(jobItem);
     }
 
-    void MaintenanceService::addArtworksToLibrary(std::unique_ptr<MetadataIO::LibrarySnapshot> &artworksSnapshot, Suggestion::LocalLibrary *localLibrary) {
+    void MaintenanceService::addArtworksToLibrary(std::unique_ptr<MetadataIO::ArtworksSnapshot> &artworksSnapshot, Suggestion::LocalLibrary *localLibrary) {
         LOG_DEBUG << "#";
         std::shared_ptr<IMaintenanceItem> jobItem(new AddToLibraryJobItem(artworksSnapshot, localLibrary));
         m_MaintenanceWorker->submitFirst(jobItem);

@@ -94,7 +94,7 @@ namespace MetadataIO {
         LOG_INFO << success;
         setHasErrors(!success);
         const QVector<Models::ArtworkMetadata*> &artworksToWrite = m_WritingWorker->getItemsToWrite();
-        std::unique_ptr<MetadataIO::LibrarySnapshot> artworksSnapshot(new MetadataIO::LibrarySnapshot(artworksToWrite));
+        std::unique_ptr<MetadataIO::ArtworksSnapshot> artworksSnapshot(new MetadataIO::ArtworksSnapshot(artworksToWrite));
         m_CommandManager->addToLibrary(artworksSnapshot);
         emit metadataWritingFinished();
     }
@@ -307,7 +307,7 @@ namespace MetadataIO {
         }
 
         if (!getHasErrors()) {
-            std::unique_ptr<MetadataIO::LibrarySnapshot> artworksSnapshot(new MetadataIO::LibrarySnapshot(itemsToRead));
+            std::unique_ptr<MetadataIO::ArtworksSnapshot> artworksSnapshot(new MetadataIO::ArtworksSnapshot(itemsToRead));
             m_CommandManager->addToLibrary(artworksSnapshot);
         }
 

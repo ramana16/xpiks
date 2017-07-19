@@ -74,10 +74,11 @@ int RestoreSessionTest::doTest() {
     });
     VERIFY(sessionManager->itemsCount() == files.length(), "Session does not contain all files");
 
-    MetadataIO::LibrarySnapshot oldArtworksSnapshot(artItemsModel->getArtworkList());
+    MetadataIO::ArtworksSnapshot oldArtworksSnapshot(artItemsModel->getArtworkList());
 
     artworksRepository->resetEverything();
     artItemsModel->deleteAllItems();
+    //artItemsModel->fakeDeleteAllItems();
 
     int restoredCount = m_CommandManager->restoreSessionForTest();
     VERIFY(addedCount == restoredCount, "Failed to properly restore");
@@ -88,11 +89,13 @@ int RestoreSessionTest::doTest() {
     }
     VERIFY(!ioCoordinator->getHasErrors(), "Errors in IO Coordinator while reading");
 
-    MetadataIO::LibrarySnapshot newArtworksSnapshot(artItemsModel->getArtworkList());
+    MetadataIO::ArtworksSnapshot newArtworksSnapshot(artItemsModel->getArtworkList());
     auto &oldArtworksList = oldArtworksSnapshot.getSnapshot();
     auto &newArtworksList = newArtworksSnapshot.getSnapshot();
 
     VERIFY(oldArtworksList.size() == newArtworksList.size(), "Old and new snapshots have different number of items");
+    LOG_INFO << "Comparing" << oldArtworksList.size() << "items";
+
     for (size_t i = 0; i < newArtworksList.size(); i++) {
         auto oldItem = oldArtworksList.at(i)->getArtworkMetadata();
         auto newItem = oldArtworksList.at(i)->getArtworkMetadata();

@@ -38,7 +38,7 @@ namespace Maintenance {
     class AddToLibraryJobItem : public IMaintenanceItem
     {
     public:
-        AddToLibraryJobItem(std::unique_ptr<MetadataIO::LibrarySnapshot> &artworksSnapshot, Suggestion::LocalLibrary *localLibrary);
+        AddToLibraryJobItem(std::unique_ptr<MetadataIO::ArtworksSnapshot> &artworksSnapshot, Suggestion::LocalLibrary *localLibrary);
 
     public:
         virtual void processJob() override;
@@ -47,7 +47,7 @@ namespace Maintenance {
         void doAddToLibrary();
 
     private:
-        std::unique_ptr<MetadataIO::LibrarySnapshot> m_ArtworksSnapshot;
+        std::unique_ptr<MetadataIO::ArtworksSnapshot> m_ArtworksSnapshot;
         Suggestion::LocalLibrary *m_LocalLibrary;
     };
 }

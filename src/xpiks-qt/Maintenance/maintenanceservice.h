@@ -67,7 +67,7 @@ namespace Maintenance {
         void cleanupUpdatesArtifacts();
         void launchExiftool(const QString &settingsExiftoolPath, MetadataIO::MetadataIOCoordinator *coordinator);
         void initializeDictionaries(Translation::TranslationManager *translationManager, Helpers::AsyncCoordinator *initCoordinator);
-        void addArtworksToLibrary(std::unique_ptr<MetadataIO::LibrarySnapshot> &artworksSnapshot, Suggestion::LocalLibrary *localLibrary);
+        void addArtworksToLibrary(std::unique_ptr<MetadataIO::ArtworksSnapshot> &artworksSnapshot, Suggestion::LocalLibrary *localLibrary);
         void cleanupLogs();
         void loadLocalLibrary(Suggestion::LocalLibrary *localLibrary);
         void saveLocalLibrary(Suggestion::LocalLibrary *localLibrary);
