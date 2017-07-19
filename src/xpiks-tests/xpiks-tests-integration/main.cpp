@@ -537,7 +537,6 @@ int main(int argc, char *argv[]) {
 
     QVector<IntegrationTestBase*> integrationTests;
 
-    integrationTests.append(new RestoreSessionTest(&commandManager));
     integrationTests.append(new AddFilesBasicTest(&commandManager));
     integrationTests.append(new AutoAttachVectorsTest(&commandManager));
     integrationTests.append(new SaveFileBasicTest(&commandManager));
@@ -564,6 +563,7 @@ int main(int argc, char *argv[]) {
     integrationTests.append(new TranslatorBasicTest(&commandManager));
     integrationTests.append(new UserDictEditTest(&commandManager));
     integrationTests.append(new WeirdNamesReadTest(&commandManager));
+    integrationTests.append(new RestoreSessionTest(&commandManager));
 
     qDebug("\n");
     int succeededTestsCount = 0, failedTestsCount = 0;

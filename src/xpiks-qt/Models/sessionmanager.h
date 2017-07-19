@@ -57,9 +57,6 @@ namespace Models {
 #endif
 
     private:
-        void sync();
-
-    private:
         inline void setValue(const char *key, const QJsonValue &value) {
             m_SessionJson.insert(QLatin1String(key), value);
         }

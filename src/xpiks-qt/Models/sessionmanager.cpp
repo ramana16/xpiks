@@ -37,15 +37,13 @@
 #define SESSION_FILE "session.json"
 #endif
 
-#define OPENED_FILES "openedFiles"
-
-#define SESSION_SAVE_TIMER_SEC 5
-
+#define OPENED_FILES_KEY "openedFiles"
 #define FILE_KEY "file"
 #define VECTOR_KEY "vector"
 
 namespace Models {
-    SessionManager::SessionManager()
+    SessionManager::SessionManager():
+        QObject()
     {
     }
 
@@ -84,7 +82,7 @@ namespace Models {
             filesList.append(jsonObject);
         }
 
-        setValue(OPENED_FILES, filesList);
+        setValue(OPENED_FILES_KEY, filesList);
 
         QJsonDocument doc;
         doc.setObject(m_SessionJson);
@@ -115,7 +113,7 @@ namespace Models {
             return;
         }
 
-        QJsonArray filesArray = value(OPENED_FILES).toArray();
+        QJsonArray filesArray = value(OPENED_FILES_KEY).toArray();
 
         if (filesArray.isEmpty()) {
             LOG_DEBUG << "The session is empty";
@@ -123,7 +121,7 @@ namespace Models {
         }
 
         m_Filenames.reserve(filesArray.size());
-        m_Vectors.reserve(filesArray.size());
+        m_Vectors.reserve(filesArray.size()/2);
 
         for (const auto &item: filesArray) {
             QJsonObject obj = item.toObject();
@@ -144,13 +142,12 @@ namespace Models {
 
 #ifdef INTEGRATION_TESTS
     int SessionManager::filesCount() const {
-        const QJsonArray &filesArray = value(OPENED_FILES).toArray();
-
+        const QJsonArray &filesArray = value(OPENED_FILES_KEY).toArray();
         return filesArray.size();
     }
 
     void SessionManager::clearSession() {
-        setValue(OPENED_FILES, QJsonArray());
+        setValue(OPENED_FILES_KEY, QJsonArray());
         m_Filenames.clear();
         m_Vectors.clear();
     }
