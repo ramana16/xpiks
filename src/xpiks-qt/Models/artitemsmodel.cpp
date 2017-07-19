@@ -26,7 +26,6 @@
 #include <QList>
 #include <QHash>
 #include <QSet>
-#include <memory>
 #include "artitemsmodel.h"
 #include "metadataelement.h"
 #include "../Helpers/indiceshelper.h"

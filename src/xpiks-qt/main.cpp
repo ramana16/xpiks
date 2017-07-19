@@ -84,6 +84,7 @@
 #include "Models/artitemsmodel.h"
 #include "Models/settingsmodel.h"
 #include "Models/ziparchiver.h"
+#include "Models/sessionmanager.h"
 #include "Helpers/constants.h"
 #include "Helpers/runguard.h"
 #include "Models/logsmodel.h"
@@ -339,6 +340,8 @@ int main(int argc, char *argv[]) {
     Translation::TranslationManager translationManager;
     Translation::TranslationService translationService(translationManager);
     Models::UIManager uiManager;
+    Models::SessionManager sessionManager;
+    sessionManager.setPath();
     QuickBuffer::QuickBuffer quickBuffer;
     Maintenance::MaintenanceService maintenanceService;
 
@@ -398,6 +401,8 @@ int main(int argc, char *argv[]) {
     commandManager.InjectDependency(&translationService);
     commandManager.InjectDependency(&uiManager);
     commandManager.InjectDependency(&artworkProxyModel);
+    commandManager.InjectDependency(&sessionManager);
+    commandManager.InjectDependency(&warningsModel);
     commandManager.InjectDependency(&quickBuffer);
     commandManager.InjectDependency(&maintenanceService);
 
@@ -499,17 +504,6 @@ int main(int argc, char *argv[]) {
 
     uiProvider->setRoot(window->contentItem());
     uiProvider->setUIManager(&uiManager);
-
-#ifdef QT_DEBUG
-    if (argc > 1) {
-        QList<QUrl> pathes;
-        for (int i = 1; i < argc; ++i) {
-            pathes.append(QUrl::fromLocalFile(QString::fromUtf8(argv[i])));
-        }
-
-        commandManager.addInitialArtworks(pathes);
-    }
-#endif
 
     commandManager.afterConstructionCallback();
 

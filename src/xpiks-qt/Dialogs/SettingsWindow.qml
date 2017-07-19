@@ -357,6 +357,22 @@ ApplicationWindow {
                         }
 
                         StyledCheckbox {
+                            id: saveSessionCheckbox
+                            text: i18.n + qsTr("Save session")
+                            onCheckedChanged: {
+                                settingsModel.saveSession = checked
+                            }
+                            function onResetRequested() {
+                                checked = settingsModel.saveSession
+                            }
+
+                            Component.onCompleted: {
+                                checked = settingsModel.saveSession
+                                behaviorTab.resetRequested.connect(saveSessionCheckbox.onResetRequested)
+                            }
+                        }
+
+                        StyledCheckbox {
                             id: saveBackupsCheckbox
                             text: i18.n + qsTr("Save backups for artworks")
                             onCheckedChanged: {

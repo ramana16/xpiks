@@ -52,14 +52,14 @@ namespace Suggestion {
     LocalLibrary::~LocalLibrary() {
     }
 
-    void LocalLibrary::addToLibrary(const QVector<Models::ArtworkMetadata *> artworksList) {
+    void LocalLibrary::addToLibrary(std::unique_ptr<MetadataIO::LibrarySnapshot> &artworksSnapshot) {
         // adding to library will be complicated in future
         // so always do it in the background
 #ifndef INTEGRATION_TESTS
         Maintenance::MaintenanceService *maintenanceService = m_CommandManager->getMaintenanceService();
-        maintenanceService->addArtworksToLibrary(artworksList, this);
+        maintenanceService->addArtworksToLibrary(artworksSnapshot, this);
 #else
-        doAddToLibrary(artworksList);
+        doAddToLibrary(artworksSnapshot);
 #endif
     }
 
@@ -176,15 +176,17 @@ namespace Suggestion {
         LOG_INFO << itemsToRemove.count() << "item(s) removed.";
     }
 
-    void LocalLibrary::doAddToLibrary(const QVector<Models::ArtworkMetadata *> artworksList) {
-        int length = artworksList.length();
+    void LocalLibrary::doAddToLibrary(std::unique_ptr<MetadataIO::LibrarySnapshot> &artworksSnapshot) {
+        auto artworksList = artworksSnapshot->getSnapshot();
+
+        int length = artworksList.size();
 
         LOG_INFO << length << "file(s)";
 
         QMutexLocker locker(&m_Mutex);
 
         for (int i = 0; i < length; ++i) {
-            Models::ArtworkMetadata *metadata = artworksList.at(i);
+            Models::ArtworkMetadata *metadata = artworksList.at(i)->getArtworkMetadata();
             const QString &filepath = metadata->getFilepath();
             QFileInfo fi(filepath);
 

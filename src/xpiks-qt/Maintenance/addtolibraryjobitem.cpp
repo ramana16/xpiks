@@ -24,12 +24,13 @@
 #include "addtolibraryjobitem.h"
 
 namespace Maintenance {
-    AddToLibraryJobItem::AddToLibraryJobItem(const QVector<Models::ArtworkMetadata *> artworksList, Suggestion::LocalLibrary *localLibrary):
-        m_ArtworksList(artworksList),
+    AddToLibraryJobItem::AddToLibraryJobItem(std::unique_ptr<MetadataIO::LibrarySnapshot> &artworksSnapshot, Suggestion::LocalLibrary *localLibrary):
+        m_ArtworksSnapshot(std::move(artworksSnapshot)),
         m_LocalLibrary(localLibrary)
     {
         Q_ASSERT(localLibrary != NULL);
-        Q_ASSERT(!artworksList.isEmpty());
+        Q_ASSERT(m_ArtworksSnapshot != NULL);
+        Q_ASSERT(!m_ArtworksSnapshot->getSnapshot().empty());
     }
 
     void AddToLibraryJobItem::processJob() {
@@ -38,7 +39,7 @@ namespace Maintenance {
     }
 
     void AddToLibraryJobItem::doAddToLibrary() {
-        m_LocalLibrary->doAddToLibrary(m_ArtworksList);
+        m_LocalLibrary->doAddToLibrary(m_ArtworksSnapshot);
         m_LocalLibrary->saveToFile();
     }
 }

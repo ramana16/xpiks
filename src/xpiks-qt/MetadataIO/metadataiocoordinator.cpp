@@ -36,6 +36,7 @@
 #include "../Common/defines.h"
 #include "../Models/imageartwork.h"
 #include "../Maintenance/maintenanceservice.h"
+#include "../Warnings/warningsmodel.h"
 #include "readingorchestrator.h"
 #include "writingorchestrator.h"
 
@@ -93,7 +94,8 @@ namespace MetadataIO {
         LOG_INFO << success;
         setHasErrors(!success);
         const QVector<Models::ArtworkMetadata*> &artworksToWrite = m_WritingWorker->getItemsToWrite();
-        m_CommandManager->addToLibrary(artworksToWrite);
+        std::unique_ptr<MetadataIO::LibrarySnapshot> artworksSnapshot(new MetadataIO::LibrarySnapshot(artworksToWrite));
+        m_CommandManager->addToLibrary(artworksSnapshot);
         emit metadataWritingFinished();
     }
 
@@ -305,7 +307,8 @@ namespace MetadataIO {
         }
 
         if (!getHasErrors()) {
-            m_CommandManager->addToLibrary(itemsToRead);
+            std::unique_ptr<MetadataIO::LibrarySnapshot> artworksSnapshot(new MetadataIO::LibrarySnapshot(itemsToRead));
+            m_CommandManager->addToLibrary(artworksSnapshot);
         }
 
         m_CommandManager->updateArtworks(rangesToUpdate);

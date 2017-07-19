@@ -19,21 +19,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "backupsaverworker.h"
-#include <QFile>
-#include "../Helpers/constants.h"
-#include "../Models/artworkmetadata.h"
-#include "../Common/defines.h"
+#include "../Models/sessionmanager.h"
+#include "savesessionjobitem.h"
 
-namespace MetadataIO {
-    bool BackupSaverWorker::initWorker() {
-        LOG_DEBUG << "#";
-        return true;
+namespace Maintenance {
+    SaveSessionJobItem::SaveSessionJobItem(std::unique_ptr<MetadataIO::SessionSnapshot> &sessionSnapshot, Models::SessionManager *sessionManager):
+        m_SessionSnapshot(std::move(sessionSnapshot)),
+        m_SessionManager(sessionManager)
+    {
+        Q_ASSERT(m_SessionManager != NULL);
     }
 
-    void BackupSaverWorker::processOneItem(std::shared_ptr<SaverWorkerJobItem> &item) {
-        Models::ArtworkMetadata *metadata = item->getArtworkMetadata();
-        MetadataSavingCopy copy(metadata->getBasicModel());
-        copy.saveToFile(metadata->getFilepath());
+    void SaveSessionJobItem::processJob() {
+        LOG_DEBUG << "#";
+        doSaveSession();
+    }
+
+    void SaveSessionJobItem::doSaveSession() {
+        auto snapshot = m_SessionSnapshot->getSnapshot();
+        m_SessionManager->saveToFile(snapshot);
     }
 }

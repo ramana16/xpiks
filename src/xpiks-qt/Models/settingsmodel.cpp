@@ -22,6 +22,7 @@
 #include "settingsmodel.h"
 #include <QQmlEngine>
 #include "../Common/defines.h"
+#include "../Models/artitemsmodel.h"
 
 #ifdef Q_OS_MAC
 #  define DEFAULT_EXIFTOOL "/usr/bin/exiftool"
@@ -47,6 +48,7 @@
 #define DEFAULT_USE_MASTERPASSWORD false
 #define DEFAULT_UPLOAD_TIMEOUT 10
 #define DEFAULT_USE_CONFIRMATIONS false
+#define DEFAULT_SAVE_SESSION false
 #define DEFAULT_SAVE_BACKUPS true
 #define DEFAULT_KEYWORD_SIZE_SCALE 1.0
 #define DEFAULT_DISMISS_DURATION 10
@@ -97,6 +99,7 @@ namespace Models {
         m_SelectedDictIndex(DEFAULT_SELECTED_DICT_INDEX),
         m_MustUseMasterPassword(DEFAULT_USE_MASTERPASSWORD),
         m_MustUseConfirmations(DEFAULT_USE_CONFIRMATIONS),
+        m_SaveSession(DEFAULT_SAVE_SESSION),
         m_SaveBackups(DEFAULT_SAVE_BACKUPS),
         m_FitSmallPreview(DEFAULT_FIT_SMALL_PREVIEW),
         m_SearchUsingAnd(DEFAULT_SEARCH_USING_AND),
@@ -423,6 +426,20 @@ namespace Models {
         sync();
     }
 
+    void SettingsModel::saveSessionSetting(bool saveSession) {
+        if (m_SaveSession == saveSession)
+            return;
+
+        m_SaveSession = saveSession;
+        emit saveSessionChanged(saveSession);
+
+        setValue(Constants::saveSession, m_SaveSession);
+        sync();
+        if (m_SaveSession) {
+            m_CommandManager->saveSession();
+        }
+    }
+
     void SettingsModel::doRetrieveAllValues() {
         using namespace Constants;
 
@@ -431,6 +448,7 @@ namespace Models {
         setUploadTimeout(intValue(oneUploadSecondsTimeout, DEFAULT_UPLOAD_TIMEOUT));
         setMustUseMasterPassword(boolValue(useMasterPassword, DEFAULT_USE_MASTERPASSWORD));
         setMustUseConfirmations(boolValue(useConfirmationDialogs, DEFAULT_USE_CONFIRMATIONS));
+        setSaveSession(boolValue(saveSession, DEFAULT_SAVE_SESSION));
         setSaveBackups(boolValue(saveBackups, DEFAULT_SAVE_BACKUPS));
         setKeywordSizeScale(doubleValue(keywordSizeScale, DEFAULT_KEYWORD_SIZE_SCALE));
         setDismissDuration(intValue(dismissDuration, DEFAULT_DISMISS_DURATION));
@@ -527,6 +545,7 @@ namespace Models {
         setUploadTimeout(DEFAULT_UPLOAD_TIMEOUT);
         setMustUseMasterPassword(DEFAULT_USE_MASTERPASSWORD);
         setMustUseConfirmations(DEFAULT_USE_CONFIRMATIONS);
+        setSaveSession(DEFAULT_SAVE_SESSION);
         setSaveBackups(DEFAULT_SAVE_BACKUPS);
         setKeywordSizeScale(DEFAULT_KEYWORD_SIZE_SCALE);
         setDismissDuration(DEFAULT_DISMISS_DURATION);
@@ -575,6 +594,7 @@ namespace Models {
         setValue(oneUploadSecondsTimeout, m_UploadTimeout);
         setValue(useMasterPassword, m_MustUseMasterPassword);
         setValue(useConfirmationDialogs, m_MustUseConfirmations);
+        setValue(saveSession, m_SaveSession);
         setValue(saveBackups, m_SaveBackups);
         setValue(keywordSizeScale, m_KeywordSizeScale);
         setValue(dismissDuration, m_DismissDuration);

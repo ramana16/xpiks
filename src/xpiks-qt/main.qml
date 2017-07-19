@@ -423,6 +423,19 @@ ApplicationWindow {
                 }
             }
 
+            Menu {
+                title: i18.n + qsTr("Session Manager")
+
+                MenuItem {
+                    text: i18.n + qsTr("Save session")
+                    checkable: true
+                    checked: settingsModel.saveSession
+                    onCheckedChanged: {
+                        settingsModel.saveSessionSetting(checked);
+                    }
+                }
+            }
+
             MenuItem {
                 action: upgradeAction
                 visible: helpersWrapper.isUpdateDownloaded

@@ -121,6 +121,7 @@ SOURCES += main.cpp \
     ../../xpiks-qt/Maintenance/initializedictionariesjobitem.cpp \
     ../../xpiks-qt/Maintenance/addtolibraryjobitem.cpp \
     ../../xpiks-qt/Maintenance/movesettingsjobitem.cpp \
+    ../../xpiks-qt/Maintenance/savesessionjobitem.cpp \
     ../../xpiks-qt/Translation/translationmanager.cpp \
     ../../xpiks-qt/Translation/translationquery.cpp \
     ../../xpiks-qt/Translation/translationservice.cpp \
@@ -188,6 +189,8 @@ SOURCES += main.cpp \
     ../../xpiks-qt/QuickBuffer/quickbuffer.cpp \
     ../../xpiks-qt/Models/artworkproxymodel.cpp \
     ../../xpiks-qt/Models/uimanager.cpp \
+    ../../xpiks-qt/Models/sessionmanager.cpp \
+    ../../xpiks-qt/Warnings/warningsmodel.cpp \
     ../../xpiks-qt/QMLExtensions/tabsmodel.cpp \
     ../../xpiks-qt/Helpers/asynccoordinator.cpp \
     ../../xpiks-qt/Maintenance/locallibraryloadsaveitem.cpp
@@ -242,6 +245,7 @@ HEADERS += \
     ../../xpiks-qt/Maintenance/initializedictionariesjobitem.h \
     ../../xpiks-qt/Maintenance/addtolibraryjobitem.h \
     ../../xpiks-qt/Maintenance/movesettingsjobitem.h \
+    ../../xpiks-qt/Maintenance/savesessionjobitem.h \
     ../../xpiks-qt/Translation/translationmanager.h \
     ../../xpiks-qt/Translation/translationquery.h \
     ../../xpiks-qt/Translation/translationservice.h \
@@ -270,6 +274,7 @@ HEADERS += \
     ../../xpiks-qt/MetadataIO/metadataiocoordinator.h \
     ../../xpiks-qt/MetadataIO/metadatareadingworker.h \
     ../../xpiks-qt/MetadataIO/saverworkerjobitem.h \
+    ../../xpiks-qt/MetadataIO/artworkmetadatasnapshot.h \
     ../../xpiks-qt/Suggestion/locallibrary.h \
     ../../xpiks-qt/MetadataIO/metadatawritingworker.h \
     filteredmodel_tests.h \
@@ -326,6 +331,8 @@ HEADERS += \
     ../../xpiks-qt/QuickBuffer/quickbuffer.h \
     ../../xpiks-qt/Models/artworkproxymodel.h \
     ../../xpiks-qt/Models/uimanager.h \
+    ../../xpiks-qt/Models/sessionmanager.h \
+    ../../xpiks-qt/Warnings/warningsmodel.h \
     ../../xpiks-qt/KeywordsPresets/ipresetsmanager.h \
     ../../xpiks-qt/QMLExtensions/tabsmodel.h \
     ../../xpiks-qt/Helpers/asynccoordinator.h \

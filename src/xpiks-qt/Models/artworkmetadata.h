@@ -221,6 +221,29 @@ namespace Models {
         volatile Common::WarningFlags m_WarningsFlags;
         volatile bool m_IsLockedForEditing;
     };
+
+    class ArtworkMetadataLocker
+    {
+    public:
+        ArtworkMetadataLocker(Models::ArtworkMetadata *metadata):
+            m_ArtworkMetadata(metadata)
+        {
+            if (m_ArtworkMetadata != nullptr) {
+                m_ArtworkMetadata->acquire();
+            }
+        }
+        virtual ~ArtworkMetadataLocker() {
+            if (m_ArtworkMetadata != nullptr) {
+                m_ArtworkMetadata->release();
+            }
+        }
+
+    public:
+        ArtworkMetadata *getArtworkMetadata() const { return m_ArtworkMetadata; }
+
+    private:
+        ArtworkMetadata *m_ArtworkMetadata;
+    };
 }
 
 Q_DECLARE_METATYPE(Models::ArtworkMetadata *)

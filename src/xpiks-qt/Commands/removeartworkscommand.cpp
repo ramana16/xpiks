@@ -107,6 +107,8 @@ namespace Commands {
                 commandManager->recordHistoryItem(removeArtworksItem);
             }
 
+            commandManager->saveSessionInBackground();
+
         } else {
             LOG_WARNING << "No items to remove found!";
         }

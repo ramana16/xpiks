@@ -36,6 +36,7 @@ namespace Helpers {
         QJsonDocument& getConfig() { return m_Config; }
         const QJsonDocument& getConfig() const { return m_Config; }
         void setConfig(const QJsonDocument &config) { m_Config = config; }
+        void setPath(const QString filePath) { m_FilePath = filePath; }
         void initConfig(const QString &configPath);
         void saveToFile();
 

@@ -151,7 +151,9 @@ SOURCES += main.cpp \
     Maintenance/initializedictionariesjobitem.cpp \
     Maintenance/addtolibraryjobitem.cpp \
     Maintenance/locallibraryloadsaveitem.cpp \
-    Maintenance/movesettingsjobitem.cpp
+    Maintenance/movesettingsjobitem.cpp \
+    Models/sessionmanager.cpp \
+    Maintenance/savesessionjobitem.cpp
 
 RESOURCES += qml.qrc
 
@@ -356,7 +358,10 @@ HEADERS += \
     Maintenance/initializedictionariesjobitem.h \
     Maintenance/addtolibraryjobitem.h \
     Maintenance/locallibraryloadsaveitem.h \
-    Maintenance/movesettingsjobitem.h
+    Maintenance/movesettingsjobitem.h \
+    Models/sessionmanager.h \
+    MetadataIO/artworkmetadatasnapshot.h \
+    Maintenance/savesessionjobitem.h
 
 DISTFILES += \
     Components/CloseIcon.qml \

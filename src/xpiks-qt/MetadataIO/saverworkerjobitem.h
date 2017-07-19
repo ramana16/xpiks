@@ -24,13 +24,10 @@
 
 #include <QHash>
 #include <QString>
+#include "../Models/artworkmetadata.h"
 
 namespace Common {
     class BasicMetadataModel;
-}
-
-namespace Models {
-    class ArtworkMetadata;
 }
 
 namespace MetadataIO {
@@ -54,16 +51,13 @@ namespace MetadataIO {
         QHash<QString, QString> m_MetadataInfo;
     };
 
-    class SaverWorkerJobItem {
+    class SaverWorkerJobItem: public Models::ArtworkMetadataLocker
+    {
     public:
-        SaverWorkerJobItem(Models::ArtworkMetadata *metadata);
-        virtual ~SaverWorkerJobItem();
-
-    public:
-        Models::ArtworkMetadata *getMetadata() const { return m_ArtworkMetadata; }
-
-    private:
-        Models::ArtworkMetadata *m_ArtworkMetadata;
+        SaverWorkerJobItem(Models::ArtworkMetadata *metadata):
+            Models::ArtworkMetadataLocker(metadata)
+        {
+        }
     };
 }
 

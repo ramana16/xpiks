@@ -46,6 +46,7 @@ SOURCES += main.cpp \
     ../../xpiks-qt/Maintenance/initializedictionariesjobitem.cpp \
     ../../xpiks-qt/Maintenance/addtolibraryjobitem.cpp \
     ../../xpiks-qt/Maintenance/movesettingsjobitem.cpp \
+    ../../xpiks-qt/Maintenance/savesessionjobitem.cpp \
     ../../xpiks-qt/Conectivity/testconnection.cpp \
     ../../xpiks-qt/Conectivity/updatescheckerworker.cpp \
     ../../xpiks-qt/Encryption/aes-qt.cpp \
@@ -176,6 +177,7 @@ SOURCES += main.cpp \
     ../../xpiks-qt/Translation/translationservice.cpp \
     ../../xpiks-qt/Translation/translationworker.cpp \
     ../../xpiks-qt/Models/uimanager.cpp \
+    ../../xpiks-qt/Models/sessionmanager.cpp \
     ../../xpiks-qt/Plugins/sandboxeddependencies.cpp \
     translatorbasictest.cpp \
     ../../xpiks-qt/Commands/expandpresetcommand.cpp \
@@ -188,7 +190,8 @@ SOURCES += main.cpp \
     weirdnamesreadtest.cpp \
     ../../xpiks-qt/QMLExtensions/tabsmodel.cpp \
     ../../xpiks-qt/Helpers/asynccoordinator.cpp \
-    ../../xpiks-qt/Maintenance/locallibraryloadsaveitem.cpp
+    ../../xpiks-qt/Maintenance/locallibraryloadsaveitem.cpp \
+    restoresessiontest.cpp
 
 RESOURCES +=
 
@@ -233,6 +236,7 @@ HEADERS += \
     ../../xpiks-qt/Maintenance/initializedictionariesjobitem.h \
     ../../xpiks-qt/Maintenance/addtolibraryjobitem.h \
     ../../xpiks-qt/Maintenance/movesettingsjobitem.h \
+    ../../xpiks-qt/Maintenance/savesessionjobitem.h \
     ../../xpiks-qt/Conectivity/testconnection.h \
     ../../xpiks-qt/Conectivity/updatescheckerworker.h \
     ../../xpiks-qt/Conectivity/uploadbatch.h \
@@ -260,6 +264,7 @@ HEADERS += \
     ../../xpiks-qt/MetadataIO/metadatareadingworker.h \
     ../../xpiks-qt/MetadataIO/metadatawritingworker.h \
     ../../xpiks-qt/MetadataIO/saverworkerjobitem.h \
+    ../../xpiks-qt/MetadataIO/artworkmetadatasnapshot.h \
     ../../xpiks-qt/Common/abstractlistmodel.h \
     ../../xpiks-qt/Models/metadataelement.h \
     ../../xpiks-qt/Models/artitemsmodel.h \
@@ -392,6 +397,7 @@ HEADERS += \
     ../../xpiks-qt/Translation/translationservice.h \
     ../../xpiks-qt/Translation/translationworker.h \
     ../../xpiks-qt/Models/uimanager.h \
+    ../../xpiks-qt/Models/sessionmanager.h \
     ../../xpiks-qt/Plugins/sandboxeddependencies.h \
     translatorbasictest.h \
     ../../xpiks-qt/Commands/expandpresetcommand.h \
@@ -406,7 +412,8 @@ HEADERS += \
     weirdnamesreadtest.h \
     ../../xpiks-qt/QMLExtensions/tabsmodel.h \
     ../../xpiks-qt/Helpers/asynccoordinator.h \
-    ../../xpiks-qt/Maintenance/locallibraryloadsaveitem.h
+    ../../xpiks-qt/Maintenance/locallibraryloadsaveitem.h \
+    restoresessiontest.h
 
 INCLUDEPATH += ../../../vendors/tiny-aes
 INCLUDEPATH += ../../../vendors/cpp-libface

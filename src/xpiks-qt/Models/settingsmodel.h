@@ -55,6 +55,7 @@ namespace Models {
         Q_PROPERTY(int uploadTimeout READ getUploadTimeout WRITE setUploadTimeout NOTIFY uploadTimeoutChanged)
         Q_PROPERTY(bool mustUseMasterPassword READ getMustUseMasterPassword WRITE setMustUseMasterPassword NOTIFY mustUseMasterPasswordChanged)
         Q_PROPERTY(bool mustUseConfirmations READ getMustUseConfirmations WRITE setMustUseConfirmations NOTIFY mustUseConfirmationsChanged)
+        Q_PROPERTY(bool saveSession READ getSaveSession WRITE setSaveSession NOTIFY saveSessionChanged)
         Q_PROPERTY(bool saveBackups READ getSaveBackups WRITE setSaveBackups NOTIFY saveBackupsChanged)
         Q_PROPERTY(double keywordSizeScale READ getKeywordSizeScale WRITE setKeywordSizeScale NOTIFY keywordSizeScaleChanged)
         Q_PROPERTY(int dismissDuration READ getDismissDuration WRITE setDismissDuration NOTIFY dismissDurationChanged)
@@ -121,6 +122,7 @@ namespace Models {
         Q_INVOKABLE void saveProxySetting(const QString &address, const QString &user, const QString &password, const QString &port);
         Q_INVOKABLE void saveArtworkEditUISettings();
         Q_INVOKABLE void saveSelectedDictionaryIndex();
+        Q_INVOKABLE void saveSessionSetting(bool saveSession);
 
     private:
         void doRetrieveAllValues();
@@ -316,6 +318,7 @@ namespace Models {
         int getUploadTimeout() const { return m_UploadTimeout; }
         bool getMustUseMasterPassword() const { return m_MustUseMasterPassword; }
         bool getMustUseConfirmations() const { return m_MustUseConfirmations; }
+        bool getSaveSession() const { return m_SaveSession; }
         bool getSaveBackups() const { return m_SaveBackups; }
         double getKeywordSizeScale() const { return m_KeywordSizeScale; }
         int getDismissDuration() const { return m_DismissDuration; }
@@ -354,6 +357,7 @@ namespace Models {
         void uploadTimeoutChanged(int uploadTimeout);
         void mustUseMasterPasswordChanged(bool mustUseMasterPassword);
         void mustUseConfirmationsChanged(bool mustUseConfirmations);
+        void saveSessionChanged(bool saveSession);
         void saveBackupsChanged(bool saveBackups);
         void keywordSizeScaleChanged(double value);
         void dismissDurationChanged(int value);
@@ -413,6 +417,14 @@ namespace Models {
 
             m_MustUseConfirmations = mustUseConfirmations;
             emit mustUseConfirmationsChanged(mustUseConfirmations);
+        }
+
+        void setSaveSession(bool saveSession) {
+            if (m_SaveSession == saveSession)
+                return;
+
+            m_SaveSession = saveSession;
+            emit saveSessionChanged(saveSession);
         }
 
         void setSaveBackups(bool saveBackups) {
@@ -625,6 +637,7 @@ namespace Models {
         int m_SelectedDictIndex;
         bool m_MustUseMasterPassword;
         bool m_MustUseConfirmations;
+        bool m_SaveSession;
         bool m_SaveBackups;
         bool m_FitSmallPreview;
         bool m_SearchUsingAnd;

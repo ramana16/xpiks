@@ -174,6 +174,7 @@ namespace Constants {
     const char artworkEditRightPaneWidth[] = "artworkEditRightPaneWidth";
     const char translatorSelectedDictIndex[] = "translatorSelectedDictIndex";
     const char verboseUpload[] = "verboseUpload";
+    const char saveSession[] = "saveSession";
 }
 
 #endif // CONSTANTS

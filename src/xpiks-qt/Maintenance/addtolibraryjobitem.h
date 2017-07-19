@@ -23,6 +23,7 @@
 #define ADDTOLIBRARYJOBITEM_H
 
 #include <QVector>
+#include "../MetadataIO/artworkmetadatasnapshot.h"
 #include "imaintenanceitem.h"
 
 namespace Models {
@@ -37,7 +38,7 @@ namespace Maintenance {
     class AddToLibraryJobItem : public IMaintenanceItem
     {
     public:
-        AddToLibraryJobItem(const QVector<Models::ArtworkMetadata *> artworksList, Suggestion::LocalLibrary *localLibrary);
+        AddToLibraryJobItem(std::unique_ptr<MetadataIO::LibrarySnapshot> &artworksSnapshot, Suggestion::LocalLibrary *localLibrary);
 
     public:
         virtual void processJob() override;
@@ -46,7 +47,7 @@ namespace Maintenance {
         void doAddToLibrary();
 
     private:
-        QVector<Models::ArtworkMetadata *> m_ArtworksList;
+        std::unique_ptr<MetadataIO::LibrarySnapshot> m_ArtworksSnapshot;
         Suggestion::LocalLibrary *m_LocalLibrary;
     };
 }

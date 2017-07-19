@@ -160,6 +160,8 @@ std::shared_ptr<Commands::ICommandResult> Commands::AddArtworksCommand::execute(
         commandManager->recordHistoryItem(addArtworksItem);
 
         commandManager->addToRecentFiles(filesToWatch);
+
+        commandManager->saveSessionInBackground();
     }
 
     artItemsModel->raiseArtworksAdded(newFilesCount, attachedCount);

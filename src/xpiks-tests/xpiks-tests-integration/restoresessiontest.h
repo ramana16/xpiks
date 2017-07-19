@@ -19,21 +19,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "backupsaverworker.h"
-#include <QFile>
-#include "../Helpers/constants.h"
-#include "../Models/artworkmetadata.h"
-#include "../Common/defines.h"
+#ifndef RETORESESSIONTEST_H
+#define RETORESESSIONTEST_H
 
-namespace MetadataIO {
-    bool BackupSaverWorker::initWorker() {
-        LOG_DEBUG << "#";
-        return true;
-    }
+#include "integrationtestbase.h"
 
-    void BackupSaverWorker::processOneItem(std::shared_ptr<SaverWorkerJobItem> &item) {
-        Models::ArtworkMetadata *metadata = item->getArtworkMetadata();
-        MetadataSavingCopy copy(metadata->getBasicModel());
-        copy.saveToFile(metadata->getFilepath());
-    }
-}
+class RestoreSessionTest: public IntegrationTestBase
+{
+public:
+    RestoreSessionTest(Commands::CommandManager *commandManager):
+        IntegrationTestBase(commandManager)
+    {}
+
+    // IntegrationTestBase interface
+public:
+    virtual QString testName();
+    virtual void setup();
+    virtual int doTest();
+};
+
+#endif // RETORESESSIONTEST_H

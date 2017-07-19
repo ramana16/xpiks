@@ -30,6 +30,7 @@
 #include "addtolibraryjobitem.h"
 #include "locallibraryloadsaveitem.h"
 #include "movesettingsjobitem.h"
+#include "savesessionjobitem.h"
 
 namespace Maintenance {
     MaintenanceService::MaintenanceService():
@@ -94,9 +95,9 @@ namespace Maintenance {
         m_MaintenanceWorker->submitFirst(jobItem);
     }
 
-    void MaintenanceService::addArtworksToLibrary(const QVector<Models::ArtworkMetadata *> artworksList, Suggestion::LocalLibrary *localLibrary) {
+    void MaintenanceService::addArtworksToLibrary(std::unique_ptr<MetadataIO::LibrarySnapshot> &artworksSnapshot, Suggestion::LocalLibrary *localLibrary) {
         LOG_DEBUG << "#";
-        std::shared_ptr<IMaintenanceItem> jobItem(new AddToLibraryJobItem(artworksList, localLibrary));
+        std::shared_ptr<IMaintenanceItem> jobItem(new AddToLibraryJobItem(artworksSnapshot, localLibrary));
         m_MaintenanceWorker->submitFirst(jobItem);
     }
 
@@ -126,6 +127,13 @@ namespace Maintenance {
     void MaintenanceService::moveSettings(Models::SettingsModel *settingsModel) {
         std::shared_ptr<IMaintenanceItem> jobItem(new MoveSettingsJobItem(settingsModel));
         m_MaintenanceWorker->submitFirst(jobItem);
+    }
+
+    void MaintenanceService::saveSession(std::unique_ptr<MetadataIO::SessionSnapshot> &sessionSnapshot, Models::SessionManager *sessionManager) {
+        LOG_DEBUG << "#";
+
+        std::shared_ptr<IMaintenanceItem> jobItem(new SaveSessionJobItem(sessionSnapshot, sessionManager));
+        m_MaintenanceWorker->submitItem(jobItem);
     }
 
     void MaintenanceService::workerFinished() {

@@ -45,6 +45,7 @@
 #include "../../xpiks-qt/Models/artitemsmodel.h"
 #include "../../xpiks-qt/Models/settingsmodel.h"
 #include "../../xpiks-qt/Models/ziparchiver.h"
+#include "../../xpiks-qt/Models/sessionmanager.h"
 #include "../../xpiks-qt/Helpers/constants.h"
 #include "../../xpiks-qt/Helpers/runguard.h"
 #include "../../xpiks-qt/Models/logsmodel.h"
@@ -82,6 +83,7 @@
 #include "translatorbasictest.h"
 #include "userdictedittest.h"
 #include "weirdnamesreadtest.h"
+#include "restoresessiontest.h"
 
 #ifdef Q_OS_WIN
 #include <tchar.h>
@@ -463,6 +465,8 @@ int main(int argc, char *argv[]) {
     Translation::TranslationManager translationManager;
     Translation::TranslationService translationService(translationManager);
     Models::ArtworkProxyModel artworkProxy;
+    Models::SessionManager sessionManager;
+    sessionManager.setPath();
     // intentional memory leak to beat spellcheck lock stuff
     QuickBuffer::QuickBuffer quickBuffer;
     Maintenance::MaintenanceService maintenanceService;
@@ -508,6 +512,8 @@ int main(int argc, char *argv[]) {
     commandManager.InjectDependency(&translationManager);
     commandManager.InjectDependency(&translationService);
     commandManager.InjectDependency(&artworkProxy);
+    commandManager.InjectDependency(&sessionManager);
+    commandManager.InjectDependency(&warningsModel);
     commandManager.InjectDependency(&quickBuffer);
     commandManager.InjectDependency(&maintenanceService);
 
@@ -531,6 +537,7 @@ int main(int argc, char *argv[]) {
 
     QVector<IntegrationTestBase*> integrationTests;
 
+    integrationTests.append(new RestoreSessionTest(&commandManager));
     integrationTests.append(new AddFilesBasicTest(&commandManager));
     integrationTests.append(new AutoAttachVectorsTest(&commandManager));
     integrationTests.append(new SaveFileBasicTest(&commandManager));

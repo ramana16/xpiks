@@ -30,7 +30,6 @@
 #include <QSize>
 #include <QHash>
 #include <QQuickTextDocument>
-#include <QVector>
 #include <deque>
 #include "../Common/abstractlistmodel.h"
 #include "../Common/baseentity.h"
@@ -224,7 +223,14 @@ namespace Models {
         const std::deque<ArtworkMetadata *> &getFinalizationList() const { return m_FinalizationList; }
 #endif
 
+    public:
+        const std::deque<ArtworkMetadata *> &getArtworkList() const { return m_ArtworkList; }
+
+#ifdef INTEGRATION_TESTS
+    public:
+#else
     private:
+#endif
         std::deque<ArtworkMetadata *> m_ArtworkList;
         std::deque<ArtworkMetadata *> m_FinalizationList;
 #ifdef QT_DEBUG

@@ -23,6 +23,7 @@
 #include "../Common/defines.h"
 #include "../Models/artworksrepository.h"
 #include "../Models/artitemsmodel.h"
+#include "../Models/imageartwork.h"
 #include "../Models/combinedartworksmodel.h"
 #include "../Models/artworkuploader.h"
 #include "../Models/uploadinforepository.h"
@@ -61,6 +62,8 @@
 #include "../Translation/translationservice.h"
 #include "../Models/uimanager.h"
 #include "../Models/artworkproxymodel.h"
+#include "../Models/sessionmanager.h"
+#include "../Warnings/warningsmodel.h"
 #include "../QuickBuffer/quickbuffer.h"
 #include "../QuickBuffer/currenteditableartwork.h"
 #include "../QuickBuffer/currenteditableproxyartwork.h"
@@ -105,6 +108,8 @@ Commands::CommandManager::CommandManager():
     m_TranslationManager(NULL),
     m_UIManager(NULL),
     m_ArtworkProxyModel(NULL),
+    m_SessionManager(NULL),
+    m_WarningsModel(NULL),
     m_QuickBuffer(NULL),
     m_MaintenanceService(NULL),
     m_ServicesInitialized(false),
@@ -285,6 +290,15 @@ void Commands::CommandManager::InjectDependency(Models::UIManager *uiManager) {
 void Commands::CommandManager::InjectDependency(Models::ArtworkProxyModel *artworkProxy) {
     Q_ASSERT(artworkProxy != NULL); m_ArtworkProxyModel = artworkProxy;
     m_ArtworkProxyModel->setCommandManager(this);
+}
+
+void Commands::CommandManager::InjectDependency(Models::SessionManager *sessionManager) {
+    Q_ASSERT(sessionManager != NULL); m_SessionManager = sessionManager;
+    m_SessionManager->setCommandManager(this);
+}
+
+void Commands::CommandManager::InjectDependency(Warnings::WarningsModel *warningsModel) {
+    Q_ASSERT(warningsModel != NULL); m_WarningsModel = warningsModel;
 }
 
 void Commands::CommandManager::InjectDependency(QuickBuffer::QuickBuffer *quickBuffer) {
@@ -476,6 +490,8 @@ void Commands::CommandManager::ensureDependenciesInjected() {
     Q_ASSERT(m_TranslationService != NULL);
     Q_ASSERT(m_TranslationManager != NULL);
     Q_ASSERT(m_ArtworkProxyModel != NULL);
+    Q_ASSERT(m_SessionManager != NULL);
+    Q_ASSERT(m_WarningsModel != NULL);
     Q_ASSERT(m_QuickBuffer != NULL);
     Q_ASSERT(m_MaintenanceService != NULL);
 
@@ -642,9 +658,9 @@ void Commands::CommandManager::writeMetadata(const QVector<Models::ArtworkMetada
 #endif
 }
 
-void Commands::CommandManager::addToLibrary(const QVector<Models::ArtworkMetadata *> &artworks) const {
+void Commands::CommandManager::addToLibrary(std::unique_ptr<MetadataIO::LibrarySnapshot> &artworksSnapshot) const {
     if (m_LocalLibrary) {
-        m_LocalLibrary->addToLibrary(artworks);
+        m_LocalLibrary->addToLibrary(artworksSnapshot);
     }
 }
 
@@ -689,21 +705,6 @@ void Commands::CommandManager::autoDiscoverExiftool() const {
         m_MetadataIOCoordinator->autoDiscoverExiftool();
     }
 }
-
-#ifdef QT_DEBUG
-void Commands::CommandManager::openInitialFiles() {
-    if (m_InitialFilesToOpen.isEmpty()) {
-        return;
-    }
-
-    m_ArtItemsModel->dropFiles(m_InitialFilesToOpen);
-}
-
-void Commands::CommandManager::addInitialArtworks(const QList<QUrl> &filePaths) {
-    m_InitialFilesToOpen = filePaths;
-}
-
-#endif
 
 void Commands::CommandManager::generatePreviews(const QVector<Models::ArtworkMetadata *> &items) const {
 #ifndef CORE_TESTS
@@ -911,6 +912,8 @@ void Commands::CommandManager::afterConstructionCallback() {
 #endif
 
     executeMaintenanceJobs();
+
+    readSession();
 }
 
 void Commands::CommandManager::afterInnerServicesInitialized() {
@@ -922,20 +925,89 @@ void Commands::CommandManager::afterInnerServicesInitialized() {
 #endif
 #endif
 
-#ifdef QT_DEBUG
-    openInitialFiles();
-#endif
+    afterReadSession();
 }
 
 void Commands::CommandManager::executeMaintenanceJobs() {
     m_MaintenanceService->loadLocalLibrary(m_LocalLibrary);
 
+#if !defined(CORE_TESTS) && !defined(INTEGRATION_TESTS)
     m_MaintenanceService->moveSettings(m_SettingsModel);
 
-#if !defined(CORE_TESTS) && !defined(INTEGRATION_TESTS)
     m_MaintenanceService->cleanupLogs();
     m_MaintenanceService->cleanupUpdatesArtifacts();
 #endif
+}
+
+void Commands::CommandManager::readSession() {
+    LOG_DEBUG << "#";
+
+    Q_ASSERT(m_SettingsModel != nullptr);
+    if (!m_SettingsModel->getSaveSession()) {
+        return;
+    }
+
+    m_SessionManager->restoreFromFile();
+}
+
+int Commands::CommandManager::afterReadSession() {
+    LOG_DEBUG << "#";
+
+    if (!m_SettingsModel->getSaveSession()) {
+        return 0;
+    }
+
+    bool autoFindVectors = m_SettingsModel->getAutoFindVectors();
+    auto filenames = m_SessionManager->getFilenames();
+    auto vectors = m_SessionManager->getVectors();
+
+    if (filenames.empty()) {
+        LOG_WARNING << "Session was empty";
+        return 0;
+    }
+
+    std::shared_ptr<Commands::AddArtworksCommand> addArtworksCommand(new Commands::AddArtworksCommand(filenames, vectors, autoFindVectors));
+    std::shared_ptr<Commands::ICommandResult> result = processCommand(addArtworksCommand);
+    std::shared_ptr<Commands::AddArtworksCommandResult> addArtworksResult = std::dynamic_pointer_cast<Commands::AddArtworksCommandResult>(result);
+
+    int newFilesCount = addArtworksResult->m_NewFilesAdded;
+    return newFilesCount;
+}
+
+#ifdef INTEGRATION_TESTS
+int Commands::CommandManager::restoreSession() {
+    readSession();
+
+    return afterReadSession();
+}
+#endif
+
+void Commands::CommandManager::saveSession() const {
+    LOG_DEBUG << "#";
+
+    Q_ASSERT(m_SettingsModel != nullptr);
+    if (!m_SettingsModel->getSaveSession()) {
+        return;
+    }
+
+    auto artworkList = m_ArtItemsModel->getArtworkList();
+    MetadataIO::SessionSnapshot sessionSnapshot(artworkList);
+    auto snapshot = sessionSnapshot.getSnapshot();
+
+    m_SessionManager->saveToFile(snapshot);
+}
+
+void Commands::CommandManager::saveSessionInBackground() {
+    LOG_DEBUG << "#";
+
+    if (!m_SettingsModel || !m_SettingsModel->getSaveSession()) {
+        return;
+    }
+
+    auto artworkList = m_ArtItemsModel->getArtworkList();
+    std::unique_ptr<MetadataIO::SessionSnapshot> sessionSnapshot(new MetadataIO::SessionSnapshot(artworkList));
+
+    m_MaintenanceService->saveSession(sessionSnapshot, m_SessionManager);
 }
 
 void Commands::CommandManager::beforeDestructionCallback() const {
@@ -944,6 +1016,7 @@ void Commands::CommandManager::beforeDestructionCallback() const {
         return;
     }
 
+    saveSession();
     m_ArtworksRepository->stopListeningToUnavailableFiles();
 
     m_ArtItemsModel->disconnect();

@@ -41,6 +41,7 @@
 #include "../KeywordsPresets/presetkeywordsmodel.h"
 #include "../KeywordsPresets/presetkeywordsmodelconfig.h"
 #include "../Helpers/asynccoordinator.h"
+#include "../MetadataIO/artworkmetadatasnapshot.h"
 
 namespace Encryption {
     class SecretsManager;
@@ -75,6 +76,7 @@ namespace Models {
     class UIManager;
     class ArtworkProxyBase;
     class ArtworkProxyModel;
+    class SessionManager;
 }
 
 namespace Suggestion {
@@ -103,6 +105,7 @@ namespace Plugins {
 
 namespace Warnings {
     class WarningsService;
+    class WarningsModel;
 }
 
 namespace QMLExtensions {
@@ -176,6 +179,8 @@ namespace Commands {
         void InjectDependency(Translation::TranslationManager *translationManager);
         void InjectDependency(Models::UIManager *uiManager);
         void InjectDependency(Models::ArtworkProxyModel *artworkProxy);
+        void InjectDependency(Models::SessionManager *sessionManager);
+        void InjectDependency(Warnings::WarningsModel *warningsModel);
         void InjectDependency(QuickBuffer::QuickBuffer *quickBuffer);
         void InjectDependency(Maintenance::MaintenanceService *maintenanceService);
 
@@ -209,19 +214,13 @@ namespace Commands {
         void readMetadata(const QVector<Models::ArtworkMetadata*> &artworks,
                           const QVector<QPair<int, int> > &rangesToUpdate) const;
         void writeMetadata(const QVector<Models::ArtworkMetadata*> &artworks, bool useBackups) const;
-        void addToLibrary(const QVector<Models::ArtworkMetadata*> &artworks) const;
+        void addToLibrary(std::unique_ptr<MetadataIO::LibrarySnapshot> &artworksSnapshot) const;
         void updateArtworks(const QVector<int> &indices) const;
         void updateArtworks(const QVector<QPair<int, int> > &rangesToUpdate) const;
         void addToRecentDirectories(const QString &path) const;
         void addToRecentFiles(const QString &path) const;
         void addToRecentFiles(const QStringList &filenames) const;
         void autoDiscoverExiftool() const;
-#ifdef QT_DEBUG
-    private:
-        void openInitialFiles();
-    public:
-        void addInitialArtworks(const QList<QUrl> &filePaths);
-#endif
 
     public:
         void generatePreviews(const QVector<Models::ArtworkMetadata*> &items) const;
@@ -251,6 +250,14 @@ namespace Commands {
     private:
         void afterInnerServicesInitialized();
         void executeMaintenanceJobs();
+        void readSession();
+        int afterReadSession();
+    public:
+#ifdef INTEGRATION_TESTS
+        int restoreSession();
+#endif
+        void saveSession() const;
+        void saveSessionInBackground();
 
     public:
         void beforeDestructionCallback() const;
@@ -299,6 +306,8 @@ namespace Commands {
         virtual Models::RecentDirectoriesModel *getRecentDirectories() const { return m_RecentDirectories; }
         virtual Models::RecentFilesModel *getRecentFiles() const { return m_RecentFiles; }
         virtual Maintenance::MaintenanceService *getMaintenanceService() const { return m_MaintenanceService; }
+        virtual Models::SessionManager *getSessionManager() const { return m_SessionManager; }
+        virtual Warnings::WarningsModel *getWarningsModel() const { return m_WarningsModel; }
 
 #ifdef INTEGRATION_TESTS
         virtual Translation::TranslationManager *getTranslationManager() const { return m_TranslationManager; }
@@ -347,14 +356,13 @@ namespace Commands {
         Translation::TranslationManager *m_TranslationManager;
         Models::UIManager *m_UIManager;
         Models::ArtworkProxyModel *m_ArtworkProxyModel;
+        Models::SessionManager *m_SessionManager;
+        Warnings::WarningsModel *m_WarningsModel;
         QuickBuffer::QuickBuffer *m_QuickBuffer;
         Maintenance::MaintenanceService *m_MaintenanceService;
 
         QVector<Common::IServiceBase<Common::IBasicArtwork, Common::WarningsCheckFlags> *> m_WarningsCheckers;
         QVector<Helpers::IFileNotAvailableModel*> m_AvailabilityListeners;
-#ifdef QT_DEBUG
-        QList<QUrl> m_InitialFilesToOpen;
-#endif
 
         volatile bool m_ServicesInitialized;
         volatile bool m_AfterInitCalled;

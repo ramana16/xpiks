@@ -110,4 +110,6 @@ void UndoRedo::RemoveArtworksHistoryItem::undo(const Commands::ICommandManager *
 
     commandManager->readMetadata(artworksToImport, ranges);
     artItemsModel->raiseArtworksAdded(usedCount, attachedVectors);
+
+    commandManager->saveSessionInBackground();
 }

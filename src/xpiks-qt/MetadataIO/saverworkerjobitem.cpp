@@ -24,7 +24,6 @@
 #include <QDataStream>
 #include "../Helpers/constants.h"
 #include "../Common/basicmetadatamodel.h"
-#include "../Models/artworkmetadata.h"
 #include "../Common/defines.h"
 
 namespace MetadataIO {
@@ -90,20 +89,6 @@ namespace MetadataIO {
         m_MetadataInfo["title"] = keywordsModel->getTitle();
         m_MetadataInfo["description"] = keywordsModel->getDescription();
         m_MetadataInfo["keywords"] = keywordsModel->getKeywordsString();
-    }
-
-    SaverWorkerJobItem::SaverWorkerJobItem(Models::ArtworkMetadata *metadata):
-        m_ArtworkMetadata(metadata)
-    {
-        if (m_ArtworkMetadata != nullptr) {
-            m_ArtworkMetadata->acquire();
-        }
-    }
-
-    SaverWorkerJobItem::~SaverWorkerJobItem() {
-        if (m_ArtworkMetadata != nullptr) {
-            m_ArtworkMetadata->release();
-        }
     }
 }
 

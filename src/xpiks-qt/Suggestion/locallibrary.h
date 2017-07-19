@@ -34,6 +34,7 @@
 #include "../Common/baseentity.h"
 #include "../Maintenance/locallibraryloadsaveitem.h"
 #include "../Maintenance/addtolibraryjobitem.h"
+#include "../MetadataIO/artworkmetadatasnapshot.h"
 
 namespace Models {
     class ArtworkMetadata;
@@ -72,7 +73,7 @@ namespace Suggestion {
     public:
         const QString &getLibraryPath() const { return m_Filename; }
         void setLibraryPath(const QString &filename) { m_Filename = filename; }
-        void addToLibrary(const QVector<Models::ArtworkMetadata *> artworksList);
+        void addToLibrary(std::unique_ptr<MetadataIO::LibrarySnapshot> &artworksSnapshot);
         void swap(QHash<QString, LocalArtworkData> &hash);
         void saveToFile();
         void searchArtworks(const QStringList &query,
@@ -81,7 +82,7 @@ namespace Suggestion {
         void cleanupTrash();
 
     private:
-        void doAddToLibrary(const QVector<Models::ArtworkMetadata *> artworksList);
+        void doAddToLibrary(std::unique_ptr<MetadataIO::LibrarySnapshot> &artworksSnapshot);
 
     private:
         friend class Maintenance::AddToLibraryJobItem;
