@@ -98,7 +98,9 @@ namespace Models {
     private:
         void releaseArtwork() {
             if (m_ArtworkMetadata != nullptr) {
-                m_ArtworkMetadata->release();
+                if (m_ArtworkMetadata->release()) {
+                    LOG_DEBUG << "Item could have been removed";
+                }
             }
         }
 
