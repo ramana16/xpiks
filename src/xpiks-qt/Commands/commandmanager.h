@@ -255,7 +255,7 @@ namespace Commands {
 
     public:
 #ifdef INTEGRATION_TESTS
-        int restoreSession();
+        int restoreSessionForTest();
 #endif
         void saveSession() const;
         void saveSessionInBackground();

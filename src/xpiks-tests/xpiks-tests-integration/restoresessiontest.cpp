@@ -36,7 +36,6 @@ QString RestoreSessionTest::testName() {
 
 void RestoreSessionTest::setup() {
     Models::SettingsModel *settingsModel = m_CommandManager->getSettingsModel();
-    Models::SessionManager *sessionManager = m_CommandManager->getSessionManager();
 
     settingsModel->setSaveSession(true);
     settingsModel->setUseSpellCheck(false);
