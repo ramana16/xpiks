@@ -40,7 +40,6 @@ void RestoreSessionTest::setup() {
 
     settingsModel->setSaveSession(true);
     settingsModel->setUseSpellCheck(false);
-    sessionManager->clearSession();
 }
 
 int RestoreSessionTest::doTest() {
@@ -70,7 +69,7 @@ int RestoreSessionTest::doTest() {
     }
     VERIFY(!ioCoordinator->getHasErrors(), "Errors in IO Coordinator while reading");
 
-    sleepWait(20, [=]() {
+    sleepWait(10, [=]() {
         return sessionManager->filesCount() == files.length();
     });
 
@@ -78,7 +77,7 @@ int RestoreSessionTest::doTest() {
     artItemsModel->m_ArtworkList.clear();
 
     artworksRepository->resetEverything();
-    addedCount = m_CommandManager->restoreSession();
+    addedCount = m_CommandManager->restoreSessionForTest();
     VERIFY(addedCount == files.length(), "Failed to add file");
     ioCoordinator->continueReading(true);
 
@@ -95,18 +94,22 @@ int RestoreSessionTest::doTest() {
     for (size_t i = 0; i < newArtworksList.size(); i++) {
         auto oldItem = oldArtworksList.at(i)->getArtworkMetadata();
         auto newItem = oldArtworksList.at(i)->getArtworkMetadata();
-        Models::ImageArtwork *oldImage = dynamic_cast<Models::ImageArtwork*>(oldItem);
-        Models::ImageArtwork *newImage = dynamic_cast<Models::ImageArtwork*>(newItem);
 
-        VERIFY(oldItem->getFilepath() == newItem->getFilepath(), "Filenames don't match");
+        VERIFY(oldItem->getFilepath() == newItem->getFilepath(), "Filepaths don't match");
         VERIFY(oldItem->getTitle() == newItem->getTitle(), "Titles don't match");
         VERIFY(oldItem->getDescription() == newItem->getDescription(), "Descriptions don't match");
         VERIFY(oldItem->getKeywords() == newItem->getKeywords(), "Keywords don't match");
-        VERIFY(oldImage->getImageSize().width() == newImage->getImageSize().width(), "Image widths don't match");
-        VERIFY(oldImage->getImageSize().height() == newImage->getImageSize().height(), "Image heights don't match");
+
+        Models::ImageArtwork *oldImage = dynamic_cast<Models::ImageArtwork*>(oldItem);
+        Models::ImageArtwork *newImage = dynamic_cast<Models::ImageArtwork*>(newItem);
+        if (oldImage != nullptr && newImage != nullptr) {
+            VERIFY(oldImage->getImageSize().width() == newImage->getImageSize().width(), "Image widths don't match");
+            VERIFY(oldImage->getImageSize().height() == newImage->getImageSize().height(), "Image heights don't match");
+        }
     }
 
     // -------------------------------------
+    // TODO: move below code away (maybe to perf tests)
 
     sessionManager->clearSession();
 
@@ -122,9 +125,14 @@ int RestoreSessionTest::doTest() {
     VERIFY(sessionManager->filesCount() == 0, "Session is not cleared");
 
     QTime timer;
+
     timer.start();
-    sessionManager->readSessionFromFile();
-    VERIFY(timer.elapsed() < 1000, "Session parsing is slow");
+    {
+        sessionManager->readSessionFromFile();
+    }
+    int elapsed = timer.elapsed();
+
+    VERIFY(elapsed < 1000, "Session parsing is slow");
     VERIFY(sessionManager->filesCount() == 10000, "Session initialization failed");
 
     //qDeleteAll(metadataVector);

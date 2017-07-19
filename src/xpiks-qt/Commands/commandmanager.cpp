@@ -977,7 +977,7 @@ int Commands::CommandManager::restoreReadSession() {
 }
 
 #ifdef INTEGRATION_TESTS
-int Commands::CommandManager::restoreSession() {
+int Commands::CommandManager::restoreSessionForTest() {
     readSession();
 
     int filesRead = restoreReadSession();
@@ -1111,6 +1111,7 @@ void Commands::CommandManager::cleanup() {
     m_ArtItemsModel->deleteAllItems();
     m_SettingsModel->resetToDefault();
     m_SpellCheckerService->clearUserDictionary();
+    m_SessionManager->clearSession();
 }
 #endif
 
