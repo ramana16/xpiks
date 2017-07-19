@@ -61,21 +61,19 @@ namespace Models {
         m_Config.setPath(m_LocalConfigPath);
     }
 
-    void SessionManager::saveToFile(std::vector<std::shared_ptr<MetadataIO::ArtworkMetadataSnapshot> > &snapshot) {
+    void SessionManager::saveToFile(std::vector<std::shared_ptr<MetadataIO::ArtworkSessionSnapshot> > &snapshot) {
         LOG_INFO << snapshot.size() << "artwork(s)";
 
         QJsonArray filesList;
 
         for (auto &item: snapshot) {
-            Models::ArtworkMetadata *metadata = item->getArtworkMetadata();
             QJsonObject jsonObject;
 
-            auto filePath = metadata->getFilepath();
+            auto &filePath = item->getArtworkFilePath();
             jsonObject.insert(FILE_KEY, filePath);
 
-            ImageArtwork *image = dynamic_cast<ImageArtwork *>(metadata);
-            if (image != NULL && image->hasVectorAttached()) {
-                auto vectorPath = image->getAttachedVectorPath();
+            auto &vectorPath = item->getAttachedVectorPath();
+            if (!vectorPath.isEmpty()) {
                 jsonObject.insert(VECTOR_KEY, vectorPath);
             }
 
@@ -141,7 +139,7 @@ namespace Models {
     }
 
 #ifdef INTEGRATION_TESTS
-    int SessionManager::filesCount() const {
+    int SessionManager::itemsCount() const {
         const QJsonArray &filesArray = value(OPENED_FILES_KEY).toArray();
         return filesArray.size();
     }

@@ -37,15 +37,15 @@ QString RestoreSessionTest::testName() {
 void RestoreSessionTest::setup() {
     Models::SettingsModel *settingsModel = m_CommandManager->getSettingsModel();
 
-    settingsModel->setSaveSession(true);
     settingsModel->setUseSpellCheck(false);
+    settingsModel->setSaveSession(true);
     settingsModel->setAutoFindVectors(true);
 }
 
 int RestoreSessionTest::doTest() {
     Models::ArtItemsModel *artItemsModel = m_CommandManager->getArtItemsModel();
     Models::SessionManager *sessionManager = m_CommandManager->getSessionManager();
-    VERIFY(sessionManager->filesCount() == 0, "Session is not cleared");
+    VERIFY(sessionManager->itemsCount() == 0, "Session is not cleared");
     Models::ArtworksRepository *artworksRepository = m_CommandManager->getArtworksRepository();
 
     QList<QUrl> files;
@@ -70,13 +70,14 @@ int RestoreSessionTest::doTest() {
     VERIFY(!ioCoordinator->getHasErrors(), "Errors in IO Coordinator while reading");
 
     sleepWait(10, [&]() {
-        return sessionManager->filesCount() > files.length();
+        return sessionManager->itemsCount() == files.length();
     });
+    VERIFY(sessionManager->itemsCount() == files.length(), "Session does not contain all files");
 
-    MetadataIO::SessionSnapshot oldArtworksSnapshot(artItemsModel->getArtworkList());
+    MetadataIO::LibrarySnapshot oldArtworksSnapshot(artItemsModel->getArtworkList());
 
-    artItemsModel->deleteAllItems();
     artworksRepository->resetEverything();
+    artItemsModel->deleteAllItems();
 
     int restoredCount = m_CommandManager->restoreSessionForTest();
     VERIFY(addedCount == restoredCount, "Failed to properly restore");
@@ -87,7 +88,7 @@ int RestoreSessionTest::doTest() {
     }
     VERIFY(!ioCoordinator->getHasErrors(), "Errors in IO Coordinator while reading");
 
-    MetadataIO::SessionSnapshot newArtworksSnapshot(artItemsModel->getArtworkList());
+    MetadataIO::LibrarySnapshot newArtworksSnapshot(artItemsModel->getArtworkList());
     auto &oldArtworksList = oldArtworksSnapshot.getSnapshot();
     auto &newArtworksList = newArtworksSnapshot.getSnapshot();
 
@@ -104,6 +105,8 @@ int RestoreSessionTest::doTest() {
         Models::ImageArtwork *oldImage = dynamic_cast<Models::ImageArtwork*>(oldItem);
         Models::ImageArtwork *newImage = dynamic_cast<Models::ImageArtwork*>(newItem);
         if (oldImage != nullptr && newImage != nullptr) {
+            VERIFY(oldImage->hasVectorAttached() == newImage->hasVectorAttached(), "Vector attachment lost");
+            VERIFY(oldImage->getAttachedVectorPath() == newImage->getAttachedVectorPath(), "Vector filepath lost");
             VERIFY(oldImage->getImageSize().width() == newImage->getImageSize().width(), "Image widths don't match");
             VERIFY(oldImage->getImageSize().height() == newImage->getImageSize().height(), "Image heights don't match");
         }

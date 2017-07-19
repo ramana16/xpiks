@@ -29,7 +29,7 @@
 #include "../Common/baseentity.h"
 
 namespace MetadataIO {
-    class ArtworkMetadataSnapshot;
+    class ArtworkSessionSnapshot;
 }
 
 namespace Models {
@@ -46,7 +46,7 @@ namespace Models {
 
     public:
         void initialize();
-        void saveToFile(std::vector<std::shared_ptr<MetadataIO::ArtworkMetadataSnapshot> > &snapshot);
+        void saveToFile(std::vector<std::shared_ptr<MetadataIO::ArtworkSessionSnapshot> > &snapshot);
         void readSessionFromFile();
 
     public:
@@ -54,7 +54,7 @@ namespace Models {
         const QStringList &getVectors() const { return m_Vectors; }
 
 #ifdef INTEGRATION_TESTS
-        int filesCount() const;
+        int itemsCount() const;
         void clearSession();
 #endif
 

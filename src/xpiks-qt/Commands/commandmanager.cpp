@@ -978,6 +978,7 @@ int Commands::CommandManager::restoreReadSession() {
 
 #ifdef INTEGRATION_TESTS
 int Commands::CommandManager::restoreSessionForTest() {
+    LOG_DEBUG << "#";
     readSession();
 
     int filesRead = restoreReadSession();

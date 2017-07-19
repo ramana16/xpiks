@@ -22,45 +22,81 @@
 #ifndef ARTWORKMETADATASNAPSHOT_H
 #define ARTWORKMETADATASNAPSHOT_H
 
+#include <QString>
 #include <deque>
 #include "../Models/artworkmetadata.h"
+#include "../Models/imageartwork.h"
 
 namespace MetadataIO {
-    class ArtworkMetadataSnapshot : public Models::ArtworkMetadataLocker
+    class ArtworkSessionSnapshot
     {
     public:
-        ArtworkMetadataSnapshot(Models::ArtworkMetadata *metadata):
-            Models::ArtworkMetadataLocker(metadata)
-        {
+        ArtworkSessionSnapshot(Models::ArtworkMetadata *metadata) {
+            Q_ASSERT(metadata != nullptr);
+            m_ArtworkPath = metadata->getFilepath();
+
+            Models::ImageArtwork *image = dynamic_cast<Models::ImageArtwork*>(metadata);
+            if (image != nullptr && image->hasVectorAttached()){
+                m_VectorPath = image->getAttachedVectorPath();
+            }
         }
+
+    public:
+        const QString &getArtworkFilePath() const { return m_ArtworkPath; }
+        const QString &getAttachedVectorPath() const { return m_VectorPath; }
+
+    private:
+        QString m_ArtworkPath;
+        QString m_VectorPath;
     };
 
     template <typename T>
-    class ArtworksSnapshotBase {
+    class SessionSnapshotBase {
     public:
-        ArtworksSnapshotBase(const T &artworksList) {
+        SessionSnapshotBase(const T &artworksList) {
             LOG_DEBUG << "#";
 
             m_Snapshot.reserve(artworksList.size());
             for (const auto &artwork: artworksList) {
-                m_Snapshot.emplace_back(new MetadataIO::ArtworkMetadataSnapshot(artwork));
+                m_Snapshot.emplace_back(new MetadataIO::ArtworkSessionSnapshot(artwork));
             }
         }
 
-        virtual ~ArtworksSnapshotBase() {
+        virtual ~SessionSnapshotBase() {
             LOG_DEBUG << "#";
         }
 
     public:
-        std::vector<std::shared_ptr<MetadataIO::ArtworkMetadataSnapshot> > &getSnapshot() { return m_Snapshot; }
+        std::vector<std::shared_ptr<MetadataIO::ArtworkSessionSnapshot> > &getSnapshot() { return m_Snapshot; }
 
     private:
-        std::vector<std::shared_ptr<MetadataIO::ArtworkMetadataSnapshot> > m_Snapshot;
+        std::vector<std::shared_ptr<MetadataIO::ArtworkSessionSnapshot> > m_Snapshot;
     };
 
-    typedef ArtworksSnapshotBase<std::deque<Models::ArtworkMetadata *>> SessionSnapshot;
-    typedef ArtworksSnapshotBase<std::vector<Models::ArtworkMetadata *>> ArtworksSnapshot;
-    typedef ArtworksSnapshotBase<const QVector<Models::ArtworkMetadata *>> LibrarySnapshot;
+    typedef SessionSnapshotBase<std::deque<Models::ArtworkMetadata *>> SessionSnapshot;
+
+    class LibrarySnapshot {
+    public:
+        LibrarySnapshot(const QVector<Models::ArtworkMetadata *> &artworks) {
+            m_ArtworksSnapshot.reserve(artworks.size());
+            for (auto &item: artworks) {
+                m_ArtworksSnapshot.emplace_back(new Models::ArtworkMetadataLocker(item));
+            }
+        }
+
+        LibrarySnapshot(const std::deque<Models::ArtworkMetadata *> &artworks) {
+            m_ArtworksSnapshot.reserve(artworks.size());
+            for (auto &item: artworks) {
+                m_ArtworksSnapshot.emplace_back(new Models::ArtworkMetadataLocker(item));
+            }
+        }
+
+    public:
+        const std::vector<std::shared_ptr<Models::ArtworkMetadataLocker> > &getSnapshot() const { return m_ArtworksSnapshot; }
+
+    private:
+        std::vector<std::shared_ptr<Models::ArtworkMetadataLocker> > m_ArtworksSnapshot;
+    };
 }
 
 #endif // ARTWORKMETADATASNAPSHOT_H
