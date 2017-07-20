@@ -90,24 +90,7 @@ namespace Models {
         size_t size = artworksToDestroy.size();
         for (size_t i = 0; i < size; ++i) {
             ArtworkMetadata *metadata = artworksToDestroy.at(i);
-            if (metadata->release()) {
-                LOG_INTEGRATION_TESTS << "Destroying metadata for real";
-                m_CommandManager->disconnectArtworkSignals(metadata);
-                metadata->deepDisconnect();
-#ifdef QT_DEBUG
-                m_DestroyedList.push_back(metadata);
-#endif
-                metadata->deleteLater();
-            } else {
-                LOG_WARNING << "Metadata #" << metadata->getItemID() << "at index" << i << "is locked. Postponing destruction...";
-
-                metadata->disconnect();
-                auto *metadataModel = metadata->getBasicModel();
-                metadataModel->disconnect();
-                metadataModel->clearModel();
-
-                m_FinalizationList.push_back(metadata);
-            }
+            destroyInnerItem(metadata);
         }        
     }
 
@@ -1174,6 +1157,7 @@ namespace Models {
 
     void ArtItemsModel::destroyInnerItem(ArtworkMetadata *metadata) {
         if (metadata->release()) {
+            LOG_INTEGRATION_TESTS << "Destroying metadata" << metadata->getItemID() << "for real";
             m_CommandManager->disconnectArtworkSignals(metadata);
             metadata->deepDisconnect();
 #ifdef QT_DEBUG
@@ -1181,7 +1165,7 @@ namespace Models {
 #endif
             metadata->deleteLater();
         } else {
-            LOG_DEBUG << "Metadata is locked. Postponing destruction...";
+            LOG_DEBUG << "Metadata #" << metadata->getItemID() << "is locked. Postponing destruction...";
 
             metadata->disconnect();
             auto *metadataModel = metadata->getBasicModel();
