@@ -1152,7 +1152,9 @@ namespace Models {
             destroyInnerItem(metadata);
         }
 
-        emit selectedArtworksRemoved(selectedItems);
+        if (selectedItems > 0) {
+            emit selectedArtworksRemoved(selectedItems);
+        }
     }
 
     void ArtItemsModel::destroyInnerItem(ArtworkMetadata *metadata) {
