@@ -66,6 +66,7 @@ namespace Common {
         const QString &getKeywordAt(int index) const { return m_KeywordsList.at(index); }
 #endif
         virtual void removeItemsAtIndices(const QVector<QPair<int, int> > &ranges) override;
+        virtual int getRangesLengthForReset() const override { return 10; }
 
     protected:
         // UNSAFE

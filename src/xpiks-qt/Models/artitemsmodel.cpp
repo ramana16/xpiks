@@ -1095,11 +1095,11 @@ namespace Models {
         return roles;
     }
 
-    bool ArtItemsModel::shouldRemoveInRanges(int rangesLength) const {
+    int ArtItemsModel::getRangesLengthForReset() const {
 #ifdef QT_DEBUG
-        return rangesLength > 10;
+        return 10;
 #else
-        return rangesLength > 50;
+        return 50;
 #endif
     }
 

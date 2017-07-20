@@ -207,7 +207,7 @@ namespace Models {
         virtual QHash<int, QByteArray> roleNames() const override;
 
     protected:
-        virtual bool shouldRemoveInRanges(int rangesLength) const override;
+        virtual int getRangesLengthForReset() const override;
         virtual void removeInnerItem(int row) override;
         virtual void removeInnerItemRange(int start, int end) override;
 

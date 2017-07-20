@@ -60,7 +60,7 @@ namespace Common {
 
         virtual void removeInnerItem(int row) = 0;
 
-        virtual bool shouldRemoveInRanges(int rangesLength) const { return rangesLength > RANGES_LENGTH_FOR_RESET; }
+        virtual int getRangesLengthForReset() const { return RANGES_LENGTH_FOR_RESET; }
 
         virtual void removeInnerItemRange(int startRow, int endRow) {
             for (int row = endRow; row >= startRow; --row) { removeInnerItem(row); }
@@ -68,8 +68,9 @@ namespace Common {
 
         void doRemoveItemsAtIndices(const QVector<QPair<int, int> > &ranges, int rangesLength) {
             const int rangesCount = ranges.count();
+            const int rangesLengthForReset = getRangesLengthForReset();
 
-            const bool willResetModel = shouldRemoveInRanges(rangesLength);
+            const bool willResetModel = rangesLength >= rangesLengthForReset;
 
             if (willResetModel) {
                 beginResetModel();
