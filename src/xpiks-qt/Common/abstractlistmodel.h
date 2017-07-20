@@ -67,17 +67,17 @@ namespace Common {
 
         void doRemoveItemsAtIndices(const QVector<QPair<int, int> > &ranges, int rangesLength) {
             int removedCount = 0;
-            int rangesCount = ranges.count();
+            const int rangesCount = ranges.count();
 
-            bool willResetModel = shouldRemoveInRanges(rangesLength);
+            const bool willResetModel = shouldRemoveInRanges(rangesLength);
 
             if (willResetModel) {
                 beginResetModel();
             }
 
             for (int i = 0; i < rangesCount; ++i) {
-                int startRow = ranges[i].first - removedCount;
-                int endRow = ranges[i].second - removedCount;
+                const int startRow = ranges[i].first - removedCount;
+                const int endRow = ranges[i].second - removedCount;
 
                 if (!willResetModel) {
                     beginRemoveRows(QModelIndex(), startRow, endRow);
