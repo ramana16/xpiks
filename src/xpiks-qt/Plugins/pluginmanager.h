@@ -70,7 +70,7 @@ namespace Plugins {
         Q_INVOKABLE void triggerPluginAction(int pluginID, int actionID) const;
 
     private:
-        void addPlugin(XpiksPluginInterface *plugin);
+        std::shared_ptr<PluginWrapper> instantiatePlugin(XpiksPluginInterface *plugin);
 
         // QAbstractItemModel interface
     public:

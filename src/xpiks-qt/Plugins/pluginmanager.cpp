@@ -78,6 +78,7 @@ namespace Plugins {
     }
 
     void PluginManager::loadPlugins() {
+        LOG_DEBUG << "#";
         QDir pluginsDir;
 
         if (!getPluginsDir(pluginsDir)) {
@@ -85,29 +86,50 @@ namespace Plugins {
         }
 
         LOG_INFO << "Plugins dir:" << pluginsDir.absolutePath();
+        std::vector<std::shared_ptr<PluginWrapper> > loadedPlugins;
+        QHash<int, std::shared_ptr<PluginWrapper> > pluginsDict;
 
-        beginResetModel();
-        m_PluginsList.clear();
+        QStringList pluginDirFiles = pluginsDir.entryList(QDir::Files);
+        LOG_INFO << "Trying to load" << pluginDirFiles.size() << "file(s)";
 
-        foreach (QString fileName, pluginsDir.entryList(QDir::Files)) {
+        foreach (QString fileName, pluginDirFiles) {
             LOG_DEBUG << "Trying file:" << fileName;
 
-            QPluginLoader loader(pluginsDir.absoluteFilePath(fileName));
-            QObject *plugin = loader.instance();
-            if (plugin) {
-                XpiksPluginInterface *xpiksPlugin = qobject_cast<XpiksPluginInterface *>(plugin);
+            try {
+                QPluginLoader loader(pluginsDir.absoluteFilePath(fileName));
+                QObject *plugin = loader.instance();
+                if (plugin) {
+                    XpiksPluginInterface *xpiksPlugin = qobject_cast<XpiksPluginInterface *>(plugin);
 
-                if (xpiksPlugin) {
-                    addPlugin(xpiksPlugin);
+                    if (xpiksPlugin) {
+                        auto pluginWrapper = instantiatePlugin(xpiksPlugin);
+                        if (pluginWrapper) {
+                            loadedPlugins.push_back(pluginWrapper);
+                            pluginsDict.insert(pluginWrapper->getPluginID(), pluginWrapper);
+                        }
+                    } else {
+                        LOG_DEBUG << "Not Xpiks Plugin:" << fileName;
+                    }
                 } else {
-                    LOG_DEBUG << "Not Xpiks Plugin";
+                    LOG_WARNING << loader.errorString();
                 }
-            } else {
-                LOG_DEBUG << loader.errorString();
+            } catch(...) {
+                LOG_WARNING << "Exception while loading" << fileName;
             }
         }
 
-        endResetModel();
+        if (!loadedPlugins.empty()) {
+            LOG_DEBUG << "Resetting plugins model";
+            beginResetModel();
+            {
+                m_PluginsList.swap(loadedPlugins);
+                m_PluginsDict.swap(pluginsDict);
+
+                loadedPlugins.clear();
+                pluginsDict.clear();
+            }
+            endResetModel();
+        }
     }
 
     void PluginManager::unloadPlugins() {
@@ -183,7 +205,7 @@ namespace Plugins {
         }
     }
 
-    void PluginManager::addPlugin(XpiksPluginInterface *plugin) {
+    std::shared_ptr<PluginWrapper> PluginManager::instantiatePlugin(XpiksPluginInterface *plugin) {
         int pluginID = getNextPluginID();
         LOG_INFO << "ID:" << pluginID << "name:" << plugin->getPrettyName() << "version:" << plugin->getVersionString();
 
@@ -205,10 +227,7 @@ namespace Plugins {
             pluginWrapper.reset();
         }
 
-        if (pluginWrapper) {
-            m_PluginsList.push_back(pluginWrapper);
-            m_PluginsDict.insert(pluginID, pluginWrapper);
-        }
+        return pluginWrapper;
     }
 
     int PluginManager::rowCount(const QModelIndex &parent) const {
