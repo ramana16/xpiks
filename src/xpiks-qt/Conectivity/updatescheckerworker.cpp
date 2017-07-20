@@ -24,6 +24,7 @@
 #define UPDATE_JSON_MAJOR_VERSION "major_version"
 #define UPDATE_JSON_MINOR_VERSION "minor_version"
 #define UPDATE_JSON_FIX_VERSION "fix_version"
+#define UPDATE_JSON_HOTFIX_VERSION "hotfix_version"
 #define UPDATE_JSON_UPDATE_URL "update_link"
 #define UPDATE_JSON_CHECKSUM "checksum"
 
@@ -166,14 +167,16 @@ namespace Conectivity {
 
             if (jsonObject.contains(UPDATE_JSON_MAJOR_VERSION) &&
                     jsonObject.contains(UPDATE_JSON_MINOR_VERSION) &&
-                    jsonObject.contains(UPDATE_JSON_FIX_VERSION)) {
+                    jsonObject.contains(UPDATE_JSON_FIX_VERSION) /*&&
+                    jsonObject.contains(UPDATE_JSON_HOTFIX_VERSION)*/) {
 
-                int majorVersion = jsonObject.value(UPDATE_JSON_MAJOR_VERSION).toInt();
-                int minorVersion = jsonObject.value(UPDATE_JSON_MINOR_VERSION).toInt();
-                int fixVersion = jsonObject.value(UPDATE_JSON_FIX_VERSION).toInt();
+                const int majorVersion = jsonObject.value(UPDATE_JSON_MAJOR_VERSION).toInt();
+                const int minorVersion = jsonObject.value(UPDATE_JSON_MINOR_VERSION).toInt();
+                const int fixVersion = jsonObject.value(UPDATE_JSON_FIX_VERSION).toInt();
+                /*const int hotfixVersion = jsonObject.value(UPDATE_JSON_HOTFIX_VERSION).toInt();*/
 
-                int availableVersion = majorVersion*100 + minorVersion*10 + fixVersion;
-                int currVersion = XPIKS_MAJOR_VERSION*100 + XPIKS_MINOR_VERSION*10 + XPIKS_FIX_VERSION;
+                const int availableVersion = XPIKS_VERSION_TO_INT(majorVersion, minorVersion, fixVersion/*, hotfixVersion*/);
+                const int currVersion = XPIKS_VERSION_INT;
 
                 LOG_INFO << "Update service: available =" << availableVersion << "current =" << currVersion;
 

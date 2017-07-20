@@ -278,7 +278,7 @@ int main(int argc, char *argv[]) {
     qInstallMessageHandler(myMessageHandler);
 
     LOG_INFO << "Log started. Today is" << QDateTime::currentDateTimeUtc().toString("dd.MM.yyyy");
-    LOG_INFO << "Xpiks" << XPIKS_VERSION_STRING << "-" << STRINGIZE(BUILDNUMBER);
+    LOG_INFO << "Xpiks" << XPIKS_FULL_VERSION_STRING << "-" << STRINGIZE(BUILDNUMBER);
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5, 4, 0))
     LOG_INFO << QSysInfo::productType() << QSysInfo::productVersion() << QSysInfo::currentCpuArchitecture();
