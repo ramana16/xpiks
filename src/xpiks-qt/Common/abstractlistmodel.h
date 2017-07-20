@@ -29,6 +29,8 @@
 #include "../Helpers/indiceshelper.h"
 #include "../Common/defines.h"
 
+#define RANGES_LENGTH_FOR_RESET 40
+
 namespace Common {
     class AbstractListModel : public QAbstractListModel {
         Q_OBJECT
@@ -58,15 +60,13 @@ namespace Common {
 
         virtual void removeInnerItem(int row) = 0;
 
-        virtual bool shouldRemoveInRanges(int rangesLength) const { return rangesLength > 50; }
+        virtual bool shouldRemoveInRanges(int rangesLength) const { return rangesLength > RANGES_LENGTH_FOR_RESET; }
 
         virtual void removeInnerItemRange(int startRow, int endRow) {
-            int count = endRow - startRow + 1;
-            for (int j = 0; j < count; ++j) { removeInnerItem(startRow); }
+            for (int row = endRow; row >= startRow; --row) { removeInnerItem(row); }
         }
 
         void doRemoveItemsAtIndices(const QVector<QPair<int, int> > &ranges, int rangesLength) {
-            int removedCount = 0;
             const int rangesCount = ranges.count();
 
             const bool willResetModel = shouldRemoveInRanges(rangesLength);
@@ -74,17 +74,18 @@ namespace Common {
             if (willResetModel) {
                 beginResetModel();
             }
+            
+            QModelIndex dummy;
 
-            for (int i = 0; i < rangesCount; ++i) {
-                const int startRow = ranges[i].first - removedCount;
-                const int endRow = ranges[i].second - removedCount;
+            for (int i = rangesCount - 1; i >= 0; --i) {
+                const int startRow = ranges[i].first;
+                const int endRow = ranges[i].second;
 
                 if (!willResetModel) {
-                    beginRemoveRows(QModelIndex(), startRow, endRow);
+                    beginRemoveRows(dummy, startRow, endRow);
                 }
 
                 removeInnerItemRange(startRow, endRow);
-                removedCount += (endRow - startRow + 1);
 
                 if (!willResetModel) {
                     endRemoveRows();
