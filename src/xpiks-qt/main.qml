@@ -427,6 +427,7 @@ ApplicationWindow {
                 title: i18.n + qsTr("Session Manager")
 
                 MenuItem {
+                    id: saveSessionMenu
                     text: i18.n + qsTr("Save session")
                     checkable: true
 
@@ -975,6 +976,13 @@ ApplicationWindow {
         property int vectorsAttached: 0
         property string originalText: vectorsAttached > 1 ? qsTr("%1 vectors attached").arg(vectorsAttached) : qsTr("1 vector attached")
         text: i18.n + originalText
+    }
+
+    Connections {
+        target: settingsModel
+        onSaveSessionChanged: {
+            saveSessionMenu.checked = settingsModel.saveSession
+        }
     }
 
     Connections {
