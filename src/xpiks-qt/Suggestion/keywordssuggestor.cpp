@@ -33,6 +33,14 @@
 #include "fotoliaqueryengine.h"
 #include "gettyqueryengine.h"
 
+#define LINEAR_TIMER_INTERVAL 1000
+
+#ifdef QT_DEBUG
+    #define LOAD_PREVIEWS_ONCE 4
+#else
+    #define LOAD_PREVIEWS_ONCE 10
+#endif
+
 namespace Suggestion {
     KeywordsSuggestor::KeywordsSuggestor(LocalLibrary *library, QObject *parent):
         QAbstractListModel(parent),
@@ -47,6 +55,9 @@ namespace Suggestion {
     {
         setLastErrorString(tr("No results found"));
         qsrand(QTime::currentTime().msec());
+
+        m_LinearTimer.setSingleShot(true);
+        QObject::connect(&m_LinearTimer, &QTimer::timeout, this, &KeywordsSuggestor::onLinearTimer);
     }
 
     KeywordsSuggestor::~KeywordsSuggestor() {
@@ -84,13 +95,31 @@ namespace Suggestion {
 
     void KeywordsSuggestor::setSuggestedArtworks(std::vector<std::shared_ptr<SuggestionArtwork> > &suggestedArtworks) {
         LOG_INFO << suggestedArtworks.size() << "item(s)";
+
         m_SelectedArtworksCount = 0;
         m_KeywordsHash.clear();
         m_SuggestedKeywords.clearKeywords();
         m_AllOtherKeywords.clearKeywords();
+
+        // good candidate for remote config
+#ifdef QT_DEBUG
+        m_LoadedPreviewsNumber = 0;
+#else
+        m_LoadedPreviewsNumber = suggestedArtworks.size();
+#endif
+
         beginResetModel();
-        m_Suggestions = std::move(suggestedArtworks);
+        {
+            m_Suggestions = std::move(suggestedArtworks);
+        }
         endResetModel();
+
+#ifdef QT_DEBUG
+        m_LinearTimer.start(LINEAR_TIMER_INTERVAL);
+#else
+        // ...
+#endif
+
         unsetInProgress();
         emit suggestionArrived();
         emit suggestedKeywordsCountChanged();
@@ -100,14 +129,20 @@ namespace Suggestion {
 
     void KeywordsSuggestor::clear() {
         LOG_DEBUG << "#";
+
         m_SelectedArtworksCount = 0;
         m_KeywordsHash.clear();
         m_SuggestedKeywords.clearKeywords();
         m_AllOtherKeywords.clearKeywords();
         m_ExistingKeywords.clear();
+        m_LoadedPreviewsNumber = 0;
+
         beginResetModel();
-        m_Suggestions.clear();
+        {
+            m_Suggestions.clear();
+        }
         endResetModel();
+
         unsetInProgress();
         emit suggestedKeywordsCountChanged();
         emit otherKeywordsCountChanged();
@@ -144,6 +179,23 @@ namespace Suggestion {
     void KeywordsSuggestor::errorsReceivedHandler(const QString &error) {
         unsetInProgress();
         setLastErrorString(error);
+    }
+
+    void KeywordsSuggestor::onLinearTimer() {
+        const int size = rowCount();
+        if (m_LoadedPreviewsNumber >= size) { return; }
+
+        QModelIndex firstIndex = this->index(m_LoadedPreviewsNumber);
+        int nextIndex = m_LoadedPreviewsNumber + LOAD_PREVIEWS_ONCE;
+        if (nextIndex > size/2) {
+            nextIndex = size - 1;
+        }
+
+        QModelIndex lastIndex = this->index(nextIndex);
+        m_LoadedPreviewsNumber = nextIndex;
+
+        emit dataChanged(firstIndex, lastIndex, QVector<int>() << UrlRole);
+        m_LinearTimer.start(LINEAR_TIMER_INTERVAL);
     }
 
     void KeywordsSuggestor::onLanguageChanged() {
@@ -278,8 +330,17 @@ namespace Suggestion {
         auto &suggestionArtwork = m_Suggestions.at(row);
 
         switch (role) {
-        case UrlRole:
+        case UrlRole: {
+#ifdef QT_DEBUG
+            if (row <= m_LoadedPreviewsNumber) {
+                return suggestionArtwork->getUrl();
+            } else {
+                return QVariant();
+            }
+#else
             return suggestionArtwork->getUrl();
+#endif
+        }
         case IsSelectedRole:
             return suggestionArtwork->getIsSelected();
         case ExternalUrlRole:

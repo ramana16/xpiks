@@ -28,6 +28,7 @@
 #include <QList>
 #include <QHash>
 #include <QSet>
+#include <QTimer>
 #include "../Common/baseentity.h"
 #include "../Common/basickeywordsmodel.h"
 #include "suggestionartwork.h"
@@ -89,6 +90,7 @@ namespace Suggestion {
     private slots:
         void resultsAvailableHandler();
         void errorsReceivedHandler(const QString &error);
+        void onLinearTimer();
 
     public slots:
         void onLanguageChanged();
@@ -155,6 +157,9 @@ namespace Suggestion {
         Common::FakeHold m_HoldPlaceholder;
         Common::BasicKeywordsModel m_SuggestedKeywords;
         Common::BasicKeywordsModel m_AllOtherKeywords;
+        // hack to load previews gradually
+        QTimer m_LinearTimer;
+        volatile int m_LoadedPreviewsNumber;
         int m_SelectedArtworksCount;
         int m_SelectedSourceIndex;
         int m_LocalSearchIndex;
