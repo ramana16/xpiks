@@ -171,7 +171,16 @@ ColumnLayout {
         anchors.left: parent.left
         anchors.right: parent.right
         text: i18.n + qsTr("Donate")
-        visible: (switcher.isDonationCampaign1Active) && (artworkRepository.artworksSourcesCount > 0)
+        visible: {
+            if (switcher.isDonationCampaign1Active) {
+                if ((artworkRepository.artworksSourcesCount > 0) ||
+                        (switcher.isDonateCampaign1LinkClicked)) {
+                    return true
+                }
+            }
+
+            return false
+        }
         onClicked: {
             Qt.openUrlExternally(switcher.donateCampaign1Link)
             switcher.setDonateCampaign1LinkClicked()

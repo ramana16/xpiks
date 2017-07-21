@@ -1453,7 +1453,8 @@ ColumnLayout {
                             return true
                         }
 
-                        if (switcher.isDonationCampaign1Active) {
+                        if ((switcher.isDonationCampaign1Active) &&
+                                (!switcher.isDonateCampaign1LinkClicked)) {
                             return false
                         }
 

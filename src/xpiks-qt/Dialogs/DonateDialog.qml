@@ -95,6 +95,7 @@ Item {
             DonateComponent {
                 id: donateItem
                 anchors.centerIn: parent
+                onDonateLinkClicked: closePopup()
             }
 
             StyledText {

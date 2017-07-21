@@ -31,6 +31,7 @@ import "../StyledControls"
 
 ColumnLayout {
     spacing: 0
+    signal donateLinkClicked()
 
     Image {
         source: Colors.t + helpersWrapper.getSvgForTheme("qrc:/Graphics/Icon_donate_", settingsModel.selectedThemeIndex)
@@ -69,6 +70,7 @@ ColumnLayout {
             onClicked: {
                 Qt.openUrlExternally(switcher.donateCampaign1Link)
                 switcher.setDonateCampaign1LinkClicked()
+                donateLinkClicked()
             }
         }
     }

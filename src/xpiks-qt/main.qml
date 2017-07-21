@@ -1004,7 +1004,7 @@ ApplicationWindow {
                     (switcher.isDonateCampaign1DialogOn)) {
                 Common.launchDialog("Dialogs/DonateDialog.qml", applicationWindow, {})
             } else {
-                console.debug("Opened dialogs found. Postponing donate dialog");
+                console.debug("Postponing donate dialog");
                 donateTimer.start()
             }
         }
