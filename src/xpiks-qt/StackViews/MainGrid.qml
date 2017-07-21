@@ -1436,22 +1436,70 @@ ColumnLayout {
             }
 
             Item {
-                visible: (artworksHost.count == 0) && (switcher.isDonationCampaign1Active)
+                visible: (artworksHost.count == 0) && (!commonCenterItem.visible)
                 anchors.fill: parent
 
-                Image {
-                    source: Colors.t + helpersWrapper.getSvgForTheme("qrc:/Graphics/Icon_donate_", settingsModel.selectedThemeIndex)
-                    cache: false
-                    width: 123
-                    height: 115
-                    //fillMode: Image.PreserveAspectFit
+                ColumnLayout {
                     anchors.centerIn: parent
-                    asynchronous: true
+                    anchors.verticalCenterOffset: -30
+                    spacing: 0
+
+                    Image {
+                        source: Colors.t + helpersWrapper.getSvgForTheme("qrc:/Graphics/Icon_donate_", settingsModel.selectedThemeIndex)
+                        cache: false
+                        width: 123
+                        height: 115
+                        //fillMode: Image.PreserveAspectFit
+                        asynchronous: true
+                        anchors.horizontalCenter: parent.horizontalCenter
+                    }
+
+                    Item {
+                        height: 30
+                    }
+
+                    StyledText {
+                        text: i18.n + qsTr("Show your support by helping Xpiks today!")
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        isActive: true
+                    }
+
+                    Item {
+                        height: 10
+                    }
+
+                    StyledText {
+                        text: i18.n + qsTr("Donate here")
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        color: donateMA.pressed ? Colors.linkClickedColor : Colors.artworkModifiedColor
+                        font.bold: true
+
+                        MouseArea {
+                            id: donateMA
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: Qt.openUrlExternally(switcher.donateCampaign1Link)
+                        }
+                    }
                 }
             }
 
             Item {
-                visible: (artworksHost.count == 0) && (!switcher.isDonationCampaign1Active)
+                id: commonCenterItem
+                visible: {
+                    if (artworksHost.count == 0) {
+                        if (artworkRepository.artworksSourcesCount > 0) {
+                            return true
+                        }
+
+                        if (switcher.isDonationCampaign1Active) {
+                            return false
+                        }
+                    } else {
+                        return false
+                    }
+                }
+
                 anchors.fill: parent
 
                 RowLayout {

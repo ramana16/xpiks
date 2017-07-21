@@ -164,4 +164,14 @@ ColumnLayout {
             }
         }
     }
+
+    StyledBlackButton {
+        implicitHeight: 30
+        height: 30
+        anchors.left: parent.left
+        anchors.right: parent.right
+        text: i18.n + qsTr("Donate")
+        onClicked: Qt.openUrlExternally(switcher.donateCampaign1Link)
+        visible: (switcher.isDonationCampaign1Active) && (artworkRepository.artworksSourcesCount > 0)
+    }
 }

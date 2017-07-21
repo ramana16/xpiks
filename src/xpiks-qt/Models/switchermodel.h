@@ -31,6 +31,7 @@ namespace Models {
     {
         Q_OBJECT
         Q_PROPERTY(bool isDonationCampaign1Active READ getIsDonationCampaign1Active NOTIFY switchesUpdated)
+        Q_PROPERTY(QString donateCampaign1Link READ getDonateCampaign1Link CONSTANT)
     public:
         SwitcherModel(QObject *parent=nullptr);
 
@@ -40,6 +41,7 @@ namespace Models {
 
     public:
         bool getIsDonationCampaign1Active() { return m_Config.isSwitchOn(Conectivity::SwitcherConfig::DonateCampaign1); }
+        QString getDonateCampaign1Link() const { return QString("https://ribtoks.github.io/xpiks/donatecampaign/"); }
 
     private slots:
         void configUpdated();
