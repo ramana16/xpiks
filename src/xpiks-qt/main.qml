@@ -774,6 +774,13 @@ ApplicationWindow {
                     Common.launchDialog("Dialogs/InstallUpdateDialog.qml", applicationWindow, {})
                 }
             }
+
+            MenuItem {
+                text: "Donate dialog"
+                onTriggered: {
+                    Common.launchDialog("Dialogs/DonateDialog.qml", applicationWindow, {})
+                }
+            }
         }
     }
 
@@ -986,6 +993,24 @@ ApplicationWindow {
     }
 
     Connections {
+        target: switcher
+        onDonateDialogRequested: {
+            console.debug("Donate dialog requested")
+
+            if ((applicationWindow.openedDialogsCount == 0) &&
+                    (mainStackView.areActionsAllowed) &&
+                    (artworkRepository.artworksSourcesCount > 0) &&
+                    (switcher.isDonationCampaign1Active) &&
+                    (switcher.isDonateCampaign1DialogOn)) {
+                Common.launchDialog("Dialogs/DonateDialog.qml", applicationWindow, {})
+            } else {
+                console.debug("Opened dialogs found. Postponing donate dialog");
+                donateTimer.start()
+            }
+        }
+    }
+
+    Connections {
         target: artItemsModel
 
         onUnavailableArtworksFound: {
@@ -1051,6 +1076,30 @@ ApplicationWindow {
             if (applicationWindow.openedDialogsCount == 0) {
                 upgradeTimer.stop()
                 Common.launchDialog("Dialogs/InstallUpdateDialog.qml", applicationWindow, {})
+            }
+        }
+    }
+
+    Timer {
+        id: donateTimer
+        interval: 5000
+        repeat: true
+        running: false
+        triggeredOnStart: false
+        onTriggered: {
+            if ((applicationWindow.openedDialogsCount == 0) &&
+                    (mainStackView.areActionsAllowed) &&
+                    (artworkRepository.artworksSourcesCount > 0) &&
+                    (switcher.isDonationCampaign1Active) &&
+                    (switcher.isDonateCampaign1DialogOn)) {
+                donateTimer.stop()
+                Common.launchDialog("Dialogs/DonateDialog.qml", applicationWindow, {})
+            }
+
+            if ((!switcher.isDonationCampaign1Active) ||
+                    (!switcher.isDonateCampaign1DialogOn)) {
+                console.debug("Donate campaing is over. Switching off donate timer")
+                donateTimer.stop()
             }
         }
     }

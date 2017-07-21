@@ -34,7 +34,7 @@
         #define SESSION_FILE "debug_session.json"
     #endif
 #else
-#define SESSION_FILE "session.json"
+    #define SESSION_FILE "session.json"
 #endif
 
 #define OPENED_FILES_KEY "openedFiles"

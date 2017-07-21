@@ -81,5 +81,7 @@
         <file>Components/LoaderIcon.qml</file>
         <file>Graphics/Icon_donate_black.svg</file>
         <file>Graphics/Icon_donate_slategray.svg</file>
+        <file>Dialogs/DonateDialog.qml</file>
+        <file>Components/DonateComponent.qml</file>
     </qresource>
 </RCC>

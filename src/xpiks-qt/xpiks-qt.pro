@@ -448,7 +448,9 @@ DISTFILES += \
     Dialogs/UserDictEditDialog.qml \
     Components/LoaderIcon.qml \
     Graphics/Icon_donate_black.svg \
-    Graphics/Icon_donate_slategray.svg
+    Graphics/Icon_donate_slategray.svg \
+    Dialogs/DonateDialog.qml \
+    Components/DonateComponent.qml
 
 lupdate_only {
 SOURCES += *.qml \

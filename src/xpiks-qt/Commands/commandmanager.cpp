@@ -938,6 +938,12 @@ void Commands::CommandManager::afterInnerServicesInitialized() {
 #endif
 
     restoreReadSession();
+
+#if !defined(CORE_TESTS) && !defined(INTEGRATION_TESTS)
+    m_SwitcherModel->initEngagement();
+#endif
+
+    m_SwitcherModel->afterInitializedCallback();
 }
 
 void Commands::CommandManager::executeMaintenanceJobs() {

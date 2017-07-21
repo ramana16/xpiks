@@ -56,7 +56,8 @@ namespace Conectivity {
 
     public:
         enum Switches_Keys {
-            DonateCampaign1=0
+            DonateCampaign1=0,
+            DonateCampaign1Dialog
         };
 
     private:
