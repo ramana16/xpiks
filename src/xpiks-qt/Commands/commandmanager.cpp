@@ -941,9 +941,8 @@ void Commands::CommandManager::afterInnerServicesInitialized() {
 
 #if !defined(CORE_TESTS) && !defined(INTEGRATION_TESTS)
     m_SwitcherModel->initEngagement();
-#endif
-
     m_SwitcherModel->afterInitializedCallback();
+#endif
 }
 
 void Commands::CommandManager::executeMaintenanceJobs() {
