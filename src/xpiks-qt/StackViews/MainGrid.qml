@@ -1495,6 +1495,8 @@ ColumnLayout {
                         if (switcher.isDonationCampaign1Active) {
                             return false
                         }
+
+                        return true
                     } else {
                         return false
                     }
