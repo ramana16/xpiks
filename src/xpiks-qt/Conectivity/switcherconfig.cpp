@@ -20,6 +20,8 @@
  */
 
 #include "switcherconfig.h"
+#include <QDir>
+#include <QJsonValue>
 #include "../Helpers/asynccoordinator.h"
 #include "apimanager.h"
 
