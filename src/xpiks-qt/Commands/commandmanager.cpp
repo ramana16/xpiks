@@ -875,7 +875,9 @@ void Commands::CommandManager::afterConstructionCallback() {
         return;
     }
 
+#ifndef CORE_TESTS
     m_SwitcherModel->updateConfigs();
+#endif
 
     const int waitSeconds = 5;
     Helpers::AsyncCoordinatorStarter defferedStarter(&m_InitCoordinator, waitSeconds);
