@@ -875,7 +875,7 @@ void Commands::CommandManager::afterConstructionCallback() {
         return;
     }
 
-#ifndef CORE_TESTS
+#if !defined(CORE_TESTS) && !defined(INTEGRATION_TESTS)
     m_SwitcherModel->updateConfigs();
 #endif
 
