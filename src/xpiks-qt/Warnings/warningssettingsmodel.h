@@ -47,7 +47,7 @@ namespace Warnings {
         // AbstractConfigUpdaterModel interface
     protected:
         virtual void processRemoteConfig(const QJsonDocument &remoteDocument, bool overwriteLocal) override;
-        virtual bool parseConfig(const QJsonDocument &document) override;
+        virtual bool processLocalConfig(const QJsonDocument &document) override;
 
         // CompareValuesJson interface
     public:

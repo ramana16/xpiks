@@ -66,6 +66,10 @@ namespace Conectivity {
             return m_BaseUrl + "presets.json";
         }
 
+        QString getSwitcherAddr() {
+            return m_BaseUrl + "switcher.json";
+        }
+
     private:
         ApiManager() {
 #ifdef QT_DEBUG

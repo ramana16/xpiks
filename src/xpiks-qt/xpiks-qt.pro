@@ -153,7 +153,8 @@ SOURCES += main.cpp \
     Maintenance/locallibraryloadsaveitem.cpp \
     Maintenance/movesettingsjobitem.cpp \
     Models/sessionmanager.cpp \
-    Maintenance/savesessionjobitem.cpp
+    Maintenance/savesessionjobitem.cpp \
+    Conectivity/switcherconfig.cpp
 
 RESOURCES += qml.qrc
 
@@ -361,7 +362,8 @@ HEADERS += \
     Maintenance/movesettingsjobitem.h \
     Models/sessionmanager.h \
     MetadataIO/artworkmetadatasnapshot.h \
-    Maintenance/savesessionjobitem.h
+    Maintenance/savesessionjobitem.h \
+    Conectivity/switcherconfig.h
 
 DISTFILES += \
     Components/CloseIcon.qml \

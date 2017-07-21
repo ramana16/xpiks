@@ -46,15 +46,12 @@ namespace KeywordsPresets {
         void initializeConfigs(Helpers::AsyncCoordinator *initCoordinator);
         void saveFromModel(const std::vector<PresetModel *> &presets);
 
-    public:
         // AbstractConfigUpdaterModel interface
-
     protected:
-        virtual bool parseConfig(const QJsonDocument &document) override;
-
+        virtual bool processLocalConfig(const QJsonDocument &document) override;
         virtual void processRemoteConfig(const QJsonDocument &remoteDocument, bool overwriteLocal) override;
-        // CompareValuesJson interface
 
+        // CompareValuesJson interface
     public:
         virtual int operator ()(const QJsonObject &val1, const QJsonObject &val2) override;
 

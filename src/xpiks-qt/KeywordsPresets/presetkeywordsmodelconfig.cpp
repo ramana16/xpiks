@@ -86,7 +86,7 @@ namespace KeywordsPresets {
 #endif
     }
 
-    bool PresetKeywordsModelConfig::parseConfig(const QJsonDocument &document) {
+    bool PresetKeywordsModelConfig::processLocalConfig(const QJsonDocument &document) {
         LOG_INTEGR_TESTS_OR_DEBUG << document;
         bool anyError = false;
 

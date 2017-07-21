@@ -59,10 +59,6 @@ namespace AutoComplete {
         auto &apiManager = Conectivity::ApiManager::getInstance();
         QString remoteAddress = apiManager.getStocksACSourceAddr();
         AbstractConfigUpdaterModel::initializeConfigs(remoteAddress, localConfigPath);
-
-        const Helpers::LocalConfig &localConfig = getLocalConfig();
-        const QJsonDocument &localDocument = localConfig.getConfig();
-        parseConfig(localDocument);
     }
 
     void StocksFtpListModel::processRemoteConfig(const QJsonDocument &remoteDocument, bool overwriteLocal) {
@@ -86,7 +82,7 @@ namespace AutoComplete {
         Models::AbstractConfigUpdaterModel::processRemoteConfig(remoteDocument, overwrite);
     }
 
-    bool StocksFtpListModel::parseConfig(const QJsonDocument &document) {
+    bool StocksFtpListModel::processLocalConfig(const QJsonDocument &document) {
         bool anyError = false;
 
         m_StocksHash.clear();

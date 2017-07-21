@@ -71,10 +71,6 @@ namespace Warnings {
         auto &apiManager = Conectivity::ApiManager::getInstance();
         QString remoteAddress = apiManager.getWarningSettingsAddr();
         AbstractConfigUpdaterModel::initializeConfigs(remoteAddress, localConfigPath);
-
-        const Helpers::LocalConfig &localConfig = getLocalConfig();
-        const QJsonDocument &localDocument = localConfig.getConfig();
-        parseConfig(localDocument);
     }
 
     void WarningsSettingsModel::processRemoteConfig(const QJsonDocument &remoteDocument, bool overwriteLocal) {
@@ -98,7 +94,7 @@ namespace Warnings {
         Models::AbstractConfigUpdaterModel::processRemoteConfig(remoteDocument, overwrite);
     }
 
-    bool WarningsSettingsModel::parseConfig(const QJsonDocument &document) {
+    bool WarningsSettingsModel::processLocalConfig(const QJsonDocument &document) {
 #ifdef QT_DEBUG
         LOG_DEBUG << document;
 #endif

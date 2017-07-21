@@ -63,6 +63,6 @@ namespace Models {
     void AbstractConfigUpdaterModel::initLocalConfig(const QString &filePath){
         m_LocalConfig.initConfig(filePath);
         const QJsonDocument &localDocument = m_LocalConfig.getConfig();
-        parseConfig(localDocument);
+        processLocalConfig(localDocument);
     }
 }

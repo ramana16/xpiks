@@ -19,46 +19,54 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef STOCKSFTPLISTMODEL_H
-#define STOCKSFTPLISTMODEL_H
+#ifndef SWITCHERCONFIG_H
+#define SWITCHERCONFIG_H
 
-#include <QHash>
-#include <QList>
 #include <QJsonDocument>
-#include <QJsonArray>
+#include <QJsonObject>
+#include <QHash>
+#include <QReadWriteLock>
 #include "../Models/abstractconfigupdatermodel.h"
 
-namespace AutoComplete {
-    class StocksFtpListModel: public Models::AbstractConfigUpdaterModel
+namespace Helpers {
+    class AsyncCoordinator;
+}
+
+namespace Conectivity {
+    class SwitcherConfig: public Models::AbstractConfigUpdaterModel
     {
         Q_OBJECT
     public:
-        StocksFtpListModel();
+        SwitcherConfig(QObject *parent=nullptr);
 
     public:
-        void initializeConfigs();
-        QString getFtpAddress(const QString &stockName) const { return m_StocksHash.value(stockName, ""); }
-        const QStringList &getStockNamesList() const { return m_StockNames; }
+        void initializeConfigs(Helpers::AsyncCoordinator *initCoordinator);
+        bool isSwitchOn(int switchKey);
+
+    signals:
+        void switchesUpdated();
 
         // AbstractConfigUpdaterModel interface
     protected:
-        virtual void processRemoteConfig(const QJsonDocument &remoteDocument, bool overwriteLocal) override;
         virtual bool processLocalConfig(const QJsonDocument &document) override;
-
-    private:
-        void parseFtpArray(const QJsonArray &array);
-
-    signals:
-        void stocksListUpdated();
+        virtual void processRemoteConfig(const QJsonDocument &remoteDocument, bool overwriteLocal) override;
 
         // CompareValuesJson interface
     public:
         virtual int operator ()(const QJsonObject &val1, const QJsonObject &val2) override;
 
     private:
-        QHash<QString, QString> m_StocksHash;
-        QStringList m_StockNames;
+        void parseSwitches(const QJsonObject &object);
+
+    public:
+        enum Switches_Keys {
+            DonateCampaign1=0
+        };
+
+    private:
+        QReadWriteLock m_RwLock;
+        QHash<int, bool> m_SwitchesHash;
     };
 }
 
-#endif // STOCKSFTPLISTMODEL_H
+#endif // SWITCHERCONFIG_H
