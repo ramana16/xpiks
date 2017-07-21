@@ -77,6 +77,7 @@ namespace Models {
     class ArtworkProxyBase;
     class ArtworkProxyModel;
     class SessionManager;
+    class SwitcherModel;
 }
 
 namespace Suggestion {
@@ -183,6 +184,7 @@ namespace Commands {
         void InjectDependency(Warnings::WarningsModel *warningsModel);
         void InjectDependency(QuickBuffer::QuickBuffer *quickBuffer);
         void InjectDependency(Maintenance::MaintenanceService *maintenanceService);
+        void InjectDependency(Models::SwitcherModel *switcherModel);
 
     private:
         int generateNextCommandID() { int id = m_LastCommandID++; return id; }
@@ -361,6 +363,7 @@ namespace Commands {
         Warnings::WarningsModel *m_WarningsModel;
         QuickBuffer::QuickBuffer *m_QuickBuffer;
         Maintenance::MaintenanceService *m_MaintenanceService;
+        Models::SwitcherModel *m_SwitcherModel;
 
         QVector<Common::IServiceBase<Common::IBasicArtwork, Common::WarningsCheckFlags> *> m_WarningsCheckers;
         QVector<Helpers::IFileNotAvailableModel*> m_AvailabilityListeners;

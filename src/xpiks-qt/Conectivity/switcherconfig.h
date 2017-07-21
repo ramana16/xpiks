@@ -28,10 +28,6 @@
 #include <QReadWriteLock>
 #include "../Models/abstractconfigupdatermodel.h"
 
-namespace Helpers {
-    class AsyncCoordinator;
-}
-
 namespace Conectivity {
     class SwitcherConfig: public Models::AbstractConfigUpdaterModel
     {
@@ -40,7 +36,7 @@ namespace Conectivity {
         SwitcherConfig(QObject *parent=nullptr);
 
     public:
-        void initializeConfigs(Helpers::AsyncCoordinator *initCoordinator);
+        void initializeConfigs();
         bool isSwitchOn(int switchKey);
 
     signals:

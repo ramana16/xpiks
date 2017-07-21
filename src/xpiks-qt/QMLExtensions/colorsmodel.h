@@ -43,6 +43,8 @@ namespace QMLExtensions {
     class ColorsModel : public QObject
     {
         Q_OBJECT
+        Q_PROPERTY(QString t READ getThemeTrigger NOTIFY themeChanged)
+
         Q_PROPERTY(QColor defaultDarkColor READ defaultDarkColor WRITE setDefaultDarkColor NOTIFY defaultDarkColorChanged)
         Q_PROPERTY(QColor defaultDarkerColor READ defaultDarkerColor WRITE setDefaultDarkerColor NOTIFY defaultDarkerColorChanged)
         Q_PROPERTY(QColor defaultControlColor READ defaultControlColor WRITE setDefaultControlColor NOTIFY defaultControlColorChanged)
@@ -154,6 +156,9 @@ namespace QMLExtensions {
 
         Q_INVOKABLE bool applyTheme(int index);
         Q_INVOKABLE QStringList getThemeNames() const { return m_ThemeNames; }
+        const QString &getThemeName(int index) const { Q_ASSERT((index >= 0) && (index < m_ThemeNames.size())); return m_ThemeNames[index]; }
+
+        QString getThemeTrigger() const { return QString(); }
 
         QColor defaultDarkColor() const
         {

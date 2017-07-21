@@ -67,7 +67,7 @@ namespace Conectivity {
         }
 
         QString getSwitcherAddr() {
-            return m_BaseUrl + "switcher.json";
+            return m_BaseUrl + "switches.json";
         }
 
     private:

@@ -35,6 +35,10 @@ class QQuickWindow;
 class QWinTaskbarButton;
 #endif
 
+namespace QMLExtensions {
+    class ColorsModel;
+}
+
 namespace Helpers {
     class HelpersQmlWrapper : public QObject, public Common::BaseEntity
     {
@@ -42,7 +46,7 @@ namespace Helpers {
         Q_PROPERTY(bool pluginsAvailable READ getPluginsAvailable CONSTANT)
         Q_PROPERTY(bool isUpdateDownloaded READ getIsUpdateDownloaded NOTIFY updateDownloadedChanged)
     public:
-        HelpersQmlWrapper();
+        HelpersQmlWrapper(QMLExtensions::ColorsModel *colorsModel);
 
     public:
         Q_INVOKABLE bool isKeywordValid(const QString &keyword) const;
@@ -62,7 +66,8 @@ namespace Helpers {
         Q_INVOKABLE bool isVector(const QString &path) const;
         Q_INVOKABLE QString toImagePath(const QString &path) const;
         Q_INVOKABLE void setUpgradeConsent();
-        Q_INVOKABLE void upgradeNow();
+        Q_INVOKABLE void upgradeNow();        
+        Q_INVOKABLE QString getSvgForTheme(const QString &imagePrefix, int themeIndex) const;
 
     public:
         void requestCloseApplication() { emit globalCloseRequested(); }
@@ -104,6 +109,7 @@ namespace Helpers {
         bool m_IsUpdateDownloaded;
         bool m_HaveUpgradeConsent;
         QString m_PathToUpdate;
+        QMLExtensions::ColorsModel *m_ColorsModel;
     };
 }
 

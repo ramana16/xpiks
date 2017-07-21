@@ -41,6 +41,7 @@
 #include "../Common/defines.h"
 #include "../Helpers/filenameshelpers.h"
 #include "../Helpers/updatehelpers.h"
+#include "../QMLExtensions/colorsmodel.h"
 
 #ifdef Q_OS_WIN
 #include <QWinTaskbarButton>
@@ -48,10 +49,13 @@
 #endif
 
 namespace Helpers {
-    HelpersQmlWrapper::HelpersQmlWrapper():
+    HelpersQmlWrapper::HelpersQmlWrapper(QMLExtensions::ColorsModel *colorsModel):
         m_IsUpdateDownloaded(false),
-        m_HaveUpgradeConsent(false)
+        m_HaveUpgradeConsent(false),
+        m_ColorsModel(colorsModel)
     {
+        Q_ASSERT(colorsModel != nullptr);
+
 #ifdef Q_OS_WIN
         m_WinTaskbarButtonApplicable = QSysInfo::windowsVersion() >= QSysInfo::WV_WINDOWS7;
         if (m_WinTaskbarButtonApplicable) {
@@ -182,6 +186,13 @@ namespace Helpers {
     void HelpersQmlWrapper::upgradeNow() {
         setUpgradeConsent();
         emit upgradeInitiated();
+    }
+
+    QString HelpersQmlWrapper::getSvgForTheme(const QString &imagePrefix, int themeIndex) const {
+        QString themeName = m_ColorsModel->getThemeName(themeIndex);
+        themeName.remove(QChar(' '));
+        QString result = imagePrefix + themeName + ".svg";
+        return result;
     }
 
     QObject *HelpersQmlWrapper::getLogsModel() {

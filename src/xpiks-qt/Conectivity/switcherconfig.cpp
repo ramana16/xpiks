@@ -22,14 +22,13 @@
 #include "switcherconfig.h"
 #include <QDir>
 #include <QJsonValue>
-#include "../Helpers/asynccoordinator.h"
 #include "apimanager.h"
 
 namespace Conectivity {
 #ifdef QT_DEBUG
-    #define LOCAL_SWITCHER_CONFIG "debug_switcher.json"
+    #define LOCAL_SWITCHER_CONFIG "debug_switches.json"
 #else
-    #define LOCAL_SWITCHER_CONFIG "switcher.json"
+    #define LOCAL_SWITCHER_CONFIG "switches.json"
 #endif
 
 #define OVERWRITE_KEY QLatin1String("overwrite")
@@ -41,11 +40,7 @@ namespace Conectivity {
     {
     }
 
-    void SwitcherConfig::initializeConfigs(Helpers::AsyncCoordinator *initCoordinator) {
-        Helpers::AsyncCoordinatorLocker locker(initCoordinator);
-        Helpers::AsyncCoordinatorUnlocker unlocker(initCoordinator);
-        Q_UNUSED(locker); Q_UNUSED(unlocker);
-
+    void SwitcherConfig::initializeConfigs() {
         QString localConfigPath;
 
         QString appDataPath = XPIKS_USERDATA_PATH;

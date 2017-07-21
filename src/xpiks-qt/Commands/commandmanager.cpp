@@ -69,6 +69,7 @@
 #include "../QuickBuffer/currenteditableproxyartwork.h"
 #include "../Maintenance/maintenanceservice.h"
 #include "../Helpers/asynccoordinator.h"
+#include "../Models/switchermodel.h"
 
 Commands::CommandManager::CommandManager():
     QObject(),
@@ -112,6 +113,7 @@ Commands::CommandManager::CommandManager():
     m_WarningsModel(NULL),
     m_QuickBuffer(NULL),
     m_MaintenanceService(NULL),
+    m_SwitcherModel(NULL),
     m_ServicesInitialized(false),
     m_AfterInitCalled(false),
     m_LastCommandID(0)
@@ -310,6 +312,11 @@ void Commands::CommandManager::InjectDependency(Maintenance::MaintenanceService 
     Q_ASSERT(maintenanceService != NULL); m_MaintenanceService = maintenanceService;
 }
 
+void Commands::CommandManager::InjectDependency(Models::SwitcherModel *switcherModel) {
+    Q_ASSERT(switcherModel != NULL); m_SwitcherModel = switcherModel;
+    m_SwitcherModel->setCommandManager(this);
+}
+
 std::shared_ptr<Commands::ICommandResult> Commands::CommandManager::processCommand(const std::shared_ptr<ICommandBase> &command)
 {
     int id = generateNextCommandID();
@@ -497,6 +504,7 @@ void Commands::CommandManager::ensureDependenciesInjected() {
 
 #if !defined(INTEGRATION_TESTS) && !defined(CORE_TESTS)
     Q_ASSERT(m_UIManager != NULL);
+    Q_ASSERT(m_SwitcherModel != NULL);
 #endif
 
 #ifndef INTEGRATION_TESTS
@@ -866,6 +874,8 @@ void Commands::CommandManager::afterConstructionCallback() {
         LOG_WARNING << "Attempt to call afterConstructionCallback() second time";
         return;
     }
+
+    m_SwitcherModel->updateConfigs();
 
     const int waitSeconds = 5;
     Helpers::AsyncCoordinatorStarter defferedStarter(&m_InitCoordinator, waitSeconds);

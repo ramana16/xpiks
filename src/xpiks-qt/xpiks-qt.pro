@@ -154,7 +154,8 @@ SOURCES += main.cpp \
     Maintenance/movesettingsjobitem.cpp \
     Models/sessionmanager.cpp \
     Maintenance/savesessionjobitem.cpp \
-    Conectivity/switcherconfig.cpp
+    Conectivity/switcherconfig.cpp \
+    Models/switchermodel.cpp
 
 RESOURCES += qml.qrc
 
@@ -363,7 +364,8 @@ HEADERS += \
     Models/sessionmanager.h \
     MetadataIO/artworkmetadatasnapshot.h \
     Maintenance/savesessionjobitem.h \
-    Conectivity/switcherconfig.h
+    Conectivity/switcherconfig.h \
+    Models/switchermodel.h
 
 DISTFILES += \
     Components/CloseIcon.qml \
@@ -444,7 +446,9 @@ DISTFILES += \
     CollapserTabs/QuickBufferIcon.qml \
     CollapserTabs/QuickBufferTab.qml \
     Dialogs/UserDictEditDialog.qml \
-    Components/LoaderIcon.qml
+    Components/LoaderIcon.qml \
+    Graphics/Icon_donate_black.svg \
+    Graphics/Icon_donate_slategray.svg
 
 lupdate_only {
 SOURCES += *.qml \

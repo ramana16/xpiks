@@ -1436,7 +1436,22 @@ ColumnLayout {
             }
 
             Item {
-                visible: artworksHost.count == 0
+                visible: (artworksHost.count == 0) && (switcher.isDonationCampaign1Active)
+                anchors.fill: parent
+
+                Image {
+                    source: Colors.t + helpersWrapper.getSvgForTheme("qrc:/Graphics/Icon_donate_", settingsModel.selectedThemeIndex)
+                    cache: false
+                    width: 123
+                    height: 115
+                    //fillMode: Image.PreserveAspectFit
+                    anchors.centerIn: parent
+                    asynchronous: true
+                }
+            }
+
+            Item {
+                visible: (artworksHost.count == 0) && (!switcher.isDonationCampaign1Active)
                 anchors.fill: parent
 
                 RowLayout {

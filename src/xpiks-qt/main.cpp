@@ -99,6 +99,7 @@
 #include "KeywordsPresets/presetkeywordsmodel.h"
 #include "KeywordsPresets/presetkeywordsmodelconfig.h"
 #include "Maintenance/maintenanceservice.h"
+#include "Models/switchermodel.h"
 
 void myMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg) {
     Q_UNUSED(context);
@@ -344,6 +345,7 @@ int main(int argc, char *argv[]) {
     sessionManager.initialize();
     QuickBuffer::QuickBuffer quickBuffer;
     Maintenance::MaintenanceService maintenanceService;
+    Models::SwitcherModel switcherModel;
 
     Conectivity::UpdateService updateService(&settingsModel);
 
@@ -360,7 +362,7 @@ int main(int argc, char *argv[]) {
     Plugins::PluginsWithActionsModel pluginsWithActions;
     pluginsWithActions.setSourceModel(&pluginManager);
 
-    Helpers::HelpersQmlWrapper helpersQmlWrapper;
+    Helpers::HelpersQmlWrapper helpersQmlWrapper(&colorsModel);
 
     LOG_INFO << "Models created";
 
@@ -405,6 +407,7 @@ int main(int argc, char *argv[]) {
     commandManager.InjectDependency(&warningsModel);
     commandManager.InjectDependency(&quickBuffer);
     commandManager.InjectDependency(&maintenanceService);
+    commandManager.InjectDependency(&switcherModel);
 
     userDictEditModel.setCommandManager(&commandManager);
     autoCompleteModel.setCommandManager(&commandManager);
@@ -467,6 +470,7 @@ int main(int argc, char *argv[]) {
     rootContext->setContextProperty("uiManager", &uiManager);
     rootContext->setContextProperty("quickBuffer", &quickBuffer);
     rootContext->setContextProperty("userDictEditModel", &userDictEditModel);
+    rootContext->setContextProperty("switcher", &switcherModel);
 
     rootContext->setContextProperty("tabsModel", uiManager.getTabsModel());
     rootContext->setContextProperty("activeTabs", uiManager.getActiveTabs());
