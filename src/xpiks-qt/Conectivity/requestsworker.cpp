@@ -19,32 +19,31 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "remoteconfig.h"
-#include <QThread>
-#include "../Common/defines.h"
-#include "../Conectivity/simplecurlrequest.h"
-#include "../Models/proxysettings.h"
+#include "requestsworker.h"
+#include "simplecurlrequest.h"
 
-namespace Helpers {
-    RemoteConfig::RemoteConfig(QObject *parent):
-        QObject(parent)
+namespace Conectivity {
+    RequestsWorker::RequestsWorker(QObject *parent) : QObject(parent)
     {
     }
 
-    RemoteConfig::~RemoteConfig() {
+    bool RequestsWorker::initWorker() {
+        LOG_DEBUG << "#";
+        return true;
     }
 
-    void RemoteConfig::setRemoteResponse(const QByteArray &responseData) {
-        QJsonParseError error;
-        LOG_INTEGR_TESTS_OR_DEBUG << responseData;
+    void RequestsWorker::processOneItem(std::shared_ptr<ConectivityRequest> &item) {
+        auto &url = item->getURL();
+        LOG_INFO << "Request:" << url;
 
-        m_Config = QJsonDocument::fromJson(responseData, &error);
+        SimpleCurlRequest request(url);
+        request.setProxySettings(item->getProxySettings());
 
-        if (error.error == QJsonParseError::NoError) {
-            emit configArrived();
+        bool success = request.sendRequestSync();
+        if (success) {
+            item->setResponse(request.getResponseData());
         } else {
-            LOG_INTEGRATION_TESTS << m_ConfigUrl;
-            LOG_WARNING << "Failed to parse remote json" << error.errorString();
+            LOG_WARNING << "Failed to get" << url;
         }
     }
 }

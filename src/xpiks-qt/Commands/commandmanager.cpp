@@ -70,6 +70,7 @@
 #include "../Maintenance/maintenanceservice.h"
 #include "../Helpers/asynccoordinator.h"
 #include "../Models/switchermodel.h"
+#include "../Conectivity/requestsservice.h"
 
 Commands::CommandManager::CommandManager():
     QObject(),
@@ -114,6 +115,7 @@ Commands::CommandManager::CommandManager():
     m_QuickBuffer(NULL),
     m_MaintenanceService(NULL),
     m_SwitcherModel(NULL),
+    m_RequestsService(NULL),
     m_ServicesInitialized(false),
     m_AfterInitCalled(false),
     m_LastCommandID(0)
@@ -317,6 +319,11 @@ void Commands::CommandManager::InjectDependency(Models::SwitcherModel *switcherM
     m_SwitcherModel->setCommandManager(this);
 }
 
+void Commands::CommandManager::InjectDependency(Conectivity::RequestsService *requestsService) {
+    Q_ASSERT(requestsService != NULL); m_RequestsService = requestsService;
+    m_RequestsService->setCommandManager(this);
+}
+
 std::shared_ptr<Commands::ICommandResult> Commands::CommandManager::processCommand(const std::shared_ptr<ICommandBase> &command)
 {
     int id = generateNextCommandID();
@@ -501,6 +508,7 @@ void Commands::CommandManager::ensureDependenciesInjected() {
     Q_ASSERT(m_WarningsModel != NULL);
     Q_ASSERT(m_QuickBuffer != NULL);
     Q_ASSERT(m_MaintenanceService != NULL);
+    Q_ASSERT(m_RequestsService != NULL);
 
 #if !defined(INTEGRATION_TESTS) && !defined(CORE_TESTS)
     Q_ASSERT(m_UIManager != NULL);
@@ -875,6 +883,10 @@ void Commands::CommandManager::afterConstructionCallback() {
         return;
     }
 
+#ifndef CORE_TESTS
+    m_RequestsService->startService();
+#endif
+
 #if !defined(CORE_TESTS) && !defined(INTEGRATION_TESTS)
     m_SwitcherModel->updateConfigs();
 #endif
@@ -1066,6 +1078,7 @@ void Commands::CommandManager::beforeDestructionCallback() const {
     m_TelemetryService->stopReporting();
 
     m_LogsModel->stopLogging();
+    m_RequestsService->stopService();
 #endif
 
     m_MaintenanceService->stopService();

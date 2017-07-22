@@ -55,6 +55,7 @@
 #include "../../xpiks-qt/KeywordsPresets/presetkeywordsmodel.h"
 #include "../../xpiks-qt/KeywordsPresets/presetkeywordsmodelconfig.h"
 #include "../../xpiks-qt/Maintenance/maintenanceservice.h"
+#include "../../xpiks-qt/Conectivity/requestsservice.h"
 
 #include "integrationtestbase.h"
 #include "addfilesbasictest.h"
@@ -470,6 +471,7 @@ int main(int argc, char *argv[]) {
     // intentional memory leak to beat spellcheck lock stuff
     QuickBuffer::QuickBuffer quickBuffer;
     Maintenance::MaintenanceService maintenanceService;
+    Conectivity::RequestsService requestsService;
 
     Conectivity::UpdateService updateService(&settingsModel);
 
@@ -516,6 +518,7 @@ int main(int argc, char *argv[]) {
     commandManager.InjectDependency(&warningsModel);
     commandManager.InjectDependency(&quickBuffer);
     commandManager.InjectDependency(&maintenanceService);
+    commandManager.InjectDependency(&requestsService);
 
     commandManager.ensureDependenciesInjected();
 

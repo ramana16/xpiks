@@ -19,42 +19,50 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef REMOTECONFIG_H
-#define REMOTECONFIG_H
+#ifndef CONECTIVITYREQUEST_H
+#define CONECTIVITYREQUEST_H
 
 #include <QObject>
 #include <QString>
 #include <QByteArray>
-#include <QJsonDocument>
-#include "../Conectivity/conectivityrequest.h"
-#include "../Common/defines.h"
 
 namespace Models {
     class ProxySettings;
 }
 
 namespace Helpers {
-    class RemoteConfig : public QObject {
+    class RemoteConfig;
+}
+
+namespace Conectivity {
+    class ConectivityRequest: public QObject {
         Q_OBJECT
-    public:
-        RemoteConfig(QObject *parent=0);
-        virtual ~RemoteConfig();
 
     public:
-        void setConfigUrl(const QString &configUrl) { m_ConfigUrl = configUrl; }
-        const QJsonDocument& getConfig() const { return m_Config; }
+        ConectivityRequest(Helpers::RemoteConfig *config, const QString &url, Models::ProxySettings *proxySettings):
+            QObject(),
+            m_RemoteConfig(config),
+            m_Url(url),
+            m_ProxySettings(proxySettings)
+        {
+            Q_ASSERT(config != nullptr);
+        }
 
-    private:
-        friend class Conectivity::ConectivityRequest;
-        void setRemoteResponse(const QByteArray &responseData);
+    public:
+        const QString &getURL() const { return m_Url; }
+        Models::ProxySettings *getProxySettings() const { return m_ProxySettings; }
+
+    public:
+        void setResponse(const QByteArray &responseData);
 
     signals:
-        void configArrived();
+        void responseReceived(bool success);
 
     private:
-        QString m_ConfigUrl;
-        QJsonDocument m_Config;
+        Helpers::RemoteConfig *m_RemoteConfig;
+        QString m_Url;
+        Models::ProxySettings *m_ProxySettings;
     };
 }
 
-#endif // REMOTECONFIG_H
+#endif // CONECTIVITYREQUEST_H

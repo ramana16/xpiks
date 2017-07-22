@@ -19,32 +19,36 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "remoteconfig.h"
-#include <QThread>
-#include "../Common/defines.h"
-#include "../Conectivity/simplecurlrequest.h"
-#include "../Models/proxysettings.h"
+#ifndef REQUESTSWORKER_H
+#define REQUESTSWORKER_H
 
-namespace Helpers {
-    RemoteConfig::RemoteConfig(QObject *parent):
-        QObject(parent)
+#include <QObject>
+#include "conectivityrequest.h"
+#include "../Common/itemprocessingworker.h"
+
+namespace Conectivity {
+    class RequestsWorker: public QObject, public Common::ItemProcessingWorker<ConectivityRequest>
     {
-    }
+        Q_OBJECT
+    public:
+        explicit RequestsWorker(QObject *parent = 0);
 
-    RemoteConfig::~RemoteConfig() {
-    }
+    protected:
+        virtual bool initWorker() override;
+        virtual void processOneItem(std::shared_ptr<ConectivityRequest> &item) override;
 
-    void RemoteConfig::setRemoteResponse(const QByteArray &responseData) {
-        QJsonParseError error;
-        LOG_INTEGR_TESTS_OR_DEBUG << responseData;
+    protected:
+        virtual void notifyQueueIsEmpty() override { emit queueIsEmpty(); }
+        virtual void workerStopped() override { emit stopped(); }
 
-        m_Config = QJsonDocument::fromJson(responseData, &error);
+    public slots:
+        void process() { doWork(); }
+        void cancel() { stopWorking(); }
 
-        if (error.error == QJsonParseError::NoError) {
-            emit configArrived();
-        } else {
-            LOG_INTEGRATION_TESTS << m_ConfigUrl;
-            LOG_WARNING << "Failed to parse remote json" << error.errorString();
-        }
-    }
+    signals:
+        void stopped();
+        void queueIsEmpty();
+    };
 }
+
+#endif // REQUESTSWORKER_H

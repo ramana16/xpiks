@@ -22,6 +22,7 @@
 #include "abstractconfigupdatermodel.h"
 #include "../Models/settingsmodel.h"
 #include "../Commands/commandmanager.h"
+#include "../Conectivity/requestsservice.h"
 
 namespace Models {
     AbstractConfigUpdaterModel::AbstractConfigUpdaterModel(bool forceOverwrite, QObject *parent):
@@ -51,13 +52,13 @@ namespace Models {
         m_LocalConfig.saveToFile();
     }
 
-    void AbstractConfigUpdaterModel::initRemoteConfig(const QString &configUrl)
-    {
+    void AbstractConfigUpdaterModel::initRemoteConfig(const QString &configUrl) {
         Q_ASSERT(m_CommandManager != NULL);
-        Models::SettingsModel *settingsModel = m_CommandManager->getSettingsModel();
-        ProxySettings *proxySettings = settingsModel->retrieveProxySettings();
         Q_ASSERT(!configUrl.isEmpty());
-        m_RemoteConfig.requestInitConfig(configUrl, proxySettings);
+        m_RemoteConfig.setConfigUrl(configUrl);
+
+        Conectivity::RequestsService *requestsService = m_CommandManager->getRequestsService();
+        requestsService->receiveConfig(configUrl, &m_RemoteConfig);
     }
 
     void AbstractConfigUpdaterModel::initLocalConfig(const QString &filePath){

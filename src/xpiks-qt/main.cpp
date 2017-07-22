@@ -100,6 +100,7 @@
 #include "KeywordsPresets/presetkeywordsmodelconfig.h"
 #include "Maintenance/maintenanceservice.h"
 #include "Models/switchermodel.h"
+#include "Conectivity/requestsservice.h"
 
 void myMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg) {
     Q_UNUSED(context);
@@ -346,6 +347,7 @@ int main(int argc, char *argv[]) {
     QuickBuffer::QuickBuffer quickBuffer;
     Maintenance::MaintenanceService maintenanceService;
     Models::SwitcherModel switcherModel;
+    Conectivity::RequestsService requestsService;
 
     Conectivity::UpdateService updateService(&settingsModel);
 
@@ -408,6 +410,7 @@ int main(int argc, char *argv[]) {
     commandManager.InjectDependency(&quickBuffer);
     commandManager.InjectDependency(&maintenanceService);
     commandManager.InjectDependency(&switcherModel);
+    commandManager.InjectDependency(&requestsService);
 
     userDictEditModel.setCommandManager(&commandManager);
     autoCompleteModel.setCommandManager(&commandManager);

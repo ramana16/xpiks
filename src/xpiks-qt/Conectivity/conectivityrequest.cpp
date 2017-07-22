@@ -19,32 +19,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "remoteconfig.h"
-#include <QThread>
-#include "../Common/defines.h"
-#include "../Conectivity/simplecurlrequest.h"
-#include "../Models/proxysettings.h"
+#include "conectivityrequest.h"
+#include "../Helpers/remoteconfig.h"
 
-namespace Helpers {
-    RemoteConfig::RemoteConfig(QObject *parent):
-        QObject(parent)
-    {
-    }
-
-    RemoteConfig::~RemoteConfig() {
-    }
-
-    void RemoteConfig::setRemoteResponse(const QByteArray &responseData) {
-        QJsonParseError error;
-        LOG_INTEGR_TESTS_OR_DEBUG << responseData;
-
-        m_Config = QJsonDocument::fromJson(responseData, &error);
-
-        if (error.error == QJsonParseError::NoError) {
-            emit configArrived();
-        } else {
-            LOG_INTEGRATION_TESTS << m_ConfigUrl;
-            LOG_WARNING << "Failed to parse remote json" << error.errorString();
-        }
+namespace Conectivity {
+    void ConectivityRequest::setResponse(const QByteArray &responseData) {
+        m_RemoteConfig->setRemoteResponse(responseData);
     }
 }

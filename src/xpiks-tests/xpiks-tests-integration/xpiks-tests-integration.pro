@@ -191,7 +191,10 @@ SOURCES += main.cpp \
     ../../xpiks-qt/QMLExtensions/tabsmodel.cpp \
     ../../xpiks-qt/Helpers/asynccoordinator.cpp \
     ../../xpiks-qt/Maintenance/locallibraryloadsaveitem.cpp \
-    restoresessiontest.cpp
+    restoresessiontest.cpp \
+    ../../xpiks-qt/Conectivity/conectivityrequest.cpp \
+    ../../xpiks-qt/Conectivity/requestsservice.cpp \
+    ../../xpiks-qt/Conectivity/requestsworker.cpp
 
 RESOURCES +=
 
@@ -413,7 +416,10 @@ HEADERS += \
     ../../xpiks-qt/QMLExtensions/tabsmodel.h \
     ../../xpiks-qt/Helpers/asynccoordinator.h \
     ../../xpiks-qt/Maintenance/locallibraryloadsaveitem.h \
-    restoresessiontest.h
+    restoresessiontest.h \
+    ../../xpiks-qt/Conectivity/conectivityrequest.h \
+    ../../xpiks-qt/Conectivity/requestsservice.h \
+    ../../xpiks-qt/Conectivity/requestsworker.h
 
 INCLUDEPATH += ../../../vendors/tiny-aes
 INCLUDEPATH += ../../../vendors/cpp-libface

@@ -19,32 +19,48 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "remoteconfig.h"
-#include <QThread>
-#include "../Common/defines.h"
-#include "../Conectivity/simplecurlrequest.h"
-#include "../Models/proxysettings.h"
+#ifndef REQUESTSSERVICE_H
+#define REQUESTSSERVICE_H
+
+#include <QObject>
+#include "../Common/baseentity.h"
 
 namespace Helpers {
-    RemoteConfig::RemoteConfig(QObject *parent):
-        QObject(parent)
-    {
-    }
-
-    RemoteConfig::~RemoteConfig() {
-    }
-
-    void RemoteConfig::setRemoteResponse(const QByteArray &responseData) {
-        QJsonParseError error;
-        LOG_INTEGR_TESTS_OR_DEBUG << responseData;
-
-        m_Config = QJsonDocument::fromJson(responseData, &error);
-
-        if (error.error == QJsonParseError::NoError) {
-            emit configArrived();
-        } else {
-            LOG_INTEGRATION_TESTS << m_ConfigUrl;
-            LOG_WARNING << "Failed to parse remote json" << error.errorString();
-        }
-    }
+    class RemoteConfig;
 }
+
+namespace Models {
+    class ProxySettings;
+}
+
+namespace Conectivity {
+    class RequestsWorker;
+
+    class RequestsService : public QObject, public Common::BaseEntity
+    {
+        Q_OBJECT
+    public:
+        explicit RequestsService(QObject *parent = 0);
+
+    public:
+        void startService();
+        void stopService();
+
+    public:
+        void receiveConfig(const QString &url, Helpers::RemoteConfig *config);
+
+    private:
+        Models::ProxySettings *getProxySettings() const;
+
+    signals:
+        void cancelServing();
+
+    private slots:
+        void workerFinished();
+
+    private:
+        RequestsWorker *m_RequestsWorker;
+    };
+}
+
+#endif // REQUESTSSERVICE_H

@@ -100,6 +100,10 @@ namespace SpellCheck {
                          highlighter, &SpellCheckErrorsHighlighter::rehighlight);
         QObject::connect(colorsModel, &QMLExtensions::ColorsModel::themeChanged,
                          highlighter, &SpellCheckErrorsHighlighter::rehighlight);
+#else
+        Q_UNUSED(document);
+        Q_UNUSED(colorsModel);
+        Q_UNUSED(basicKeywordsModel);
 #endif
     }
 
@@ -112,6 +116,10 @@ namespace SpellCheck {
                          highlighter, &SpellCheckErrorsHighlighter::rehighlight);
         QObject::connect(colorsModel, &QMLExtensions::ColorsModel::themeChanged,
                          highlighter, &SpellCheckErrorsHighlighter::rehighlight);
+#else
+        Q_UNUSED(document);
+        Q_UNUSED(colorsModel);
+        Q_UNUSED(basicKeywordsModel);
 #endif
     }
 }

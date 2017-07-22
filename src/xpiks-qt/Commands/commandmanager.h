@@ -98,6 +98,7 @@ namespace SpellCheck {
 namespace Conectivity {
     class TelemetryService;
     class UpdateService;
+    class RequestsService;
 }
 
 namespace Plugins {
@@ -185,6 +186,7 @@ namespace Commands {
         void InjectDependency(QuickBuffer::QuickBuffer *quickBuffer);
         void InjectDependency(Maintenance::MaintenanceService *maintenanceService);
         void InjectDependency(Models::SwitcherModel *switcherModel);
+        void InjectDependency(Conectivity::RequestsService *requestsService);
 
     private:
         int generateNextCommandID() { int id = m_LastCommandID++; return id; }
@@ -311,6 +313,7 @@ namespace Commands {
         virtual Maintenance::MaintenanceService *getMaintenanceService() const { return m_MaintenanceService; }
         virtual Models::SessionManager *getSessionManager() const { return m_SessionManager; }
         virtual Warnings::WarningsModel *getWarningsModel() const { return m_WarningsModel; }
+        virtual Conectivity::RequestsService *getRequestsService() const { return m_RequestsService; }
 
 #ifdef INTEGRATION_TESTS
         virtual Translation::TranslationManager *getTranslationManager() const { return m_TranslationManager; }
@@ -364,6 +367,7 @@ namespace Commands {
         QuickBuffer::QuickBuffer *m_QuickBuffer;
         Maintenance::MaintenanceService *m_MaintenanceService;
         Models::SwitcherModel *m_SwitcherModel;
+        Conectivity::RequestsService *m_RequestsService;
 
         QVector<Common::IServiceBase<Common::IBasicArtwork, Common::WarningsCheckFlags> *> m_WarningsCheckers;
         QVector<Helpers::IFileNotAvailableModel*> m_AvailabilityListeners;

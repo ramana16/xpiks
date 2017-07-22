@@ -155,7 +155,10 @@ SOURCES += main.cpp \
     Models/sessionmanager.cpp \
     Maintenance/savesessionjobitem.cpp \
     Conectivity/switcherconfig.cpp \
-    Models/switchermodel.cpp
+    Models/switchermodel.cpp \
+    Conectivity/requestsworker.cpp \
+    Conectivity/requestsservice.cpp \
+    Conectivity/conectivityrequest.cpp
 
 RESOURCES += qml.qrc
 
@@ -365,7 +368,10 @@ HEADERS += \
     MetadataIO/artworkmetadatasnapshot.h \
     Maintenance/savesessionjobitem.h \
     Conectivity/switcherconfig.h \
-    Models/switchermodel.h
+    Models/switchermodel.h \
+    Conectivity/conectivityrequest.h \
+    Conectivity/requestsworker.h \
+    Conectivity/requestsservice.h
 
 DISTFILES += \
     Components/CloseIcon.qml \
