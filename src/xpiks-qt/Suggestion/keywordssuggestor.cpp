@@ -104,6 +104,7 @@ namespace Suggestion {
 
         Models::SwitcherModel *switcher = m_CommandManager->getSwitcherModel();
         const bool sequentialLoading = switcher->getSequentialSuggestionPreviewsOn();
+        LOG_INFO << "With sequential loading:" << sequentialLoading;
 
         if (sequentialLoading) {
             m_LoadedPreviewsNumber = 0;
