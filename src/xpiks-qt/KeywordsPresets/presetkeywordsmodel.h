@@ -28,6 +28,7 @@
 #include <QAbstractListModel>
 #include <QSortFilterProxyModel>
 #include <QTimer>
+#include <QReadWriteLock>
 #include "ipresetsmanager.h"
 
 namespace KeywordsPresets {
@@ -58,6 +59,8 @@ namespace KeywordsPresets {
         Common::Hold m_Hold;
     };
 
+    class FilteredPresetKeywordsModel;
+
     class PresetKeywordsModel:
             public QAbstractListModel,
             public Common::BaseEntity,
@@ -82,6 +85,20 @@ namespace KeywordsPresets {
         virtual void triggerPresetsUpdated() override;
 
         bool tryFindPresetByFullName(const QString &name, bool caseSensitive, int &index);
+
+        // safe and unsafe versions exist because of plugins which
+        // can use presets manager in multithreaded way
+    private:
+        // TODO: fix this "friendship" when C++ will be an adequate language
+        // and will allow access to protected methods from derived classes
+        friend class FilteredPresetKeywordsModel;
+        bool tryGetNameFromIndexUnsafe(int index, QString &name);
+        bool tryGetPresetUnsafe(int presetIndex, QStringList &keywords);
+        bool tryFindSinglePresetByNameUnsafe(const QString &name, bool strictMatch, int &index);
+        void findPresetsByNameUnsafe(const QString &name, QVector<QPair<int, QString> > &results);
+        void findOrRegisterPresetUnsafe(const QString &name, const QStringList &keywords, int &index);
+        void addOrUpdatePresetUnsafe(const QString &name, const QStringList &keywords, int &index, bool &isAdded);
+        bool tryFindPresetByFullNameUnsafe(const QString &name, bool caseSensitive, int &index);
 
     private:
         enum PresetKeywords_Roles {
@@ -134,6 +151,7 @@ namespace KeywordsPresets {
         void removeAllPresets();
 
     private:
+        QReadWriteLock m_PresetsLock;
         std::vector<PresetModel *> m_PresetsList;
         std::vector<PresetModel *> m_Finalizers;
         QTimer m_SavingTimer;

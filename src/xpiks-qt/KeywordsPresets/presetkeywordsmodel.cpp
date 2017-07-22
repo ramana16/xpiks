@@ -45,8 +45,10 @@ namespace KeywordsPresets {
             return false;
         }
 
-        name = m_PresetsList[index]->m_PresetName;
-        return true;
+        QReadLocker locker(&m_PresetsLock);
+        Q_UNUSED(locker);
+        bool result = tryGetNameFromIndexUnsafe(index, name);
+        return result;
     }
 
     bool PresetKeywordsModel::tryGetPreset(int presetIndex, QStringList &keywords) {
@@ -54,10 +56,10 @@ namespace KeywordsPresets {
             return false;
         }
 
-        auto *preset = m_PresetsList[presetIndex];
-        auto &keywordsModel = preset->m_KeywordsModel;
-        keywords = keywordsModel.getKeywords();
-        return true;
+        QReadLocker locker(&m_PresetsLock);
+        Q_UNUSED(locker);
+        bool result = tryGetPresetUnsafe(presetIndex, keywords);
+        return result;
     }
 
     void PresetKeywordsModel::setName(int presetIndex, const QString &name) {
@@ -69,6 +71,62 @@ namespace KeywordsPresets {
     }
 
     bool PresetKeywordsModel::tryFindSinglePresetByName(const QString &name, bool strictMatch, int &index) {
+        QReadLocker locker(&m_PresetsLock);
+        Q_UNUSED(locker);
+        bool result = tryFindSinglePresetByNameUnsafe(name, strictMatch, index);
+        return result;
+    }
+
+    void PresetKeywordsModel::findPresetsByName(const QString &name, QVector<QPair<int, QString> > &results) {
+        QReadLocker locker(&m_PresetsLock);
+        Q_UNUSED(locker);
+        findPresetsByNameUnsafe(name, results);
+    }
+
+    void PresetKeywordsModel::findOrRegisterPreset(const QString &name, const QStringList &keywords, int &index) {
+        QWriteLocker locker(&m_PresetsLock);
+        Q_UNUSED(locker);
+        findOrRegisterPresetUnsafe(name, keywords, index);
+    }
+
+    void PresetKeywordsModel::addOrUpdatePreset(const QString &name, const QStringList &keywords, int &index, bool &isAdded) {
+        QWriteLocker locker(&m_PresetsLock);
+        Q_UNUSED(locker);
+        addOrUpdatePresetUnsafe(name, keywords, index, isAdded);
+    }
+
+    void PresetKeywordsModel::requestBackup() {
+        LOG_DEBUG << "#";
+        m_SavingTimer.start(2000);
+    }
+
+    void PresetKeywordsModel::triggerPresetsUpdated() {
+        LOG_DEBUG << "#";
+        emit presetsUpdated();
+    }
+
+    bool PresetKeywordsModel::tryFindPresetByFullName(const QString &name, bool caseSensitive, int &index) {
+        QReadLocker locker(&m_PresetsLock);
+        Q_UNUSED(locker);
+        bool result = tryFindPresetByFullNameUnsafe(name, caseSensitive, index);
+        return result;
+    }
+
+    bool PresetKeywordsModel::tryGetNameFromIndexUnsafe(int index, QString &name) {
+        Q_ASSERT((index >= 0) && (index < (int)m_PresetsList.size()));
+        name = m_PresetsList[index]->m_PresetName;
+        return true;
+    }
+
+    bool PresetKeywordsModel::tryGetPresetUnsafe(int presetIndex, QStringList &keywords) {
+        Q_ASSERT((presetIndex >= 0) && (presetIndex < (int)m_PresetsList.size()));
+        auto *preset = m_PresetsList[presetIndex];
+        auto &keywordsModel = preset->m_KeywordsModel;
+        keywords = keywordsModel.getKeywords();
+        return true;
+    }
+
+    bool PresetKeywordsModel::tryFindSinglePresetByNameUnsafe(const QString &name, bool strictMatch, int &index) {
         LOG_INFO << name;
         int foundIndex = -1;
         size_t size = m_PresetsList.size();
@@ -118,7 +176,7 @@ namespace KeywordsPresets {
         return found;
     }
 
-    void PresetKeywordsModel::findPresetsByName(const QString &name, QVector<QPair<int, QString> > &results) {
+    void PresetKeywordsModel::findPresetsByNameUnsafe(const QString &name, QVector<QPair<int, QString> > &results) {
         LOG_INFO << name;
         size_t size = m_PresetsList.size();
 
@@ -131,11 +189,11 @@ namespace KeywordsPresets {
         }
     }
 
-    void PresetKeywordsModel::findOrRegisterPreset(const QString &name, const QStringList &keywords, int &index) {
+    void PresetKeywordsModel::findOrRegisterPresetUnsafe(const QString &name, const QStringList &keywords, int &index) {
         LOG_INFO << name;
 
         int existingIndex = -1;
-        if (!tryFindPresetByFullName(name, false, existingIndex)) {
+        if (!tryFindPresetByFullNameUnsafe(name, false, existingIndex)) {
             int lastIndex = getPresetsCount();
 
             beginInsertRows(QModelIndex(), lastIndex, lastIndex);
@@ -148,11 +206,11 @@ namespace KeywordsPresets {
         }
     }
 
-    void PresetKeywordsModel::addOrUpdatePreset(const QString &name, const QStringList &keywords, int &index, bool &isAdded) {
+    void PresetKeywordsModel::addOrUpdatePresetUnsafe(const QString &name, const QStringList &keywords, int &index, bool &isAdded) {
         LOG_INFO << name;
 
         int existingIndex = -1;
-        if (!tryFindPresetByFullName(name, false, existingIndex)) {
+        if (!tryFindPresetByFullNameUnsafe(name, false, existingIndex)) {
             int lastIndex = getPresetsCount();
 
             beginInsertRows(QModelIndex(), lastIndex, lastIndex);
@@ -174,17 +232,7 @@ namespace KeywordsPresets {
         }
     }
 
-    void PresetKeywordsModel::requestBackup() {
-        LOG_DEBUG << "#";
-        m_SavingTimer.start(2000);
-    }
-
-    void PresetKeywordsModel::triggerPresetsUpdated() {
-        LOG_DEBUG << "#";
-        emit presetsUpdated();
-    }
-
-    bool PresetKeywordsModel::tryFindPresetByFullName(const QString &name, bool caseSensitive, int &index) {
+    bool PresetKeywordsModel::tryFindPresetByFullNameUnsafe(const QString &name, bool caseSensitive, int &index) {
         LOG_INFO << name;
         int foundIndex = -1;
         size_t size = m_PresetsList.size();
@@ -345,7 +393,12 @@ namespace KeywordsPresets {
         LOG_DEBUG << "#";
 #ifndef CORE_TESTS
         auto *presetConfig = m_CommandManager->getPresetsModelConfig();
-        presetConfig->saveFromModel(m_PresetsList);
+        {
+            QWriteLocker locker(&m_PresetsLock);
+            Q_UNUSED(locker);
+            presetConfig->loadFromModel(m_PresetsList);
+        }
+        presetConfig->sync();
 #endif
     }
 
@@ -373,12 +426,15 @@ namespace KeywordsPresets {
 
         // removeAllPresets();
 
+        QWriteLocker locker(&m_PresetsLock);
+        Q_UNUSED(locker);
+
         for (auto &item: presetData) {
             auto &keywords = item.m_Keywords;
             auto &name = item.m_Name;
             int index;
 
-            if (!tryFindPresetByFullName(name, false, index)) {
+            if (!tryFindPresetByFullNameUnsafe(name, false, index)) {
                 PresetModel *model = new PresetModel(name);
                 model->m_KeywordsModel.setKeywords(keywords);
                 m_PresetsList.push_back(model);
@@ -391,6 +447,9 @@ namespace KeywordsPresets {
     }
 
     void PresetKeywordsModel::removeAllPresets() {
+        QWriteLocker locker(&m_PresetsLock);
+        Q_UNUSED(locker);
+
         for (auto *p: m_PresetsList) {
             if (p->release()) {
                 delete p;
@@ -514,7 +573,7 @@ namespace KeywordsPresets {
 
         PresetKeywordsModel *presetsModel = getPresetsModel();
         QString name;
-        if (presetsModel->tryGetNameFromIndex(sourceRow, name)) {
+        if (presetsModel->tryGetNameFromIndexUnsafe(sourceRow, name)) {
             result = name.contains(m_SearchTerm, Qt::CaseInsensitive);
         }
 
