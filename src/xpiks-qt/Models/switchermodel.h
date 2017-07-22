@@ -48,6 +48,7 @@ namespace Models {
     public:
         bool getIsDonationCampaign1Active() { return m_Config.isSwitchOn(Conectivity::SwitcherConfig::DonateCampaign1); }
         bool getIsDonateCampaign1Stage2On() { return m_Config.isSwitchOn(Conectivity::SwitcherConfig::DonateCampaign1Stage2); }
+        bool getSequentialSuggestionPreviewsOn() { return m_Config.isSwitchOn(Conectivity::SwitcherConfig::SequentialSuggestionPreviews); }
 
     public:
         bool getDonateCampaign1LinkClicked() const { return m_DonateCampaign1LinkClicked; }

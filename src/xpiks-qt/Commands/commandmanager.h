@@ -313,6 +313,7 @@ namespace Commands {
         virtual Maintenance::MaintenanceService *getMaintenanceService() const { return m_MaintenanceService; }
         virtual Models::SessionManager *getSessionManager() const { return m_SessionManager; }
         virtual Warnings::WarningsModel *getWarningsModel() const { return m_WarningsModel; }
+        virtual Models::SwitcherModel *getSwitcherModel() const { return m_SwitcherModel; }
         virtual Conectivity::RequestsService *getRequestsService() const { return m_RequestsService; }
 
 #ifdef INTEGRATION_TESTS

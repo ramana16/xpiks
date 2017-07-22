@@ -32,6 +32,7 @@
 #include "locallibraryqueryengine.h"
 #include "fotoliaqueryengine.h"
 #include "gettyqueryengine.h"
+#include "../Models/switchermodel.h"
 
 #define LINEAR_TIMER_INTERVAL 1000
 
@@ -101,12 +102,14 @@ namespace Suggestion {
         m_SuggestedKeywords.clearKeywords();
         m_AllOtherKeywords.clearKeywords();
 
-        // good candidate for remote config
-#ifdef QT_DEBUG
-        m_LoadedPreviewsNumber = 0;
-#else
-        m_LoadedPreviewsNumber = suggestedArtworks.size();
-#endif
+        Models::SwitcherModel *switcher = m_CommandManager->getSwitcherModel();
+        const bool sequentialLoading = switcher->getSequentialSuggestionPreviewsOn();
+
+        if (sequentialLoading) {
+            m_LoadedPreviewsNumber = 0;
+        } else {
+            m_LoadedPreviewsNumber = suggestedArtworks.size();
+        }
 
         beginResetModel();
         {
@@ -114,11 +117,9 @@ namespace Suggestion {
         }
         endResetModel();
 
-#ifdef QT_DEBUG
-        m_LinearTimer.start(LINEAR_TIMER_INTERVAL);
-#else
-        // ...
-#endif
+        if (sequentialLoading) {
+            m_LinearTimer.start(LINEAR_TIMER_INTERVAL);
+        }
 
         unsetInProgress();
         emit suggestionArrived();
