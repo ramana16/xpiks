@@ -44,6 +44,7 @@ Item {
     }
 
     Component.onCompleted: focus = true
+    Keys.onEscapePressed: closePopup()
 
     PropertyAnimation { target: donateComponent; property: "opacity";
         duration: 400; from: 0; to: 1;
