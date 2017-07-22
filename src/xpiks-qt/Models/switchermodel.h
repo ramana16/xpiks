@@ -35,7 +35,7 @@ namespace Models {
         Q_PROPERTY(bool isDonationCampaign1Active READ getIsDonationCampaign1Active NOTIFY switchesUpdated)
         Q_PROPERTY(QString donateCampaign1Link READ getDonateCampaign1Link CONSTANT)
         Q_PROPERTY(bool isDonateCampaign1LinkClicked READ getDonateCampaign1LinkClicked NOTIFY donateCampaign1LinkClicked)
-        Q_PROPERTY(bool isDonateCampaign1DialogOn READ getIsDonateCampaign1DialogOn NOTIFY switchesUpdated)
+        Q_PROPERTY(bool isDonateCampaign1Stage2On READ getIsDonateCampaign1Stage2On NOTIFY switchesUpdated)
     public:
         SwitcherModel(QObject *parent=nullptr);
 
@@ -47,7 +47,7 @@ namespace Models {
 
     public:
         bool getIsDonationCampaign1Active() { return m_Config.isSwitchOn(Conectivity::SwitcherConfig::DonateCampaign1); }
-        bool getIsDonateCampaign1DialogOn() { return m_Config.isSwitchOn(Conectivity::SwitcherConfig::DonateCampaign1Dialog); }
+        bool getIsDonateCampaign1Stage2On() { return m_Config.isSwitchOn(Conectivity::SwitcherConfig::DonateCampaign1Stage2); }
 
     public:
         bool getDonateCampaign1LinkClicked() const { return m_DonateCampaign1LinkClicked; }

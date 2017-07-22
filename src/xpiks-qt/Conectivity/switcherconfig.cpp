@@ -34,7 +34,7 @@ namespace Conectivity {
 #define OVERWRITE_KEY QLatin1String("overwrite")
 #define OVERWRITE_SWITCHER_CONFIG true
 #define DONATE_CAMPAIGN_1_KEY QLatin1String("donateCampaign1")
-#define DONATE_CAMPAIGN_1_DIALOG_KEY QLatin1String("donateCampaign1Dialog")
+#define DONATE_CAMPAIGN_1_STAGE_2 QLatin1String("donateCampaign1Stage2")
 
     SwitcherConfig::SwitcherConfig(QObject *parent):
         Models::AbstractConfigUpdaterModel(OVERWRITE_SWITCHER_CONFIG, parent)
@@ -131,14 +131,14 @@ namespace Conectivity {
         LOG_DEBUG << "#";
 
         bool donateCampaign1Active = getSwitchValue(object, DONATE_CAMPAIGN_1_KEY);
-        bool donateCampaign1DialogOn = getSwitchValue(object, DONATE_CAMPAIGN_1_DIALOG_KEY);
+        bool donateCampaign1Stage2 = getSwitchValue(object, DONATE_CAMPAIGN_1_STAGE_2);
 
         // overwrite these values
         {
             QWriteLocker locker(&m_RwLock);
             m_SwitchesHash.clear();
             m_SwitchesHash[DonateCampaign1] = donateCampaign1Active;
-            m_SwitchesHash[DonateCampaign1Dialog] = donateCampaign1DialogOn;
+            m_SwitchesHash[DonateCampaign1Stage2] = donateCampaign1Stage2;
         }
 
         emit switchesUpdated();

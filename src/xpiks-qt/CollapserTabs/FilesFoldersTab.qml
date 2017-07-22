@@ -171,6 +171,8 @@ ColumnLayout {
         anchors.left: parent.left
         anchors.right: parent.right
         text: i18.n + qsTr("Donate")
+        defaultForeground: Colors.goldColor
+        hoverForeground: Colors.buttonDefaultForeground
         visible: {
             if (switcher.isDonationCampaign1Active) {
                 if ((artworkRepository.artworksSourcesCount > 0) ||

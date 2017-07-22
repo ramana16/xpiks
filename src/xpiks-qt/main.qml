@@ -996,17 +996,7 @@ ApplicationWindow {
         target: switcher
         onDonateDialogRequested: {
             console.debug("Donate dialog requested")
-
-            if ((applicationWindow.openedDialogsCount == 0) &&
-                    (mainStackView.areActionsAllowed) &&
-                    (artworkRepository.artworksSourcesCount > 0) &&
-                    (switcher.isDonationCampaign1Active) &&
-                    (switcher.isDonateCampaign1DialogOn)) {
-                Common.launchDialog("Dialogs/DonateDialog.qml", applicationWindow, {})
-            } else {
-                console.debug("Postponing donate dialog");
-                donateTimer.start()
-            }
+            donateTimer.start()
         }
     }
 
@@ -1091,13 +1081,13 @@ ApplicationWindow {
                     (mainStackView.areActionsAllowed) &&
                     (artworkRepository.artworksSourcesCount > 0) &&
                     (switcher.isDonationCampaign1Active) &&
-                    (switcher.isDonateCampaign1DialogOn)) {
+                    (switcher.isDonateCampaign1Stage2On)) {
                 donateTimer.stop()
                 Common.launchDialog("Dialogs/DonateDialog.qml", applicationWindow, {})
             }
 
             if ((!switcher.isDonationCampaign1Active) ||
-                    (!switcher.isDonateCampaign1DialogOn)) {
+                    (!switcher.isDonateCampaign1Stage2On)) {
                 console.debug("Donate campaing is over. Switching off donate timer")
                 donateTimer.stop()
             }

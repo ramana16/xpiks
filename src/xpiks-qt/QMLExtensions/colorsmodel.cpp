@@ -77,6 +77,7 @@
 
 #define DESTRUCTIVE_COLOR "destructiveColor"
 #define GREEN_COLOR "greenColor"
+#define GOLD_COLOR "goldColor"
 
 #define STATUS_BAR_COLOR "statusBarColor"
 #define LEFT_SLIDER_COLOR "leftSliderColor"
@@ -97,6 +98,7 @@ ColorsMap createBlackTheme() {
     BlackTheme[PANEL_COLOR] = "#242424";
     BlackTheme[PANEL_SELECTED_COLOR] = "#5d5d5d";
     BlackTheme[WHITE_COLOR] = "#ffffff";
+    BlackTheme[GOLD_COLOR] = "#f49c12";
 
     BlackTheme[LABEL_ACTIVE_FOREGROUND] = "#c9c9c9";
     BlackTheme[LABEL_INACTIVE_FOREGROUND] = "#939393";
@@ -108,7 +110,7 @@ ColorsMap createBlackTheme() {
 
     BlackTheme[ARTWORK_BACKGROUND] = "#181818";
     //BlackTheme[ARTWORK_IMAGE_BACKGROUND] = "#071215";
-    BlackTheme[ARTWORK_MODIFIED_COLOR] = "#f49c12";
+    BlackTheme[ARTWORK_MODIFIED_COLOR] = BlackTheme[GOLD_COLOR];
     BlackTheme[ARTWORK_SAVED_COLOR] = "#435151";
     BlackTheme[ARTWORK_ACTIVE_COLOR] = "#12b9bc";
 
@@ -162,6 +164,7 @@ ColorsMap createSlateGrayTheme() {
     SlateGrayTheme[PANEL_COLOR] = "#292c34";
     SlateGrayTheme[PANEL_SELECTED_COLOR] = "#515761";
     SlateGrayTheme[WHITE_COLOR] = "#ffffff";
+    SlateGrayTheme[GOLD_COLOR] = "#f49c12";
 
     SlateGrayTheme[LABEL_ACTIVE_FOREGROUND] = "#c7ccd3";
     SlateGrayTheme[LABEL_INACTIVE_FOREGROUND] = "#979ca5";
@@ -173,7 +176,7 @@ ColorsMap createSlateGrayTheme() {
 
     SlateGrayTheme[ARTWORK_BACKGROUND] = "#1e2026";
     //SlateGrayTheme[ARTWORK_IMAGE_BACKGROUND] = "#071215";
-    SlateGrayTheme[ARTWORK_MODIFIED_COLOR] = "#f49c12";
+    SlateGrayTheme[ARTWORK_MODIFIED_COLOR] = SlateGrayTheme[GOLD_COLOR];
     SlateGrayTheme[ARTWORK_SAVED_COLOR] = "#435151";
     SlateGrayTheme[ARTWORK_ACTIVE_COLOR] = "#2ec1c3";
 
@@ -330,6 +333,7 @@ namespace QMLExtensions {
 
         setDestructiveColor(getColor(DESTRUCTIVE_COLOR, theme, fallback));
         setGreenColor(getColor(GREEN_COLOR, theme, fallback));
+        setGoldColor(getColor(GOLD_COLOR, theme, fallback));
 
         setStatusBarColor(getColor(STATUS_BAR_COLOR, theme, fallback));
         setLeftSliderColor(getColor(LEFT_SLIDER_COLOR, theme, fallback));

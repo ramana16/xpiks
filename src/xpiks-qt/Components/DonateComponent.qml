@@ -60,7 +60,7 @@ ColumnLayout {
     StyledText {
         text: i18.n + qsTr("Donate here")
         anchors.horizontalCenter: parent.horizontalCenter
-        color: donateMA.pressed ? Colors.linkClickedColor : Colors.artworkModifiedColor
+        color: donateMA.pressed ? Colors.linkClickedColor : Colors.goldColor
         font.bold: true
 
         MouseArea {

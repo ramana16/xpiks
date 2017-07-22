@@ -26,6 +26,8 @@ import "../Constants"
 
 Button {
     activeFocusOnTab: false
+    property color defaultForeground: Colors.buttonDefaultForeground
+    property color hoverForeground: defaultForeground
 
     style: ButtonStyle {
         background: Rectangle {
@@ -51,7 +53,7 @@ Button {
                 var result = Colors.defaultControlColor;
 
                 if (control.enabled) {
-                    result = control.pressed ? Colors.buttonPressedForeground : Colors.buttonDefaultForeground;
+                    result = control.pressed ? Colors.buttonPressedForeground : (control.hovered ? control.hoverForeground : control.defaultForeground);
                 } else {
                     result = Colors.inactiveControlColor;
                 }

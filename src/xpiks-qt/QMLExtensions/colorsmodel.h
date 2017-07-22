@@ -86,6 +86,7 @@ namespace QMLExtensions {
 
         Q_PROPERTY(QColor destructiveColor READ destructiveColor WRITE setDestructiveColor NOTIFY destructiveColorChanged)
         Q_PROPERTY(QColor greenColor READ greenColor WRITE setGreenColor NOTIFY greenColorChanged)
+        Q_PROPERTY(QColor goldColor READ goldColor WRITE setGoldColor NOTIFY goldColorChanged)
 
         Q_PROPERTY(QColor statusBarColor READ statusBarColor WRITE setStatusBarColor NOTIFY statusBarColorChanged)
         Q_PROPERTY(QColor leftSliderColor READ leftSliderColor WRITE setLeftSliderColor NOTIFY leftSliderColorChanged)
@@ -143,7 +144,8 @@ namespace QMLExtensions {
         QColor m_closeIconInactiveColor;
         QColor m_closeIconDisabledColor;
         QColor m_inputHintForeground;
-        QColor m_popupDarkInputBackground;
+        QColor m_popupDarkInputBackground;        
+        QColor m_goldColor;
 
     public:
         explicit ColorsModel(QObject *parent = 0);
@@ -370,6 +372,11 @@ namespace QMLExtensions {
             return m_popupDarkInputBackground;
         }
 
+        QColor goldColor() const
+        {
+            return m_goldColor;
+        }
+
     signals:
         void themeChanged();
         void defaultDarkColorChanged(QColor defaultDarkColor);
@@ -413,7 +420,8 @@ namespace QMLExtensions {
         void closeIconInactiveColorChanged(QColor closeIconInactiveColor);
         void closeIconDisabledColorChanged(QColor closeIconDisabledColor);
         void inputHintForegroundChanged(QColor inputHintForeground);
-        void popupDarkInputBackgroundChanged(QColor popupInputBackground);
+        void popupDarkInputBackgroundChanged(QColor popupInputBackground);        
+        void goldColorChanged(QColor goldColor);
 
     public slots:
         void setDefaultDarkColor(QColor defaultDarkColor)
@@ -751,6 +759,14 @@ namespace QMLExtensions {
 
             m_popupDarkInputBackground = popupInputBackground;
             emit popupDarkInputBackgroundChanged(popupInputBackground);
+        }
+        void setGoldColor(QColor goldColor)
+        {
+            if (m_goldColor == goldColor)
+                return;
+
+            m_goldColor = goldColor;
+            emit goldColorChanged(goldColor);
         }
     };
 }
