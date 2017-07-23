@@ -177,7 +177,7 @@ namespace Warnings {
         m_PendingUpdates.clear();
     }
 
-    void WarningsModel::warningsCouldHaveChanged(int originalIndex) {
+    void WarningsModel::onWarningsCouldHaveChanged(int originalIndex) {
         LOG_INFO << originalIndex;
         m_PendingUpdates.push_back(originalIndex);
     }

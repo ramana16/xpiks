@@ -59,7 +59,7 @@ namespace Warnings {
         void warningsCountChanged();
 
     public slots:
-        void warningsCouldHaveChanged(int originalIndex);
+        void onWarningsCouldHaveChanged(int originalIndex);
 
     private slots:
         void sourceRowsRemoved(QModelIndex,int,int);
