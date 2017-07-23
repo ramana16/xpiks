@@ -101,7 +101,7 @@ namespace Suggestion {
         Models::SettingsModel *settingsModel = m_CommandManager->getSettingsModel();
         const bool sequentialLoading =
                 (switcher->getProgressiveSuggestionPreviewsOn() ||
-                 settingsModel->getProgressiveSuggestionPreviews()) &&
+                 settingsModel->getUseProgressiveSuggestionPreviews()) &&
                 (!getIsLocalSearch());
         LOG_INFO << "With sequential loading:" << sequentialLoading;
 

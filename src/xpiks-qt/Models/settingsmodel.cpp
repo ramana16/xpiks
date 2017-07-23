@@ -76,7 +76,7 @@
 #define DEFAULT_PROXY_HOST ""
 #define DEFAULT_ARTWORK_EDIT_RIGHT_PANE_WIDTH 300
 #define DEFAULT_SELECTED_DICT_INDEX -1
-#define DEFAULT_PROGRESSIVE_SUGGESTION_PREVIEWS false
+#define DEFAULT_USE_PROGRESSIVE_SUGGESTION_PREVIEWS false
 #define DEFAULT_PROGRESSIVE_SUGGESTION_INCREMENT 10
 
 #ifndef INTEGRATION_TESTS
@@ -119,7 +119,7 @@ namespace Models {
         m_UseProxy(DEFAULT_USE_PROXY),
         m_AutoCacheImages(DEFAULT_AUTO_CACHE_IMAGES),
         m_VerboseUpload(DEFAULT_VERBOSE_UPLOAD),
-        m_ProgressiveSuggestionPreviews(DEFAULT_PROGRESSIVE_SUGGESTION_PREVIEWS),
+        m_UseProgressiveSuggestionPreviews(DEFAULT_USE_PROGRESSIVE_SUGGESTION_PREVIEWS),
         m_ProgressiveSuggestionIncrement(DEFAULT_PROGRESSIVE_SUGGESTION_INCREMENT)
     {
     }
@@ -486,7 +486,7 @@ namespace Models {
         setUseProxy(boolValue(useProxy, DEFAULT_USE_PROXY));
         setVerboseUpload(boolValue(verboseUpload, DEFAULT_VERBOSE_UPLOAD));
 
-        setProgressiveSuggestionPreviews(expBoolValue(progressiveSuggestionPreviews, DEFAULT_PROGRESSIVE_SUGGESTION_PREVIEWS));
+        setUseProgressiveSuggestionPreviews(expBoolValue(useProgressiveSuggestionPreviews, DEFAULT_USE_PROGRESSIVE_SUGGESTION_PREVIEWS));
         setProgressiveSuggestionIncrement(expIntValue(progressiveSuggestionIncrement, DEFAULT_PROGRESSIVE_SUGGESTION_INCREMENT));
 
         deserializeProxyFromSettings(stringValue(proxyHost, DEFAULT_PROXY_HOST));
@@ -590,7 +590,7 @@ namespace Models {
         setSelectedDictIndex(DEFAULT_SELECTED_DICT_INDEX);
         setVerboseUpload(DEFAULT_VERBOSE_UPLOAD);
 
-        setProgressiveSuggestionPreviews(DEFAULT_PROGRESSIVE_SUGGESTION_PREVIEWS);
+        setUseProgressiveSuggestionPreviews(DEFAULT_USE_PROGRESSIVE_SUGGESTION_PREVIEWS);
         setProgressiveSuggestionIncrement(DEFAULT_PROGRESSIVE_SUGGESTION_INCREMENT);
 
 #if defined(QT_DEBUG)
@@ -640,7 +640,7 @@ namespace Models {
         setValue(artworkEditRightPaneWidth, m_ArtworkEditRightPaneWidth);
         setValue(verboseUpload, m_VerboseUpload);
 
-        setExperimentalValue(progressiveSuggestionPreviews, m_ProgressiveSuggestionPreviews);
+        setExperimentalValue(useProgressiveSuggestionPreviews, m_UseProgressiveSuggestionPreviews);
         setExperimentalValue(progressiveSuggestionIncrement, m_ProgressiveSuggestionIncrement);
 
         if (!m_MustUseMasterPassword) {

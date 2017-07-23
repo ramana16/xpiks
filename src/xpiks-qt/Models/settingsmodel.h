@@ -82,7 +82,7 @@ namespace Models {
         Q_PROPERTY(bool autoCacheImages READ getAutoCacheImages WRITE setAutoCacheImages NOTIFY autoCacheImagesChanged)
         Q_PROPERTY(int artworkEditRightPaneWidth READ getArtworkEditRightPaneWidth WRITE setArtworkEditRightPaneWidth NOTIFY artworkEditRightPaneWidthChanged)
         Q_PROPERTY(bool verboseUpload READ getVerboseUpload WRITE setVerboseUpload NOTIFY verboseUploadChanged)
-        Q_PROPERTY(bool progressiveSuggestionPreviews READ getProgressiveSuggestionPreviews WRITE setProgressiveSuggestionPreviews NOTIFY progressiveSuggestionPreviewsChanged)
+        Q_PROPERTY(bool useProgressiveSuggestionPreviews READ getUseProgressiveSuggestionPreviews WRITE setUseProgressiveSuggestionPreviews NOTIFY useProgressiveSuggestionPreviewsChanged)
         Q_PROPERTY(int progressiveSuggestionIncrement READ getProgressiveSuggestionIncrement WRITE setProgressiveSuggestionIncrement NOTIFY progressiveSuggestionIncrementChanged)
 
         Q_PROPERTY(QString appVersion READ getAppVersion CONSTANT)
@@ -361,7 +361,7 @@ namespace Models {
         int getArtworkEditRightPaneWidth() const { return m_ArtworkEditRightPaneWidth; }
         int getSelectedDictIndex() const { return m_SelectedDictIndex; }
         bool getVerboseUpload() const { return m_VerboseUpload; }
-        bool getProgressiveSuggestionPreviews() const { return m_ProgressiveSuggestionPreviews; }
+        bool getUseProgressiveSuggestionPreviews() const { return m_UseProgressiveSuggestionPreviews; }
         int getProgressiveSuggestionIncrement() const { return m_ProgressiveSuggestionIncrement; }
 
     signals:
@@ -401,7 +401,7 @@ namespace Models {
         void artworkEditRightPaneWidthChanged(int value);
         void selectedDictIndexChanged(int value);        
         void verboseUploadChanged(bool verboseUpload);        
-        void progressiveSuggestionPreviewsChanged(bool progressiveSuggestionPreviews);
+        void useProgressiveSuggestionPreviewsChanged(bool progressiveSuggestionPreviews);
         void progressiveSuggestionIncrementChanged(int progressiveSuggestionIncrement);
 
     public:
@@ -621,13 +621,13 @@ namespace Models {
             emit verboseUploadChanged(verboseUpload);
         }
 
-        void setProgressiveSuggestionPreviews(bool progressiveSuggestionPreviews)
+        void setUseProgressiveSuggestionPreviews(bool useProgressiveSuggestionPreviews)
         {
-            if (m_ProgressiveSuggestionPreviews == progressiveSuggestionPreviews)
+            if (m_UseProgressiveSuggestionPreviews == useProgressiveSuggestionPreviews)
                 return;
 
-            m_ProgressiveSuggestionPreviews = progressiveSuggestionPreviews;
-            emit progressiveSuggestionPreviewsChanged(progressiveSuggestionPreviews);
+            m_UseProgressiveSuggestionPreviews = useProgressiveSuggestionPreviews;
+            emit useProgressiveSuggestionPreviewsChanged(useProgressiveSuggestionPreviews);
         }
 
         void setProgressiveSuggestionIncrement(int progressiveSuggestionIncrement)
@@ -689,7 +689,7 @@ namespace Models {
         ProxySettings m_ProxySettings;
         bool m_AutoCacheImages;
         bool m_VerboseUpload;
-        bool m_ProgressiveSuggestionPreviews;
+        bool m_UseProgressiveSuggestionPreviews;
         int m_ProgressiveSuggestionIncrement;
     };
 }

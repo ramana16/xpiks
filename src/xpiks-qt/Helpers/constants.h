@@ -175,7 +175,7 @@ namespace Constants {
     const char translatorSelectedDictIndex[] = "translatorSelectedDictIndex";
     const char verboseUpload[] = "verboseUpload";
     const char saveSession[] = "saveSession";
-    const char progressiveSuggestionPreviews[] = "progressiveSuggestionPreviews";
+    const char useProgressiveSuggestionPreviews[] = "useProgressiveSuggestionPreviews";
     const char progressiveSuggestionIncrement[] = "progressiveSuggestionIncrement";
 }
 
