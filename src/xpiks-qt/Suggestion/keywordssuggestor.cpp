@@ -106,7 +106,9 @@ namespace Suggestion {
         LOG_INFO << "With sequential loading:" << sequentialLoading;
 
         if (sequentialLoading) {
-            m_LoadedPreviewsNumber = 0;
+            const int increment = settingsModel->getProgressiveSuggestionIncrement();
+            m_LoadedPreviewsNumber = increment;
+            LOG_DEBUG << "Progressive increment is" << increment;
         } else {
             m_LoadedPreviewsNumber = suggestedArtworks.size();
         }
