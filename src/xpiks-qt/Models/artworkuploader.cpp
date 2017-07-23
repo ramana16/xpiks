@@ -114,10 +114,6 @@ namespace Models {
     }
 
     void ArtworkUploader::updateStocksList() {
-        auto &initCoordinator = m_CommandManager->getInitCoordinator();
-        Helpers::AsyncCoordinatorUnlocker unlocker(&initCoordinator);
-        Q_UNUSED(unlocker);
-
         m_StocksFtpList.initializeConfigs();
     }
 
@@ -184,8 +180,10 @@ namespace Models {
     void ArtworkUploader::initializeStocksList(Helpers::AsyncCoordinator *initCoordinator) {
         Helpers::AsyncCoordinatorLocker locker(initCoordinator);
         Q_UNUSED(locker);
+        Helpers::AsyncCoordinatorUnlocker unlocker(initCoordinator);
+        Q_UNUSED(unlocker);
 
-        QTimer::singleShot(1000, this, SLOT(updateStocksList()));
+        updateStocksList();
     }
 
     void ArtworkUploader::doUploadArtworks(const QVector<ArtworkMetadata *> &artworkList) {

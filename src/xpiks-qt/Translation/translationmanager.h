@@ -70,7 +70,7 @@ namespace Translation {
         int getSelectedDictionaryIndex() const { return m_SelectedDictionaryIndex; }
 
     public:
-        void initializeDictionaries(Helpers::AsyncCoordinator *initCoordinator);
+        void initializeDictionaries(Helpers::AsyncCoordinator *initCoordinator=nullptr);
         void setQuery(const QString &value);
         void setSelectedDictionaryIndex(int value);
         QStringList getDictionariesDescriptions() const;

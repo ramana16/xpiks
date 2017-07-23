@@ -929,7 +929,7 @@ void Commands::CommandManager::afterConstructionCallback() {
     m_UpdateService->startChecking();
     m_ArtworkUploader->initializeStocksList(&m_InitCoordinator);
     m_WarningsService->initWarningsSettings();
-    m_TranslationManager->initializeDictionaries(&m_InitCoordinator);
+    m_TranslationManager->initializeDictionaries();
     m_PresetsModelConfig->initializeConfigs(&m_InitCoordinator);
 #endif
 
