@@ -103,7 +103,9 @@ namespace Suggestion {
         m_AllOtherKeywords.clearKeywords();
 
         Models::SwitcherModel *switcher = m_CommandManager->getSwitcherModel();
-        const bool sequentialLoading = switcher->getSequentialSuggestionPreviewsOn();
+        const bool sequentialLoading =
+                switcher->getProgressiveSuggestionPreviewsOn() &&
+                (!getIsLocalSearch());
         LOG_INFO << "With sequential loading:" << sequentialLoading;
 
         if (sequentialLoading) {
@@ -163,6 +165,12 @@ namespace Suggestion {
         }
     }
 
+    bool KeywordsSuggestor::getIsLocalSearch() const {
+        bool result = m_SelectedSourceIndex == m_LocalSearchIndex;
+        Q_ASSERT(result == isLocalSuggestionActive());
+        return result;
+    }
+
     void KeywordsSuggestor::resultsAvailableHandler() {
         Q_ASSERT(0 <= m_SelectedSourceIndex && m_SelectedSourceIndex < m_QueryEngines.length());
         SuggestionQueryEngineBase *currentEngine = m_QueryEngines.at(m_SelectedSourceIndex);
@@ -210,6 +218,16 @@ namespace Suggestion {
         }
 
         setLastErrorString(tr("No results found"));
+    }
+
+    bool KeywordsSuggestor::isLocalSuggestionActive() const {
+        const int index = getSelectedSourceIndex();
+        if ((index < 0) || (index >= (int)m_QueryEngines.size())) { return false; }
+
+        SuggestionQueryEngineBase *engine = m_QueryEngines.at(index);
+        LocalLibraryQueryEngine *localEngine = dynamic_cast<LocalLibraryQueryEngine*>(engine);
+        bool result = localEngine != nullptr;
+        return result;
     }
 
     QString KeywordsSuggestor::removeSuggestedKeywordAt(int keywordIndex) {

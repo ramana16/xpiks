@@ -35,7 +35,7 @@ namespace Conectivity {
 #define OVERWRITE_SWITCHER_CONFIG true
 #define DONATE_CAMPAIGN_1_KEY QLatin1String("donateCampaign1")
 #define DONATE_CAMPAIGN_1_STAGE_2 QLatin1String("donateCampaign1Stage2")
-#define SEQUENTIAL_SUGGESTION_PREVIEWS QLatin1String("sequentialSuggestionPreviews")
+#define PROGRESSIVE_SUGGESTION_PREVIEWS QLatin1String("progressiveSuggestionPreviews")
 
     SwitcherConfig::SwitcherConfig(QObject *parent):
         Models::AbstractConfigUpdaterModel(OVERWRITE_SWITCHER_CONFIG, parent)
@@ -133,7 +133,7 @@ namespace Conectivity {
 
         bool donateCampaign1Active = getSwitchValue(object, DONATE_CAMPAIGN_1_KEY);
         bool donateCampaign1Stage2 = getSwitchValue(object, DONATE_CAMPAIGN_1_STAGE_2);
-        bool sequentialSuggestionPreviews = getSwitchValue(object, SEQUENTIAL_SUGGESTION_PREVIEWS);
+        bool progressiveSuggestionPreviews = getSwitchValue(object, PROGRESSIVE_SUGGESTION_PREVIEWS);
 
         // overwrite these values
         {
@@ -141,7 +141,7 @@ namespace Conectivity {
             m_SwitchesHash.clear();
             m_SwitchesHash[DonateCampaign1] = donateCampaign1Active;
             m_SwitchesHash[DonateCampaign1Stage2] = donateCampaign1Stage2;
-            m_SwitchesHash[SequentialSuggestionPreviews] = sequentialSuggestionPreviews;
+            m_SwitchesHash[ProgressiveSuggestionPreviews] = progressiveSuggestionPreviews;
 
             LOG_INTEGR_TESTS_OR_DEBUG << m_SwitchesHash;
         }

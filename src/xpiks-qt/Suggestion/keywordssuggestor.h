@@ -75,7 +75,7 @@ namespace Suggestion {
         bool getIsInProgress() const { return m_IsInProgress; }
         int getSelectedArtworksCount() const { return m_SelectedArtworksCount; }
         const QString &getLastErrorString() const { return m_LastErrorString; }
-        bool getIsLocalSearch() const { return m_SelectedSourceIndex == m_LocalSearchIndex; }
+        bool getIsLocalSearch() const;
 
     signals:
         void suggestedKeywordsCountChanged();
@@ -98,6 +98,7 @@ namespace Suggestion {
     private:
         void setInProgress() { m_IsInProgress = true; emit isInProgressChanged(); }
         void unsetInProgress() { m_IsInProgress = false; emit isInProgressChanged(); }
+        bool isLocalSuggestionActive() const;
 
     public:
         Q_INVOKABLE void appendKeywordToSuggested(const QString &keyword) { m_SuggestedKeywords.appendKeyword(keyword); emit suggestedKeywordsCountChanged(); }

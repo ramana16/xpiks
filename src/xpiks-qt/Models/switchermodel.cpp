@@ -105,11 +105,11 @@ namespace Models {
 
     void SwitcherModel::onDelayTimer() {
         LOG_DEBUG << "#";
-        LOG_DEBUG << "Donate Campaign 1 active:" << getIsDonationCampaign1Active();
+        LOG_DEBUG << "Donate Campaign 1 active:" << getIsDonationCampaign1On();
         LOG_DEBUG << "Donate Campaign 1 Dialog on:" << getIsDonateCampaign1Stage2On();
         LOG_DEBUG << "Donate Campaign 1 link clicked:" << getDonateCampaign1LinkClicked();
 
-        if (getIsDonationCampaign1Active() &&
+        if (getIsDonationCampaign1On() &&
                 getIsDonateCampaign1Stage2On() &&
                 !getDonateCampaign1LinkClicked()) {
             emit donateDialogRequested();

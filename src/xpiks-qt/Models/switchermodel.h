@@ -32,7 +32,7 @@ namespace Models {
     class SwitcherModel: public QObject, public Common::BaseEntity
     {
         Q_OBJECT
-        Q_PROPERTY(bool isDonationCampaign1Active READ getIsDonationCampaign1Active NOTIFY switchesUpdated)
+        Q_PROPERTY(bool isDonationCampaign1Active READ getIsDonationCampaign1On NOTIFY switchesUpdated)
         Q_PROPERTY(QString donateCampaign1Link READ getDonateCampaign1Link CONSTANT)
         Q_PROPERTY(bool isDonateCampaign1LinkClicked READ getDonateCampaign1LinkClicked NOTIFY donateCampaign1LinkClicked)
         Q_PROPERTY(bool isDonateCampaign1Stage2On READ getIsDonateCampaign1Stage2On NOTIFY switchesUpdated)
@@ -46,9 +46,9 @@ namespace Models {
         void afterInitializedCallback();
 
     public:
-        bool getIsDonationCampaign1Active() { return m_Config.isSwitchOn(Conectivity::SwitcherConfig::DonateCampaign1); }
+        bool getIsDonationCampaign1On() { return m_Config.isSwitchOn(Conectivity::SwitcherConfig::DonateCampaign1); }
         bool getIsDonateCampaign1Stage2On() { return m_Config.isSwitchOn(Conectivity::SwitcherConfig::DonateCampaign1Stage2); }
-        bool getSequentialSuggestionPreviewsOn() { return m_Config.isSwitchOn(Conectivity::SwitcherConfig::SequentialSuggestionPreviews); }
+        bool getProgressiveSuggestionPreviewsOn() { return m_Config.isSwitchOn(Conectivity::SwitcherConfig::ProgressiveSuggestionPreviews); }
 
     public:
         bool getDonateCampaign1LinkClicked() const { return m_DonateCampaign1LinkClicked; }
