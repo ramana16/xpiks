@@ -437,6 +437,11 @@ void Commands::CommandManager::connectEntitiesSignalsSlots() const {
                          m_WarningsModel, &Warnings::WarningsModel::onWarningsCouldHaveChanged);
     }
 
+    if (m_WarningsModel != NULL && m_WarningsService != NULL) {
+        QObject::connect(m_WarningsService, &Warnings::WarningsService::queueIsEmpty,
+                         m_WarningsModel, &Warnings::WarningsModel::onWarningsUpdateRequired);
+    }
+
     if (m_SpellCheckerService != NULL && m_QuickBuffer != NULL) {
         QObject::connect(m_SpellCheckerService, &SpellCheck::SpellCheckerService::userDictUpdate,
                          m_QuickBuffer, &QuickBuffer::QuickBuffer::userDictUpdateHandler);

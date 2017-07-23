@@ -64,12 +64,8 @@ namespace Warnings {
         void workerStopped();
         void updateWarningsSettings();
 
-#ifdef INTEGRATION_TESTS
-
     signals:
         void queueIsEmpty();
-
-#endif
 
     private:
         WarningsCheckingWorker *m_WarningsWorker;

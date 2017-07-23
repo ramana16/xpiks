@@ -55,10 +55,8 @@ namespace Warnings {
         QObject::connect(m_WarningsWorker, &WarningsCheckingWorker::stopped,
                          this, &WarningsService::workerStopped);
 
-#ifdef INTEGRATION_TESTS
         QObject::connect(m_WarningsWorker, &WarningsCheckingWorker::queueIsEmpty,
                          this, &WarningsService::queueIsEmpty);
-#endif
 
         LOG_INFO << "Starting worker";
 

@@ -60,6 +60,7 @@ namespace Warnings {
 
     public slots:
         void onWarningsCouldHaveChanged(int originalIndex);
+        void onWarningsUpdateRequired();
 
     private slots:
         void sourceRowsRemoved(QModelIndex,int,int);

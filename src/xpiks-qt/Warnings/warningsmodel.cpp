@@ -188,6 +188,10 @@ namespace Warnings {
         m_PendingUpdates.push_back(originalIndex);
     }
 
+    void WarningsModel::onWarningsUpdateRequired() {
+        update();
+    }
+
     void WarningsModel::sourceRowsRemoved(QModelIndex, int, int) {
         emit warningsCountChanged();
     }
