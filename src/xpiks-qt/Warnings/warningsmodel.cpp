@@ -127,8 +127,8 @@ namespace Warnings {
 
     WarningsModel::WarningsModel(QObject *parent):
         QSortFilterProxyModel(parent),
-        m_ShowOnlySelected(false),
-        m_WarningsSettingsModel(nullptr)
+        m_WarningsSettingsModel(nullptr),
+        m_ShowOnlySelected(false)
     {
     }
 
@@ -162,6 +162,24 @@ namespace Warnings {
         QModelIndex originalIndex = mapToSource(this->index(index, 0));
         int row = originalIndex.row();
         return row;
+    }
+
+    void WarningsModel::processPendingUpdates() {
+        QAbstractItemModel *sourceItemModel = sourceModel();
+        QVector<int> roles;
+        roles << WarningsRole;
+
+        for (auto &originalIndex: m_PendingUpdates) {
+            QModelIndex index = mapFromSource(sourceItemModel->index(originalIndex, 0));
+            emit dataChanged(index, index, roles);
+        }
+
+        m_PendingUpdates.clear();
+    }
+
+    void WarningsModel::warningsCouldHaveChanged(int originalIndex) {
+        LOG_INFO << originalIndex;
+        m_PendingUpdates.push_back(originalIndex);
     }
 
     void WarningsModel::sourceRowsRemoved(QModelIndex, int, int) {
@@ -209,5 +227,19 @@ namespace Warnings {
                          this, &WarningsModel::sourceRowsInserted);
         QObject::connect(sourceModel, &QAbstractItemModel::modelReset,
                          this, &WarningsModel::sourceModelReset);
+    }
+
+    QVariant WarningsModel::data(const QModelIndex &index, int role) const {
+        if (role == WarningsRole) {
+            return describeWarnings(index.row());
+        } else {
+            return QSortFilterProxyModel::data(index, role);
+        }
+    }
+
+    QHash<int, QByteArray> WarningsModel::roleNames() const {
+        QHash<int, QByteArray> roles = QSortFilterProxyModel::roleNames();
+        roles[WarningsRole] = "warningsList";
+        return roles;
     }
 }

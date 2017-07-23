@@ -332,6 +332,8 @@ namespace Models {
         if (m_ArtworkMetadata != nullptr) {
             m_CommandManager->submitForWarningsCheck(m_ArtworkMetadata);
         }
+
+        emit warningsCouldHaveChanged(m_ArtworkOriginalIndex);
     }
 
     void ArtworkProxyModel::doResetModel() {

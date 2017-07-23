@@ -37,6 +37,12 @@ Rectangle {
     property bool wasLeftSideCollapsed
     property bool isRestricted: false
 
+    Stack.onStatusChanged: {
+        if (Stack.status == Stack.Active) {
+            warningsModel.processPendingUpdates()
+        }
+    }
+
     function closePopup() {
         mainStackView.pop({immediate: true})
         restoreLeftPane()
@@ -180,7 +186,7 @@ Rectangle {
 
                         Repeater {
                             id: warningsDescriptions
-                            model: warningsModel.describeWarnings(imageWrapper.delegateIndex)
+                            model: warningsList
 
                             delegate: RowLayout {
                                 width: warningsTextList.width

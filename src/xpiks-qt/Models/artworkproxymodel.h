@@ -75,6 +75,7 @@ namespace Models {
         void keywordsCountChanged();
         void completionsAvailable();
         void itemBecomeUnavailable();
+        void warningsCouldHaveChanged(int originalIndex);
 
     protected:
         virtual void signalDescriptionChanged() override { emit descriptionChanged(); }

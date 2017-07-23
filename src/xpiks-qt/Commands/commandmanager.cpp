@@ -432,6 +432,11 @@ void Commands::CommandManager::connectEntitiesSignalsSlots() const {
                          m_ArtworkProxyModel, &Models::ArtworkProxyModel::userDictClearedHandler);
     }
 
+    if (m_WarningsModel != NULL && m_ArtworkProxyModel != NULL) {
+        QObject::connect(m_ArtworkProxyModel, &Models::ArtworkProxyModel::warningsCouldHaveChanged,
+                         m_WarningsModel, &Warnings::WarningsModel::warningsCouldHaveChanged);
+    }
+
     if (m_SpellCheckerService != NULL && m_QuickBuffer != NULL) {
         QObject::connect(m_SpellCheckerService, &SpellCheck::SpellCheckerService::userDictUpdate,
                          m_QuickBuffer, &QuickBuffer::QuickBuffer::userDictUpdateHandler);

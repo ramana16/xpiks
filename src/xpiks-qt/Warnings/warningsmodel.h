@@ -24,7 +24,9 @@
 
 #include <QSortFilterProxyModel>
 #include <QStringList>
+#include <vector>
 #include "../Common/baseentity.h"
+#include "../Models/artitemsmodel.h"
 
 namespace Warnings {
     class WarningsSettingsModel;
@@ -51,24 +53,37 @@ namespace Warnings {
         Q_INVOKABLE QStringList describeWarnings(int index) const;
         Q_INVOKABLE void update();
         Q_INVOKABLE int getOriginalIndex(int index) const;
+        Q_INVOKABLE void processPendingUpdates();
 
     signals:
         void warningsCountChanged();
+
+    public slots:
+        void warningsCouldHaveChanged(int originalIndex);
 
     private slots:
         void sourceRowsRemoved(QModelIndex,int,int);
         void sourceRowsInserted(QModelIndex,int,int);
         void sourceModelReset();
 
+    private:
+        enum WarningsModel_Roles {
+            WarningsRole = Models::ArtItemsModel::RolesNumber + 1
+        };
+
         // QSortFilterProxyModel interface
     protected:
         virtual bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
+
     public:
         virtual void setSourceModel(QAbstractItemModel *sourceModel) override;
+        virtual QVariant data(const QModelIndex &index, int role) const override;
+        virtual QHash<int, QByteArray> roleNames() const override;
 
     private:
-        bool m_ShowOnlySelected;
         const WarningsSettingsModel *m_WarningsSettingsModel;
+        std::vector<int> m_PendingUpdates;
+        bool m_ShowOnlySelected;
     };
 }
 
