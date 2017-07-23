@@ -82,6 +82,8 @@ namespace Models {
         Q_PROPERTY(bool autoCacheImages READ getAutoCacheImages WRITE setAutoCacheImages NOTIFY autoCacheImagesChanged)
         Q_PROPERTY(int artworkEditRightPaneWidth READ getArtworkEditRightPaneWidth WRITE setArtworkEditRightPaneWidth NOTIFY artworkEditRightPaneWidthChanged)
         Q_PROPERTY(bool verboseUpload READ getVerboseUpload WRITE setVerboseUpload NOTIFY verboseUploadChanged)
+        Q_PROPERTY(bool progressiveSuggestionPreviews READ getProgressiveSuggestionPreviews WRITE setProgressiveSuggestionPreviews NOTIFY progressiveSuggestionPreviewsChanged)
+        Q_PROPERTY(int progressiveSuggestionIncrement READ getProgressiveSuggestionIncrement WRITE setProgressiveSuggestionIncrement NOTIFY progressiveSuggestionIncrementChanged)
 
         Q_PROPERTY(QString appVersion READ getAppVersion CONSTANT)
 
@@ -136,6 +138,10 @@ namespace Models {
             m_SettingsJson.insert(QLatin1String(key), value);
         }
 
+        inline void setExperimentalValue(const char *key, const QJsonValue &value) {
+            m_ExperimentalJson.insert(QLatin1String(key), value);
+        }
+
         inline QJsonValue value(const char *key, const QJsonValue &defaultValue = QJsonValue()) const {
             QJsonValue value = m_SettingsJson.value(QLatin1String(key));
 
@@ -150,12 +156,20 @@ namespace Models {
             return m_SettingsJson.value(QLatin1String(key)).toBool(defaultValue);
         }
 
+        inline bool expBoolValue(const char *key, const bool defaultValue = false) const {
+            return m_ExperimentalJson.value(QLatin1String(key)).toBool(defaultValue);
+        }
+
         inline double doubleValue(const char *key, const double defaultValue = 0) const {
             return m_SettingsJson.value(QLatin1String(key)).toDouble(defaultValue);
         }
 
         inline int intValue(const char *key, const int defaultValue = 0) const {
             return m_SettingsJson.value(QLatin1String(key)).toInt(defaultValue);
+        }
+
+        inline int expIntValue(const char *key, const int defaultValue = 0) const {
+            return m_ExperimentalJson.value(QLatin1String(key)).toInt(defaultValue);
         }
 
         inline QString stringValue(const char *key, const QString defaultValue = QString("")) const {
@@ -347,6 +361,8 @@ namespace Models {
         int getArtworkEditRightPaneWidth() const { return m_ArtworkEditRightPaneWidth; }
         int getSelectedDictIndex() const { return m_SelectedDictIndex; }
         bool getVerboseUpload() const { return m_VerboseUpload; }
+        bool getProgressiveSuggestionPreviews() const { return m_ProgressiveSuggestionPreviews; }
+        int getProgressiveSuggestionIncrement() const { return m_ProgressiveSuggestionIncrement; }
 
     signals:
         void settingsReset();
@@ -384,7 +400,9 @@ namespace Models {
         void autoCacheImagesChanged(bool value);
         void artworkEditRightPaneWidthChanged(int value);
         void selectedDictIndexChanged(int value);        
-        void verboseUploadChanged(bool verboseUpload);
+        void verboseUploadChanged(bool verboseUpload);        
+        void progressiveSuggestionPreviewsChanged(bool progressiveSuggestionPreviews);
+        void progressiveSuggestionIncrementChanged(int progressiveSuggestionIncrement);
 
     public:
         void setExifToolPath(QString exifToolPath) {
@@ -603,7 +621,23 @@ namespace Models {
             emit verboseUploadChanged(verboseUpload);
         }
 
-    public:
+        void setProgressiveSuggestionPreviews(bool progressiveSuggestionPreviews)
+        {
+            if (m_ProgressiveSuggestionPreviews == progressiveSuggestionPreviews)
+                return;
+
+            m_ProgressiveSuggestionPreviews = progressiveSuggestionPreviews;
+            emit progressiveSuggestionPreviewsChanged(progressiveSuggestionPreviews);
+        }
+
+        void setProgressiveSuggestionIncrement(int progressiveSuggestionIncrement)
+        {
+            if (m_ProgressiveSuggestionIncrement == progressiveSuggestionIncrement)
+                return;
+
+            m_ProgressiveSuggestionIncrement = progressiveSuggestionIncrement;
+            emit progressiveSuggestionIncrementChanged(progressiveSuggestionIncrement);
+        }
 
 #ifndef INTEGRATION_TESTS
     private:
@@ -624,6 +658,7 @@ namespace Models {
         QMutex m_SettingsMutex;
         Helpers::LocalConfig m_Config;
         QJsonObject m_SettingsJson;
+        QJsonObject m_ExperimentalJson;
         QString m_ExifToolPath;
         QString m_DictPath;
         QString m_SelectedLocale;
@@ -654,6 +689,8 @@ namespace Models {
         ProxySettings m_ProxySettings;
         bool m_AutoCacheImages;
         bool m_VerboseUpload;
+        bool m_ProgressiveSuggestionPreviews;
+        int m_ProgressiveSuggestionIncrement;
     };
 }
 

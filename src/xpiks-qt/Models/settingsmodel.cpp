@@ -42,6 +42,8 @@
 #define SETTINGS_FILE "settings.json"
 #endif
 
+#define EXPERIMENTAL_KEY QLatin1String("experimental")
+
 #define CURRENT_SETTINGS_VERSION 1
 
 #define DEFAULT_DICT_PATH ""
@@ -74,13 +76,15 @@
 #define DEFAULT_PROXY_HOST ""
 #define DEFAULT_ARTWORK_EDIT_RIGHT_PANE_WIDTH 300
 #define DEFAULT_SELECTED_DICT_INDEX -1
+#define DEFAULT_PROGRESSIVE_SUGGESTION_PREVIEWS false
+#define DEFAULT_PROGRESSIVE_SUGGESTION_INCREMENT 10
 
 #ifndef INTEGRATION_TESTS
-#define DEFAULT_AUTO_CACHE_IMAGES true
-#define DEFAULT_VERBOSE_UPLOAD true
+    #define DEFAULT_AUTO_CACHE_IMAGES true
+    #define DEFAULT_VERBOSE_UPLOAD true
 #else
-#define DEFAULT_AUTO_CACHE_IMAGES false
-#define DEFAULT_VERBOSE_UPLOAD false
+    #define DEFAULT_AUTO_CACHE_IMAGES false
+    #define DEFAULT_VERBOSE_UPLOAD false
 #endif
 
 namespace Models {
@@ -114,7 +118,9 @@ namespace Models {
         m_UseExifTool(DEFAULT_USE_EXIFTOOL),
         m_UseProxy(DEFAULT_USE_PROXY),
         m_AutoCacheImages(DEFAULT_AUTO_CACHE_IMAGES),
-        m_VerboseUpload(DEFAULT_VERBOSE_UPLOAD)
+        m_VerboseUpload(DEFAULT_VERBOSE_UPLOAD),
+        m_ProgressiveSuggestionPreviews(DEFAULT_PROGRESSIVE_SUGGESTION_PREVIEWS),
+        m_ProgressiveSuggestionIncrement(DEFAULT_PROGRESSIVE_SUGGESTION_INCREMENT)
     {
     }
 
@@ -136,6 +142,13 @@ namespace Models {
         QJsonDocument &doc = m_Config.getConfig();
         if (doc.isObject()) {
             m_SettingsJson = doc.object();
+
+            if (m_SettingsJson.contains(EXPERIMENTAL_KEY)) {
+                QJsonValue experimental = m_SettingsJson[EXPERIMENTAL_KEY];
+                if (experimental.isObject()) {
+                    m_ExperimentalJson = experimental.toObject();
+                }
+            }
         } else {
             LOG_WARNING << "JSON document doesn't contain an object";
         }
@@ -247,6 +260,8 @@ namespace Models {
 
     void SettingsModel::sync() {
         LOG_DEBUG << "Syncing settings";
+
+        m_SettingsJson[EXPERIMENTAL_KEY] = m_ExperimentalJson;
 
         QJsonDocument doc;
         doc.setObject(m_SettingsJson);
@@ -471,6 +486,9 @@ namespace Models {
         setUseProxy(boolValue(useProxy, DEFAULT_USE_PROXY));
         setVerboseUpload(boolValue(verboseUpload, DEFAULT_VERBOSE_UPLOAD));
 
+        setProgressiveSuggestionPreviews(expBoolValue(progressiveSuggestionPreviews, DEFAULT_PROGRESSIVE_SUGGESTION_PREVIEWS));
+        setProgressiveSuggestionIncrement(expIntValue(progressiveSuggestionIncrement, DEFAULT_PROGRESSIVE_SUGGESTION_INCREMENT));
+
         deserializeProxyFromSettings(stringValue(proxyHost, DEFAULT_PROXY_HOST));
 
         setAutoCacheImages(boolValue(cacheImagesAutomatically, DEFAULT_AUTO_CACHE_IMAGES));
@@ -572,6 +590,9 @@ namespace Models {
         setSelectedDictIndex(DEFAULT_SELECTED_DICT_INDEX);
         setVerboseUpload(DEFAULT_VERBOSE_UPLOAD);
 
+        setProgressiveSuggestionPreviews(DEFAULT_PROGRESSIVE_SUGGESTION_PREVIEWS);
+        setProgressiveSuggestionIncrement(DEFAULT_PROGRESSIVE_SUGGESTION_INCREMENT);
+
 #if defined(QT_DEBUG)
         setValue(Constants::userConsent, DEFAULT_HAVE_USER_CONSENT);
         setValue(Constants::installedVersion, 0);
@@ -618,6 +639,9 @@ namespace Models {
         setValue(cacheImagesAutomatically, m_AutoCacheImages);
         setValue(artworkEditRightPaneWidth, m_ArtworkEditRightPaneWidth);
         setValue(verboseUpload, m_VerboseUpload);
+
+        setExperimentalValue(progressiveSuggestionPreviews, m_ProgressiveSuggestionPreviews);
+        setExperimentalValue(progressiveSuggestionIncrement, m_ProgressiveSuggestionIncrement);
 
         if (!m_MustUseMasterPassword) {
             setValue(masterPasswordHash, "");

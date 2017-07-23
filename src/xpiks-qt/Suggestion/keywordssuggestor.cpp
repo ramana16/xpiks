@@ -33,14 +33,9 @@
 #include "fotoliaqueryengine.h"
 #include "gettyqueryengine.h"
 #include "../Models/switchermodel.h"
+#include "../Models/settingsmodel.h"
 
 #define LINEAR_TIMER_INTERVAL 1000
-
-#ifdef QT_DEBUG
-    #define LOAD_PREVIEWS_ONCE 4
-#else
-    #define LOAD_PREVIEWS_ONCE 10
-#endif
 
 namespace Suggestion {
     KeywordsSuggestor::KeywordsSuggestor(LocalLibrary *library, QObject *parent):
@@ -103,8 +98,10 @@ namespace Suggestion {
         m_AllOtherKeywords.clearKeywords();
 
         Models::SwitcherModel *switcher = m_CommandManager->getSwitcherModel();
+        Models::SettingsModel *settingsModel = m_CommandManager->getSettingsModel();
         const bool sequentialLoading =
-                switcher->getProgressiveSuggestionPreviewsOn() &&
+                (switcher->getProgressiveSuggestionPreviewsOn() ||
+                 settingsModel->getProgressiveSuggestionPreviews()) &&
                 (!getIsLocalSearch());
         LOG_INFO << "With sequential loading:" << sequentialLoading;
 
@@ -195,8 +192,11 @@ namespace Suggestion {
         const int size = rowCount();
         if (m_LoadedPreviewsNumber >= size) { return; }
 
+        Models::SettingsModel *settingsModel = m_CommandManager->getSettingsModel();
+        const int increment = settingsModel->getProgressiveSuggestionIncrement();
+
         QModelIndex firstIndex = this->index(m_LoadedPreviewsNumber);
-        int nextIndex = m_LoadedPreviewsNumber + LOAD_PREVIEWS_ONCE;
+        int nextIndex = m_LoadedPreviewsNumber + increment;
         if (nextIndex > size/2) {
             nextIndex = size - 1;
         }
