@@ -194,7 +194,9 @@ SOURCES += main.cpp \
     restoresessiontest.cpp \
     ../../xpiks-qt/Conectivity/conectivityrequest.cpp \
     ../../xpiks-qt/Conectivity/requestsservice.cpp \
-    ../../xpiks-qt/Conectivity/requestsworker.cpp
+    ../../xpiks-qt/Conectivity/requestsworker.cpp \
+    ../../xpiks-qt/Models/switchermodel.cpp \
+    ../../xpiks-qt/Conectivity/switcherconfig.cpp
 
 RESOURCES +=
 
@@ -419,7 +421,9 @@ HEADERS += \
     restoresessiontest.h \
     ../../xpiks-qt/Conectivity/conectivityrequest.h \
     ../../xpiks-qt/Conectivity/requestsservice.h \
-    ../../xpiks-qt/Conectivity/requestsworker.h
+    ../../xpiks-qt/Conectivity/requestsworker.h \
+    ../../xpiks-qt/Models/switchermodel.h \
+    ../../xpiks-qt/Conectivity/switcherconfig.h
 
 INCLUDEPATH += ../../../vendors/tiny-aes
 INCLUDEPATH += ../../../vendors/cpp-libface
