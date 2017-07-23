@@ -24,7 +24,7 @@
 
 #include <QSortFilterProxyModel>
 #include <QStringList>
-#include <vector>
+#include <QVector>
 #include "../Common/baseentity.h"
 #include "../Models/artitemsmodel.h"
 
@@ -82,7 +82,7 @@ namespace Warnings {
 
     private:
         const WarningsSettingsModel *m_WarningsSettingsModel;
-        std::vector<int> m_PendingUpdates;
+        QVector<int> m_PendingUpdates;
         bool m_ShowOnlySelected;
     };
 }

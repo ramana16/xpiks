@@ -27,6 +27,7 @@
 #include "../Common/flags.h"
 #include "../Models/imageartwork.h"
 #include "../Common/basickeywordsmodel.h"
+#include "../Helpers/indiceshelper.h"
 #include "warningssettingsmodel.h"
 
 namespace Warnings {
@@ -169,9 +170,14 @@ namespace Warnings {
         QVector<int> roles;
         roles << WarningsRole;
 
-        for (auto &originalIndex: m_PendingUpdates) {
-            QModelIndex index = mapFromSource(sourceItemModel->index(originalIndex, 0));
-            emit dataChanged(index, index, roles);
+        QVector<QPair<int, int> > ranges;
+        qSort(m_PendingUpdates);
+        Helpers::indicesToRanges(m_PendingUpdates, ranges);
+
+        for (auto &r: ranges) {
+            QModelIndex indexFrom = mapFromSource(sourceItemModel->index(r.first, 0));
+            QModelIndex indexTo = mapFromSource(sourceItemModel->index(r.second, 0));
+            emit dataChanged(indexFrom, indexTo, roles);
         }
 
         m_PendingUpdates.clear();
