@@ -91,6 +91,7 @@ namespace Models {
         Q_INVOKABLE void updateAllItems();
         virtual bool removeUnavailableItems() override;
         void generateAboutToBeRemoved();
+        int getMinChangedItemsCountForReset() const { return getRangesLengthForReset(); }
 
     public:
         /*Q_INVOKABLE*/ void removeArtworksDirectory(int index);
@@ -173,6 +174,7 @@ namespace Models {
         void removeArtworks(const QVector<QPair<int, int> > &ranges);
         ArtworkMetadata *getArtwork(int index) const;
         void raiseArtworksAdded(int imagesCount, int vectorsCount);
+        void raiseArtworksChanged(bool navigateToCurrent);
         virtual void updateItemsAtIndices(const QVector<int> &indices);
         virtual void updateItemsInRanges(const QVector<QPair<int, int> > &ranges);
         void setAllItemsSelected(bool selected);

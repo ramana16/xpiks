@@ -906,6 +906,11 @@ namespace Models {
         LOG_INFO << imagesCount << "images" << vectorsCount << "vectors";
     }
 
+    void ArtItemsModel::raiseArtworksChanged(bool navigateToCurrent) {
+        emit artworksChanged(navigateToCurrent);
+        QCoreApplication::processEvents(QEventLoop::AllEvents);
+    }
+
     void ArtItemsModel::updateItemsAtIndices(const QVector<int> &indices) {
         QVector<int> sortedIndices(indices);
         qSort(sortedIndices);

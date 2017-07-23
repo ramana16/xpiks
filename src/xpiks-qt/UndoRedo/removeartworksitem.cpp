@@ -47,7 +47,7 @@ void UndoRedo::RemoveArtworksHistoryItem::undo(const Commands::ICommandManager *
     watchList.reserve(m_RemovedArtworksIndices.length());
 
     bool filesWereAccounted = artworksRepository->beginAccountingFiles(m_RemovedArtworksPathes);
-    bool willResetModel = m_RemovedArtworksPathes.length() > 50;
+    const bool willResetModel = m_RemovedArtworksPathes.length() > artItemsModel->getMinChangedItemsCountForReset();
 
     int usedCount = 0, attachedVectors = 0;
     int rangesCount = ranges.count();
@@ -82,8 +82,7 @@ void UndoRedo::RemoveArtworksHistoryItem::undo(const Commands::ICommandManager *
                     if (image != NULL) {
                         image->attachVector(vectorPath);
                         attachedVectors++;
-                    }
-                    else {
+                    } else {
                         LOG_WARNING << "Vector was attached not to an image!";
                     }
                 }
@@ -110,6 +109,10 @@ void UndoRedo::RemoveArtworksHistoryItem::undo(const Commands::ICommandManager *
 
     commandManager->readMetadata(artworksToImport, ranges);
     artItemsModel->raiseArtworksAdded(usedCount, attachedVectors);
+
+    if (!willResetModel) {
+        artItemsModel->raiseArtworksChanged(true);
+    }
 
     commandManager->saveSessionInBackground();
 }

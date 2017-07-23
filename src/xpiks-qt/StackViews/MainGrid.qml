@@ -432,7 +432,6 @@ ColumnLayout {
                             cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
                             onClicked: {
                                 undoRedoManager.undoLastAction()
-                                filteredArtItemsModel.updateFilter()
                             }
                         }
                     }

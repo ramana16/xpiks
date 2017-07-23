@@ -67,8 +67,7 @@ namespace Models {
 
         updateSearchFlags();
 
-        invalidateFilter();
-        emit afterInvalidateFilter();
+        updateFilter();
         forceUnselectAllItems();
     }
 
@@ -146,7 +145,6 @@ namespace Models {
         QVector<int> indices = getSelectedOriginalIndices();
         ArtItemsModel *artItemsModel = getArtItemsModel();
         artItemsModel->removeSelectedArtworks(indices);
-        updateFilter();
     }
 
     void FilteredArtItemsProxyModel::updateSelectedArtworks() {
