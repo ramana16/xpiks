@@ -8,13 +8,15 @@
 #include "../../xpiks-qt/Models/artworkproxymodel.h"
 #include "../../xpiks-qt/Models/combinedartworksmodel.h"
 #include "../../xpiks-qt/Models/uimanager.h"
+#include "../../xpiks-qt/Models/settingsmodel.h"
 
 #define DECLARE_MODELS_AND_GENERATE(count) \
     Mocks::CommandManagerMock commandManagerMock;\
     Mocks::ArtItemsModelMock artItemsModelMock;\
     Models::ArtworksRepository artworksRepository;\
     QuickBuffer::QuickBuffer quickBuffer;\
-    Models::UIManager uiManager;\
+    Models::SettingsModel settingsModel;\
+    Models::UIManager uiManager(&settingsModel);\
     Models::FilteredArtItemsProxyModel filteredItemsModel;\
     commandManagerMock.InjectDependency(&artworksRepository);\
     commandManagerMock.InjectDependency(&artItemsModelMock);\
