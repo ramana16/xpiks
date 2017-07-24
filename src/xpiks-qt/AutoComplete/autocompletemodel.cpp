@@ -32,13 +32,14 @@ namespace AutoComplete {
     {
     }
 
-    void AutoCompleteModel::setCompletions(const QStringList &completions) {
-        Q_ASSERT(!completions.isEmpty());
-        LOG_INFO << completions.length() << "completions";
-        m_LastGeneratedCompletions = completions;
+    void AutoCompleteModel::setCompletions(std::vector<std::shared_ptr<CompletionItem> > &completions) {
+        Q_ASSERT(!completions.empty());
+        LOG_INFO << completions.size() << "completions";
+        m_LastGeneratedCompletions = std::move(completions);
     }
 
     bool AutoCompleteModel::moveSelectionUp() {
+        LOG_INTEGR_TESTS_OR_DEBUG << "#";
         bool canMove = m_SelectedIndex > 0;
         if (canMove) {
             setSelectedIndex(m_SelectedIndex - 1);
@@ -47,7 +48,8 @@ namespace AutoComplete {
     }
 
     bool AutoCompleteModel::moveSelectionDown() {
-        bool canMove = m_SelectedIndex < m_CompletionList.length() - 1;
+        LOG_INTEGR_TESTS_OR_DEBUG << "#";
+        bool canMove = m_SelectedIndex < m_CompletionList.size() - 1;
         if (canMove) {
             setSelectedIndex(m_SelectedIndex + 1);
         }
@@ -57,8 +59,10 @@ namespace AutoComplete {
     void AutoCompleteModel::acceptSelected(bool tryExpandPreset) {
         LOG_DEBUG << "Selected index:" << m_SelectedIndex << "expand preset" << tryExpandPreset;
 
-        if (0 <= m_SelectedIndex && m_SelectedIndex < m_CompletionList.length()) {
-            emit completionAccepted(m_CompletionList.at(m_SelectedIndex), tryExpandPreset);
+        if (0 <= m_SelectedIndex && m_SelectedIndex < m_CompletionList.size()) {
+            auto &item = m_CompletionList.at(m_SelectedIndex);
+            auto &completion = item->getCompletion();
+            emit completionAccepted(completion, tryExpandPreset);
         }
 
         emit dismissPopupRequested();
@@ -68,15 +72,12 @@ namespace AutoComplete {
 
     void AutoCompleteModel::completionsArrived() {
         LOG_DEBUG << "Updating completions...";
+
         beginResetModel();
-
-        m_CompletionList.clear();
-        m_CompletionList.reserve(m_LastGeneratedCompletions.length());
-
-        foreach (const QString &item, m_LastGeneratedCompletions) {
-            m_CompletionList.append(item);
+        {
+            m_CompletionList.swap(m_LastGeneratedCompletions);
+            m_LastGeneratedCompletions.clear();
         }
-
         endResetModel();
 
         setSelectedIndex(-1);
@@ -89,15 +90,11 @@ namespace AutoComplete {
 
     QVariant AutoCompleteModel::data(const QModelIndex &index, int role) const {
         int row = index.row();
-        if (row < 0 || row >= m_CompletionList.length()) return QVariant();
-        if (role == Qt::DisplayRole) { return m_CompletionList.at(index.row()); }
-        else if (role == IsPresetRole) {
-            auto *presetsModel = m_CommandManager->getPresetsModel();
-            QString completion = m_CompletionList.at(index.row());
-            int dummy;
-            bool haveOnePreset = presetsModel->tryFindSinglePresetByName(completion, false, dummy);
-            return haveOnePreset;
-        }
+        if (row < 0 || row >= m_CompletionList.size()) return QVariant();
+
+        auto &item = m_CompletionList[row];
+        if (role == Qt::DisplayRole) { return item->getCompletion(); }
+        else if (role == IsPresetRole) { return item->isPreset(); }
         return QVariant();
     }
 

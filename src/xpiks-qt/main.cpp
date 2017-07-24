@@ -334,7 +334,7 @@ int main(int argc, char *argv[]) {
     warningsModel.setWarningsSettingsModel(warningsService.getWarningsSettingsModel());
     Models::LanguagesModel languagesModel;
     AutoComplete::AutoCompleteModel autoCompleteModel;
-    AutoComplete::AutoCompleteService autoCompleteService(&autoCompleteModel);
+    AutoComplete::AutoCompleteService autoCompleteService(&autoCompleteModel, &presetsModel);
     QMLExtensions::ImageCachingService imageCachingService;
     Models::FindAndReplaceModel replaceModel(&colorsModel);
     Models::DeleteKeywordsViewModel deleteKeywordsModel;

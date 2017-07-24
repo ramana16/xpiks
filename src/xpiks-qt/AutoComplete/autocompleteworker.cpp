@@ -28,16 +28,19 @@
 #include <string>
 #include <QStringList>
 #include "../Helpers/asynccoordinator.h"
+#include "../KeywordsPresets/ipresetsmanager.h"
 
 #define FREQUENCY_TABLE_FILENAME "en_wordlist.tsv"
 
 namespace AutoComplete {
-    AutoCompleteWorker::AutoCompleteWorker(Helpers::AsyncCoordinator *initCoordinator, QObject *parent) :
+    AutoCompleteWorker::AutoCompleteWorker(Helpers::AsyncCoordinator *initCoordinator, KeywordsPresets::IPresetsManager *presetsManager, QObject *parent) :
         QObject(parent),
         m_InitCoordinator(initCoordinator),
+        m_PresetsManager(presetsManager),
         m_Soufleur(NULL),
         m_CompletionsCount(8)
     {
+        Q_ASSERT(presetsManager != nullptr);
     }
 
     AutoCompleteWorker::~AutoCompleteWorker() {
@@ -104,24 +107,27 @@ namespace AutoComplete {
 
         vp_t completions = m_Soufleur->prompt(prefix.toStdString(), m_CompletionsCount);
 
-        QStringList completionsList;
+        std::vector<std::shared_ptr<CompletionItem> > completionsList;
         QSet<QString> completionsSet;
 
-        int size = (int)completions.size(), i = 0;
+        size_t size = completions.size(), i = 0;
         completions.reserve(size);
         completionsSet.reserve(size);
 
         for (; i < size; ++i) {
             const phrase_t &suggestion = completions[i];
-            QString phrase = QString::fromStdString(suggestion.phrase).trimmed();
+            const QString phrase = QString::fromStdString(suggestion.phrase).trimmed();
 
             if (!completionsSet.contains(phrase)) {
-                completionsList.append(phrase);
+                int dummy;
+                const bool haveOnePreset = m_PresetsManager->tryFindSinglePresetByName(phrase, false, dummy);
+
+                completionsList.emplace_back(new CompletionItem(phrase, haveOnePreset));
                 completionsSet.insert(phrase);
             }
         }
 
-        if (!completionsList.isEmpty()) {
+        if (!completionsList.empty()) {
             item->setCompletions(completionsList);
         }
     }

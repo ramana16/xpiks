@@ -28,12 +28,15 @@
 #include "../Helpers/asynccoordinator.h"
 
 namespace AutoComplete {
-    AutoCompleteService::AutoCompleteService(AutoCompleteModel *autoCompleteModel, QObject *parent):
+    AutoCompleteService::AutoCompleteService(AutoCompleteModel *autoCompleteModel, KeywordsPresets::IPresetsManager *presetsManager, QObject *parent):
         QObject(parent),
         m_AutoCompleteWorker(NULL),
         m_AutoCompleteModel(autoCompleteModel),
+        m_PresetsManager(presetsManager),
         m_RestartRequired(false)
     {
+        Q_ASSERT(autoCompleteModel != nullptr);
+        Q_ASSERT(presetsManager != nullptr);
     }
 
     AutoCompleteService::~AutoCompleteService() {
@@ -52,7 +55,7 @@ namespace AutoComplete {
         Helpers::AsyncCoordinatorLocker locker(coordinator);
         Q_UNUSED(locker);
 
-        m_AutoCompleteWorker = new AutoCompleteWorker(coordinator);
+        m_AutoCompleteWorker = new AutoCompleteWorker(coordinator, m_PresetsManager);
 
         QThread *thread = new QThread();
         m_AutoCompleteWorker->moveToThread(thread);

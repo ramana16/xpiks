@@ -31,6 +31,10 @@ namespace Helpers {
     class AsyncCoordinator;
 }
 
+namespace KeywordsPresets {
+    class IPresetsManager;
+}
+
 namespace AutoComplete {
     class AutoCompleteWorker :
             public QObject,
@@ -38,7 +42,7 @@ namespace AutoComplete {
     {
         Q_OBJECT
     public:
-        explicit AutoCompleteWorker(Helpers::AsyncCoordinator *initCoordinator, QObject *parent = 0);
+        explicit AutoCompleteWorker(Helpers::AsyncCoordinator *initCoordinator, KeywordsPresets::IPresetsManager *presetsManager, QObject *parent = 0);
         virtual ~AutoCompleteWorker();
 
     protected:
@@ -59,6 +63,7 @@ namespace AutoComplete {
 
     private:
         Helpers::AsyncCoordinator *m_InitCoordinator;
+        KeywordsPresets::IPresetsManager *m_PresetsManager;
         Souffleur *m_Soufleur;
         const int m_CompletionsCount;
     };

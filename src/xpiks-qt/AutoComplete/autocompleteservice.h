@@ -26,6 +26,10 @@
 #include <QString>
 #include "../Common/iservicebase.h"
 
+namespace KeywordsPresets {
+    class IPresetsManager;
+}
+
 namespace AutoComplete {
     class AutoCompleteWorker;
     class AutoCompleteModel;
@@ -36,7 +40,7 @@ namespace AutoComplete {
     {
         Q_OBJECT
     public:
-        AutoCompleteService(AutoCompleteModel *autoCompleteModel, QObject *parent = 0);
+        AutoCompleteService(AutoCompleteModel *autoCompleteModel, KeywordsPresets::IPresetsManager *presetsManager, QObject *parent = 0);
         virtual ~AutoCompleteService();
 
         virtual void startService(const std::shared_ptr<Common::ServiceStartParams> &params) override;
@@ -72,6 +76,7 @@ namespace AutoComplete {
     private:
         AutoCompleteWorker *m_AutoCompleteWorker;
         AutoCompleteModel *m_AutoCompleteModel;
+        KeywordsPresets::IPresetsManager *m_PresetsManager;
         volatile bool m_RestartRequired;
     };
 }

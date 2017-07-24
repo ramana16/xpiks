@@ -25,7 +25,10 @@
 #include <QObject>
 #include <QString>
 #include <QStringList>
+#include <vector>
+#include <memory>
 #include "autocompletemodel.h"
+#include "completionitem.h"
 #include "../Common/defines.h"
 
 namespace AutoComplete {
@@ -41,7 +44,7 @@ namespace AutoComplete {
 
         const QString &getPrefix() const { return m_Prefix; }
 
-        void setCompletions(const QStringList &completions) {
+        void setCompletions(std::vector<std::shared_ptr<CompletionItem> > &completions) {
             m_AutoCompleteModel->setCompletions(completions);
             emit completionsAvailable();
         }

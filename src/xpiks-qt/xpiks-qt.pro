@@ -372,7 +372,8 @@ HEADERS += \
     Conectivity/conectivityrequest.h \
     Conectivity/requestsworker.h \
     Conectivity/requestsservice.h \
-    Warnings/iwarningsitem.h
+    Warnings/iwarningsitem.h \
+    AutoComplete/completionitem.h
 
 DISTFILES += \
     Components/CloseIcon.qml \
