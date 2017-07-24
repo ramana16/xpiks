@@ -110,7 +110,7 @@ namespace AutoComplete {
     bool AutoCompleteModel::containsWord(const QString &word) const {
         bool contains = false;
         for (auto &item: m_CompletionList) {
-            if (item->getComplation() == word) {
+            if (item->getCompletion() == word) {
                 contains = true;
                 break;
             }

@@ -93,8 +93,8 @@ namespace AutoComplete {
         virtual QHash<int, QByteArray> roleNames() const override;
 
 #ifdef INTEGRATION_TESTS
-        bool containsWord(const QString &word) { return m_CompletionList.contains(word); }
-        const QStringList &getLastGeneratedCompletions() const { return m_LastGeneratedCompletions; }
+        bool containsWord(const QString &word) const;
+        QStringList getLastGeneratedCompletions() const;
 #endif
 
     private:
