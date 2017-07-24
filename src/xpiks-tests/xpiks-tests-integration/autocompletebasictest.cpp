@@ -76,5 +76,9 @@ int AutoCompleteBasicTest::doTest() {
     VERIFY(acModel->getCount() > 0, "AC model didn't receive the completions second time");
     VERIFY(acModel->containsWord("test"), "AC model has irrelevant results");
 
+    VERIFY(acModel->moveSelectionDown(), "AC model can't move selection down");
+    VERIFY(acModel->moveSelectionUp(), "AC model can't move selection back up");
+    VERIFY(!acModel->moveSelectionUp(), "AC model can move selection back up while being at a top");
+
     return 0;
 }
