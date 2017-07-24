@@ -459,7 +459,7 @@ int main(int argc, char *argv[]) {
     warningsModel.setSourceModel(&artItemsModel);
     Models::LanguagesModel languagesModel;
     AutoComplete::AutoCompleteModel autoCompleteModel;
-    AutoComplete::AutoCompleteService autoCompleteService(&autoCompleteModel);
+    AutoComplete::AutoCompleteService autoCompleteService(&autoCompleteModel, &presetsModel);
     QMLExtensions::ImageCachingService imageCachingService;
     Models::FindAndReplaceModel findAndReplaceModel(&colorsModel);
     Models::DeleteKeywordsViewModel deleteKeywordsModel;
