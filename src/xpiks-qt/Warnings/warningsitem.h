@@ -29,9 +29,15 @@
 #include "../Common/flags.h"
 #include "../Models/artworkmetadata.h"
 #include "../Common/defines.h"
+#include "iwarningsitem.h"
 
 namespace Warnings {
-    class WarningsItem {
+    class EmptyWarningsItem: public IWarningsItem {
+    public:
+        virtual void submitWarnings(Common::WarningFlags) override { /* BUMP */ }
+    };
+
+    class WarningsItem: public IWarningsItem {
     public:
         WarningsItem(Models::ArtworkMetadata *checkableItem, Common::WarningsCheckFlags checkingFlags = Common::WarningsCheckFlags::All):
             m_CheckableItem(checkableItem),
@@ -43,14 +49,14 @@ namespace Warnings {
             m_KeywordsSet = checkableItem->getKeywordsSet();
         }
 
-        ~WarningsItem() {
+        virtual ~WarningsItem() {
             if (m_CheckableItem->release()) {
                 LOG_WARNING << "Item #" << m_CheckableItem->getItemID() << "could have been removed";
             }
         }
 
     public:
-        void submitWarnings(Common::WarningFlags warningsFlags) {
+        virtual void submitWarnings(Common::WarningFlags warningsFlags) override {
             if (m_CheckingFlags == Common::WarningsCheckFlags::All) {
                 m_CheckableItem->setWarningsFlags(warningsFlags);
             } else {

@@ -24,13 +24,14 @@
 
 #include <QObject>
 #include "../Common/itemprocessingworker.h"
-#include "warningsitem.h"
+#include "iwarningsitem.h"
 
 namespace Warnings {
     class WarningsSettingsModel;
+    class WarningsItem;
 
     class WarningsCheckingWorker:
-        public QObject, public Common::ItemProcessingWorker<WarningsItem>
+        public QObject, public Common::ItemProcessingWorker<IWarningsItem>
     {
     Q_OBJECT
 
@@ -39,13 +40,14 @@ namespace Warnings {
 
     protected:
         virtual bool initWorker() override;
-        virtual void processOneItem(std::shared_ptr<WarningsItem> &item) override;
+        virtual void processOneItem(std::shared_ptr<IWarningsItem> &item) override;
 
     private:
+        void processWarningsItem(std::shared_ptr<WarningsItem> &item);
         void initValuesFromSettings();
 
     protected:
-        virtual void notifyQueueIsEmpty() override { emit queueIsEmpty(); }
+        virtual void notifyQueueIsEmpty() override { /* Notify only on batches */ /* emit queueIsEmpty(); */ }
         virtual void workerStopped() override { emit stopped(); }
 
     public slots:

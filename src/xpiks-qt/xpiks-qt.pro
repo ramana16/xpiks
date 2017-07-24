@@ -371,7 +371,8 @@ HEADERS += \
     Models/switchermodel.h \
     Conectivity/conectivityrequest.h \
     Conectivity/requestsworker.h \
-    Conectivity/requestsservice.h
+    Conectivity/requestsservice.h \
+    Warnings/iwarningsitem.h
 
 DISTFILES += \
     Components/CloseIcon.qml \

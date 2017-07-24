@@ -28,6 +28,7 @@
 #include "../Models/artworkmetadata.h"
 #include "../Models/imageartwork.h"
 #include "warningssettingsmodel.h"
+#include "warningsitem.h"
 
 namespace Warnings {
     QSet<QString> toLowerSet(const QStringList &from) {
@@ -52,7 +53,18 @@ namespace Warnings {
         return true;
     }
 
-    void WarningsCheckingWorker::processOneItem(std::shared_ptr<WarningsItem> &item) {
+    void WarningsCheckingWorker::processOneItem(std::shared_ptr<IWarningsItem> &item) {
+        std::shared_ptr<WarningsItem> warningItem = std::dynamic_pointer_cast<WarningsItem>(item);
+        std::shared_ptr<EmptyWarningsItem> emptyItem = std::dynamic_pointer_cast<EmptyWarningsItem>(item);
+
+        if (warningItem) {
+            processWarningsItem(warningItem);
+        } else if (emptyItem) {
+            emit queueIsEmpty();
+        }
+    }
+
+    void WarningsCheckingWorker::processWarningsItem(std::shared_ptr<WarningsItem> &item) {
         Common::WarningFlags warningsFlags = Common::WarningFlags::None;
 
         if (item->needCheckAll()) {

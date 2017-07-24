@@ -423,7 +423,8 @@ HEADERS += \
     ../../xpiks-qt/Conectivity/requestsservice.h \
     ../../xpiks-qt/Conectivity/requestsworker.h \
     ../../xpiks-qt/Models/switchermodel.h \
-    ../../xpiks-qt/Conectivity/switcherconfig.h
+    ../../xpiks-qt/Conectivity/switcherconfig.h \
+    ../../xpiks-qt/Warnings/iwarningsitem.h
 
 INCLUDEPATH += ../../../vendors/tiny-aes
 INCLUDEPATH += ../../../vendors/cpp-libface
