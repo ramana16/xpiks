@@ -72,7 +72,7 @@ namespace AutoComplete {
         Q_INVOKABLE void cancelCompletion() { setIsActive(false); emit dismissPopupRequested(); }
         Q_INVOKABLE void acceptSelected(bool tryExpandPreset=false);
         Q_INVOKABLE int getCount() const { return qMax(m_CompletionList.size(), m_LastGeneratedCompletions.size()); }
-        Q_INVOKABLE bool hasSelectedCompletion() const { return (0 <= m_SelectedIndex) && (m_SelectedIndex < m_CompletionList.size()); }
+        Q_INVOKABLE bool hasSelectedCompletion() const { return (0 <= m_SelectedIndex) && (m_SelectedIndex < rowCount()); }
 
     signals:
         void selectedIndexChanged(int index);
@@ -88,7 +88,7 @@ namespace AutoComplete {
 
         // QAbstractItemModel interface
     public:
-        virtual int rowCount(const QModelIndex &parent) const override { Q_UNUSED(parent); return (int)m_CompletionList.size(); }
+        virtual int rowCount(const QModelIndex &parent=QModelIndex()) const override { Q_UNUSED(parent); return (int)m_CompletionList.size(); }
         virtual QVariant data(const QModelIndex &index, int role) const override;
         virtual QHash<int, QByteArray> roleNames() const override;
 

@@ -112,7 +112,7 @@ namespace AutoComplete {
 
         size_t size = completions.size(), i = 0;
         completions.reserve(size);
-        completionsSet.reserve(size);
+        completionsSet.reserve((int)size);
 
         for (; i < size; ++i) {
             const phrase_t &suggestion = completions[i];

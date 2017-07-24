@@ -39,8 +39,8 @@ namespace AutoComplete {
     }
 
     bool AutoCompleteModel::moveSelectionUp() {
-        LOG_INTEGR_TESTS_OR_DEBUG << "#";
-        bool canMove = m_SelectedIndex > 0;
+        const bool canMove = m_SelectedIndex > 0;
+        LOG_INTEGR_TESTS_OR_DEBUG << "can move:" << canMove;
         if (canMove) {
             setSelectedIndex(m_SelectedIndex - 1);
         }
@@ -48,8 +48,9 @@ namespace AutoComplete {
     }
 
     bool AutoCompleteModel::moveSelectionDown() {
-        LOG_INTEGR_TESTS_OR_DEBUG << "#";
-        bool canMove = m_SelectedIndex < m_CompletionList.size() - 1;
+        const int size = (int)m_CompletionList.size();
+        const bool canMove = m_SelectedIndex < size - 1;
+        LOG_INTEGR_TESTS_OR_DEBUG << "can move:" << canMove;
         if (canMove) {
             setSelectedIndex(m_SelectedIndex + 1);
         }
@@ -58,8 +59,9 @@ namespace AutoComplete {
 
     void AutoCompleteModel::acceptSelected(bool tryExpandPreset) {
         LOG_DEBUG << "Selected index:" << m_SelectedIndex << "expand preset" << tryExpandPreset;
+        const int size = (int)m_CompletionList.size();
 
-        if (0 <= m_SelectedIndex && m_SelectedIndex < m_CompletionList.size()) {
+        if (0 <= m_SelectedIndex && m_SelectedIndex < size) {
             auto &item = m_CompletionList.at(m_SelectedIndex);
             auto &completion = item->getCompletion();
             emit completionAccepted(completion, tryExpandPreset);
@@ -90,7 +92,7 @@ namespace AutoComplete {
 
     QVariant AutoCompleteModel::data(const QModelIndex &index, int role) const {
         int row = index.row();
-        if (row < 0 || row >= m_CompletionList.size()) return QVariant();
+        if (row < 0 || row >= (int)m_CompletionList.size()) return QVariant();
 
         auto &item = m_CompletionList[row];
         if (role == Qt::DisplayRole) { return item->getCompletion(); }
