@@ -48,7 +48,7 @@ ColumnLayout {
     }
 
     StyledText {
-        text: i18.n + qsTr("Show your support by helping Xpiks today!")
+        text: i18.n + qsTr("Help us to make Xpiks even better.")
         anchors.horizontalCenter: parent.horizontalCenter
         isActive: true
     }
@@ -58,7 +58,7 @@ ColumnLayout {
     }
 
     StyledText {
-        text: i18.n + qsTr("Donate here")
+        text: i18.n + qsTr("Support Xpiks")
         anchors.horizontalCenter: parent.horizontalCenter
         color: donateMA.pressed ? Colors.linkClickedColor : Colors.goldColor
         font.bold: true
