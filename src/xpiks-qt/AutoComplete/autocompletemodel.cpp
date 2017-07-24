@@ -105,4 +105,26 @@ namespace AutoComplete {
         roles[IsPresetRole] = "ispreset";
         return roles;
     }
+
+#ifdef INTEGRATION_TESTS
+    bool AutoCompleteModel::containsWord(const QString &word) const {
+        bool contains = false;
+        for (auto &item: m_CompletionList) {
+            if (item->getComplation() == word) {
+                contains = true;
+                break;
+            }
+        }
+
+        return contains;
+    }
+
+    QStringList AutoCompleteModel::getLastGeneratedCompletions() const {
+        QStringList completions;
+        for (auto &item: m_LastGeneratedCompletions) {
+            completions.append(item->getCompletion());
+        }
+        return completions;
+    }
+#endif
 }
