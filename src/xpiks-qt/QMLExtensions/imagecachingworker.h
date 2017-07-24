@@ -58,7 +58,7 @@ namespace QMLExtensions {
         virtual void processOneItem(std::shared_ptr<ImageCacheRequest> &item) override;
 
     protected:
-        virtual void notifyQueueIsEmpty() override { emit queueIsEmpty(); }
+        virtual void onQueueIsEmpty() override { emit queueIsEmpty(); }
         virtual void workerStopped() override { saveIndex(); emit stopped(); }
 
     public slots:

@@ -110,7 +110,7 @@ namespace Suggestion {
             m_LoadedPreviewsNumber = increment;
             LOG_DEBUG << "Progressive increment is" << increment;
         } else {
-            m_LoadedPreviewsNumber = suggestedArtworks.size();
+            m_LoadedPreviewsNumber = (int)suggestedArtworks.size();
         }
 
         beginResetModel();

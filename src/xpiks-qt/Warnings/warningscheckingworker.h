@@ -47,7 +47,7 @@ namespace Warnings {
         void initValuesFromSettings();
 
     protected:
-        virtual void notifyQueueIsEmpty() override { /* Notify only on batches */ /* emit queueIsEmpty(); */ }
+        virtual void onQueueIsEmpty() override { /* Notify only on batches */ /* emit queueIsEmpty(); */ }
         virtual void workerStopped() override { emit stopped(); }
 
     public slots:

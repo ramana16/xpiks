@@ -43,7 +43,7 @@ namespace Conectivity {
         bool sendOneReport(const QString &resource, const QString &payload);
 
     protected:
-        virtual void notifyQueueIsEmpty() override { emit queueIsEmpty(); }
+        virtual void onQueueIsEmpty() override { emit queueIsEmpty(); }
         virtual void workerStopped() override { emit stopped(); }
 
     public slots:

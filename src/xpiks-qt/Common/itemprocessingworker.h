@@ -127,7 +127,7 @@ namespace Common {
             }
             m_QueueMutex.unlock();
 
-            notifyQueueIsEmpty();
+            onQueueIsEmpty();
         }
 
         bool hasPendingJobs() {
@@ -169,7 +169,7 @@ namespace Common {
     protected:
         virtual bool initWorker() = 0;
         virtual void processOneItem(std::shared_ptr<T> &item) = 0;
-        virtual void notifyQueueIsEmpty() = 0;
+        virtual void onQueueIsEmpty() = 0;
         virtual void workerStopped() = 0;
 
         void runWorkerLoop() {
@@ -207,7 +207,7 @@ namespace Common {
                 }
 
                 if (noMoreItems) {
-                    notifyQueueIsEmpty();
+                    onQueueIsEmpty();
                 }
             }
         }

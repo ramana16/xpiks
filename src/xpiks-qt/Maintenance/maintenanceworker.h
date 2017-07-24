@@ -35,7 +35,7 @@ namespace Maintenance {
     protected:
         virtual bool initWorker() override;
         virtual void processOneItem(std::shared_ptr<IMaintenanceItem> &item) override;
-        virtual void notifyQueueIsEmpty() override { emit queueIsEmpty(); }
+        virtual void onQueueIsEmpty() override { emit queueIsEmpty(); }
         virtual void workerStopped() override { emit stopped(); }
 
     public slots:

@@ -51,7 +51,7 @@ namespace Translation {
         virtual void processOneItem(std::shared_ptr<TranslationQuery> &item) override;
 
     protected:
-        virtual void notifyQueueIsEmpty() override { emit queueIsEmpty(); }
+        virtual void onQueueIsEmpty() override { emit queueIsEmpty(); }
         virtual void workerStopped() override { emit stopped(); }
 
     public slots:
