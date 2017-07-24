@@ -157,7 +157,7 @@ namespace Common {
     signals:
         void spellCheckResultsReady();
         void spellCheckErrorsChanged();
-        void completionsAvailable();
+        void completionsAvailable(int completionsCount);
         void aboutToBeRemoved();
         void afterSpellingErrorsFixed();
 

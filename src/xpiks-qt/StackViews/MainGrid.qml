@@ -646,7 +646,7 @@ ColumnLayout {
                                                                         currWordStartRect.x - 17,
                                                                         flv.editControl.height + 1)
 
-                                    var visibleItemsCount = Math.min(acSource.getCount(), 5);
+                                    var visibleItemsCount = Math.min(completionsCount, 5);
                                     var popupHeight = visibleItemsCount * (25 + 1) + 10
 
                                     var isBelow = (tmp.y + popupHeight) < directParent.height;

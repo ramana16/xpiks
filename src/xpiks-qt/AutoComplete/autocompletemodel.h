@@ -25,6 +25,7 @@
 #include <QAbstractListModel>
 #include <QVector>
 #include <QString>
+#include <QSet>
 #include <vector>
 #include <memory>
 #include "../Common/baseentity.h"
@@ -45,19 +46,15 @@ namespace AutoComplete {
         };
 
     public:
-        void setCompletions(std::vector<std::shared_ptr<CompletionItem> > &completions);
+        void setCompletions(const QStringList &completions);
+        void setPresetsMembership(const QSet<QString> &presetsMembership);
 
     public:
         int getSelectedIndex() const { return m_SelectedIndex; }
         bool getIsActive() const { return m_IsActive; }
 
     public:
-        void setSelectedIndex(int value) {
-            if (value != m_SelectedIndex) {
-                m_SelectedIndex = value;
-                emit selectedIndexChanged(value);
-            }
-        }
+        void setSelectedIndex(int value);
 
         void setIsActive(bool value) {
             if (value != m_IsActive) {
@@ -71,7 +68,7 @@ namespace AutoComplete {
         Q_INVOKABLE bool moveSelectionDown();
         Q_INVOKABLE void cancelCompletion() { setIsActive(false); emit dismissPopupRequested(); }
         Q_INVOKABLE void acceptSelected(bool tryExpandPreset=false);
-        Q_INVOKABLE int getCount() const { return qMax(m_CompletionList.size(), m_LastGeneratedCompletions.size()); }
+        Q_INVOKABLE int getCount() const { return (int)m_CompletionList.size(); }
         Q_INVOKABLE bool hasSelectedCompletion() const { return (0 <= m_SelectedIndex) && (m_SelectedIndex < rowCount()); }
 
     signals:
@@ -79,12 +76,14 @@ namespace AutoComplete {
         void dismissPopupRequested();
         void completionAccepted(const QString &completion, bool expandPreset);
         void isActiveChanged(bool value);
+        void completionsAvailable();
 #ifdef INTEGRATION_TESTS
         void completionsUpdated();
 #endif
 
     public slots:
         void completionsArrived();
+        void updatesArrived();
 
         // QAbstractItemModel interface
     public:
@@ -100,6 +99,7 @@ namespace AutoComplete {
     private:
         std::vector<std::shared_ptr<CompletionItem> > m_CompletionList;
         std::vector<std::shared_ptr<CompletionItem> > m_LastGeneratedCompletions;
+        QSet<QString> m_PresetsMembership;
         int m_SelectedIndex;
         bool m_IsActive;
     };

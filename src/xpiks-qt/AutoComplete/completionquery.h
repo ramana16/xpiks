@@ -23,10 +23,9 @@
 #define COMPLETIONQUERY_H
 
 #include <QObject>
+#include <QSet>
 #include <QString>
 #include <QStringList>
-#include <vector>
-#include <memory>
 #include "autocompletemodel.h"
 #include "completionitem.h"
 #include "../Common/defines.h"
@@ -37,24 +36,48 @@ namespace AutoComplete {
     public:
         CompletionQuery(const QString &prefix, AutoCompleteModel *autoCompleteModel) :
             m_Prefix(prefix),
-            m_AutoCompleteModel(autoCompleteModel)
+            m_AutoCompleteModel(autoCompleteModel),
+            m_NeedsUpdate(false)
         {
             Q_ASSERT(autoCompleteModel != nullptr);
         }
 
         const QString &getPrefix() const { return m_Prefix; }
+        const QStringList &getCompletions() const { return m_Completions; }
 
-        void setCompletions(std::vector<std::shared_ptr<CompletionItem> > &completions) {
+        void setCompletions(const QStringList &completions) {
+            m_Completions = completions;
             m_AutoCompleteModel->setCompletions(completions);
-            emit completionsAvailable();
+            emit completionsAvailable(completions.size());
+        }
+
+        void propagateUpdates() {
+            m_AutoCompleteModel->setPresetsMembership(m_PresetsSet);
+            emit updatesAvailable();
+        }
+
+        void setNeedsUpdate() { m_NeedsUpdate = true; }
+        bool getNeedsUpdate() const { return m_NeedsUpdate; }
+
+        void setIsPreset(const QString &completion) {
+            m_PresetsSet.insert(completion);
+        }
+
+        bool getIsPreset(const QString &completion) {
+            bool isPreset = m_PresetsSet.contains(completion);
+            return isPreset;
         }
 
     signals:
-        void completionsAvailable();
+        void completionsAvailable(int completionsCount);
+        void updatesAvailable();
 
     private:
         QString m_Prefix;
+        QStringList m_Completions;
+        QSet<QString> m_PresetsSet;
         AutoCompleteModel *m_AutoCompleteModel;
+        volatile bool m_NeedsUpdate;
     };
 }
 

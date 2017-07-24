@@ -103,11 +103,20 @@ namespace AutoComplete {
     }
 
     void AutoCompleteWorker::processOneItem(std::shared_ptr<CompletionQuery> &item) {
+        if (!item->getNeedsUpdate()) {
+            generateCompletions(item);
+        } else {
+            updateCompletions(item);
+        }
+    }
+
+    void AutoCompleteWorker::generateCompletions(std::shared_ptr<CompletionQuery> &item) {
+        LOG_INTEGR_TESTS_OR_DEBUG << item->getPrefix();
         const QString &prefix = item->getPrefix();
 
         vp_t completions = m_Soufleur->prompt(prefix.toStdString(), m_CompletionsCount);
 
-        std::vector<std::shared_ptr<CompletionItem> > completionsList;
+        QStringList completionsList;
         QSet<QString> completionsSet;
 
         size_t size = completions.size(), i = 0;
@@ -119,16 +128,40 @@ namespace AutoComplete {
             const QString phrase = QString::fromStdString(suggestion.phrase).trimmed();
 
             if (!completionsSet.contains(phrase)) {
-                int dummy;
-                const bool haveOnePreset = m_PresetsManager->tryFindSinglePresetByName(phrase, false, dummy);
-
-                completionsList.emplace_back(new CompletionItem(phrase, haveOnePreset));
+                completionsList.append(phrase);
                 completionsSet.insert(phrase);
             }
         }
 
         if (!completionsList.empty()) {
             item->setCompletions(completionsList);
+
+            item->setNeedsUpdate();
+            this->submitFirst(item);
+        }
+    }
+
+    void AutoCompleteWorker::updateCompletions(std::shared_ptr<CompletionQuery> &item) {
+        LOG_INTEGR_TESTS_OR_DEBUG << item->getPrefix();
+        Q_ASSERT(m_PresetsManager != nullptr);
+
+        bool anyChanges = false;
+        auto &completionsList = item->getCompletions();
+        int dummy;
+
+        LOG_INTEGR_TESTS_OR_DEBUG << "Updating" << completionsList.size() << "items";
+
+        for (auto &completion: completionsList) {
+            const bool haveOnePreset = m_PresetsManager->tryFindSinglePresetByName(completion, false, dummy);
+            if (haveOnePreset) {
+                item->setIsPreset(completion);
+                anyChanges = true;
+            }
+        }
+
+        if (anyChanges) {
+            LOG_INTEGR_TESTS_OR_DEBUG << "Propagating update to the model";
+            item->propagateUpdates();
         }
     }
 }

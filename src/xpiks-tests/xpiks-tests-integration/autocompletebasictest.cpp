@@ -77,6 +77,8 @@ int AutoCompleteBasicTest::doTest() {
     VERIFY(acModel->containsWord("test"), "AC model has irrelevant results");
 
     VERIFY(acModel->moveSelectionDown(), "AC model can't move selection down");
+    // in the beginning the selection index is -1
+    VERIFY(acModel->moveSelectionDown(), "AC model can't move selection down");
     VERIFY(acModel->moveSelectionUp(), "AC model can't move selection back up");
     VERIFY(!acModel->moveSelectionUp(), "AC model can move selection back up while being at a top");
 

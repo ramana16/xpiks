@@ -27,18 +27,19 @@
 namespace AutoComplete {
     class CompletionItem {
     public:
-        CompletionItem(const QString &completion, bool isPreset):
+        CompletionItem(const QString &completion):
             m_Completion(completion),
-            m_IsPreset(isPreset)
+            m_IsPreset(false)
         {}
 
     public:
         const QString &getCompletion() const { return m_Completion; }
         bool isPreset() const { return m_IsPreset; }
+        void setIsPreset() { m_IsPreset = true; }
 
     private:
         QString m_Completion;
-        bool m_IsPreset;
+        volatile bool m_IsPreset;
     };
 }
 
