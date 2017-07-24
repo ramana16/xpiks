@@ -404,6 +404,11 @@ void Commands::CommandManager::connectEntitiesSignalsSlots() const {
         QObject::connect(m_PresetsModelConfig, &KeywordsPresets::PresetKeywordsModelConfig::presetsUpdated,
                          m_PresetsModel, &KeywordsPresets::PresetKeywordsModel::onPresetsUpdated);
     }
+
+    if (m_WarningsModel != NULL && m_WarningsService != NULL) {
+        QObject::connect(m_WarningsService, &Warnings::WarningsService::queueIsEmpty,
+                         m_WarningsModel, &Warnings::WarningsModel::onWarningsUpdateRequired);
+    }
 #endif
 
     if (m_SpellCheckerService != NULL && m_ArtItemsModel != NULL) {
@@ -435,11 +440,6 @@ void Commands::CommandManager::connectEntitiesSignalsSlots() const {
     if (m_WarningsModel != NULL && m_ArtworkProxyModel != NULL) {
         QObject::connect(m_ArtworkProxyModel, &Models::ArtworkProxyModel::warningsCouldHaveChanged,
                          m_WarningsModel, &Warnings::WarningsModel::onWarningsCouldHaveChanged);
-    }
-
-    if (m_WarningsModel != NULL && m_WarningsService != NULL) {
-        QObject::connect(m_WarningsService, &Warnings::WarningsService::queueIsEmpty,
-                         m_WarningsModel, &Warnings::WarningsModel::onWarningsUpdateRequired);
     }
 
     if (m_SpellCheckerService != NULL && m_QuickBuffer != NULL) {
