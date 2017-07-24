@@ -93,7 +93,9 @@ namespace SpellCheck {
         void processChangeUserDict(std::shared_ptr<ModifyUserDictItem> &item);
 
     protected:
-        virtual void notifyQueueIsEmpty() override { emit queueIsEmpty(); }
+        virtual void notifyQueueIsEmpty() override {
+            /* Notify on emptiness only for batches with separator */
+            /* emit queueIsEmpty(); */ }
         virtual void workerStopped() override { emit stopped(); }
 
     public slots:
