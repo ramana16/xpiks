@@ -384,7 +384,7 @@ CloseRequested")
                                 objectName: "keywordsInput"
                                 anchors.fill: parent
                                 model: keywordsToDeleteWrapper.keywordsModel
-                                property int keywordHeight: 20 * settingsModel.keywordSizeScale + (settingsModel.keywordSizeScale - 1)*10
+                                property int keywordHeight: uiManager.keywordHeight
                                 scrollStep: keywordHeight
 
                                 delegate: KeywordWrapper {
@@ -510,7 +510,7 @@ CloseRequested")
                                 objectName: "keywordsInput"
                                 anchors.fill: parent
                                 model: commonKeywordsWrapper.keywordsModel
-                                property int keywordHeight: 20 * settingsModel.keywordSizeScale + (settingsModel.keywordSizeScale - 1)*10
+                                property int keywordHeight: uiManager.keywordHeight
                                 scrollStep: keywordHeight
                                 editEnabled: false
 

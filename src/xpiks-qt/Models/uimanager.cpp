@@ -24,12 +24,17 @@
 #include "../QuickBuffer/currenteditableartwork.h"
 #include "../QuickBuffer/currenteditableproxyartwork.h"
 #include "artworkmetadata.h"
+#include "../Models/settingsmodel.h"
 
 namespace Models {
-    UIManager::UIManager(QObject *parent) :
+    UIManager::UIManager(SettingsModel *settingsModel, QObject *parent) :
         QObject(parent),
+        m_SettingsModel(settingsModel),
         m_TabID(42)
     {
+        Q_ASSERT(settingsModel != nullptr);
+        QObject::connect(m_SettingsModel, &Models::SettingsModel::keywordSizeScaleChanged, this, &UIManager::keywordHeightChanged);
+
         m_ActiveTabs.setSourceModel(&m_TabsModel);
         m_InactiveTabs.setSourceModel(&m_TabsModel);
 
@@ -40,6 +45,12 @@ namespace Models {
         QObject::connect(&m_TabsModel, &QMLExtensions::TabsModel::cacheRebuilt, &m_InactiveTabs, &QMLExtensions::InactiveTabsModel::onInvalidateRequired);
 
         QObject::connect(&m_InactiveTabs, &QMLExtensions::InactiveTabsModel::tabOpened, &m_ActiveTabs, &QMLExtensions::ActiveTabsModel::onInactiveTabOpened);
+    }
+
+    double UIManager::getKeywordHeight() const {
+        double keywordScale = m_SettingsModel->getKeywordSizeScale();
+        double height = 20.0 * keywordScale + (keywordScale - 1.0) * 10.0;
+        return height;
     }
 
     void UIManager::registerCurrentItem(std::shared_ptr<QuickBuffer::ICurrentEditable> &currentItem) {

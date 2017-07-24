@@ -35,13 +35,15 @@
 namespace Models {
     class ArtworkMetadata;
     class ArtworkProxyBase;
+    class SettingsModel;
 
     class UIManager: public QObject
     {
         Q_OBJECT
         Q_PROPERTY(bool hasCurrentEditable READ getHasCurrentEditable NOTIFY currentEditableChanged)
+        Q_PROPERTY(double keywordHeight READ getKeywordHeight NOTIFY keywordHeightChanged)
     public:
-        explicit UIManager(QObject *parent = 0);
+        explicit UIManager(Models::SettingsModel *settingsModel, QObject *parent = 0);
 
     private:
         int generateNextTabID() { int id = m_TabID++; return id; }
@@ -49,6 +51,7 @@ namespace Models {
     public:
         void initTabs();
         bool getHasCurrentEditable() const { return m_CurrentEditable.operator bool(); }
+        double getKeywordHeight() const;
         std::shared_ptr<QuickBuffer::ICurrentEditable> getCurrentEditable() const { return m_CurrentEditable; }
 
     public:
@@ -71,8 +74,10 @@ namespace Models {
         void tabsListChanged();
         void tabsIconsChanged();
         void currentEditableChanged();
+        void keywordHeightChanged(double value);
 
     private:
+        Models::SettingsModel *m_SettingsModel;
         QMLExtensions::TabsModel m_TabsModel;
         QMLExtensions::ActiveTabsModel m_ActiveTabs;
         QMLExtensions::InactiveTabsModel m_InactiveTabs;

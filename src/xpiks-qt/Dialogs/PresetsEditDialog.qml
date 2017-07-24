@@ -404,7 +404,7 @@ Item {
                             anchors.fill: parent
                             enabled: presetNamesListView.currentIndex >= 0
                             model: presetsModel.getKeywordsModel(presetNamesListView.currentIndex)
-                            property int keywordHeight: 20 * settingsModel.keywordSizeScale + (settingsModel.keywordSizeScale - 1)*10
+                            property int keywordHeight: uiManager.keywordHeight
                             scrollStep: keywordHeight
 
                             delegate: KeywordWrapper {

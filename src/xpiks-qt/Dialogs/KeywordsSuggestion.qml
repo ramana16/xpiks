@@ -445,7 +445,7 @@ Item {
                             id: suggestedFlv
                             anchors.fill: parent
                             model: keywordsSuggestor.getSuggestedKeywordsModel()
-                            property int keywordHeight: 20 * settingsModel.keywordSizeScale + (settingsModel.keywordSizeScale - 1)*10
+                            property int keywordHeight: uiManager.keywordHeight
                             scrollStep: keywordHeight
                             editEnabled: false
 
@@ -544,7 +544,7 @@ Item {
                             id: otherFlv
                             anchors.fill: parent
                             model: keywordsSuggestor.getAllOtherKeywordsModel()
-                            property int keywordHeight: 20 * settingsModel.keywordSizeScale + (settingsModel.keywordSizeScale - 1)*10
+                            property int keywordHeight: uiManager.keywordHeight
                             scrollStep: keywordHeight
                             editEnabled: false
 

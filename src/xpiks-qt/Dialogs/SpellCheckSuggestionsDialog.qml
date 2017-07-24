@@ -226,7 +226,7 @@ Item {
 
                                             delegate: SuggestionWrapper {
                                                 property int suggestionIndex: index
-                                                itemHeight: 20 * settingsModel.keywordSizeScale + (settingsModel.keywordSizeScale - 1)*10
+                                                itemHeight: uiManager.keywordHeight
                                                 suggestionText: suggestion
                                                 isSelected: isselected
                                                 onActionClicked: editreplacementindex = suggestionIndex

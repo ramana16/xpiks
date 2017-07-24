@@ -1156,7 +1156,7 @@ ColumnLayout {
                                                 id: flv
                                                 model: rowWrapper.keywordsModel
                                                 anchors.fill: parent
-                                                property int keywordHeight: 20 * settingsModel.keywordSizeScale + (settingsModel.keywordSizeScale - 1)*10
+                                                property int keywordHeight: uiManager.keywordHeight
                                                 scrollStep: keywordHeight
                                                 stealWheel: false
                                                 focus: true

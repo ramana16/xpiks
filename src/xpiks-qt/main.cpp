@@ -341,7 +341,7 @@ int main(int argc, char *argv[]) {
     Models::ArtworkProxyModel artworkProxyModel;
     Translation::TranslationManager translationManager;
     Translation::TranslationService translationService(translationManager);
-    Models::UIManager uiManager;
+    Models::UIManager uiManager(&settingsModel);
     Models::SessionManager sessionManager;
     sessionManager.initialize();
     QuickBuffer::QuickBuffer quickBuffer;

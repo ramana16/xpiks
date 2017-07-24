@@ -84,7 +84,7 @@ Rectangle {
         }
 
         Item {
-            height: 20 * settingsModel.keywordSizeScale + (settingsModel.keywordSizeScale - 1)*10
+            height: uiManager.keywordHeight
             width: height
 
             CloseIcon {

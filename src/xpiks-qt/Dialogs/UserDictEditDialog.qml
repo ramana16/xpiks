@@ -166,7 +166,7 @@ Item {
                         objectName: "keywordsInput"
                         anchors.fill: parent
                         model: keywordsWrapper.keywordsModel
-                        property int keywordHeight: 20 * settingsModel.keywordSizeScale + (settingsModel.keywordSizeScale - 1)*10
+                        property int keywordHeight: uiManager.keywordHeight
                         populateAnimationEnabled: false
                         scrollStep: keywordHeight
 

@@ -808,7 +808,7 @@ Rectangle {
                                 id: flv
                                 anchors.fill: parent
                                 model: artworkEditComponent.keywordsModel
-                                property int keywordHeight: 20 * settingsModel.keywordSizeScale + (settingsModel.keywordSizeScale - 1)*10
+                                property int keywordHeight: uiManager.keywordHeight
                                 scrollStep: keywordHeight
                                 populateAnimationEnabled: false
 
