@@ -23,6 +23,7 @@
 #define AUTOCOMPLETEMODEL_H
 
 #include <QAbstractListModel>
+#include <QMutex>
 #include <QVector>
 #include <QString>
 #include <QSet>
@@ -64,6 +65,7 @@ namespace AutoComplete {
         }
 
     public:
+        Q_INVOKABLE void sync();
         Q_INVOKABLE bool moveSelectionUp();
         Q_INVOKABLE bool moveSelectionDown();
         Q_INVOKABLE void cancelCompletion() { setIsActive(false); emit dismissPopupRequested(); }
@@ -77,13 +79,9 @@ namespace AutoComplete {
         void completionAccepted(const QString &completion, bool expandPreset);
         void isActiveChanged(bool value);
         void completionsAvailable();
-#ifdef INTEGRATION_TESTS
-        void completionsUpdated();
-#endif
 
     public slots:
-        void completionsArrived();
-        void updatesArrived();
+        void onUpdatesArrived();
 
         // QAbstractItemModel interface
     public:
@@ -93,10 +91,11 @@ namespace AutoComplete {
 
 #ifdef INTEGRATION_TESTS
         bool containsWord(const QString &word) const;
-        QStringList getLastGeneratedCompletions() const;
+        QStringList getLastGeneratedCompletions();
 #endif
 
     private:
+        QMutex m_Mutex;
         std::vector<std::shared_ptr<CompletionItem> > m_CompletionList;
         std::vector<std::shared_ptr<CompletionItem> > m_LastGeneratedCompletions;
         QSet<QString> m_PresetsMembership;

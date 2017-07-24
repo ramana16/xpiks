@@ -42,13 +42,13 @@ int AutoCompleteBasicTest::doTest() {
     VERIFY(!ioCoordinator->getHasErrors(), "Errors in IO Coordinator while reading");
 
     Models::ArtworkMetadata *metadata = artItemsModel->getArtwork(0);
+    Common::BasicMetadataModel *basicModel = metadata->getBasicModel();
 
     AutoComplete::AutoCompleteService *acService = m_CommandManager->getAutoCompleteService();
     AutoComplete::AutoCompleteModel *acModel = acService->getAutoCompleteModel();
 
     SignalWaiter completionWaiter;
-    QObject::connect(acModel, SIGNAL(completionsUpdated()), &completionWaiter, SIGNAL(finished()));
-
+    QObject::connect(basicModel, SIGNAL(completionsAvailable()), &completionWaiter, SIGNAL(finished()));
 
     VERIFY(acModel->getCount() == 0, "AC model was not empty");
 
@@ -57,6 +57,8 @@ int AutoCompleteBasicTest::doTest() {
     if (!completionWaiter.wait(10)) {
         VERIFY(false, "Timeout while waiting for the completion");
     }
+
+    acModel->sync();
 
     qInfo() << "Generated" << acModel->getCount() << "completions";
     qInfo() << "Completions:" << acModel->getLastGeneratedCompletions();
@@ -69,6 +71,8 @@ int AutoCompleteBasicTest::doTest() {
     if (!completionWaiter.wait(10)) {
         VERIFY(false, "Timeout while waiting for the completion");
     }
+
+    acModel->sync();
 
     qInfo() << "Generated" << acModel->getCount() << "completions";
     qInfo() << "Completions:" << acModel->getLastGeneratedCompletions();

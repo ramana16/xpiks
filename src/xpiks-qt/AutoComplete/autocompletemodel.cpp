@@ -37,6 +37,9 @@ namespace AutoComplete {
         LOG_INFO << completions.size() << "completions";
         LOG_INTEGR_TESTS_OR_DEBUG << completions;
 
+        QMutexLocker locker(&m_Mutex);
+        Q_UNUSED(locker);
+
         m_LastGeneratedCompletions.clear();
         m_LastGeneratedCompletions.reserve(completions.size());
 
@@ -56,6 +59,26 @@ namespace AutoComplete {
             m_SelectedIndex = value;
             emit selectedIndexChanged(value);
         }
+    }
+
+    void AutoCompleteModel::sync() {
+        LOG_DEBUG << "Setting completions...";
+
+        {
+            QMutexLocker locker(&m_Mutex);
+            Q_UNUSED(locker);
+
+            beginResetModel();
+            {
+                m_CompletionList.swap(m_LastGeneratedCompletions);
+            }
+            endResetModel();
+
+            m_LastGeneratedCompletions.clear();
+        }
+
+        setSelectedIndex(-1);
+        setIsActive(true);
     }
 
     bool AutoCompleteModel::moveSelectionUp() {
@@ -92,27 +115,7 @@ namespace AutoComplete {
         setIsActive(false);
     }
 
-    void AutoCompleteModel::completionsArrived() {
-        LOG_DEBUG << "Setting completions...";
-
-        beginResetModel();
-        {
-            m_CompletionList.swap(m_LastGeneratedCompletions);
-            m_LastGeneratedCompletions.clear();
-        }
-        endResetModel();
-
-        setSelectedIndex(-1);
-        setIsActive(true);
-
-        emit completionsAvailable();
-
-#ifdef INTEGRATION_TESTS
-        emit completionsUpdated();
-#endif
-    }
-
-    void AutoCompleteModel::updatesArrived() {
+    void AutoCompleteModel::onUpdatesArrived() {
         LOG_DEBUG << "Updating completions...";
         bool anyChange = false;
 
@@ -161,7 +164,7 @@ namespace AutoComplete {
         return contains;
     }
 
-    QStringList AutoCompleteModel::getLastGeneratedCompletions() const { return m_LastGeneratedCompletions; }
+    QStringList AutoCompleteModel::getLastGeneratedCompletions() {
         QStringList completions;
         for (auto &item: m_CompletionList) {
             completions.append(item->getCompletion());

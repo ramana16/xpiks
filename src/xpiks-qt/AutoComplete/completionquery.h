@@ -48,7 +48,7 @@ namespace AutoComplete {
         void setCompletions(const QStringList &completions) {
             m_Completions = completions;
             m_AutoCompleteModel->setCompletions(completions);
-            emit completionsAvailable(completions.size());
+            emit completionsAvailable();
         }
 
         void propagateUpdates() {
@@ -69,7 +69,7 @@ namespace AutoComplete {
         }
 
     signals:
-        void completionsAvailable(int completionsCount);
+        void completionsAvailable();
         void updatesAvailable();
 
     private:

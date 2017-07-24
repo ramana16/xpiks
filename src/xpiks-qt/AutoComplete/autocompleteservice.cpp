@@ -134,8 +134,7 @@ namespace AutoComplete {
         Q_ASSERT(basicKeywordsModel != NULL);
 
         QObject::connect(query.get(), &CompletionQuery::completionsAvailable, basicKeywordsModel, &Common::BasicKeywordsModel::completionsAvailable);
-        QObject::connect(query.get(), &CompletionQuery::completionsAvailable, m_AutoCompleteModel, &AutoCompleteModel::completionsArrived);
-        QObject::connect(query.get(), &CompletionQuery::updatesAvailable, m_AutoCompleteModel, &AutoCompleteModel::updatesArrived);
+        QObject::connect(query.get(), &CompletionQuery::updatesAvailable, m_AutoCompleteModel, &AutoCompleteModel::onUpdatesArrived);
 
         m_AutoCompleteWorker->submitItem(query);
     }
