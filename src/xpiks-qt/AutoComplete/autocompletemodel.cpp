@@ -121,7 +121,7 @@ namespace AutoComplete {
 
     QStringList AutoCompleteModel::getLastGeneratedCompletions() const {
         QStringList completions;
-        for (auto &item: m_LastGeneratedCompletions) {
+        for (auto &item: m_CompletionList) {
             completions.append(item->getCompletion());
         }
         return completions;
