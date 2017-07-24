@@ -170,7 +170,7 @@ ColumnLayout {
         height: 30
         anchors.left: parent.left
         anchors.right: parent.right
-        text: i18.n + qsTr("Donate")
+        text: i18.n + qsTr("Support Xpiks")
         defaultForeground: Colors.goldColor
         hoverForeground: Colors.buttonDefaultForeground
         visible: {
