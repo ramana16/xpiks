@@ -184,12 +184,12 @@ Rectangle {
     Connections {
         target: combinedArtworks
         onCompletionsAvailable: {
+            acSource.sync()
+
             if (typeof combinedEditComponent.autoCompleteBox !== "undefined") {
                 // update completion
                 return
             }
-
-            acSource.sync()
 
             var directParent = combinedEditComponent;
             var currWordStartRect = flv.editControl.getCurrentWordStartRect()

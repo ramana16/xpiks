@@ -241,13 +241,13 @@ Rectangle {
     Connections {
         target: artworkProxy
 
-        onCompletionsAvailable: {
+        onCompletionsAvailable: {            
+            acSource.sync()
+
             if (typeof artworkEditComponent.autoCompleteBox !== "undefined") {
                 // update completion
                 return
             }
-
-            acSource.sync()
 
             var directParent = artworkEditComponent;
             var currWordStartRect = flv.editControl.getCurrentWordStartRect()

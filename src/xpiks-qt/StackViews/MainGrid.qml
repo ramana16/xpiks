@@ -633,13 +633,13 @@ ColumnLayout {
                                     }
                                 }
 
-                                onCompletionsAvailable: {
+                                onCompletionsAvailable: {                                    
+                                    acSource.sync()
+
                                     if (typeof workflowHost.autoCompleteBox !== "undefined") {
                                         // update completion
                                         return
                                     }
-
-                                    acSource.sync()
 
                                     var directParent = mainScrollView;
                                     var currWordStartRect = flv.editControl.getCurrentWordStartRect()
