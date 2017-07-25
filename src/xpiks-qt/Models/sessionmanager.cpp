@@ -43,7 +43,8 @@
 
 namespace Models {
     SessionManager::SessionManager():
-        QObject()
+        QObject(),
+        m_CanRestore(false)
     {
     }
 
@@ -61,7 +62,17 @@ namespace Models {
         m_Config.setPath(m_LocalConfigPath);
     }
 
+    void SessionManager::onBeforeRestore() {
+        LOG_DEBUG << "#";
+        m_CanRestore = true;
+    }
+
     void SessionManager::saveToFile(std::vector<std::shared_ptr<MetadataIO::ArtworkSessionSnapshot> > &snapshot) {
+        if (!m_CanRestore) {
+            LOG_INFO << "Session hasn't been initialized yet. Exiting...";
+            return;
+        }
+
         LOG_INFO << snapshot.size() << "artwork(s)";
 
         QJsonArray filesList;

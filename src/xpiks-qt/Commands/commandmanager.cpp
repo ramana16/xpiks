@@ -992,7 +992,9 @@ void Commands::CommandManager::readSession() {
 int Commands::CommandManager::restoreReadSession() {
     LOG_DEBUG << "#";
 
-    if (!m_SettingsModel->getSaveSession()) {
+    m_SessionManager->onBeforeRestore();
+
+    if (!m_SettingsModel || !m_SettingsModel->getSaveSession()) {
         return 0;
     }
 

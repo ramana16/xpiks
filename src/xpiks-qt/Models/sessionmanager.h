@@ -46,6 +46,7 @@ namespace Models {
 
     public:
         void initialize();
+        void onBeforeRestore();
         void saveToFile(std::vector<std::shared_ptr<MetadataIO::ArtworkSessionSnapshot> > &snapshot);
         void readSessionFromFile();
 
@@ -80,6 +81,7 @@ namespace Models {
         QMutex m_Mutex;
         QStringList m_Filenames;
         QStringList m_Vectors;
+        volatile bool m_CanRestore;
     };
 }
 
