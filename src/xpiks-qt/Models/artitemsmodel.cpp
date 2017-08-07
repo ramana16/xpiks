@@ -108,8 +108,7 @@ namespace Models {
         endResetModel();
 
         for (auto *item: artworksToDelete) {
-            item->disconnect();
-            item->clearModel();
+            item->deepDisconnect();
             m_DestroyedList.push_back(item);
         }
     }
@@ -1177,8 +1176,9 @@ namespace Models {
             metadata->deepDisconnect();
 #ifdef QT_DEBUG
             m_DestroyedList.push_back(metadata);
-#endif
+#else
             metadata->deleteLater();
+#endif
         } else {
             LOG_DEBUG << "Metadata #" << metadata->getItemID() << "is locked. Postponing destruction...";
 
