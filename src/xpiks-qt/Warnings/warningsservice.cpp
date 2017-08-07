@@ -36,6 +36,14 @@ namespace Warnings {
         QTimer::singleShot(1000, this, SLOT(updateWarningsSettings()));
     }
 
+    void WarningsService::cancelCurrentBatch() {
+        LOG_DEBUG << "#";
+
+        if (m_WarningsWorker != nullptr) {
+            m_WarningsWorker->cancelCurrentBatch();
+        }
+    }
+
     void WarningsService::startService(const std::shared_ptr<Common::ServiceStartParams> &params) {
         Q_UNUSED(params);
         m_WarningsWorker = new WarningsCheckingWorker(&m_WarningsSettingsModel);

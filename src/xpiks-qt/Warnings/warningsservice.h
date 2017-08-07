@@ -46,6 +46,7 @@ namespace Warnings {
     public:
         void initWarningsSettings();
         const WarningsSettingsModel *getWarningsSettingsModel() const { return &m_WarningsSettingsModel; }
+        void cancelCurrentBatch();
 
     public:
         virtual void startService(const std::shared_ptr<Common::ServiceStartParams> &params) override;
