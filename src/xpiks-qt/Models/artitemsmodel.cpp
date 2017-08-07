@@ -98,12 +98,20 @@ namespace Models {
     void ArtItemsModel::fakeDeleteAllItems() {
         LOG_DEBUG << "#";
 
+        std::deque<ArtworkMetadata *> artworksToDelete;
+
         beginResetModel();
         {
-            m_DestroyedList.swap(m_ArtworkList);
+            artworksToDelete.swap(m_ArtworkList);
             m_ArtworkList.clear();
         }
         endResetModel();
+
+        for (auto *item: artworksToDelete) {
+            item->disconnect();
+            item->clearModel();
+            m_DestroyedList.push_back(item);
+        }
     }
 #endif
 
