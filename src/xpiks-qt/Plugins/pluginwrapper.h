@@ -37,11 +37,12 @@ namespace Plugins {
     class PluginWrapper
     {
     public:
-        PluginWrapper(XpiksPluginInterface *pluginInterface, int pluginID, UIProvider *realUIProvider);
+        PluginWrapper(const QString &filepath, XpiksPluginInterface *pluginInterface, int pluginID, UIProvider *realUIProvider);
 
     public:
         int getPluginID() const { return m_PluginID; }
         bool getIsEnabled() const { return m_IsEnabled; }
+        const QString &getFilepath() const { return m_PluginFilepath; }
         const QString &getPrettyName() const { return m_PrettyName; }
         const QString &getVersionString() const { return m_VersionString; }
         const QString &getAuthor() const { return m_Author; }
@@ -63,6 +64,7 @@ namespace Plugins {
         PluginActionsModel m_ActionsModel;
         Common::flag_t m_NotificationFlags;
         UIProviderSafe m_UIProviderSafe;
+        QString m_PluginFilepath;
         int m_PluginID;
         bool m_IsEnabled;
         const QString &m_PrettyName;

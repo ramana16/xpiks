@@ -27,11 +27,12 @@
 #include "../Common/defines.h"
 
 namespace Plugins {
-    PluginWrapper::PluginWrapper(XpiksPluginInterface *pluginInterface, int pluginID, UIProvider *realUIProvider):
+    PluginWrapper::PluginWrapper(const QString &filepath, XpiksPluginInterface *pluginInterface, int pluginID, UIProvider *realUIProvider):
         m_PluginInterface(pluginInterface),
         m_ActionsModel(pluginInterface->getExportedActions(), pluginID),
         m_NotificationFlags(pluginInterface->getDesiredNotificationFlags()),
         m_UIProviderSafe(pluginID, realUIProvider),
+        m_PluginFilepath(filepath),
         m_PluginID(pluginID),
         m_IsEnabled(true),
         m_PrettyName(pluginInterface->getPrettyName()),

@@ -43,7 +43,7 @@ namespace Plugins {
         LOG_DEBUG << "#";
     }
 
-    bool PluginManager::getPluginsDir(QDir &pluginsDir) {
+    bool PluginManager::retrievePluginsDir(QDir &pluginsDir) {
         LOG_DEBUG << "#";
         QString appDataPath = XPIKS_USERDATA_PATH;
         bool pluginsFound = false;
@@ -74,6 +74,11 @@ namespace Plugins {
             }
         }
 
+        if (pluginsFound) {
+            m_PluginsDirectoryPath = pluginsDir.absolutePath();
+            LOG_INFO << "Plugins directory:" << m_PluginsDirectoryPath;
+        }
+
         return pluginsFound;
     }
 
@@ -81,7 +86,7 @@ namespace Plugins {
         LOG_DEBUG << "#";
         QDir pluginsDir;
 
-        if (!getPluginsDir(pluginsDir)) {
+        if (!retrievePluginsDir(pluginsDir)) {
             return;
         }
 
@@ -95,26 +100,11 @@ namespace Plugins {
         foreach (QString fileName, pluginDirFiles) {
             LOG_DEBUG << "Trying file:" << fileName;
 
-            try {
-                QPluginLoader loader(pluginsDir.absoluteFilePath(fileName));
-                QObject *plugin = loader.instance();
-                if (plugin) {
-                    XpiksPluginInterface *xpiksPlugin = qobject_cast<XpiksPluginInterface *>(plugin);
-
-                    if (xpiksPlugin) {
-                        auto pluginWrapper = instantiatePlugin(xpiksPlugin);
-                        if (pluginWrapper) {
-                            loadedPlugins.push_back(pluginWrapper);
-                            pluginsDict.insert(pluginWrapper->getPluginID(), pluginWrapper);
-                        }
-                    } else {
-                        LOG_DEBUG << "Not Xpiks Plugin:" << fileName;
-                    }
-                } else {
-                    LOG_WARNING << loader.errorString();
-                }
-            } catch(...) {
-                LOG_WARNING << "Exception while loading" << fileName;
+            const QString pluginFullPath = pluginsDir.absoluteFilePath(fileName);
+            auto pluginWrapper = loadPlugin(pluginFullPath);
+            if (pluginWrapper) {
+                loadedPlugins.push_back(pluginWrapper);
+                pluginsDict.insert(pluginWrapper->getPluginID(), pluginWrapper);
             }
         }
 
@@ -138,6 +128,7 @@ namespace Plugins {
 
         for (size_t i = 0; i < size; ++i) {
             auto &wrapper = m_PluginsList.at(i);
+            wrapper->disablePlugin();
             wrapper->finalizePlugin();
         }
     }
@@ -205,11 +196,143 @@ namespace Plugins {
         }
     }
 
-    std::shared_ptr<PluginWrapper> PluginManager::instantiatePlugin(XpiksPluginInterface *plugin) {
-        int pluginID = getNextPluginID();
-        LOG_INFO << "ID:" << pluginID << "name:" << plugin->getPrettyName() << "version:" << plugin->getVersionString();
+    void PluginManager::removePlugin(int index) {
+        LOG_INFO << "index:" << index;
 
-        std::shared_ptr<PluginWrapper> pluginWrapper(new PluginWrapper(plugin, pluginID, &m_UIProvider));
+        if ((0 <= index) && (index < rowCount())) {
+            std::shared_ptr<PluginWrapper> wrapper = m_PluginsList.at(index);
+            const int pluginID = wrapper->getPluginID();
+            LOG_INFO << "Removing plugin with ID:" << pluginID;
+
+            wrapper->disablePlugin();
+            wrapper->finalizePlugin();
+
+            beginRemoveRows(QModelIndex(), index, index);
+            {
+                m_PluginsList.erase(m_PluginsList.begin() + index);
+            }
+            endRemoveRows();
+
+            int removedCount = m_PluginsDict.remove(pluginID);
+            Q_ASSERT(removedCount == 1);
+
+            const QString fullPath = wrapper->getFilepath();
+            if (!QFile::remove(fullPath)) {
+                LOG_WARNING << "Failed to remove file" << fullPath;
+            }
+
+            LOG_INFO << "Plugin with ID #" << pluginID << "removed";
+        }
+    }
+
+    bool PluginManager::pluginExists(const QUrl &pluginUrl) {
+        bool exists = false;
+        QString fullpath = pluginUrl.toLocalFile();
+
+        QFileInfo existingFI(fullpath);
+        if (existingFI.exists()) {
+            const QString filename = existingFI.fileName();
+            QString destinationPath = QDir::cleanPath(m_PluginsDirectoryPath + QDir::separator() + filename);
+            exists = QFileInfo(destinationPath).exists();
+        }
+
+        return exists;
+    }
+
+    bool PluginManager::installPlugin(const QUrl &pluginUrl) {
+        bool result = addPlugin(pluginUrl.toLocalFile());
+        return result;
+    }
+
+    bool PluginManager::addPlugin(const QString &fullpath) {
+        LOG_INFO << fullpath;
+        bool success = false;
+
+        do {
+            QFileInfo existingFI(fullpath);
+            if (!existingFI.exists()) {
+                LOG_WARNING << "Path not found:" << fullpath;
+                break;
+            }
+
+            const QString filename = existingFI.fileName();
+            QString destinationPath = QDir::cleanPath(m_PluginsDirectoryPath + QDir::separator() + filename);
+            if (QFileInfo(destinationPath).exists()) {
+                LOG_WARNING << "Plugin already exists";
+                break;
+            }
+
+            if (!QFile::copy(fullpath, destinationPath)) {
+                LOG_WARNING << "Failed to copy plugin to" << destinationPath;
+                break;
+            }
+
+            if (!doAddPlugin(destinationPath)) {
+                if (!QFile::remove(destinationPath)) {
+                    LOG_WARNING << "Failed to remove file" << destinationPath;
+                }
+
+                break;
+            }
+
+            LOG_INFO << "Added plugin" << fullpath;
+            success = true;
+        } while (false);
+
+        return success;
+    }
+
+    bool PluginManager::doAddPlugin(const QString &filepath) {
+        bool added = false;
+        auto plugin = loadPlugin(filepath);
+        if (plugin) {
+            const int size = (int)m_PluginsList.size();
+
+            beginInsertRows(QModelIndex(), size, size);
+            {
+                m_PluginsList.push_back(plugin);
+            }
+            endInsertRows();
+
+            const int pluginID = plugin->getPluginID();
+            m_PluginsDict.insert(pluginID, plugin);
+
+            added = true;
+        }
+
+        return added;
+    }
+
+    std::shared_ptr<PluginWrapper> PluginManager::loadPlugin(const QString &filepath) {
+        LOG_INFO << filepath;
+        std::shared_ptr<PluginWrapper> result;
+
+        try {
+            QPluginLoader loader(filepath);
+            QObject *plugin = loader.instance();
+            if (plugin) {
+                XpiksPluginInterface *xpiksPlugin = qobject_cast<XpiksPluginInterface *>(plugin);
+
+                if (xpiksPlugin) {
+                    result = instantiatePlugin(filepath, xpiksPlugin);
+                } else {
+                    LOG_DEBUG << "Not Xpiks Plugin:" << filepath;
+                }
+            } else {
+                LOG_WARNING << loader.errorString();
+            }
+        } catch(...) {
+            LOG_WARNING << "Exception while loading" << filepath;
+        }
+
+        return result;
+    }
+
+    std::shared_ptr<PluginWrapper> PluginManager::instantiatePlugin(const QString &filepath, XpiksPluginInterface *plugin) {
+        const int pluginID = getNextPluginID();
+        LOG_INFO << "ID:" << pluginID << "name:" << plugin->getPrettyName() << "version:" << plugin->getVersionString() << "filepath:" << filepath;
+
+        std::shared_ptr<PluginWrapper> pluginWrapper(new PluginWrapper(filepath, plugin, pluginID, &m_UIProvider));
 
         try {
             plugin->injectCommandManager(m_CommandManager);
