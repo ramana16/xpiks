@@ -63,6 +63,72 @@ Item {
         }
     }
 
+    MessageDialog {
+        id: pluginExistsDialog
+        property string pluginUrl
+        title: i18.n + qsTr("Warning")
+        text: i18.n + qsTr("Selected plugin is already installed. Do you want to replace it?")
+        standardButtons: StandardButton.Yes | StandardButton.No
+        onYes: {
+            if (!pluginManager.replaceInstallPlugin(pluginUrl)) {
+                failedToInstallDialog.open()
+            } else {
+                installedSuccessfullyDialog.open()
+            }
+        }
+    }
+
+    MessageDialog {
+        id: confirmRemovePluginDialog
+        property int pluginIndex
+        title: i18.n + qsTr("Confirmation")
+        text: i18.n + qsTr("Are you sure you want to remove this plugin?")
+        standardButtons: StandardButton.Yes | StandardButton.No
+        onYes: {
+            pluginManager.removePlugin(pluginIndex)
+        }
+    }
+
+    MessageDialog {
+        id: installedSuccessfullyDialog
+        title: i18.n + qsTr("Info")
+        text: i18.n + qsTr("Plugin has been added successfully.")
+        standardButtons: StandardButton.Ok
+    }
+
+    MessageDialog {
+        id: failedToInstallDialog
+        title: i18.n + qsTr("Warning")
+        text: i18.n + qsTr("Failed to install selected plugin.")
+        standardButtons: StandardButton.Ok
+    }
+
+    FileDialog {
+        id: choosePluginDialog
+        title: "Select plugin"
+        selectExisting: true
+        selectMultiple: false
+        nameFilters: [ "All files (*)" ]
+
+        onAccepted: {
+            console.debug("You chose: " + choosePluginDialog.fileUrl)
+            if (!pluginManager.installPlugin(choosePluginDialog.fileUrl)) {
+                if (pluginManager.pluginExists(choosePluginDialog.fileUrl)) {
+                    pluginExistsDialog.pluginUrl = choosePluginDialog.fileUrl
+                    pluginExistsDialog.open()
+                } else {
+                    failedToInstallDialog.open()
+                }
+            } else {
+                installedSuccessfullyDialog.open()
+            }
+        }
+
+        onRejected: {
+            console.debug("Open files dialog canceled")
+        }
+    }
+
     FocusScope {
         anchors.fill: parent
 
@@ -142,8 +208,9 @@ Item {
                         spacing: 5
 
                         delegate: Rectangle {
-                            color: Colors.panelColor
-
+                            id: wrapper
+                            color: Colors.panelColor                            
+                            property int delegateIndex: index
                             anchors.left: parent.left
                             anchors.right: parent.right
                             height: 30
@@ -158,8 +225,24 @@ Item {
                             StyledText {
                                 text: version
                                 anchors.verticalCenter: parent.verticalCenter
+                                anchors.right: deleteIcon.left
+                                anchors.rightMargin: 10
+                            }
+
+                            CloseIcon {
+                                id: deleteIcon
+                                width: 14
+                                height: 14
+                                anchors.verticalCenter: parent.verticalCenter
                                 anchors.right: parent.right
                                 anchors.rightMargin: 10
+                                isActive: false
+                                crossOpacity: 1
+
+                                onItemClicked: {
+                                    confirmRemovePluginDialog.pluginIndex = wrapper.delegateIndex
+                                    confirmRemovePluginDialog.open()
+                                }
                             }
                         }
                     }
@@ -187,6 +270,14 @@ Item {
                 anchors.rightMargin: 20
                 height: 24
                 spacing: 20
+
+                StyledButton {
+                    text: i18.n + qsTr("Add plugin")
+                    width: 150
+                    onClicked: {
+                        choosePluginDialog.open()
+                    }
+                }
 
                 Item {
                     Layout.fillWidth: true

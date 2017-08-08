@@ -90,6 +90,7 @@ namespace QMLExtensions {
         bool touchTab(int index);
         TabModel &getTab(int index);
         void updateCache();
+        int getMostRecentIndex() const;
 
     private:
         void recacheTab(int index);
@@ -127,6 +128,9 @@ namespace QMLExtensions {
         Q_OBJECT
     public:
         explicit ActiveTabsModel(QObject *parent = 0);
+
+    public:
+        Q_INVOKABLE void reactivateMostRecentTab();
 
     public slots:
         void onInactiveTabOpened(int index);

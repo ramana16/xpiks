@@ -52,7 +52,9 @@ namespace Plugins {
         };
 
     private:
-        bool retrievePluginsDir(QDir &pluginsDir);
+        bool initPluginsDir();
+        const QString &getPluginsDirectoryPath() const { return m_PluginsDirectoryPath; }
+        void processInvalidFile(const QString &filename, const QString &pluginFullPath);
 
     public:
         void loadPlugins();
@@ -71,10 +73,13 @@ namespace Plugins {
         Q_INVOKABLE void removePlugin(int index);
         Q_INVOKABLE bool pluginExists(const QUrl &pluginUrl);
         Q_INVOKABLE bool installPlugin(const QUrl &pluginUrl);
+        Q_INVOKABLE bool replaceInstallPlugin(const QUrl &pluginUrl);
 
     private:
         bool addPlugin(const QString &fullpath);
         bool doAddPlugin(const QString &filepath);
+        int findPluginIndex(const QString &fullpath) const;
+        bool isPluginAdded(const QString &fullpath) const { return findPluginIndex(fullpath) != -1; }
         std::shared_ptr<PluginWrapper> loadPlugin(const QString &filepath);
         std::shared_ptr<PluginWrapper> instantiatePlugin(const QString &filepath, XpiksPluginInterface *plugin);
 
@@ -90,6 +95,7 @@ namespace Plugins {
 
     private:
         QString m_PluginsDirectoryPath;
+        QString m_FailedPluginsDirectory;
         std::vector<std::shared_ptr<PluginWrapper> > m_PluginsList;
         QHash<int, std::shared_ptr<PluginWrapper> > m_PluginsDict;
         UIProvider m_UIProvider;

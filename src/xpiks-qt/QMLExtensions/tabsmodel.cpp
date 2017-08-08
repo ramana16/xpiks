@@ -172,6 +172,24 @@ namespace QMLExtensions {
          updateActiveTabs();
     }
 
+    int TabsModel::getMostRecentIndex() const {
+        int index = 0;
+        unsigned int maxTag = 0;
+
+        const int size = m_TabsList.size();
+        for (int i = 0; i < size; i++) {
+            if (m_ActiveTabs.contains(i)) {
+                unsigned int tag = m_TabsList[i].m_CacheTag;
+                if (tag > maxTag) {
+                    index = i;
+                    maxTag = tag;
+                }
+            }
+        }
+
+        return index;
+    }
+
     void TabsModel::recacheTab(int index) {
         Q_ASSERT((0 <= index) && (index < m_TabsList.size()));
         auto &tab = m_TabsList[index];
@@ -266,6 +284,12 @@ namespace QMLExtensions {
     ActiveTabsModel::ActiveTabsModel(QObject *parent):
         DependentTabsModel(parent)
     { }
+
+    void ActiveTabsModel::reactivateMostRecentTab() {
+        auto *tabsModel = getTabsModel();
+        int index = tabsModel->getMostRecentIndex();
+        emit tabActivateRequested(index);
+    }
 
     void ActiveTabsModel::onInactiveTabOpened(int index) {
         LOG_INFO << index;

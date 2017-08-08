@@ -33,6 +33,19 @@
 #include "../Helpers/constants.h"
 
 namespace Plugins {
+    bool ensureDirectoryExists(const QString &path) {
+        bool anyError = false;
+
+        if (!QDir(path).exists()) {
+            LOG_INFO << "Creating" << path;
+            if (!QDir().mkpath(path)) {
+                anyError = true;
+            }
+        }
+
+        return !anyError;
+    }
+
     PluginManager::PluginManager():
         QAbstractListModel(),
         m_LastPluginID(0)
@@ -43,54 +56,75 @@ namespace Plugins {
         LOG_DEBUG << "#";
     }
 
-    bool PluginManager::retrievePluginsDir(QDir &pluginsDir) {
+    bool PluginManager::initPluginsDir() {
         LOG_DEBUG << "#";
-        QString appDataPath = XPIKS_USERDATA_PATH;
-        bool pluginsFound = false;
 
-        if (!appDataPath.isEmpty()) {
-            QString pluginsPath = QDir::cleanPath(appDataPath + QDir::separator() + Constants::PLUGINS_DIR);
-            if (QFileInfo(pluginsPath).exists()) {
-                pluginsDir.setPath(pluginsPath);
-                pluginsFound = true;
-            }
-        }
+        bool anyError = false;
+        const QString appDataPath = XPIKS_USERDATA_PATH;
+        QString basePath;
 
-        if (!pluginsFound) {
+        if (appDataPath.isEmpty()) {
+#ifdef Q_OS_MAC
+            QDir pluginsDir;
             pluginsDir.setPath(QCoreApplication::applicationDirPath());
-#if defined(Q_OS_WIN)
-#elif defined(Q_OS_MAC)
+
             if (pluginsDir.dirName() == "MacOS") {
                 pluginsDir.cdUp();
             }
 
             pluginsDir.cd("PlugIns");
+            pluginsDir.cd(Constants::PLUGINS_DIR);
+            basePath = pluginsDir.absolutePath();
+#else
+            basePath = QDir::currentPath();
 #endif
+        } else {
+            basePath = appDataPath;
+        }
 
-            pluginsFound = pluginsDir.cd("XpiksPlugins");
+        const QString pluginsPath = QDir::cleanPath(basePath + QDir::separator() + Constants::PLUGINS_DIR);
+        LOG_INFO << "Trying" << pluginsPath;
 
-            if (!pluginsFound) {
-                LOG_WARNING << "Plugins directory not found";
+        if (!ensureDirectoryExists(pluginsPath)) { anyError = true; }
+
+        if (!anyError) {
+            m_PluginsDirectoryPath = pluginsPath;
+            LOG_INFO << "Plugins directory:" << m_PluginsDirectoryPath;
+
+            m_FailedPluginsDirectory = QDir::cleanPath(pluginsPath + QDir::separator() + Constants::FAILED_PLUGINS_DIR);
+            ensureDirectoryExists(m_FailedPluginsDirectory);
+        }
+
+        return !anyError;
+    }
+
+    void PluginManager::processInvalidFile(const QString &filename, const QString &pluginFullPath) {
+        LOG_DEBUG << pluginFullPath;
+
+        const QString failedDestination = QDir::cleanPath(m_FailedPluginsDirectory + QDir::separator() + filename);
+        if (QFile::rename(pluginFullPath, failedDestination)) {
+            LOG_INFO << "Moved invalid file from the plugins dir" << pluginFullPath;
+        } else {
+            LOG_WARNING << "Failed to move invalid file from plugins dir. Attempting remove...";
+            if (QFile::remove(pluginFullPath)) {
+                LOG_INFO << "Removed invalid file from plugins dir";
+            } else {
+                LOG_WARNING << "Failed to remove invalid file from plugins dir";
             }
         }
-
-        if (pluginsFound) {
-            m_PluginsDirectoryPath = pluginsDir.absolutePath();
-            LOG_INFO << "Plugins directory:" << m_PluginsDirectoryPath;
-        }
-
-        return pluginsFound;
     }
 
     void PluginManager::loadPlugins() {
         LOG_DEBUG << "#";
-        QDir pluginsDir;
 
-        if (!retrievePluginsDir(pluginsDir)) {
+        if (!initPluginsDir()) {
+            LOG_WARNING << "Failed to initialize plugins directory. Exiting...";
             return;
         }
 
-        LOG_INFO << "Plugins dir:" << pluginsDir.absolutePath();
+        QDir pluginsDir(getPluginsDirectoryPath());
+        Q_ASSERT(pluginsDir.exists());
+
         std::vector<std::shared_ptr<PluginWrapper> > loadedPlugins;
         QHash<int, std::shared_ptr<PluginWrapper> > pluginsDict;
 
@@ -104,7 +138,10 @@ namespace Plugins {
             auto pluginWrapper = loadPlugin(pluginFullPath);
             if (pluginWrapper) {
                 loadedPlugins.push_back(pluginWrapper);
+                Q_ASSERT(!pluginsDict.contains(pluginWrapper->getPluginID()));
                 pluginsDict.insert(pluginWrapper->getPluginID(), pluginWrapper);
+            } else {
+                processInvalidFile(fileName, pluginFullPath);
             }
         }
 
@@ -123,7 +160,7 @@ namespace Plugins {
     }
 
     void PluginManager::unloadPlugins() {
-        size_t size = m_PluginsList.size();
+        const size_t size = m_PluginsList.size();
         LOG_DEBUG << size << "plugin(s)";
 
         for (size_t i = 0; i < size; ++i) {
@@ -244,6 +281,16 @@ namespace Plugins {
         return result;
     }
 
+    bool PluginManager::replaceInstallPlugin(const QUrl &pluginUrl) {
+        const QString fullpath = pluginUrl.toLocalFile();
+        const int index = findPluginIndex(fullpath);
+        if (index == -1) { return false; }
+
+        removePlugin(index);
+        bool success = addPlugin(fullpath);
+        return success;
+    }
+
     bool PluginManager::addPlugin(const QString &fullpath) {
         LOG_INFO << fullpath;
         bool success = false;
@@ -258,7 +305,13 @@ namespace Plugins {
             const QString filename = existingFI.fileName();
             QString destinationPath = QDir::cleanPath(m_PluginsDirectoryPath + QDir::separator() + filename);
             if (QFileInfo(destinationPath).exists()) {
-                LOG_WARNING << "Plugin already exists";
+                if (isPluginAdded(destinationPath)) {
+                    LOG_WARNING << "Plugin with same filename already added";
+                } else {
+                    if (QFile::remove(destinationPath)) {
+                        LOG_INFO << "Cleaned up not used file with same name";
+                    }
+                }
                 break;
             }
 
@@ -301,6 +354,21 @@ namespace Plugins {
         }
 
         return added;
+    }
+
+    int PluginManager::findPluginIndex(const QString &fullpath) const {
+        int index = -1;
+
+        const size_t size = m_PluginsList.size();
+        for (size_t i = 0; i < size; i++) {
+            const auto &wrapper = m_PluginsList.at(i);
+            if (wrapper->getFilepath() == fullpath) {
+                index = (int)i;
+                break;
+            }
+        }
+
+        return index;
     }
 
     std::shared_ptr<PluginWrapper> PluginManager::loadPlugin(const QString &filepath) {

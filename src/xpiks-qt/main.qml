@@ -1206,13 +1206,27 @@ ApplicationWindow {
 
                 CustomTab {
                     id: plusTab
-                    enabled: tabsHolder.moreTabsAvailable
-                    visible: tabsHolder.moreTabsAvailable
+                    enabled: false
+                    visible: false
                     tabIndex: tabsRepeater.count
                     isSelected: tabsHolder.currentIndex == tabIndex
                     hovered: (!isSelected) && plusMA.containsMouse
                     width: 20
                     property bool isHighlighted: isSelected || hovered
+
+                    Connections {
+                        target: tabsModel
+                        onTabsCountChanged: {
+                            if (tabsModel.tabsCount <= 3) {
+                                if (plusTab.isSelected) {
+                                    activeTabs.reactivateMostRecentTab()
+                                }
+                            }
+
+                            plusTab.enabled = tabsModel.tabsCount > 3
+                            plusTab.visible = tabsModel.tabsCount > 3
+                        }
+                    }
 
                     TriangleElement {
                         anchors.centerIn: parent
@@ -1221,7 +1235,6 @@ ApplicationWindow {
                         isFlipped: !plusTab.isSelected
                         width: parent.width * 0.6
                         height: width * 0.5
-                        enabled: tabsHolder.moreTabsAvailable
                     }
 
                     MouseArea {
