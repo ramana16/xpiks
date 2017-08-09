@@ -52,7 +52,7 @@ namespace Constants {
     const char USE_PROXY[] = "USE_PROXY";
     const char PROXY_HOST[] = "PROXY_HOST_HASH";
     const char UPDATES_DIRECTORY[] = "updates";
-    const char FAILED_PLUGINS_DIR[] = "failed";
+    const char FAILED_PLUGINS_DIR[] = "invalid";
 
     // different for DEBUG and RELEASE
 

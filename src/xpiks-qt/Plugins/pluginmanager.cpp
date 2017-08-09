@@ -233,8 +233,9 @@ namespace Plugins {
         }
     }
 
-    void PluginManager::removePlugin(int index) {
+    bool PluginManager::removePlugin(int index) {
         LOG_INFO << "index:" << index;
+        bool removed = false;
 
         if ((0 <= index) && (index < rowCount())) {
             std::shared_ptr<PluginWrapper> wrapper = m_PluginsList.at(index);
@@ -259,7 +260,10 @@ namespace Plugins {
             }
 
             LOG_INFO << "Plugin with ID #" << pluginID << "removed";
+            removed = true;
         }
+
+        return removed;
     }
 
     bool PluginManager::pluginExists(const QUrl &pluginUrl) {
@@ -282,9 +286,22 @@ namespace Plugins {
     }
 
     bool PluginManager::replaceInstallPlugin(const QUrl &pluginUrl) {
+        LOG_INFO << pluginUrl;
         const QString fullpath = pluginUrl.toLocalFile();
-        const int index = findPluginIndex(fullpath);
-        if (index == -1) { return false; }
+        QFileInfo fi(fullpath);
+        const QString pluginName = fi.fileName();
+
+        QDir pluginsDir(m_PluginsDirectoryPath);
+        QString possiblePluginPath;
+        if (pluginsDir.exists()) {
+            possiblePluginPath = pluginsDir.absoluteFilePath(pluginName);
+        }
+
+        const int index = findPluginIndex(possiblePluginPath);
+        if (index == -1) {
+            LOG_WARNING << "Plugin cannot be found";
+            return false;
+        }
 
         removePlugin(index);
         bool success = addPlugin(fullpath);
@@ -357,6 +374,7 @@ namespace Plugins {
     }
 
     int PluginManager::findPluginIndex(const QString &fullpath) const {
+        LOG_INFO << fullpath;
         int index = -1;
 
         const size_t size = m_PluginsList.size();

@@ -70,7 +70,7 @@ namespace Plugins {
     public:
         Q_INVOKABLE QObject *getPluginActions(int index) const;
         Q_INVOKABLE void triggerPluginAction(int pluginID, int actionID) const;
-        Q_INVOKABLE void removePlugin(int index);
+        Q_INVOKABLE bool removePlugin(int index);
         Q_INVOKABLE bool pluginExists(const QUrl &pluginUrl);
         Q_INVOKABLE bool installPlugin(const QUrl &pluginUrl);
         Q_INVOKABLE bool replaceInstallPlugin(const QUrl &pluginUrl);

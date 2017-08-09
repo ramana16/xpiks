@@ -85,14 +85,25 @@ Item {
         text: i18.n + qsTr("Are you sure you want to remove this plugin?")
         standardButtons: StandardButton.Yes | StandardButton.No
         onYes: {
-            pluginManager.removePlugin(pluginIndex)
+            if (pluginManager.removePlugin(pluginIndex)) {
+                removedSuccessfullyDialog.open()
+            } else {
+                failedToRemoveDialog.open()
+            }
         }
     }
 
     MessageDialog {
         id: installedSuccessfullyDialog
         title: i18.n + qsTr("Info")
-        text: i18.n + qsTr("Plugin has been added successfully.")
+        text: i18.n + qsTr("Plugin has been successfully installed.")
+        standardButtons: StandardButton.Ok
+    }
+
+    MessageDialog {
+        id: removedSuccessfullyDialog
+        title: i18.n + qsTr("Info")
+        text: i18.n + qsTr("Plugin has been successfully uninstalled.")
         standardButtons: StandardButton.Ok
     }
 
@@ -100,6 +111,13 @@ Item {
         id: failedToInstallDialog
         title: i18.n + qsTr("Warning")
         text: i18.n + qsTr("Failed to install selected plugin.")
+        standardButtons: StandardButton.Ok
+    }
+
+    MessageDialog {
+        id: failedToRemoveDialog
+        title: i18.n + qsTr("Warning")
+        text: i18.n + qsTr("Failed to uninstall selected plugin.")
         standardButtons: StandardButton.Ok
     }
 
@@ -111,10 +129,11 @@ Item {
         nameFilters: [ "All files (*)" ]
 
         onAccepted: {
-            console.debug("You chose: " + choosePluginDialog.fileUrl)
-            if (!pluginManager.installPlugin(choosePluginDialog.fileUrl)) {
-                if (pluginManager.pluginExists(choosePluginDialog.fileUrl)) {
-                    pluginExistsDialog.pluginUrl = choosePluginDialog.fileUrl
+            var pluginUrl = choosePluginDialog.fileUrl
+            console.debug("You chose: " + pluginUrl)
+            if (!pluginManager.installPlugin(pluginUrl)) {
+                if (pluginManager.pluginExists(pluginUrl)) {
+                    pluginExistsDialog.pluginUrl = pluginUrl
                     pluginExistsDialog.open()
                 } else {
                     failedToInstallDialog.open()
@@ -285,7 +304,7 @@ Item {
 
                 StyledButton {
                     text: i18.n + qsTr("Close")
-                    width: 100
+                    width: 150
                     onClicked: {
                         closePopup()
                     }
