@@ -168,6 +168,11 @@ namespace Plugins {
             wrapper->disablePlugin();
             wrapper->finalizePlugin();
         }
+
+        m_PluginsList.clear();
+        m_PluginsDict.clear();
+
+        // plugins should be automagically unloaded
     }
 
     bool PluginManager::hasExportedActions(int row) const {
@@ -237,6 +242,8 @@ namespace Plugins {
         LOG_INFO << "index:" << index;
         bool removed = false;
 
+        QPluginLoader loader;
+
         if ((0 <= index) && (index < rowCount())) {
             std::shared_ptr<PluginWrapper> wrapper = m_PluginsList.at(index);
             const int pluginID = wrapper->getPluginID();
@@ -244,6 +251,8 @@ namespace Plugins {
 
             wrapper->disablePlugin();
             wrapper->finalizePlugin();
+
+            loader.setFileName(wrapper->getFilepath());
 
             beginRemoveRows(QModelIndex(), index, index);
             {
@@ -255,12 +264,19 @@ namespace Plugins {
             Q_ASSERT(removedCount == 1);
 
             const QString fullPath = wrapper->getFilepath();
+            LOG_DEBUG << "Attempting to remove file" << fullPath;
             if (!QFile::remove(fullPath)) {
                 LOG_WARNING << "Failed to remove file" << fullPath;
             }
 
             LOG_INFO << "Plugin with ID #" << pluginID << "removed";
             removed = true;
+        }
+
+        if (removed) {
+            Q_ASSERT(loader.isLoaded());
+            bool canUnload = loader.unload();
+            LOG_INFO << "Can unload the plugin:" << canUnload;
         }
 
         return removed;
@@ -322,6 +338,7 @@ namespace Plugins {
             const QString filename = existingFI.fileName();
             QString destinationPath = QDir::cleanPath(m_PluginsDirectoryPath + QDir::separator() + filename);
             if (QFileInfo(destinationPath).exists()) {
+                LOG_DEBUG << "Destination file already exists" << destinationPath;
                 if (isPluginAdded(destinationPath)) {
                     LOG_WARNING << "Plugin with same filename already added";
                 } else {
@@ -332,6 +349,7 @@ namespace Plugins {
                 break;
             }
 
+            LOG_DEBUG << "Copying [" << fullpath << "] to [" << destinationPath << "]";
             if (!QFile::copy(fullpath, destinationPath)) {
                 LOG_WARNING << "Failed to copy plugin to" << destinationPath;
                 break;
@@ -393,19 +411,33 @@ namespace Plugins {
         LOG_INFO << filepath;
         std::shared_ptr<PluginWrapper> result;
 
-        try {
-            QPluginLoader loader(filepath);
-            QObject *plugin = loader.instance();
-            if (plugin) {
-                XpiksPluginInterface *xpiksPlugin = qobject_cast<XpiksPluginInterface *>(plugin);
 
-                if (xpiksPlugin) {
-                    result = instantiatePlugin(filepath, xpiksPlugin);
-                } else {
-                    LOG_DEBUG << "Not Xpiks Plugin:" << filepath;
+        try {
+            bool success = false;
+            QPluginLoader loader(filepath);
+            do {
+                QObject *plugin = loader.instance();
+                if (!plugin) {
+                    LOG_WARNING << loader.errorString();
+                    break;
                 }
-            } else {
-                LOG_WARNING << loader.errorString();
+
+                XpiksPluginInterface *xpiksPlugin = qobject_cast<XpiksPluginInterface *>(plugin);
+                if (!xpiksPlugin) {
+                    LOG_DEBUG << "Not Xpiks Plugin:" << filepath;
+                    break;
+                }
+
+                result = instantiatePlugin(filepath, xpiksPlugin);
+                if (!result) {
+                    break;
+                }
+
+                success = true;
+            } while (false);
+
+            if (!success) {
+                loader.unload();
             }
         } catch(...) {
             LOG_WARNING << "Exception while loading" << filepath;
@@ -492,5 +524,4 @@ namespace Plugins {
         bool result = pluginManager->hasExportedActions(sourceRow);
         return result;
     }
-
 }

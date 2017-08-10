@@ -38,6 +38,7 @@ namespace Plugins {
     {
     public:
         PluginWrapper(const QString &filepath, XpiksPluginInterface *pluginInterface, int pluginID, UIProvider *realUIProvider);
+        virtual ~PluginWrapper();
 
     public:
         int getPluginID() const { return m_PluginID; }

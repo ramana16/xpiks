@@ -42,8 +42,12 @@ namespace Plugins {
         Q_ASSERT(realUIProvider != nullptr);
     }
 
+    PluginWrapper::~PluginWrapper() {
+        LOG_DEBUG << m_PluginID;
+    }
+
     void PluginWrapper::enablePlugin() {
-        LOG_INFO << getPrettyName();
+        LOG_INFO << getPrettyName() << getVersionString();
 
         try {
             m_PluginInterface->enablePlugin();
@@ -55,7 +59,7 @@ namespace Plugins {
     }
 
     void PluginWrapper::disablePlugin() {
-        LOG_INFO << getPrettyName();
+        LOG_INFO << getPrettyName() << getVersionString();
 
         try {
             // set disabled in any case
@@ -83,7 +87,7 @@ namespace Plugins {
     }
 
     void PluginWrapper::finalizePlugin() {
-        LOG_INFO << getPrettyName();
+        LOG_INFO << getPrettyName() << getVersionString();
 
         try {
             m_PluginInterface->finalizePlugin();

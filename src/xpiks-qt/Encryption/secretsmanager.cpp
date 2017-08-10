@@ -25,9 +25,6 @@
 #include <QTime>
 #include "../Common/defines.h"
 
-#define STRINGIZE_(x) #x
-#define STRINGIZE(x) STRINGIZE_(x)
-
 void shuffleString(QString &str) {
     qsrand(QTime::currentTime().msec());
 

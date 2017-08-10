@@ -39,6 +39,9 @@ namespace Plugins {
     {
     }
 
+    UIProvider::~UIProvider() {
+    }
+
     void UIProvider::openWindow(const QUrl &rcPath, const QHash<QString, QObject *> &contextModels) const {
         QQmlComponent component(m_QmlEngine);
 
@@ -53,7 +56,7 @@ namespace Plugins {
         }
 
         LOG_DEBUG << "Creating a new window";
-        QQmlContext *context = new QQmlContext(m_QmlEngine);
+        QQmlContext *context = new QQmlContext(m_QmlEngine, nullptr);
         QObject::connect(context, &QQmlContext::destroyed,
                          this, &UIProvider::contextDestroyed);
 
@@ -95,11 +98,13 @@ namespace Plugins {
     void UIProvider::windowDestroyed(QObject *object) {
         Q_UNUSED(object);
         LOG_DEBUG << "Plugin window destroyed";
+        m_QmlEngine->collectGarbage();
     }
 
     void UIProvider::contextDestroyed(QObject *object) {
         Q_UNUSED(object);
         LOG_DEBUG << "#";
+        m_QmlEngine->collectGarbage();
     }
 
     void UIProvider::windowClosing(QQuickCloseEvent *closeEvent) {

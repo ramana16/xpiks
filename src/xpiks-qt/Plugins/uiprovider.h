@@ -38,7 +38,7 @@ namespace Plugins {
         Q_OBJECT
     public:
         UIProvider(QObject *parent=0);
-        virtual ~UIProvider() {}
+        virtual ~UIProvider();
 
     public:
         Models::UIManager *getUIManager() const { return m_UiManager; }
