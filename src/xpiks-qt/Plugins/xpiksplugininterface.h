@@ -80,7 +80,7 @@ namespace Plugins {
     };
 }
 
-#define XpiksPluginInterface_iid "Xpiks.Plugins.XpiksPluginInterface.v0.2"
+#define XpiksPluginInterface_iid "Xpiks.Plugins.XpiksPluginInterface.v0.0.1"
 Q_DECLARE_INTERFACE(Plugins::XpiksPluginInterface, XpiksPluginInterface_iid)
 
 #endif // XPIKSPLUGININTERFACE_H
