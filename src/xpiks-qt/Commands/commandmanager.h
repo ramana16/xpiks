@@ -31,6 +31,7 @@
 #include "../KeywordsPresets/presetkeywordsmodelconfig.h"
 #include "../Helpers/asynccoordinator.h"
 #include "../MetadataIO/artworkssnapshot.h"
+#include "../Common/flags.h"
 
 namespace Encryption {
     class SecretsManager;
@@ -67,6 +68,7 @@ namespace Models {
     class ArtworkProxyModel;
     class SessionManager;
     class SwitcherModel;
+    class DuplicatesModel;
 }
 
 namespace Suggestion {
@@ -180,6 +182,7 @@ namespace Commands {
         void InjectDependency(QMLExtensions::ArtworksUpdateHub *artworksUpdateHub);
         void InjectDependency(Connectivity::RequestsService *requestsService);
         void InjectDependency(Helpers::DatabaseManager *databaseManager);
+        void InjectDependency(Models::DuplicatesModel *duplicatesModel);
 
     private:
         int generateNextCommandID() { int id = m_LastCommandID++; return id; }
@@ -228,6 +231,8 @@ namespace Commands {
         void setupSpellCheckSuggestions(Common::IMetadataOperator *item, int index, Common::SuggestionFlags flags);
         void setupSpellCheckSuggestions(std::vector<std::pair<Common::IMetadataOperator *, int> > &itemPairs, Common::SuggestionFlags flags);
         void submitForSpellCheck(const QVector<Common::BasicKeywordsModel *> &items, const QStringList &wordsToCheck) const;
+        void setupDuplicatesModel(Common::IMetadataOperator * item);
+        void setupDuplicatesModel(std::vector<std::pair<Common::IMetadataOperator *, int> > &itemPairs);
 
     public:
         void submitKeywordsForWarningsCheck(Models::ArtworkMetadata *item) const;
@@ -319,6 +324,8 @@ namespace Commands {
         virtual Warnings::WarningsService *getWarningsService() const { return m_WarningsService; }
         virtual Models::FindAndReplaceModel *getFindAndReplaceModel() const { return m_FindAndReplaceModel; }
 #endif
+    private:
+        Common::WordAnalysisFlags getWordAnalysisFlag() const;
 
     private:
         Helpers::AsyncCoordinator m_InitCoordinator;
@@ -339,6 +346,7 @@ namespace Commands {
         Models::RecentFilesModel *m_RecentFiles;
         SpellCheck::SpellCheckerService *m_SpellCheckerService;
         SpellCheck::SpellCheckSuggestionModel *m_SpellCheckSuggestionModel;
+		Models::DuplicatesModel *m_DuplicatesModel;
         MetadataIO::MetadataIOService *m_MetadataIOService;
         Connectivity::TelemetryService *m_TelemetryService;
         Connectivity::UpdateService *m_UpdateService;

@@ -91,6 +91,7 @@
 #include "KeywordsPresets/presetkeywordsmodelconfig.h"
 #include "Models/switchermodel.h"
 #include "Connectivity/requestsservice.h"
+#include "Models/duplicatesmodel.h"
 
 void myMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg) {
     Q_UNUSED(context);
@@ -324,6 +325,7 @@ int main(int argc, char *argv[]) {
     Models::SwitcherModel switcherModel;
     Connectivity::RequestsService requestsService;
     Helpers::DatabaseManager databaseManager;
+    Models::DuplicatesModel duplicatesModel;
 
     Connectivity::UpdateService updateService(&settingsModel);
 
@@ -389,6 +391,7 @@ int main(int argc, char *argv[]) {
     commandManager.InjectDependency(&switcherModel);
     commandManager.InjectDependency(&requestsService);
     commandManager.InjectDependency(&databaseManager);
+    commandManager.InjectDependency(&duplicatesModel);
 
     userDictEditModel.setCommandManager(&commandManager);
     autoCompleteModel.setCommandManager(&commandManager);
@@ -452,6 +455,7 @@ int main(int argc, char *argv[]) {
     rootContext->setContextProperty("quickBuffer", &quickBuffer);
     rootContext->setContextProperty("userDictEditModel", &userDictEditModel);
     rootContext->setContextProperty("switcher", &switcherModel);
+    rootContext->setContextProperty("duplicatesModel", &duplicatesModel);
 
     rootContext->setContextProperty("tabsModel", uiManager.getTabsModel());
     rootContext->setContextProperty("activeTabs", uiManager.getActiveTabs());

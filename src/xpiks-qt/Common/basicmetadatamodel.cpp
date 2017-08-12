@@ -52,7 +52,7 @@ namespace Common {
     }
 #endif
 
-    void BasicMetadataModel::setSpellCheckResults(const QHash<QString, bool> &results, Common::SpellCheckFlags flags) {
+    void BasicMetadataModel::setSpellCheckResults(const QHash<QString, Common::WordAnalysisResult> &results, Common::SpellCheckFlags flags) {
         if (Common::HasFlag(flags, Common::SpellCheckFlags::Description)) {
             updateDescriptionSpellErrors(results);
         }
@@ -170,6 +170,10 @@ namespace Common {
 
     bool BasicMetadataModel::appendPreset(const QStringList &presetList) {
         return BasicKeywordsModel::appendPreset(presetList);
+    }
+
+    const QHash<QString, QStringList> BasicMetadataModel::getDuplicatesModel() {
+        return BasicKeywordsModel::getDuplicatesModel();
     }
 
     bool BasicMetadataModel::replaceInDescription(const QString &replaceWhat, const QString &replaceTo,
@@ -347,11 +351,12 @@ namespace Common {
         emit spellCheckResultsReady();
     }
 
-    void BasicMetadataModel::updateDescriptionSpellErrors(const QHash<QString, bool> &results) {
+    void BasicMetadataModel::updateDescriptionSpellErrors(const QHash<QString, Common::WordAnalysisResult> &results) {
         QSet<QString> descriptionErrors;
         QStringList descriptionWords = getDescriptionWords();
+        Common::WordAnalysisResult defaultWordAnalysisResult;
         foreach(const QString &word, descriptionWords) {
-            if (results.value(word, true) == false) {
+            if (results.value(word, defaultWordAnalysisResult).m_IsCorrect == false) {
                 descriptionErrors.insert(word.toLower());
             }
         }
@@ -359,11 +364,12 @@ namespace Common {
         m_SpellCheckInfo->setDescriptionErrors(descriptionErrors);
     }
 
-    void BasicMetadataModel::updateTitleSpellErrors(const QHash<QString, bool> &results) {
+    void BasicMetadataModel::updateTitleSpellErrors(const QHash<QString, Common::WordAnalysisResult> &results) {
         QSet<QString> titleErrors;
         QStringList titleWords = getTitleWords();
+        Common::WordAnalysisResult defaultWordAnalysisResult;
         foreach(const QString &word, titleWords) {
-            if (results.value(word, true) == false) {
+            if (results.value(word, defaultWordAnalysisResult).m_IsCorrect == false) {
                 titleErrors.insert(word.toLower());
             }
         }

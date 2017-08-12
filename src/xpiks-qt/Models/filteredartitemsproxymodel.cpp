@@ -453,6 +453,13 @@ namespace Models {
         m_CommandManager->setupSpellCheckSuggestions(itemsForSuggestions, (SuggestionFlags)flags);
     }
 
+    void FilteredArtItemsProxyModel::removeDuplicatesFromSelected() const {
+        auto itemsForSuggestions = getFilteredOriginalItems<std::pair<Common::IMetadataOperator *, int> >(
+                    [](ArtworkMetadata *artwork) { return artwork->hasDuplicates(); },
+                    [] (ArtworkMetadata *metadata, int index, int) { return std::pair<Common::IMetadataOperator *, int>(metadata, index); });
+        m_CommandManager->setupDuplicatesModel(itemsForSuggestions);
+    }
+
     void FilteredArtItemsProxyModel::itemSelectedChanged(bool value) {
         int plus = value ? +1 : -1;
 

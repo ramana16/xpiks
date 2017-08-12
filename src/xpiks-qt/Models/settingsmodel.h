@@ -54,6 +54,7 @@ namespace Models {
         Q_PROPERTY(bool searchByFilepath READ getSearchByFilepath WRITE setSearchByFilepath NOTIFY searchByFilepathChanged)
         Q_PROPERTY(double scrollSpeedScale READ getScrollSpeedScale WRITE setScrollSpeedScale NOTIFY scrollSpeedScaleChanged)
         Q_PROPERTY(bool useSpellCheck READ getUseSpellCheck WRITE setUseSpellCheck NOTIFY useSpellCheckChanged)
+        Q_PROPERTY(bool detectDuplicates READ getDetectDuplicates WRITE setDetectDuplicates NOTIFY detectDuplicatesChanged)
         Q_PROPERTY(bool userStatistics READ getUserStatistics WRITE setUserStatistics NOTIFY userStatisticsChanged)
         Q_PROPERTY(bool checkForUpdates READ getCheckForUpdates WRITE setCheckForUpdates NOTIFY checkForUpdatesChanged)
         Q_PROPERTY(bool autoDownloadUpdates READ getAutoDownloadUpdates WRITE setAutoDownloadUpdates NOTIFY autoDownloadUpdatesChanged)
@@ -343,6 +344,7 @@ namespace Models {
         bool getSearchByFilepath() const { return m_SearchByFilepath; }
         double getScrollSpeedScale() const { return m_ScrollSpeedScale; }
         bool getUseSpellCheck() const { return m_UseSpellCheck; }
+        bool getDetectDuplicates() const { return m_DetectDuplicates; }
         bool getUserStatistics() const { return m_UserStatistics; }
         bool getCheckForUpdates() const { return m_CheckForUpdates; }
         bool getAutoDownloadUpdates() const { return m_AutoDownloadUpdates; }
@@ -385,6 +387,7 @@ namespace Models {
         void searchByFilepathChanged(bool value);
         void scrollSpeedScaleChanged(double value);
         void useSpellCheckChanged(bool value);
+        void detectDuplicatesChanged(bool value);
         void userStatisticsChanged(bool value);
         void checkForUpdatesChanged(bool value);
         void autoDownloadUpdatesChanged(bool value);
@@ -511,6 +514,14 @@ namespace Models {
 
             m_UseSpellCheck = value;
             emit useSpellCheckChanged(value);
+        }
+
+        void setDetectDuplicates(bool value)  {
+            if (m_DetectDuplicates == value)
+                return;
+
+            m_DetectDuplicates = value;
+            emit detectDuplicatesChanged(value);
         }
 
         void setUserStatistics(bool value) {
@@ -682,6 +693,7 @@ namespace Models {
         bool m_SearchUsingAnd;
         bool m_SearchByFilepath;
         bool m_UseSpellCheck;
+        bool m_DetectDuplicates;
         bool m_UserStatistics;
         bool m_CheckForUpdates;
         bool m_AutoDownloadUpdates;

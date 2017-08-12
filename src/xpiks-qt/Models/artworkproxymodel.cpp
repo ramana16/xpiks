@@ -150,6 +150,10 @@ namespace Models {
         doSuggestCorrections();
     }
 
+    void ArtworkProxyModel::retreiveDuplicates() {
+       doSetupDuplicatesModel();
+    }
+
     void ArtworkProxyModel::initDescriptionHighlighting(QQuickTextDocument *document) {
         doInitDescriptionHighlighting(document);
     }

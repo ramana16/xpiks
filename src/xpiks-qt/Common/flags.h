@@ -161,6 +161,13 @@ namespace Common {
         Spelling = 4
     };
 
+    enum struct WordAnalysisFlags: flag_t {
+        None = 0,
+        Spelling = 1 << 0,
+        Stemming = 1 << 1,
+        All = Spelling | Stemming
+    };
+
     const char *warningsFlagToString(WarningsCheckFlags flags);
 
     template<typename FlagType>

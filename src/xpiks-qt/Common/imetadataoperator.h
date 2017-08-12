@@ -38,6 +38,7 @@ namespace Common {
         virtual bool appendPreset(const QStringList &presetList) = 0;
         virtual bool hasKeywords(const QStringList &keywordsList) = 0;
         virtual void requestBackup() = 0;
+        virtual const QHash<QString, QStringList> getDuplicatesModel() = 0;
 
         virtual Common::BasicKeywordsModel *getBasicKeywordsModel() = 0;
 

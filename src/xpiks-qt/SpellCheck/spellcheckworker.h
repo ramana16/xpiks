@@ -108,6 +108,8 @@ namespace SpellCheck {
         QStringList suggestCorrections(const QString &word);
         bool checkWordSpelling(const std::shared_ptr<SpellCheckQueryItem> &queryItem);
         bool checkWordSpelling(const QString &word);
+        void checkWordStem(const std::shared_ptr<SpellCheckQueryItem> &queryItem);
+        QString getWordStem(const QString &word);
         bool isHunspellSpellingCorrect(const QString &word) const;
         void findSuggestions(const QString &word);
         void initUserDictionary();

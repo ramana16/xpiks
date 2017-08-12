@@ -85,5 +85,16 @@
 #define SPECIAL_ID_ARTWORK_PROXY_MODEL 2
 #define SPECIAL_ID_COMBINED_MODEL 3
 
+#if defined(CORE_TESTS)
+#define SYNONYMS_DISTANCE 3
+#else
+#if defined (INTEGRATION_TESTS)
+#define SYNONYMS_DISTANCE 1000
+#else
+// prod value
+#define SYNONYMS_DISTANCE 3
+#endif
+#endif
+
 #endif // DEFINES
 

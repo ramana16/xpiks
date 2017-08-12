@@ -192,6 +192,14 @@ namespace Models {
         m_CommandManager->setupSpellCheckSuggestions(metadataOperator, -1, Common::SuggestionFlags::All);
     }
 
+    void ArtworkProxyBase::doSetupDuplicatesModel() {
+        LOG_DEBUG << "#";
+        auto *metadataOperator = getMetadataOperator();
+        if (metadataOperator) {
+            m_CommandManager->setupDuplicatesModel(metadataOperator);
+        }
+    }
+
     void ArtworkProxyBase::doInitDescriptionHighlighting(QQuickTextDocument *document) {
         auto *keywordsModel = getBasicMetadataModel();
         SpellCheck::SpellCheckItemInfo *info = keywordsModel->getSpellCheckInfo();

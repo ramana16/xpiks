@@ -9,9 +9,9 @@ class PresetTests: public QObject
     Q_OBJECT
 private slots:
     void expandFromPresetTrivial();
-    void expandFromPresetWithDublicates();
+    void expandFromPresetWithDuplicates();
     void appendFromPresetTrivial();
-    void appendFromPresetWithDublicates();
+    void appendFromPresetWithDuplicates();
     void findPresetByNameTest();
     void strictFindPresetByNameTest();
     void findPresetWithLongNamesByNameTest();

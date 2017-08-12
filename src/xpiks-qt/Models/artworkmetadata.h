@@ -106,7 +106,8 @@ namespace Models {
         size_t getLastKnownIndex() const { return m_LastKnownIndex; }
         virtual qint64 getFileSize() const { return m_FileSize; }
         virtual Common::ID_t getItemID() const override { return m_ID; }
-
+        bool hasDuplicates(int keywordIndex) const;
+        bool hasDuplicates();
     public:
         void setCurrentIndex(size_t index) { m_LastKnownIndex = index; }
         Common::flag_t getWarningsFlags() const { return m_WarningsFlags; }
@@ -151,6 +152,7 @@ namespace Models {
         virtual int appendKeywords(const QStringList &keywordsList) override;
         virtual bool removeKeywords(const QSet<QString> &keywordsSet, bool caseSensitive=true) override;
         virtual QString getKeywordsString() override { return m_MetadataModel.getKeywordsString(); }
+        virtual const QHash<QString, QStringList> getDuplicatesModel() override { return m_MetadataModel.getDuplicatesModel(); }
 
     public:
         virtual Common::KeywordReplaceResult fixKeywordSpelling(int index, const QString &existing, const QString &replacement) override;

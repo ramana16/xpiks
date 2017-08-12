@@ -26,7 +26,7 @@ import "Constants/UIConfig.js" as UIConfig
 ApplicationWindow {
     id: applicationWindow
     visible: true
-    width: settingsModel.getAppWidth(930)
+    width: settingsModel.getAppWidth(1010)
     height: settingsModel.getAppHeight(725)
     minimumHeight: 725
     minimumWidth: 930

@@ -18,6 +18,7 @@
 #include <QHash>
 #include <functional>
 #include "../Common/flags.h"
+#include "../Common/wordanalysisresult.h"
 
 namespace Common {
     class BasicKeywordsModel;
@@ -30,20 +31,23 @@ namespace SpellCheck {
         SpellCheckQueryItem(int index, const QString &word):
             m_Word(word),
             m_Index(index),
-            m_IsCorrect(true)
+            m_IsCorrect(true),
+            m_Stem()
         {}
 
         SpellCheckQueryItem(const SpellCheckQueryItem &copy):
             m_Word(copy.m_Word),
             m_Index(copy.m_Index),
             m_IsCorrect(copy.m_IsCorrect),
-            m_Suggestions(copy.m_Suggestions)
+            m_Suggestions(copy.m_Suggestions),
+            m_Stem(copy.m_Stem)
         {}
 
         QString m_Word;
         int m_Index;
         volatile bool m_IsCorrect;
         QStringList m_Suggestions;
+        QString m_Stem;
     };
 
     class ISpellCheckItem
@@ -61,13 +65,19 @@ namespace SpellCheck {
         virtual ~SpellCheckItemBase();
 
     protected:
-        SpellCheckItemBase():
+        SpellCheckItemBase(Common::WordAnalysisFlags wordAnalysisFlag):
             QObject(),
-            m_NeedsSuggestions(false) {}
+            m_NeedsSuggestions(false),
+            m_WordAnalysisFlag(wordAnalysisFlag)
+            {}
 
     public:
         const std::vector<std::shared_ptr<SpellCheckQueryItem> > &getQueries() const { return m_QueryItems; }
-        const QHash<QString, bool> &getHash() const { return m_SpellCheckResults; }
+        Common::WordAnalysisFlags getWordAnalysisFlags() const { return m_WordAnalysisFlag; }
+
+        const QHash<QString, Common::WordAnalysisResult> &getHash() const {
+            return m_SpellCheckResults;
+        }
         virtual void submitSpellCheckResult() = 0;
 
         bool needsSuggestions() const { return m_NeedsSuggestions; }
@@ -81,8 +91,9 @@ namespace SpellCheck {
 
     private:
         std::vector<std::shared_ptr<SpellCheckQueryItem> > m_QueryItems;
-        QHash<QString, bool> m_SpellCheckResults;
+        QHash<QString, Common::WordAnalysisResult> m_SpellCheckResults;
         volatile bool m_NeedsSuggestions;
+        Common::WordAnalysisFlags m_WordAnalysisFlag;
     };
 
     class SpellCheckSeparatorItem:
@@ -98,9 +109,9 @@ namespace SpellCheck {
     Q_OBJECT
 
     public:
-        SpellCheckItem(Common::BasicKeywordsModel *spellCheckable, Common::SpellCheckFlags spellCheckFlags, int keywordIndex);
-        SpellCheckItem(Common::BasicKeywordsModel *spellCheckable, Common::SpellCheckFlags spellCheckFlags);
-        SpellCheckItem(Common::BasicKeywordsModel *spellCheckable, const QStringList &keywordsToCheck);
+        SpellCheckItem(Common::BasicKeywordsModel *spellCheckable, Common::SpellCheckFlags spellCheckFlags, Common::WordAnalysisFlags wordAnalysisFlags, int keywordIndex);
+        SpellCheckItem(Common::BasicKeywordsModel *spellCheckable, Common::SpellCheckFlags spellCheckFlags, Common::WordAnalysisFlags wordAnalysisFlags);
+        SpellCheckItem(Common::BasicKeywordsModel *spellCheckable, const QStringList &keywordsToCheck, Common::WordAnalysisFlags wordAnalysisFlags);
         virtual ~SpellCheckItem();
 
     private:

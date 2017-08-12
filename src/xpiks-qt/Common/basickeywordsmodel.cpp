@@ -73,7 +73,9 @@ namespace Common {
             case KeywordRole:
                 return m_KeywordsList.at(index.row());
             case IsCorrectRole:
-                return m_SpellCheckResults.at(index.row());
+                return m_SpellCheckResults.at(index.row()).m_IsCorrect;
+            case HasDuplicateRole:
+                return hasDuplicates(index.row());
             default:
                 return QVariant();
         }
@@ -103,6 +105,54 @@ namespace Common {
         return m_KeywordsList.join(", ");
     }
 
+    bool BasicKeywordsModel::hasDuplicates(int keywordIndex) const {
+        bool result = false;
+        if ((0 <= keywordIndex) && (keywordIndex < m_SpellCheckResults.length())) {
+            // Qt limitations =(
+            // QReadLocker readLocker(&m_StemsLock);
+            QStringList synonymStems;
+            result = hasDuplicatesUnsafe(keywordIndex, synonymStems);
+        }
+
+        return result;
+    }
+
+    const QHash<QString, QStringList> BasicKeywordsModel::getDuplicatesModel() {
+        QReadLocker readLocker(&m_StemsLock);
+        return getDuplicatesModelUnsafe();
+    }
+
+    QStringList BasicKeywordsModel::getStems(int keywordIndex) {
+         QStringList result;
+         QReadLocker readLocker(&m_StemsLock);
+         const QStringList &stems = m_SpellCheckResults[keywordIndex].m_Stems;
+            for (const QString &stem : stems) {
+                if (m_StemsResults[stem].size() > 1) {
+                    result.append(stem);
+                }
+            }
+            return result;
+    }
+
+    void BasicKeywordsModel::initializeKeywords(BasicKeywordsModel *model) {
+        QStringList words = model->getKeywords();
+        QVector<KeywordSpellInfo> spellcheckStatuses = model->getSpellStatusesUnsafe();
+        beginResetModel();
+        {
+            LOG_INFO << "#" << words;
+            QWriteLocker writeLocker(&m_KeywordsLock);
+            Q_UNUSED(writeLocker);
+            clearKeywordsUnsafe();
+            m_KeywordsList = words;
+            for (const auto &word : m_KeywordsList) {
+                m_KeywordsSet.insert(word);
+            }
+            m_SpellCheckResults = spellcheckStatuses;
+            reevaluateStemsData();
+        }
+        endResetModel();
+    }
+
     bool BasicKeywordsModel::appendKeyword(const QString &keyword) {
         QWriteLocker writeLocker(&m_KeywordsLock);
 
@@ -118,6 +168,7 @@ namespace Common {
         {
             if (0 <= index && index < m_KeywordsList.length()) {
                 beginRemoveRows(QModelIndex(), index, index);
+                removeStemsData(index);
                 takeKeywordAtUnsafe(index, removedKeyword, wasCorrect);
                 endRemoveRows();
                 result = true;
@@ -128,6 +179,8 @@ namespace Common {
         if (!wasCorrect) {
             emit spellCheckErrorsChanged();
         }
+
+        emitDuplicateStateChanged();
 
         return result;
     }
@@ -140,6 +193,7 @@ namespace Common {
             if (m_KeywordsList.length() > 0) {
                 int index = m_KeywordsList.length() - 1;
                 beginRemoveRows(QModelIndex(), index, index);
+                removeStemsData(index);
                 takeKeywordAtUnsafe(index, removedKeyword, wasCorrect);
                 endRemoveRows();
                 result = true;
@@ -150,6 +204,7 @@ namespace Common {
         if (!wasCorrect) {
             emit spellCheckErrorsChanged();
         }
+        emitDuplicateStateChanged();
 
         return result;
     }
@@ -260,15 +315,24 @@ namespace Common {
             }
         }
 
+        if (anyChanged) {
+            emitDuplicateStateChanged();
+        }
+
         return anyChanged;
     }
 
     bool BasicKeywordsModel::removeKeywords(const QSet<QString> &keywords, bool caseSensitive) {
-        QWriteLocker writeLocker(&m_KeywordsLock);
-
-        Q_UNUSED(writeLocker);
+        m_KeywordsLock.lockForWrite();
 
         bool result = removeKeywordsUnsafe(keywords, caseSensitive);
+
+        m_KeywordsLock.unlock();
+
+        if (result) {
+            emitDuplicateStateChanged();
+        }
+
         return result;
     }
 
@@ -280,7 +344,7 @@ namespace Common {
             int keywordsCount = m_KeywordsList.length();
 
             m_KeywordsSet.insert(sanitizedKeyword.toLower());
-            m_SpellCheckResults.append(true);
+            m_SpellCheckResults.append(Common::KeywordSpellInfo());
 
             beginInsertRows(QModelIndex(), keywordsCount, keywordsCount);
             m_KeywordsList.append(sanitizedKeyword);
@@ -298,7 +362,7 @@ namespace Common {
         m_KeywordsSet.remove(invariant);
 
         removedKeyword = m_KeywordsList.takeAt(index);
-        wasCorrect = m_SpellCheckResults.takeAt(index);
+        wasCorrect = m_SpellCheckResults.takeAt(index).m_IsCorrect;
     }
 
     void BasicKeywordsModel::setKeywordsUnsafe(const QStringList &keywordsList) {
@@ -335,7 +399,7 @@ namespace Common {
             for (int i = 0; i < size; ++i) {
                 const QString &keywordToAdd = keywordsToAdd.at(i);
                 m_KeywordsSet.insert(keywordToAdd.toLower());
-                m_SpellCheckResults.append(true);
+                m_SpellCheckResults.append(Common::KeywordSpellInfo());
                 m_KeywordsList.append(keywordToAdd);
             }
 
@@ -471,13 +535,28 @@ namespace Common {
         int length = m_SpellCheckResults.length();
 
         for (int i = 0; i < length; ++i) {
-            if (!m_SpellCheckResults[i]) {
+            if (!m_SpellCheckResults[i].m_IsCorrect) {
                 anyError = true;
                 break;
             }
         }
 
         return anyError;
+    }
+
+    bool BasicKeywordsModel::hasKeywordsDuplicatesUnsafe() const {
+        bool anyDuplicates = false;
+        int length = m_SpellCheckResults.length();
+
+        for (int i = 0; i < length; ++i) {
+            QStringList synonymStems;
+            if (hasDuplicatesUnsafe(i, synonymStems)) {
+                anyDuplicates = true;
+                break;
+            }
+        }
+
+        return anyDuplicates;
     }
 
     bool BasicKeywordsModel::removeKeywordsUnsafe(const QSet<QString> &keywordsToRemove, bool caseSensitive) {
@@ -538,6 +617,9 @@ namespace Common {
         LOG_DEBUG << indices.size() << "item(s)";
         QVector<QPair<int, int> > rangesToRemove;
         Helpers::indicesToRanges(indices, rangesToRemove);
+        for (const auto &indice : indices) {
+            removeStemsData(indice);
+        }
         AbstractListModel::removeItemsAtIndices(rangesToRemove);
     }
 
@@ -631,19 +713,30 @@ namespace Common {
         return hasKeywordsSpellErrorUnsafe();
     }
 
+    bool BasicKeywordsModel::hasKeywordsDuplicates() {
+        QReadLocker readLocker(&m_KeywordsLock);
+
+        Q_UNUSED(readLocker);
+
+        return hasKeywordsDuplicatesUnsafe();
+    }
+
     bool BasicKeywordsModel::hasSpellErrors() {
         bool hasErrors = hasKeywordsSpellError();
         return hasErrors;
     }
 
-    void BasicKeywordsModel::setSpellStatuses(BasicKeywordsModel *keywordsModel) {
-        QWriteLocker writeLocker(&m_KeywordsLock);
+    bool BasicKeywordsModel::hasDuplicates() {
+        bool hasDuplicates = hasKeywordsDuplicates();
+        return hasDuplicates;
+    }
 
-        Q_UNUSED(writeLocker);
+    void BasicKeywordsModel::setSpellStatuses(BasicKeywordsModel *keywordsModel) {
+        m_KeywordsLock.lockForWrite();
 
         keywordsModel->lockKeywordsRead();
         {
-            const QVector<bool> &spellStatuses = keywordsModel->getSpellStatusesUnsafe();
+            const QVector<KeywordSpellInfo> &spellStatuses = keywordsModel->getSpellStatusesUnsafe();
 
 #ifdef QT_DEBUG
             // sync issue between adding/removing/undo/spellcheck
@@ -656,7 +749,14 @@ namespace Common {
                 m_SpellCheckResults[i] = spellStatuses[i];
             }
         }
+
         keywordsModel->unlockKeywords();
+
+        reevaluateStemsData();
+
+        m_KeywordsLock.unlock();
+
+        emitDuplicateStateChanged();
     }
 
     void BasicKeywordsModel::notifySpellCheckResults(Common::SpellCheckFlags flags) {
@@ -673,7 +773,7 @@ namespace Common {
 
         // TODO: use smth like memset
         for (int i = 0; i < size; ++i) {
-            m_SpellCheckResults[i] = true;
+            m_SpellCheckResults[i].reset();
         }
     }
 
@@ -681,6 +781,59 @@ namespace Common {
         bool isValid = Helpers::isValidKeyword(keyword);
         bool result = isValid && !m_KeywordsSet.contains(keyword.toLower());
 
+        return result;
+    }
+
+    bool BasicKeywordsModel::hasDuplicatesUnsafe(int keywordIndex, QStringList & synonymStems, bool findAll) const {
+        const QStringList &stems = m_SpellCheckResults[keywordIndex].m_Stems;
+        const auto targetWords = m_KeywordsList[keywordIndex].split(QChar::Space, QString::SkipEmptyParts);
+        int count = 0;
+        int size = std::min(targetWords.size(), stems.size());
+        bool result = false;
+
+        for (int i = 0; i < size; i++) {
+            count = 0;
+            const auto &stem = stems[i];
+            if (stem.isEmpty()) {
+                continue;
+            }
+
+            const auto &target_word = targetWords[i];
+            auto it = m_StemsResults.find(stem);
+            if (it != m_StemsResults.end()) {
+                auto &words = it.value();
+                for (const auto &word : words) {
+                    if (Helpers::levensteinDistance(target_word, word) <= SYNONYMS_DISTANCE) {
+                        count++;
+                        if (count > 1) {
+                            LOG_INFO << keywordIndex << stems << count;
+                            synonymStems.append(stem);
+                            result = true;
+                            if (! findAll) {
+                                return result;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return result;
+    }
+
+    QHash<QString, QStringList> BasicKeywordsModel::getDuplicatesModelUnsafe()
+    {
+        QHash<QString, QStringList>  result;
+        int keywordsCount = m_KeywordsList.length();
+        for (int i =0; i < keywordsCount; i++) {
+            QStringList synonymStems;
+            if (hasDuplicatesUnsafe(i, synonymStems, true)) {
+                synonymStems.removeDuplicates();
+                for (const auto &synonymStem : synonymStems) {
+                    result[synonymStem].append(m_KeywordsList[i]);
+                }
+            }
+        }
         return result;
     }
 
@@ -740,7 +893,7 @@ namespace Common {
         spellCheckSuggestions.reserve(length/2);
 
         for (int i = 0; i < length; ++i) {
-            if (!m_SpellCheckResults[i]) {
+            if (!m_SpellCheckResults[i].m_IsCorrect) {
                 const QString &keyword = m_KeywordsList.at(i);
                 LOG_DEBUG << keyword << "has wrong spelling";
 
@@ -767,7 +920,7 @@ namespace Common {
         {
             if (0 <= index && index < m_KeywordsList.length()) {
                 if (replaceKeywordUnsafe(index, existing, replacement)) {
-                    m_SpellCheckResults[index] = true;
+                    m_SpellCheckResults[index].m_IsCorrect = true;
                     result = Common::KeywordReplaceResult::Succeeded;
                 } else {
                     result = Common::KeywordReplaceResult::FailedDuplicate;
@@ -783,6 +936,7 @@ namespace Common {
             QModelIndex i = this->index(index);
             // combined roles from legacy editKeyword() and replace()
             emit dataChanged(i, i, QVector<int>() << KeywordRole << IsCorrectRole);
+            emitDuplicateStateChanged();
         }
 
         return result;
@@ -835,6 +989,7 @@ namespace Common {
         LOG_DEBUG << "#";
         emit spellCheckErrorsChanged();
         emit afterSpellingErrorsFixed();
+        emit emitDuplicateStateChanged();
     }
 
     void BasicKeywordsModel::connectSignals(SpellCheck::SpellCheckItem *item) {
@@ -846,7 +1001,6 @@ namespace Common {
         if (Common::HasFlag(flags, Common::SpellCheckFlags::Keywords)) {
             emitSpellCheckChanged(index);
         }
-
         notifySpellCheckResults(flags);
     }
 
@@ -867,7 +1021,8 @@ namespace Common {
             auto &item = items.at(i);
             int index = item->m_Index;
             if (0 <= index && index < keywordsLength) {
-                m_SpellCheckResults[index] = true;
+                m_SpellCheckResults[index].m_IsCorrect = true;
+                m_SpellCheckResults[index].m_Stems.clear();
             }
 
             if (index >= keywordsLength) {
@@ -881,10 +1036,24 @@ namespace Common {
             Q_ASSERT(keywordsLength == m_KeywordsList.length());
 
             if (0 <= index && index < keywordsLength) {
+                const auto words = m_KeywordsList[index].split(QChar::Space, QString::SkipEmptyParts);
+                if (m_SpellCheckResults[index].m_Stems.empty()) {
+                int size = words.size();
+                m_SpellCheckResults[index].m_Stems.reserve(size);
+                    for (int i = 0; i < size; i++) {
+                        m_SpellCheckResults[index].m_Stems.append(QString());
+                    }
+                }
                 if (m_KeywordsList[index].contains(item->m_Word)) {
                     // if keyword contains several words, there would be
                     // several queryitems and there's error if any has error
-                    m_SpellCheckResults[index] = m_SpellCheckResults[index] && item->m_IsCorrect;
+                    m_SpellCheckResults[index].m_IsCorrect = m_SpellCheckResults[index].m_IsCorrect && item->m_IsCorrect;
+                    // consolidate information about stems
+                    const auto pos = std::find(words.begin(), words.end(), item->m_Word);
+                    if (pos != words.end())
+                    {
+                        m_SpellCheckResults[index].m_Stems[pos - words.begin()] = item->m_Stem;
+                    }
                 }
             }
 
@@ -892,6 +1061,8 @@ namespace Common {
                 break;
             }
         }
+
+        reevaluateStemsData();
     }
 
     bool BasicKeywordsModel::isReplacedADuplicateUnsafe(int index, const QString &existingPrev,
@@ -938,12 +1109,67 @@ namespace Common {
                 emit dataChanged(i, i, QVector<int>() << IsCorrectRole);
             }
         }
+
+        emitDuplicateStateChanged();
+    }
+
+    void BasicKeywordsModel::reevaluateStemsData()
+    {
+        QWriteLocker writeLocker(&m_StemsLock);
+        reevaluateStemsDataUnsafe();
+    }
+
+    void BasicKeywordsModel::removeStemsData(int index) {
+        QWriteLocker writeLocker(&m_StemsLock);
+
+        if (0 <= index && index < m_SpellCheckResults.length()) {
+            removeStemsDataUnsafe(index);
+        }
+    }
+
+    void BasicKeywordsModel::reevaluateStemsDataUnsafe()
+    {
+        m_StemsResults.clear();
+        int i = 0;
+        for (const auto &spellCheckResult  : m_SpellCheckResults) {
+            const auto &stems = spellCheckResult.m_Stems;
+            const auto words = m_KeywordsList[i].split(QChar::Space, QString::SkipEmptyParts);
+            int size = std::min(stems.size(), words.size());
+            LOG_INFO << words << stems;
+            for (int i = 0; i < size; i++) {
+                const auto &stem = stems[i];
+                const auto &word = words[i];
+                m_StemsResults[stem].append(word);
+            }
+
+            i++;
+        }
+    }
+
+    void BasicKeywordsModel::removeStemsDataUnsafe(int index) {
+        auto &stems = m_SpellCheckResults[index].m_Stems;
+        LOG_INFO << stems;
+        for (const auto &stem : stems) {
+            const auto words = m_KeywordsList[index].split(QChar::Space, QString::SkipEmptyParts);
+            for (const auto &word : words) {
+                m_StemsResults[stem].removeOne(word);
+            }
+        }
+    }
+
+    void BasicKeywordsModel::emitDuplicateStateChanged()
+    {
+        emit hasDuplicatesChanged();
+        QModelIndex start = this->index(0);
+        QModelIndex end = this->index(m_KeywordsList.length() - 1);
+        emit dataChanged(start, end, QVector<int>() << HasDuplicateRole);
     }
 
     QHash<int, QByteArray> BasicKeywordsModel::roleNames() const {
         QHash<int, QByteArray> roles;
         roles[KeywordRole] = "keyword";
         roles[IsCorrectRole] = "iscorrect";
+        roles[HasDuplicateRole] = "hasduplicate";
         return roles;
     }
 }

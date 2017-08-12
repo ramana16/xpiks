@@ -1171,6 +1171,7 @@ ColumnLayout {
                                                     keywordText: keyword
                                                     itemHeight: flv.keywordHeight
                                                     hasSpellCheckError: !iscorrect
+                                                    hasDuplicate: hasduplicate
                                                     onRemoveClicked: keywordsWrapper.removeKeyword(kw.delegateIndex)
 
                                                     onActionDoubleClicked: {
@@ -1336,6 +1337,33 @@ ColumnLayout {
                                                         Common.launchDialog("../Dialogs/SpellCheckSuggestionsDialog.qml",
                                                                             applicationWindow,
                                                                             {})
+                                                    }
+                                                }
+                                            }
+
+                                            StyledText {
+                                                text: "|"
+                                                isActive: rowWrapper.isHighlighted
+                                                verticalAlignment: Text.AlignVCenter
+                                            }
+
+                                            StyledText {
+                                                id: removeDuplicatesText
+                                                text: i18.n + qsTr("Remove Duplicates")
+                                                enabled: rowWrapper.keywordsModel ? rowWrapper.keywordsModel.hasDuplicates : false
+                                                color: enabled ? (fixSpellingMA.pressed ? uiColors.linkClickedColor : uiColors.artworkActiveColor) : (rowWrapper.isHighlighted ? uiColors.labelActiveForeground : uiColors.labelInactiveForeground)
+                                                MouseArea {
+                                                    id: removeDuplicatesMA
+                                                    anchors.fill: parent
+                                                    cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+
+                                                    onClicked: {
+                                                        artItemsModel.setupDuplicatesModel(rowWrapper.getIndex())
+                                                        Common.launchDialog("../Dialogs/RemoveDuplicatesDialog.qml",
+                                                                            applicationWindow,
+                                                                            {
+                                                                                componentParent: applicationWindow
+                                                                            })
                                                     }
                                                 }
                                             }

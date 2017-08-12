@@ -729,6 +729,7 @@ Rectangle {
                                 isHighlighted: keywordsCheckBox.checked
                                 keywordText: keyword
                                 hasSpellCheckError: !iscorrect
+                                hasDuplicate: hasduplicate
                                 delegateIndex: index
                                 itemHeight: flv.keywordHeight
                                 closeIconDisabledColor: uiColors.closeIconInactiveColor
@@ -871,10 +872,35 @@ Rectangle {
                                     anchors.fill: parent
                                     cursorShape: Qt.PointingHandCursor
                                     onClicked: {
-                                        combinedArtworks.suggestCorrections()
                                         Common.launchDialog("Dialogs/SpellCheckSuggestionsDialog.qml",
                                                             componentParent,
                                                             {})
+                                    }
+                                }
+                            }
+
+                            StyledText {
+                                text: "|"
+                                verticalAlignment: Text.AlignVCenter
+                            }
+
+                            StyledText {
+                                id: removeDuplicatesText
+                                text: i18.n + qsTr("Remove Duplicates")
+                                enabled: keywordsWrapper.keywordsModel ? keywordsWrapper.keywordsModel.hasDuplicates : false
+                                color: plainTextMA.containsMouse ? uiColors.linkClickedColor : uiColors.labelActiveForeground
+                                MouseArea {
+                                    id: removeDuplicatesMA
+                                    anchors.fill: parent
+                                    cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+
+                                    onClicked: {
+                                        combinedArtworks.retreiveDuplicates()
+                                        Common.launchDialog("Dialogs/RemoveDuplicatesDialog.qml",
+                                                            componentParent,
+                                                            {
+                                                                componentParent: componentParent
+                                                            })
                                     }
                                 }
                             }

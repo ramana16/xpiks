@@ -343,6 +343,7 @@ ColumnLayout {
                 isHighlighted: false
                 keywordText: keyword
                 hasSpellCheckError: !iscorrect
+                hasDuplicate: hasduplicate
                 delegateIndex: index
                 itemHeight: flv.keywordHeight
                 onRemoveClicked: keywordsWrapper.removeKeyword(delegateIndex)

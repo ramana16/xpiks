@@ -27,6 +27,7 @@
 #include "deletekeywords_tests.h"
 #include "preset_tests.h"
 #include "quickbuffer_tests.h"
+#include "duplicatesearch_tests.h"
 
 #define QTEST_CLASS(TestObject, vName, result) \
     TestObject vName; \
@@ -63,6 +64,7 @@ int main(int argc, char *argv[]) {
     QTEST_CLASS(DeleteKeywordsTests, dkt, result);
     QTEST_CLASS(PresetTests, pst, result);
     QTEST_CLASS(QuickBufferTests, qbt, result);
+    QTEST_CLASS(DuplicateSearchTests, dst, result);
 
     QThread::sleep(1);
 

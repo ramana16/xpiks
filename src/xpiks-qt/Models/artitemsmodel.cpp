@@ -658,6 +658,15 @@ namespace Models {
 #endif
     }
 
+    void ArtItemsModel::setupDuplicatesModel(int metadataIndex) {
+        LOG_INFO << metadataIndex;
+        if (0 <= metadataIndex && metadataIndex < rowCount()) {
+            ArtworkMetadata *metadata = m_ArtworkList.at(metadataIndex);
+            Q_ASSERT(metadata);
+            m_CommandManager->setupDuplicatesModel(metadata);
+        }
+    }
+
     void ArtItemsModel::fillFromQuickBuffer(int metadataIndex) {
         LOG_INFO << "item" << metadataIndex;
 
@@ -684,6 +693,16 @@ namespace Models {
             m_CommandManager->processCommand(combinedEditCommand);
             updateItemAtIndex(metadataIndex);
         }
+    }
+
+    bool ArtItemsModel::hasDuplicates(int metadataIndex, int keywordIndex) const {
+        if (0 <= metadataIndex && metadataIndex < getArtworksCount()) {
+            ArtworkMetadata *metadata = m_ArtworkList.at(metadataIndex);
+            Q_ASSERT(metadata);
+            return metadata->hasDuplicates(keywordIndex);
+        }
+
+        return false;
     }
 
     int ArtItemsModel::rowCount(const QModelIndex &parent) const {

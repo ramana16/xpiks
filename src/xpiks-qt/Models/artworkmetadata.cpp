@@ -182,6 +182,14 @@ namespace Models {
         return isInDir;
     }
 
+    bool ArtworkMetadata::hasDuplicates(int keywordIndex) const {
+        return m_MetadataModel.hasDuplicates(keywordIndex);
+    }
+
+    bool ArtworkMetadata::hasDuplicates() {
+        return m_MetadataModel.hasDuplicates();
+    }
+
     void ArtworkMetadata::clearModel() {
         if (!getIsInitializedFlag()) {
             LOG_WARNING << "#" << m_ID << "attempt to clear not initialized artwork";

@@ -160,7 +160,8 @@ SOURCES += main.cpp \
     MetadataIO/metadataioservice.cpp \
     MetadataIO/artworkssnapshot.cpp \
     Connectivity/connectivityrequest.cpp \
-    MetadataIO/metadatareadinghub.cpp
+    MetadataIO/metadatareadinghub.cpp \
+	Models/duplicatesmodel.cpp
 
 RESOURCES += qml.qrc
 
@@ -380,7 +381,9 @@ HEADERS += \
     Suggestion/locallibraryquery.h \
     MetadataIO/artworkssnapshot.h \
     Connectivity/connectivityrequest.h \
-    MetadataIO/metadatareadinghub.h
+    MetadataIO/metadatareadinghub.h \
+    Models/duplicatesmodel.h \
+    Common/wordanalysisresult.h
 
 DISTFILES += \
     Components/CloseIcon.qml \

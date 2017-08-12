@@ -139,13 +139,22 @@ namespace SpellCheck {
     void SpellCheckWorker::processQueryItem(std::shared_ptr<SpellCheckItem> &item) {
         bool neededSuggestions = item->needsSuggestions();
         auto &queryItems = item->getQueries();
+        const auto wordAnalysisFlags = item->getWordAnalysisFlags();
         bool anyWrong = false;
 
         if (!neededSuggestions) {
             size_t size = queryItems.size();
             for (size_t i = 0; i < size; ++i) {
                 auto &queryItem = queryItems.at(i);
-                bool isOk = checkWordSpelling(queryItem);
+                bool isOk = true;
+                if (HasFlag(wordAnalysisFlags, Common::WordAnalysisFlags::Spelling)) {
+                    isOk = checkWordSpelling(queryItem);
+                }
+
+                if (HasFlag(wordAnalysisFlags, Common::WordAnalysisFlags::Stemming)) {
+                    checkWordStem(queryItem);
+                }
+
                 item->accountResultAt((int)i);
                 anyWrong = anyWrong || !isOk;
             }
@@ -257,6 +266,29 @@ namespace SpellCheck {
         }
 
         return isOk;
+    }
+
+    QString SpellCheckWorker::getWordStem(const QString &word) {
+        QString result;
+
+        if (word.size() == 0) {
+            return result;
+        }
+        std::string encodedWord = m_Codec->fromUnicode(word).toStdString();
+        const std::vector<std::string> stems = m_Hunspell->stem(encodedWord);
+        bool stemsNotEmpty = !stems.empty();
+        if (stemsNotEmpty) {
+            const auto & iter = std::min_element(stems.begin(), stems.end());
+            result =  QString::fromStdString(*iter);
+        }
+        return result;
+    }
+
+    void SpellCheckWorker::checkWordStem(const std::shared_ptr<SpellCheckQueryItem> &queryItem) {
+        const QString &word = queryItem->m_Word;
+        QString result = getWordStem(word);
+
+        queryItem->m_Stem = result;
     }
 
     bool SpellCheckWorker::isHunspellSpellingCorrect(const QString &word) const {

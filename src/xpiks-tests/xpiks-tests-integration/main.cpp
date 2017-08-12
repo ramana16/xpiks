@@ -61,6 +61,7 @@
 #include "../../xpiks-qt/KeywordsPresets/presetkeywordsmodelconfig.h"
 #include "../../xpiks-qt/Maintenance/maintenanceservice.h"
 #include "../../xpiks-qt/Connectivity/requestsservice.h"
+#include "../../xpiks-qt/Models/duplicatesmodel.h"
 
 #ifdef Q_OS_WIN
 #include "windowscrashhandler.h"
@@ -102,6 +103,7 @@
 #include "locallibrarysearchtest.h"
 #include "metadatacachesavetest.h"
 #include "savevideobasictest.h"
+#include "duplicatesearch_test.h"
 
 #if defined(WITH_LOGS)
 #undef WITH_LOGS
@@ -245,6 +247,7 @@ int main(int argc, char *argv[]) {
     Connectivity::TelemetryService telemetryService("1234567890", false);
     Plugins::PluginManager pluginManager;    
     Helpers::DatabaseManager databaseManager;
+    Models::DuplicatesModel duplicatesModel;
 
     Commands::CommandManager commandManager;
     commandManager.InjectDependency(&artworkRepository);
@@ -288,6 +291,8 @@ int main(int argc, char *argv[]) {
     commandManager.InjectDependency(&requestsService);
     commandManager.InjectDependency(&artworksUpdateHub);
     commandManager.InjectDependency(&databaseManager);
+    commandManager.InjectDependency(&duplicatesModel);
+
 
     commandManager.ensureDependenciesInjected();
 
@@ -343,6 +348,7 @@ int main(int argc, char *argv[]) {
     integrationTests.append(new UserDictEditTest(&commandManager));
     integrationTests.append(new WeirdNamesReadTest(&commandManager));
     integrationTests.append(new RestoreSessionTest(&commandManager));
+    integrationTests.append(new DuplicateSearchTest(&commandManager));
     // always the last one. insert new tests above
     integrationTests.append(new LocalLibrarySearchTest(&commandManager));
 

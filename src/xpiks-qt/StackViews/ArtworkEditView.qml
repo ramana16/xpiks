@@ -820,6 +820,7 @@ Rectangle {
                                     isHighlighted: true
                                     keywordText: keyword
                                     hasSpellCheckError: !iscorrect
+                                    hasDuplicate: hasduplicate
                                     delegateIndex: index
                                     itemHeight: flv.keywordHeight
                                     onRemoveClicked: keywordsWrapper.removeKeyword(delegateIndex)
@@ -919,6 +920,32 @@ Rectangle {
                                                             componentParent,
                                                             {})
                                         updateChangesText()
+                                    }
+                                }
+                            }
+
+                            StyledText {
+                                text: "|"
+                                verticalAlignment: Text.AlignVCenter
+                            }
+
+                            StyledText {
+                                id: removeDuplicatesText
+                                text: i18.n + qsTr("Remove Duplicates")
+                                enabled: artworkEditComponent.keywordsModel ? artworkEditComponent.keywordsModel.hasDuplicates : false
+                                color: enabled ? (fixSpellingMA.pressed ? uiColors.linkClickedColor : uiColors.artworkActiveColor) : uiColors.labelActiveForeground
+                                MouseArea {
+                                    id: removeDuplicatesMA
+                                    anchors.fill: parent
+                                    cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
+
+                                    onClicked: {
+                                        artworkProxy.retreiveDuplicates()
+                                        Common.launchDialog("Dialogs/RemoveDuplicatesDialog.qml",
+                                                            componentParent,
+                                                            {
+                                                                componentParent: componentParent
+                                                            })
                                     }
                                 }
                             }

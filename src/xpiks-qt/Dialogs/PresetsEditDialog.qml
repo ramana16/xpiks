@@ -401,6 +401,7 @@ Item {
                                 isHighlighted: true
                                 keywordText: keyword
                                 hasSpellCheckError: !iscorrect
+                                hasDuplicate: hasduplicate
                                 delegateIndex: index
                                 itemHeight: flv.keywordHeight
                                 onRemoveClicked: presetsModel.removeKeywordAt(presetNamesListView.currentIndex, index)

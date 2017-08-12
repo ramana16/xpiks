@@ -181,7 +181,9 @@ SOURCES += main.cpp \
     ../../xpiks-qt/MetadataIO/cachedartwork.cpp \
     ../../xpiks-qt/Maintenance/logscleanupjobitem.cpp \
     ../../xpiks-qt/MetadataIO/artworkssnapshot.cpp \
-    ../../xpiks-qt/Helpers/threadhelpers.cpp
+    ../../xpiks-qt/Helpers/threadhelpers.cpp \
+    duplicatesearch_tests.cpp \
+    ../../xpiks-qt/Models/duplicatesmodel.cpp
 
 HEADERS += \
     encryption_tests.h \
@@ -307,5 +309,7 @@ HEADERS += \
     ../../xpiks-qt/MetadataIO/cachedartwork.h \
     ../../xpiks-qt/Maintenance/imaintenanceitem.h \
     ../../xpiks-qt/Maintenance/logscleanupjobitem.h \
-    ../../xpiks-qt/Helpers/threadhelpers.h
+    ../../xpiks-qt/Helpers/threadhelpers.h \
+    duplicatesearch_tests.h \
+    ../../xpiks-qt/Models/duplicatesmodel.h
 

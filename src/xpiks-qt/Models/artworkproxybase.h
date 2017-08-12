@@ -62,6 +62,7 @@ namespace Models {
         bool doClearKeywords();
         QString doGetKeywordsString();
         void doSuggestCorrections();
+        void doSetupDuplicatesModel();
         void doInitDescriptionHighlighting(QQuickTextDocument *document);
         void doInitTitleHighlighting(QQuickTextDocument *document);
         void doSpellCheckDescription();

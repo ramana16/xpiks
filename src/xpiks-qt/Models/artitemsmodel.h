@@ -139,7 +139,10 @@ namespace Models {
 
         Q_INVOKABLE void initSuggestion(int metadataIndex);
 
+        Q_INVOKABLE void setupDuplicatesModel(int metadataIndex);
+
         void fillFromQuickBuffer(int metadataIndex);
+        bool hasDuplicates(int metadataIndex, int keywordIndex) const;
 
     public:
         virtual int rowCount(const QModelIndex &parent=QModelIndex()) const override;

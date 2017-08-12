@@ -45,7 +45,7 @@ void PresetTests::expandFromPresetTrivial()
     QVERIFY(metadata->isModified());
 }
 
-void PresetTests::expandFromPresetWithDublicates()
+void PresetTests::expandFromPresetWithDuplicates()
 {
     const int itemsToGenerate = 5;
     DECLARE_MODELS_AND_GENERATE(itemsToGenerate);
@@ -94,7 +94,7 @@ void PresetTests::appendFromPresetTrivial() {
     QVERIFY(metadata->isModified());
 }
 
-void PresetTests::appendFromPresetWithDublicates()
+void PresetTests::appendFromPresetWithDuplicates()
 {
     const int itemsToGenerate = 5;
     DECLARE_MODELS_AND_GENERATE(itemsToGenerate);

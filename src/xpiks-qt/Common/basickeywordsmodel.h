@@ -23,6 +23,8 @@
 #include "hold.h"
 #include "../Common/flags.h"
 #include "../Common/imetadataoperator.h"
+#include "../Common/wordanalysisresult.h"
+#include <QHash>
 
 namespace SpellCheck {
     class SpellCheckQueryItem;
@@ -37,6 +39,7 @@ namespace Common {
     {
         Q_OBJECT
         Q_PROPERTY(bool hasSpellErrors READ hasSpellErrors NOTIFY spellCheckErrorsChanged)
+        Q_PROPERTY(bool hasDuplicates READ hasDuplicates NOTIFY hasDuplicatesChanged)
 
     public:
         BasicKeywordsModel(Common::Hold &hold, QObject *parent=0);
@@ -46,12 +49,13 @@ namespace Common {
     public:
         enum BasicKeywordsModel_Roles {
             KeywordRole = Qt::UserRole + 1,
-            IsCorrectRole
+            IsCorrectRole,
+            HasDuplicateRole
         };
 
     public:
 #ifdef CORE_TESTS
-        QVector<bool> &getSpellCheckResults() { return m_SpellCheckResults; }
+        QVector<KeywordSpellInfo> &getSpellCheckResults() { return m_SpellCheckResults; }
         const QString &getKeywordAt(int index) const { return m_KeywordsList.at(index); }
 #endif
         virtual void removeItemsAtIndices(const QVector<QPair<int, int> > &ranges) override;
@@ -69,6 +73,10 @@ namespace Common {
         int getKeywordsCount();
         QSet<QString> getKeywordsSet();
         virtual QString getKeywordsString();
+        bool hasDuplicates(int keywordIndex) const;
+        const QHash<QString, QStringList> getDuplicatesModel();
+        QStringList getStems(int keywordIndex);
+        void initializeKeywords(BasicKeywordsModel * model);
 
     public:
         virtual bool appendKeyword(const QString &keyword);
@@ -96,6 +104,7 @@ namespace Common {
         bool clearKeywordsUnsafe();
         bool containsKeywordUnsafe(const QString &searchTerm, Common::SearchFlags searchFlags=Common::SearchFlags::Keywords);
         bool hasKeywordsSpellErrorUnsafe() const;
+        bool hasKeywordsDuplicatesUnsafe() const;
         bool removeKeywordsUnsafe(const QSet<QString> &keywordsToRemove, bool caseSensitive);
         void expandPresetUnsafe(int keywordsIndex, const QStringList &keywordsList);
         bool hasKeywordsUnsafe(const QStringList &keywordsList) const;
@@ -123,8 +132,10 @@ namespace Common {
         bool containsKeywords(const QStringList &keywordsList);
         virtual bool isEmpty();
         bool hasKeywordsSpellError();
+        bool hasKeywordsDuplicates();
 
         virtual bool hasSpellErrors();
+        virtual bool hasDuplicates();
         void setSpellStatuses(BasicKeywordsModel *keywordsModel);
 
     public:
@@ -136,9 +147,11 @@ namespace Common {
         bool release() { return m_Hold.release(); }
 
     private:
-        const QVector<bool> &getSpellStatusesUnsafe() const { return m_SpellCheckResults; }
+        const QVector<KeywordSpellInfo> &getSpellStatusesUnsafe() const { return m_SpellCheckResults; }
         void resetSpellCheckResultsUnsafe();
         bool canBeAddedUnsafe(const QString &keyword) const;
+        bool hasDuplicatesUnsafe(int keywordIndex, QStringList & synonymStems, bool findAll = false) const;
+        QHash<QString, QStringList> getDuplicatesModelUnsafe();
 
     public:
         Q_INVOKABLE bool hasKeyword(const QString &keyword);
@@ -147,6 +160,7 @@ namespace Common {
     signals:
         void spellCheckResultsReady();
         void spellCheckErrorsChanged();
+        void hasDuplicatesChanged();
         void completionsAvailable();
         void aboutToBeRemoved();
         void afterSpellingErrorsFixed();
@@ -159,6 +173,14 @@ namespace Common {
         bool isReplacedADuplicateUnsafe(int index, const QString &existingPrev,
                                         const QString &replacement) const;
         void emitSpellCheckChanged(int index=-1);
+        void reevaluateStemsDataUnsafe();
+        void removeStemsDataUnsafe(int index);
+#ifdef CORE_TESTS
+   public:
+#endif
+        void reevaluateStemsData();
+        void removeStemsData(int index);
+        void emitDuplicateStateChanged();
 
     protected:
         virtual QHash<int, QByteArray> roleNames() const override;
@@ -168,7 +190,9 @@ namespace Common {
         QStringList m_KeywordsList;
         QSet<QString> m_KeywordsSet;
         QReadWriteLock m_KeywordsLock;
-        QVector<bool> m_SpellCheckResults;
+        QVector<Common::KeywordSpellInfo> m_SpellCheckResults;
+        QHash<QString, QStringList> m_StemsResults;
+        QReadWriteLock m_StemsLock;
     };
 }
 

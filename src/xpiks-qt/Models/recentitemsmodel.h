@@ -41,8 +41,8 @@ namespace Models {
         bool doPushItem(const QString &itemPath);
 
     public:
-        int rowCount(const QModelIndex & parent = QModelIndex()) const override { Q_UNUSED(parent); return m_RecentItems.length(); }
-        QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const override;
+        int rowCount(const QModelIndex &parent = QModelIndex()) const override { Q_UNUSED(parent); return m_RecentItems.length(); }
+        QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
     protected:
         virtual QHash<int, QByteArray> roleNames() const override { return QAbstractListModel::roleNames(); }

@@ -409,6 +409,23 @@ ApplicationWindow {
                             }
                         }
 
+                        StyledCheckbox {
+                            id: autoDuplicateSearchCheckbox
+                            text: i18.n + qsTr("Detect duplicates automatically")
+                            onCheckedChanged: {
+                                settingsModel.detectDuplicates = checked
+                            }
+                            function onResetRequested() {
+                                checked = settingsModel.detectDuplicates
+                            }
+
+                            Component.onCompleted: {
+                                checked = settingsModel.detectDuplicates
+                                behaviorTab.resetRequested.connect(autoDuplicateSearchCheckbox.onResetRequested)
+                            }
+                        }
+
+
                         Item {
                             Layout.fillHeight: true
                         }

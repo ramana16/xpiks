@@ -81,6 +81,8 @@ namespace SpellCheck {
         void workerFinished();
         void workerDestroyed(QObject *object);
         void wordsNumberChangedHandler(int number);
+    private:
+        Common::WordAnalysisFlags getSpellCheckFlag() const;
 
     private:
         SpellCheckWorker *m_SpellCheckWorker;

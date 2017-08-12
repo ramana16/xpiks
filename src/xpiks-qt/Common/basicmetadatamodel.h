@@ -45,7 +45,7 @@ namespace Common {
 #endif
 
     public:
-        virtual void setSpellCheckResults(const QHash<QString, bool> &results, SpellCheckFlags flags);
+        virtual void setSpellCheckResults(const QHash<QString, Common::WordAnalysisResult> &results, SpellCheckFlags flags);
         virtual std::vector<std::shared_ptr<SpellCheck::SpellSuggestionsItem> > createDescriptionSuggestionsList() override;
         virtual std::vector<std::shared_ptr<SpellCheck::SpellSuggestionsItem> > createTitleSuggestionsList() override;
         virtual bool fixDescriptionSpelling(const QString &word, const QString &replacement) override;
@@ -60,6 +60,7 @@ namespace Common {
         virtual QStringList getTitleWords();
         virtual bool expandPreset(int keywordIndex, const QStringList &presetList) override;
         virtual bool appendPreset(const QStringList &presetList) override;
+        virtual const QHash<QString, QStringList> getDuplicatesModel() override;
 
     private:
         bool replaceInDescription(const QString &replaceWhat, const QString &replaceTo,
@@ -103,8 +104,8 @@ namespace Common {
         void notifyTitleSpellCheck();
 
     private:
-        void updateDescriptionSpellErrors(const QHash<QString, bool> &results);
-        void updateTitleSpellErrors(const QHash<QString, bool> &results);
+        void updateDescriptionSpellErrors(const QHash<QString, Common::WordAnalysisResult> &results);
+        void updateTitleSpellErrors(const QHash<QString, Common::WordAnalysisResult> &results);
 
     private:
         QReadWriteLock m_DescriptionLock;

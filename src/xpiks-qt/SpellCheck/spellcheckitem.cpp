@@ -23,22 +23,22 @@ namespace SpellCheck {
     void SpellCheckItemBase::accountResultAt(int index) {
         if (0 <= index && (size_t)index < m_QueryItems.size()) {
             auto &item = m_QueryItems.at(index);
-            m_SpellCheckResults[item->m_Word] = item->m_IsCorrect;
+            m_SpellCheckResults[item->m_Word] = {item->m_Stem, item->m_IsCorrect};
         }
     }
 
     bool SpellCheckItemBase::getIsCorrect(const QString &word) const {
-        bool result = m_SpellCheckResults.value(word, true);
+        Common::WordAnalysisResult result = m_SpellCheckResults.value(word, Common::WordAnalysisResult());
 
-        return result;
+        return result.m_IsCorrect;
     }
 
     void SpellCheckItemBase::appendItem(const std::shared_ptr<SpellCheckQueryItem> &item) {
         m_QueryItems.push_back(item);
     }
 
-    SpellCheckItem::SpellCheckItem(Common::BasicKeywordsModel *spellCheckable, Common::SpellCheckFlags spellCheckFlags, int keywordIndex):
-        SpellCheckItemBase(),
+    SpellCheckItem::SpellCheckItem(Common::BasicKeywordsModel *spellCheckable, Common::SpellCheckFlags spellCheckFlags, Common::WordAnalysisFlags wordAnalysisFlag, int keywordIndex):
+        SpellCheckItemBase(wordAnalysisFlag),
         m_SpellCheckable(spellCheckable),
         m_SpellCheckFlags(spellCheckFlags),
         m_OnlyOneKeyword(true) {
@@ -62,8 +62,8 @@ namespace SpellCheck {
         }
     }
 
-    SpellCheckItem::SpellCheckItem(Common::BasicKeywordsModel *spellCheckable, Common::SpellCheckFlags spellCheckFlags):
-        SpellCheckItemBase(),
+    SpellCheckItem::SpellCheckItem(Common::BasicKeywordsModel *spellCheckable, Common::SpellCheckFlags spellCheckFlags, Common::WordAnalysisFlags wordAnalysisFlags):
+        SpellCheckItemBase(wordAnalysisFlags),
         m_SpellCheckable(spellCheckable),
         m_SpellCheckFlags(spellCheckFlags),
         m_OnlyOneKeyword(false) {
@@ -97,8 +97,8 @@ namespace SpellCheck {
         }
     }
 
-    SpellCheckItem::SpellCheckItem(Common::BasicKeywordsModel *spellCheckable, const QStringList &keywordsToCheck):
-        SpellCheckItemBase(),
+    SpellCheckItem::SpellCheckItem(Common::BasicKeywordsModel *spellCheckable, const QStringList &keywordsToCheck, Common::WordAnalysisFlags wordAnalysisFlags):
+        SpellCheckItemBase(wordAnalysisFlags),
         m_SpellCheckable(spellCheckable),
         m_SpellCheckFlags(Common::SpellCheckFlags::All),
         m_OnlyOneKeyword(false)
@@ -219,7 +219,7 @@ namespace SpellCheck {
     ModifyUserDictItem::ModifyUserDictItem(const QStringList &keywords):
         m_ClearFlag(true)
     {
-        for (auto & keyword : keywords) {
+        for (auto &keyword : keywords) {
             Helpers::splitText(keyword, m_KeywordsToAdd);
         }
 

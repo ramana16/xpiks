@@ -101,7 +101,7 @@ namespace SpellCheck {
         Q_ASSERT(itemToCheck != nullptr);
         LOG_INFO << "flags:" << (int)flags;
 
-        std::shared_ptr<SpellCheckItem> item(new SpellCheckItem(itemToCheck, flags),
+        std::shared_ptr<SpellCheckItem> item(new SpellCheckItem(itemToCheck, flags, getSpellCheckFlag()),
             [](SpellCheckItem *spi) {
             LOG_INTEGRATION_TESTS << "Delete later for single spellcheck item";
             spi->disconnect();
@@ -129,7 +129,7 @@ namespace SpellCheck {
         for (int i = 0; i < length; ++i) {
             auto *itemToCheck = itemsToCheck.at(i);
             Q_ASSERT(itemToCheck != nullptr);
-            std::shared_ptr<SpellCheckItem> item(new SpellCheckItem(itemToCheck, Common::SpellCheckFlags::All),
+            std::shared_ptr<SpellCheckItem> item(new SpellCheckItem(itemToCheck, Common::SpellCheckFlags::All, getSpellCheckFlag()),
                 deleter);
             itemToCheck->connectSignals(item.get());
             items.emplace_back(std::dynamic_pointer_cast<ISpellCheckItem>(item));
@@ -158,7 +158,7 @@ namespace SpellCheck {
 
         for (int i = 0; i < length; ++i) {
             auto *itemToCheck = itemsToCheck.at(i);
-            std::shared_ptr<SpellCheckItem> item(new SpellCheckItem(itemToCheck, wordsToCheck),
+            std::shared_ptr<SpellCheckItem> item(new SpellCheckItem(itemToCheck, wordsToCheck, getSpellCheckFlag()),
                                                  deleter);
             itemToCheck->connectSignals(item.get());
             items.emplace_back(std::dynamic_pointer_cast<ISpellCheckItem>(item));
@@ -177,7 +177,7 @@ namespace SpellCheck {
             return;
         }
 
-        std::shared_ptr<SpellCheckItem> item(new SpellCheckItem(itemToCheck, Common::SpellCheckFlags::Keywords, keywordIndex),
+        std::shared_ptr<SpellCheckItem> item(new SpellCheckItem(itemToCheck, Common::SpellCheckFlags::Keywords, getSpellCheckFlag(), keywordIndex),
             [](SpellCheckItem *spi) {
             LOG_INTEGRATION_TESTS << "Delete later for keyword spelling item";
             spi->deleteLater();
@@ -256,7 +256,9 @@ namespace SpellCheck {
 
     void SpellCheckerService::clearUserDictionary() {
         LOG_DEBUG << "#";
-        m_SpellCheckWorker->submitItem(std::shared_ptr<ISpellCheckItem>(new ModifyUserDictItem(true)));
+        if (m_SpellCheckWorker != nullptr) {
+            m_SpellCheckWorker->submitItem(std::shared_ptr<ISpellCheckItem>(new ModifyUserDictItem(true)));
+        }
     }
 
     void SpellCheckerService::workerFinished() {
@@ -278,5 +280,19 @@ namespace SpellCheck {
     void SpellCheckerService::wordsNumberChangedHandler(int number) {
         LOG_INFO << "Size of dictionary:" << number << "word(s)";
         emit userDictWordsNumberChanged();
+    }
+
+    Common::WordAnalysisFlags SpellCheckerService::getSpellCheckFlag() const {
+        Common::WordAnalysisFlags result = Common::WordAnalysisFlags::None;
+        if (m_SettingsModel != NULL) {
+            if (m_SettingsModel->getUseSpellCheck()) {
+                Common::SetFlag(result, Common::WordAnalysisFlags::Spelling);
+            }
+
+            if (m_SettingsModel->getDetectDuplicates()) {
+                Common::SetFlag(result, Common::WordAnalysisFlags::Stemming);
+            }
+        }
+        return result;
     }
 }

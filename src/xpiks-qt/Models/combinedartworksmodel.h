@@ -161,6 +161,7 @@ namespace Models {
         }
 
         Q_INVOKABLE void suggestCorrections();
+        Q_INVOKABLE void retreiveDuplicates();
         Q_INVOKABLE void initDescriptionHighlighting(QQuickTextDocument *document);
         Q_INVOKABLE void initTitleHighlighting(QQuickTextDocument *document);
         Q_INVOKABLE void spellCheckDescription();

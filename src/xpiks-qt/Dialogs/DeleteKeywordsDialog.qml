@@ -393,6 +393,7 @@ CloseRequested")
                                     id: kw
                                     keywordText: keyword
                                     hasSpellCheckError: !iscorrect
+                                    hasDuplicate: hasduplicate
                                     delegateIndex: index
                                     isHighlighted: true
                                     itemHeight: flv.keywordHeight
@@ -519,6 +520,7 @@ CloseRequested")
                                 delegate: KeywordWrapper {
                                     keywordText: keyword
                                     hasSpellCheckError: !iscorrect
+                                    hasDuplicate: hasduplicate
                                     delegateIndex: index
                                     isHighlighted: false
                                     hasPlusSign: true
