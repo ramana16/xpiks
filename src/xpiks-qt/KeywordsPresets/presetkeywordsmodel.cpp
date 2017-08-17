@@ -19,6 +19,8 @@ namespace KeywordsPresets {
     {
         m_SavingTimer.setSingleShot(true);
         QObject::connect(&m_SavingTimer, &QTimer::timeout, this, &PresetKeywordsModel::onSavingTimerTriggered);
+
+        QObject::connect(this, &PresetKeywordsModel::backupRequest, this, &PresetKeywordsModel::onBackupRequested);
     }
 
     PresetKeywordsModel::~PresetKeywordsModel() {
@@ -86,7 +88,16 @@ namespace KeywordsPresets {
 
     void PresetKeywordsModel::requestBackup() {
         LOG_DEBUG << "#";
-        m_SavingTimer.start(2000);
+        emit backupRequest();
+    }
+
+    void PresetKeywordsModel::refreshPresets() {
+        LOG_DEBUG << "#";
+        // used for plugins/background threads
+        beginResetModel();
+        {
+        }
+        endResetModel();
     }
 
     void PresetKeywordsModel::triggerPresetsUpdated() {
@@ -203,7 +214,9 @@ namespace KeywordsPresets {
             int lastIndex = getPresetsCount();
 
             beginInsertRows(QModelIndex(), lastIndex, lastIndex);
-            m_PresetsList.push_back(new PresetModel(name, keywords));
+            {
+                m_PresetsList.push_back(new PresetModel(name, keywords));
+            }
             endInsertRows();
 
             index = lastIndex;
@@ -401,6 +414,11 @@ namespace KeywordsPresets {
          LOG_INFO << "loading Model";
          loadModelFromConfig();
          requestBackup();
+    }
+
+    void PresetKeywordsModel::onBackupRequested() {
+        LOG_DEBUG << "#";
+        m_SavingTimer.start(2000);
     }
 
     void PresetKeywordsModel::onSavingTimerTriggered() {

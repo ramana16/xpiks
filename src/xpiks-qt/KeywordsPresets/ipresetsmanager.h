@@ -26,6 +26,7 @@ namespace KeywordsPresets {
         virtual void findOrRegisterPreset(const QString &name, const QStringList &keywords, int &index) = 0;
         virtual void addOrUpdatePreset(const QString &name, const QStringList &keywords, int &index, bool &isAdded) = 0;
         virtual void requestBackup() = 0;
+        virtual void refreshPresets() = 0;
         virtual void triggerPresetsUpdated() = 0;
     };
 }

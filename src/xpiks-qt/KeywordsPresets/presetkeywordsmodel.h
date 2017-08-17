@@ -71,6 +71,7 @@ namespace KeywordsPresets {
         virtual void findOrRegisterPreset(const QString &name, const QStringList &keywords, int &index) override;
         virtual void addOrUpdatePreset(const QString &name, const QStringList &keywords, int &index, bool &isAdded) override;
         virtual void requestBackup() override;
+        virtual void refreshPresets() override;
         virtual void triggerPresetsUpdated() override;
 
         bool tryFindPresetByFullName(const QString &name, bool caseSensitive, int &index);
@@ -99,6 +100,7 @@ namespace KeywordsPresets {
 
     signals:
         void presetsUpdated();
+        void backupRequest();
 
     public:
         virtual int rowCount(const QModelIndex &parent=QModelIndex()) const override;
@@ -131,6 +133,7 @@ namespace KeywordsPresets {
 
     public slots:
         void onPresetsUpdated();
+        void onBackupRequested();
 
     private slots:
         void onSavingTimerTriggered();
