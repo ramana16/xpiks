@@ -250,6 +250,9 @@ namespace Models {
     void SettingsModel::sync() {
         LOG_DEBUG << "Syncing settings";
 
+        Helpers::LocalConfigDropper dropper(&m_Config);
+        Q_UNUSED(dropper);
+
         m_SettingsJson[EXPERIMENTAL_KEY] = m_ExperimentalJson;
 
         QJsonDocument doc;
