@@ -15,7 +15,7 @@
 #include <QDir>
 #include "../Models/artworkmetadata.h"
 #include "../Models/imageartwork.h"
-#include "../Helpers/filenameshelpers.h"
+#include "../Helpers/fileshelpers.h"
 #include "../Common/defines.h"
 
 #ifndef CORE_TESTS

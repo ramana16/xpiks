@@ -75,7 +75,9 @@ namespace Constants {
     const char TRANSLATOR_SELECTED_DICT_INDEX[] = "TRANSLATOR_SELECTED_DICT_INDEX";
     const char TRANSLATOR_DIR[] = "dictionaries";
     const char PLUGINS_DIR[] = "XpiksPlugins";
+    const char STATES_DIR[] = "states";
 #else
+    // common for DEBUG and INTEGRATION_TESTS
     const char ONE_UPLOAD_SECONDS_TIMEMOUT[] = "DEBUG_ONE_UPLOAD_SECONDS_TIMEMOUT";
     const char USE_CONFIRMATION_DIALOGS[] = "DEBUG_USE_CONFIRMATION_DIALOGS";
     const char MAX_PARALLEL_UPLOADS[] = "DEBUG_MAX_PARALLEL_UPLOADS";
@@ -98,7 +100,9 @@ namespace Constants {
     const char TRANSLATOR_SELECTED_DICT_INDEX[] = "DEBUG_TRANSLATOR_SELECTED_DICT_INDEX";
     const char TRANSLATOR_DIR[] = "debug_dictionaries";
     const char PLUGINS_DIR[] = "debug_XpiksPlugins";
+    const char STATES_DIR[] = "debug_states";
 
+    // different for DEBUG and INTEGRATION_TESTS
 #ifdef INTEGRATION_TESTS
     const char LIBRARY_FILENAME[] = "xpiks.integration.v14.library";
     const char UPLOAD_HOSTS[] = "INTEGRATION_UPLOAD_HOSTS_HASH";

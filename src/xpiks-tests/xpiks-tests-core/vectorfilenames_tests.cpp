@@ -2,7 +2,7 @@
 #include <QStringList>
 #include <QString>
 #include <string>
-#include "../../xpiks-qt/Helpers/filenameshelpers.h"
+#include "../../xpiks-qt/Helpers/fileshelpers.h"
 
 void CompareLists(const QStringList &actual, const QStringList &expected) {
     bool anyDifference = false;

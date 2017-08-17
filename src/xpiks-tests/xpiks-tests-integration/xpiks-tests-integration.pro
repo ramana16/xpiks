@@ -51,7 +51,7 @@ SOURCES += main.cpp \
     ../../xpiks-qt/Conectivity/updatescheckerworker.cpp \
     ../../xpiks-qt/Encryption/aes-qt.cpp \
     ../../xpiks-qt/Encryption/secretsmanager.cpp \
-    ../../xpiks-qt/Helpers/filenameshelpers.cpp \
+    ../../xpiks-qt/Helpers/fileshelpers.cpp \
     ../../xpiks-qt/Helpers/filterhelpers.cpp \
     ../../xpiks-qt/Helpers/globalimageprovider.cpp \
     ../../xpiks-qt/Helpers/helpersqmlwrapper.cpp \
@@ -250,7 +250,7 @@ HEADERS += \
     ../../xpiks-qt/Encryption/secretsmanager.h \
     ../../xpiks-qt/Helpers/clipboardhelper.h \
     ../../xpiks-qt/Helpers/constants.h \
-    ../../xpiks-qt/Helpers/filenameshelpers.h \
+    ../../xpiks-qt/Helpers/fileshelpers.h \
     ../../xpiks-qt/Helpers/filterhelpers.h \
     ../../xpiks-qt/Helpers/globalimageprovider.h \
     ../../xpiks-qt/Helpers/helpersqmlwrapper.h \

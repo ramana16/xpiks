@@ -14,7 +14,7 @@
 #include <QThread>
 #include "../Models/artworkmetadata.h"
 #include "../Models/uploadinfo.h"
-#include "../Helpers/filenameshelpers.h"
+#include "../Helpers/fileshelpers.h"
 #include "../Encryption/secretsmanager.h"
 #include "../Commands/commandmanager.h"
 #include "../Models/settingsmodel.h"

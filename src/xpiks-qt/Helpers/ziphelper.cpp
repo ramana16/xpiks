@@ -11,7 +11,7 @@
 #include "ziphelper.h"
 #include <QFileInfo>
 #include <quazip/JlCompress.h>
-#include "filenameshelpers.h"
+#include "fileshelpers.h"
 #include "../Common/defines.h"
 
 namespace Helpers {

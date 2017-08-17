@@ -44,7 +44,6 @@ SOURCES += main.cpp \
     Helpers/logger.cpp \
     Models/logsmodel.cpp \
     Models/filteredartitemsproxymodel.cpp \
-    Helpers/filenameshelpers.cpp \
     Helpers/helpersqmlwrapper.cpp \
     Models/recentdirectoriesmodel.cpp \
     Suggestion/locallibrary.cpp \
@@ -158,7 +157,9 @@ SOURCES += main.cpp \
     Models/switchermodel.cpp \
     Conectivity/requestsworker.cpp \
     Conectivity/requestsservice.cpp \
-    Conectivity/conectivityrequest.cpp
+    Conectivity/conectivityrequest.cpp \
+    Common/statefulentity.cpp \
+    Helpers/fileshelpers.cpp
 
 RESOURCES += qml.qrc
 
@@ -222,7 +223,6 @@ HEADERS += \
     Helpers/loggingworker.h \
     Common/defines.h \
     Models/filteredartitemsproxymodel.h \
-    Helpers/filenameshelpers.h \
     Common/flags.h \
     Helpers/helpersqmlwrapper.h \
     Models/recentdirectoriesmodel.h \
@@ -373,7 +373,9 @@ HEADERS += \
     Conectivity/requestsworker.h \
     Conectivity/requestsservice.h \
     Warnings/iwarningsitem.h \
-    AutoComplete/completionitem.h
+    AutoComplete/completionitem.h \
+    Common/statefulentity.h \
+    Helpers/fileshelpers.h
 
 DISTFILES += \
     Components/CloseIcon.qml \

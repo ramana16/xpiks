@@ -11,7 +11,7 @@
 #include "../../xpiks-qt/Models/settingsmodel.h"
 #include "../../xpiks-qt/Models/filteredartitemsproxymodel.h"
 #include "../../xpiks-qt/Models/ziparchiver.h"
-#include "../../xpiks-qt/Helpers/filenameshelpers.h"
+#include "../../xpiks-qt/Helpers/fileshelpers.h"
 
 QString ZipArtworksTest::testName() {
     return QLatin1String("ZipArtworksTest");

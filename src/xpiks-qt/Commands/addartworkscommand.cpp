@@ -19,7 +19,7 @@
 #include "../Models/artitemsmodel.h"
 #include "../UndoRedo/addartworksitem.h"
 #include "../Common/defines.h"
-#include "../Helpers/filenameshelpers.h"
+#include "../Helpers/fileshelpers.h"
 #include "../Models/imageartwork.h"
 
 int findAndAttachVectors(const QVector<Models::ArtworkMetadata*> &artworksList, QVector<int> &modifiedIndices) {

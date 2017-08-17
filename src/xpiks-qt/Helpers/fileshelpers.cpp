@@ -8,10 +8,11 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#include "filenameshelpers.h"
+#include "fileshelpers.h"
 #include <QRegExp>
 #include <QFileInfo>
 #include <QDir>
+#include "../Common/defines.h"
 
 QStringList Helpers::convertToVectorFilenames(const QStringList &item) {
     QStringList converted;
@@ -58,4 +59,17 @@ QString Helpers::getImagePath(const QString &path) {
     result.replace(regExp, "\\1.jpg");
 
     return result;
+}
+
+bool Helpers::ensureDirectoryExists(const QString &path) {
+    bool anyError = false;
+
+    if (!QDir(path).exists()) {
+        LOG_INFO << "Creating" << path;
+        if (!QDir().mkpath(path)) {
+            anyError = true;
+        }
+    }
+
+    return !anyError;
 }

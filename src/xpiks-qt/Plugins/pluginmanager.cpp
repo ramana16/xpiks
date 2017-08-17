@@ -20,21 +20,9 @@
 #include "../Models/artitemsmodel.h"
 #include "../Common/defines.h"
 #include "../Helpers/constants.h"
+#include "../Helpers/fileshelpers.h"
 
 namespace Plugins {
-    bool ensureDirectoryExists(const QString &path) {
-        bool anyError = false;
-
-        if (!QDir(path).exists()) {
-            LOG_INFO << "Creating" << path;
-            if (!QDir().mkpath(path)) {
-                anyError = true;
-            }
-        }
-
-        return !anyError;
-    }
-
     PluginManager::PluginManager():
         QAbstractListModel(),
         m_LastPluginID(0)
@@ -74,14 +62,14 @@ namespace Plugins {
         const QString pluginsPath = QDir::cleanPath(basePath + QDir::separator() + Constants::PLUGINS_DIR);
         LOG_INFO << "Trying" << pluginsPath;
 
-        if (!ensureDirectoryExists(pluginsPath)) { anyError = true; }
+        if (!Helpers::ensureDirectoryExists(pluginsPath)) { anyError = true; }
 
         if (!anyError) {
             m_PluginsDirectoryPath = pluginsPath;
             LOG_INFO << "Plugins directory:" << m_PluginsDirectoryPath;
 
             m_FailedPluginsDirectory = QDir::cleanPath(pluginsPath + QDir::separator() + Constants::FAILED_PLUGINS_DIR);
-            ensureDirectoryExists(m_FailedPluginsDirectory);
+            Helpers::ensureDirectoryExists(m_FailedPluginsDirectory);
         }
 
         return !anyError;

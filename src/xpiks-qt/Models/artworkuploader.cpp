@@ -18,7 +18,7 @@
 #include "../Models/artworkmetadata.h"
 #include "../Commands/commandmanager.h"
 #include "../Models/settingsmodel.h"
-#include "../Helpers/filenameshelpers.h"
+#include "../Helpers/fileshelpers.h"
 #include "../Conectivity/iftpcoordinator.h"
 #include "../Conectivity/testconnection.h"
 #include "../Conectivity/uploadcontext.h"
