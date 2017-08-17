@@ -24,6 +24,7 @@ namespace Plugins {
         m_PluginFilepath(filepath),
         m_PluginID(pluginID),
         m_IsEnabled(true),
+        m_IsRemoved(false),
         m_PrettyName(pluginInterface->getPrettyName()),
         m_VersionString(pluginInterface->getVersionString()),
         m_Author(pluginInterface->getAuthor())
@@ -64,7 +65,7 @@ namespace Plugins {
         LOG_INFO << getPrettyName() << "executing action:" << actionID;
 
         try {
-            if (m_IsEnabled) {
+            if (getIsEnabled()) {
                 m_PluginInterface->executeAction(actionID);
             } else {
                 LOG_WARNING << getPrettyName() << "is disabled";
@@ -87,7 +88,7 @@ namespace Plugins {
     }
 
     void PluginWrapper::notifyPlugin(PluginNotificationFlags flag, const QVariant &data, void *pointer) {
-        if (m_IsEnabled) {
+        if (getIsEnabled()) {
             if (Common::HasFlag(m_NotificationFlags, flag)) {
                 m_PluginInterface->onPropertyChanged(flag, data, pointer);
             } else {

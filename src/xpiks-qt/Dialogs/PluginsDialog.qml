@@ -54,17 +54,9 @@ Item {
 
     MessageDialog {
         id: pluginExistsDialog
-        property string pluginUrl
         title: i18.n + qsTr("Warning")
-        text: i18.n + qsTr("Selected plugin is already installed. Do you want to replace it?")
-        standardButtons: StandardButton.Yes | StandardButton.No
-        onYes: {
-            if (!pluginManager.replaceInstallPlugin(pluginUrl)) {
-                failedToInstallDialog.open()
-            } else {
-                installedSuccessfullyDialog.open()
-            }
-        }
+        text: i18.n + qsTr("Selected plugin is already installed.")
+        standardButtons: StandardButton.Ok
     }
 
     MessageDialog {
@@ -122,7 +114,6 @@ Item {
             console.debug("You chose: " + pluginUrl)
             if (!pluginManager.installPlugin(pluginUrl)) {
                 if (pluginManager.pluginExists(pluginUrl)) {
-                    pluginExistsDialog.pluginUrl = pluginUrl
                     pluginExistsDialog.open()
                 } else {
                     failedToInstallDialog.open()
@@ -224,10 +215,23 @@ Item {
                             height: 30
 
                             StyledText {
+                                id: pluginNameText
                                 text: prettyname
                                 anchors.verticalCenter: parent.verticalCenter
                                 anchors.left: parent.left
                                 anchors.leftMargin: 10
+                                isActive: !removed
+                                font.strikeout: removed
+                            }
+
+                            StyledText {
+                                text: qsTr("(restart required)")
+                                anchors.verticalCenter: parent.verticalCenter
+                                anchors.left: pluginNameText.right
+                                anchors.leftMargin: 10
+                                isActive: false
+                                visible: removed
+                                enabled: removed
                             }
 
                             StyledText {
@@ -235,6 +239,8 @@ Item {
                                 anchors.verticalCenter: parent.verticalCenter
                                 anchors.right: deleteIcon.left
                                 anchors.rightMargin: 10
+                                isActive: !removed
+                                font.strikeout: removed
                             }
 
                             CloseIcon {
@@ -245,6 +251,7 @@ Item {
                                 anchors.right: parent.right
                                 anchors.rightMargin: 10
                                 isActive: false
+                                enabled: !removed
                                 crossOpacity: 1
 
                                 onItemClicked: {

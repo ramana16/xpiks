@@ -31,7 +31,8 @@ namespace Plugins {
 
     public:
         int getPluginID() const { return m_PluginID; }
-        bool getIsEnabled() const { return m_IsEnabled; }
+        bool getIsEnabled() const { return m_IsEnabled && !m_IsRemoved; }
+        bool getIsRemoved() const { return m_IsRemoved; }
         const QString &getFilepath() const { return m_PluginFilepath; }
         const QString &getPrettyName() const { return m_PrettyName; }
         const QString &getVersionString() const { return m_VersionString; }
@@ -46,6 +47,7 @@ namespace Plugins {
 
         void triggerActionSafe(int actionID) const;
         void finalizePlugin();
+        void removePlugin() { m_IsRemoved = true; }
 
         void notifyPlugin(PluginNotificationFlags flag, const QVariant &data, void *pointer);
 
@@ -57,6 +59,7 @@ namespace Plugins {
         QString m_PluginFilepath;
         int m_PluginID;
         bool m_IsEnabled;
+        bool m_IsRemoved;
         const QString &m_PrettyName;
         const QString &m_VersionString;
         const QString &m_Author;

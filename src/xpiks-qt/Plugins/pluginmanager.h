@@ -37,7 +37,8 @@ namespace Plugins {
             VersionRole,
             AuthorRole,
             PluginIDRole,
-            IsEnabledRole
+            IsEnabledRole,
+            IsRemovedRole
         };
 
     private:
@@ -49,6 +50,7 @@ namespace Plugins {
         void loadPlugins();
         void unloadPlugins();
         bool hasExportedActions(int row) const;
+        bool isUsable(int row) const;
         UIProvider *getUIProvider() { return &m_UIProvider; }
 
     public slots:
@@ -62,7 +64,6 @@ namespace Plugins {
         Q_INVOKABLE bool removePlugin(int index);
         Q_INVOKABLE bool pluginExists(const QUrl &pluginUrl);
         Q_INVOKABLE bool installPlugin(const QUrl &pluginUrl);
-        Q_INVOKABLE bool replaceInstallPlugin(const QUrl &pluginUrl);
 
     private:
         bool addPlugin(const QString &fullpath);

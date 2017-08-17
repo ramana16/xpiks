@@ -142,6 +142,12 @@ namespace Plugins {
 
         for (size_t i = 0; i < size; ++i) {
             auto &wrapper = m_PluginsList.at(i);
+
+            if (wrapper->getIsRemoved()) {
+                LOG_INFO << "Plugin" << wrapper->getPluginID() << "is already removed";
+                continue;
+            }
+
             wrapper->disablePlugin();
             wrapper->finalizePlugin();
         }
@@ -160,6 +166,17 @@ namespace Plugins {
         }
 
         return hasActions;
+    }
+
+    bool PluginManager::isUsable(int row) const {
+        bool isUsable = false;
+
+        if ((0 <= row) && (row < rowCount())) {
+            auto &wrapper = m_PluginsList.at(row);
+            isUsable = wrapper->getIsEnabled() && !wrapper->getIsRemoved();
+        }
+
+        return isUsable;
     }
 
     void PluginManager::onCurrentEditableChanged() {
@@ -231,11 +248,13 @@ namespace Plugins {
 
             loader.setFileName(wrapper->getFilepath());
 
-            beginRemoveRows(QModelIndex(), index, index);
+            wrapper->removePlugin();
+            emit dataChanged(this->index(index), this->index(index), QVector<int>() << IsRemovedRole);
+            /*beginRemoveRows(QModelIndex(), index, index);
             {
                 m_PluginsList.erase(m_PluginsList.begin() + index);
             }
-            endRemoveRows();
+            endRemoveRows();*/
 
             int removedCount = m_PluginsDict.remove(pluginID);
             Q_ASSERT(removedCount == 1);
@@ -267,7 +286,7 @@ namespace Plugins {
         if (existingFI.exists()) {
             const QString filename = existingFI.fileName();
             QString destinationPath = QDir::cleanPath(m_PluginsDirectoryPath + QDir::separator() + filename);
-            exists = QFileInfo(destinationPath).exists();
+            exists = QFileInfo(destinationPath).exists() || isPluginAdded(destinationPath);
         }
 
         return exists;
@@ -276,29 +295,6 @@ namespace Plugins {
     bool PluginManager::installPlugin(const QUrl &pluginUrl) {
         bool result = addPlugin(pluginUrl.toLocalFile());
         return result;
-    }
-
-    bool PluginManager::replaceInstallPlugin(const QUrl &pluginUrl) {
-        LOG_INFO << pluginUrl;
-        const QString fullpath = pluginUrl.toLocalFile();
-        QFileInfo fi(fullpath);
-        const QString pluginName = fi.fileName();
-
-        QDir pluginsDir(m_PluginsDirectoryPath);
-        QString possiblePluginPath;
-        if (pluginsDir.exists()) {
-            possiblePluginPath = pluginsDir.absoluteFilePath(pluginName);
-        }
-
-        const int index = findPluginIndex(possiblePluginPath);
-        if (index == -1) {
-            LOG_WARNING << "Plugin cannot be found";
-            return false;
-        }
-
-        removePlugin(index);
-        bool success = addPlugin(fullpath);
-        return success;
     }
 
     bool PluginManager::addPlugin(const QString &fullpath) {
@@ -314,15 +310,8 @@ namespace Plugins {
 
             const QString filename = existingFI.fileName();
             QString destinationPath = QDir::cleanPath(m_PluginsDirectoryPath + QDir::separator() + filename);
-            if (QFileInfo(destinationPath).exists()) {
-                LOG_DEBUG << "Destination file already exists" << destinationPath;
-                if (isPluginAdded(destinationPath)) {
-                    LOG_WARNING << "Plugin with same filename already added";
-                } else {
-                    if (QFile::remove(destinationPath)) {
-                        LOG_INFO << "Cleaned up not used file with same name";
-                    }
-                }
+            if (QFileInfo(destinationPath).exists() || isPluginAdded(destinationPath)) {
+                LOG_WARNING << "Plugin with same filename already added";
                 break;
             }
 
@@ -470,6 +459,8 @@ namespace Plugins {
             return plugin->getPluginID();
         case IsEnabledRole:
             return plugin->getIsEnabled();
+        case IsRemovedRole:
+            return plugin->getIsRemoved();
         default:
             return QVariant();
         }
@@ -482,6 +473,7 @@ namespace Plugins {
         roles[VersionRole] = "version";
         roles[PluginIDRole] = "pluginID";
         roles[IsEnabledRole] = "enabled";
+        roles[IsRemovedRole] = "removed";
         return roles;
     }
 
@@ -498,7 +490,7 @@ namespace Plugins {
         QAbstractItemModel *sourceItemModel = sourceModel();
         PluginManager *pluginManager = dynamic_cast<PluginManager *>(sourceItemModel);
         Q_ASSERT(pluginManager != NULL);
-        bool result = pluginManager->hasExportedActions(sourceRow);
+        bool result = pluginManager->isUsable(sourceRow) && pluginManager->hasExportedActions(sourceRow);
         return result;
     }
 }
