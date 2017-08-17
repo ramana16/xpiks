@@ -107,7 +107,7 @@ SOURCES += main.cpp \
     ../../xpiks-qt/Encryption/aes-qt.cpp \
     removecommand_tests.cpp \
     vectorfilenames_tests.cpp \
-    ../../xpiks-qt/Helpers/fileshelpers.cpp \
+    ../../xpiks-qt/Helpers/filehelpers.cpp \
     ../../xpiks-qt/Helpers/helpersqmlwrapper.cpp \
     ../../xpiks-qt/Models/recentitemsmodel.cpp \
     ../../xpiks-qt/Models/recentdirectoriesmodel.cpp \
@@ -230,7 +230,7 @@ HEADERS += \
     ../../xpiks-qt/Common/basickeywordsmodel.h \
     ../../xpiks-qt/Common/basicmetadatamodel.h \
     vectorfilenames_tests.h \
-    ../../xpiks-qt/Helpers/fileshelpers.h \
+    ../../xpiks-qt/Helpers/filehelpers.h \
     ../../xpiks-qt/Helpers/helpersqmlwrapper.h \
     ../../xpiks-qt/Models/recentitemsmodel.h \
     ../../xpiks-qt/Models/recentdirectoriesmodel.h \

@@ -8,7 +8,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#include "fileshelpers.h"
+#include "filehelpers.h"
 #include <QRegExp>
 #include <QFileInfo>
 #include <QDir>

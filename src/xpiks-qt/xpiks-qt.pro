@@ -159,7 +159,7 @@ SOURCES += main.cpp \
     Conectivity/requestsservice.cpp \
     Conectivity/conectivityrequest.cpp \
     Common/statefulentity.cpp \
-    Helpers/fileshelpers.cpp
+    Helpers/filehelpers.cpp
 
 RESOURCES += qml.qrc
 
@@ -375,7 +375,7 @@ HEADERS += \
     Warnings/iwarningsitem.h \
     AutoComplete/completionitem.h \
     Common/statefulentity.h \
-    Helpers/fileshelpers.h
+    Helpers/filehelpers.h
 
 DISTFILES += \
     Components/CloseIcon.qml \

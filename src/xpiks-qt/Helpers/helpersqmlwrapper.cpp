@@ -28,7 +28,7 @@
 #include "../SpellCheck/spellchecksuggestionmodel.h"
 #include "logger.h"
 #include "../Common/defines.h"
-#include "../Helpers/fileshelpers.h"
+#include "../Helpers/filehelpers.h"
 #include "../Helpers/updatehelpers.h"
 #include "../QMLExtensions/colorsmodel.h"
 

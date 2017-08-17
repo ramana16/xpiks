@@ -20,7 +20,7 @@
 #include "../Models/artitemsmodel.h"
 #include "../Common/defines.h"
 #include "../Helpers/constants.h"
-#include "../Helpers/fileshelpers.h"
+#include "../Helpers/filehelpers.h"
 
 namespace Plugins {
     PluginManager::PluginManager():

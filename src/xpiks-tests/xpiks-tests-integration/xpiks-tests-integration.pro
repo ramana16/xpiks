@@ -51,7 +51,6 @@ SOURCES += main.cpp \
     ../../xpiks-qt/Conectivity/updatescheckerworker.cpp \
     ../../xpiks-qt/Encryption/aes-qt.cpp \
     ../../xpiks-qt/Encryption/secretsmanager.cpp \
-    ../../xpiks-qt/Helpers/fileshelpers.cpp \
     ../../xpiks-qt/Helpers/filterhelpers.cpp \
     ../../xpiks-qt/Helpers/globalimageprovider.cpp \
     ../../xpiks-qt/Helpers/helpersqmlwrapper.cpp \
@@ -196,7 +195,8 @@ SOURCES += main.cpp \
     ../../xpiks-qt/Conectivity/requestsservice.cpp \
     ../../xpiks-qt/Conectivity/requestsworker.cpp \
     ../../xpiks-qt/Models/switchermodel.cpp \
-    ../../xpiks-qt/Conectivity/switcherconfig.cpp
+    ../../xpiks-qt/Conectivity/switcherconfig.cpp \
+    ../../xpiks-qt/Helpers/filehelpers.cpp
 
 RESOURCES +=
 
@@ -250,7 +250,6 @@ HEADERS += \
     ../../xpiks-qt/Encryption/secretsmanager.h \
     ../../xpiks-qt/Helpers/clipboardhelper.h \
     ../../xpiks-qt/Helpers/constants.h \
-    ../../xpiks-qt/Helpers/fileshelpers.h \
     ../../xpiks-qt/Helpers/filterhelpers.h \
     ../../xpiks-qt/Helpers/globalimageprovider.h \
     ../../xpiks-qt/Helpers/helpersqmlwrapper.h \
@@ -425,7 +424,8 @@ HEADERS += \
     ../../xpiks-qt/Models/switchermodel.h \
     ../../xpiks-qt/Conectivity/switcherconfig.h \
     ../../xpiks-qt/Warnings/iwarningsitem.h \
-    ../../xpiks-qt/AutoComplete/completionitem.h
+    ../../xpiks-qt/AutoComplete/completionitem.h \
+    ../../xpiks-qt/Helpers/filehelpers.h
 
 INCLUDEPATH += ../../../vendors/tiny-aes
 INCLUDEPATH += ../../../vendors/cpp-libface

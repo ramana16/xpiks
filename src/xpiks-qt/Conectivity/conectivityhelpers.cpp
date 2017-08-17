@@ -16,7 +16,7 @@
 #include "../Encryption/secretsmanager.h"
 #include "uploadcontext.h"
 #include "uploadbatch.h"
-#include "../Helpers/fileshelpers.h"
+#include "../Helpers/filehelpers.h"
 #include "../Models/imageartwork.h"
 #include "../Commands/commandmanager.h"
 #include "../Models/settingsmodel.h"

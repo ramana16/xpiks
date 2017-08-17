@@ -11,7 +11,7 @@
 #include "statefulentity.h"
 #include <QDir>
 #include "../Helpers/constants.h"
-#include "../Helpers/fileshelpers.h"
+#include "../Helpers/filehelpers.h"
 
 namespace Common {
     QAtomicInt StatefulEntity::s_DirectoryInitialized = 0;
