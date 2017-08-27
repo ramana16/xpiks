@@ -594,15 +594,7 @@ travis-ci {
     INCLUDEPATH += "../../vendors/quazip"
 
     LIBS -= -lthmbnlr
-    LIBS -= -lxpks
-    HEADERS += ../../vendors/libxpks/readingorchestrator.h \
-               ../../vendors/libxpks/writingorchestrator.h \
-               ../../vendors/libxpks/ftpcoordinator.h
-
-    SOURCES += ../../vendors/libthmbnlr/thumbnailcreator_stub.cpp \
-               ../../vendors/libxpks/readingorchestrator_stub.cpp \
-               ../../vendors/libxpks/writingorchestrator_stub.cpp \
-               ../../vendors/libxpks/ftpcoordinator_stub.cpp
+    SOURCES += ../../vendors/libthmbnlr/thumbnailcreator_stub.cpp
 }
 
 linux-g++-64 {
