@@ -8,11 +8,21 @@ class ArtworkMetadataTests: public QObject
 {
     Q_OBJECT
 private slots:
-    void initializeOverwriteTest();
-    void initializeNoOverwriteButEmptyTest();
-    void initializeNoOverwriteNotEmptyTest();
-    void initializeNoOverwriteTest();
-    void initializeOverwriteWithEmptyTest();
+    void initializeBlancFromOriginTest();
+    void initializeEmptyFromCachedTest();
+    void initializeNotEmptyFromCachedSkipTest();
+    void initializeOriginalWithEmpty();
+    void initOriginThenStorageTest();
+    void initStorageThenOriginTest();
+    void initOriginalThenStorageDescriptionEmptyTest();
+    void initOriginalThenStorageTitleEmptyTest();
+    void initStorageThenOriginKeywordsOverwriteTest();
+    void initStorageThenOriginKeywordsAddTest();
+    void initStorageThenOriginShouldModifyTest();
+    void parallelInitOriginStorageTest();
+    void parallelInitEmptyStorageTest();
+    void parallelInitStorageSetTest();
+    void parallelInitOriginSetTest();
     void freshObjectTest();
     void markModifiedShouldEmitSignalTest();
     void modifiedIsNotMarkedModifiedAgainTest();

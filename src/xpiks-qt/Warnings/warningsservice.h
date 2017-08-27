@@ -17,6 +17,7 @@
 #include "../Models/artworkmetadata.h"
 #include "../Common/flags.h"
 #include "warningssettingsmodel.h"
+#include "../MetadataIO/artworkssnapshot.h"
 
 namespace Warnings {
     class WarningsCheckingWorker;
@@ -46,7 +47,7 @@ namespace Warnings {
 
         virtual void submitItem(Models::ArtworkMetadata *item) override;
         virtual void submitItem(Models::ArtworkMetadata *item, Common::WarningsCheckFlags flags) override;
-        virtual void submitItems(const QVector<Models::ArtworkMetadata *> &items) override;
+        virtual void submitItems(const MetadataIO::WeakArtworksSnapshot &items) override;
         virtual void setCommandManager(Commands::CommandManager *commandManager) override;
 
     private slots:

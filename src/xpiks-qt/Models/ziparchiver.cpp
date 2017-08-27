@@ -30,10 +30,11 @@ namespace Models {
     }
 
     int ZipArchiver::getItemsCount() const {
-        const QVector<Models::ArtworkMetadata *> items = getArtworkList();
-        int size = items.size(), count = 0;
-        for (int i = 0; i < size; ++i) {
-            ImageArtwork *image = dynamic_cast<ImageArtwork *>(items.at(i));
+        auto &snapshot = getArtworksSnapshot();
+        const size_t size = snapshot.size();
+        int count = 0;
+        for (size_t i = 0; i < size; ++i) {
+            ImageArtwork *image = dynamic_cast<ImageArtwork *>(snapshot.get(i));
             if (image != NULL && image->hasVectorAttached()) {
                 count++;
             }
@@ -52,7 +53,7 @@ namespace Models {
     }
 
     void ZipArchiver::archiveArtworks() {
-        LOG_DEBUG << "#";
+        LOG_DEBUG << getItemsCount() << "item(s) pending";
         QHash<QString, QStringList> itemsWithSameName;
         fillFilenamesHash(itemsWithSameName);
 
@@ -74,23 +75,31 @@ namespace Models {
     }
 
     void ZipArchiver::fillFilenamesHash(QHash<QString, QStringList> &hash) {
-        QVector<Models::ArtworkMetadata*> artworksList = getArtworkList();
+        auto &snapshot = getArtworksSnapshot();
+        auto &artworksList = snapshot.getWeakSnapshot();
+        LOG_DEBUG << "Processing" << artworksList.size() << "item(s)";
 
-        foreach (Models::ArtworkMetadata *metadata, artworksList) {
-            const QString &filepath = metadata->getFilepath();
+        for (auto &artwork: artworksList) {
+            const QString &filepath = artwork->getFilepath();
 
             QFileInfo fi(filepath);
             QString basename = fi.baseName();
 
-            ImageArtwork *image = dynamic_cast<ImageArtwork*>(metadata);
+            ImageArtwork *image = dynamic_cast<ImageArtwork*>(artwork);
+            if (image != NULL) {
+                if (image->hasVectorAttached()) {
+                    LOG_INTEGRATION_TESTS << filepath << "is zipping candidate";
+                    if (!hash.contains(basename)) {
+                        hash.insert(basename, QStringList());
+                    }
 
-            if (image != NULL && image->hasVectorAttached()) {
-                if (!hash.contains(basename)) {
-                    hash.insert(basename, QStringList());
+                    hash[basename].append(filepath);
+                    hash[basename].append(image->getAttachedVectorPath());
+                } else {
+                    LOG_INTEGRATION_TESTS << filepath << "does not have vector attached";
                 }
-
-                hash[basename].append(filepath);
-                hash[basename].append(image->getAttachedVectorPath());
+            } else {
+                LOG_INTEGRATION_TESTS << filepath << "is not an image";
             }
         }
     }

@@ -13,7 +13,7 @@
 #include "../Models/imageartwork.h"
 #include "../Models/artworksrepository.h"
 #include "../Commands/commandmanager.h"
-#include "../MetadataIO/artworkmetadatasnapshot.h"
+#include "../MetadataIO/artworkssnapshot.h"
 #include "sessionmanager.h"
 
 #ifdef QT_DEBUG
@@ -54,6 +54,11 @@ namespace Models {
     void SessionManager::onBeforeRestore() {
         LOG_DEBUG << "#";
         m_CanRestore = true;
+    }
+
+    void SessionManager::onAfterRestore() {
+        m_Filenames.clear();
+        m_Vectors.clear();
     }
 
     void SessionManager::saveToFile(std::vector<std::shared_ptr<MetadataIO::ArtworkSessionSnapshot> > &snapshot) {

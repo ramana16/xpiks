@@ -31,7 +31,7 @@ namespace Helpers {
         };
 
     public:
-        void allBegun(int timeoutSeconds=1);
+        void allBegun(int timeoutSeconds=-1);
         void aboutToBegin(int operationsToAdd=1);
         void justEnded();
         void cancel();

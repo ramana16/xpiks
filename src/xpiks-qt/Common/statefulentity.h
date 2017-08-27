@@ -57,6 +57,10 @@ namespace Common {
             return m_StateJson.value(QLatin1String(key)).toString(defaultValue);
         }
 
+        inline bool containsState(const char *key) const {
+            return m_StateJson.contains(QLatin1String(key));
+        }
+
     private:
         static QAtomicInt s_DirectoryInitialized;
         QString m_StateName;

@@ -8,7 +8,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 #include "warningssettingsmodel.h"
-#include "../Conectivity/apimanager.h"
+#include "../Connectivity/apimanager.h"
 #include <QStandardPaths>
 #include <QDir>
 
@@ -57,7 +57,7 @@ namespace Warnings {
             localConfigPath = LOCAL_WARNINGS_SETTINGS_FILE;
         }
 
-        auto &apiManager = Conectivity::ApiManager::getInstance();
+        auto &apiManager = Connectivity::ApiManager::getInstance();
         QString remoteAddress = apiManager.getWarningSettingsAddr();
         AbstractConfigUpdaterModel::initializeConfigs(remoteAddress, localConfigPath);
     }

@@ -28,7 +28,7 @@ std::shared_ptr<Commands::ICommandResult> Commands::PasteKeywordsCommand::execut
 
     QVector<int> indicesToUpdate;
     std::vector<UndoRedo::ArtworkMetadataBackup> artworksBackups;
-    QVector<Models::ArtworkMetadata*> affectedArtworks;
+    MetadataIO::WeakArtworksSnapshot affectedArtworks;
     size_t size = m_MetadataElements.size();
     indicesToUpdate.reserve((int)size);
     artworksBackups.reserve(size);

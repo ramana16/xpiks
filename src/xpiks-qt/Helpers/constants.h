@@ -42,6 +42,9 @@ namespace Constants {
     const char PROXY_HOST[] = "PROXY_HOST_HASH";
     const char UPDATES_DIRECTORY[] = "updates";
     const char FAILED_PLUGINS_DIR[] = "invalid";
+    const char IMAGE_CACHE_TABLE[] = "imgcache";
+    const char VIDEO_CACHE_TABLE[] = "vidcache";
+    const char METADATA_CACHE_TABLE[] = "metadatacache";
 
     // different for DEBUG and RELEASE
 
@@ -55,7 +58,6 @@ namespace Constants {
     const char RECENT_FILES[] = "RECENT_FILES";
     const char MAX_PARALLEL_UPLOADS[] = "MAX_PARALLEL_UPLOADS";
     const char USE_SPELL_CHECK[] = "USE_SPELL_CHECK";
-    const char LIBRARY_FILENAME[] = "xpiks.v14.library";
     const char USER_AGENT_ID[] = "USER_AGENT_ID";
     const char INSTALLED_VERSION[] = "INSTALLED_VERSION";
     const char USER_CONSENT[] = "USER_CONSENT_1_0";
@@ -75,7 +77,14 @@ namespace Constants {
     const char TRANSLATOR_SELECTED_DICT_INDEX[] = "TRANSLATOR_SELECTED_DICT_INDEX";
     const char TRANSLATOR_DIR[] = "dictionaries";
     const char PLUGINS_DIR[] = "XpiksPlugins";
+    const char VIDEO_CACHE_DIR[] = "videoscache";
     const char STATES_DIR[] = "states";
+    const char DB_DIR[] = "db";
+    const char DB_DIR_FAILOVER[] = "db_failover";
+    const char METADATA_DB_NAME[] = "metadata.db";
+    const char IMAGECACHE_DB_NAME[] = "imgcache.db";
+    const char VIDEOCACHE_DB_NAME[] = "videocache.db";
+    const char METADATA_CACHE_DB_NAME[] = "metadatacache.db";
 #else
     // common for DEBUG and INTEGRATION_TESTS
     const char ONE_UPLOAD_SECONDS_TIMEMOUT[] = "DEBUG_ONE_UPLOAD_SECONDS_TIMEMOUT";
@@ -100,11 +109,11 @@ namespace Constants {
     const char TRANSLATOR_SELECTED_DICT_INDEX[] = "DEBUG_TRANSLATOR_SELECTED_DICT_INDEX";
     const char TRANSLATOR_DIR[] = "debug_dictionaries";
     const char PLUGINS_DIR[] = "debug_XpiksPlugins";
+    const char VIDEO_CACHE_DIR[] = "debug_videoscache";
     const char STATES_DIR[] = "debug_states";
 
     // different for DEBUG and INTEGRATION_TESTS
 #ifdef INTEGRATION_TESTS
-    const char LIBRARY_FILENAME[] = "xpiks.integration.v14.library";
     const char UPLOAD_HOSTS[] = "INTEGRATION_UPLOAD_HOSTS_HASH";
     const char USE_MASTER_PASSWORD[] = "INTEGRATION_USE_MASTER_PASSWORD";
     const char MASTER_PASSWORD_HASH[] = "INTEGRATION_MASTER_PASSWORD_HASH";
@@ -112,8 +121,13 @@ namespace Constants {
     const char RECENT_FILES[] = "INTEGRATION_RECENT_FILES";
     const char CACHE_IMAGES_AUTOMATICALLY[] = "INTEGRATION_CACHE_IMAGES_AUTOMATICALLY";
     const char USER_DICT_FILENAME[] = "userdict_debug_tests.dic";
+    const char DB_DIR[] = "tests_db";
+    const char DB_DIR_FAILOVER[] = "tests_db_failover";
+    const char METADATA_DB_NAME[] = "tests_metadata.db";
+    const char IMAGECACHE_DB_NAME[] = "tests_imgcache.db";
+    const char VIDEOCACHE_DB_NAME[] = "tests_videocache.db";
+    const char METADATA_CACHE_DB_NAME[] = "tests_metadatacache.db";
 #else
-    const char LIBRARY_FILENAME[] = "xpiks.debug.v14.library";
     const char UPLOAD_HOSTS[] = "DEBUG_UPLOAD_HOSTS_HASH";
     const char USE_MASTER_PASSWORD[] = "DEBUG_USE_MASTER_PASSWORD";
     const char MASTER_PASSWORD_HASH[] = "DEBUG_MASTER_PASSWORD_HASH";
@@ -121,6 +135,12 @@ namespace Constants {
     const char RECENT_FILES[] = "DEBUG_RECENT_FILES";
     const char CACHE_IMAGES_AUTOMATICALLY[] = "DEBUG_CACHE_IMAGES_AUTOMATICALLY";
     const char USER_DICT_FILENAME[] = "userdict_debug.dic";
+    const char DB_DIR[] = "debug_db";
+    const char DB_DIR_FAILOVER[] = "debug_db_failover";
+    const char METADATA_DB_NAME[] = "debug_metadata.db";
+    const char IMAGECACHE_DB_NAME[] = "debug_imgcache.db";
+    const char VIDEOCACHE_DB_NAME[] = "debug_videocache.db";
+    const char METADATA_CACHE_DB_NAME[] = "debug_metadatacache.db";
 #endif
 #endif // QT_NO_DEBUG
 
@@ -171,6 +191,7 @@ namespace Constants {
     const char saveSession[] = "saveSession";
     const char useProgressiveSuggestionPreviews[] = "useProgressiveSuggestionPreviews";
     const char progressiveSuggestionIncrement[] = "progressiveSuggestionIncrement";
+    const char useDirectExiftoolExport[] = "useDirectExiftoolExport";
 }
 
 #endif // CONSTANTS

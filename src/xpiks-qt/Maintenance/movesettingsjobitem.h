@@ -27,9 +27,6 @@ namespace Maintenance {
         virtual void processJob() override;
 
     private:
-        void doMoveSettings();
-
-    private:
         Models::SettingsModel *m_SettingsModel;
     };
 }

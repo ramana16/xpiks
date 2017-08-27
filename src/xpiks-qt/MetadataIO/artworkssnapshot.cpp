@@ -1,0 +1,104 @@
+/*
+ * This file is a part of Xpiks - cross platform application for
+ * keywording and uploading images for microstocks
+ * Copyright (C) 2014-2017 Taras Kushnir <kushnirTV@gmail.com>
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
+#include "artworkssnapshot.h"
+
+namespace MetadataIO {
+    ArtworkSessionSnapshot::ArtworkSessionSnapshot(Models::ArtworkMetadata *metadata){
+        Q_ASSERT(metadata != nullptr);
+        m_ArtworkPath = metadata->getFilepath();
+
+        Models::ImageArtwork *image = dynamic_cast<Models::ImageArtwork*>(metadata);
+        if (image != nullptr && image->hasVectorAttached()){
+            m_VectorPath = image->getAttachedVectorPath();
+        }
+    }
+
+    SessionSnapshot::SessionSnapshot(const std::deque<Models::ArtworkMetadata *> &artworksList) {
+        LOG_DEBUG << "Creating snapshot of" << artworksList.size() << "artwork(s)";
+
+        m_ArtworksSnapshot.reserve(artworksList.size());
+        for (const auto &artwork: artworksList) {
+            m_ArtworksSnapshot.emplace_back(new MetadataIO::ArtworkSessionSnapshot(artwork));
+        }
+    }
+
+    ArtworksSnapshot::ArtworksSnapshot(const WeakArtworksSnapshot &artworks) {
+        append(artworks);
+    }
+
+    ArtworksSnapshot::ArtworksSnapshot(const std::deque<Models::ArtworkMetadata *> &artworks) {
+       append(artworks);
+    }
+
+    ArtworksSnapshot::ArtworksSnapshot(Container &rawSnapshot) {
+        set(rawSnapshot);
+    }
+
+    ArtworksSnapshot::ArtworksSnapshot(ArtworksSnapshot &&other) {
+        m_ArtworksSnapshot.swap(other.m_ArtworksSnapshot);
+        m_RawArtworks.swap(other.m_RawArtworks);
+    }
+
+    ArtworksSnapshot &ArtworksSnapshot::operator=(ArtworksSnapshot &&other) {
+        if (this != &other) {
+            LOG_DEBUG << "Moving snapshot of" << other.m_ArtworksSnapshot.size() << "item(s)";
+            m_ArtworksSnapshot = std::move(other.m_ArtworksSnapshot);
+            m_RawArtworks = std::move(other.m_RawArtworks);
+        }
+
+        return *this;
+    }
+
+    ArtworksSnapshot::ArtworksSnapshot(const ArtworksSnapshot &other):
+        m_ArtworksSnapshot(other.m_ArtworksSnapshot),
+        m_RawArtworks(other.m_RawArtworks)
+    {
+        LOG_DEBUG << "Copying snapshot of" << other.m_ArtworksSnapshot.size() << "item(s)";
+    }
+
+    void ArtworksSnapshot::append(const WeakArtworksSnapshot &artworks) {
+        m_RawArtworks.append(artworks);
+
+        LOG_DEBUG << "Appending snapshot of" << artworks.size() << "artwork(s)";
+        m_ArtworksSnapshot.reserve(m_ArtworksSnapshot.size() + artworks.size());
+        for (auto &item: artworks) {
+            m_ArtworksSnapshot.emplace_back(new Models::ArtworkMetadataLocker(item));
+        }
+    }
+
+    void ArtworksSnapshot::append(const std::deque<Models::ArtworkMetadata *> &artworks) {
+        LOG_DEBUG << "Appending snapshot of" << artworks.size() << "artwork(s)";
+        m_ArtworksSnapshot.reserve(m_ArtworksSnapshot.size() + artworks.size());
+        m_RawArtworks.reserve(m_RawArtworks.size() + (int)artworks.size());
+        for (auto &item: artworks) {
+            m_ArtworksSnapshot.emplace_back(new Models::ArtworkMetadataLocker(item));
+            m_RawArtworks << item;
+        }
+    }
+
+    void ArtworksSnapshot::set(Container &rawSnapshot) {
+        clear();
+        LOG_DEBUG << "Setting snapshot of" << rawSnapshot.size() << "artwork(s)";
+
+        m_RawArtworks.reserve((int)rawSnapshot.size());
+        for (auto &item: rawSnapshot) {
+            m_RawArtworks << item->getArtworkMetadata();
+        }
+
+        m_ArtworksSnapshot = std::move(rawSnapshot);
+    }
+
+    void ArtworksSnapshot::clear() {
+        LOG_DEBUG << "Removing" << size() << "item(s)";
+        m_RawArtworks.clear();
+        m_ArtworksSnapshot.clear();
+    }
+}

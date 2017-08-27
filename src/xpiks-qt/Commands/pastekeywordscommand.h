@@ -16,6 +16,7 @@
 #include <QStringList>
 #include "commandbase.h"
 #include "../Models/metadataelement.h"
+#include "../MetadataIO/artworkssnapshot.h"
 
 namespace Models {
     class ArtworkMetadata;
@@ -57,7 +58,7 @@ namespace Commands {
 #else
     public:
 #endif
-        QVector<Models::ArtworkMetadata *> m_AffectedItems;
+        MetadataIO::WeakArtworksSnapshot m_AffectedItems;
         QVector<int> m_IndicesToUpdate;
     };
 }

@@ -13,7 +13,6 @@ CONFIG   -= app_bundle
 CONFIG += c++11
 
 BUILDNO = $$system(git log -n 1 --pretty=format:"%H")
-DEFINES += BUILDNUMBER=$${BUILDNO}
 
 DEFINES += QT_NO_CAST_TO_ASCII \
            QT_RESTRICTED_CAST_FROM_ASCII \
@@ -32,25 +31,21 @@ SOURCES += main.cpp \
     ../../xpiks-qt/Commands/removeartworkscommand.cpp \
     ../../xpiks-qt/Common/basickeywordsmodel.cpp \
     ../../xpiks-qt/Common/basicmetadatamodel.cpp \
-    ../../xpiks-qt/Conectivity/conectivityhelpers.cpp \
-    ../../xpiks-qt/Conectivity/curlftpuploader.cpp \
-    ../../xpiks-qt/Conectivity/ftpcoordinator.cpp \
-    ../../xpiks-qt/Conectivity/ftphelpers.cpp \
-    ../../xpiks-qt/Conectivity/ftpuploaderworker.cpp \
-    ../../xpiks-qt/Conectivity/telemetryservice.cpp \
+    ../../xpiks-qt/Connectivity/ftphelpers.cpp \
+    ../../xpiks-qt/Connectivity/telemetryservice.cpp \
     ../../xpiks-qt/Maintenance/maintenanceservice.cpp \
     ../../xpiks-qt/Maintenance/maintenanceworker.cpp \
     ../../xpiks-qt/Maintenance/logscleanupjobitem.cpp \
     ../../xpiks-qt/Maintenance/updatescleanupjobitem.cpp \
     ../../xpiks-qt/Maintenance/launchexiftooljobitem.cpp \
     ../../xpiks-qt/Maintenance/initializedictionariesjobitem.cpp \
-    ../../xpiks-qt/Maintenance/addtolibraryjobitem.cpp \
     ../../xpiks-qt/Maintenance/movesettingsjobitem.cpp \
     ../../xpiks-qt/Maintenance/savesessionjobitem.cpp \
-    ../../xpiks-qt/Conectivity/testconnection.cpp \
-    ../../xpiks-qt/Conectivity/updatescheckerworker.cpp \
+    ../../xpiks-qt/Connectivity/testconnection.cpp \
+    ../../xpiks-qt/Connectivity/updatescheckerworker.cpp \
     ../../xpiks-qt/Encryption/aes-qt.cpp \
     ../../xpiks-qt/Encryption/secretsmanager.cpp \
+    ../../xpiks-qt/Helpers/filehelpers.cpp \
     ../../xpiks-qt/Helpers/filterhelpers.cpp \
     ../../xpiks-qt/Helpers/globalimageprovider.cpp \
     ../../xpiks-qt/Helpers/helpersqmlwrapper.cpp \
@@ -62,13 +57,10 @@ SOURCES += main.cpp \
     ../../xpiks-qt/Helpers/runguard.cpp \
     ../../xpiks-qt/Helpers/stringhelper.cpp \
     ../../xpiks-qt/Helpers/ziphelper.cpp \
-    ../../xpiks-qt/Conectivity/updateservice.cpp \
-    ../../xpiks-qt/MetadataIO/backupsaverservice.cpp \
-    ../../xpiks-qt/MetadataIO/backupsaverworker.cpp \
+    ../../xpiks-qt/Connectivity/updateservice.cpp \
+    ../../xpiks-qt/MetadataIO/metadataioservice.cpp \
+    ../../xpiks-qt/MetadataIO/metadataioworker.cpp \
     ../../xpiks-qt/MetadataIO/metadataiocoordinator.cpp \
-    ../../xpiks-qt/MetadataIO/metadatareadingworker.cpp \
-    ../../xpiks-qt/MetadataIO/metadatawritingworker.cpp \
-    ../../xpiks-qt/MetadataIO/saverworkerjobitem.cpp \
     ../../xpiks-qt/Models/artitemsmodel.cpp \
     ../../xpiks-qt/Models/artworkmetadata.cpp \
     ../../xpiks-qt/Models/artworksprocessor.cpp \
@@ -97,8 +89,6 @@ SOURCES += main.cpp \
     ../../xpiks-qt/SpellCheck/spellcheckworker.cpp \
     ../../xpiks-qt/SpellCheck/spellsuggestionsitem.cpp \
     ../../xpiks-qt/Suggestion/keywordssuggestor.cpp \
-    ../../xpiks-qt/Suggestion/libraryqueryworker.cpp \
-    ../../xpiks-qt/Suggestion/locallibrary.cpp \
     ../../xpiks-qt/UndoRedo/addartworksitem.cpp \
     ../../xpiks-qt/UndoRedo/artworkmetadatabackup.cpp \
     ../../xpiks-qt/UndoRedo/modifyartworkshistoryitem.cpp \
@@ -108,6 +98,7 @@ SOURCES += main.cpp \
     ../../xpiks-qt/Warnings/warningsmodel.cpp \
     ../../xpiks-qt/Warnings/warningsservice.cpp \
     ../../../vendors/tiny-aes/aes.cpp \
+    ../../../vendors/sqlite/sqlite3.c \
     addfilesbasictest.cpp \
     autoattachvectorstest.cpp \
     savefilebasictest.cpp \
@@ -133,10 +124,6 @@ SOURCES += main.cpp \
     ../../xpiks-qt/Models/imageartwork.cpp \
     spellingproduceswarningstest.cpp \
     undoaddwithvectorstest.cpp \
-    ../../xpiks-qt/MetadataIO/exiv2readingworker.cpp \
-    ../../xpiks-qt/MetadataIO/readingorchestrator.cpp \
-    ../../xpiks-qt/MetadataIO/exiv2writingworker.cpp \
-    ../../xpiks-qt/MetadataIO/writingorchestrator.cpp \
     ../../xpiks-qt/Common/flags.cpp \
     readlegacysavedtest.cpp \
     ../../xpiks-qt/QMLExtensions/imagecachingservice.cpp \
@@ -152,17 +139,16 @@ SOURCES += main.cpp \
     combinededitfixspellingtest.cpp \
     findandreplacemodeltest.cpp \
     ../../xpiks-qt/Models/findandreplacemodel.cpp \
-    ../../xpiks-qt/Conectivity/uploadwatcher.cpp \
-    ../../xpiks-qt/Conectivity/telemetryworker.cpp \
+    ../../xpiks-qt/Connectivity/uploadwatcher.cpp \
+    ../../xpiks-qt/Connectivity/telemetryworker.cpp \
     addtouserdictionarytest.cpp \
     autodetachvectortest.cpp \
     removefromuserdictionarytest.cpp \
     testshelpers.cpp \
-    ../../xpiks-qt/Conectivity/simplecurlrequest.cpp \
-    ../../xpiks-qt/Conectivity/simplecurldownloader.cpp \
-    ../../xpiks-qt/Conectivity/curlinithelper.cpp \
+    ../../xpiks-qt/Connectivity/simplecurlrequest.cpp \
+    ../../xpiks-qt/Connectivity/simplecurldownloader.cpp \
+    ../../xpiks-qt/Connectivity/curlinithelper.cpp \
     artworkuploaderbasictest.cpp \
-    ../../xpiks-qt/MetadataIO/exiv2inithelper.cpp \
     ../../xpiks-qt/Warnings/warningssettingsmodel.cpp \
     ../../xpiks-qt/Helpers/updatehelpers.cpp \
     ../../xpiks-qt/KeywordsPresets/PresetKeywordsModel.cpp \
@@ -188,15 +174,30 @@ SOURCES += main.cpp \
     userdictedittest.cpp \
     weirdnamesreadtest.cpp \
     ../../xpiks-qt/QMLExtensions/tabsmodel.cpp \
+    ../../xpiks-qt/Models/videoartwork.cpp \
     ../../xpiks-qt/Helpers/asynccoordinator.cpp \
-    ../../xpiks-qt/Maintenance/locallibraryloadsaveitem.cpp \
+    ../../xpiks-qt/QMLExtensions/videocachingservice.cpp \
+    ../../xpiks-qt/QMLExtensions/videocachingworker.cpp \
+    ../../xpiks-qt/QMLExtensions/artworksupdatehub.cpp \
     restoresessiontest.cpp \
-    ../../xpiks-qt/Conectivity/conectivityrequest.cpp \
-    ../../xpiks-qt/Conectivity/requestsservice.cpp \
-    ../../xpiks-qt/Conectivity/requestsworker.cpp \
+    ../../xpiks-qt/Connectivity/connectivityrequest.cpp \
+    ../../xpiks-qt/Connectivity/requestsservice.cpp \
+    ../../xpiks-qt/Connectivity/requestsworker.cpp \
     ../../xpiks-qt/Models/switchermodel.cpp \
-    ../../xpiks-qt/Conectivity/switcherconfig.cpp \
-    ../../xpiks-qt/Helpers/filehelpers.cpp
+    ../../xpiks-qt/Connectivity/switcherconfig.cpp \
+    ../../xpiks-qt/Helpers/artworkshelpers.cpp \
+    ../../xpiks-qt/Models/keyvaluelist.cpp \
+    ../../xpiks-qt/Helpers/database.cpp \
+    ../../xpiks-qt/QMLExtensions/cachedimage.cpp \
+    ../../xpiks-qt/QMLExtensions/cachedvideo.cpp \
+    ../../xpiks-qt/Maintenance/moveimagecachejobitem.cpp \
+    ../../xpiks-qt/QMLExtensions/dbimagecacheindex.cpp \
+    ../../xpiks-qt/QMLExtensions/dbvideocacheindex.cpp \
+    ../../xpiks-qt/MetadataIO/cachedartwork.cpp \
+    ../../xpiks-qt/MetadataIO/artworkssnapshot.cpp \
+    ../../xpiks-qt/MetadataIO/metadatacache.cpp \
+    savefilelegacytest.cpp \
+    ../../xpiks-qt/Common/statefulentity.cpp
 
 RESOURCES +=
 
@@ -225,31 +226,25 @@ HEADERS += \
     ../../xpiks-qt/Common/iservicebase.h \
     ../../xpiks-qt/Common/itemprocessingworker.h \
     ../../xpiks-qt/Common/version.h \
-    ../../xpiks-qt/Conectivity/analyticsuserevent.h \
-    ../../xpiks-qt/Conectivity/conectivityhelpers.h \
-    ../../xpiks-qt/Conectivity/curlftpuploader.h \
-    ../../xpiks-qt/Conectivity/ftpcoordinator.h \
-    ../../xpiks-qt/Conectivity/ftphelpers.h \
-    ../../xpiks-qt/Conectivity/ftpuploaderworker.h \
-    ../../xpiks-qt/Conectivity/iftpcoordinator.h \
-    ../../xpiks-qt/Conectivity/telemetryservice.h \
+    ../../xpiks-qt/Connectivity/analyticsuserevent.h \
+    ../../xpiks-qt/Connectivity/ftphelpers.h \
+    ../../xpiks-qt/Connectivity/iftpcoordinator.h \
+    ../../xpiks-qt/Connectivity/telemetryservice.h \
     ../../xpiks-qt/Maintenance/maintenanceservice.h \
     ../../xpiks-qt/Maintenance/maintenanceworker.h \
     ../../xpiks-qt/Maintenance/logscleanupjobitem.h \
     ../../xpiks-qt/Maintenance/updatescleanupjobitem.h \
     ../../xpiks-qt/Maintenance/launchexiftooljobitem.h \
     ../../xpiks-qt/Maintenance/initializedictionariesjobitem.h \
-    ../../xpiks-qt/Maintenance/addtolibraryjobitem.h \
     ../../xpiks-qt/Maintenance/movesettingsjobitem.h \
     ../../xpiks-qt/Maintenance/savesessionjobitem.h \
-    ../../xpiks-qt/Conectivity/testconnection.h \
-    ../../xpiks-qt/Conectivity/updatescheckerworker.h \
-    ../../xpiks-qt/Conectivity/uploadbatch.h \
-    ../../xpiks-qt/Conectivity/uploadcontext.h \
+    ../../xpiks-qt/Connectivity/testconnection.h \
+    ../../xpiks-qt/Connectivity/updatescheckerworker.h \
     ../../xpiks-qt/Encryption/aes-qt.h \
     ../../xpiks-qt/Encryption/secretsmanager.h \
     ../../xpiks-qt/Helpers/clipboardhelper.h \
     ../../xpiks-qt/Helpers/constants.h \
+    ../../xpiks-qt/Helpers/filehelpers.h \
     ../../xpiks-qt/Helpers/filterhelpers.h \
     ../../xpiks-qt/Helpers/globalimageprovider.h \
     ../../xpiks-qt/Helpers/helpersqmlwrapper.h \
@@ -261,14 +256,11 @@ HEADERS += \
     ../../xpiks-qt/Helpers/runguard.h \
     ../../xpiks-qt/Helpers/stringhelper.h \
     ../../xpiks-qt/Helpers/ziphelper.h \
-    ../../xpiks-qt/Conectivity/updateservice.h \
-    ../../xpiks-qt/MetadataIO/backupsaverservice.h \
-    ../../xpiks-qt/MetadataIO/backupsaverworker.h \
+    ../../xpiks-qt/Connectivity/updateservice.h \
+    ../../xpiks-qt/MetadataIO/metadataioservice.h \
+    ../../xpiks-qt/MetadataIO/metadataioworker.h \
     ../../xpiks-qt/MetadataIO/metadataiocoordinator.h \
-    ../../xpiks-qt/MetadataIO/metadatareadingworker.h \
-    ../../xpiks-qt/MetadataIO/metadatawritingworker.h \
-    ../../xpiks-qt/MetadataIO/saverworkerjobitem.h \
-    ../../xpiks-qt/MetadataIO/artworkmetadatasnapshot.h \
+    ../../xpiks-qt/MetadataIO/artworkssnapshot.h \
     ../../xpiks-qt/Common/abstractlistmodel.h \
     ../../xpiks-qt/Models/metadataelement.h \
     ../../xpiks-qt/Models/artitemsmodel.h \
@@ -304,8 +296,6 @@ HEADERS += \
     ../../xpiks-qt/SpellCheck/spellcheckworker.h \
     ../../xpiks-qt/SpellCheck/spellsuggestionsitem.h \
     ../../xpiks-qt/Suggestion/keywordssuggestor.h \
-    ../../xpiks-qt/Suggestion/libraryqueryworker.h \
-    ../../xpiks-qt/Suggestion/locallibrary.h \
     ../../xpiks-qt/Suggestion/suggestionartwork.h \
     ../../xpiks-qt/UndoRedo/addartworksitem.h \
     ../../xpiks-qt/UndoRedo/artworkmetadatabackup.h \
@@ -320,6 +310,7 @@ HEADERS += \
     ../../xpiks-qt/Warnings/warningsmodel.h \
     ../../xpiks-qt/Warnings/warningsservice.h \
     ../../../vendors/tiny-aes/aes.h \
+    ../../../vendors/sqlite/sqlite3.h \
     integrationtestbase.h \
     addfilesbasictest.h \
     signalwaiter.h \
@@ -349,14 +340,9 @@ HEADERS += \
     ../../xpiks-qt/Common/hold.h \
     ../../xpiks-qt/Models/imageartwork.h \
     undoaddwithvectorstest.h \
-    ../../xpiks-qt/MetadataIO/exiv2readingworker.h \
     ../../xpiks-qt/MetadataIO/imetadatareader.h \
-    ../../xpiks-qt/MetadataIO/importdataresult.h \
-    ../../xpiks-qt/MetadataIO/readingorchestrator.h \
-    ../../xpiks-qt/MetadataIO/exiv2writingworker.h \
+    ../../xpiks-qt/MetadataIO/originalmetadata.h \
     ../../xpiks-qt/MetadataIO/imetadatawriter.h \
-    ../../xpiks-qt/MetadataIO/exiv2tagnames.h \
-    ../../xpiks-qt/MetadataIO/writingorchestrator.h \
     readlegacysavedtest.h \
     ../../xpiks-qt/QMLExtensions/imagecacherequest.h \
     ../../xpiks-qt/QMLExtensions/imagecachingservice.h \
@@ -375,19 +361,18 @@ HEADERS += \
     ../../xpiks-qt/Common/iflagsprovider.h \
     findandreplacemodeltest.h \
     ../../xpiks-qt/Models/findandreplacemodel.h \
-    ../../xpiks-qt/Conectivity/uploadwatcher.h \
-    ../../xpiks-qt/Conectivity/telemetryworker.h \
+    ../../xpiks-qt/Connectivity/uploadwatcher.h \
+    ../../xpiks-qt/Connectivity/telemetryworker.h \
     addtouserdictionarytest.h \
     autodetachvectortest.h \
     removefromuserdictionarytest.h \
     testshelpers.h \
-    ../../xpiks-qt/Conectivity/simplecurlrequest.h \
-    ../../xpiks-qt/Conectivity/simplecurldownloader.h \
-    ../../xpiks-qt/Conectivity/curlinithelper.h \
+    ../../xpiks-qt/Connectivity/simplecurlrequest.h \
+    ../../xpiks-qt/Connectivity/simplecurldownloader.h \
+    ../../xpiks-qt/Connectivity/curlinithelper.h \
     artworkuploaderbasictest.h \
-    ../../xpiks-qt/MetadataIO/exiv2inithelper.h \
     ../../xpiks-qt/Warnings/warningssettingsmodel.h \
-    ../../xpiks-qt/Conectivity/apimanager.h \
+    ../../xpiks-qt/Connectivity/apimanager.h \
     ../../xpiks-qt/Helpers/updatehelpers.h \
     ../../xpiks-qt/KeywordsPresets/PresetKeywordsModel.h \
     ../../xpiks-qt/KeywordsPresets/PresetKeywordsModelConfig.h \
@@ -415,22 +400,45 @@ HEADERS += \
     userdictedittest.h \
     weirdnamesreadtest.h \
     ../../xpiks-qt/QMLExtensions/tabsmodel.h \
+    ../../xpiks-qt/Models/videoartwork.h \
     ../../xpiks-qt/Helpers/asynccoordinator.h \
-    ../../xpiks-qt/Maintenance/locallibraryloadsaveitem.h \
+    ../../xpiks-qt/QMLExtensions/videocacherequest.h \
+    ../../xpiks-qt/QMLExtensions/videocachingservice.h \
+    ../../xpiks-qt/QMLExtensions/videocachingworker.h \
+    ../../xpiks-qt/QMLExtensions/artworksupdatehub.h \
+    ../../xpiks-qt/QMLExtensions/artworkupdaterequest.h \
     restoresessiontest.h \
-    ../../xpiks-qt/Conectivity/conectivityrequest.h \
-    ../../xpiks-qt/Conectivity/requestsservice.h \
-    ../../xpiks-qt/Conectivity/requestsworker.h \
+    ../../xpiks-qt/Connectivity/connectivityrequest.h \
+    ../../xpiks-qt/Connectivity/requestsservice.h \
+    ../../xpiks-qt/Connectivity/requestsworker.h \
     ../../xpiks-qt/Models/switchermodel.h \
-    ../../xpiks-qt/Conectivity/switcherconfig.h \
+    ../../xpiks-qt/Connectivity/switcherconfig.h \
     ../../xpiks-qt/Warnings/iwarningsitem.h \
     ../../xpiks-qt/AutoComplete/completionitem.h \
-    ../../xpiks-qt/Helpers/filehelpers.h
+    ../../xpiks-qt/Helpers/artworkshelpers.h \
+    ../../xpiks-qt/Models/keyvaluelist.h \
+    ../../xpiks-qt/Helpers/database.h \
+    ../../xpiks-qt/QMLExtensions/cachedimage.h \
+    ../../xpiks-qt/QMLExtensions/cachedvideo.h \
+    ../../xpiks-qt/QMLExtensions/previewstorage.h \
+    ../../xpiks-qt/Maintenance/moveimagecachejobitem.h \
+    ../../xpiks-qt/QMLExtensions/dbcacheindex.h \
+    ../../xpiks-qt/QMLExtensions/dbimagecacheindex.h \
+    ../../xpiks-qt/QMLExtensions/dbvideocacheindex.h \
+    ../../xpiks-qt/MetadataIO/cachedartwork.h \
+    ../../xpiks-qt/MetadataIO/metadatacache.h \
+    ../../xpiks-qt/Suggestion/locallibraryquery.h \
+    ../../xpiks-qt/Suggestion/searchquery.h \
+    savefilelegacytest.h \
+    ../../xpiks-qt/Common/statefulentity.h
 
 INCLUDEPATH += ../../../vendors/tiny-aes
 INCLUDEPATH += ../../../vendors/cpp-libface
 INCLUDEPATH += ../../../vendors/ssdll/src/ssdll
 INCLUDEPATH += ../../../vendors/hunspell-1.6.0/src
+INCLUDEPATH += ../../../vendors/libthmbnlr
+INCLUDEPATH += ../../../vendors/libxpks
+INCLUDEPATH += ../../xpiks-qt
 
 CONFIG(debug, debug|release)  {
     LIBS += -L"$$PWD/../../../libs/debug"
@@ -443,17 +451,15 @@ LIBS += -lcurl
 LIBS += -lquazip
 LIBS += -lface
 LIBS += -lssdll
+LIBS += -lthmbnlr
+LIBS += -lxpks
+
+BUILDNO=$$system(git log -n 1 --pretty=format:"%h")
+BRANCH_NAME=$$system(git rev-parse --abbrev-ref HEAD)
 
 macx {
     INCLUDEPATH += "../../../vendors/quazip"
-    INCLUDEPATH += "../../../../vendors/libcurl/include"
-    INCLUDEPATH += "../../../vendors/exiv2-0.25/include"
-
-    LIBS += -liconv
-    LIBS += -lexpat
-
-    LIBS += -lxmpsdk
-    LIBS += -lexiv2
+    INCLUDEPATH += "../../../vendors/libcurl/include"
 }
 
 win32 {
@@ -462,12 +468,9 @@ win32 {
     INCLUDEPATH += "../../../vendors/zlib-1.2.11"
     INCLUDEPATH += "../../../vendors/quazip"
     INCLUDEPATH += "../../../vendors/libcurl/include"
-    INCLUDEPATH += "../../../vendors/exiv2-0.25/include"
+
     LIBS -= -lcurl
     LIBS += -lmman
-
-    LIBS += -llibexpat
-    LIBS += -llibexiv2
 
     CONFIG(debug, debug|release) {
         EXE_DIR = debug
@@ -483,15 +486,15 @@ win32 {
 
     # StackWalker stuff
     LIBS += -lAdvapi32 -lDbgHelp
-    HEADERS += StackWalker.h
-    SOURCES += StackWalker.cpp
+    HEADERS += StackWalker.h \
+        windowscrashhandler.h
+    SOURCES += StackWalker.cpp \
+        windowscrashhandler.cpp
     DEFINES += _UNICODE \
                _MBCS
 }
 
 linux-g++-64 {
-    LIBS += -lexiv2
-
     message("for Linux")
     target.path=/usr/bin/
     QML_IMPORT_PATH += /usr/lib/x86_64-linux-gnu/qt5/imports/
@@ -514,8 +517,11 @@ travis-ci {
     LIBS += -L"$$PWD/../../../libs"
     LIBS -= -lz
     LIBS += /usr/lib/x86_64-linux-gnu/libz.so
-    LIBS += -lexiv2
+    LIBS += -ldl
     DEFINES += TRAVIS_CI
+
+    LIBS -= -lthmbnlr
+    SOURCES += ../../../vendors/libthmbnlr/thumbnailcreator_stub.cpp
 }
 
 appveyor {
@@ -523,3 +529,6 @@ appveyor {
     DEFINES += APPVEYOR
     LIBS += -L"$$PWD/../../../libs"
 }
+
+DEFINES += BUILDNUMBER=$${BUILDNO}
+DEFINES += BRANCHNAME=$${BRANCH_NAME}

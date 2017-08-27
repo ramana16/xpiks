@@ -11,18 +11,14 @@
 #ifndef IMETADATAWRITER_H
 #define IMETADATAWRITER_H
 
-#include <QVector>
-
-namespace Models {
-    class ArtworkMetadata;
-}
+#include "artworkssnapshot.h"
 
 namespace MetadataIO {
     class IMetadataWriter {
     public:
         virtual ~IMetadataWriter() {}
 
-        virtual const QVector<Models::ArtworkMetadata *> &getItemsToWrite() const = 0;
+        virtual const ArtworksSnapshot &getArtworksSnapshot() const = 0;
     };
 }
 

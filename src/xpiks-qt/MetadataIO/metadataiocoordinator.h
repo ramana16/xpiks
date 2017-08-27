@@ -13,8 +13,11 @@
 
 #include <QObject>
 #include <QVector>
+#include <QAtomicInt>
 #include "../Common/baseentity.h"
 #include "../Common/defines.h"
+#include "../Common/readerwriterqueue.h"
+#include "originalmetadata.h"
 
 namespace Models {
     class ArtworkMetadata;
@@ -24,6 +27,7 @@ namespace MetadataIO {
     class IMetadataReader;
     class IMetadataWriter;
     class MetadataWritingWorker;
+    class ArtworksSnapshot;
 
     class MetadataIOCoordinator : public QObject, public Common::BaseEntity
     {
@@ -36,15 +40,15 @@ namespace MetadataIO {
 
     signals:
         void metadataReadingFinished();
+        void metadataReadingSkipped();
         void metadataWritingFinished();
         void processingItemsCountChanged(int value);
-        void discardReadingSignal();
         void hasErrorsChanged(bool value);
         void exiftoolNotFoundChanged();
 
     private slots:
-        void readingWorkerFinished(bool success);
-        void writingWorkerFinished(bool success);
+        void readingFinished(bool success);
+        void writingFinished(bool success);
 
     public:
         bool getExiftoolNotFound() const { return m_ExiftoolNotFound; }
@@ -73,18 +77,10 @@ namespace MetadataIO {
         }
 
     public:
-        void readMetadataExifTool(const QVector<Models::ArtworkMetadata*> &artworksToRead, const QVector<QPair<int, int> > &rangesToUpdate);
-#ifndef CORE_TESTS
-        void readMetadataExiv2(const QVector<Models::ArtworkMetadata*> &artworksToRead, const QVector<QPair<int, int> > &rangesToUpdate);
-#endif
-        void writeMetadataExifTool(const QVector<Models::ArtworkMetadata*> &artworksToWrite, bool useBackups);
-#ifndef CORE_TESTS
-        void writeMetadataExiv2(const QVector<Models::ArtworkMetadata*> &artworksToWrite);
-#endif
+        void readMetadataExifTool(const ArtworksSnapshot &artworksToRead, quint32 storageReadBatchID);
+        void writeMetadataExifTool(const ArtworksSnapshot &artworksToWrite, bool useBackups);
         void autoDiscoverExiftool();
-        void exiftoolDiscoveryFinished();
-        void tryToLaunchExiftool(const QString &settingsExiftoolPath);
-        Q_INVOKABLE void discardReading();
+        void setRecommendedExiftoolPath(const QString &recommendedExiftool);
         Q_INVOKABLE void continueReading(bool ignoreBackups);
         Q_INVOKABLE void continueWithoutReading();
 
@@ -97,7 +93,8 @@ namespace MetadataIO {
         IMetadataReader *m_ReadingWorker;
         IMetadataWriter *m_WritingWorker;
         QString m_RecommendedExiftoolPath;
-        int m_ProcessingItemsCount;
+        volatile int m_ProcessingItemsCount;
+        QAtomicInt m_FinishedCount;
         volatile bool m_IsImportInProgress;
         volatile bool m_CanProcessResults;
         volatile bool m_IgnoreBackupsAtImport;

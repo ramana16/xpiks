@@ -10,6 +10,8 @@
 
 #include "imageartwork.h"
 #include "../Common/defines.h"
+#include "../MetadataIO/cachedartwork.h"
+#include "../MetadataIO/originalmetadata.h"
 
 namespace Models {
     ImageArtwork::ImageArtwork(const QString &filepath, qint64 ID, qint64 directoryID):
@@ -28,5 +30,21 @@ namespace Models {
         LOG_INFO << "#";
         setHasVectorAttachedFlag(false);
         m_AttachedVector.clear();
+    }
+
+    bool ImageArtwork::initFromOriginUnsafe(const MetadataIO::OriginalMetadata &originalMetadata) {
+        setImageSize(originalMetadata.m_ImageSize);
+        setDateTimeOriginal(originalMetadata.m_DateTimeOriginal);
+
+        // TODO: check if this is needed
+        return false;
+    }
+
+    bool ImageArtwork::initFromStorageUnsafe(const MetadataIO::CachedArtwork &cachedArtwork) {
+        //setImageSize(cachedArtwork.m_ImageSize);
+        setDateTimeOriginal(cachedArtwork.m_CreationTime);
+
+        // TODO: check if this is needed
+        return false;
     }
 }

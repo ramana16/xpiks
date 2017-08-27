@@ -13,8 +13,7 @@ void EncryptionTests::simpleEncodeDecodeTest() {
     QCOMPARE(decoded, text);
 }
 
-void EncryptionTests::encodedTextNotEqualToRawTest()
-{
+void EncryptionTests::encodedTextNotEqualToRawTest() {
     QString text = "yet another simple text";
     QString key = "some more sophisticated key q4234";
     QString encoded = Encryption::encodeText(text, key);
@@ -22,8 +21,7 @@ void EncryptionTests::encodedTextNotEqualToRawTest()
     QVERIFY(encoded != text);
 }
 
-void EncryptionTests::encodedNotEqualToDecodedTest()
-{
+void EncryptionTests::encodedNotEqualToDecodedTest() {
     QString text = "yet another simple text";
     QString key = "some more sophisticated key q4234";
     QString encoded = Encryption::encodeText(text, key);
@@ -32,8 +30,7 @@ void EncryptionTests::encodedNotEqualToDecodedTest()
     QVERIFY(encoded != decoded);
 }
 
-void EncryptionTests::complexEncodeDecodeTest()
-{
+void EncryptionTests::complexEncodeDecodeTest() {
     QString text = "simple text which has end of line and consists of \n newlines and more \t symbols";
     QString key = "key with \t tabulation and whitespaces and";
     QString encoded = Encryption::encodeText(text, key);
@@ -42,8 +39,7 @@ void EncryptionTests::complexEncodeDecodeTest()
     QCOMPARE(decoded, text);
 }
 
-void EncryptionTests::simpleEncodeDecodeCyrrylicTest()
-{
+void EncryptionTests::simpleEncodeDecodeCyrrylicTest() {
     QString text = QString::fromUtf8("простий текст");
     QString key =  QString::fromUtf8("ключ");
     QString encoded = Encryption::encodeText(text, key);
@@ -52,8 +48,7 @@ void EncryptionTests::simpleEncodeDecodeCyrrylicTest()
     QCOMPARE(decoded, text);
 }
 
-void EncryptionTests::simpleEncodeDecodeUtf8Test()
-{
+void EncryptionTests::simpleEncodeDecodeUtf8Test() {
     QString text = QString::fromUtf8("Test \u20AC");;
     QString key = QString::fromUtf8("Test \u20AC\u20AC");;
     QString encoded = Encryption::encodeText(text, key);
@@ -62,8 +57,7 @@ void EncryptionTests::simpleEncodeDecodeUtf8Test()
     QCOMPARE(decoded, text);
 }
 
-void EncryptionTests::realTest()
-{
+void EncryptionTests::realTest() {
     QString text = "mp";
     QString key = "93b7294e86d8d9923a497364fc8148befd67f46a";
     QString encoded = Encryption::encodeText(text, key);
@@ -72,9 +66,12 @@ void EncryptionTests::realTest()
     QCOMPARE(decoded, text);
 }
 
-void EncryptionTests::bigRandomTest()
-{
+void EncryptionTests::bigRandomTest() {
+#if defined(TRAVIS_CI) || defined(APPVEYOR)
     int iterations = 10000;
+#else
+    int iterations = 500;
+#endif
     QTime time = QTime::currentTime();
     qsrand((uint)time.msec());
 

@@ -13,11 +13,20 @@
 
 #include <QStringList>
 
+namespace Models {
+    class ArtworkMetadata;
+}
+
 namespace Helpers {
+    void extractFilePathes(const QVector<Models::ArtworkMetadata *> &artworkList,
+                           QStringList &filePathes,
+                           QStringList &zipsPathes);
     QStringList convertToVectorFilenames(const QStringList &items);
     QStringList convertToVectorFilenames(const QString &path);
     QString getImagePath(const QString &path);
     QString getArchivePath(const QString &artworkPath);
+    bool couldBeVideo(const QString &artworkPath);
+    QString describeFileSize(qint64 filesizeBytes);
     bool ensureDirectoryExists(const QString &path);
 }
 

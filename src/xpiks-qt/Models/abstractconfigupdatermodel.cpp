@@ -11,7 +11,7 @@
 #include "abstractconfigupdatermodel.h"
 #include "../Models/settingsmodel.h"
 #include "../Commands/commandmanager.h"
-#include "../Conectivity/requestsservice.h"
+#include "../Connectivity/requestsservice.h"
 
 namespace Models {
     AbstractConfigUpdaterModel::AbstractConfigUpdaterModel(bool forceOverwrite, QObject *parent):
@@ -46,7 +46,7 @@ namespace Models {
         Q_ASSERT(!configUrl.isEmpty());
         m_RemoteConfig.setConfigUrl(configUrl);
 
-        Conectivity::RequestsService *requestsService = m_CommandManager->getRequestsService();
+        Connectivity::RequestsService *requestsService = m_CommandManager->getRequestsService();
         requestsService->receiveConfig(configUrl, &m_RemoteConfig);
     }
 

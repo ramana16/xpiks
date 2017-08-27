@@ -17,8 +17,7 @@ namespace Mocks {
     public:
         virtual Models::ArtworkMetadata *createMetadata(const QString &filepath, qint64 directoryID) {
             ArtworkMetadataMock *metadata = new ArtworkMetadataMock(filepath, directoryID);
-            metadata->initialize("Test title", "Test description",
-                                 QStringList() << "keyword1" << "keyword2" << "keyword3");
+            metadata->initialize("Test title", "Test description", QStringList() << "keyword1" << "keyword2" << "keyword3");
             return metadata;
         }
         void setUpdatesBlocked(bool value) { m_BlockUpdates = value; }

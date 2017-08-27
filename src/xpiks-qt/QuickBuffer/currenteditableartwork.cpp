@@ -35,7 +35,7 @@ namespace QuickBuffer {
         }
     }
 
-    qint64 CurrentEditableArtwork::getItemID() {
+    Common::ID_t CurrentEditableArtwork::getItemID() {
         return m_ArtworkMetadata->getItemID();
     }
 
@@ -116,6 +116,6 @@ namespace QuickBuffer {
     }
 
     void CurrentEditableArtwork::update() {
-        m_CommandManager->updateArtworks(QVector<int>() << m_OriginalIndex);
+        m_CommandManager->updateArtworksAtIndices(QVector<int>() << m_OriginalIndex);
     }
 }

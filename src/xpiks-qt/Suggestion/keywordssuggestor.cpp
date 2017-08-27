@@ -27,10 +27,9 @@
 #define LINEAR_TIMER_INTERVAL 1000
 
 namespace Suggestion {
-    KeywordsSuggestor::KeywordsSuggestor(LocalLibrary *library, QObject *parent):
+    KeywordsSuggestor::KeywordsSuggestor(QObject *parent):
         QAbstractListModel(parent),
         Common::BaseEntity(),
-        m_LocalLibrary(library),
         m_SuggestedKeywords(m_HoldPlaceholder, this),
         m_AllOtherKeywords(m_HoldPlaceholder, this),
         m_SelectedArtworksCount(0),
@@ -57,12 +56,13 @@ namespace Suggestion {
     void KeywordsSuggestor::initSuggestionEngines() {
         Q_ASSERT(m_CommandManager != NULL);
         auto *settingsModel = m_CommandManager->getSettingsModel();
+        auto *metadataIOService = m_CommandManager->getMetadataIOService();
 
         int id = 0;
         m_QueryEngines.append(new ShutterstockQueryEngine(id++, settingsModel));
         m_QueryEngines.append(new GettyQueryEngine(id++, settingsModel));
         m_QueryEngines.append(new FotoliaQueryEngine(id++, settingsModel));
-        m_QueryEngines.append(new LocalLibraryQueryEngine(id++, m_LocalLibrary));
+        m_QueryEngines.append(new LocalLibraryQueryEngine(id++, metadataIOService));
         m_LocalSearchIndex = m_QueryEngines.length() - 1;
 
         int length = m_QueryEngines.length();
@@ -279,15 +279,14 @@ namespace Suggestion {
         if (!m_IsInProgress && !searchTerm.trimmed().isEmpty()) {
             setInProgress();
 
-            QStringList searchTerms = searchTerm.split(QChar::Space, QString::SkipEmptyParts);
-
             SuggestionQueryEngineBase *engine = m_QueryEngines.at(m_SelectedSourceIndex);
-            engine->submitQuery(searchTerms, (QueryResultsType)resultsType);
+            SearchQuery query(searchTerm, resultsType);
+            engine->submitQuery(query);
 
             if (dynamic_cast<LocalLibraryQueryEngine*>(engine) == NULL) {
-                m_CommandManager->reportUserAction(Conectivity::UserAction::SuggestionRemote);
+                m_CommandManager->reportUserAction(Connectivity::UserAction::SuggestionRemote);
             } else {
-                m_CommandManager->reportUserAction(Conectivity::UserAction::SuggestionLocal);
+                m_CommandManager->reportUserAction(Connectivity::UserAction::SuggestionLocal);
             }
         }
     }

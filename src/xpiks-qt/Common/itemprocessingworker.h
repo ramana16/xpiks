@@ -16,6 +16,8 @@
 #include <deque>
 #include <memory>
 #include <vector>
+#include <utility>
+#include <algorithm>
 #include "../Common/defines.h"
 
 namespace Common {
@@ -23,7 +25,11 @@ namespace Common {
     class ItemProcessingWorker
     {
     public:
+        typedef quint32 batch_id_t;
+
+    public:
         ItemProcessingWorker():
+            m_BatchID(1),
             m_Cancel(false),
             m_IsRunning(false)
         { }
@@ -31,75 +37,63 @@ namespace Common {
         virtual ~ItemProcessingWorker() { }
 
     public:
-        void submitItem(const std::shared_ptr<T> &item) {
+        batch_id_t submitItem(const std::shared_ptr<T> &item) {
             if (m_Cancel) {
-                return;
+                return 0;
             }
 
+            batch_id_t batchID;
             m_QueueMutex.lock();
             {
+                batchID = getNextBatchID();
                 bool wasEmpty = m_Queue.empty();
-                m_Queue.push_back(item);
+                m_Queue.emplace_back(item, batchID);
 
                 if (wasEmpty) {
                     m_WaitAnyItem.wakeOne();
                 }
             }
             m_QueueMutex.unlock();
+
+            return batchID;
         }
 
-        void submitFirst(const std::shared_ptr<T> &item) {
+        batch_id_t submitFirst(const std::shared_ptr<T> &item) {
             if (m_Cancel) {
-                return;
+                return 0;
             }
 
+            batch_id_t batchID;
             m_QueueMutex.lock();
             {
+                batchID = getNextBatchID();
                 bool wasEmpty = m_Queue.empty();
-                m_Queue.push_front(item);
+                m_Queue.emplace_front(item, batchID);
 
                 if (wasEmpty) {
                     m_WaitAnyItem.wakeOne();
                 }
             }
             m_QueueMutex.unlock();
+
+            return batchID;
         }
 
-        void submitItems(const std::vector<std::shared_ptr<T> > &items) {
+        batch_id_t submitItems(const std::vector<std::shared_ptr<T> > &items) {
             if (m_Cancel) {
-                return;
+                return 0;
             }
 
+            batch_id_t batchID;
             m_QueueMutex.lock();
             {
-                bool wasEmpty = m_Queue.empty();
-
-                size_t size = items.size();
-                for (size_t i = 0; i < size; ++i) {
-                    auto &item = items.at(i);
-                    m_Queue.push_back(item);
-                }
-
-                if (wasEmpty) {
-                    m_WaitAnyItem.wakeOne();
-                }
-            }
-            m_QueueMutex.unlock();
-        }
-
-        void submitFirst(const std::vector<std::shared_ptr<T> > &items) {
-            if (m_Cancel) {
-                return;
-            }
-
-            m_QueueMutex.lock();
-            {
+                batchID = getNextBatchID();
                 bool wasEmpty = m_Queue.empty();
 
                 size_t size = items.size();
                 for (size_t i = 0; i < size; ++i) {
                     auto &item = items.at(i);
-                    m_Queue.push_front(item);
+                    m_Queue.emplace_back(item, batchID);
                 }
 
                 if (wasEmpty) {
@@ -107,9 +101,37 @@ namespace Common {
                 }
             }
             m_QueueMutex.unlock();
+
+            return batchID;
         }
 
-        void cancelCurrentBatch() {
+        batch_id_t submitFirst(const std::vector<std::shared_ptr<T> > &items) {
+            if (m_Cancel) {
+                return 0;
+            }
+
+            batch_id_t batchID;
+            m_QueueMutex.lock();
+            {
+                batchID = getNextBatchID();
+                bool wasEmpty = m_Queue.empty();
+
+                size_t size = items.size();
+                for (size_t i = 0; i < size; ++i) {
+                    auto &item = items.at(i);
+                    m_Queue.emplace_front(item, batchID);
+                }
+
+                if (wasEmpty) {
+                    m_WaitAnyItem.wakeOne();
+                }
+            }
+            m_QueueMutex.unlock();
+
+            return batchID;
+        }
+
+        void cancelPendingJobs() {
             m_QueueMutex.lock();
             {
                 m_Queue.clear();
@@ -117,6 +139,27 @@ namespace Common {
             m_QueueMutex.unlock();
 
             onQueueIsEmpty();
+        }
+
+        void cancelBatch(batch_id_t batchID) {
+            if (batchID == 0) { return; }
+
+            bool isEmpty = false;
+            m_QueueMutex.lock();
+            {
+                m_Queue.erase(std::remove_if(m_Queue.begin(), m_Queue.end(),
+                                             [&batchID](const std::pair<std::shared_ptr<T>, batch_id_t> &item) {
+                    return item.second == batchID;
+                }),
+                              m_Queue.end());
+
+                isEmpty = m_Queue.empty();
+            }
+            m_QueueMutex.unlock();
+
+            if (isEmpty) {
+                onQueueIsEmpty();
+            }
         }
 
         bool hasPendingJobs() {
@@ -149,7 +192,7 @@ namespace Common {
                     m_Queue.clear();
                 }
 
-                m_Queue.emplace_back(std::shared_ptr<T>());
+                m_Queue.emplace_back(std::shared_ptr<T>(), 0);
                 m_WaitAnyItem.wakeOne();
             }
             m_QueueMutex.unlock();
@@ -179,7 +222,8 @@ namespace Common {
                     }
                 }
 
-                std::shared_ptr<T> item = m_Queue.front();
+                auto &nextItem = m_Queue.front();
+                std::shared_ptr<T> item = nextItem.first;
                 m_Queue.pop_front();
 
                 noMoreItems = m_Queue.empty();
@@ -202,9 +246,16 @@ namespace Common {
         }
 
     private:
+        inline batch_id_t getNextBatchID() {
+            batch_id_t id = m_BatchID++;
+            return id;
+        }
+
+    private:
         QWaitCondition m_WaitAnyItem;
         QMutex m_QueueMutex;
-        std::deque<std::shared_ptr<T> > m_Queue;
+        std::deque<std::pair<std::shared_ptr<T>, batch_id_t> > m_Queue;
+        batch_id_t m_BatchID;
         volatile bool m_Cancel;
         volatile bool m_IsRunning;
     };

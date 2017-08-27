@@ -59,7 +59,7 @@ namespace Helpers {
         m_Stopped = true;
 
         // will make waiting flush() call unblocked if any
-        doLog("Stop message");
+        doLog("Logging stopped.");
 
         QMutexLocker flushLocker(&m_FlushMutex);
         flushStream(m_QueueFlushFrom);

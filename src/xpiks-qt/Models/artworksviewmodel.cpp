@@ -13,6 +13,7 @@
 #include "../Helpers/indiceshelper.h"
 #include "../Common/defines.h"
 #include "imageartwork.h"
+#include "videoartwork.h"
 
 namespace Models {
     ArtworksViewModel::ArtworksViewModel(QObject *parent):
@@ -153,12 +154,19 @@ namespace Models {
 
         auto &item = m_ArtworksList.at(row);
         auto *artwork = item.getOrigin();
-        auto *imageArtwork = dynamic_cast<ImageArtwork*>(artwork);
 
         switch (role) {
         case FilepathRole: return artwork->getFilepath();
         case IsSelectedRole: return item.isSelected();
-        case HasVectorAttachedRole: return (imageArtwork != nullptr) && (imageArtwork->hasVectorAttached());
+        case HasVectorAttachedRole: {
+            auto *imageArtwork = dynamic_cast<ImageArtwork*>(artwork);
+            return (imageArtwork != nullptr) && (imageArtwork->hasVectorAttached());
+        }
+        case ThumbnailPathRole: return artwork->getThumbnailPath();
+        case IsVideoRole: {
+            auto *videoArtwork = dynamic_cast<VideoArtwork*>(artwork);
+            return videoArtwork != nullptr;
+        }
         default: return QVariant();
         }
     }
@@ -168,6 +176,8 @@ namespace Models {
         names[FilepathRole] = "filepath";
         names[IsSelectedRole] = "isselected";
         names[HasVectorAttachedRole] = "hasvectorattached";
+        names[ThumbnailPathRole] = "thumbpath";
+        names[IsVideoRole] = "isvideo";
         return names;
     }
 

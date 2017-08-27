@@ -19,31 +19,31 @@
 #include "../Commands/commandmanager.h"
 #include "../Models/settingsmodel.h"
 #include "../Helpers/filehelpers.h"
-#include "../Conectivity/iftpcoordinator.h"
-#include "../Conectivity/testconnection.h"
-#include "../Conectivity/uploadcontext.h"
+#include "../Connectivity/iftpcoordinator.h"
+#include "../Connectivity/testconnection.h"
+#include <uploadcontext.h>
 #include "../Models/imageartwork.h"
-#include "../Conectivity/ftphelpers.h"
+#include "../Connectivity/ftphelpers.h"
 #include "../Helpers/asynccoordinator.h"
 
 #ifndef CORE_TESTS
-#include "../Conectivity/ftpcoordinator.h"
+#include <ftpcoordinator.h>
 #endif
 
 namespace Models {
-    ArtworkUploader::ArtworkUploader(Conectivity::IFtpCoordinator *ftpCoordinator, QObject *parent):
+    ArtworkUploader::ArtworkUploader(Connectivity::IFtpCoordinator *ftpCoordinator, QObject *parent):
         ArtworksProcessor(parent),
         m_FtpCoordinator(ftpCoordinator),
         m_Percent(0) {
-        Conectivity::FtpCoordinator *coordinator = dynamic_cast<Conectivity::FtpCoordinator *>(ftpCoordinator);
-        QObject::connect(coordinator, &Conectivity::FtpCoordinator::uploadStarted, this, &ArtworkUploader::onUploadStarted);
-        QObject::connect(coordinator, &Conectivity::FtpCoordinator::uploadFinished, this, &ArtworkUploader::allFinished);
-        QObject::connect(coordinator, &Conectivity::FtpCoordinator::overallProgressChanged, this, &ArtworkUploader::uploaderPercentChanged);
+        libxpks::net::FtpCoordinator *coordinator = dynamic_cast<libxpks::net::FtpCoordinator *>(ftpCoordinator);
+        QObject::connect(coordinator, &libxpks::net::FtpCoordinator::uploadStarted, this, &ArtworkUploader::onUploadStarted);
+        QObject::connect(coordinator, &libxpks::net::FtpCoordinator::uploadFinished, this, &ArtworkUploader::allFinished);
+        QObject::connect(coordinator, &libxpks::net::FtpCoordinator::overallProgressChanged, this, &ArtworkUploader::uploaderPercentChanged);
 
-        m_TestingCredentialWatcher = new QFutureWatcher<Conectivity::ContextValidationResult>(this);
+        m_TestingCredentialWatcher = new QFutureWatcher<Connectivity::ContextValidationResult>(this);
         QObject::connect(m_TestingCredentialWatcher, SIGNAL(finished()), SLOT(credentialsTestingFinished()));
-        QObject::connect(coordinator, &Conectivity::FtpCoordinator::transferFailed,
-                         &m_UploadWatcher, &Conectivity::UploadWatcher::reportUploadErrorHandler);
+        QObject::connect(coordinator, &libxpks::net::FtpCoordinator::transferFailed,
+                         &m_UploadWatcher, &Connectivity::UploadWatcher::reportUploadErrorHandler);
 
         QObject::connect(&m_StocksFtpList, &AutoComplete::StocksFtpListModel::stocksListUpdated, this, &ArtworkUploader::stocksListUpdated);
     }
@@ -59,7 +59,7 @@ namespace Models {
     void ArtworkUploader::setCommandManager(Commands::CommandManager *commandManager) {
         Common::BaseEntity::setCommandManager(commandManager);
 
-        Conectivity::FtpCoordinator *coordinator = dynamic_cast<Conectivity::FtpCoordinator *>(m_FtpCoordinator);
+        libxpks::net::FtpCoordinator *coordinator = dynamic_cast<libxpks::net::FtpCoordinator *>(m_FtpCoordinator);
         Q_ASSERT(coordinator != NULL);
         coordinator->setCommandManager(commandManager);
 
@@ -82,7 +82,7 @@ namespace Models {
     }
 
     void ArtworkUploader::credentialsTestingFinished() {
-        Conectivity::ContextValidationResult result = m_TestingCredentialWatcher->result();
+        Connectivity::ContextValidationResult result = m_TestingCredentialWatcher->result();
         emit credentialsChecked(result.m_Result, result.m_Host);
     }
 
@@ -106,11 +106,11 @@ namespace Models {
         m_StocksFtpList.initializeConfigs();
     }
 
-    void ArtworkUploader::uploadArtworks() { doUploadArtworks(getArtworkList()); }
+    void ArtworkUploader::uploadArtworks() { doUploadArtworks(getArtworksSnapshot()); }
 
     void ArtworkUploader::checkCredentials(const QString &host, const QString &username,
                                            const QString &password, bool disablePassiveMode, bool disableEPSV) const {
-        Conectivity::UploadContext *context = new Conectivity::UploadContext();
+        libxpks::net::UploadContext *context = new libxpks::net::UploadContext();
 
         context->m_Host = host;
         context->m_Username = username;
@@ -124,7 +124,7 @@ namespace Models {
         context->m_ProxySettings = settingsModel->getProxySettings();
         context->m_VerboseLogging = settingsModel->getVerboseUpload();
 
-        m_TestingCredentialWatcher->setFuture(QtConcurrent::run(Conectivity::isContextValid, context));
+        m_TestingCredentialWatcher->setFuture(QtConcurrent::run(Connectivity::isContextValid, context));
     }
 
     bool ArtworkUploader::needCreateArchives() const {
@@ -143,15 +143,16 @@ namespace Models {
         bool needCreate = false;
 
         if (anyZipNeeded) {
-            const QVector<ArtworkMetadata *> &artworkList = this->getArtworkList();
-            foreach(ArtworkMetadata *metadata, artworkList) {
-                ImageArtwork *image = dynamic_cast<ImageArtwork *>(metadata);
+            auto &snapshot = this->getArtworksSnapshot();
+            auto &artworkList = snapshot.getWeakSnapshot();
+            for (auto *artwork: artworkList) {
+                ImageArtwork *image = dynamic_cast<ImageArtwork *>(artwork);
 
                 if (image == NULL || !image->hasVectorAttached()) {
                     continue;
                 }
 
-                const QString &filepath = metadata->getFilepath();
+                const QString &filepath = artwork->getFilepath();
                 QString archivePath = Helpers::getArchivePath(filepath);
                 QFileInfo fi(archivePath);
 
@@ -175,12 +176,8 @@ namespace Models {
         updateStocksList();
     }
 
-    void ArtworkUploader::doUploadArtworks(const QVector<ArtworkMetadata *> &artworkList) {
-        int artworksCount = artworkList.length();
-
-        if (artworksCount == 0) {
-            return;
-        }
+    void ArtworkUploader::doUploadArtworks(const MetadataIO::ArtworksSnapshot &snapshot) {
+        if (snapshot.empty() == 0) { return; }
 
         UploadInfoRepository *uploadInfoRepository = m_CommandManager->getUploadInfoRepository();
         std::vector<std::shared_ptr<Models::UploadInfo> > selectedInfos = std::move(uploadInfoRepository->retrieveSelectedUploadInfos());
@@ -188,8 +185,8 @@ namespace Models {
         uploadInfoRepository->resetPercents();
         uploadInfoRepository->updatePercentages();
 
-        m_FtpCoordinator->uploadArtworks(artworkList, selectedInfos);
-        m_CommandManager->reportUserAction(Conectivity::UserAction::Upload);
+        m_FtpCoordinator->uploadArtworks(snapshot, selectedInfos);
+        m_CommandManager->reportUserAction(Connectivity::UserAction::Upload);
     }
 
     void ArtworkUploader::cancelProcessing() {
@@ -201,7 +198,7 @@ namespace Models {
         auto &infos = uploadInfoRepository->getUploadInfos();
 
         for (auto &info: infos) {
-            if (Conectivity::sanitizeHost(info->getHost()) == stockAddress) {
+            if (Connectivity::sanitizeHost(info->getHost()) == stockAddress) {
                 return info->getTitle();
             }
         }

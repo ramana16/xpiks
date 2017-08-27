@@ -9,46 +9,42 @@
  */
 
 #include "locallibraryqueryengine.h"
-
 #include <QThread>
-#include "libraryqueryworker.h"
+#include <vector>
+#include <memory>
+#include "../MetadataIO/metadataioservice.h"
+#include "suggestionartwork.h"
 #include "../Common/defines.h"
+
 #define MAX_LOCAL_RESULTS 200
 
 namespace Suggestion {
-    LocalLibraryQueryEngine::LocalLibraryQueryEngine(int engineID, LocalLibrary *localLibrary):
+    LocalLibraryQueryEngine::LocalLibraryQueryEngine(int engineID, MetadataIO::MetadataIOService *metadataIOService):
         SuggestionQueryEngineBase(engineID),
-        m_LocalLibrary(localLibrary)
+        m_MetadataIOService(metadataIOService)
     {
+        Q_ASSERT(metadataIOService != nullptr);
+
+        QObject::connect(&m_Query, &LocalLibraryQuery::resultsReady,
+                         this, &LocalLibraryQueryEngine::resultsFoundHandler);
     }
 
-    void LocalLibraryQueryEngine::submitQuery(const QStringList &queryKeywords, QueryResultsType resultsType) {
-        LOG_DEBUG << queryKeywords;
-        Q_UNUSED(resultsType);
-        LibraryQueryWorker *worker = new LibraryQueryWorker(m_LocalLibrary, queryKeywords, MAX_LOCAL_RESULTS);
-        QThread *thread = new QThread();
-        worker->moveToThread(thread);
+    void LocalLibraryQueryEngine::submitQuery(const SearchQuery &query) {
+        LOG_DEBUG << query.m_SearchTerms;
+        m_Query.setSearchQuery(query);
 
-        QObject::connect(thread, &QThread::started, worker, &LibraryQueryWorker::process);
-        QObject::connect(worker, &LibraryQueryWorker::stopped, thread, &QThread::quit);
-
-        QObject::connect(worker, &LibraryQueryWorker::stopped, worker, &LibraryQueryWorker::deleteLater);
-        QObject::connect(thread, &QThread::finished, thread, &QThread::deleteLater);
-
-        QObject::connect(this, &LocalLibraryQueryEngine::cancelAllQueries,
-                         worker, &LibraryQueryWorker::cancel);
-
-        QObject::connect(worker, &LibraryQueryWorker::resultsFound,
-                         this, &LocalLibraryQueryEngine::resultsFoundHandler);
-
-        thread->start();
+        m_MetadataIOService->searchArtworks(&m_Query);
     }
 
     void LocalLibraryQueryEngine::resultsFoundHandler() {
-        LibraryQueryWorker *worker = qobject_cast<LibraryQueryWorker*>(sender());
-        Q_ASSERT(worker != nullptr);
-        setResults(worker->getResults());
-        worker->doShutdown();
+        std::vector<std::shared_ptr<SuggestionArtwork> > results;
+
+        auto &cachedArtworks = m_Query.getResults();
+        for (auto &artwork: cachedArtworks) {
+            results.emplace_back(new SuggestionArtwork(artwork.m_Filepath, artwork.m_Title, artwork.m_Description, artwork.m_Keywords, true));
+        }
+
+        setResults(results);
         emit resultsAvailable();
     }
 }

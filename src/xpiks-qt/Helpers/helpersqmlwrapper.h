@@ -44,7 +44,6 @@ namespace Helpers {
         Q_INVOKABLE void beforeDestruction();
         Q_INVOKABLE void revealLogFile();
         Q_INVOKABLE void reportOpen();
-        Q_INVOKABLE void cleanupLocalLibrary() const;
         Q_INVOKABLE void setProgressIndicator(QQuickWindow *window);
         Q_INVOKABLE void turnTaskbarProgressOn();
         Q_INVOKABLE void setTaskbarProgress(double value);

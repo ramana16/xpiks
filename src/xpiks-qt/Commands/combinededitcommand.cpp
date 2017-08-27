@@ -20,6 +20,7 @@
 #include "../Common/flags.h"
 #include "../Models/settingsmodel.h"
 #include "../Common/defines.h"
+#include "../MetadataIO/artworkssnapshot.h"
 
 QString combinedFlagsToString(Common::CombinedEditFlags flags) {
     using namespace Common;
@@ -56,7 +57,7 @@ std::shared_ptr<Commands::ICommandResult> Commands::CombinedEditCommand::execute
     LOG_INFO << "flags =" << combinedFlagsToString(m_EditFlags) << ", artworks count =" << m_MetadataElements.size();
     QVector<int> indicesToUpdate;
     std::vector<UndoRedo::ArtworkMetadataBackup> artworksBackups;
-    QVector<Models::ArtworkMetadata *> itemsToSave, affectedItems;
+    MetadataIO::WeakArtworksSnapshot itemsToSave, affectedItems;
 
     CommandManager *commandManager = (CommandManager*)commandManagerInterface;
 
@@ -138,7 +139,7 @@ void Commands::CombinedEditCommandResult::afterExecCallback(const Commands::ICom
     CommandManager *commandManager = (CommandManager*)commandManagerInterface;
 
     if (!m_IndicesToUpdate.isEmpty()) {
-        commandManager->updateArtworks(m_IndicesToUpdate);
+        commandManager->updateArtworksAtIndices(m_IndicesToUpdate);
     }
 
     if (!m_ItemsToSave.isEmpty()) {

@@ -417,7 +417,7 @@ ApplicationWindow {
 
                 MenuItem {
                     id: saveSessionMenu
-                    text: i18.n + qsTr("Save session")
+                    text: i18.n + qsTr("Open files from last time")
                     checkable: true
 
                     onCheckedChanged: {
@@ -626,7 +626,7 @@ ApplicationWindow {
                 text: i18.n + qsTr("&Import metadata from selected")
                 enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
                 onTriggered: {
-                    console.info("Reimport archives triggered")
+                    console.info("Reimport metadata triggered")
                     filteredArtItemsModel.reimportMetadataForSelected()
                 }
             }
@@ -642,14 +642,6 @@ ApplicationWindow {
 
             Menu {
                 title: i18.n + qsTr("&Advanced")
-
-                MenuItem {
-                    text: i18.n + qsTr("&Cleanup local library in background")
-                    onTriggered: {
-                        console.info("Cleanup local library triggered")
-                        helpersWrapper.cleanupLocalLibrary()
-                    }
-                }
 
                 MenuItem {
                     text: i18.n + qsTr("Manage &user dictionary")

@@ -13,7 +13,7 @@ environment:
     - XPIKS_BINARY: true
     - CORE_TESTS: true
     - INTEGRATION_TESTS: true
-      
+
 branches:
   # blacklist
   except:
@@ -53,6 +53,7 @@ install:
 before_build:
   - cmd: 'echo %cd%'
   - cmd: 'xcopy /s c:\projects\xpiks-deps\windows-libs\%configuration%-x64 c:\projects\xpiks\libs'
+  - cmd: 'xcopy /s c:\projects\xpiks-deps\windows-libs\ffmpeg-x64\%configuration% c:\projects\xpiks\libs'
   - cmd: 'move c:\projects\xpiks-deps\hunspell-1.6.0 c:\projects\xpiks\vendors'
   - cmd: 'move c:\projects\xpiks-deps\zlib-1.2.11 c:\projects\xpiks\vendors'
   - cmd: 'cd c:\projects\xpiks'
@@ -86,13 +87,11 @@ after_build:
   - if defined XPIKS_BINARY cd %configuration%
   - if defined XPIKS_BINARY windeployqt.exe --debug --qmldir=../../xpiks-qt/CollapserTabs/ --qmldir=../../xpiks-qt/Components/ --qmldir=../../xpiks-qt/Constants/ --qmldir=../../xpiks-qt/Dialogs/ --qmldir=../../xpiks-qt/StackViews/ --qmldir=../../xpiks-qt/StyledControls/ --qmldir=../../xpiks-qt/ xpiks-qt.exe
   - if defined XPIKS_BINARY xcopy /Y /s c:\projects\xpiks\src\xpiks-qt\deps .
-  - if defined XPIKS_BINARY copy /Y ..\..\..\libs\libexiv2.dll .
   - if defined XPIKS_BINARY copy /Y ..\..\..\libs\libcurl*.dll .
   - if defined XPIKS_BINARY copy /Y ..\..\..\libs\quazip*.dll .
   - if defined XPIKS_BINARY copy /Y ..\..\..\libs\ssdll.dll .
   - if defined XPIKS_BINARY copy /Y ..\..\..\libs\mman.dll .
   - if defined XPIKS_BINARY copy /Y ..\..\..\libs\face.dll .
-  - if defined XPIKS_BINARY copy /Y ..\..\..\libs\libexpat.dll .
   - if defined XPIKS_BINARY copy /Y ..\..\..\libs\z.dll .
   - if defined XPIKS_BINARY del *.obj
   - if defined XPIKS_BINARY del *.cpp
@@ -108,17 +107,7 @@ before_test:
 test_script:
   - cmd: 'echo %cd%'
   - if defined CORE_TESTS %configuration%\xpiks-tests-core.exe
-  - ps: |
-      if (Test-Path env:INTEGRATION_TESTS)
-      {
-          & cmd /c '%configuration%\xpiks-tests-integration.exe 2>&1 && exit 0 || exit 1'
-          $testsExitCode = $LastExitCode
-          Get-ChildItem .\*.dmp | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
-          if ($testsExitCode -eq 0) {
-              Write-Output "Tests Succeeded"
-          } else {
-              Write-Output "Tests Failed!"
-              exit $testsExitCode
-          }
-      }
-      
+  - if defined INTEGRATION_TESTS %configuration%\xpiks-tests-integration.exe
+
+on_failure:
+  - ps: Get-ChildItem .\*.dmp | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }

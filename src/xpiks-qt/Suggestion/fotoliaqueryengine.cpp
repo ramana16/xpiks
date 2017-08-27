@@ -16,7 +16,7 @@
 #include <QJsonObject>
 #include <QJsonDocument>
 #include "../Encryption/aes-qt.h"
-#include "../Conectivity/simplecurlrequest.h"
+#include "../Connectivity/simplecurlrequest.h"
 #include "../Models/settingsmodel.h"
 #include "../Common/defines.h"
 #include "suggestionartwork.h"
@@ -28,31 +28,31 @@ namespace Suggestion {
         m_FotoliaAPIKey = "ad2954b4ee1e9686fbf8446f85e0c26edfae6003f51f49ca5559aed915879e733bbaf2003b3575bc0b96e682a30a69907c612865ec8f4ec2522131108a4a9f24467f1f83befc3d80201e5f906c761341";
     }
 
-    void FotoliaQueryEngine::submitQuery(const QStringList &queryKeywords, QueryResultsType resultsType) {
-        LOG_INFO << queryKeywords;
+    void FotoliaQueryEngine::submitQuery(const SearchQuery &query) {
+        LOG_INFO << query.m_SearchTerms;
 
         QString decodedAPIKey = Encryption::decodeText(m_FotoliaAPIKey, "MasterPassword");
 
-        QUrl url = buildQuery(decodedAPIKey, queryKeywords, resultsType);
+        QUrl url = buildQuery(decodedAPIKey, query);
 
         auto *settings = getSettingsModel();
         auto *proxySettings = settings->getProxySettings();
 
         QString resourceUrl = QString::fromLocal8Bit(url.toEncoded());
-        Conectivity::SimpleCurlRequest *request = new Conectivity::SimpleCurlRequest(resourceUrl);
+        Connectivity::SimpleCurlRequest *request = new Connectivity::SimpleCurlRequest(resourceUrl);
         request->setProxySettings(proxySettings);
 
         QThread *thread = new QThread();
 
         request->moveToThread(thread);
 
-        QObject::connect(thread, &QThread::started, request, &Conectivity::SimpleCurlRequest::process);
-        QObject::connect(request, &Conectivity::SimpleCurlRequest::stopped, thread, &QThread::quit);
+        QObject::connect(thread, &QThread::started, request, &Connectivity::SimpleCurlRequest::process);
+        QObject::connect(request, &Connectivity::SimpleCurlRequest::stopped, thread, &QThread::quit);
 
-        QObject::connect(request, &Conectivity::SimpleCurlRequest::stopped, request, &Conectivity::SimpleCurlRequest::deleteLater);
+        QObject::connect(request, &Connectivity::SimpleCurlRequest::stopped, request, &Connectivity::SimpleCurlRequest::deleteLater);
         QObject::connect(thread, &QThread::finished, thread, &QThread::deleteLater);
 
-        QObject::connect(request, &Conectivity::SimpleCurlRequest::requestFinished, this, &FotoliaQueryEngine::requestFinishedHandler);
+        QObject::connect(request, &Connectivity::SimpleCurlRequest::requestFinished, this, &FotoliaQueryEngine::requestFinishedHandler);
 
         thread->start();
     }
@@ -60,7 +60,7 @@ namespace Suggestion {
     void FotoliaQueryEngine::requestFinishedHandler(bool success) {
         LOG_INFO << "success:" << success;
 
-        Conectivity::SimpleCurlRequest *request = qobject_cast<Conectivity::SimpleCurlRequest *>(sender());
+        Connectivity::SimpleCurlRequest *request = qobject_cast<Connectivity::SimpleCurlRequest *>(sender());
 
         if (success) {
             QJsonParseError error;
@@ -116,20 +116,20 @@ namespace Suggestion {
         }
     }
 
-    QUrl FotoliaQueryEngine::buildQuery(const QString &apiKey, const QStringList &queryKeywords, QueryResultsType resultsType) const {
+    QUrl FotoliaQueryEngine::buildQuery(const QString &apiKey, const SearchQuery &query) const {
         QUrlQuery urlQuery;
 
         urlQuery.addQueryItem("search_parameters[language_id]", "2");
         urlQuery.addQueryItem("search_parameters[thumbnail_size]", "160");
         urlQuery.addQueryItem("search_parameters[limit]", "100");
         urlQuery.addQueryItem("search_parameters[order]", "nb_downloads");
-        urlQuery.addQueryItem("search_parameters[words]", queryKeywords.join(' '));
+        urlQuery.addQueryItem("search_parameters[words]", query.m_SearchTerms.join(' '));
         urlQuery.addQueryItem("result_columns[0]", "nb_results");
         urlQuery.addQueryItem("result_columns[1]", "title");
         urlQuery.addQueryItem("result_columns[2]", "keywords");
         urlQuery.addQueryItem("result_columns[3]", "thumbnail_url");
         urlQuery.addQueryItem("result_columns[4]", "id");
-        urlQuery.addQueryItem(resultsTypeToString(resultsType), "1");
+        urlQuery.addQueryItem(resultsTypeToString(query.m_Flags), "1");
 
         QUrl url;
         url.setUrl(QLatin1String("http://api.fotolia.com/Rest/1/search/getSearchResults"));
@@ -139,13 +139,11 @@ namespace Suggestion {
         return url;
     }
 
-    QString FotoliaQueryEngine::resultsTypeToString(QueryResultsType resultsType) const {
-        switch (resultsType) {
-        case QueryResultsType::AllImages: return QLatin1String("search_parameters[filters][content_type:all]");
-        case QueryResultsType::Photos: return QLatin1String("search_parameters[filters][content_type:photo]");
-        case QueryResultsType::Vectors: return QLatin1String("search_parameters[filters][content_type:vector]");
-        case QueryResultsType::Illustrations: return QLatin1String("search_parameters[filters][content_type:illustration]");
-        default: return QString();
-        }
+    QString FotoliaQueryEngine::resultsTypeToString(Common::flag_t queryFlags) const {
+        if (Common::HasFlag(queryFlags, Suggestion::AllImages)) { return QLatin1String("search_parameters[filters][content_type:all]"); }
+        else if (Common::HasFlag(queryFlags, Suggestion::Photos)) { return QLatin1String("search_parameters[filters][content_type:photo]"); }
+        else if (Common::HasFlag(queryFlags, Suggestion::Vectors)) { return QLatin1String("search_parameters[filters][content_type:vector]"); }
+        else if (Common::HasFlag(queryFlags, Suggestion::Illustrations)) { return QLatin1String("search_parameters[filters][content_type:illustration]"); }
+        else { return QString(); }
     }
 }

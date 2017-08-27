@@ -15,16 +15,16 @@
 #include <QStringList>
 #include <QFutureWatcher>
 #include "artworksprocessor.h"
-#include "../Conectivity/testconnection.h"
+#include "../Connectivity/testconnection.h"
 #include "../AutoComplete/stringfilterproxymodel.h"
 #include "../AutoComplete/stocksftplistmodel.h"
-#include "../Conectivity/uploadwatcher.h"
+#include "../Connectivity/uploadwatcher.h"
 
 namespace Helpers {
     class TestConnectionResult;
 }
 
-namespace Conectivity {
+namespace Connectivity {
     class IFtpCoordinator;
 }
 
@@ -43,7 +43,7 @@ namespace Models {
     {
         Q_OBJECT
     public:
-        ArtworkUploader(Conectivity::IFtpCoordinator *ftpCoordinator, QObject *parent=0);
+        ArtworkUploader(Connectivity::IFtpCoordinator *ftpCoordinator, QObject *parent=0);
         virtual ~ArtworkUploader();
 
     public:
@@ -88,7 +88,7 @@ namespace Models {
         void initializeStocksList(Helpers::AsyncCoordinator *initCoordinator);
 
     private:
-        void doUploadArtworks(const QVector<ArtworkMetadata *> &artworkList);
+        void doUploadArtworks(const MetadataIO::ArtworksSnapshot &snapshot);
 
     protected:
         virtual void cancelProcessing() override;
@@ -96,11 +96,11 @@ namespace Models {
         virtual void innerResetModel() override { m_Percent = 0; m_UploadWatcher.resetModel(); }
 
     private:
-        Conectivity::UploadWatcher m_UploadWatcher;
-        Conectivity::IFtpCoordinator *m_FtpCoordinator;
+        Connectivity::UploadWatcher m_UploadWatcher;
+        Connectivity::IFtpCoordinator *m_FtpCoordinator;
         AutoComplete::StringFilterProxyModel m_StocksCompletionSource;
         AutoComplete::StocksFtpListModel m_StocksFtpList;
-        QFutureWatcher<Conectivity::ContextValidationResult> *m_TestingCredentialWatcher;
+        QFutureWatcher<Connectivity::ContextValidationResult> *m_TestingCredentialWatcher;
         int m_Percent;
     };
 }

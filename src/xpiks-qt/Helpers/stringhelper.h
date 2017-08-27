@@ -37,12 +37,12 @@ namespace Helpers {
     void splitText(const QString &text, QStringList &parts);
     void splitKeywords(const QString &text, const QVector<QChar> &separators, QStringList &parts);
     int levensteinDistance(const QString &s1, const QString &s2);
-    bool isUtf8(const char* const buffer);
-    QString detectEncodingAndDecode(const std::string &value);
     bool is7BitAscii(const QByteArray &s);
     bool isPunctuation(const QChar &);
     std::string string_format(const std::string fmt, ...);
     QString getUnitedHitsString(const QString &text, const std::vector<int> &hits, int radius);
+
+    quint32 switcherHash(const QString &text);
 }
 
 #endif // STRINGHELPER

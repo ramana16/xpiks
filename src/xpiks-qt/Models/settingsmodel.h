@@ -352,6 +352,7 @@ namespace Models {
         bool getVerboseUpload() const { return m_VerboseUpload; }
         bool getUseProgressiveSuggestionPreviews() const { return m_UseProgressiveSuggestionPreviews; }
         int getProgressiveSuggestionIncrement() const { return m_ProgressiveSuggestionIncrement; }
+        int getUseDirectExiftoolExport() const { return m_UseDirectExiftoolExport; }
 
     signals:
         void settingsReset();
@@ -628,6 +629,14 @@ namespace Models {
             emit progressiveSuggestionIncrementChanged(progressiveSuggestionIncrement);
         }
 
+        void setUseDirectExiftoolExport(bool value)
+        {
+            if (m_UseDirectExiftoolExport == value)
+                return;
+
+            m_UseDirectExiftoolExport = value;
+        }
+
 #ifndef INTEGRATION_TESTS
     private:
 #else
@@ -680,6 +689,7 @@ namespace Models {
         bool m_VerboseUpload;
         bool m_UseProgressiveSuggestionPreviews;
         int m_ProgressiveSuggestionIncrement;
+        bool m_UseDirectExiftoolExport;
     };
 }
 

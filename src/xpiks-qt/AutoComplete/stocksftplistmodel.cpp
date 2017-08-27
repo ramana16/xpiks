@@ -17,7 +17,7 @@
 #include "../Models/abstractconfigupdatermodel.h"
 #include "../Common/defines.h"
 #include "../Helpers/localconfig.h"
-#include "../Conectivity/apimanager.h"
+#include "../Connectivity/apimanager.h"
 
 #define OVERWRITE_STOCKS_CONFIG false
 #define LOCAL_STOCKS_LIST_FILE QLatin1String("stocks_ftp.json")
@@ -45,7 +45,7 @@ namespace AutoComplete {
             localConfigPath = LOCAL_STOCKS_LIST_FILE;
         }
 
-        auto &apiManager = Conectivity::ApiManager::getInstance();
+        auto &apiManager = Connectivity::ApiManager::getInstance();
         QString remoteAddress = apiManager.getStocksACSourceAddr();
         AbstractConfigUpdaterModel::initializeConfigs(remoteAddress, localConfigPath);
     }

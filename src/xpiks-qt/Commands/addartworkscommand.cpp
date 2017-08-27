@@ -21,16 +21,17 @@
 #include "../Common/defines.h"
 #include "../Helpers/filehelpers.h"
 #include "../Models/imageartwork.h"
+#include "../MetadataIO/artworkssnapshot.h"
 
-int findAndAttachVectors(const QVector<Models::ArtworkMetadata*> &artworksList, QVector<int> &modifiedIndices) {
+int findAndAttachVectors(const MetadataIO::WeakArtworksSnapshot &artworksList, QVector<int> &modifiedIndices) {
     LOG_DEBUG << "#";
     int attachedCount = 0;
     int size = artworksList.length();
     modifiedIndices.reserve(size);
 
     for (int i = 0; i < size; ++i) {
-        Models::ArtworkMetadata *metadata = artworksList.at(i);
-        Models::ImageArtwork *image = dynamic_cast<Models::ImageArtwork *>(metadata);
+        Models::ArtworkMetadata *artwork = artworksList.at(i);
+        Models::ImageArtwork *image = dynamic_cast<Models::ImageArtwork *>(artwork);
 
         if (image == NULL) { continue; }
 
@@ -56,7 +57,7 @@ int findAndAttachVectors(const QVector<Models::ArtworkMetadata*> &artworksList, 
     return attachedCount;
 }
 
-void accountVectors(Models::ArtworksRepository *artworksRepository, const QVector<Models::ArtworkMetadata*> &artworks) {
+void accountVectors(Models::ArtworksRepository *artworksRepository, const MetadataIO::WeakArtworksSnapshot &artworks) {
     LOG_DEBUG << "#";
 
     int size = artworks.size();
@@ -84,7 +85,7 @@ std::shared_ptr<Commands::ICommandResult> Commands::AddArtworksCommand::execute(
     const int initialCount = artItemsModel->rowCount();
     const bool filesWereAccounted = artworksRepository->beginAccountingFiles(m_FilePathes);
 
-    QVector<Models::ArtworkMetadata*> artworksToImport;
+    MetadataIO::ArtworksSnapshot artworksToImport;
     artworksToImport.reserve(newFilesCount);
     QStringList filesToWatch;
     filesToWatch.reserve(newFilesCount);
@@ -129,7 +130,7 @@ std::shared_ptr<Commands::ICommandResult> Commands::AddArtworksCommand::execute(
 
     if (m_AutoDetectVectors) {
         QVector<int> autoAttachedIndices;
-        attachedCount = findAndAttachVectors(artworksToImport, autoAttachedIndices);
+        attachedCount = findAndAttachVectors(artworksToImport.getWeakSnapshot(), autoAttachedIndices);
 
         foreach (int index, autoAttachedIndices) {
             modifiedIndices.append(initialCount + index);
@@ -137,19 +138,18 @@ std::shared_ptr<Commands::ICommandResult> Commands::AddArtworksCommand::execute(
     }
 
     if (newFilesCount > 0) {
-        int length = artItemsModel->rowCount();
-        int start = length - newFilesCount, end = length - 1;
-        QVector<QPair<int, int> > ranges;
-        ranges << qMakePair(start, end);
-        commandManager->readMetadata(artworksToImport, ranges);
-        accountVectors(artworksRepository, artworksToImport);
+        commandManager->readMetadata(artworksToImport);
+        accountVectors(artworksRepository, artworksToImport.getWeakSnapshot());
         artworksRepository->updateCountsForExistingDirectories();
 
-        std::unique_ptr<UndoRedo::IHistoryItem> addArtworksItem(new UndoRedo::AddArtworksHistoryItem(getCommandID() ,initialCount, newFilesCount));
+        std::unique_ptr<UndoRedo::IHistoryItem> addArtworksItem(new UndoRedo::AddArtworksHistoryItem(getCommandID(), initialCount, newFilesCount));
         commandManager->recordHistoryItem(addArtworksItem);
 
+        // Generating previews was in the metadata io coordinator
+        // called _after_ the reading to make reading (in Xpiks)
+        // as fast as possible. Not needed if using only exiftool now
+        commandManager->generatePreviews(artworksToImport);
         commandManager->addToRecentFiles(filesToWatch);
-
         commandManager->saveSessionInBackground();
     }
 

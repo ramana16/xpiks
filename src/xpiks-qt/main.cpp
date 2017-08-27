@@ -34,36 +34,35 @@
 #include "QMLExtensions/imagecachingservice.h"
 #include "MetadataIO/metadataiocoordinator.h"
 #include "AutoComplete/autocompleteservice.h"
-#include "Conectivity/analyticsuserevent.h"
+#include "Connectivity/analyticsuserevent.h"
 #include "SpellCheck/spellcheckerservice.h"
 #include "AutoComplete/autocompletemodel.h"
 #include "Models/deletekeywordsviewmodel.h"
 #include "Translation/translationmanager.h"
 #include "Translation/translationservice.h"
 #include "Models/recentdirectoriesmodel.h"
-#include "Models/recentfilesmodel.h"
-#include "MetadataIO/backupsaverservice.h"
+#include "MetadataIO/metadataioservice.h"
 #include "QMLExtensions/triangleelement.h"
 #include "Suggestion/keywordssuggestor.h"
 #include "Models/combinedartworksmodel.h"
-#include "Conectivity/telemetryservice.h"
+#include "Connectivity/telemetryservice.h"
 #include "QMLExtensions/folderelement.h"
 #include "Helpers/globalimageprovider.h"
 #include "Models/uploadinforepository.h"
-#include "Conectivity/ftpcoordinator.h"
-#include "Conectivity/curlinithelper.h"
+#include <ftpcoordinator.h>
+#include "Connectivity/curlinithelper.h"
 #include "Helpers/helpersqmlwrapper.h"
 #include "Encryption/secretsmanager.h"
 #include "Models/artworksrepository.h"
 #include "QMLExtensions/colorsmodel.h"
-#include "Conectivity/updateservice.h"
+#include "Connectivity/updateservice.h"
 #include "Models/artworkproxymodel.h"
 #include "Warnings/warningsservice.h"
 #include "UndoRedo/undoredomanager.h"
+#include "Models/recentfilesmodel.h"
 #include "QuickBuffer/quickbuffer.h"
 #include "Helpers/clipboardhelper.h"
 #include "Commands/commandmanager.h"
-#include "Suggestion/locallibrary.h"
 #include "QMLExtensions/tabsmodel.h"
 #include "Models/artworkuploader.h"
 #include "Warnings/warningsmodel.h"
@@ -78,18 +77,20 @@
 #include "Helpers/runguard.h"
 #include "Models/logsmodel.h"
 #include "Models/uimanager.h"
+#include "Helpers/database.h"
 #include "Helpers/logger.h"
 #include "Common/version.h"
 #include "Common/defines.h"
 #include "Models/proxysettings.h"
-#include "MetadataIO/exiv2inithelper.h"
 #include "Models/findandreplacemodel.h"
 #include "Models/previewmetadataelement.h"
+#include "Maintenance/maintenanceservice.h"
+#include "QMLExtensions/artworksupdatehub.h"
+#include "QMLExtensions/videocachingservice.h"
 #include "KeywordsPresets/presetkeywordsmodel.h"
 #include "KeywordsPresets/presetkeywordsmodelconfig.h"
-#include "Maintenance/maintenanceservice.h"
 #include "Models/switchermodel.h"
-#include "Conectivity/requestsservice.h"
+#include "Connectivity/requestsservice.h"
 
 void myMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg) {
     Q_UNUSED(context);
@@ -130,6 +131,7 @@ void myMessageHandler(QtMsgType type, const QMessageLogContext &context, const Q
     logger.log(logLine);
 
     if (type == QtFatalMsg) {
+        logger.flush();
         abort();
     }
 }
@@ -206,16 +208,11 @@ int main(int argc, char *argv[]) {
     }
 
     // will call curl_global_init and cleanup
-    Conectivity::CurlInitHelper curlInitHelper;
+    Connectivity::CurlInitHelper curlInitHelper;
     Q_UNUSED(curlInitHelper);
-
-    // will init thread-unsafe XMP toolkit
-    MetadataIO::Exiv2InitHelper exiv2InitHelper;
-    Q_UNUSED(exiv2InitHelper);
 
     const char *highDpiEnvironmentVariable = setHighDpiEnvironmentVariable();
     qRegisterMetaTypeStreamOperators<Models::ProxySettings>("ProxySettings");
-    qRegisterMetaTypeStreamOperators<Suggestion::LocalArtworkData>("LocalArtworkData");
     qRegisterMetaType<Common::SpellCheckFlags>("Common::SpellCheckFlags");
     initQSettings();
     Models::SettingsModel settingsModel;
@@ -223,19 +220,8 @@ int main(int argc, char *argv[]) {
     settingsModel.retrieveAllValues();
     ensureUserIdExists(&settingsModel);
 
-    Suggestion::LocalLibrary localLibrary;
-
-    QString appDataPath = XPIKS_USERDATA_PATH;
-    if (!appDataPath.isEmpty()) {
-        QDir appDataDir(appDataPath);
-
-        QString libraryFilePath = appDataDir.filePath(Constants::LIBRARY_FILENAME);
-        localLibrary.setLibraryPath(libraryFilePath);
-    } else {
-        std::cerr << "AppDataPath is empty!";
-    }
-
 #ifdef WITH_LOGS
+    QString appDataPath = XPIKS_USERDATA_PATH;
     const QString &logFileDir = QDir::cleanPath(appDataPath + QDir::separator() + "logs");
     if (!logFileDir.isEmpty()) {
         QDir dir(logFileDir);
@@ -304,17 +290,17 @@ int main(int argc, char *argv[]) {
     Encryption::SecretsManager secretsManager;
     UndoRedo::UndoRedoManager undoRedoManager;
     Models::ZipArchiver zipArchiver;
-    Suggestion::KeywordsSuggestor keywordsSuggestor(&localLibrary);
+    Suggestion::KeywordsSuggestor keywordsSuggestor;
     Models::FilteredArtItemsProxyModel filteredArtItemsModel;
     filteredArtItemsModel.setSourceModel(&artItemsModel);
     Models::RecentDirectoriesModel recentDirectorieModel;
     Models::RecentFilesModel recentFileModel;
-    Conectivity::FtpCoordinator *ftpCoordinator = new Conectivity::FtpCoordinator(settingsModel.getMaxParallelUploads());
+    libxpks::net::FtpCoordinator *ftpCoordinator = new libxpks::net::FtpCoordinator(settingsModel.getMaxParallelUploads());
     Models::ArtworkUploader artworkUploader(ftpCoordinator);
     SpellCheck::SpellCheckerService spellCheckerService(&settingsModel);
     SpellCheck::SpellCheckSuggestionModel spellCheckSuggestionModel;
     SpellCheck::UserDictEditModel userDictEditModel;
-    MetadataIO::BackupSaverService metadataSaverService;
+    MetadataIO::MetadataIOService metadataIOService;
     Warnings::WarningsModel warningsModel;
     warningsModel.setSourceModel(&artItemsModel);
     warningsModel.setWarningsSettingsModel(warningsService.getWarningsSettingsModel());
@@ -332,10 +318,14 @@ int main(int argc, char *argv[]) {
     sessionManager.initialize();
     QuickBuffer::QuickBuffer quickBuffer;
     Maintenance::MaintenanceService maintenanceService;
+    QMLExtensions::VideoCachingService videoCachingService;
+    QMLExtensions::ArtworksUpdateHub artworksUpdateHub;
+    artworksUpdateHub.setStandardRoles(artItemsModel.getArtworkStandardRoles());
     Models::SwitcherModel switcherModel;
-    Conectivity::RequestsService requestsService;
+    Connectivity::RequestsService requestsService;
+    Helpers::DatabaseManager databaseManager;
 
-    Conectivity::UpdateService updateService(&settingsModel);
+    Connectivity::UpdateService updateService(&settingsModel);
 
     MetadataIO::MetadataIOCoordinator metadataIOCoordinator;
 
@@ -344,7 +334,7 @@ int main(int argc, char *argv[]) {
 #else
     const bool telemetryEnabled = false;
 #endif
-    Conectivity::TelemetryService telemetryService(userId, telemetryEnabled);
+    Connectivity::TelemetryService telemetryService(userId, telemetryEnabled);
 
     Plugins::PluginManager pluginManager;
     Plugins::PluginsWithActionsModel pluginsWithActions;
@@ -371,11 +361,10 @@ int main(int argc, char *argv[]) {
     commandManager.InjectDependency(&recentFileModel);
     commandManager.InjectDependency(&spellCheckerService);
     commandManager.InjectDependency(&spellCheckSuggestionModel);
-    commandManager.InjectDependency(&metadataSaverService);
+    commandManager.InjectDependency(&metadataIOService);
     commandManager.InjectDependency(&telemetryService);
     commandManager.InjectDependency(&updateService);
     commandManager.InjectDependency(&logsModel);
-    commandManager.InjectDependency(&localLibrary);
     commandManager.InjectDependency(&metadataIOCoordinator);
     commandManager.InjectDependency(&pluginManager);
     commandManager.InjectDependency(&languagesModel);
@@ -395,8 +384,11 @@ int main(int argc, char *argv[]) {
     commandManager.InjectDependency(&warningsModel);
     commandManager.InjectDependency(&quickBuffer);
     commandManager.InjectDependency(&maintenanceService);
+    commandManager.InjectDependency(&videoCachingService);
+    commandManager.InjectDependency(&artworksUpdateHub);
     commandManager.InjectDependency(&switcherModel);
     commandManager.InjectDependency(&requestsService);
+    commandManager.InjectDependency(&databaseManager);
 
     userDictEditModel.setCommandManager(&commandManager);
     autoCompleteModel.setCommandManager(&commandManager);

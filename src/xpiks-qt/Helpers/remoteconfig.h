@@ -15,7 +15,7 @@
 #include <QString>
 #include <QByteArray>
 #include <QJsonDocument>
-#include "../Conectivity/conectivityrequest.h"
+#include "../Connectivity/connectivityrequest.h"
 #include "../Common/defines.h"
 
 namespace Models {
@@ -34,7 +34,7 @@ namespace Helpers {
         const QJsonDocument& getConfig() const { return m_Config; }
 
     private:
-        friend class Conectivity::ConectivityRequest;
+        friend class Connectivity::ConnectivityRequest;
         void setRemoteResponse(const QByteArray &responseData);
 
     signals:

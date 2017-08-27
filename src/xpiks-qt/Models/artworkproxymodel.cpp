@@ -14,6 +14,8 @@
 #include "../Warnings/warningsservice.h"
 #include "imageartwork.h"
 #include "../Models/artitemsmodel.h"
+#include "../Models/videoartwork.h"
+#include "../Helpers/filehelpers.h"
 
 namespace Models {
     ArtworkProxyModel::ArtworkProxyModel(QObject *parent) :
@@ -26,6 +28,12 @@ namespace Models {
 
     ArtworkProxyModel::~ArtworkProxyModel() {
         doResetModel();
+    }
+
+    bool ArtworkProxyModel::getIsVideo() const {
+        Models::VideoArtwork *videoArtwork = dynamic_cast<Models::VideoArtwork*>(m_ArtworkMetadata);
+        bool isVideo = videoArtwork != nullptr;
+        return isVideo;
     }
 
     void ArtworkProxyModel::setDescription(const QString &description)  {
@@ -200,10 +208,16 @@ namespace Models {
         QObject::connect(keywordsModel, &Common::BasicMetadataModel::afterSpellingErrorsFixed,
                          this, &ArtworkProxyModel::afterSpellingErrorsFixedHandler);
 
+        QObject::connect(metadata, SIGNAL(thumbnailUpdated()),
+                         this, SIGNAL(thumbnailChanged()));
+
         emit descriptionChanged();
         emit titleChanged();
         emit keywordsCountChanged();
+        emit thumbnailChanged();
         emit imagePathChanged();
+
+        m_PropertiesMap.updateProperties(metadata);
     }
 
     void ArtworkProxyModel::resetModel() {
@@ -233,7 +247,7 @@ namespace Models {
     }
 
     QString ArtworkProxyModel::retrieveFileSize() const {
-        double size = 0;
+        qint64 size = 0;
 
         if (m_ArtworkMetadata->isInitialized()) {
             size = m_ArtworkMetadata->getFileSize();
@@ -242,17 +256,7 @@ namespace Models {
             size = fi.size(); // in bytes
         }
 
-        size /= 1024.0*1024.0;
-
-        QString sizeDescription;
-        if (size >= 1) {
-            sizeDescription = QString::number(size, 'f', 2) + QLatin1String(" MB");
-        } else {
-            size *= 1024;
-            sizeDescription = QString::number(size, 'f', 2) + QLatin1String(" KB");
-        }
-
-        return sizeDescription;
+        return Helpers::describeFileSize(size);
     }
 
     QString ArtworkProxyModel::getDateTaken() const {
@@ -299,8 +303,8 @@ namespace Models {
         doCopyToQuickBuffer();
     }
 
-    qint64 ArtworkProxyModel::getSpecialItemID() {
-        qint64 result = 0;
+    Common::ID_t ArtworkProxyModel::getSpecialItemID() {
+        Common::ID_t result = 0;
 
         if (m_ArtworkMetadata != nullptr) {
             result = m_ArtworkMetadata->getItemID();
@@ -315,7 +319,7 @@ namespace Models {
         LOG_DEBUG << "#";
 
         if (m_ArtworkOriginalIndex != -1) {
-            m_CommandManager->updateArtworks(QVector<int>() << m_ArtworkOriginalIndex);
+            m_CommandManager->updateArtworksAtIndices(QVector<int>() << m_ArtworkOriginalIndex);
         }
 
         if (m_ArtworkMetadata != nullptr) {

@@ -60,7 +60,7 @@
 #define DEFAULT_LOCALE "en_US"
 #define DEFAULT_SELECTED_THEME_INDEX 0
 #define DEFAULT_USE_AUTO_COMPLETE true
-#define DEFAULT_USE_EXIFTOOL false
+#define DEFAULT_USE_EXIFTOOL true
 #define DEFAULT_USE_PROXY false
 #define DEFAULT_PROXY_HOST ""
 #define DEFAULT_ARTWORK_EDIT_RIGHT_PANE_WIDTH 300
@@ -71,7 +71,10 @@
 #ifndef INTEGRATION_TESTS
     #define DEFAULT_AUTO_CACHE_IMAGES true
     #define DEFAULT_VERBOSE_UPLOAD true
+    #define DEFAULT_USE_DIRECT_EXIFTOOL_EXPORT false
 #else
+    // used in INTEGRATION TESTS
+    #define DEFAULT_USE_DIRECT_EXIFTOOL_EXPORT true
     #define DEFAULT_AUTO_CACHE_IMAGES false
     #define DEFAULT_VERBOSE_UPLOAD false
 #endif
@@ -109,7 +112,8 @@ namespace Models {
         m_AutoCacheImages(DEFAULT_AUTO_CACHE_IMAGES),
         m_VerboseUpload(DEFAULT_VERBOSE_UPLOAD),
         m_UseProgressiveSuggestionPreviews(DEFAULT_USE_PROGRESSIVE_SUGGESTION_PREVIEWS),
-        m_ProgressiveSuggestionIncrement(DEFAULT_PROGRESSIVE_SUGGESTION_INCREMENT)
+        m_ProgressiveSuggestionIncrement(DEFAULT_PROGRESSIVE_SUGGESTION_INCREMENT),
+        m_UseDirectExiftoolExport(DEFAULT_USE_DIRECT_EXIFTOOL_EXPORT)
     {
     }
 
@@ -434,6 +438,8 @@ namespace Models {
     }
 
     void SettingsModel::updateSaveSession(bool value) {
+        LOG_DEBUG << value;
+
         if (m_SaveSession == value) {
             return;
         }
@@ -445,7 +451,7 @@ namespace Models {
         sync();
 
         if (value) {
-            m_CommandManager->saveSession();
+            m_CommandManager->saveSessionInBackground();
         }
     }
 
@@ -480,6 +486,7 @@ namespace Models {
 
         setUseProgressiveSuggestionPreviews(expBoolValue(useProgressiveSuggestionPreviews, DEFAULT_USE_PROGRESSIVE_SUGGESTION_PREVIEWS));
         setProgressiveSuggestionIncrement(expIntValue(progressiveSuggestionIncrement, DEFAULT_PROGRESSIVE_SUGGESTION_INCREMENT));
+        setUseDirectExiftoolExport(expBoolValue(useDirectExiftoolExport, DEFAULT_USE_DIRECT_EXIFTOOL_EXPORT));
 
         deserializeProxyFromSettings(stringValue(proxyHost, DEFAULT_PROXY_HOST));
 
@@ -584,6 +591,7 @@ namespace Models {
 
         setUseProgressiveSuggestionPreviews(DEFAULT_USE_PROGRESSIVE_SUGGESTION_PREVIEWS);
         setProgressiveSuggestionIncrement(DEFAULT_PROGRESSIVE_SUGGESTION_INCREMENT);
+        setUseDirectExiftoolExport(DEFAULT_USE_DIRECT_EXIFTOOL_EXPORT);
 
 #if defined(QT_DEBUG)
         setValue(Constants::userConsent, DEFAULT_HAVE_USER_CONSENT);
@@ -634,6 +642,7 @@ namespace Models {
 
         setExperimentalValue(useProgressiveSuggestionPreviews, m_UseProgressiveSuggestionPreviews);
         setExperimentalValue(progressiveSuggestionIncrement, m_ProgressiveSuggestionIncrement);
+        setExperimentalValue(useDirectExiftoolExport, m_UseDirectExiftoolExport);
 
         if (!m_MustUseMasterPassword) {
             setValue(masterPasswordHash, "");

@@ -60,10 +60,10 @@ void RemoveFilesFsTests::removeArtworksNumberItems() {
     combinedModel.resetModel();
 
     std::vector<Models::MetadataElement> itemInfos;
-    QVector<Models::ArtworkMetadata *> artworksList;
+    MetadataIO::WeakArtworksSnapshot artworksList;
 
     for (int i = 0; i < itemsToAdd; i++) {
-         Models::ArtworkMetadata *metadata = artItemsModelMock.getArtwork(i);
+         auto *metadata = artItemsModelMock.getMockArtwork(i);
          itemInfos.emplace_back(metadata, i);
          artworksList.append(metadata);
     }
@@ -71,7 +71,8 @@ void RemoveFilesFsTests::removeArtworksNumberItems() {
     combinedModel.resetModel();
     combinedModel.setArtworks(itemInfos);
 
-    zipArchive.setArtworks(artworksList);
+    MetadataIO::ArtworksSnapshot snapshot(artworksList);
+    zipArchive.setArtworks(snapshot);
 
 // delete
    commandManagerMock.mockDeletion(itemsToDelete);
@@ -92,10 +93,10 @@ void RemoveFilesFsTests::removeArtworksAllItems() {
 
     combinedModel.resetModel();
     std::vector<Models::MetadataElement> itemInfos;
-    QVector<Models::ArtworkMetadata *> artworksList;
+    MetadataIO::WeakArtworksSnapshot artworksList;
 
     for (int i = 0; i < itemsToAdd; i++) {
-         Models::ArtworkMetadata *metadata = artItemsModelMock.getArtwork(i);
+         auto *metadata = artItemsModelMock.getMockArtwork(i);
          itemInfos.emplace_back(metadata, i);
          artworksList.append(metadata);
     }
@@ -103,7 +104,8 @@ void RemoveFilesFsTests::removeArtworksAllItems() {
     combinedModel.resetModel();
     combinedModel.setArtworks(itemInfos);
 
-    zipArchive.setArtworks(artworksList);
+    MetadataIO::ArtworksSnapshot snapshot(artworksList);
+    zipArchive.setArtworks(snapshot);
 
 // delete
    commandManagerMock.mockDeletion(itemsToDelete);

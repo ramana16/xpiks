@@ -113,25 +113,10 @@ SOURCES += main.cpp \
     ../../xpiks-qt/Models/recentdirectoriesmodel.cpp \
     ../../xpiks-qt/Models/recentfilesmodel.cpp \
     ../../xpiks-qt/Helpers/keywordshelpers.cpp \
-    ../../xpiks-qt/Maintenance/maintenanceservice.cpp \
-    ../../xpiks-qt/Maintenance/maintenanceworker.cpp \
-    ../../xpiks-qt/Maintenance/logscleanupjobitem.cpp \
-    ../../xpiks-qt/Maintenance/updatescleanupjobitem.cpp \
-    ../../xpiks-qt/Maintenance/launchexiftooljobitem.cpp \
-    ../../xpiks-qt/Maintenance/initializedictionariesjobitem.cpp \
-    ../../xpiks-qt/Maintenance/addtolibraryjobitem.cpp \
-    ../../xpiks-qt/Maintenance/movesettingsjobitem.cpp \
-    ../../xpiks-qt/Maintenance/savesessionjobitem.cpp \
-    ../../xpiks-qt/Translation/translationmanager.cpp \
-    ../../xpiks-qt/Translation/translationquery.cpp \
-    ../../xpiks-qt/Translation/translationservice.cpp \
-    ../../xpiks-qt/Translation/translationworker.cpp \
     ../../xpiks-qt/SpellCheck/spellcheckerservice.cpp \
     ../../xpiks-qt/SpellCheck/spellcheckitem.cpp \
     ../../xpiks-qt/SpellCheck/spellcheckworker.cpp \
     ../../xpiks-qt/SpellCheck/spellchecksuggestionmodel.cpp \
-    ../../xpiks-qt/MetadataIO/backupsaverservice.cpp \
-    ../../xpiks-qt/MetadataIO/backupsaverworker.cpp \
     ../../xpiks-qt/SpellCheck/spellcheckiteminfo.cpp \
     ../../xpiks-qt/SpellCheck/spellsuggestionsitem.cpp \
     ../../xpiks-qt/Common/basickeywordsmodel.cpp \
@@ -147,14 +132,8 @@ SOURCES += main.cpp \
     ../../xpiks-qt/Helpers/stringhelper.cpp \
     keywordvalidation_tests.cpp \
     artworkrepository_tests.cpp \
-    ../../xpiks-qt/MetadataIO/metadataiocoordinator.cpp \
-    ../../xpiks-qt/MetadataIO/metadatareadingworker.cpp \
-    ../../xpiks-qt/MetadataIO/saverworkerjobitem.cpp \
-    ../../xpiks-qt/Suggestion/locallibrary.cpp \
-    ../../xpiks-qt/MetadataIO/metadatawritingworker.cpp \
     filteredmodel_tests.cpp \
     conectivityhelpers_tests.cpp \
-    ../../xpiks-qt/Conectivity/conectivityhelpers.cpp \
     undoredo_tests.cpp \
     ../../xpiks-qt/Helpers/filterhelpers.cpp \
     artworkfilter_tests.cpp \
@@ -176,7 +155,7 @@ SOURCES += main.cpp \
     deletekeywords_tests.cpp \
     ../../xpiks-qt/Models/deletekeywordsviewmodel.cpp \
     ../../xpiks-qt/Commands/deletekeywordscommand.cpp \
-    ../../xpiks-qt/Conectivity/uploadwatcher.cpp \
+    ../../xpiks-qt/Connectivity/uploadwatcher.cpp \
     ../../xpiks-qt/Helpers/updatehelpers.cpp \
     basicmetadatamodel_tests.cpp \
     ../../xpiks-qt/KeywordsPresets/presetkeywordsmodel.cpp \
@@ -193,7 +172,13 @@ SOURCES += main.cpp \
     ../../xpiks-qt/Warnings/warningsmodel.cpp \
     ../../xpiks-qt/QMLExtensions/tabsmodel.cpp \
     ../../xpiks-qt/Helpers/asynccoordinator.cpp \
-    ../../xpiks-qt/Maintenance/locallibraryloadsaveitem.cpp
+    ../../xpiks-qt/Models/videoartwork.cpp \
+    ../../xpiks-qt/Helpers/artworkshelpers.cpp \
+    ../../xpiks-qt/Models/keyvaluelist.cpp \
+    ../../xpiks-qt/MetadataIO/cachedartwork.cpp \
+    ../../xpiks-qt/Maintenance/logscleanupjobitem.cpp \
+    ../../xpiks-qt/MetadataIO/artworkssnapshot.cpp \
+    ../../xpiks-qt/Helpers/threadhelpers.cpp
 
 HEADERS += \
     encryption_tests.h \
@@ -237,26 +222,11 @@ HEADERS += \
     ../../xpiks-qt/Models/recentfilesmodel.h \
     ../../xpiks-qt/Helpers/keywordshelpers.h \
     ../../xpiks-qt/Common/flags.h \
-    ../../xpiks-qt/Maintenance/maintenanceservice.h \
-    ../../xpiks-qt/Maintenance/maintenanceworker.h \
-    ../../xpiks-qt/Maintenance/logscleanupjobitem.h \
-    ../../xpiks-qt/Maintenance/updatescleanupjobitem.h \
-    ../../xpiks-qt/Maintenance/launchexiftooljobitem.h \
-    ../../xpiks-qt/Maintenance/initializedictionariesjobitem.h \
-    ../../xpiks-qt/Maintenance/addtolibraryjobitem.h \
-    ../../xpiks-qt/Maintenance/movesettingsjobitem.h \
-    ../../xpiks-qt/Maintenance/savesessionjobitem.h \
-    ../../xpiks-qt/Translation/translationmanager.h \
-    ../../xpiks-qt/Translation/translationquery.h \
-    ../../xpiks-qt/Translation/translationservice.h \
-    ../../xpiks-qt/Translation/translationworker.h \
     ../../xpiks-qt/SpellCheck/spellcheckerservice.h \
     ../../xpiks-qt/SpellCheck/spellcheckitem.h \
     ../../xpiks-qt/SpellCheck/spellcheckworker.h \
     ../../xpiks-qt/SpellCheck/spellchecksuggestionmodel.h \
-    ../../xpiks-qt/MetadataIO/backupsaverservice.h \
-    ../../xpiks-qt/MetadataIO/backupsaverworker.h \
-    ../../xpiks-qt/Conectivity/analyticsuserevent.h \
+    ../../xpiks-qt/Connectivity/analyticsuserevent.h \
     ../../xpiks-qt/SpellCheck/spellcheckiteminfo.h \
     ../../xpiks-qt/SpellCheck/spellsuggestionsitem.h \
     ../../xpiks-qt/SpellCheck/spellcheckerrorshighlighter.h \
@@ -271,12 +241,7 @@ HEADERS += \
     keywordvalidation_tests.h \
     artworkrepository_tests.h \
     ../../xpiks-qt/Common/itemprocessingworker.h \
-    ../../xpiks-qt/MetadataIO/metadataiocoordinator.h \
-    ../../xpiks-qt/MetadataIO/metadatareadingworker.h \
-    ../../xpiks-qt/MetadataIO/saverworkerjobitem.h \
-    ../../xpiks-qt/MetadataIO/artworkmetadatasnapshot.h \
-    ../../xpiks-qt/Suggestion/locallibrary.h \
-    ../../xpiks-qt/MetadataIO/metadatawritingworker.h \
+    ../../xpiks-qt/MetadataIO/artworkssnapshot.h \
     filteredmodel_tests.h \
     ../../xpiks-qt/Common/baseentity.h \
     ../../xpiks-qt/Common/defines.h \
@@ -287,13 +252,10 @@ HEADERS += \
     ../../xpiks-qt/Commands/icommandbase.h \
     ../../xpiks-qt/Commands/icommandmanager.h \
     conectivityhelpers_tests.h \
-    ../../xpiks-qt/Conectivity/conectivityhelpers.h \
-    ../../xpiks-qt/Conectivity/uploadbatch.h \
-    ../../xpiks-qt/Conectivity/uploadcontext.h \
     undoredo_tests.h \
     ../../xpiks-qt/Helpers/filterhelpers.h \
     artworkfilter_tests.h \
-    ../../xpiks-qt/Conectivity/iftpcoordinator.h \
+    ../../xpiks-qt/Connectivity/iftpcoordinator.h \
     ../../xpiks-qt/Models/ziparchiver.h \
     removefilesfs_tests.h \
     Mocks/artworksrepositorymock.h \
@@ -316,7 +278,7 @@ HEADERS += \
     ../../xpiks-qt/Models/deletekeywordsviewmodel.h \
     ../../xpiks-qt/Commands/deletekeywordscommand.h \
     ../../xpiks-qt/Common/iflagsprovider.h \
-    ../../xpiks-qt/Conectivity/uploadwatcher.h \
+    ../../xpiks-qt/Connectivity/uploadwatcher.h \
     ../../xpiks-qt/Helpers/updatehelpers.h \
     basicmetadatamodel_tests.h \
     ../../xpiks-qt/KeywordsPresets/presetkeywordsmodel.h \
@@ -335,6 +297,12 @@ HEADERS += \
     ../../xpiks-qt/Warnings/warningsmodel.h \
     ../../xpiks-qt/KeywordsPresets/ipresetsmanager.h \
     ../../xpiks-qt/QMLExtensions/tabsmodel.h \
+    ../../xpiks-qt/Models/videoartwork.h \
     ../../xpiks-qt/Helpers/asynccoordinator.h \
-    ../../xpiks-qt/Maintenance/locallibraryloadsaveitem.h
+    ../../xpiks-qt/Helpers/artworkshelpers.h \
+    ../../xpiks-qt/Models/keyvaluelist.h \
+    ../../xpiks-qt/MetadataIO/cachedartwork.h \
+    ../../xpiks-qt/Maintenance/imaintenanceitem.h \
+    ../../xpiks-qt/Maintenance/logscleanupjobitem.h \
+    ../../xpiks-qt/Helpers/threadhelpers.h
 

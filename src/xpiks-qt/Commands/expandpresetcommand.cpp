@@ -13,6 +13,7 @@
 #include "../KeywordsPresets/presetkeywordsmodel.h"
 #include "../UndoRedo/modifyartworkshistoryitem.h"
 #include "../Models/artitemsmodel.h"
+#include "../MetadataIO/artworkssnapshot.h"
 
 namespace Commands {
     ExpandPresetCommand::~ExpandPresetCommand() {
@@ -27,7 +28,7 @@ namespace Commands {
 
         int indexToUpdate = -1;
         std::vector<UndoRedo::ArtworkMetadataBackup> artworksBackups;
-        QVector<Models::ArtworkMetadata*> affectedArtworks;
+        MetadataIO::WeakArtworksSnapshot affectedArtworks;
 
         if (presetsModel->tryGetPreset(m_PresetIndex, keywords)) {
             Models::ArtworkMetadata *metadata = m_MetadataElement.getOrigin();

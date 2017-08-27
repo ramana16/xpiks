@@ -26,6 +26,14 @@ namespace Common {
         LOG_DEBUG << "#";
         QString localConfigPath;
 
+#if defined(QT_DEBUG)
+        QString filename = QString("debug_%1.json").arg(m_StateName);
+#elif defined(INTEGRATION_TESTS)
+        QString filename = QString("tests_%1.json").arg(m_StateName);
+#else
+        QString filename = QString("%1.json").arg(m_StateName);
+#endif
+
         QString appDataPath = XPIKS_USERDATA_PATH;
         if (!appDataPath.isEmpty()) {
             const QString statesPath = QDir::cleanPath(appDataPath + QDir::separator() + Constants::STATES_DIR);
@@ -35,9 +43,9 @@ namespace Common {
 
             QDir statesDir(statesPath);
             Q_ASSERT(statesDir.exists());
-            localConfigPath = statesDir.filePath(m_StateName + ".json");
+            localConfigPath = statesDir.filePath(filename);
         } else {
-            localConfigPath = m_StateName + ".json";
+            localConfigPath = filename;
         }
 
         m_StateConfig.initConfig(localConfigPath);

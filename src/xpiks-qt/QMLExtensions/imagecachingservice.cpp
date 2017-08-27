@@ -14,11 +14,15 @@
 #include "imagecachingworker.h"
 #include "imagecacherequest.h"
 #include "../Models/artworkmetadata.h"
+#include "../Models/imageartwork.h"
 #include "../Helpers/asynccoordinator.h"
+#include "../Commands/commandmanager.h"
+#include "../MetadataIO/artworkssnapshot.h"
 
 namespace QMLExtensions {
     ImageCachingService::ImageCachingService(QObject *parent) :
         QObject(parent),
+        Common::BaseEntity(),
         m_CachingWorker(NULL),
         m_IsCancelled(false),
         m_Scale(1.0)
@@ -34,7 +38,8 @@ namespace QMLExtensions {
         Helpers::AsyncCoordinatorLocker locker(coordinator);
         Q_UNUSED(locker);
 
-        m_CachingWorker = new ImageCachingWorker(coordinator);
+        auto *dbManager = m_CommandManager->getDatabaseManager();
+        m_CachingWorker = new ImageCachingWorker(coordinator, dbManager);
 
         QThread *thread = new QThread();
         m_CachingWorker->moveToThread(thread);
@@ -60,6 +65,17 @@ namespace QMLExtensions {
         }
     }
 
+    void ImageCachingService::upgradeCacheStorage() {
+        LOG_DEBUG << "#";
+
+        if ((m_CachingWorker != NULL) && !m_IsCancelled) {
+            bool migrated = m_CachingWorker->upgradeCacheStorage();
+            if (migrated) {
+                m_CachingWorker->submitSaveIndexItem();
+            }
+        }
+    }
+
     void ImageCachingService::setScale(qreal scale) {
         LOG_INFO << scale;
         if ((0.99f < scale) && (scale < 5.0f)) {
@@ -79,32 +95,36 @@ namespace QMLExtensions {
         m_CachingWorker->submitFirst(request);
     }
 
-    void ImageCachingService::generatePreviews(const QVector<Models::ArtworkMetadata *> &items) {
+    void ImageCachingService::cacheImage(const QString &key) {
+        this->cacheImage(key, QSize(DEFAULT_THUMB_WIDTH * m_Scale, DEFAULT_THUMB_HEIGHT * m_Scale));
+    }
+
+    void ImageCachingService::generatePreviews(const MetadataIO::ArtworksSnapshot &snapshot) {
         if (m_IsCancelled) { return; }
 
         Q_ASSERT(m_CachingWorker != NULL);
-        LOG_INFO << "generating for" << items.size() << "items";
+        LOG_INFO << "generating for" << snapshot.size() << "items";
 
         std::vector<std::shared_ptr<ImageCacheRequest> > requests;
-        int size = items.size();
+        const size_t size = snapshot.size();
         requests.reserve(size);
         const bool recache = false;
 
-        for (int i = 0; i < size; ++i) {
-            bool withDelay = i % 2;
-            Models::ArtworkMetadata *artwork = items.at(i);
-            requests.emplace_back(new ImageCacheRequest(artwork->getFilepath(),
-                                                        QSize(DEFAULT_THUMB_WIDTH * m_Scale, DEFAULT_THUMB_HEIGHT * m_Scale),
-                                                        recache,
-                                                        withDelay));
+        for (size_t i = 0, j = 0; i < size; i++) {
+            auto *artwork = snapshot.get(i);
+            Models::ImageArtwork *imageArtwork = dynamic_cast<Models::ImageArtwork*>(artwork);
+            if (imageArtwork != nullptr) {
+                const bool withDelay = j % 2;
+                requests.emplace_back(new ImageCacheRequest(artwork->getThumbnailPath(),
+                                                            QSize(DEFAULT_THUMB_WIDTH * m_Scale, DEFAULT_THUMB_HEIGHT * m_Scale),
+                                                            recache,
+                                                            withDelay));
+                j++;
+            }
         }
 
-        std::vector<std::shared_ptr<ImageCacheRequest> > knownRequests;
-        std::vector<std::shared_ptr<ImageCacheRequest> > unknownRequests;
-        m_CachingWorker->splitToCachedAndNot(requests, unknownRequests, knownRequests);
-
-        m_CachingWorker->submitFirst(unknownRequests);
-        m_CachingWorker->submitItems(knownRequests);
+        m_CachingWorker->submitItems(requests);
+        m_CachingWorker->submitSaveIndexItem();
     }
 
     bool ImageCachingService::tryGetCachedImage(const QString &key, const QSize &requestedSize,

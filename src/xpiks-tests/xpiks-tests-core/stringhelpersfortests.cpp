@@ -4,7 +4,7 @@ QString getRandomString(int length, bool exactSize) {
     if (length <= 0) { return QString(); }
     
     QString result;
-    result.reserve(length);
+    result.reserve(length*2);
     QLatin1String chars("/!@#$% ^&*()_+=|");
     int charsLength = chars.size() - 1;
     int originalLength = length;

@@ -28,7 +28,7 @@ namespace Commands {
         LOG_INFO << "Case sensitive:" << m_CaseSensitive;
         QVector<int> indicesToUpdate;
         std::vector<UndoRedo::ArtworkMetadataBackup> artworksBackups;
-        QVector<Models::ArtworkMetadata *> affectedItems;
+        MetadataIO::WeakArtworksSnapshot affectedItems;
 
         CommandManager *commandManager = (CommandManager*)commandManagerInterface;
 
@@ -68,7 +68,7 @@ namespace Commands {
         CommandManager *commandManager = (CommandManager*)commandManagerInterface;
 
         if (!m_IndicesToUpdate.isEmpty()) {
-            commandManager->updateArtworks(m_IndicesToUpdate);
+            commandManager->updateArtworksAtIndices(m_IndicesToUpdate);
         }
 
         if (!m_AffectedItems.isEmpty()) {

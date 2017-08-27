@@ -23,26 +23,22 @@
 #include "../Helpers/constants.h"
 #include "imagecacherequest.h"
 #include "../Helpers/asynccoordinator.h"
+#include "dbimagecacheindex.h"
+
+#define IMAGE_CACHING_WORKER_SLEEP_DELAY 500
+#define IMAGES_INDEX_BACKUP_STEP 50
+#define PREVIEW_JPG_QUALITY 70
 
 namespace QMLExtensions {
-    QString getPathHash(const QString &path) {
+    QString getImagePathHash(const QString &path) {
         return QString::fromLatin1(QCryptographicHash::hash(path.toUtf8(), QCryptographicHash::Sha256).toHex());
     }
 
-    QDataStream &operator<<(QDataStream &out, const CachedImage &v) {
-        out << v.m_Filename << v.m_LastModified << v.m_Size << v.m_RequestsServed << v.m_AdditionalData;
-        return out;
-    }
-
-    QDataStream &operator>>(QDataStream &in, CachedImage &v) {
-        in >> v.m_Filename >> v.m_LastModified >> v.m_Size >> v.m_RequestsServed >> v.m_AdditionalData;
-        return in;
-    }
-
-    ImageCachingWorker::ImageCachingWorker(Helpers::AsyncCoordinator *initCoordinator, QObject *parent):
+    ImageCachingWorker::ImageCachingWorker(Helpers::AsyncCoordinator *initCoordinator, Helpers::DatabaseManager *dbManager, QObject *parent):
         QObject(parent),
         m_InitCoordinator(initCoordinator),
         m_ProcessedItemsCount(0),
+        m_Cache(dbManager),
         m_Scale(1.0)
     {
     }
@@ -58,8 +54,6 @@ namespace QMLExtensions {
 
         if (!appDataPath.isEmpty()) {
             m_ImagesCacheDir = QDir::cleanPath(appDataPath + QDir::separator() + Constants::IMAGES_CACHE_DIR);
-            QDir appDataDir(appDataPath);
-            m_IndexFilepath = appDataDir.filePath(Constants::IMAGES_CACHE_INDEX);
 
             QDir imagesCacheDir(m_ImagesCacheDir);
             if (!imagesCacheDir.exists()) {
@@ -68,18 +62,21 @@ namespace QMLExtensions {
             }
         } else {
             m_ImagesCacheDir = QDir::currentPath();
-            m_IndexFilepath = Constants::IMAGES_CACHE_INDEX;
         }
 
         LOG_INFO << "Using" << m_ImagesCacheDir << "for images cache";
 
-        readIndex();
+        m_Cache.initialize();
 
         return true;
     }
 
     void ImageCachingWorker::processOneItem(std::shared_ptr<ImageCacheRequest> &item) {
-        if (isProcessed(item)) { return; }
+        if (isProcessed(item)) {
+            LOG_FOR_DEBUG << item->getFilepath() << "is processed";
+            return;
+        }
+        if (isSeparator(item)) { saveIndex(); return; }
 
         const QString &originalPath = item->getFilepath();
         QSize requestedSize = item->getRequestedSize();
@@ -92,55 +89,51 @@ namespace QMLExtensions {
             requestedSize.setWidth(DEFAULT_THUMB_WIDTH * m_Scale);
         }
 
+        const bool isInResources = originalPath.startsWith(":/");
+
         QImage img(originalPath);
         QImage resizedImage = img.scaled(requestedSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
         QFileInfo fi(originalPath);
-        QString pathHash = getPathHash(originalPath) + "." + fi.suffix();
+        const QString suffix = isInResources ? "jpg" : fi.suffix();
+        QString pathHash = getImagePathHash(originalPath) + "." + suffix;
         QString cachedFilepath = QDir::cleanPath(m_ImagesCacheDir + QDir::separator() + pathHash);
 
-        if (resizedImage.save(cachedFilepath)) {
+        if (resizedImage.save(cachedFilepath, nullptr, PREVIEW_JPG_QUALITY)) {
             CachedImage cachedImage;
             cachedImage.m_Filename = pathHash;
-            cachedImage.m_LastModified = fi.lastModified();
+            cachedImage.m_LastModified = isInResources ? QDateTime::currentDateTime() : fi.lastModified();
             cachedImage.m_Size = requestedSize;
 
-            {
-                QWriteLocker locker(&m_CacheLock);
-                Q_UNUSED(locker);
-
-                if (m_CacheIndex.contains(originalPath)) {
-                    cachedImage.m_RequestsServed = m_CacheIndex[originalPath].m_RequestsServed + 1;
-                } else {
-                    cachedImage.m_RequestsServed = 1;
-                }
-
-                m_CacheIndex.insert(originalPath, cachedImage);
-            }
+            m_Cache.update(originalPath, cachedImage);
 
             m_ProcessedItemsCount++;
         } else {
             LOG_WARNING << "Failed to save image. Path:" << cachedFilepath << "size" << requestedSize;
         }
 
-        if (m_ProcessedItemsCount % 50 == 0) {
+        if (m_ProcessedItemsCount % IMAGES_INDEX_BACKUP_STEP == 0) {
             saveIndex();
         }
 
         if (item->getWithDelay()) {
             // force context switch for more imporant tasks
-            QThread::msleep(500);
+            QThread::msleep(IMAGE_CACHING_WORKER_SLEEP_DELAY);
         }
+    }
+
+    void ImageCachingWorker::workerStopped() {
+        LOG_DEBUG << "#";
+        m_Cache.finalize();
+        emit stopped();
     }
 
     bool ImageCachingWorker::tryGetCachedImage(const QString &key, const QSize &requestedSize,
                                                QString &cachedPath, bool &needsUpdate) {
         bool found = false;
-        QReadLocker locker(&m_CacheLock);
-        Q_UNUSED(locker);
+        CachedImage cachedImage;
 
-        if (m_CacheIndex.contains(key)) {
-            CachedImage &cachedImage = m_CacheIndex[key];
+        if (m_Cache.tryGet(key, cachedImage)) {
             QString cachedValue = QDir::cleanPath(m_ImagesCacheDir + QDir::separator() + cachedImage.m_Filename);
 
             QFileInfo fi(cachedValue);
@@ -148,7 +141,9 @@ namespace QMLExtensions {
             if (fi.exists()) {
                 cachedImage.m_RequestsServed++;
                 cachedPath = cachedValue;
-                needsUpdate = (QFileInfo(key).lastModified() > cachedImage.m_LastModified) || (cachedImage.m_Size != requestedSize);
+                const bool isInResources = key.startsWith(":/");
+                const bool isOutdated = (!isInResources) && (QFileInfo(key).lastModified() > cachedImage.m_LastModified);
+                needsUpdate = isOutdated || (cachedImage.m_Size != requestedSize);
 
                 found = true;
             }
@@ -157,63 +152,57 @@ namespace QMLExtensions {
         return found;
     }
 
-    void ImageCachingWorker::splitToCachedAndNot(const std::vector<std::shared_ptr<ImageCacheRequest> > allRequests,
-                                                 std::vector<std::shared_ptr<ImageCacheRequest> > &unknownRequests,
-                                                 std::vector<std::shared_ptr<ImageCacheRequest> > &knownRequests) {
-        size_t size = allRequests.size();
-        if (size == 0) { return; }
-
-        LOG_DEBUG << "#";
-
-        QReadLocker locker(&m_CacheLock);
-        Q_UNUSED(locker);
-
-        knownRequests.reserve(size);
-        unknownRequests.reserve(size);
-
-        for (size_t i = 0; i < size; ++i) {
-            auto &item = allRequests.at(i);
-
-            if (m_CacheIndex.contains(item->getFilepath())) {
-                knownRequests.push_back(item);
-            } else {
-                unknownRequests.push_back(item);
-            }
-        }
-
-        LOG_DEBUG << knownRequests.size() << "known and" << unknownRequests.size() << "unknown";
+    void ImageCachingWorker::submitSaveIndexItem() {
+        std::shared_ptr<ImageCacheRequest> separatorItem(new ImageCacheRequest("", QSize(), true, false));
+        this->submitItem(separatorItem);
     }
 
-    void ImageCachingWorker::readIndex() {
-        QFile file(m_IndexFilepath);
-        if (file.open(QIODevice::ReadOnly)) {
-            QHash<QString, CachedImage> cacheIndex;
+    QString getOldCacheFilepath() {
+        QString appDataPath = XPIKS_USERDATA_PATH;
+        QString indexFilepath;
 
+        if (!appDataPath.isEmpty()) {
+            QDir appDataDir(appDataPath);
+            indexFilepath = appDataDir.filePath(Constants::IMAGES_CACHE_INDEX);
+        } else {
+            indexFilepath = Constants::IMAGES_CACHE_INDEX;
+        }
+
+        return indexFilepath;
+    }
+
+    bool ImageCachingWorker::upgradeCacheStorage() {
+        bool migrated = false;
+        QString indexFilepath = getOldCacheFilepath();
+        LOG_INFO << "Trying to load old cache index from" << indexFilepath;
+
+        QHash<QString, CachedImage> oldCache;
+
+        QFile file(indexFilepath);
+        if (file.open(QIODevice::ReadOnly)) {
             QDataStream in(&file);   // read the data
-            in >> cacheIndex;
+            in >> oldCache;
             file.close();
 
-            m_CacheIndex.swap(cacheIndex);
-            LOG_INFO << "Images cache index read:" << m_CacheIndex.size() << "entries";
+            LOG_INFO << "Read" << oldCache.size() << "items from the old cache index";
+
+            m_Cache.importCache(oldCache);
+            migrated = true;
+
+            if (file.rename(indexFilepath + ".backup")) {
+                LOG_INFO << "Old cache index has been discarded";
+            } else {
+                LOG_WARNING << "Failed to discard old cache index";
+            }
         } else {
-            LOG_WARNING << "File not found:" << m_IndexFilepath;
+            LOG_INFO << "Cannot open old cache index";
         }
+
+        return migrated;
     }
 
     void ImageCachingWorker::saveIndex() {
-        LOG_DEBUG << "#";
-
-        QFile file(m_IndexFilepath);
-
-        if (file.open(QIODevice::WriteOnly)) {
-            QReadLocker locker(&m_CacheLock);
-            Q_UNUSED(locker);
-
-            QDataStream out(&file);   // write the data
-            out << m_CacheIndex;
-            file.close();
-            LOG_INFO << "Images cache index saved:" << m_CacheIndex.size() << "entries";
-        }
+        m_Cache.sync();
     }
 
     bool ImageCachingWorker::isProcessed(std::shared_ptr<ImageCacheRequest> &item) {
@@ -231,5 +220,10 @@ namespace QMLExtensions {
         }
 
         return isAlreadyProcessed;
+    }
+
+    bool ImageCachingWorker::isSeparator(const std::shared_ptr<ImageCacheRequest> &item) {
+        bool result = item->getFilepath().isEmpty() && item->getNeedRecache() && (!item->getWithDelay());
+        return result;
     }
 }

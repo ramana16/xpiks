@@ -14,10 +14,18 @@
 #include <QObject>
 #include <QString>
 #include <QVector>
+#include <vector>
+#include <memory>
 #include "../Common/iservicebase.h"
+#include "../Common/baseentity.h"
 
 namespace Models {
     class ArtworkMetadata;
+    class ArtworkMetadataLocker;
+}
+
+namespace MetadataIO {
+    class ArtworksSnapshot;
 }
 
 class QScreen;
@@ -25,7 +33,7 @@ class QScreen;
 namespace QMLExtensions {
     class ImageCachingWorker;
 
-    class ImageCachingService : public QObject
+    class ImageCachingService : public QObject, public Common::BaseEntity
     {
         Q_OBJECT
     public:
@@ -34,11 +42,13 @@ namespace QMLExtensions {
     public:
         void startService(const std::shared_ptr<Common::ServiceStartParams> &params);
         void stopService();
+        void upgradeCacheStorage();
 
     public:
         void setScale(qreal scale);
         void cacheImage(const QString &key, const QSize &requestedSize, bool recache=false);
-        void generatePreviews(const QVector<Models::ArtworkMetadata *> &items);
+        void cacheImage(const QString &key);
+        void generatePreviews(const MetadataIO::ArtworksSnapshot &snapshot);
         bool tryGetCachedImage(const QString &key, const QSize &requestedSize, QString &cached, bool &needsUpdate);
 
     public slots:

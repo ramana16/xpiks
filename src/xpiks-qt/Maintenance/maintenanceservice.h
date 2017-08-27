@@ -12,14 +12,10 @@
 #define MAINTENANCESERVICE_H
 
 #include <QObject>
-#include "../MetadataIO/artworkmetadatasnapshot.h"
+#include "../MetadataIO/artworkssnapshot.h"
 
 namespace Models {
     class ArtworkMetadata;
-}
-
-namespace Suggestion {
-    class LocalLibrary;
 }
 
 namespace MetadataIO {
@@ -39,6 +35,10 @@ namespace Helpers {
     class AsyncCoordinator;
 }
 
+namespace QMLExtensions {
+    class ImageCachingService;
+}
+
 namespace Maintenance {
     class MaintenanceWorker;
 
@@ -56,12 +56,9 @@ namespace Maintenance {
         void cleanupUpdatesArtifacts();
         void launchExiftool(const QString &settingsExiftoolPath, MetadataIO::MetadataIOCoordinator *coordinator);
         void initializeDictionaries(Translation::TranslationManager *translationManager, Helpers::AsyncCoordinator *initCoordinator);
-        void addArtworksToLibrary(std::unique_ptr<MetadataIO::ArtworksSnapshot> &artworksSnapshot, Suggestion::LocalLibrary *localLibrary);
         void cleanupLogs();
-        void loadLocalLibrary(Suggestion::LocalLibrary *localLibrary);
-        void saveLocalLibrary(Suggestion::LocalLibrary *localLibrary);
-        void cleanupLocalLibrary(Suggestion::LocalLibrary *localLibrary);
         void moveSettings(Models::SettingsModel *settingsModel);
+        void upgradeImagesCache(QMLExtensions::ImageCachingService *imageCachingService);
         void saveSession(std::unique_ptr<MetadataIO::SessionSnapshot> &sessionSnapshot, Models::SessionManager *sessionManager);
 
     private slots:

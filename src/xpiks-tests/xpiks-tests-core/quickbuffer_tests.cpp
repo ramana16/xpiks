@@ -35,7 +35,7 @@ void QuickBufferTests::copyArtworkToQuickBufferTest() {
     keywordsForQB << "brand" << "new" << "keywords";
 
     auto *artwork = artItemsModelMock.getMockArtwork(0);
-    artwork->initialize(titleForQB, descriptionForQB, keywordsForQB, true);
+    artwork->set(titleForQB, descriptionForQB, keywordsForQB);
     filteredItemsModel.copyToQuickBuffer(0);
 
     QCOMPARE(quickBuffer.getTitle(), titleForQB);
@@ -98,7 +98,7 @@ void QuickBufferTests::copyHalfEmptyArtworkToQuickBufferTest() {
     keywordsForQB << "brand" << "new" << "keywords";
 
     auto *artwork = artItemsModelMock.getMockArtwork(0);
-    artwork->initialize(titleForQB, descriptionForQB, keywordsForQB, true);
+    artwork->set(titleForQB, descriptionForQB, keywordsForQB);
     filteredItemsModel.copyToQuickBuffer(0);
 
     QCOMPARE(quickBuffer.getTitle(), titleForQB);

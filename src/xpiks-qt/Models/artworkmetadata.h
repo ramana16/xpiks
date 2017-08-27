@@ -12,13 +12,13 @@
 #define IMAGEMETADATA_H
 
 #include <QAbstractListModel>
-#include <QReadWriteLock>
 #include <QStringList>
 #include <QFileInfo>
 #include <QString>
 #include <QVector>
 #include <QSet>
 #include <QTimer>
+#include <QMutex>
 #include <QQmlEngine>
 #include "../Common/basicmetadatamodel.h"
 #include "../Common/flags.h"
@@ -27,6 +27,11 @@
 #include "../Common/hold.h"
 #include "../SpellCheck/spellcheckiteminfo.h"
 #include "../UndoRedo/artworkmetadatabackup.h"
+
+namespace MetadataIO {
+    struct CachedArtwork;
+    struct OriginalMetadata;
+}
 
 class QTextDocument;
 
@@ -41,33 +46,47 @@ namespace Models {
         Q_OBJECT
 
     public:
-        ArtworkMetadata(const QString &filepath, qint64 ID, qint64 directoryID);
+        ArtworkMetadata(const QString &filepath, Common::ID_t ID, qint64 directoryID);
         virtual ~ArtworkMetadata();
 
     private:
         enum MetadataFlags {
             FlagIsModified = 1 << 0,
             FlagsIsSelected = 1 << 1,
-            FlagIsInitialized = 1 << 2,
-            FlagIsUnavailable = 1 << 3
+            FlagIsInitialized = 1 << 2, // is initialized from real file
+            FlagIsAlmostInitialized = 1 << 3, // is initialized from cached storage
+            FlagIsUnavailable = 1 << 4,
+            FlagIsLockedForEditing = 1 << 5
         };
 
         inline bool getIsModifiedFlag() const { return Common::HasFlag(m_MetadataFlags, FlagIsModified); }
         inline bool getIsSelectedFlag() const { return Common::HasFlag(m_MetadataFlags, FlagsIsSelected); }
         inline bool getIsUnavailableFlag() const { return Common::HasFlag(m_MetadataFlags, FlagIsUnavailable); }
         inline bool getIsInitializedFlag() const { return Common::HasFlag(m_MetadataFlags, FlagIsInitialized); }
+        inline bool getIsAlmostInitializedFlag() const { return Common::HasFlag(m_MetadataFlags, FlagIsAlmostInitialized); }
+        inline bool getIsLockedForEditingFlag() const { return Common::HasFlag(m_MetadataFlags, FlagIsLockedForEditing); }
 
         inline void setIsModifiedFlag(bool value) { Common::ApplyFlag(m_MetadataFlags, value, FlagIsModified); }
         inline void setIsSelectedFlag(bool value) { Common::ApplyFlag(m_MetadataFlags, value, FlagsIsSelected); }
         inline void setIsUnavailableFlag(bool value) { Common::ApplyFlag(m_MetadataFlags, value, FlagIsUnavailable); }
         inline void setIsInitializedFlag(bool value) { Common::ApplyFlag(m_MetadataFlags, value, FlagIsInitialized); }
+        inline void setIsAlmostInitializedFlag(bool value) { Common::ApplyFlag(m_MetadataFlags, value, FlagIsAlmostInitialized); }
+        inline void setIsLockedForEditingFlag(bool value) { Common::ApplyFlag(m_MetadataFlags, value, FlagIsLockedForEditing); }
 
     public:
-        bool initialize(const QString &title,
-                        const QString &description, const QStringList &rawKeywords, bool overwrite=true);
+        bool initFromOrigin(const MetadataIO::OriginalMetadata &originalMetadata, bool overwrite=false);
+        bool initFromStorage(const MetadataIO::CachedArtwork &cachedArtwork);
+        // called when Close is pressed in the Import dialog
+        void initAsEmpty(const MetadataIO::OriginalMetadata &originalMetadata);
+        void initAsEmpty();
+
+    protected:
+        virtual bool initFromOriginUnsafe(const MetadataIO::OriginalMetadata &originalMetadata) { Q_UNUSED(originalMetadata); return false; }
+        virtual bool initFromStorageUnsafe(const MetadataIO::CachedArtwork &cachedArtwork) { Q_UNUSED(cachedArtwork); return false; }
 
     public:
         virtual const QString &getFilepath() const override { return m_ArtworkFilepath; }
+        virtual const QString &getThumbnailPath() const override { return m_ArtworkFilepath; }
         virtual QString getDirectory() const { QFileInfo fi(m_ArtworkFilepath); return fi.absolutePath(); }
         QString getBaseFilename() const;
         bool isInDirectory(const QString &directoryAbsolutePath) const;
@@ -76,10 +95,13 @@ namespace Models {
         bool isSelected() const { return getIsSelectedFlag(); }
         bool isUnavailable() const { return getIsUnavailableFlag(); }
         bool isInitialized() const { return getIsInitializedFlag(); }
+        bool isAlmostInitialized() const { return getIsAlmostInitializedFlag(); }
+        size_t getLastKnownIndex() const { return m_LastKnownIndex; }
         virtual qint64 getFileSize() const { return m_FileSize; }
-        virtual qint64 getItemID() const override { return m_ID; }
+        virtual Common::ID_t getItemID() const override { return m_ID; }
 
     public:
+        void setCurrentIndex(size_t index) { m_LastKnownIndex = index; }
         Common::WarningFlags getWarningsFlags() const { return m_WarningsFlags; }
         void setWarningsFlags(Common::WarningFlags flags) { m_WarningsFlags = flags; }
         void addWarningsFlags(Common::WarningFlags flags) { Common::SetFlag(m_WarningsFlags, flags); }
@@ -89,8 +111,8 @@ namespace Models {
         Common::BasicMetadataModel *getBasicModel() { return &m_MetadataModel; }
         const Common::BasicMetadataModel *getBasicModel() const { return &m_MetadataModel; }
 
-        bool isLockedForEditing() const { return m_IsLockedForEditing; }
-        void setIsLockedForEditing(bool value) { m_IsLockedForEditing = value; }
+        bool isLockedForEditing() const { return getIsLockedForEditingFlag(); }
+        void setIsLockedForEditing(bool value) { setIsLockedForEditingFlag(value); }
 
         virtual void clearModel();
         virtual bool clearKeywords() override;
@@ -98,26 +120,9 @@ namespace Models {
         virtual bool replace(const QString &replaceWhat, const QString &replaceTo, Common::SearchFlags flags);
 
     public:
-        virtual bool setDescription(const QString &value) override {
-            bool result = m_MetadataModel.setDescription(value);
-
-            if (result) { markModified(); }
-
-            return result;
-        }
-
-        virtual bool setTitle(const QString &value) override {
-            bool result = m_MetadataModel.setTitle(value);
-
-            if (result) { markModified(); }
-
-            return result;
-        }
-
-        virtual void setKeywords(const QStringList &keywords) override {
-            m_MetadataModel.setKeywords(keywords);
-            markModified();
-        }
+        virtual bool setDescription(const QString &value) override;
+        virtual bool setTitle(const QString &value) override;
+        virtual void setKeywords(const QStringList &keywords) override;
 
         bool setIsSelected(bool value);
 
@@ -192,23 +197,28 @@ namespace Models {
         void backupRequired();
         void aboutToBeRemoved();
         void spellCheckErrorsChanged();
+        void thumbnailUpdated();
 
     private slots:
         void backupTimerTriggered() { m_BackupTimerDelay = 0; emit backupRequired(); }
+
+    protected:
+        virtual void resetFlags() { m_MetadataFlags = 0; }
 
     private:
         Common::Hold m_Hold;
         SpellCheck::SpellCheckItemInfo m_SpellCheckInfo;
         Common::BasicMetadataModel m_MetadataModel;
+        QMutex m_InitMutex;
         qint64 m_FileSize;  // in bytes
         QString m_ArtworkFilepath;
         QTimer m_BackupTimer;
         int m_BackupTimerDelay;
-        qint64 m_ID;
+        Common::ID_t m_ID;
         qint64 m_DirectoryID;
         volatile Common::flag_t m_MetadataFlags;
+        volatile size_t m_LastKnownIndex; // optimistic guess on current index of this item in artitemsmodel
         volatile Common::WarningFlags m_WarningsFlags;
-        volatile bool m_IsLockedForEditing;
     };
 
     class ArtworkMetadataLocker

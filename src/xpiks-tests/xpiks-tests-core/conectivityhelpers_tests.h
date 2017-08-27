@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QtTest/QtTest>
 
-class ConectivityHelpersTests : public QObject
+class ConnectivityHelpersTests : public QObject
 {
     Q_OBJECT
 private slots:

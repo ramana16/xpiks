@@ -14,7 +14,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
-#include "../Conectivity/apimanager.h"
+#include "../Connectivity/apimanager.h"
 #include "../Helpers/asynccoordinator.h"
 
 namespace KeywordsPresets {
@@ -48,7 +48,7 @@ namespace KeywordsPresets {
             localConfigPath = LOCAL_PRESETKEYWORDS_LIST_FILE;
         }
 
-        auto &apiManager = Conectivity::ApiManager::getInstance();
+        auto &apiManager = Connectivity::ApiManager::getInstance();
         QString remoteAddress = apiManager.getPresetsSourceAddr();
         AbstractConfigUpdaterModel::initializeConfigs(remoteAddress, localConfigPath);
         emit presetsUpdated();

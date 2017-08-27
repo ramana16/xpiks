@@ -16,7 +16,7 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include "../Encryption/aes-qt.h"
-#include "../Conectivity/simplecurlrequest.h"
+#include "../Connectivity/simplecurlrequest.h"
 #include "../Models/settingsmodel.h"
 #include "../Common/defines.h"
 #include "suggestionartwork.h"
@@ -28,9 +28,9 @@ namespace Suggestion {
         m_GettyImagesAPIKey = QLatin1String("17a45639c3bf88f7a6d549759af398090c3f420e53a61a06d7a2a2b153c89fc9470b2365dae8c6d92203287dc6f69f55b230835a8fb2a70b24e806771b750690");
     }
 
-    void GettyQueryEngine::submitQuery(const QStringList &queryKeywords, QueryResultsType resultsType) {
-        LOG_INFO << queryKeywords;
-        QUrl url = buildQuery(queryKeywords, resultsType);
+    void GettyQueryEngine::submitQuery(const SearchQuery &query) {
+        LOG_INFO << query.m_SearchTerms;
+        QUrl url = buildQuery(query);
 
         QString decodedAPIKey = Encryption::decodeText(m_GettyImagesAPIKey, "MasterPassword");
 
@@ -38,7 +38,7 @@ namespace Suggestion {
         auto *proxySettings = settings->retrieveProxySettings();
 
         QString resourceUrl = QString::fromLocal8Bit(url.toEncoded());
-        Conectivity::SimpleCurlRequest *request = new Conectivity::SimpleCurlRequest(resourceUrl);
+        Connectivity::SimpleCurlRequest *request = new Connectivity::SimpleCurlRequest(resourceUrl);
         request->setRawHeaders(QStringList() << "Api-Key: " + decodedAPIKey);
         request->setProxySettings(proxySettings);
 
@@ -46,13 +46,13 @@ namespace Suggestion {
 
         request->moveToThread(thread);
 
-        QObject::connect(thread, &QThread::started, request, &Conectivity::SimpleCurlRequest::process);
-        QObject::connect(request, &Conectivity::SimpleCurlRequest::stopped, thread, &QThread::quit);
+        QObject::connect(thread, &QThread::started, request, &Connectivity::SimpleCurlRequest::process);
+        QObject::connect(request, &Connectivity::SimpleCurlRequest::stopped, thread, &QThread::quit);
 
-        QObject::connect(request, &Conectivity::SimpleCurlRequest::stopped, request, &Conectivity::SimpleCurlRequest::deleteLater);
+        QObject::connect(request, &Connectivity::SimpleCurlRequest::stopped, request, &Connectivity::SimpleCurlRequest::deleteLater);
         QObject::connect(thread, &QThread::finished, thread, &QThread::deleteLater);
 
-        QObject::connect(request, &Conectivity::SimpleCurlRequest::requestFinished, this, &GettyQueryEngine::requestFinishedHandler);
+        QObject::connect(request, &Connectivity::SimpleCurlRequest::requestFinished, this, &GettyQueryEngine::requestFinishedHandler);
 
         thread->start();
     }
@@ -60,7 +60,7 @@ namespace Suggestion {
     void GettyQueryEngine::requestFinishedHandler(bool success) {
         LOG_INFO << "success:" << success;
 
-        Conectivity::SimpleCurlRequest *request = qobject_cast<Conectivity::SimpleCurlRequest *>(sender());
+        Connectivity::SimpleCurlRequest *request = qobject_cast<Connectivity::SimpleCurlRequest *>(sender());
 
         if (success) {
             QJsonParseError error;
@@ -181,17 +181,17 @@ namespace Suggestion {
         }
     }
 
-    QUrl GettyQueryEngine::buildQuery(const QStringList &queryKeywords, QueryResultsType resultsType) const {
+    QUrl GettyQueryEngine::buildQuery(const SearchQuery &query) const {
         QUrlQuery urlQuery;
 
         urlQuery.addQueryItem("fields", "keywords,preview,title,id,caption");
-        urlQuery.addQueryItem("phrase", queryKeywords.join(' '));
+        urlQuery.addQueryItem("phrase", query.m_SearchTerms.join(' '));
         urlQuery.addQueryItem("page", "1");
         urlQuery.addQueryItem("page_size", "100");
         urlQuery.addQueryItem("sort_order", "most_popular");
 
-        if (resultsType != QueryResultsType::AllImages) {
-            urlQuery.addQueryItem("graphical_styles", resultsTypeToString(resultsType));
+        if (!Common::HasFlag(query.m_Flags, Suggestion::AllImages)) {
+            urlQuery.addQueryItem("graphical_styles", resultsTypeToString(query.m_Flags));
         }
 
         QUrl url;
@@ -200,12 +200,10 @@ namespace Suggestion {
         return url;
     }
 
-    QString GettyQueryEngine::resultsTypeToString(QueryResultsType resultsType) const {
-        switch (resultsType) {
-        case QueryResultsType::Photos: return QLatin1String("photography");
-        case QueryResultsType::Vectors: return QLatin1String("illustration");
-        case QueryResultsType::Illustrations: return QLatin1String("fine_art");
-        default: return QString();
-        }
+    QString GettyQueryEngine::resultsTypeToString(Common::flag_t queryFlags) const {
+        if (Common::HasFlag(queryFlags, Suggestion::Photos)) { return QLatin1String("photography"); }
+        else if (Common::HasFlag(queryFlags, Suggestion::Vectors)) { return QLatin1String("illustration"); }
+        else if (Common::HasFlag(queryFlags, Suggestion::Illustrations)) { return QLatin1String("fine_art"); }
+        else { return QString(); }
     }
 }

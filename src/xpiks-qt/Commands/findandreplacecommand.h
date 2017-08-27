@@ -15,6 +15,7 @@
 #include <QString>
 #include <QVector>
 #include "../Common/flags.h"
+#include "../MetadataIO/artworkssnapshot.h"
 
 namespace Models {
     class PreviewMetadataElement;
@@ -68,7 +69,7 @@ namespace Commands {
 
     public:
 #endif
-        QVector<Models::ArtworkMetadata *> m_ItemsToSave;
+        MetadataIO::WeakArtworksSnapshot m_ItemsToSave;
         QVector<int> m_IndicesToUpdate;
     };
 }

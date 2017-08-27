@@ -72,7 +72,7 @@ namespace Models {
         spellCheckKeywords();
     }
 
-    qint64 ArtworkProxyBase::getSpecialItemID() {
+    Common::ID_t ArtworkProxyBase::getSpecialItemID() {
         return SPECIAL_ID_INVALID;
     }
 

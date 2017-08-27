@@ -91,11 +91,7 @@ namespace Helpers {
     }
 
     void Helpers::HelpersQmlWrapper::reportOpen() {
-        m_CommandManager->reportUserAction(Conectivity::UserAction::Open);
-    }
-
-    void Helpers::HelpersQmlWrapper::cleanupLocalLibrary() const {
-        m_CommandManager->cleanupLocalLibraryAsync();
+        m_CommandManager->reportUserAction(Connectivity::UserAction::Open);
     }
 
     void HelpersQmlWrapper::setProgressIndicator(QQuickWindow *window) {

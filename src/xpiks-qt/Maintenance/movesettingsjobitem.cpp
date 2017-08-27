@@ -21,10 +21,6 @@ namespace Maintenance {
 
     void MoveSettingsJobItem::processJob() {
         LOG_DEBUG << "#";
-        doMoveSettings();
-    }
-
-    void MoveSettingsJobItem::doMoveSettings() {
         m_SettingsModel->migrateSettings();
     }
 }

@@ -13,6 +13,7 @@
 
 #include <QQuickTextDocument>
 #include "../Common/baseentity.h"
+#include "../Common/ibasicartwork.h"
 #include "../Common/basicmetadatamodel.h"
 #include "../Common/imetadataoperator.h"
 #include "../QuickBuffer/currenteditableproxyartwork.h"
@@ -49,7 +50,7 @@ namespace Models {
         virtual Common::IMetadataOperator *getMetadataOperator() = 0;
 
     protected:
-        virtual qint64 getSpecialItemID();
+        virtual Common::ID_t getSpecialItemID();
 
     protected:
         bool doEditKeyword(int index, const QString &replacement);

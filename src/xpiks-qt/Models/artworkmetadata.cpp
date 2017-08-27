@@ -19,8 +19,16 @@
 #include "../SpellCheck/spellcheckitem.h"
 #include "../SpellCheck/spellcheckiteminfo.h"
 #include "../Common/defines.h"
+#include "../MetadataIO/cachedartwork.h"
+#include "../MetadataIO/originalmetadata.h"
 
 #define MAX_BACKUP_TIMER_DELAYS 5
+
+#ifdef SIZE_MAX
+  #define INVALID_INDEX SIZE_MAX
+#else
+  #define INVALID_INDEX (~(size_t)0)
+#endif
 
 namespace Models {
     ArtworkMetadata::ArtworkMetadata(const QString &filepath, qint64 ID, qint64 directoryID):
@@ -31,8 +39,8 @@ namespace Models {
         m_ID(ID),
         m_DirectoryID(directoryID),
         m_MetadataFlags(0),
-        m_WarningsFlags(Common::WarningFlags::None),
-        m_IsLockedForEditing(false)
+        m_LastKnownIndex(INVALID_INDEX),
+        m_WarningsFlags(Common::WarningFlags::None)
     {
         m_MetadataModel.setSpellCheckInfo(&m_SpellCheckInfo);
         m_BackupTimer.setSingleShot(true);
@@ -47,34 +55,112 @@ namespace Models {
 #endif
     }
 
-    bool ArtworkMetadata::initialize(const QString &title,
-                                     const QString &description, const QStringList &rawKeywords, bool overwrite) {
-        LOG_INTEGRATION_TESTS << "#" << m_ID << title << description << rawKeywords << overwrite;
+    bool ArtworkMetadata::initFromOrigin(const MetadataIO::OriginalMetadata &originalMetadata, bool overwrite) {
+        LOG_INTEGRATION_TESTS << "#" << m_ID << originalMetadata.m_Title << originalMetadata.m_Description << originalMetadata.m_Keywords;
+        bool anythingChanged = false;
+        QMutexLocker initLocker(&m_InitMutex);
+        Q_UNUSED(initLocker);
 
-        bool anythingModified = false;
+        Q_ASSERT(!getIsInitializedFlag());
 
-        if (overwrite || (m_MetadataModel.isTitleEmpty() && !title.trimmed().isEmpty())) {
-            anythingModified = true;
-            m_MetadataModel.setTitle(title);
+        if (!getIsAlmostInitializedFlag() || overwrite) {
+            anythingChanged = m_MetadataModel.setTitle(originalMetadata.m_Title) || anythingChanged;
+            anythingChanged = m_MetadataModel.setDescription(originalMetadata.m_Description) || anythingChanged;
+            m_MetadataModel.setKeywords(originalMetadata.m_Keywords);
+            anythingChanged = anythingChanged || !originalMetadata.m_Keywords.isEmpty();
+            Q_ASSERT(getIsModifiedFlag() == false);
+        } else {
+            Q_ASSERT(getIsAlmostInitializedFlag());
+            bool shouldPreserveModified = false;
+
+            if (!originalMetadata.m_Title.trimmed().isEmpty()) {
+                anythingChanged = m_MetadataModel.setTitle(originalMetadata.m_Title) || anythingChanged;
+            } else {
+                shouldPreserveModified = !m_MetadataModel.isTitleEmpty() || shouldPreserveModified;
+            }
+
+            if (!originalMetadata.m_Description.trimmed().isEmpty()) {
+                anythingChanged = m_MetadataModel.setDescription(originalMetadata.m_Description) || anythingChanged;
+            } else {
+                shouldPreserveModified = !m_MetadataModel.isDescriptionEmpty() || shouldPreserveModified;
+            }
+
+            if (!m_MetadataModel.containsKeywords(originalMetadata.m_Keywords)) {
+                m_MetadataModel.setKeywords(originalMetadata.m_Keywords);
+                anythingChanged = true;
+            } else {
+                const int existingCount = m_MetadataModel.getKeywordsCount();
+                const int originCount = originalMetadata.m_Keywords.count();
+                // which should mean that this artwork has been already imported from storage
+                shouldPreserveModified = (existingCount > originCount) || shouldPreserveModified;
+            }
+
+            setIsModifiedFlag(shouldPreserveModified);
         }
 
-        if (overwrite || (m_MetadataModel.isDescriptionEmpty() && !description.trimmed().isEmpty())) {
-            anythingModified = true;
-            m_MetadataModel.setDescription(description);
-        }
-
-        if (overwrite) {
-            anythingModified = true;
-            m_MetadataModel.setKeywords(rawKeywords);
-        } else if (!rawKeywords.isEmpty()) {
-            int appendedCount = m_MetadataModel.appendKeywords(rawKeywords);
-            anythingModified = anythingModified || (appendedCount > 0);
-        }
-
-        setIsModifiedFlag(false);
         setIsInitializedFlag(true);
+        setFileSize(originalMetadata.m_FileSize);
 
-        return anythingModified;
+        anythingChanged = initFromOriginUnsafe(originalMetadata) || anythingChanged;
+        return anythingChanged;
+    }
+
+    bool ArtworkMetadata::initFromStorage(const MetadataIO::CachedArtwork &cachedArtwork) {
+        LOG_INTEGRATION_TESTS << "#" << m_ID << cachedArtwork.m_Title <<
+                                 cachedArtwork.m_Description << cachedArtwork.m_Keywords;
+        bool anythingChanged = false;
+        QMutexLocker initLocker(&m_InitMutex);
+        Q_UNUSED(initLocker);
+
+        Q_ASSERT(!getIsAlmostInitializedFlag());
+
+        if (!getIsInitializedFlag()) {
+            anythingChanged = m_MetadataModel.setTitle(cachedArtwork.m_Title) || anythingChanged;
+            anythingChanged = m_MetadataModel.setDescription(cachedArtwork.m_Description) || anythingChanged;
+            m_MetadataModel.setKeywords(cachedArtwork.m_Keywords);
+            anythingChanged = anythingChanged || !cachedArtwork.m_Keywords.isEmpty();
+            Q_ASSERT(getIsModifiedFlag() == false);
+        } else {
+            if (m_MetadataModel.isTitleEmpty() && !cachedArtwork.m_Title.trimmed().isEmpty()) {
+                anythingChanged = this->setTitle(cachedArtwork.m_Title) || anythingChanged;
+            }
+
+            if (m_MetadataModel.isDescriptionEmpty() && !cachedArtwork.m_Description.trimmed().isEmpty()) {
+                anythingChanged = this->setDescription(cachedArtwork.m_Description) || anythingChanged;
+            }
+
+            const int addedCount = this->appendKeywords(cachedArtwork.m_Keywords);
+            if (addedCount > 0) {
+                anythingChanged = true;
+            }
+        }
+
+        setIsAlmostInitializedFlag(true);
+
+        anythingChanged = initFromStorageUnsafe(cachedArtwork) || anythingChanged;
+        return anythingChanged;
+    }
+
+    void ArtworkMetadata::initAsEmpty(const MetadataIO::OriginalMetadata &originalMetadata) {
+        QMutexLocker initLocker(&m_InitMutex);
+        Q_UNUSED(initLocker);
+
+        m_MetadataModel.clearModel();
+        setIsInitializedFlag(true);
+        setIsModifiedFlag(false);
+
+        setFileSize(originalMetadata.m_FileSize);
+
+        initFromOriginUnsafe(originalMetadata);
+    }
+
+    void ArtworkMetadata::initAsEmpty() {
+        QMutexLocker initLocker(&m_InitMutex);
+        Q_UNUSED(initLocker);
+
+        m_MetadataModel.clearModel();
+        setIsInitializedFlag(true);
+        setIsModifiedFlag(false);
     }
 
     QString ArtworkMetadata::getBaseFilename() const {
@@ -97,26 +183,82 @@ namespace Models {
     }
 
     void ArtworkMetadata::clearModel() {
+        if (!getIsInitializedFlag()) {
+            LOG_WARNING << "#" << m_ID << "attempt to clear not initialized artwork";
+            return;
+        }
+
         m_MetadataModel.clearModel();
         markModified();
     }
 
     bool ArtworkMetadata::clearKeywords() {
+        if (!getIsInitializedFlag()) {
+            LOG_WARNING << "#" << m_ID << "attempt to clear keywords of not initialized artwork";
+            return false;
+        }
+
         bool result = m_MetadataModel.clearKeywords();
         if (result) { markModified(); }
         return result;
     }
 
     bool ArtworkMetadata::editKeyword(int index, const QString &replacement) {
+        if (!getIsInitializedFlag()) {
+            LOG_WARNING << "#" << m_ID << "attempt to edit keyword int not initialized artwork";
+            return false;
+        }
+
         bool result = m_MetadataModel.editKeyword(index, replacement);
         if (result) { markModified(); }
         return result;
     }
 
     bool ArtworkMetadata::replace(const QString &replaceWhat, const QString &replaceTo, Common::SearchFlags flags) {
+        if (!getIsInitializedFlag()) {
+            LOG_WARNING << "#" << m_ID << "attempt to replace strings in not initialized artwork";
+            return false;
+        }
+
         bool result = m_MetadataModel.replace(replaceWhat, replaceTo, flags);
         if (result) { markModified(); }
         return result;
+    }
+
+    bool ArtworkMetadata::setDescription(const QString &value)  {
+        if (!getIsInitializedFlag()) {
+            LOG_WARNING << "#" << m_ID << "attempt to set description for not initialized artwork";
+            return false;
+        }
+
+        bool result = m_MetadataModel.setDescription(value);
+
+        if (result) { markModified(); }
+
+        return result;
+    }
+
+    bool ArtworkMetadata::setTitle(const QString &value) {
+        if (!getIsInitializedFlag()) {
+            LOG_WARNING << "#" << m_ID << "attempt to set title for not initialized artwork";
+            return false;
+        }
+
+        bool result = m_MetadataModel.setTitle(value);
+
+        if (result) { markModified(); }
+
+        return result;
+    }
+
+    void ArtworkMetadata::setKeywords(const QStringList &keywords)  {
+        if (!getIsInitializedFlag()) {
+            LOG_WARNING << "#" << m_ID << "attempt to set keywords for not initialized artwork";
+            return;
+        }
+
+        m_MetadataModel.setKeywords(keywords);
+        markModified();
     }
 
     bool ArtworkMetadata::setIsSelected(bool value) {
@@ -136,18 +278,33 @@ namespace Models {
     }
 
     bool ArtworkMetadata::removeLastKeyword(QString &removed) {
+        if (!getIsInitializedFlag()) {
+            LOG_WARNING << "#" << m_ID << "attempt to remove last keyword from not initialized artwork";
+            return false;
+        }
+
         bool result = m_MetadataModel.removeLastKeyword(removed);
         if (result) { markModified(); }
         return result;
     }
 
     bool ArtworkMetadata::appendKeyword(const QString &keyword) {
+        if (!getIsInitializedFlag()) {
+            LOG_WARNING << "#" << m_ID << "attempt to append keyword to not initialized artwork";
+            return false;
+        }
+
         bool result = m_MetadataModel.appendKeyword(keyword);
         if (result) { markModified(); }
         return result;
     }
 
     int ArtworkMetadata::appendKeywords(const QStringList &keywordsList) {
+        if (!getIsInitializedFlag()) {
+            LOG_WARNING << "#" << m_ID << "attempt to append keywords to not initialized artwork";
+            return false;
+        }
+
         int result = m_MetadataModel.appendKeywords(keywordsList);
         LOG_INFO << "Appended" << result << "keywords out of" << keywordsList.length();
         if (result > 0) { markModified(); }
@@ -155,6 +312,11 @@ namespace Models {
     }
 
     bool ArtworkMetadata::removeKeywords(const QSet<QString> &keywordsSet, bool caseSensitive) {
+        if (!getIsInitializedFlag()) {
+            LOG_WARNING << "#" << m_ID << "attempt to remove keywords int not initialized artwork";
+            return false;
+        }
+
         bool result = m_MetadataModel.removeKeywords(keywordsSet, caseSensitive);
         LOG_INFO << "Removed keywords:" << result;
         if (result) { markModified(); }
@@ -162,6 +324,11 @@ namespace Models {
     }
 
     Common::KeywordReplaceResult ArtworkMetadata::fixKeywordSpelling(int index, const QString &existing, const QString &replacement) {
+        if (!getIsInitializedFlag()) {
+            LOG_WARNING << "#" << m_ID << "attempt to fix keyword for not initialized artwork";
+            return Common::KeywordReplaceResult::Unknown;
+        }
+
         auto result = m_MetadataModel.fixKeywordSpelling(index, existing, replacement);
         if (Common::KeywordReplaceResult::Succeeded == result) {
             markModified();
@@ -171,6 +338,11 @@ namespace Models {
     }
 
     bool ArtworkMetadata::fixDescriptionSpelling(const QString &word, const QString &replacement) {
+        if (!getIsInitializedFlag()) {
+            LOG_WARNING << "#" << m_ID << "attempt to fix description for not initialized artwork";
+            return false;
+        }
+
         bool result = m_MetadataModel.fixDescriptionSpelling(word, replacement);
         if (result) {
             markModified();
@@ -180,6 +352,11 @@ namespace Models {
     }
 
     bool ArtworkMetadata::fixTitleSpelling(const QString &word, const QString &replacement) {
+        if (!getIsInitializedFlag()) {
+            LOG_WARNING << "#" << m_ID << "attempt to fix title for not initialized artwork";
+            return false;
+        }
+
         bool result = m_MetadataModel.fixTitleSpelling(word, replacement);
         if (result) {
             markModified();

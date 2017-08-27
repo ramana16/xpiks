@@ -120,6 +120,7 @@ namespace Common {
 
     public:
         bool containsKeyword(const QString &searchTerm, Common::SearchFlags searchFlags=Common::SearchFlags::ExactKeywords);
+        bool containsKeywords(const QStringList &keywordsList);
         virtual bool isEmpty();
         bool hasKeywordsSpellError();
 

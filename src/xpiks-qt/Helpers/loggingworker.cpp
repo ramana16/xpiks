@@ -22,11 +22,11 @@ namespace Helpers {
 
     void LoggingWorker::process() {
         Logger &logger = Logger::getInstance();
-        const int sleepTimeout = 1000;
+        const int sleepTimeout = 700;
 
         while (!m_Cancel) {
             logger.flush();
-            QThread::usleep(sleepTimeout);
+            QThread::msleep(sleepTimeout);
         }
 
         emit stopped();

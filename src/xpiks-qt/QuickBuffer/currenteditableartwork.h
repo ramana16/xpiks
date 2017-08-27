@@ -12,6 +12,7 @@
 #define CURRENTITEMARTWORK_H
 
 #include "icurrenteditable.h"
+#include "../Common/ibasicartwork.h"
 
 namespace Models {
     class ArtworkMetadata;
@@ -33,7 +34,7 @@ namespace QuickBuffer {
 
         // ICurrentEditable interface
     public:
-        virtual qint64 getItemID() override;
+        virtual Common::ID_t getItemID() override;
 
         virtual QString getTitle() override;
         virtual QString getDescription() override;

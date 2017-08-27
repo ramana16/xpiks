@@ -56,6 +56,7 @@ int ZipArtworksTest::doTest() {
         VERIFY(false, "Timeout while zipping artworks");
     }
 
+    VERIFY(zipArchiver->getItemsCount() > 0, "Empty archiver");
     VERIFY(!zipArchiver->getIsError(), "Errors while zipping");
 
     for (int i = 0; i < files.length(); ++i) {

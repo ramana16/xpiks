@@ -11,7 +11,7 @@
 #include "remoteconfig.h"
 #include <QThread>
 #include "../Common/defines.h"
-#include "../Conectivity/simplecurlrequest.h"
+#include "../Connectivity/simplecurlrequest.h"
 #include "../Models/proxysettings.h"
 
 namespace Helpers {

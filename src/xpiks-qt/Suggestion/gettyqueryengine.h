@@ -26,7 +26,7 @@ namespace Suggestion {
         GettyQueryEngine(int engineID, Models::SettingsModel *settingsModel);
 
     public:
-        virtual void submitQuery(const QStringList &queryKeywords, QueryResultsType resultsType) override;
+        virtual void submitQuery(const SearchQuery &query) override;
         virtual QString getName() const override { return tr("iStock"); }
 
     private slots:
@@ -37,8 +37,8 @@ namespace Suggestion {
                            std::vector<std::shared_ptr<SuggestionArtwork> > &suggestionArtworks);
         void parseUrl(const QJsonValue &previewObject, QString &url);
         void parseKeywords(const QJsonValue &keywordsObject, QStringList &keywords);
-        QUrl buildQuery(const QStringList &queryKeywords, QueryResultsType resultsType) const;
-        QString resultsTypeToString(QueryResultsType resultsType) const;
+        QUrl buildQuery(const SearchQuery &query) const;
+        QString resultsTypeToString(Common::flag_t queryFlags) const;
 
     private:
         QString m_GettyImagesAPIKey;

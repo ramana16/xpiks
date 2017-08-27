@@ -122,7 +122,8 @@ namespace Models {
             EditIsSelectedRole,
             HasTitleMatchRole,
             HasDescriptionMatchRole,
-            HasKeywordsMatchRole
+            HasKeywordsMatchRole,
+            IsVideoRole
         };
 
     public:

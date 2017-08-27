@@ -161,7 +161,7 @@ void UndoRedoTests::undoModifyCommandTest() {
     std::vector<Models::MetadataElement> infos;
 
     for (int i = 0; i < itemsToAdd; ++i) {
-        artItemsMock.getArtwork(i)->initialize(originalTitle, originalDescription, originalKeywords);
+        artItemsMock.getMockArtwork(i)->set(originalTitle, originalDescription, originalKeywords);
         infos.emplace_back(artItemsMock.getArtwork(i), i);
     }
 
@@ -206,7 +206,7 @@ void UndoRedoTests::undoUndoModifyCommandTest() {
     std::vector<Models::MetadataElement> infos;
 
     for (int i = 0; i < itemsToAdd; ++i) {
-        artItemsMock.getArtwork(i)->initialize(originalTitle, originalDescription, originalKeywords);
+        artItemsMock.getMockArtwork(i)->set(originalTitle, originalDescription, originalKeywords);
         infos.emplace_back(artItemsMock.getArtwork(i), i);
     }
 
@@ -242,7 +242,7 @@ void UndoRedoTests::undoPasteCommandTest() {
     std::vector<Models::MetadataElement> infos;
 
     for (int i = 0; i < itemsToAdd; ++i) {
-        artItemsMock.getArtwork(i)->initialize(originalTitle, originalDescription, originalKeywords);
+        artItemsMock.getMockArtwork(i)->set(originalTitle, originalDescription, originalKeywords);
         infos.emplace_back(artItemsMock.getArtwork(i), i);
     }
 
@@ -287,7 +287,7 @@ void UndoRedoTests::undoClearAllTest() {
     std::vector<Models::MetadataElement> infos;
 
     for (int i = 0; i < itemsToAdd; ++i) {
-        artItemsMock.getArtwork(i)->initialize(originalTitle, originalDescription, originalKeywords);
+        artItemsMock.getMockArtwork(i)->set(originalTitle, originalDescription, originalKeywords);
         infos.emplace_back(artItemsMock.getArtwork(i), i);
     }
 
@@ -330,7 +330,7 @@ void UndoRedoTests::undoClearKeywordsTest() {
     std::vector<Models::MetadataElement> infos;
 
     for (int i = 0; i < itemsToAdd; ++i) {
-        artItemsMock.getArtwork(i)->initialize(originalTitle, originalDescription, originalKeywords);
+        artItemsMock.getMockArtwork(i)->set(originalTitle, originalDescription, originalKeywords);
         infos.emplace_back(artItemsMock.getArtwork(i), i);
     }
 
@@ -373,8 +373,8 @@ void UndoRedoTests::undoReplaceCommandTest() {
     QStringList originalKeywords = {"ReplaceMe"};
 
     for (int i = 0; i < itemsToAdd; i++) {
-        Models::ArtworkMetadata *metadata = artItemsModel->getArtwork(i);
-        metadata->initialize(originalDescription, originalTitle, originalKeywords);
+        auto *metadata = artItemsMock.getMockArtwork(i);
+        metadata->set(originalDescription, originalTitle, originalKeywords);
     }
 
     QString replaceTo = "Replaced";

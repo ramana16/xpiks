@@ -13,34 +13,21 @@
 
 #include "../Common/itemprocessingworker.h"
 #include <QString>
-#include <QHash>
-#include <QDateTime>
-#include <QSize>
-#include <QReadWriteLock>
 #include "imagecacherequest.h"
+#include "cachedimage.h"
+#include "dbimagecacheindex.h"
 
 namespace Helpers {
     class AsyncCoordinator;
+    class DatabaseManager;
 }
 
 namespace QMLExtensions {
-    struct CachedImage {
-        QDateTime m_LastModified;
-        QString m_Filename;
-        QSize m_Size;
-        quint64 m_RequestsServed;
-        // reserved for future demands
-        QHash<qint32, QByteArray> m_AdditionalData;
-    };
-
-    QDataStream &operator<<(QDataStream &out, const CachedImage &v);
-    QDataStream &operator>>(QDataStream &in, CachedImage &v);
-
     class ImageCachingWorker : public QObject, public Common::ItemProcessingWorker<ImageCacheRequest>
     {
         Q_OBJECT
     public:
-        ImageCachingWorker(Helpers::AsyncCoordinator *initCoordinator, QObject *parent=0);
+        ImageCachingWorker(Helpers::AsyncCoordinator *initCoordinator, Helpers::DatabaseManager *dbManager, QObject *parent=0);
 
     protected:
         virtual bool initWorker() override;
@@ -48,7 +35,7 @@ namespace QMLExtensions {
 
     protected:
         virtual void onQueueIsEmpty() override { emit queueIsEmpty(); }
-        virtual void workerStopped() override { saveIndex(); emit stopped(); }
+        virtual void workerStopped() override;
 
     public slots:
         void process() { doWork(); }
@@ -62,23 +49,20 @@ namespace QMLExtensions {
         void setScale(qreal scale) { m_Scale = scale; }
         bool tryGetCachedImage(const QString &key, const QSize &requestedSize,
                                QString &cached, bool &needsUpdate);
-        void splitToCachedAndNot(const std::vector<std::shared_ptr<ImageCacheRequest> > allRequests,
-                                 std::vector<std::shared_ptr<ImageCacheRequest> > &unknownRequests,
-                                 std::vector<std::shared_ptr<ImageCacheRequest> > &knownRequests);
+        void submitSaveIndexItem();
+        bool upgradeCacheStorage();
 
     private:
-        void readIndex();
         void saveIndex();
         bool isProcessed(std::shared_ptr<ImageCacheRequest> &item);
+        bool isSeparator(const std::shared_ptr<ImageCacheRequest> &item);
 
     private:
         Helpers::AsyncCoordinator *m_InitCoordinator;
         volatile int m_ProcessedItemsCount;
+        DbImageCacheIndex m_Cache;
         qreal m_Scale;
         QString m_ImagesCacheDir;
-        QString m_IndexFilepath;
-        QReadWriteLock m_CacheLock;
-        QHash<QString, CachedImage> m_CacheIndex;
     };
 }
 

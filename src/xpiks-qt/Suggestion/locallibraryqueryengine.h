@@ -14,26 +14,30 @@
 #include <QObject>
 #include <QString>
 #include "suggestionqueryenginebase.h"
+#include "locallibraryquery.h"
+
+namespace MetadataIO {
+    class MetadataIOService;
+}
 
 namespace Suggestion {
-    class LocalLibrary;
-
     class LocalLibraryQueryEngine : public SuggestionQueryEngineBase
     {
         Q_OBJECT
     public:
-        LocalLibraryQueryEngine(int engineID, LocalLibrary *localLibrary);
+        LocalLibraryQueryEngine(int engineID, MetadataIO::MetadataIOService *metadataIOService);
 
         // ISuggestionQueryEngine interface
     public:
-        virtual void submitQuery(const QStringList &queryKeywords, QueryResultsType resultsType) override;
+        virtual void submitQuery(const SearchQuery &query) override;
         virtual QString getName() const override { return tr("Local files"); }
 
     private slots:
         void resultsFoundHandler();
 
     private:
-        LocalLibrary *m_LocalLibrary;
+        LocalLibraryQuery m_Query;
+        MetadataIO::MetadataIOService *m_MetadataIOService;
     };
 }
 

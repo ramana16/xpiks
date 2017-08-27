@@ -17,6 +17,8 @@
 #include <QString>
 
 namespace Common {
+    typedef qint64 ID_t;
+
     class IBasicArtwork {
     public:
         virtual ~IBasicArtwork() {}
@@ -28,8 +30,9 @@ namespace Common {
         virtual QString getDescription() = 0;
         virtual QString getTitle() = 0;
         virtual const QString &getFilepath() const = 0;
+        virtual const QString &getThumbnailPath() const = 0;
 
-        virtual qint64 getItemID() const { return -1; }
+        virtual ID_t getItemID() const = 0;
     };
 }
 

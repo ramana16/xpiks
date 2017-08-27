@@ -12,7 +12,7 @@
 #define SAVESESSIONJOBITEM_H
 
 #include "imaintenanceitem.h"
-#include "../MetadataIO/artworkmetadatasnapshot.h"
+#include "../MetadataIO/artworkssnapshot.h"
 
 namespace Models {
     class SessionManager;

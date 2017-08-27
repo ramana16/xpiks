@@ -2,9 +2,30 @@
 #include <QSignalSpy>
 #include <QList>
 #include <QVariant>
+#include <QSemaphore>
 #include "Mocks/artworkmetadatamock.h"
+#include "../../xpiks-qt/MetadataIO/cachedartwork.h"
+#include "../../xpiks-qt/MetadataIO/originalmetadata.h"
+#include <thread>
+#include "../../xpiks-qt/Helpers/threadhelpers.h"
 
-void ArtworkMetadataTests::initializeOverwriteTest() {
+MetadataIO::CachedArtwork CA(const QString &title, const QString &description, const QStringList &keywords) {
+    MetadataIO::CachedArtwork result;
+    result.m_Title = title;
+    result.m_Description = description;
+    result.m_Keywords = keywords;
+    return result;
+}
+
+MetadataIO::OriginalMetadata OM(const QString &title, const QString &description, const QStringList &keywords) {
+    MetadataIO::OriginalMetadata result;
+    result.m_Title = title;
+    result.m_Description = description;
+    result.m_Keywords = keywords;
+    return result;
+}
+
+void ArtworkMetadataTests::initializeBlancFromOriginTest() {
     Mocks::ArtworkMetadataMock metadata("file.jpg");
 
     QString title = "Artwork Special Title";
@@ -14,7 +35,7 @@ void ArtworkMetadataTests::initializeOverwriteTest() {
 
     QCOMPARE(metadata.isInitialized(), false);
 
-    bool result = metadata.initialize(title, description, rawKeywords, true);
+    bool result = metadata.initFromOrigin(OM(title, description, rawKeywords));
 
     // overwrite in this case is true
     QCOMPARE(result, true);
@@ -30,7 +51,7 @@ void ArtworkMetadataTests::initializeOverwriteTest() {
     QCOMPARE(metadata.isInitialized(), true);
 }
 
-void ArtworkMetadataTests::initializeNoOverwriteButEmptyTest() {
+void ArtworkMetadataTests::initializeEmptyFromCachedTest() {
     Mocks::ArtworkMetadataMock metadata("file.jpg");
 
     QString title = "Artwork Special Title";
@@ -40,7 +61,7 @@ void ArtworkMetadataTests::initializeNoOverwriteButEmptyTest() {
 
     QCOMPARE(metadata.isInitialized(), false);
 
-    bool result = metadata.initialize(title, description, rawKeywords, false);
+    bool result = metadata.initFromStorage(CA(title, description, rawKeywords));
 
     // overwrite in this case is false, but metadata is empty
     QCOMPARE(result, true);
@@ -53,54 +74,23 @@ void ArtworkMetadataTests::initializeNoOverwriteButEmptyTest() {
     QCOMPARE(metadata.retrieveKeyword(2), QLatin1String("keyword3"));
 
     QCOMPARE(metadata.isModified(), false);
-    QCOMPARE(metadata.isInitialized(), true);
+    QCOMPARE(metadata.isInitialized(), false);
+    QCOMPARE(metadata.isAlmostInitialized(), true);
 }
 
-void ArtworkMetadataTests::initializeNoOverwriteNotEmptyTest() {
+void ArtworkMetadataTests::initializeNotEmptyFromCachedSkipTest() {
     Mocks::ArtworkMetadataMock metadata("file.jpg");
-
-
-    metadata.setDescription("Test Description");
-    metadata.setTitle("");
-    metadata.setKeywords(QStringList() << "keyword1" << "keyword3");
-
-    QString title = "Artwork Special Title";
-    QString description = "Artwork Special Description";
-    QStringList rawKeywords;
-    rawKeywords << "keyword1" << "keyword2" << "keyword3";
-    QCOMPARE(metadata.isInitialized(), false);
-
-    bool result = metadata.initialize(title, description, rawKeywords, false);
-
-    // some items will be overwritten
+    bool result = metadata.initFromOrigin(OM("Existing Title", "Existing Description", QStringList() << "keyword1" << "keyword3" << "keyword2"));
     QCOMPARE(result, true);
 
-    QCOMPARE(metadata.getTitle(), title);
-    QVERIFY(metadata.getDescription() != description);
-    QCOMPARE(metadata.rowCount(), 3);
-    QCOMPARE(metadata.retrieveKeyword(0), QLatin1String("keyword1"));
-    QCOMPARE(metadata.retrieveKeyword(1), QLatin1String("keyword3"));
-    QCOMPARE(metadata.retrieveKeyword(2), QLatin1String("keyword2"));
-
-    QCOMPARE(metadata.isModified(), false);
-    QCOMPARE(metadata.isInitialized(), true);
-}
-
-void ArtworkMetadataTests::initializeNoOverwriteTest() {
-    Mocks::ArtworkMetadataMock metadata("file.jpg");
-
-    metadata.setDescription("Existing Description");
-    metadata.setTitle("Existing Title");
-    metadata.setKeywords(QStringList() << "keyword1" << "keyword3" << "keyword2" );
-
     QString title = "Artwork Special Title";
     QString description = "Artwork Special Description";
     QStringList rawKeywords;
     rawKeywords << "keyword1" << "keyword2" << "keyword3";
 
-    QCOMPARE(metadata.isInitialized(), false);
+    QCOMPARE(metadata.isInitialized(), true);
 
-    bool result = metadata.initialize(title, description, rawKeywords, false);
+    result = metadata.initFromStorage(CA(title, description, rawKeywords));
 
     // no items will be overwritten
     QCOMPARE(result, false);
@@ -116,26 +106,353 @@ void ArtworkMetadataTests::initializeNoOverwriteTest() {
     QCOMPARE(metadata.isInitialized(), true);
 }
 
-void ArtworkMetadataTests::initializeOverwriteWithEmptyTest() {
+void ArtworkMetadataTests::initializeOriginalWithEmpty() {
     Mocks::ArtworkMetadataMock metadata("file.jpg");
 
-    metadata.setDescription("Existing Description");
-    metadata.setTitle("Existing Title");
-    metadata.setKeywords(QStringList() << "keyword1" << "keyword3" << "keyword2" );
+    metadata.initFromStorage(CA("Existing Title", "Existing Desc", QStringList() << "keyword1" << "keyword3" << "keyword2"));
+    metadata.resetModified();
 
     QString title;
     QString description;
     QStringList rawKeywords;
 
-    bool result = metadata.initialize(title, description, rawKeywords, true);
+    bool result = metadata.initFromOrigin(OM(title, description, rawKeywords));
 
-    QCOMPARE(result, true);
+    QCOMPARE(result, false);
 
-    QVERIFY(metadata.isTitleEmpty());
-    QVERIFY(metadata.isDescriptionEmpty());
-    QVERIFY(metadata.areKeywordsEmpty());
+    QVERIFY(!metadata.isTitleEmpty());
+    QVERIFY(!metadata.isDescriptionEmpty());
+    QVERIFY(!metadata.areKeywordsEmpty());
 
     QCOMPARE(metadata.isInitialized(), true);
+}
+
+void ArtworkMetadataTests::initOriginThenStorageTest() {
+    Mocks::ArtworkMetadataMock metadata("file.jpg");
+
+    const QString oTitle = "Existing Title";
+    const QString oDescription = "Existing Description";
+    const QStringList oKeywords = QStringList() << "keyword1" << "keyword3" << "keyword2";
+    bool result = metadata.initFromOrigin(OM(oTitle, oDescription, oKeywords));
+    QCOMPARE(result, true);
+    QCOMPARE(metadata.isInitialized(), true);
+    QCOMPARE(metadata.getTitle(), oTitle);
+    QCOMPARE(metadata.getDescription(), oDescription);
+    QCOMPARE(metadata.getKeywords(), oKeywords);
+    QCOMPARE(metadata.isModified(), false);
+
+    const QString cTitle = "Other Title";
+    const QString cDescription = "other Description";
+    const QStringList cKeywords = QStringList() << "keyword4" << "keyword5" << "keyword6";
+    result = metadata.initFromStorage(CA(cTitle, cDescription, cKeywords));
+    QCOMPARE(result, true);
+    QCOMPARE(metadata.isInitialized(), true);
+    QCOMPARE(metadata.getTitle(), oTitle);
+    QCOMPARE(metadata.getDescription(), oDescription);
+    QCOMPARE(metadata.getKeywords(), oKeywords + cKeywords);
+    QCOMPARE(metadata.isModified(), true);
+}
+
+void ArtworkMetadataTests::initStorageThenOriginTest() {
+    Mocks::ArtworkMetadataMock metadata("file.jpg");
+
+    const QString cTitle = "Existing Title";
+    const QString cDescription = "Existing Description";
+    const QStringList cKeywords = QStringList() << "keyword1" << "keyword3" << "keyword2";
+    bool result = metadata.initFromStorage(CA(cTitle, cDescription, cKeywords));
+    QCOMPARE(result, true);
+    QCOMPARE(metadata.isAlmostInitialized(), true);
+    QCOMPARE(metadata.isInitialized(), false);
+    QCOMPARE(metadata.getTitle(), cTitle);
+    QCOMPARE(metadata.getDescription(), cDescription);
+    QCOMPARE(metadata.getKeywords(), cKeywords);
+    QCOMPARE(metadata.isModified(), false);
+
+    const QString oTitle = "Other Title";
+    const QString oDescription = "other Description";
+    const QStringList oKeywords = QStringList() << "keyword4" << "keyword5" << "keyword6";
+    result = metadata.initFromOrigin(OM(oTitle, oDescription, oKeywords));
+    QCOMPARE(result, true);
+    QCOMPARE(metadata.isInitialized(), true);
+    QCOMPARE(metadata.getTitle(), oTitle);
+    QCOMPARE(metadata.getDescription(), oDescription);
+    QCOMPARE(metadata.getKeywords(), oKeywords);
+    QCOMPARE(metadata.isModified(), false);
+}
+
+void ArtworkMetadataTests::initOriginalThenStorageDescriptionEmptyTest() {
+    Mocks::ArtworkMetadataMock metadata("file.jpg");
+
+    const QString oTitle = "Existing Title";
+    const QString oDescription = "";
+    const QStringList oKeywords = QStringList() << "keyword1" << "keyword3" << "keyword2";
+    bool result = metadata.initFromOrigin(OM(oTitle, oDescription, oKeywords));
+    QCOMPARE(result, true);
+    QCOMPARE(metadata.isInitialized(), true);
+    QCOMPARE(metadata.getTitle(), oTitle);
+    QCOMPARE(metadata.getDescription(), oDescription);
+    QCOMPARE(metadata.isModified(), false);
+
+    const QString cTitle = "Other Title";
+    const QString cDescription = "other Description";
+    const QStringList cKeywords = QStringList() << "keyword4" << "keyword5" << "keyword6";
+    result = metadata.initFromStorage(CA(cTitle, cDescription, cKeywords));
+    QCOMPARE(result, true);
+    QCOMPARE(metadata.isInitialized(), true);
+    QCOMPARE(metadata.getTitle(), oTitle);
+    QCOMPARE(metadata.getDescription(), cDescription);
+    QCOMPARE(metadata.isModified(), true);
+}
+
+void ArtworkMetadataTests::initOriginalThenStorageTitleEmptyTest() {
+    Mocks::ArtworkMetadataMock metadata("file.jpg");
+
+    const QString oTitle = "";
+    const QString oDescription = "Existing Description";
+    const QStringList oKeywords = QStringList() << "keyword1" << "keyword3" << "keyword2";
+    bool result = metadata.initFromOrigin(OM(oTitle, oDescription, oKeywords));
+    QCOMPARE(result, true);
+    QCOMPARE(metadata.isInitialized(), true);
+    QCOMPARE(metadata.getTitle(), oTitle);
+    QCOMPARE(metadata.getDescription(), oDescription);
+    QCOMPARE(metadata.isModified(), false);
+
+    const QString cTitle = "Other Title";
+    const QString cDescription = "other Description";
+    const QStringList cKeywords = QStringList() << "keyword4" << "keyword5" << "keyword6";
+    result = metadata.initFromStorage(CA(cTitle, cDescription, cKeywords));
+    QCOMPARE(result, true);
+    QCOMPARE(metadata.isInitialized(), true);
+    QCOMPARE(metadata.getTitle(), cTitle);
+    QCOMPARE(metadata.getDescription(), oDescription);
+    QCOMPARE(metadata.isModified(), true);
+}
+
+void ArtworkMetadataTests::initStorageThenOriginKeywordsOverwriteTest() {
+    Mocks::ArtworkMetadataMock metadata("file.jpg");
+
+    const QString cTitle = "Existing Title";
+    const QString cDescription = "Existing Description";
+    const QStringList cKeywords = QStringList() << "keyword1" << "keyword3" << "keyword2";
+    bool result = metadata.initFromStorage(CA(cTitle, cDescription, cKeywords));
+    QCOMPARE(result, true);
+    QCOMPARE(metadata.isAlmostInitialized(), true);
+    QCOMPARE(metadata.isInitialized(), false);
+    QCOMPARE(metadata.getKeywords(), cKeywords);
+    QCOMPARE(metadata.isModified(), false);
+
+    const QString oTitle = "Other Title";
+    const QString oDescription = "other Description";
+    const QStringList oKeywords = QStringList() << "keyword4" << "keyword5" << "keyword6";
+    result = metadata.initFromOrigin(OM(oTitle, oDescription, oKeywords));
+    QCOMPARE(result, true);
+    QCOMPARE(metadata.isInitialized(), true);
+    QCOMPARE(metadata.getKeywords(), oKeywords);
+    QCOMPARE(metadata.isModified(), false);
+}
+
+void ArtworkMetadataTests::initStorageThenOriginKeywordsAddTest() {
+    Mocks::ArtworkMetadataMock metadata("file.jpg");
+
+    const QString cTitle = "Existing Title";
+    const QString cDescription = "Existing Description";
+    const QStringList cKeywords = QStringList() << "keyword1" << "keyword3" << "keyword2" << "keyword4" << "keyword5" << "keyword6";
+    bool result = metadata.initFromStorage(CA(cTitle, cDescription, cKeywords));
+    QCOMPARE(result, true);
+    QCOMPARE(metadata.isInitialized(), false);
+    QCOMPARE(metadata.isAlmostInitialized(), true);
+    QCOMPARE(metadata.getKeywords(), cKeywords);
+    QCOMPARE(metadata.isModified(), false);
+
+    const QString oTitle = "Other Title";
+    const QString oDescription = "other Description";
+    const QStringList oKeywords = QStringList() << "keyword4" << "keyword5" << "keyword6";
+    result = metadata.initFromOrigin(OM(oTitle, oDescription, oKeywords));
+    QCOMPARE(result, true);
+    QCOMPARE(metadata.isInitialized(), true);
+    QCOMPARE(metadata.getKeywords(), cKeywords);
+    QCOMPARE(metadata.isModified(), true);
+}
+
+void ArtworkMetadataTests::initStorageThenOriginShouldModifyTest() {
+    Mocks::ArtworkMetadataMock metadata("file.jpg");
+
+    const QString cTitle = "Existing Title";
+    const QString cDescription = "Existing Description";
+    const QStringList cKeywords = QStringList() << "keyword1" << "keyword3" << "keyword2";
+    bool result = metadata.initFromStorage(CA(cTitle, cDescription, cKeywords));
+    QCOMPARE(result, true);
+    QCOMPARE(metadata.isInitialized(), false);
+    QCOMPARE(metadata.isAlmostInitialized(), true);
+    QCOMPARE(metadata.getTitle(), cTitle);
+    QCOMPARE(metadata.getDescription(), cDescription);
+    QCOMPARE(metadata.getKeywords(), cKeywords);
+    QCOMPARE(metadata.isModified(), false);
+
+    const QString oTitle = "";
+    const QString oDescription = "";
+    const QStringList oKeywords = QStringList() << "keyword4" << "keyword5" << "keyword6";
+    result = metadata.initFromOrigin(OM(oTitle, oDescription, oKeywords));
+    QCOMPARE(result, true);
+    QCOMPARE(metadata.isInitialized(), true);
+    QCOMPARE(metadata.getTitle(), cTitle);
+    QCOMPARE(metadata.getDescription(), cDescription);
+    QCOMPARE(metadata.getKeywords(), oKeywords);
+    QCOMPARE(metadata.isModified(), true);
+}
+
+#define PARALLEL_TEST_BEGIN \
+    const int initIterations = 10000; \
+    Mocks::ArtworkMetadataMock metadata("file.jpg"); \
+    MetadataIO::OriginalMetadata om; \
+    om.m_Keywords = QStringList() << "keyword1" << "keyword2" << "keyword3"; \
+    om.m_Title = "titleOM"; \
+    om.m_Description = "description OM"; \
+    MetadataIO::CachedArtwork ca; \
+    ca.m_Keywords = QStringList() << "keyword8" << "keyword7" << "keyword6"; \
+    ca.m_Title = "title CA"; \
+    ca.m_Description = "descriptionCA";
+
+void ArtworkMetadataTests::parallelInitOriginStorageTest() {
+    PARALLEL_TEST_BEGIN;
+
+    Helpers::Barrier barrier1(2), barrier2(2);
+
+    std::thread originThread([&]() {
+        int n = initIterations;
+        while (n--) {
+            metadata.initFromOrigin(om, false);
+
+            /*-------------*/barrier1.wait();
+
+            metadata.resetAll();
+
+            /*-------------*/barrier2.wait();
+        }
+    });
+
+    std::thread cachedThread([&]() {
+        int n = initIterations;
+        while (n--) {
+            metadata.initFromStorage(ca);
+
+            /*-------------*/barrier1.wait();
+
+            // metadata.resetAll(); // anough 1 reset in the other thread
+
+            /*-------------*/barrier2.wait();
+        }
+    });
+
+    originThread.join();
+    cachedThread.join();
+}
+
+void ArtworkMetadataTests::parallelInitEmptyStorageTest() {
+    PARALLEL_TEST_BEGIN;
+
+    Helpers::Barrier barrier1(2), barrier2(2);
+
+    std::thread originThread([&]() {
+        int n = initIterations;
+        while (n--) {
+            metadata.initAsEmpty();
+
+            /*-------------*/barrier1.wait();
+
+            metadata.resetAll();
+
+            /*-------------*/barrier2.wait();
+        }
+    });
+
+    std::thread cachedThread([&]() {
+        int n = initIterations;
+        while (n--) {
+            metadata.initFromStorage(ca);
+
+            /*-------------*/barrier1.wait();
+
+            // metadata.resetAll(); // anough 1 reset in the other thread
+
+            /*-------------*/barrier2.wait();
+        }
+    });
+
+    originThread.join();
+    cachedThread.join();
+}
+
+void ArtworkMetadataTests::parallelInitStorageSetTest() {
+    PARALLEL_TEST_BEGIN;
+
+    Helpers::Barrier barrier2(2), barrier3(2);
+
+    std::thread originThread([&]() {
+        int n = initIterations;
+        while (n--) {
+            metadata.setTitle("test");
+            metadata.setDescription("another test");
+            metadata.setKeywords(QStringList() << "some brand new keyword");
+
+            /*-------------*/barrier2.wait();
+
+            metadata.resetAll();
+
+            /*-------------*/barrier3.wait();
+        }
+    });
+
+    std::thread cachedThread([&]() {
+        int n = initIterations;
+        while (n--) {
+            /*-------------*/barrier2.wait();
+
+            // metadata.resetAll(); // anough 1 reset in the other thread
+
+            /*-------------*/barrier3.wait();
+        }
+    });
+
+    originThread.join();
+    cachedThread.join();
+}
+
+void ArtworkMetadataTests::parallelInitOriginSetTest() {
+    PARALLEL_TEST_BEGIN;
+
+    Helpers::Barrier barrier2(2), barrier3(2);
+
+    std::thread originThread([&]() {
+        int n = initIterations;
+        while (n--) {
+            metadata.setTitle("test");
+            metadata.setDescription("another test");
+            metadata.setKeywords(QStringList() << "some brand new keyword");
+
+            /*-------------*/barrier2.wait();
+
+            metadata.resetAll();
+
+            /*-------------*/barrier3.wait();
+        }
+    });
+
+    std::thread cachedThread([&]() {
+        int n = initIterations;
+        while (n--) {
+            metadata.initFromOrigin(om);
+
+            /*-------------*/barrier2.wait();
+
+            // metadata.resetAll(); // anough 1 reset in the other thread
+
+            /*-------------*/barrier3.wait();
+        }
+    });
+
+    originThread.join();
+    cachedThread.join();
 }
 
 void ArtworkMetadataTests::freshObjectTest() {
@@ -176,6 +493,7 @@ void ArtworkMetadataTests::modifiedIsNotMarkedModifiedAgainTest() {
 
 void ArtworkMetadataTests::setDescriptionEmitsModifiedTest() {
     Mocks::ArtworkMetadataMock metadata("file.jpg");
+    metadata.initAsEmpty();
 
     QSignalSpy modifiedSpy(&metadata, SIGNAL(modifiedChanged(bool)));
 
@@ -188,6 +506,7 @@ void ArtworkMetadataTests::setDescriptionEmitsModifiedTest() {
 
 void ArtworkMetadataTests::setTitleEmitsModifiedTest() {
     Mocks::ArtworkMetadataMock metadata("file.jpg");
+    metadata.initAsEmpty();
 
     QSignalSpy modifiedSpy(&metadata, SIGNAL(modifiedChanged(bool)));
 
@@ -200,6 +519,7 @@ void ArtworkMetadataTests::setTitleEmitsModifiedTest() {
 
 void ArtworkMetadataTests::addNewKeywordsEmitsModifiedTest() {
     Mocks::ArtworkMetadataMock metadata("file.jpg");
+    metadata.initAsEmpty();
 
     QSignalSpy modifiedSpy(&metadata, SIGNAL(modifiedChanged(bool)));
     QSignalSpy addedSpy(metadata.getBasicModel(), SIGNAL(rowsInserted(QModelIndex,int,int)));
@@ -220,6 +540,7 @@ void ArtworkMetadataTests::addNewKeywordsEmitsModifiedTest() {
 
 void ArtworkMetadataTests::addExistingKeywordsDoesNotEmitModifiedTest() {
     Mocks::ArtworkMetadataMock metadata("file.jpg");
+    metadata.initAsEmpty();
     int addedCount = metadata.appendKeywords(QStringList() << "keyword1" << "keyword2");
 
     QCOMPARE(addedCount, 2);
@@ -237,6 +558,7 @@ void ArtworkMetadataTests::addExistingKeywordsDoesNotEmitModifiedTest() {
 
 void ArtworkMetadataTests::addOneNewKeywordEmitsModifiedTest() {
     Mocks::ArtworkMetadataMock metadata("file.jpg");
+    metadata.initAsEmpty();
 
     QSignalSpy modifiedSpy(&metadata, SIGNAL(modifiedChanged(bool)));
     QSignalSpy addedSpy(metadata.getBasicModel(), SIGNAL(rowsInserted(QModelIndex,int,int)));
@@ -256,6 +578,8 @@ void ArtworkMetadataTests::addOneNewKeywordEmitsModifiedTest() {
 
 void ArtworkMetadataTests::addOneExistingKeywordDoesNotEmitModifiedTest() {
     Mocks::ArtworkMetadataMock metadata("file.jpg");
+    metadata.initAsEmpty();
+
     bool added = metadata.appendKeyword("keyword2");
 
     QCOMPARE(added, true);
@@ -299,6 +623,8 @@ void ArtworkMetadataTests::removeLastKeywordFromEmptyTest() {
 
 void ArtworkMetadataTests::removeActualKeywordTest() {
     Mocks::ArtworkMetadataMock metadata("file.jpg");
+    metadata.initAsEmpty();
+
     QSignalSpy modifiedSpy(&metadata, SIGNAL(modifiedChanged(bool)));
     QSignalSpy removedSpy(metadata.getBasicModel(), SIGNAL(rowsRemoved(QModelIndex,int,int)));
 
@@ -321,6 +647,8 @@ void ArtworkMetadataTests::removeActualKeywordTest() {
 
 void ArtworkMetadataTests::removeLastActualKeywordTest() {
     Mocks::ArtworkMetadataMock metadata("file.jpg");
+    metadata.initAsEmpty();
+
     QSignalSpy modifiedSpy(&metadata, SIGNAL(modifiedChanged(bool)));
     QSignalSpy removedSpy(metadata.getBasicModel(), SIGNAL(rowsRemoved(QModelIndex,int,int)));
 
@@ -343,6 +671,7 @@ void ArtworkMetadataTests::removeLastActualKeywordTest() {
 
 void ArtworkMetadataTests::editKeywordToAnotherEmitsModifiedTest() {
     Mocks::ArtworkMetadataMock metadata("file.jpg");
+    metadata.initAsEmpty();
 
     QSignalSpy modifiedSpy(&metadata, SIGNAL(modifiedChanged(bool)));
 
@@ -450,6 +779,7 @@ void ArtworkMetadataTests::isNotInEmptyDirectoryTest() {
 
 void ArtworkMetadataTests::clearKeywordsMarksAsModifiedTest() {
     Mocks::ArtworkMetadataMock metadata("file.jpg");
+    metadata.initAsEmpty();
     metadata.appendKeywords(QStringList() << "keyword1" << "keyword2");
     metadata.resetModified();
 
@@ -467,6 +797,7 @@ void ArtworkMetadataTests::clearEmptyKeywordsDoesNotMarkModifiedTest() {
 
 void ArtworkMetadataTests::removeKeywordsMarksModifiedTest() {
     Mocks::ArtworkMetadataMock metadata("file.jpg");
+    metadata.initAsEmpty();
     metadata.appendKeywords(QStringList() << "keyword1" << "keyword2");
     metadata.resetModified();
 

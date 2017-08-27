@@ -128,3 +128,18 @@ void StringHelpersTests::replaceWholeNoHitTest() {
     QString replaced = Helpers::replaceWholeWords(text, "whole", "Bob");
     QCOMPARE(replaced, text);
 }
+
+void StringHelpersTests::switcherHashTest() {
+    QCOMPARE(Helpers::switcherHash(""), quint32(3820012610));
+    QCOMPARE(Helpers::switcherHash("-"), quint32(963895330));
+    QCOMPARE(Helpers::switcherHash("a"), quint32(3398926610));
+    QCOMPARE(Helpers::switcherHash("0"), quint32(1609362278));
+    QCOMPARE(Helpers::switcherHash("foo"), quint32(740734059));
+
+    QCOMPARE(Helpers::switcherHash("261aad35-2cce-41e3-afed-ae97831eb2be"), quint32(3867831621));
+    QCOMPARE(Helpers::switcherHash("31f8f3e7-b003-481a-b0c9-6afd1a07daea"), quint32(809399339));
+    QCOMPARE(Helpers::switcherHash("5c2bd3c9-a063-4974-9fd7-542c0ec5e225"), quint32(1798162191));
+    QCOMPARE(Helpers::switcherHash("48eaeb10-1d03-4020-a747-604616cedf28"), quint32(535900959));
+    QCOMPARE(Helpers::switcherHash("dc16d9fe-61d6-4564-931b-650e42fcf443"), quint32(3282680053));
+
+}

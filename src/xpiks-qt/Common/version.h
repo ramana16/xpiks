@@ -28,6 +28,11 @@
     VERSION_STR(XPIKS_FIX_VERSION)"."\
     VERSION_STR(XPIKS_HOTFIX_VERSION)
 
+#define XPIKS_API_VERSION_STRING \
+    VERSION_STR(XPIKS_MAJOR_VERSION)\
+    VERSION_STR(XPIKS_MINOR_VERSION)\
+    VERSION_STR(XPIKS_FIX_VERSION)
+
 #define XPIKS_VERSION_TO_INT(major, minor, fix) ((major)*100 + (minor)*10 + (fix))
 #define XPIKS_FULL_VERSION_TO_INT(major, minor, fix, hotfix) (10*XPIKS_VERSION_TO_INT(major, minor, fix) + (hotfix))
 

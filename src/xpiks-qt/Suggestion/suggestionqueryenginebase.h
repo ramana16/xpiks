@@ -16,19 +16,13 @@
 #include <memory>
 #include <QObject>
 #include "suggestionartwork.h"
+#include "searchquery.h"
 
 namespace Models {
     class SettingsModel;
 }
 
 namespace Suggestion {
-    enum struct QueryResultsType {
-        AllImages,
-        Photos,
-        Vectors,
-        Illustrations
-    };
-
     class SuggestionQueryEngineBase: public QObject {
         Q_OBJECT
     public:
@@ -41,7 +35,8 @@ namespace Suggestion {
 
         virtual ~SuggestionQueryEngineBase() { }
 
-        virtual void submitQuery(const QStringList &queryKeywords, QueryResultsType resultsType) = 0;
+    public:
+        virtual void submitQuery(const SearchQuery &query) = 0;
         virtual QString getName() const = 0;
 
     public:

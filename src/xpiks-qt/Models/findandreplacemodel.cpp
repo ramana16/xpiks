@@ -21,6 +21,7 @@
 #include "../Commands/findandreplacecommand.h"
 #include "../Common/defines.h"
 #include "../Helpers/stringhelper.h"
+#include "../Models/videoartwork.h"
 
 QString searchFlagsToString(Common::SearchFlags flags) {
     QStringList items;
@@ -130,7 +131,7 @@ namespace Models {
 
         switch (role) {
         case PathRole:
-            return item.getOrigin()->getFilepath();
+            return item.getOrigin()->getThumbnailPath();
         case IsSelectedRole:
             return item.isSelected();
         case HasTitleMatchRole:
@@ -139,6 +140,10 @@ namespace Models {
             return item.hasDescriptionMatch();
         case HasKeywordsMatchRole:
             return item.hasKeywordsMatch();
+        case IsVideoRole: {
+            Models::VideoArtwork *videoArtwork = dynamic_cast<Models::VideoArtwork*>(item.getOrigin());
+            return videoArtwork != nullptr;
+        }
         default:
             return QVariant();
         }
@@ -182,6 +187,7 @@ namespace Models {
         roles[HasTitleMatchRole] = "hastitle";
         roles[HasDescriptionMatchRole] = "hasdescription";
         roles[HasKeywordsMatchRole] = "haskeywords";
+        roles[IsVideoRole] = "isvideo";
         return roles;
     }
 

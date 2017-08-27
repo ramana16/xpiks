@@ -22,6 +22,7 @@ SOURCES += main.cpp \
     Models/artworksprocessor.cpp \
     Models/uploadinforepository.cpp \
     ../../vendors/tiny-aes/aes.cpp \
+    ../../vendors/sqlite/sqlite3.c \
     Encryption/secretsmanager.cpp \
     Helpers/stringhelper.cpp \
     Commands/commandmanager.cpp \
@@ -46,9 +47,7 @@ SOURCES += main.cpp \
     Models/filteredartitemsproxymodel.cpp \
     Helpers/helpersqmlwrapper.cpp \
     Models/recentdirectoriesmodel.cpp \
-    Suggestion/locallibrary.cpp \
-    Suggestion/libraryqueryworker.cpp \
-    Conectivity/updateservice.cpp \
+    Connectivity/updateservice.cpp \
     SpellCheck/spellcheckerservice.cpp \
     SpellCheck/spellcheckitem.cpp \
     SpellCheck/spellcheckworker.cpp \
@@ -56,21 +55,13 @@ SOURCES += main.cpp \
     Common/basickeywordsmodel.cpp \
     SpellCheck/spellcheckerrorshighlighter.cpp \
     SpellCheck/spellcheckiteminfo.cpp \
-    MetadataIO/backupsaverworker.cpp \
-    MetadataIO/backupsaverservice.cpp \
     SpellCheck/spellsuggestionsitem.cpp \
-    Conectivity/telemetryservice.cpp \
-    Conectivity/updatescheckerworker.cpp \
+    Connectivity/telemetryservice.cpp \
+    Connectivity/updatescheckerworker.cpp \
     Warnings/warningscheckingworker.cpp \
-    MetadataIO/metadatareadingworker.cpp \
     MetadataIO/metadataiocoordinator.cpp \
-    MetadataIO/saverworkerjobitem.cpp \
-    MetadataIO/metadatawritingworker.cpp \
-    Conectivity/curlftpuploader.cpp \
-    Conectivity/ftpuploaderworker.cpp \
-    Conectivity/ftpcoordinator.cpp \
-    Conectivity/testconnection.cpp \
-    Conectivity/ftphelpers.cpp \
+    Connectivity/testconnection.cpp \
+    Connectivity/ftphelpers.cpp \
     Plugins/pluginmanager.cpp \
     Plugins/pluginwrapper.cpp \
     Plugins/pluginactionsmodel.cpp \
@@ -79,7 +70,6 @@ SOURCES += main.cpp \
     Helpers/loghighlighter.cpp \
     Warnings/warningsmodel.cpp \
     Models/languagesmodel.cpp \
-    Conectivity/conectivityhelpers.cpp \
     Helpers/filterhelpers.cpp \
     QMLExtensions/triangleelement.cpp \
     Suggestion/shutterstockqueryengine.cpp \
@@ -97,10 +87,6 @@ SOURCES += main.cpp \
     AutoComplete/stocksftplistmodel.cpp \
     AutoComplete/stringfilterproxymodel.cpp \
     Models/imageartwork.cpp \
-    MetadataIO/exiv2readingworker.cpp \
-    MetadataIO/readingorchestrator.cpp \
-    MetadataIO/exiv2writingworker.cpp \
-    MetadataIO/writingorchestrator.cpp \
     Common/flags.cpp \
     Models/proxysettings.cpp \
     QMLExtensions/imagecachingworker.cpp \
@@ -113,13 +99,12 @@ SOURCES += main.cpp \
     Models/deletekeywordsviewmodel.cpp \
     Models/artworksviewmodel.cpp \
     Helpers/keywordshelpers.cpp \
-    Conectivity/uploadwatcher.cpp \
-    Conectivity/telemetryworker.cpp \
+    Connectivity/uploadwatcher.cpp \
+    Connectivity/telemetryworker.cpp \
     Warnings/warningssettingsmodel.cpp \
-    Conectivity/simplecurlrequest.cpp \
-    Conectivity/curlinithelper.cpp \
-    MetadataIO/exiv2inithelper.cpp \
-    Conectivity/simplecurldownloader.cpp \
+    Connectivity/simplecurlrequest.cpp \
+    Connectivity/curlinithelper.cpp \
+    Connectivity/simplecurldownloader.cpp \
     Helpers/updatehelpers.cpp \
     Common/basicmetadatamodel.cpp \
     KeywordsPresets/presetkeywordsmodel.cpp \
@@ -142,24 +127,39 @@ SOURCES += main.cpp \
     QMLExtensions/tabsmodel.cpp \
     Models/recentitemsmodel.cpp \
     Models/recentfilesmodel.cpp \
+    Models/videoartwork.cpp \
     Maintenance/maintenanceworker.cpp \
     Maintenance/maintenanceservice.cpp \
     Maintenance/logscleanupjobitem.cpp \
     Maintenance/updatescleanupjobitem.cpp \
     Maintenance/launchexiftooljobitem.cpp \
     Maintenance/initializedictionariesjobitem.cpp \
-    Maintenance/addtolibraryjobitem.cpp \
-    Maintenance/locallibraryloadsaveitem.cpp \
     Maintenance/movesettingsjobitem.cpp \
+    QMLExtensions/videocachingservice.cpp \
+    QMLExtensions/videocachingworker.cpp \
+    QMLExtensions/artworksupdatehub.cpp \
+    Models/keyvaluelist.cpp \
+    Helpers/filehelpers.cpp \
+    Helpers/artworkshelpers.cpp \
     Models/sessionmanager.cpp \
     Maintenance/savesessionjobitem.cpp \
-    Conectivity/switcherconfig.cpp \
+    Connectivity/switcherconfig.cpp \
     Models/switchermodel.cpp \
-    Conectivity/requestsworker.cpp \
-    Conectivity/requestsservice.cpp \
-    Conectivity/conectivityrequest.cpp \
+    Connectivity/requestsworker.cpp \
+    Connectivity/requestsservice.cpp \
+    Helpers/database.cpp \
     Common/statefulentity.cpp \
-    Helpers/filehelpers.cpp
+    QMLExtensions/cachedimage.cpp \
+    QMLExtensions/dbimagecacheindex.cpp \
+    Maintenance/moveimagecachejobitem.cpp \
+    QMLExtensions/cachedvideo.cpp \
+    QMLExtensions/dbvideocacheindex.cpp \
+    MetadataIO/cachedartwork.cpp \
+    MetadataIO/metadatacache.cpp \
+    MetadataIO/metadataioworker.cpp \
+    MetadataIO/metadataioservice.cpp \
+    MetadataIO/artworkssnapshot.cpp \
+    Connectivity/connectivityrequest.cpp
 
 RESOURCES += qml.qrc
 
@@ -197,6 +197,7 @@ HEADERS += \
     Models/logsmodel.h \
     Encryption/aes-qt.h \
     ../../vendors/tiny-aes/aes.h \
+    ../../vendors/sqlite/sqlite3.h \
     Encryption/secretsmanager.h \
     Helpers/stringhelper.h \
     Helpers/logger.h \
@@ -227,34 +228,23 @@ HEADERS += \
     Helpers/helpersqmlwrapper.h \
     Models/recentdirectoriesmodel.h \
     Common/version.h \
-    Suggestion/locallibrary.h \
-    Suggestion/libraryqueryworker.h \
-    Conectivity/updateservice.h \
+    Connectivity/updateservice.h \
     SpellCheck/spellcheckerservice.h \
     SpellCheck/spellcheckitem.h \
     SpellCheck/spellcheckworker.h \
     SpellCheck/spellchecksuggestionmodel.h \
     SpellCheck/spellcheckerrorshighlighter.h \
     SpellCheck/spellcheckiteminfo.h \
-    MetadataIO/backupsaverworker.h \
     Common/itemprocessingworker.h \
-    MetadataIO/backupsaverservice.h \
     SpellCheck/spellsuggestionsitem.h \
-    Conectivity/analyticsuserevent.h \
-    Conectivity/telemetryservice.h \
-    Conectivity/updatescheckerworker.h \
+    Connectivity/analyticsuserevent.h \
+    Connectivity/telemetryservice.h \
+    Connectivity/updatescheckerworker.h \
     Warnings/warningscheckingworker.h \
     Warnings/warningsitem.h \
-    MetadataIO/saverworkerjobitem.h \
-    MetadataIO/metadatareadingworker.h \
     MetadataIO/metadataiocoordinator.h \
-    MetadataIO/metadatawritingworker.h \
-    Conectivity/curlftpuploader.h \
-    Conectivity/ftpuploaderworker.h \
-    Conectivity/ftpcoordinator.h \
-    Conectivity/uploadcontext.h \
-    Conectivity/testconnection.h \
-    Conectivity/ftphelpers.h \
+    Connectivity/testconnection.h \
+    Connectivity/ftphelpers.h \
     Plugins/xpiksplugininterface.h \
     Commands/icommandmanager.h \
     Commands/icommandbase.h \
@@ -273,10 +263,8 @@ HEADERS += \
     Helpers/loghighlighter.h \
     Warnings/warningsmodel.h \
     Models/languagesmodel.h \
-    Conectivity/conectivityhelpers.h \
-    Conectivity/uploadbatch.h \
     Helpers/filterhelpers.h \
-    Conectivity/iftpcoordinator.h \
+    Connectivity/iftpcoordinator.h \
     QMLExtensions/triangleelement.h \
     Suggestion/shutterstockqueryengine.h \
     Suggestion/locallibraryqueryengine.h \
@@ -298,13 +286,7 @@ HEADERS += \
     AutoComplete/stringfilterproxymodel.h \
     Models/imageartwork.h \
     Common/hold.h \
-    MetadataIO/exiv2readingworker.h \
-    MetadataIO/importdataresult.h \
-    MetadataIO/readingorchestrator.h \
     MetadataIO/imetadatareader.h \
-    MetadataIO/exiv2writingworker.h \
-    MetadataIO/writingorchestrator.h \
-    MetadataIO/exiv2tagnames.h \
     MetadataIO/imetadatawriter.h \
     Models/proxysettings.h \
     QMLExtensions/imagecachingworker.h \
@@ -320,15 +302,14 @@ HEADERS += \
     Models/deletekeywordsviewmodel.h \
     Models/artworksviewmodel.h \
     Helpers/keywordshelpers.h \
-    Conectivity/uploadwatcher.h \
+    Connectivity/uploadwatcher.h \
     Common/iflagsprovider.h \
-    Conectivity/telemetryworker.h \
+    Connectivity/telemetryworker.h \
     Warnings/warningssettingsmodel.h \
-    Conectivity/simplecurlrequest.h \
-    Conectivity/curlinithelper.h \
-    MetadataIO/exiv2inithelper.h \
-    Conectivity/simplecurldownloader.h \
-    Conectivity/apimanager.h \
+    Connectivity/simplecurlrequest.h \
+    Connectivity/curlinithelper.h \
+    Connectivity/simplecurldownloader.h \
+    Connectivity/apimanager.h \
     Helpers/updatehelpers.h \
     Common/basicmetadatamodel.h \
     KeywordsPresets/presetkeywordsmodel.h \
@@ -354,6 +335,7 @@ HEADERS += \
     QMLExtensions/tabsmodel.h \
     Models/recentitemsmodel.h \
     Models/recentfilesmodel.h \
+    Models/videoartwork.h \
     Maintenance/maintenanceworker.h \
     Maintenance/maintenanceservice.h \
     Maintenance/imaintenanceitem.h \
@@ -361,21 +343,44 @@ HEADERS += \
     Maintenance/updatescleanupjobitem.h \
     Maintenance/launchexiftooljobitem.h \
     Maintenance/initializedictionariesjobitem.h \
-    Maintenance/addtolibraryjobitem.h \
-    Maintenance/locallibraryloadsaveitem.h \
     Maintenance/movesettingsjobitem.h \
+    QMLExtensions/videocachingservice.h \
+    QMLExtensions/videocachingworker.h \
+    QMLExtensions/videocacherequest.h \
+    QMLExtensions/artworksupdatehub.h \
+    QMLExtensions/artworkupdaterequest.h \
+    Models/keyvaluelist.h \
+    Helpers/filehelpers.h \
+    Helpers/artworkshelpers.h \
     Models/sessionmanager.h \
-    MetadataIO/artworkmetadatasnapshot.h \
     Maintenance/savesessionjobitem.h \
-    Conectivity/switcherconfig.h \
+    Connectivity/switcherconfig.h \
     Models/switchermodel.h \
-    Conectivity/conectivityrequest.h \
-    Conectivity/requestsworker.h \
-    Conectivity/requestsservice.h \
+    Connectivity/requestsworker.h \
+    Connectivity/requestsservice.h \
     Warnings/iwarningsitem.h \
     AutoComplete/completionitem.h \
+    Helpers/database.h \
+    AutoComplete/completionitem.h \
     Common/statefulentity.h \
-    Helpers/filehelpers.h
+    QMLExtensions/previewstorage.h \
+    QMLExtensions/cachedimage.h \
+    QMLExtensions/dbimagecacheindex.h \
+    Maintenance/moveimagecachejobitem.h \
+    QMLExtensions/dbcacheindex.h \
+    QMLExtensions/cachedvideo.h \
+    QMLExtensions/dbvideocacheindex.h \
+    MetadataIO/cachedartwork.h \
+    MetadataIO/metadatacache.h \
+    Common/readerwriterqueue.h \
+    MetadataIO/metadataioworker.h \
+    MetadataIO/metadataiotask.h \
+    MetadataIO/metadataioservice.h \
+    MetadataIO/originalmetadata.h \
+    Suggestion/searchquery.h \
+    Suggestion/locallibraryquery.h \
+    MetadataIO/artworkssnapshot.h \
+    Connectivity/connectivityrequest.h
 
 DISTFILES += \
     Components/CloseIcon.qml \
@@ -476,6 +481,8 @@ INCLUDEPATH += ../../vendors/tiny-aes
 INCLUDEPATH += ../../vendors/cpp-libface
 INCLUDEPATH += ../../vendors/ssdll/src/ssdll
 INCLUDEPATH += ../../vendors/hunspell-1.6.0/src
+INCLUDEPATH += ../../vendors/libthmbnlr
+INCLUDEPATH += ../../vendors/libxpks
 
 CONFIG(debug, debug|release)  {
     LIBS += -L"$$PWD/../../libs/debug"
@@ -486,10 +493,11 @@ CONFIG(debug, debug|release)  {
 LIBS += -lhunspell
 LIBS += -lcurl
 LIBS += -lface
-LIBS += -lexiv2
 LIBS += -lssdll
 LIBS += -lquazip
 LIBS += -lz
+LIBS += -lthmbnlr
+LIBS += -lxpks
 
 BUILDNO=$$system(git log -n 1 --pretty=format:"%h")
 BRANCH_NAME=$$system(git rev-parse --abbrev-ref HEAD)
@@ -504,14 +512,8 @@ CONFIG(debug, debug|release)  {
 }
 
 macx {
-    LIBS += -liconv
-    LIBS += -lexpat
-
     INCLUDEPATH += "../../vendors/quazip"
-    INCLUDEPATH += "../../../vendors/libcurl/include"
-    INCLUDEPATH += ../../vendors/exiv2-0.25/include
-
-    LIBS += -lxmpsdk
+    INCLUDEPATH += "../../vendors/libcurl/include"
 
     HUNSPELL_DICT_FILES.files = deps/dict/en_US.aff deps/dict/en_US.dic deps/dict/license.txt deps/dict/README_en_US.txt
     HUNSPELL_DICT_FILES.path = Contents/Resources
@@ -543,10 +545,8 @@ win32 {
     INCLUDEPATH += "../../vendors/zlib-1.2.11"
     INCLUDEPATH += "../../vendors/quazip"
     INCLUDEPATH += "../../vendors/libcurl/include"
-    INCLUDEPATH += "../../vendors/exiv2-0.25/include"
 
     LIBS -= -lcurl
-    LIBS -= -lexiv2
 
     CONFIG(debug, debug|release) {
 	EXE_DIR = debug
@@ -561,8 +561,6 @@ win32 {
     }
 
     LIBS += -lmman
-    LIBS += -llibexpat
-    LIBS += -llibexiv2
 
     copywhatsnew.commands = $(COPY_FILE) \"$$shell_path($$PWD/deps/whatsnew.txt)\" \"$$shell_path($$OUT_PWD/$$EXE_DIR/)\"
     copyterms.commands = $(COPY_FILE) \"$$shell_path($$PWD/deps/terms_and_conditions.txt)\" \"$$shell_path($$OUT_PWD/$$EXE_DIR/)\"
@@ -591,13 +589,26 @@ travis-ci {
     LIBS += -L"$$PWD/../../libs"
     LIBS -= -lz
     LIBS += /usr/lib/x86_64-linux-gnu/libz.so
+    LIBS += -ldl
     DEFINES += TRAVIS_CI
     INCLUDEPATH += "../../vendors/quazip"
+
+    LIBS -= -lthmbnlr
+    LIBS -= -lxpks
+    HEADERS += ../../vendors/libxpks/readingorchestrator.h \
+               ../../vendors/libxpks/writingorchestrator.h \
+               ../../vendors/libxpks/ftpcoordinator.h
+
+    SOURCES += ../../vendors/libthmbnlr/thumbnailcreator_stub.cpp \
+               ../../vendors/libxpks/readingorchestrator_stub.cpp \
+               ../../vendors/libxpks/writingorchestrator_stub.cpp \
+               ../../vendors/libxpks/ftpcoordinator_stub.cpp
 }
 
 linux-g++-64 {
     message("for Linux")
     target.path=/usr/bin/
+
     QML_IMPORT_PATH += /usr/lib/x86_64-linux-gnu/qt5/imports/
     LIBS += -L/lib/x86_64-linux-gnu/
     BUILDNO = $$system($$PWD/buildno.sh)
@@ -607,7 +618,7 @@ linux-g++-64 {
     contains( UNAME, Debian|Ubuntu ) {
         message("distribution : Debian")
         LIBS -= -lquazip
-	LIBS += -lquazip5
+        LIBS += -lquazip5
     }
     
     contains( UNAME, SUSE ) {

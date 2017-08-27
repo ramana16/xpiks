@@ -12,6 +12,7 @@
 
 Models::MetadataElement createArtworkMetadata(const QString &desc, const QString &title, const QStringList &keywords, int index=0) {
     Mocks::ArtworkMetadataMock *metadata = new Mocks::ArtworkMetadataMock("/random/file/path.jpg");
+    metadata->initAsEmpty();
     metadata->appendKeywords(keywords);
     metadata->setTitle(title);
     metadata->setDescription(desc);

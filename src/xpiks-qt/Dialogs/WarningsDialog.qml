@@ -153,13 +153,26 @@ Item {
                                             anchors.horizontalCenter: parent.horizontalCenter
 
                                             Image {
+                                                id: artworkImage
                                                 anchors.fill: parent
-                                                source: "image://cached/" + filename
+                                                source: "image://cached/" + thumbpath
                                                 sourceSize.width: 150
                                                 sourceSize.height: 150
                                                 fillMode: settingsModel.fitSmallPreview ? Image.PreserveAspectFit : Image.PreserveAspectCrop
                                                 asynchronous: true
                                                 cache: false
+                                            }                                            
+
+                                            Image {
+                                                id: videoTypeIconSmall
+                                                visible: isvideo
+                                                enabled: isvideo
+                                                source: "qrc:/Graphics/video-icon-s.png"
+                                                fillMode: Image.PreserveAspectFit
+                                                sourceSize.width: 150
+                                                sourceSize.height: 150
+                                                anchors.fill: artworkImage
+                                                cache: true
                                             }
                                         }
 

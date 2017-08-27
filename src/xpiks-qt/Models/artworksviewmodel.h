@@ -32,7 +32,9 @@ namespace Models {
         enum ArtworksViewModel_Roles {
             FilepathRole = Qt::UserRole + 1,
             IsSelectedRole,
-            HasVectorAttachedRole
+            HasVectorAttachedRole,
+            ThumbnailPathRole,
+            IsVideoRole
         };
 
     public:

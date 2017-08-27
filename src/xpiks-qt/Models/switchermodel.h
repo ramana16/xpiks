@@ -13,12 +13,13 @@
 
 #include <QObject>
 #include <QTimer>
-#include "../Conectivity/switcherconfig.h"
+#include "../Connectivity/switcherconfig.h"
 #include "../Helpers/localconfig.h"
 #include "../Common/baseentity.h"
+#include "../Common/statefulentity.h"
 
 namespace Models {
-    class SwitcherModel: public QObject, public Common::BaseEntity
+    class SwitcherModel: public QObject, public Common::BaseEntity, public Common::StatefulEntity
     {
         Q_OBJECT
         Q_PROPERTY(bool isDonationCampaign1Active READ getIsDonationCampaign1On NOTIFY switchesUpdated)
@@ -30,17 +31,24 @@ namespace Models {
 
     public:
         virtual void setCommandManager(Commands::CommandManager *commandManager) override;
-        void initEngagement();
+
+    public:
+        void initialize();
         void updateConfigs();
         void afterInitializedCallback();
 
-    public:
-        bool getIsDonationCampaign1On() { return m_Config.isSwitchOn(Conectivity::SwitcherConfig::DonateCampaign1); }
-        bool getIsDonateCampaign1Stage2On() { return m_Config.isSwitchOn(Conectivity::SwitcherConfig::DonateCampaign1Stage2); }
-        bool getProgressiveSuggestionPreviewsOn() { return m_Config.isSwitchOn(Conectivity::SwitcherConfig::ProgressiveSuggestionPreviews); }
+    private:
+        void ensureSessionTokenValid();
 
     public:
-        bool getDonateCampaign1LinkClicked() const { return m_DonateCampaign1LinkClicked; }
+        bool getIsDonationCampaign1On() { return m_Config.isSwitchOn(Connectivity::SwitcherConfig::DonateCampaign1, m_Threshold); }
+        bool getIsDonateCampaign1Stage2On() { return m_Config.isSwitchOn(Connectivity::SwitcherConfig::DonateCampaign1Stage2, m_Threshold); }
+        bool getProgressiveSuggestionPreviewsOn() { return m_Config.isSwitchOn(Connectivity::SwitcherConfig::ProgressiveSuggestionPreviews, m_Threshold); }
+        bool getUseDirectMetadataExport() { return m_Config.isSwitchOn(Connectivity::SwitcherConfig::DirectMetadataExport, m_Threshold); }
+        bool getGoodQualityVideoPreviews() { return m_Config.isSwitchOn(Connectivity::SwitcherConfig::GoodQualityVideoPreviews, m_Threshold); }
+
+    public:
+        bool getDonateCampaign1LinkClicked() const;
         QString getDonateCampaign1Link() const { return QString("https://ribtoks.github.io/xpiks/donatecampaign/"); }
 
     public:
@@ -60,11 +68,8 @@ namespace Models {
 
     private:
         QTimer m_DelayTimer;
-        Conectivity::SwitcherConfig m_Config;
-        QString m_EngagementConfigPath;
-        Helpers::LocalConfig m_EngagementConfig;
-        // ----------------------------
-        bool m_DonateCampaign1LinkClicked;
+        Connectivity::SwitcherConfig m_Config;
+        int m_Threshold;
     };
 }
 

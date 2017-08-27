@@ -29,7 +29,7 @@ namespace Warnings {
         LOG_DEBUG << "#";
 
         if (m_WarningsWorker != nullptr) {
-            m_WarningsWorker->cancelCurrentBatch();
+            m_WarningsWorker->cancelPendingJobs();
         }
     }
 
@@ -97,7 +97,7 @@ namespace Warnings {
         m_WarningsWorker->submitItem(wItem);
     }
 
-    void WarningsService::submitItems(const QVector<Models::ArtworkMetadata *> &items) {
+    void WarningsService::submitItems(const MetadataIO::WeakArtworksSnapshot &items) {
         if (m_WarningsWorker == NULL) {
             return;
         }

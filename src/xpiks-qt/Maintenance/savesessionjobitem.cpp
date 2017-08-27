@@ -9,6 +9,7 @@
  */
 
 #include "../Models/sessionmanager.h"
+#include "../MetadataIO/artworkssnapshot.h"
 #include "savesessionjobitem.h"
 
 namespace Maintenance {

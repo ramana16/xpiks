@@ -21,7 +21,10 @@ namespace Helpers {
     }
 
     void AsyncCoordinator::allBegun(int timeoutSeconds) {
-        m_Timer.start(timeoutSeconds*1000);
+        if (timeoutSeconds != -1) {
+            m_Timer.start(timeoutSeconds*1000);
+        }
+
         justEnded();
     }
 

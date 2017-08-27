@@ -18,6 +18,7 @@ namespace Models {
         setInProgress(false);
         setIsError(false);
         innerResetModel();
+        resetArtworks();
         m_ArtworksCount = 0;
         m_ProcessedArtworksCount = 0;
         updateProgress();
@@ -26,27 +27,28 @@ namespace Models {
     bool ArtworksProcessor::removeUnavailableItems() {
         LOG_DEBUG << "#";
 
-        const QVector<Models::ArtworkMetadata*> &artworksListOld = getArtworkList();
-        QVector<Models::ArtworkMetadata*> artworksListNew;
+        auto &artworksListOld = getArtworksSnapshot();
+        MetadataIO::ArtworksSnapshot::Container artworksListNew;
 
-        int size = artworksListOld.size();
-        for (int i = 0; i < size; ++i) {
-            Models::ArtworkMetadata* item = artworksListOld.at(i);
+        const size_t size = artworksListOld.size();
+        for (size_t i = 0; i < size; ++i) {
+            auto &item = artworksListOld.at(i);
 
-            if (!item->isUnavailable()) {
-                artworksListNew.append(item);
+            if (!item->getArtworkMetadata()->isUnavailable()) {
+                artworksListNew.push_back(item);
             }
         }
 
-        bool anyUnavailable = artworksListNew.size() != m_ArtworkList.size();
+        bool anyUnavailable = artworksListNew.size() != m_ArtworksSnapshot.size();
+        if (anyUnavailable) {
+            m_ArtworksSnapshot.set(artworksListNew);
 
-        setArtworks(artworksListNew);
+            if (artworksListNew.empty()) {
+                emit requestCloseWindow();
+            }
 
-        if (artworksListNew.isEmpty()) {
-            emit requestCloseWindow();
+            emit itemsNumberChanged();
         }
-
-        emit itemsNumberChanged();
 
         return anyUnavailable;
     }
@@ -54,7 +56,7 @@ namespace Models {
     void ArtworksProcessor::beginProcessing() {
         m_ExistingMaxThreadsNumber = QThreadPool::globalInstance()->maxThreadCount();
         LOG_DEBUG << "Saving pools max threads" << m_ExistingMaxThreadsNumber;
-        m_ArtworksCount = m_ArtworkList.length();
+        m_ArtworksCount = (int)m_ArtworksSnapshot.size();
         m_ProcessedArtworksCount = 0;
         updateProgress();
         setInProgress(true);

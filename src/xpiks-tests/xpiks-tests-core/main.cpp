@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
     QTEST_CLASS(KeywordValidationTests, kvt, result);
     QTEST_CLASS(ArtworkRepositoryTests, art, result);
     QTEST_CLASS(FilteredModelTests, fil, result);
-    QTEST_CLASS(ConectivityHelpersTests, cht, result);
+    QTEST_CLASS(ConnectivityHelpersTests, cht, result);
     QTEST_CLASS(UndoRedoTests, urt, result);
     QTEST_CLASS(ArtworkFilterTests, aft, result);
     QTEST_CLASS(RemoveFilesFsTests, del,result);

@@ -33,8 +33,8 @@ void PresetTests::expandFromPresetTrivial()
     presetKeywordsModel.appendKeyword(0, "keyword_5");
 
     for (int i = 0; i < itemsToGenerate; i++) {
-        Models::ArtworkMetadata *metadata = artItemsModelMock.getArtwork(i);
-        metadata->initialize("title", "description", QStringList() << "keyword_0");
+        auto *metadata = artItemsModelMock.getMockArtwork(i);
+        metadata->set("title", "description", QStringList() << "keyword_0");
     }
 
     artItemsModelMock.expandPreset(0, 0, 0);
@@ -58,8 +58,8 @@ void PresetTests::expandFromPresetWithDublicates()
     presetKeywordsModel.appendKeyword(0, "keyword_5");
 
     for (int i = 0; i < itemsToGenerate; i++) {
-        Models::ArtworkMetadata *metadata = artItemsModelMock.getArtwork(i);
-        metadata->initialize("title", "description", QStringList() << "keyword_0" << "keyword_1" << "keyword_2");
+        auto *metadata = artItemsModelMock.getMockArtwork(i);
+        metadata->set("title", "description", QStringList() << "keyword_0" << "keyword_1" << "keyword_2");
     }
 
     artItemsModelMock.expandPreset(0, 0, 0);
@@ -70,8 +70,7 @@ void PresetTests::expandFromPresetWithDublicates()
     QVERIFY(metadata->isModified());
 }
 
-void PresetTests::appendFromPresetTrivial()
-{
+void PresetTests::appendFromPresetTrivial() {
     const int itemsToGenerate = 5;
     DECLARE_MODELS_AND_GENERATE(itemsToGenerate);
     presetKeywordsModel.addItem();
@@ -83,8 +82,8 @@ void PresetTests::appendFromPresetTrivial()
     presetKeywordsModel.appendKeyword(0, "keyword_5");
 
     for (int i = 0; i < itemsToGenerate; i++) {
-        Models::ArtworkMetadata *metadata = artItemsModelMock.getArtwork(i);
-        metadata->initialize("title", "description", QStringList() << "keyword_0" << "keyword_1" << "keyword_2");
+        auto *metadata = artItemsModelMock.getMockArtwork(i);
+        metadata->set("title", "description", QStringList() << "keyword_0" << "keyword_1" << "keyword_2");
     }
 
     artItemsModelMock.addPreset(0, 0);
@@ -108,8 +107,8 @@ void PresetTests::appendFromPresetWithDublicates()
     presetKeywordsModel.appendKeyword(0, "keyword_5");
 
     for (int i = 0; i < itemsToGenerate; i++) {
-        Models::ArtworkMetadata *metadata = artItemsModelMock.getArtwork(i);
-        metadata->initialize("title", "description", QStringList() << "keyword_0" << "keyword_1" << "keyword_2");
+        auto *metadata = artItemsModelMock.getMockArtwork(i);
+        metadata->set("title", "description", QStringList() << "keyword_0" << "keyword_1" << "keyword_2");
     }
 
     artItemsModelMock.addPreset(0, 0);

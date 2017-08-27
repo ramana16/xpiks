@@ -38,11 +38,16 @@ namespace Models {
         void setDateTimeOriginal(const QDateTime &dateTime) { m_DateTimeOriginal = dateTime; }
         const QString &getAttachedVectorPath() const { return m_AttachedVector; }
         QString getDateTaken() const { return m_DateTimeOriginal.toString(); }
+        const QDateTime &getDateTimeOriginal() const { return m_DateTimeOriginal; }
         bool hasVectorAttached() const { return getHasVectorAttachedFlag(); }
 
     public:
         void attachVector(const QString &vectorFilepath);
         void detachVector();
+
+    protected:
+        virtual bool initFromOriginUnsafe(const MetadataIO::OriginalMetadata &originalMetadata) override;
+        virtual bool initFromStorageUnsafe(const MetadataIO::CachedArtwork &cachedArtwork) override;
 
     private:
         QSize m_ImageSize;

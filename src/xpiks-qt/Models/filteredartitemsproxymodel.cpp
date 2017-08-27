@@ -64,7 +64,7 @@ namespace Models {
         LOG_DEBUG << "#";
         QVector<ArtworkMetadata *> allArtworks = getAllOriginalItems();
         m_CommandManager->submitForSpellCheck(allArtworks);
-        m_CommandManager->reportUserAction(Conectivity::UserAction::SpellCheck);
+        m_CommandManager->reportUserAction(Connectivity::UserAction::SpellCheck);
     }
 
     int FilteredArtItemsProxyModel::getOriginalIndex(int index) const {
@@ -153,15 +153,16 @@ namespace Models {
 
     void FilteredArtItemsProxyModel::setSelectedForUpload() {
         LOG_DEBUG << "#";
-        QVector<ArtworkMetadata *> selectedArtworks = getSelectedOriginalItems();
-        m_CommandManager->setArtworksForUpload(selectedArtworks);
+        auto selectedArtworks = getSelectedArtworksSnapshot();
+        MetadataIO::ArtworksSnapshot snapshot(selectedArtworks);
+        m_CommandManager->setArtworksForUpload(snapshot);
     }
 
     void FilteredArtItemsProxyModel::setSelectedForZipping() {
-        QVector<ArtworkMetadata *> selectedArtworks = getSelectedOriginalItems();
-        LOG_INFO << selectedArtworks.length() << "item(s)";
-
-        m_CommandManager->setArtworksForZipping(selectedArtworks);
+        LOG_DEBUG << "#";
+        auto selectedArtworks = getSelectedArtworksSnapshot();
+        MetadataIO::ArtworksSnapshot snapshot(selectedArtworks);
+        m_CommandManager->setArtworksForZipping(snapshot);
     }
 
     bool FilteredArtItemsProxyModel::areSelectedArtworksSaved() {
@@ -174,7 +175,7 @@ namespace Models {
         LOG_DEBUG << "#";
         QVector<ArtworkMetadata *> selectedArtworks = getSelectedOriginalItems();
         m_CommandManager->submitForSpellCheck(selectedArtworks);
-        m_CommandManager->reportUserAction(Conectivity::UserAction::SpellCheck);
+        m_CommandManager->reportUserAction(Connectivity::UserAction::SpellCheck);
     }
 
     int FilteredArtItemsProxyModel::getModifiedSelectedCount(bool overwriteAll) const {
@@ -207,10 +208,8 @@ namespace Models {
     void FilteredArtItemsProxyModel::reimportMetadataForSelected() {
         LOG_DEBUG << "#";
         QVector<ArtworkMetadata *> selectedArtworks = getSelectedOriginalItems();
-        QVector<QPair<int, int> > ranges;
-        Helpers::indicesToRanges(getSelectedOriginalIndices(), ranges);
 
-        m_CommandManager->readMetadata(selectedArtworks, ranges);
+        m_CommandManager->readMetadata(selectedArtworks);
         ArtItemsModel *artItemsModel = getArtItemsModel();
         artItemsModel->raiseArtworksAdded(selectedArtworks.count(), 0);
     }
@@ -513,6 +512,7 @@ namespace Models {
             }
         }
 
+        LOG_DEBUG << "Set selected" << indices.size() << "item(s) to" << selected;
         artItemsModel->updateItems(indices, QVector<int>() << ArtItemsModel::IsSelectedRole);
         emit allItemsSelectedChanged();
 
@@ -548,6 +548,14 @@ namespace Models {
             [] (ArtworkMetadata *metadata, int, int) { return metadata; });
 
         return QVector<ArtworkMetadata *>::fromStdVector(items);
+    }
+
+    MetadataIO::ArtworksSnapshot::Container FilteredArtItemsProxyModel::getSelectedArtworksSnapshot() const {
+        return getFilteredOriginalItems<std::shared_ptr<ArtworkMetadataLocker> >(
+            [](ArtworkMetadata *metadata) { return metadata->isSelected(); },
+            [] (ArtworkMetadata *metadata, int, int) {
+            return std::shared_ptr<ArtworkMetadataLocker>(new ArtworkMetadataLocker(metadata));
+        });
     }
 
     std::vector<MetadataElement> FilteredArtItemsProxyModel::getSelectedOriginalItemsWithIndices() const {

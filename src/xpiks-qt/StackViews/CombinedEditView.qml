@@ -1133,13 +1133,25 @@ Rectangle {
                     id: artworkImage
                     anchors.fill: parent
                     anchors.margins: 15
-                    source: "image://cached/" + filepath
+                    source: "image://cached/" + thumbpath
                     sourceSize.width: 150
                     sourceSize.height: 150
                     fillMode: settingsModel.fitSmallPreview ? Image.PreserveAspectFit : Image.PreserveAspectCrop
                     asynchronous: true
                     // caching is implemented on different level
                     cache: false
+                }
+
+                Image {
+                    id: videoTypeIconSmall
+                    visible: isvideo
+                    enabled: isvideo
+                    source: "qrc:/Graphics/video-icon-s.png"
+                    fillMode: Image.PreserveAspectFit
+                    sourceSize.width: 150
+                    sourceSize.height: 150
+                    anchors.fill: artworkImage
+                    cache: true
                 }
 
                 Image {

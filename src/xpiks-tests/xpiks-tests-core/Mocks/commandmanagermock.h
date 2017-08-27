@@ -44,16 +44,20 @@ namespace Mocks {
                 qint64 directoryID;
 
                 if (artworksRepository->accountFile(filename, directoryID)) {
-                    Models::ArtworkMetadata *metadata = artItemsModel->createMetadata(filename, directoryID);
-                    Models::ImageArtwork *image = dynamic_cast<Models::ImageArtwork*>(metadata);
+                    Models::ArtworkMetadata *artwork = artItemsModel->createMetadata(filename, directoryID);
+                    artwork->initAsEmpty();
 
-                    this->connectArtworkSignals(metadata);
+                    Models::ImageArtwork *image = dynamic_cast<Models::ImageArtwork*>(artwork);
+
+                    this->connectArtworkSignals(artwork);
 
                     if (withVector) {
                         image->attachVector(vectorname);
                     }
 
-                    artItemsModel->appendMetadata(metadata);
+                    artItemsModel->appendMetadata(artwork);
+                } else {
+                    Q_ASSERT(false);
                 }
 
                 i++;

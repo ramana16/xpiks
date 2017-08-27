@@ -12,7 +12,37 @@
 #include <QRegExp>
 #include <QFileInfo>
 #include <QDir>
+#include <QVector>
 #include "../Common/defines.h"
+#include "../Models/artworkmetadata.h"
+#include "../Models/imageartwork.h"
+
+void Helpers::extractFilePathes(const QVector<Models::ArtworkMetadata *> &artworkList,
+                       QStringList &filePathes,
+                       QStringList &zipsPathes) {
+
+    int size = artworkList.length();
+    filePathes.reserve(size);
+    zipsPathes.reserve(size);
+    LOG_DEBUG << "Generating filepathes for" << size << "item(s)";
+
+    for (int i = 0; i < size; ++i) {
+        Models::ArtworkMetadata *metadata = artworkList.at(i);
+        QString filepath = metadata->getFilepath();
+        filePathes.append(filepath);
+
+        Models::ImageArtwork *image = dynamic_cast<Models::ImageArtwork*>(metadata);
+
+        if (image != NULL && image->hasVectorAttached()) {
+            filePathes.append(image->getAttachedVectorPath());
+
+            QString zipPath = Helpers::getArchivePath(filepath);
+            zipsPathes.append(zipPath);
+        } else {
+            zipsPathes.append(filepath);
+        }
+    }
+}
 
 QStringList Helpers::convertToVectorFilenames(const QStringList &item) {
     QStringList converted;
@@ -60,6 +90,36 @@ QString Helpers::getImagePath(const QString &path) {
 
     return result;
 }
+
+bool Helpers::couldBeVideo(const QString &artworkPath) {
+    static QVector<QString> videoExtensions({"avi", "mpeg", "mpg", "mpe", "vob", "qt", "mov", "asf", "asx", "wm", "wmv", "mp4", "webm", "flv"});
+    bool found = false;
+
+    for (auto &ext: videoExtensions) {
+        if (artworkPath.endsWith(ext, Qt::CaseInsensitive)) {
+            found = true;
+            break;
+        }
+    }
+
+    return found;
+}
+
+QString Helpers::describeFileSize(qint64 filesizeBytes) {
+    double size = filesizeBytes;
+    size /= 1024.0*1024.0;
+
+    QString sizeDescription;
+    if (size >= 1) {
+        sizeDescription = QString::number(size, 'f', 2) + QLatin1String(" MB");
+    } else {
+        size *= 1024;
+        sizeDescription = QString::number(size, 'f', 2) + QLatin1String(" KB");
+    }
+
+    return sizeDescription;
+}
+
 
 bool Helpers::ensureDirectoryExists(const QString &path) {
     bool anyError = false;

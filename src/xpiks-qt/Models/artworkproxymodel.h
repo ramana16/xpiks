@@ -29,6 +29,7 @@
 #include "../Common/hold.h"
 #include "../Models/metadataelement.h"
 #include "artworkproxybase.h"
+#include "keyvaluelist.h"
 
 namespace Models {
     class ArtworkProxyModel: public QObject, public ArtworkProxyBase
@@ -37,19 +38,23 @@ namespace Models {
         Q_PROPERTY(QString description READ getDescription WRITE setDescription NOTIFY descriptionChanged)
         Q_PROPERTY(QString title READ getTitle WRITE setTitle NOTIFY titleChanged)
         Q_PROPERTY(int keywordsCount READ getKeywordsCount NOTIFY keywordsCountChanged)
-        Q_PROPERTY(QString imagePath READ getImagePath NOTIFY imagePathChanged)
+        Q_PROPERTY(QString thumbPath READ getThumbPath NOTIFY thumbnailChanged)
+        Q_PROPERTY(QString filePath READ getFilePath NOTIFY imagePathChanged)
         Q_PROPERTY(QString basename READ getBasename NOTIFY imagePathChanged)
         Q_PROPERTY(QString attachedVectorPath READ getAttachedVectorPath NOTIFY imagePathChanged)
         Q_PROPERTY(QSize imageSize READ retrieveImageSize NOTIFY imagePathChanged)
         Q_PROPERTY(QString fileSize READ retrieveFileSize NOTIFY imagePathChanged)
         Q_PROPERTY(QString dateTaken READ getDateTaken NOTIFY imagePathChanged)
+        Q_PROPERTY(bool isVideo READ getIsVideo NOTIFY imagePathChanged)
 
     public:
         explicit ArtworkProxyModel(QObject *parent = 0);
         virtual ~ArtworkProxyModel();
 
     public:
-        const QString &getImagePath() const { return m_ArtworkMetadata->getFilepath(); }
+        bool getIsVideo() const;
+        QString getThumbPath() const { return m_ArtworkMetadata->getThumbnailPath(); }
+        const QString &getFilePath() const { return m_ArtworkMetadata->getFilepath(); }
         QString getBasename() const { return m_ArtworkMetadata->getBaseFilename(); }
 
     public:
@@ -59,6 +64,7 @@ namespace Models {
 
     signals:
         void imagePathChanged();
+        void thumbnailChanged();
         void descriptionChanged();
         void titleChanged();
         void keywordsCountChanged();
@@ -95,10 +101,18 @@ namespace Models {
         Q_INVOKABLE void plainTextEdit(const QString &rawKeywords, bool spaceIsSeparator=false);
         Q_INVOKABLE bool hasTitleWordSpellError(const QString &word);
         Q_INVOKABLE bool hasDescriptionWordSpellError(const QString &word);
+        // --
         Q_INVOKABLE void setSourceArtwork(QObject *artworkMetadata, int originalIndex=-1);
+        // --
         Q_INVOKABLE void resetModel();
         Q_INVOKABLE QObject *getBasicModel() {
             QObject *item = getBasicMetadataModel();
+            QQmlEngine::setObjectOwnership(item, QQmlEngine::CppOwnership);
+
+            return item;
+        }
+        Q_INVOKABLE QObject *getPropertiesMap() {
+            QObject *item = &m_PropertiesMap;
             QQmlEngine::setObjectOwnership(item, QQmlEngine::CppOwnership);
 
             return item;
@@ -125,7 +139,7 @@ namespace Models {
             return m_ArtworkMetadata;
         }
 
-        virtual qint64 getSpecialItemID() override;
+        virtual Common::ID_t getSpecialItemID() override;
 
     private:
         void updateCurrentArtwork();
@@ -133,6 +147,7 @@ namespace Models {
         void disconnectCurrentArtwork();
 
     private:
+        ArtworkPropertiesMap m_PropertiesMap;
         Models::ArtworkMetadata *m_ArtworkMetadata;
         int m_ArtworkOriginalIndex;
     };

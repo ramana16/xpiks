@@ -38,17 +38,20 @@ int SaveFileBasicTest::doTest() {
 
     VERIFY(!ioCoordinator->getHasErrors(), "Errors in IO Coordinator while reading");
 
-    Models::ArtworkMetadata *metadata = artItemsModel->getArtwork(0);
-    Models::ImageArtwork *image = dynamic_cast<Models::ImageArtwork*>(metadata);
+    Models::ArtworkMetadata *artwork = artItemsModel->getArtwork(0);
+    const Common::ID_t id = artwork->getItemID();
+    Models::ImageArtwork *image = dynamic_cast<Models::ImageArtwork*>(artwork);
 
     VERIFY(image->getImageSize().width() == 1920, "Image width was read incorrectly");
     VERIFY(image->getImageSize().height() == 1272, "Image height was read incorrectly");
 
     QStringList keywords; keywords << "picture" << "seagull" << "bird";
-    metadata->setDescription("Brand new description");
-    metadata->setTitle("Brand new title");
-    metadata->getBasicModel()->setKeywords(keywords);
-    metadata->setIsSelected(true);
+    QString title = "Brand new title";
+    QString description = "Brand new description";
+    artwork->setDescription(description);
+    artwork->setTitle(title);
+    artwork->getBasicModel()->setKeywords(keywords);
+    artwork->setIsSelected(true);
 
     bool doOverwrite = true, dontSaveBackups = false;
 
@@ -75,10 +78,15 @@ int SaveFileBasicTest::doTest() {
 
     VERIFY(!ioCoordinator->getHasErrors(), "Errors in IO Coordinator while reading");
 
-    metadata = artItemsModel->getArtwork(0);
-    const QStringList &actualKeywords = metadata->getKeywords();
+    artwork = artItemsModel->getArtwork(0);
+    const QStringList &actualKeywords = artwork->getKeywords();
+    const QString &actualTitle = artwork->getTitle();
+    const QString &actualDescription = artwork->getDescription();
 
+    VERIFY(id != artwork->getItemID(), "ID should not match");
     VERIFY(actualKeywords == keywords, "Read keywords are not the same");
+    VERIFY(actualTitle == title, "Real title is not the same");
+    VERIFY(actualDescription == description, "Real description is not the same");
 
     return 0;
 }

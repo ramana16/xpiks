@@ -30,7 +30,7 @@ void UndoRedo::RemoveArtworksHistoryItem::undo(const Commands::ICommandManager *
     Models::ArtItemsModel *artItemsModel = commandManager->getArtItemsModel();
     Models::ArtworksRepository *artworksRepository = commandManager->getArtworksRepository();
 
-    QVector<Models::ArtworkMetadata*> artworksToImport;
+    MetadataIO::ArtworksSnapshot artworksToImport;
     artworksToImport.reserve(m_RemovedArtworksIndices.length());
     QStringList watchList;
     watchList.reserve(m_RemovedArtworksIndices.length());
@@ -96,11 +96,12 @@ void UndoRedo::RemoveArtworksHistoryItem::undo(const Commands::ICommandManager *
     std::unique_ptr<IHistoryItem> addArtworksItem(new AddArtworksHistoryItem(getCommandID(), ranges));
     commandManager->recordHistoryItem(addArtworksItem);
 
-    commandManager->readMetadata(artworksToImport, ranges);
+    commandManager->readMetadata(artworksToImport);
     artItemsModel->raiseArtworksAdded(usedCount, attachedVectors);
 
     if (!willResetModel) {
         artItemsModel->raiseArtworksChanged(true);
+        artItemsModel->syncArtworksIndices();
     }
 
     commandManager->saveSessionInBackground();

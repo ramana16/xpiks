@@ -22,7 +22,7 @@
 #include "../../xpiks-qt/Models/settingsmodel.h"
 #include "../../xpiks-qt/Models/sessionmanager.h"
 #include "../../xpiks-qt/MetadataIO/metadataiocoordinator.h"
-#include "../../xpiks-qt/MetadataIO/artworkmetadatasnapshot.h"
+#include "../../xpiks-qt/MetadataIO/artworkssnapshot.h"
 #include "../../xpiks-qt/Models/artitemsmodel.h"
 #include "../../xpiks-qt/Models/artworksrepository.h"
 #include "../../xpiks-qt/Models/imageartwork.h"
@@ -90,8 +90,8 @@ int RestoreSessionTest::doTest() {
     VERIFY(!ioCoordinator->getHasErrors(), "Errors in IO Coordinator while reading");
 
     MetadataIO::ArtworksSnapshot newArtworksSnapshot(artItemsModel->getArtworkList());
-    auto &oldArtworksList = oldArtworksSnapshot.getSnapshot();
-    auto &newArtworksList = newArtworksSnapshot.getSnapshot();
+    auto &oldArtworksList = oldArtworksSnapshot.getRawData();
+    auto &newArtworksList = newArtworksSnapshot.getRawData();
 
     VERIFY(oldArtworksList.size() == newArtworksList.size(), "Old and new snapshots have different number of items");
     LOG_INFO << "Comparing" << oldArtworksList.size() << "items";

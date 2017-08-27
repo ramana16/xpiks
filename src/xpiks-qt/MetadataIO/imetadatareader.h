@@ -14,7 +14,8 @@
 #include <QVector>
 #include <QHash>
 #include <QString>
-#include "importdataresult.h"
+#include "originalmetadata.h"
+#include "artworkssnapshot.h"
 
 namespace Models {
     class ArtworkMetadata;
@@ -25,9 +26,9 @@ namespace MetadataIO {
     public:
         virtual ~IMetadataReader() {}
 
-        virtual const QHash<QString, ImportDataResult> &getImportResult() const = 0;
-        virtual const QVector<Models::ArtworkMetadata *> &getItemsToRead() const = 0;
-        virtual const QVector<QPair<int, int> > &getRangesToUpdate() const = 0;
+        virtual const QVector<QHash<QString, OriginalMetadata> > &getImportResults() const = 0;
+        virtual const ArtworksSnapshot &getArtworksSnapshot() const = 0;
+        virtual quint32 getReadingBatchID() const = 0;
     };
 }
 

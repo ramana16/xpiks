@@ -16,6 +16,7 @@
 #include "../Common/baseentity.h"
 #include "../Helpers/ifilenotavailablemodel.h"
 #include "../Models/artworkmetadata.h"
+#include "../MetadataIO/artworkssnapshot.h"
 
 namespace Commands {
     class CommandManager;
@@ -56,7 +57,7 @@ namespace Models {
         void updateProgress() { emit percentChanged(); }
         bool getIsError() const { return m_IsError; }
         void setIsError(bool value) { m_IsError = value; emit isErrorChanged(); }
-        virtual int getItemsCount() const { return m_ArtworkList.length(); }
+        virtual int getItemsCount() const { return (int)m_ArtworksSnapshot.size(); }
 
     public:
         Q_INVOKABLE void resetModel();
@@ -73,9 +74,8 @@ namespace Models {
         void requestCloseWindow();
 
     public:
-        void setArtworks(const QVector<ArtworkMetadata*> &artworkList) { resetArtworks(); addArtworks(artworkList); }
-        void addArtworks(const QVector<Models::ArtworkMetadata*> &artworkList) { m_ArtworkList << artworkList; emit itemsCountChanged(); }
-        void resetArtworks() { m_ArtworkList.clear(); }
+        void setArtworks(MetadataIO::ArtworksSnapshot &snapshot) { m_ArtworksSnapshot = std::move(snapshot); emit itemsCountChanged(); }
+        void resetArtworks() { m_ArtworksSnapshot.clear(); emit itemsCountChanged(); }
         virtual bool removeUnavailableItems();
 
 #ifdef CORE_TESTS
@@ -83,7 +83,7 @@ namespace Models {
 #else
     protected:
 #endif
-        const QVector<ArtworkMetadata*> &getArtworkList() const { return m_ArtworkList; }
+        const MetadataIO::ArtworksSnapshot &getArtworksSnapshot() const { return m_ArtworksSnapshot; }
 
     protected:
         virtual void cancelProcessing() = 0;
@@ -94,7 +94,7 @@ namespace Models {
         virtual void restrictMaxThreads();
 
     private:
-        QVector<ArtworkMetadata*> m_ArtworkList;
+        MetadataIO::ArtworksSnapshot m_ArtworksSnapshot;
         volatile int m_ProcessedArtworksCount;
         volatile int m_ArtworksCount;
         volatile int m_ExistingMaxThreadsNumber;

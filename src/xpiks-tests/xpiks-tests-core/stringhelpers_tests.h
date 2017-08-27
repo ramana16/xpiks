@@ -24,6 +24,7 @@ private slots:
     void replaceWholeWithCommaTest();
     void replaceWholeNoCaseHitTest();
     void replaceWholeNoHitTest();
+    void switcherHashTest();
 };
 
 #endif // STRINGHELPERSTESTS_H

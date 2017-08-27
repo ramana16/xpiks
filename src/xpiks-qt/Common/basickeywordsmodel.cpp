@@ -598,6 +598,23 @@ namespace Common {
         return containsKeywordUnsafe(searchTerm, searchFlags);
     }
 
+    bool BasicKeywordsModel::containsKeywords(const QStringList &keywordsList) {
+        QReadLocker readLocker(&m_KeywordsLock);
+        Q_UNUSED(readLocker);
+
+        bool anyError = false;
+
+        Common::SearchFlags searchFlags = Common::SearchFlags::ExactKeywords;
+        for (auto &keyword: keywordsList) {
+            if (!containsKeywordUnsafe(keyword, searchFlags)) {
+                anyError = true;
+                break;
+            }
+        }
+
+        return !anyError;
+    }
+
     bool BasicKeywordsModel::isEmpty() {
         QReadLocker readLocker(&m_KeywordsLock);
 

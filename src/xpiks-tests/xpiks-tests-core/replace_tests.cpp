@@ -35,8 +35,8 @@ void ReplaceTests::replaceTrivialTest() {
                 Common::SearchFlags::Keywords;
 
     for (int i = 0; i < itemsToGenerate; i++) {
-        Models::ArtworkMetadata *metadata = artItemsModelMock.getArtwork(i);
-        metadata->initialize(initString, initString, QStringList() << initString);
+        auto *metadata = artItemsModelMock.getMockArtwork(i);
+        metadata->set(initString, initString, QStringList() << initString);
     }
 
     auto artWorksInfo = filteredItemsModel.getSearchablePreviewOriginalItems(replaceFrom, flags);
@@ -45,7 +45,7 @@ void ReplaceTests::replaceTrivialTest() {
     auto result = commandManagerMock.processCommand(replaceCommand);
 
     for (int i = 0; i < itemsToGenerate; i++) {
-        Models::ArtworkMetadata *metadata = artItemsModelMock.getArtwork(i);
+        auto *metadata = artItemsModelMock.getMockArtwork(i);
         QCOMPARE(metadata->getDescription(), finalString);
         QCOMPARE(metadata->getTitle(), finalString);
         QCOMPARE(metadata->getKeywords()[0], finalString);
@@ -68,8 +68,8 @@ void ReplaceTests::noReplaceTrivialTest() {
                 Common::SearchFlags::Keywords;
 
     for (int i = 0; i < itemsToGenerate; i++) {
-        Models::ArtworkMetadata *metadata = artItemsModelMock.getArtwork(i);
-        metadata->initialize(initString, initString, QStringList() << initString);
+        auto *metadata = artItemsModelMock.getMockArtwork(i);
+        metadata->set(initString, initString, QStringList() << initString);
     }
 
     auto artWorksInfo = filteredItemsModel.getSearchablePreviewOriginalItems(replaceFrom, flags);
@@ -78,7 +78,7 @@ void ReplaceTests::noReplaceTrivialTest() {
     auto result = commandManagerMock.processCommand(replaceCommand);
 
     for (int i = 0; i < itemsToGenerate; i++) {
-        Models::ArtworkMetadata *metadata = artItemsModelMock.getArtwork(i);
+        auto *metadata = artItemsModelMock.getMockArtwork(i);
         QCOMPARE(metadata->getDescription(), finalString);
         QCOMPARE(metadata->getTitle(), finalString);
         QCOMPARE(metadata->getKeywords()[0], finalString);
@@ -100,8 +100,8 @@ void ReplaceTests::caseSensitiveTest() {
             Common::SearchFlags::Keywords;
 
     for (int i = 0; i < itemsToGenerate; i++) {
-        Models::ArtworkMetadata *metadata = artItemsModelMock.getArtwork(i);
-        metadata->initialize(initString, initString, QStringList() << initString);
+        auto *metadata = artItemsModelMock.getMockArtwork(i);
+        metadata->set(initString, initString, QStringList() << initString);
     }
 
     auto artWorksInfo = filteredItemsModel.getSearchablePreviewOriginalItems(replaceFrom, flags);
@@ -110,7 +110,7 @@ void ReplaceTests::caseSensitiveTest() {
     auto result = commandManagerMock.processCommand(replaceCommand);
 
     for (int i = 0; i < itemsToGenerate; i++) {
-        Models::ArtworkMetadata *metadata = artItemsModelMock.getArtwork(i);
+        auto *metadata = artItemsModelMock.getMockArtwork(i);
         QCOMPARE(metadata->getDescription(), finalString);
         QCOMPARE(metadata->getTitle(), finalString);
         QCOMPARE(metadata->getKeywords()[0], finalString);
@@ -130,8 +130,8 @@ void ReplaceTests::replaceTitleTest() {
     auto flags = Common::SearchFlags::CaseSensitive | Common::SearchFlags::Title;
 
     for (int i = 0; i < itemsToGenerate; i++) {
-        Models::ArtworkMetadata *metadata = artItemsModelMock.getArtwork(i);
-        metadata->initialize(initString, initString, QStringList() << initString);
+        auto *metadata = artItemsModelMock.getMockArtwork(i);
+        metadata->set(initString, initString, QStringList() << initString);
     }
 
     auto artWorksInfo = filteredItemsModel.getSearchablePreviewOriginalItems(replaceFrom, flags);
@@ -140,7 +140,7 @@ void ReplaceTests::replaceTitleTest() {
     auto result = commandManagerMock.processCommand(replaceCommand);
 
     for (int i = 0; i < itemsToGenerate; i++) {
-        Models::ArtworkMetadata *metadata = artItemsModelMock.getArtwork(i);
+        auto *metadata = artItemsModelMock.getMockArtwork(i);
         QCOMPARE(metadata->getDescription(), initString);
         QCOMPARE(metadata->getTitle(), finalString);
         QCOMPARE(metadata->getKeywords()[0], initString);
@@ -163,8 +163,8 @@ void ReplaceTests::replaceKeywordsTest() {
             Common::SearchFlags::IncludeSpaces;
 
     for (int i = 0; i < itemsToGenerate; i++) {
-        Models::ArtworkMetadata *metadata = artItemsModelMock.getArtwork(i);
-        metadata->initialize(QString("title"), QString("description"),
+        auto *metadata = artItemsModelMock.getMockArtwork(i);
+        metadata->set(QString("title"), QString("description"),
                              QStringList() << replaceToLower << "dummyKey" << replaceFrom);
     }
 
@@ -174,7 +174,7 @@ void ReplaceTests::replaceKeywordsTest() {
     auto result = commandManagerMock.processCommand(replaceCommand);
 
     for (int i = 0; i < itemsToGenerate; i++) {
-        Models::ArtworkMetadata *metadata = artItemsModelMock.getArtwork(i);
+        auto *metadata = artItemsModelMock.getMockArtwork(i);
         QCOMPARE(metadata->getDescription(), QString("description"));
         QCOMPARE(metadata->getTitle(), QString("title"));
 
@@ -203,8 +203,8 @@ void ReplaceTests::replaceToSpaceTest() {
             Common::SearchFlags::IncludeSpaces;
 
     for (int i = 0; i < itemsToGenerate; i++) {
-        Models::ArtworkMetadata *metadata = artItemsModelMock.getArtwork(i);
-        metadata->initialize(QString("A vector can be found here"), QString("And here"),
+        auto *metadata = artItemsModelMock.getMockArtwork(i);
+        metadata->set(QString("A vector can be found here"), QString("And here"),
                              QStringList());
     }
 
@@ -214,7 +214,7 @@ void ReplaceTests::replaceToSpaceTest() {
     auto result = commandManagerMock.processCommand(replaceCommand);
 
     for (int i = 0; i < itemsToGenerate; i++) {
-        Models::ArtworkMetadata *metadata = artItemsModelMock.getArtwork(i);
+        auto *metadata = artItemsModelMock.getMockArtwork(i);
         QCOMPARE(metadata->getDescription(), QString("And here"));
         QCOMPARE(metadata->getTitle(), QString("A can be found here"));
         QVERIFY(metadata->isModified());
@@ -234,8 +234,8 @@ void ReplaceTests::replaceToNothingTest() {
             Common::SearchFlags::IncludeSpaces;
 
     for (int i = 0; i < itemsToGenerate; i++) {
-        Models::ArtworkMetadata *metadata = artItemsModelMock.getArtwork(i);
-        metadata->initialize(QString("A vector can be found here"), QString("And here vector  as well"),
+        auto *metadata = artItemsModelMock.getMockArtwork(i);
+        metadata->set(QString("A vector can be found here"), QString("And here vector  as well"),
                              QStringList());
     }
 
@@ -245,7 +245,7 @@ void ReplaceTests::replaceToNothingTest() {
     auto result = commandManagerMock.processCommand(replaceCommand);
 
     for (int i = 0; i < itemsToGenerate; i++) {
-        Models::ArtworkMetadata *metadata = artItemsModelMock.getArtwork(i);
+        auto *metadata = artItemsModelMock.getMockArtwork(i);
         QCOMPARE(metadata->getDescription(), QString("And here as well"));
         QCOMPARE(metadata->getTitle(), QString("Acan be found here"));
         QVERIFY(metadata->isModified());
@@ -266,8 +266,8 @@ void ReplaceTests::spacesReplaceCaseSensitiveTest() {
             Common::SearchFlags::IncludeSpaces;
 
     for (int i = 0; i < itemsToGenerate; i++) {
-        Models::ArtworkMetadata *metadata = artItemsModelMock.getArtwork(i);
-        metadata->initialize(QString("A Vector can be found here"), QString("And vector here"),
+        auto *metadata = artItemsModelMock.getMockArtwork(i);
+        metadata->set(QString("A Vector can be found here"), QString("And vector here"),
                              QStringList());
     }
 
@@ -277,7 +277,7 @@ void ReplaceTests::spacesReplaceCaseSensitiveTest() {
     auto result = commandManagerMock.processCommand(replaceCommand);
 
     for (int i = 0; i < itemsToGenerate; i++) {
-        Models::ArtworkMetadata *metadata = artItemsModelMock.getArtwork(i);
+        auto *metadata = artItemsModelMock.getMockArtwork(i);
         QCOMPARE(metadata->getDescription(), QString("And here"));
         QCOMPARE(metadata->getTitle(), QString("A Vector can be found here"));
         QVERIFY(metadata->isModified());
@@ -298,8 +298,8 @@ void ReplaceTests::spaceReplaceCaseSensitiveNoReplaceTest() {
             Common::SearchFlags::IncludeSpaces;
 
     for (int i = 0; i < itemsToGenerate; i++) {
-        Models::ArtworkMetadata *metadata = artItemsModelMock.getArtwork(i);
-        metadata->initialize(QString("A vector can be found here"), QString("And vector here"),
+        auto *metadata = artItemsModelMock.getMockArtwork(i);
+        metadata->set(QString("A vector can be found here"), QString("And vector here"),
                              QStringList());
     }
 
@@ -309,7 +309,7 @@ void ReplaceTests::spaceReplaceCaseSensitiveNoReplaceTest() {
     auto result = commandManagerMock.processCommand(replaceCommand);
 
     for (int i = 0; i < itemsToGenerate; i++) {
-        Models::ArtworkMetadata *metadata = artItemsModelMock.getArtwork(i);
+        auto *metadata = artItemsModelMock.getMockArtwork(i);
         QCOMPARE(metadata->getDescription(), QString("And vector here"));
         QCOMPARE(metadata->getTitle(), QString("A vector can be found here"));
         QVERIFY(!metadata->isModified());
@@ -329,8 +329,8 @@ void ReplaceTests::replaceSpacesToWordsTest() {
             Common::SearchFlags::IncludeSpaces;
 
     for (int i = 0; i < itemsToGenerate; i++) {
-        Models::ArtworkMetadata *metadata = artItemsModelMock.getArtwork(i);
-        metadata->initialize(QString("A   here"), QString("And    here"),
+        auto *metadata = artItemsModelMock.getMockArtwork(i);
+        metadata->set(QString("A   here"), QString("And    here"),
                              QStringList());
     }
 
@@ -340,7 +340,7 @@ void ReplaceTests::replaceSpacesToWordsTest() {
     auto result = commandManagerMock.processCommand(replaceCommand);
 
     for (int i = 0; i < itemsToGenerate; i++) {
-        Models::ArtworkMetadata *metadata = artItemsModelMock.getArtwork(i);
+        auto *metadata = artItemsModelMock.getMockArtwork(i);
         QCOMPARE(metadata->getDescription(), QString("Andwordwordhere"));
         QCOMPARE(metadata->getTitle(), QString("Aword here"));
     }
@@ -359,8 +359,8 @@ void ReplaceTests::replaceSpacesToSpacesTest() {
             Common::SearchFlags::IncludeSpaces;
 
     for (int i = 0; i < itemsToGenerate; i++) {
-        Models::ArtworkMetadata *metadata = artItemsModelMock.getArtwork(i);
-        metadata->initialize(QString("A   here"), QString("And    here"),
+        auto *metadata = artItemsModelMock.getMockArtwork(i);
+        metadata->set(QString("A   here"), QString("And    here"),
                              QStringList());
     }
 
@@ -370,7 +370,7 @@ void ReplaceTests::replaceSpacesToSpacesTest() {
     auto result = commandManagerMock.processCommand(replaceCommand);
 
     for (int i = 0; i < itemsToGenerate; i++) {
-        Models::ArtworkMetadata *metadata = artItemsModelMock.getArtwork(i);
+        auto *metadata = artItemsModelMock.getMockArtwork(i);
         QCOMPARE(metadata->getDescription(), QString("And  here"));
         QCOMPARE(metadata->getTitle(), QString("A  here"));
     }
@@ -390,8 +390,8 @@ void ReplaceTests::replaceKeywordsToEmptyTest() {
             Common::SearchFlags::IncludeSpaces;
 
     for (int i = 0; i < itemsToGenerate; i++) {
-        Models::ArtworkMetadata *metadata = artItemsModelMock.getArtwork(i);
-        metadata->initialize(QString("A Vector can be found here"), QString("And vector here"),
+        auto *metadata = artItemsModelMock.getMockArtwork(i);
+        metadata->set(QString("A Vector can be found here"), QString("And vector here"),
                              QStringList() << "a vector here" << " vector ");
     }
 
@@ -401,7 +401,7 @@ void ReplaceTests::replaceKeywordsToEmptyTest() {
     auto result = commandManagerMock.processCommand(replaceCommand);
 
     for (int i = 0; i < itemsToGenerate; i++) {
-        Models::ArtworkMetadata *metadata = artItemsModelMock.getArtwork(i);
+        auto *metadata = artItemsModelMock.getMockArtwork(i);
         QCOMPARE(metadata->getDescription(), QString("And   here"));
         QCOMPARE(metadata->getTitle(), QString("A Vector can be found here"));
 

@@ -9,10 +9,76 @@
  */
 
 #include "../Common/defines.h"
+#include <QProcess>
+#include <QFileInfo>
 #include "../MetadataIO/metadataiocoordinator.h"
 #include "launchexiftooljobitem.h"
 
-namespace Maintenance {
+namespace Maintenance {    
+    bool tryGetExiftoolVersion(const QString &path, QString &version) {
+        QProcess process;
+        process.start(path, QStringList() << "-ver");
+        bool success = process.waitForFinished(3000);
+
+        const int exitCode = process.exitCode();
+        const QProcess::ExitStatus exitStatus = process.exitStatus();
+
+        success = success &&
+                (exitCode == 0) &&
+                (exitStatus == QProcess::NormalExit);
+
+        LOG_DEBUG << "Exiftool exitcode =" << exitCode << "exitstatus =" << exitStatus;
+
+        if (success) {
+            version = QString::fromUtf8(process.readAll());
+        }
+
+        if (process.state() != QProcess::NotRunning) {
+            process.kill();
+        }
+
+        return success;
+    }
+
+    QString discoverExiftool(const QString &defaultPath) {
+        LOG_DEBUG << "Default path is" << defaultPath;
+
+        QStringList possiblePaths;
+        QString exiftoolPath;
+        QString exiftoolVersion;
+
+        possiblePaths << defaultPath;
+
+#if defined(Q_OS_MAC)
+        possiblePaths << "/usr/bin/exiftool" << "/usr/local/bin/exiftool";
+#elif defined(Q_OS_WIN)
+        possiblePaths << "c:/exiftool.exe";
+#elif defined(Q_OS_LINUX)
+        possiblePaths << "/usr/bin/exiftool" << "/usr/local/bin/exiftool";
+        // TODO: add path inside AppImage
+#else
+        // BUMP
+#endif
+
+        possiblePaths << "exiftool";
+
+        foreach (const QString &path, possiblePaths) {
+            LOG_DEBUG << "Trying path" << path;
+
+            if (!QFileInfo(path).exists()) {
+                LOG_INFO << "File" << path << "does not exist";
+            }
+
+            if (tryGetExiftoolVersion(path, exiftoolVersion)) {
+                LOG_INFO << "Exiftool version:" << exiftoolVersion;
+                exiftoolPath = path;
+                break;
+            }
+        }
+
+        return exiftoolPath;
+    }
+
     LaunchExiftoolJobItem::LaunchExiftoolJobItem(const QString &settingsExiftoolPath,
                                                  MetadataIO::MetadataIOCoordinator *coordinator):
         m_SettingsExiftoolPath(settingsExiftoolPath),
@@ -23,11 +89,7 @@ namespace Maintenance {
 
     void LaunchExiftoolJobItem::processJob() {
         LOG_DEBUG << "#";
-        doLaunchExiftool();
-    }
-
-    void LaunchExiftoolJobItem::doLaunchExiftool() {
-        m_MetadataIOCoordinator->tryToLaunchExiftool(m_SettingsExiftoolPath);
-        m_MetadataIOCoordinator->exiftoolDiscoveryFinished();
+        QString recommendedPath = discoverExiftool(m_SettingsExiftoolPath);
+        m_MetadataIOCoordinator->setRecommendedExiftoolPath(recommendedPath);
     }
 }

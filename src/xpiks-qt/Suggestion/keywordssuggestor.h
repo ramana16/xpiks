@@ -24,7 +24,6 @@
 #include "../Common/hold.h"
 
 namespace Suggestion {
-    class LocalLibrary;
     class SuggestionQueryEngineBase;
 
     class KeywordsSuggestor : public QAbstractListModel, public Common::BaseEntity
@@ -39,7 +38,7 @@ namespace Suggestion {
         Q_PROPERTY(bool isLocalSearch READ getIsLocalSearch NOTIFY isLocalSearchChanged)
 
     public:
-        KeywordsSuggestor(LocalLibrary *library, QObject *parent=NULL);
+        KeywordsSuggestor(QObject *parent=NULL);
         virtual ~KeywordsSuggestor();
 
     public:
@@ -140,7 +139,6 @@ namespace Suggestion {
         QHash<QString, int> m_KeywordsHash;
         std::vector<std::shared_ptr<SuggestionArtwork> > m_Suggestions;
         QVector<SuggestionQueryEngineBase*> m_QueryEngines;
-        LocalLibrary *m_LocalLibrary;
         QStringList m_QueryEnginesNames;
         QString m_LastErrorString;
         QSet<QString> m_ExistingKeywords;

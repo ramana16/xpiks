@@ -17,6 +17,7 @@
 #include <QString>
 #include <vector>
 #include "../Models/metadataelement.h"
+#include "../MetadataIO/artworkssnapshot.h"
 
 namespace Models {
     class ArtworkMetadata;
@@ -42,7 +43,7 @@ namespace Commands {
 
     class DeleteKeywordsCommandResult : public CommandResult {
     public:
-        DeleteKeywordsCommandResult(const QVector<Models::ArtworkMetadata *> &affectedItems,
+        DeleteKeywordsCommandResult(const MetadataIO::WeakArtworksSnapshot &affectedItems,
                                     const QVector<int> &indicesToUpdate):
             m_AffectedItems(affectedItems),
             m_IndicesToUpdate(indicesToUpdate)
@@ -57,7 +58,7 @@ namespace Commands {
 #else
     public:
 #endif
-        QVector<Models::ArtworkMetadata *> m_AffectedItems;
+        MetadataIO::WeakArtworksSnapshot m_AffectedItems;
         QVector<int> m_IndicesToUpdate;
     };
 }

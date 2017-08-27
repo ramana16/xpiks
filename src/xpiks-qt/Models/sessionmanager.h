@@ -36,6 +36,7 @@ namespace Models {
     public:
         void initialize();
         void onBeforeRestore();
+        void onAfterRestore();
         void saveToFile(std::vector<std::shared_ptr<MetadataIO::ArtworkSessionSnapshot> > &snapshot);
         void readSessionFromFile();
 

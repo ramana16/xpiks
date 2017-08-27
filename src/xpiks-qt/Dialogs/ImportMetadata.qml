@@ -191,7 +191,7 @@ Item {
 
                 StyledCheckbox {
                     id: ignoreAutosavesCheckbox
-                    text: i18.n + qsTr("Ignore autosaves (.xpks)")
+                    text: i18.n + qsTr("Ignore autosaves")
                     enabled: settingsModel.saveBackups && !metadataImportComponent.isInProgress
                     checked: false
                 }

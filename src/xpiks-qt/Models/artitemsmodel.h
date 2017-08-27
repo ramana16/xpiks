@@ -20,6 +20,8 @@
 #include <QHash>
 #include <QQuickTextDocument>
 #include <deque>
+#include <vector>
+#include <memory>
 #include "../Common/abstractlistmodel.h"
 #include "../Common/baseentity.h"
 #include "../Common/ibasicartwork.h"
@@ -28,6 +30,10 @@
 
 namespace Common {
     class BasicMetadataModel;
+}
+
+namespace QMLExtensions {
+    class ArtworkUpdateRequest;
 }
 
 namespace Models {
@@ -62,6 +68,8 @@ namespace Models {
             EditIsSelectedRole,
             HasVectorAttachedRole,
             BaseFilenameRole,
+            IsVideoRole,
+            ArtworkThumbnailRole,
             RolesNumber
         };
 
@@ -159,16 +167,24 @@ namespace Models {
         void endAccountingManyFiles();
 
     public:
+        void syncArtworksIndices();
         void insertArtwork(int index, ArtworkMetadata *metadata);
         void appendMetadata(ArtworkMetadata *metadata);
         void removeArtworks(const QVector<QPair<int, int> > &ranges);
-        ArtworkMetadata *getArtwork(int index) const;
+        ArtworkMetadata *getArtwork(size_t index) const;
         void raiseArtworksAdded(int imagesCount, int vectorsCount);
         void raiseArtworksChanged(bool navigateToCurrent);
         virtual void updateItemsAtIndices(const QVector<int> &indices);
+        void updateItemsAtIndicesEx(const QVector<int> &indices, const QVector<int> &roles);
         virtual void updateItemsInRanges(const QVector<QPair<int, int> > &ranges);
+        void updateItemsInRangesEx(const QVector<QPair<int, int> > &ranges, const QVector<int> &roles);
         void setAllItemsSelected(bool selected);
         int attachVectors(const QHash<QString, QHash<QString, QString> > &vectorsPaths, QVector<int> &indicesToUpdate) const;
+
+    public:
+        // update hub related
+        void processUpdateRequests(const std::vector<std::shared_ptr<QMLExtensions::ArtworkUpdateRequest> > &updateRequests);
+        void updateArtworks(const QSet<qint64> &artworkIDs, const QVector<int> &rolesToUpdate);
 
     public:
         // IARTWORKSSOURCE
@@ -184,6 +200,7 @@ namespace Models {
 
     private:
         void doCombineArtwork(int index);
+        Models::ArtworkMetadata *accessArtwork(size_t index) const;
 
     signals:
         void modifiedArtworksCountChanged();
@@ -208,6 +225,9 @@ namespace Models {
         void doRemoveItemsAtIndices(QVector<int> &indicesToRemove);
         void doRemoveItemsInRanges(const QVector<QPair<int, int> > &rangesToRemove);
         void getSelectedItemsIndices(QVector<int> &indices);
+
+    public:
+        QVector<int> getArtworkStandardRoles() const;
 
     private:
         void fillStandardRoles(QVector<int> &roles) const;

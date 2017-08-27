@@ -382,7 +382,7 @@ Rectangle {
 
                     Image {
                         id: previewImage
-                        source: "image://global/" + artworkProxy.imagePath
+                        source: "image://global/" + artworkProxy.thumbPath
                         cache: false
                         property bool isFullSize: false
                         width: isFullSize ? sourceSize.width : (imageWrapper.width - 2*imageWrapper.imageMargin)
@@ -391,6 +391,18 @@ Rectangle {
                         anchors.centerIn: parent
                         asynchronous: true
                     }
+                }
+
+                Image {
+                    id: videoTypeIcon
+                    visible: (artworkProxy.isVideo) && (previewImage.status == Image.Ready)
+                    enabled: artworkProxy.isVideo
+                    source: "qrc:/Graphics/video-icon.svg"
+                    fillMode: Image.PreserveAspectCrop
+                    sourceSize.width: 225
+                    sourceSize.height: 225
+                    anchors.centerIn: imageWrapper
+                    cache: true
                 }
 
                 Rectangle {
@@ -1023,11 +1035,50 @@ Rectangle {
                     color: Colors.selectedArtworkBackground
                     anchors.fill: parent
 
-                    ColumnLayout {
-                        id: column
+                    ListView {
+                        model: artworkProxy.getPropertiesMap()
                         anchors.fill: parent
                         anchors.margins: 20
                         spacing: 10
+
+                        delegate: Item {
+                            id: rowWrapper
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            height: childrenRect.height
+
+                            Item {
+                                id: keyItem
+                                anchors.left: parent.left
+                                width: 70
+                                height: childrenRect.height
+
+                                StyledText {
+                                    text: i18.n + key + ":"
+                                    isActive: false
+                                    anchors.right: parent.right
+                                }
+                            }
+
+                            Item {
+                                id: valueItem
+                                anchors.left: keyItem.right
+                                anchors.right: parent.right
+                                anchors.leftMargin: 10
+                                height: childrenRect.height
+
+                                StyledText {
+                                    wrapMode: TextEdit.Wrap
+                                    text: value
+                                    width: parent.width
+                                }
+                            }
+                        }
+                    }
+
+                    /*ColumnLayout {
+                        id: column
+
 
                         Item {
                             height: 15
@@ -1058,7 +1109,7 @@ Rectangle {
                             StyledText {
                                 wrapMode: TextEdit.Wrap
                                 anchors.fill: parent
-                                text: artworkProxy.imagePath
+                                text: artworkProxy.filePath
                                 height: 90
                                 elide: Text.ElideRight
                             }
@@ -1080,7 +1131,7 @@ Rectangle {
                         Item {
                             Layout.fillHeight: true
                         }
-                    }
+                    }*/
                 }
             }
         }
@@ -1178,13 +1229,25 @@ Rectangle {
                     id: artworkImage
                     anchors.fill: parent
                     anchors.margins: 15
-                    source: "image://cached/" + filename
+                    source: "image://cached/" + thumbpath
                     sourceSize.width: 150
                     sourceSize.height: 150
                     fillMode: settingsModel.fitSmallPreview ? Image.PreserveAspectFit : Image.PreserveAspectCrop
                     asynchronous: true
                     // caching is implemented on different level
                     cache: false
+                }
+
+                Image {
+                    id: videoTypeIconSmall
+                    visible: isvideo
+                    enabled: isvideo
+                    source: "qrc:/Graphics/video-icon-s.png"
+                    fillMode: Image.PreserveAspectFit
+                    sourceSize.width: 150
+                    sourceSize.height: 150
+                    anchors.fill: artworkImage
+                    cache: true
                 }
 
                 Image {

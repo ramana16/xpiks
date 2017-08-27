@@ -2,6 +2,7 @@
 #define REMOVEFILESFS_TESTS_H
 
 #include <QObject>
+#include <QtTest/QtTest>
 
 class RemoveFilesFsTests: public QObject
 {

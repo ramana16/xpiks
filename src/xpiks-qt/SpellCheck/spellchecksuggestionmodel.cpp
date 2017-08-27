@@ -317,6 +317,6 @@ namespace SpellCheck {
             }
         }
 
-        m_CommandManager->updateArtworks(indices);
+        m_CommandManager->updateArtworksAtIndices(indices);
     }
 }

@@ -29,7 +29,7 @@ namespace Commands {
         std::vector<UndoRedo::ArtworkMetadataBackup> artworksBackups;
 
         QVector<int> indicesToUpdate;
-        QVector<Models::ArtworkMetadata *> itemsToSave;
+        MetadataIO::WeakArtworksSnapshot itemsToSave;
 
         size_t size = m_MetadataElements.size();
         itemsToSave.reserve((int)size);
@@ -73,7 +73,7 @@ namespace Commands {
         CommandManager *commandManager = (CommandManager *)commandManagerInterface;
 
         if (!m_IndicesToUpdate.isEmpty()) {
-            commandManager->updateArtworks(m_IndicesToUpdate);
+            commandManager->updateArtworksAtIndices(m_IndicesToUpdate);
         }
 
         if (!m_ItemsToSave.isEmpty()) {

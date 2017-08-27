@@ -47,7 +47,7 @@ int SaveWithEmptyTitleTest::doTest() {
 
     QString description = "Description for title";
     metadata->setDescription(description);
-    metadata->setTitle(""); // title should be taken from keywords
+    metadata->setTitle(""); // title should be taken from description
     metadata->setIsSelected(true);
 
     bool doOverwrite = true, dontSaveBackups = false;

@@ -18,9 +18,7 @@
 #include "suggestionartwork.h"
 #include "keywordssuggestor.h"
 #include "../Encryption/aes-qt.h"
-#include "libraryqueryworker.h"
-#include "locallibrary.h"
-#include "../Conectivity/simplecurlrequest.h"
+#include "../Connectivity/simplecurlrequest.h"
 #include "../Common/defines.h"
 #include "../Models/settingsmodel.h"
 
@@ -32,9 +30,9 @@ namespace Suggestion {
         m_ClientSecret = "5092d9a967c2f19b57aac29bc09ac3b9e6ae5baec1a371331b73ff24f1625d95c4f3fef90bdacfbe9b0b3803b48c269192bc55f14bb9c2b5a16d650cd641b746eb384fcf9dbd53a96f1f81215921b04409f3635ecf846ffdf01ee04ba76624c9";
     }
 
-    void ShutterstockQueryEngine::submitQuery(const QStringList &queryKeywords, QueryResultsType resultsType) {
-        LOG_INFO << queryKeywords;
-        QUrl url = buildQuery(queryKeywords, resultsType);
+    void ShutterstockQueryEngine::submitQuery(const SearchQuery &query) {
+        LOG_INFO << query.m_SearchTerms;
+        QUrl url = buildQuery(query);
 
         QString decodedClientId = Encryption::decodeText(m_ClientId, "MasterPassword");
         QString decodedClientSecret = Encryption::decodeText(m_ClientSecret, "MasterPassword");
@@ -46,7 +44,7 @@ namespace Suggestion {
         auto *proxySettings = settings->retrieveProxySettings();
 
         QString resourceUrl = QString::fromLocal8Bit(url.toEncoded());
-        Conectivity::SimpleCurlRequest *request = new Conectivity::SimpleCurlRequest(resourceUrl);
+        Connectivity::SimpleCurlRequest *request = new Connectivity::SimpleCurlRequest(resourceUrl);
         request->setRawHeaders(QStringList() << "Authorization: " + headerData);
         request->setProxySettings(proxySettings);
 
@@ -54,13 +52,13 @@ namespace Suggestion {
 
         request->moveToThread(thread);
 
-        QObject::connect(thread, &QThread::started, request, &Conectivity::SimpleCurlRequest::process);
-        QObject::connect(request, &Conectivity::SimpleCurlRequest::stopped, thread, &QThread::quit);
+        QObject::connect(thread, &QThread::started, request, &Connectivity::SimpleCurlRequest::process);
+        QObject::connect(request, &Connectivity::SimpleCurlRequest::stopped, thread, &QThread::quit);
 
-        QObject::connect(request, &Conectivity::SimpleCurlRequest::stopped, request, &Conectivity::SimpleCurlRequest::deleteLater);
+        QObject::connect(request, &Connectivity::SimpleCurlRequest::stopped, request, &Connectivity::SimpleCurlRequest::deleteLater);
         QObject::connect(thread, &QThread::finished, thread, &QThread::deleteLater);
 
-        QObject::connect(request, &Conectivity::SimpleCurlRequest::requestFinished, this, &ShutterstockQueryEngine::requestFinishedHandler);
+        QObject::connect(request, &Connectivity::SimpleCurlRequest::requestFinished, this, &ShutterstockQueryEngine::requestFinishedHandler);
 
         thread->start();
     }
@@ -68,7 +66,7 @@ namespace Suggestion {
     void ShutterstockQueryEngine::requestFinishedHandler(bool success) {
         LOG_INFO << "success:" << success;
 
-        Conectivity::SimpleCurlRequest *request = qobject_cast<Conectivity::SimpleCurlRequest *>(sender());
+        Connectivity::SimpleCurlRequest *request = qobject_cast<Connectivity::SimpleCurlRequest *>(sender());
 
         if (success) {
             QJsonParseError error;
@@ -134,17 +132,17 @@ namespace Suggestion {
         }
     }
 
-    QUrl ShutterstockQueryEngine::buildQuery(const QStringList &queryKeywords, QueryResultsType resultsType) const {
+    QUrl ShutterstockQueryEngine::buildQuery(const SearchQuery &query) const {
         QUrlQuery urlQuery;
 
         urlQuery.addQueryItem("language", "en");
         urlQuery.addQueryItem("view", "full");
         urlQuery.addQueryItem("per_page", "100");
         urlQuery.addQueryItem("sort", "popular");
-        urlQuery.addQueryItem("query", queryKeywords.join(' '));
+        urlQuery.addQueryItem("query", query.m_SearchTerms.join(' '));
 
-        if (resultsType != QueryResultsType::AllImages) {
-            urlQuery.addQueryItem("image_type", resultsTypeToString(resultsType));
+        if (!Common::HasFlag(query.m_Flags, Suggestion::AllImages)) {
+            urlQuery.addQueryItem("image_type", resultsTypeToString(query.m_Flags));
         }
 
         QUrl url;
@@ -153,13 +151,11 @@ namespace Suggestion {
         return url;
     }
 
-    QString ShutterstockQueryEngine::resultsTypeToString(QueryResultsType resultsType) const {
-        switch (resultsType) {
-        case QueryResultsType::Photos: return QLatin1String("photo");
-        case QueryResultsType::Vectors: return QLatin1String("vector");
-        case QueryResultsType::Illustrations: return QLatin1String("illustration");
-        default: return QString();
-        }
+    QString ShutterstockQueryEngine::resultsTypeToString(Common::flag_t queryFlags) const {
+        if (Common::HasFlag(queryFlags, Suggestion::Photos)) { return QLatin1String("photo"); }
+        else if (Common::HasFlag(queryFlags, Suggestion::Vectors)) { return QLatin1String("vector"); }
+        else if (Common::HasFlag(queryFlags, Suggestion::Illustrations)) { return QLatin1String("illustration"); }
+        else { return QString(); }
     }
 }
 

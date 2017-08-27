@@ -27,7 +27,6 @@ int WeirdNamesReadTest::doTest() {
     QList<QUrl> directories;
     directories << getDirPathForTest("images-for-tests/weird/");
 
-
     MetadataIO::MetadataIOCoordinator *ioCoordinator = m_CommandManager->getMetadataIOCoordinator();
     SignalWaiter waiter;
     QObject::connect(ioCoordinator, SIGNAL(metadataReadingFinished()), &waiter, SIGNAL(finished()));

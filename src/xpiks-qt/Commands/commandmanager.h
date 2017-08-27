@@ -21,7 +21,7 @@
 #include <vector>
 #include "../UndoRedo/ihistoryitem.h"
 #include "commandbase.h"
-#include "../Conectivity/analyticsuserevent.h"
+#include "../Connectivity/analyticsuserevent.h"
 #include "../Common/flags.h"
 #include "icommandmanager.h"
 #include "../Common/iservicebase.h"
@@ -30,7 +30,7 @@
 #include "../KeywordsPresets/presetkeywordsmodel.h"
 #include "../KeywordsPresets/presetkeywordsmodelconfig.h"
 #include "../Helpers/asynccoordinator.h"
-#include "../MetadataIO/artworkmetadatasnapshot.h"
+#include "../MetadataIO/artworkssnapshot.h"
 
 namespace Encryption {
     class SecretsManager;
@@ -71,11 +71,10 @@ namespace Models {
 
 namespace Suggestion {
     class KeywordsSuggestor;
-    class LocalLibrary;
 }
 
 namespace MetadataIO {
-    class BackupSaverService;
+    class MetadataIOService;
     class MetadataIOCoordinator;
 }
 
@@ -84,7 +83,7 @@ namespace SpellCheck {
     class SpellCheckSuggestionModel;
 }
 
-namespace Conectivity {
+namespace Connectivity {
     class TelemetryService;
     class UpdateService;
     class RequestsService;
@@ -102,6 +101,8 @@ namespace Warnings {
 namespace QMLExtensions {
     class ColorsModel;
     class ImageCachingService;
+    class VideoCachingService;
+    class ArtworksUpdateHub;
 }
 
 namespace AutoComplete {
@@ -110,6 +111,7 @@ namespace AutoComplete {
 
 namespace Helpers {
     class HelpersQmlWrapper;
+    class DatabaseManager;
 }
 
 namespace Translation {
@@ -131,7 +133,7 @@ namespace Commands {
         Q_OBJECT
     public:
         CommandManager();
-        virtual ~CommandManager() {}
+        virtual ~CommandManager();
 
     public:
         void InjectDependency(Models::ArtworksRepository *artworkRepository);
@@ -150,12 +152,11 @@ namespace Commands {
         void InjectDependency(Models::RecentFilesModel *recentFiles);
         void InjectDependency(SpellCheck::SpellCheckerService *spellCheckerService);
         void InjectDependency(SpellCheck::SpellCheckSuggestionModel *spellCheckSuggestionModel);
-        void InjectDependency(MetadataIO::BackupSaverService *backupSaverService);
-        void InjectDependency(Conectivity::TelemetryService *telemetryService);
-        void InjectDependency(Conectivity::UpdateService *updateService);
+        void InjectDependency(MetadataIO::MetadataIOService *metadataIOService);
+        void InjectDependency(Connectivity::TelemetryService *telemetryService);
+        void InjectDependency(Connectivity::UpdateService *updateService);
         void InjectDependency(Models::LogsModel *logsModel);
         void InjectDependency(MetadataIO::MetadataIOCoordinator *metadataIOCoordinator);
-        void InjectDependency(Suggestion::LocalLibrary *localLibrary);
         void InjectDependency(Plugins::PluginManager *pluginManager);
         void InjectDependency(Models::LanguagesModel *languagesModel);
         void InjectDependency(QMLExtensions::ColorsModel *colorsModel);
@@ -174,8 +175,11 @@ namespace Commands {
         void InjectDependency(Warnings::WarningsModel *warningsModel);
         void InjectDependency(QuickBuffer::QuickBuffer *quickBuffer);
         void InjectDependency(Maintenance::MaintenanceService *maintenanceService);
+        void InjectDependency(QMLExtensions::VideoCachingService *videoCachingService);
         void InjectDependency(Models::SwitcherModel *switcherModel);
-        void InjectDependency(Conectivity::RequestsService *requestsService);
+        void InjectDependency(QMLExtensions::ArtworksUpdateHub *artworksUpdateHub);
+        void InjectDependency(Connectivity::RequestsService *requestsService);
+        void InjectDependency(Helpers::DatabaseManager *databaseManager);
 
     private:
         int generateNextCommandID() { int id = m_LastCommandID++; return id; }
@@ -200,25 +204,25 @@ namespace Commands {
         void combineArtwork(Models::ArtworkMetadata *metadata, int index) const;
         void combineArtworks(std::vector<Models::MetadataElement> &artworks) const;
         void deleteKeywordsFromArtworks(std::vector<Models::MetadataElement> &artworks) const;
-        void setArtworksForUpload(const QVector<Models::ArtworkMetadata*> &artworks) const;
-        void setArtworksForZipping(const QVector<Models::ArtworkMetadata*> &artworks) const;
+        void setArtworksForUpload(MetadataIO::ArtworksSnapshot &artworks) const;
+        void setArtworksForZipping(MetadataIO::ArtworksSnapshot &artworks) const;
         virtual void connectArtworkSignals(Models::ArtworkMetadata *metadata) const;
         void disconnectArtworkSignals(Models::ArtworkMetadata *metadata) const;
-        void readMetadata(const QVector<Models::ArtworkMetadata*> &artworks,
-                          const QVector<QPair<int, int> > &rangesToUpdate) const;
+        void readMetadata(const MetadataIO::ArtworksSnapshot &snapshot) const;
         void writeMetadata(const QVector<Models::ArtworkMetadata*> &artworks, bool useBackups) const;
-        void addToLibrary(std::unique_ptr<MetadataIO::ArtworksSnapshot> &artworksSnapshot) const;
-        void updateArtworks(const QVector<int> &indices) const;
-        void updateArtworks(const QVector<QPair<int, int> > &rangesToUpdate) const;
+        void addToLibrary(const QVector<Models::ArtworkMetadata *> &artworks) const;
+        void updateArtworksAtIndices(const QVector<int> &indices) const;
+        void updateArtworks(const MetadataIO::WeakArtworksSnapshot &artworks) const;
+        void updateArtworks(const std::vector<std::shared_ptr<Models::ArtworkMetadataLocker> > &artworks);
         void addToRecentDirectories(const QString &path) const;
         void addToRecentFiles(const QString &path) const;
         void addToRecentFiles(const QStringList &filenames) const;
         void autoDiscoverExiftool() const;
 
     public:
-        void generatePreviews(const QVector<Models::ArtworkMetadata*> &items) const;
+        void generatePreviews(const MetadataIO::ArtworksSnapshot &snapshot) const;
         void submitKeywordForSpellCheck(Common::BasicKeywordsModel *item, int keywordIndex) const;
-        void submitForSpellCheck(const QVector<Models::ArtworkMetadata*> &items) const;
+        void submitForSpellCheck(const MetadataIO::WeakArtworksSnapshot &items) const;
         void submitForSpellCheck(const QVector<Common::BasicKeywordsModel *> &items) const;
         void submitItemForSpellCheck(Common::BasicKeywordsModel *item, Common::SpellCheckFlags flags = Common::SpellCheckFlags::All) const;
         void setupSpellCheckSuggestions(Common::IMetadataOperator *item, int index, Common::SuggestionFlags flags);
@@ -228,16 +232,15 @@ namespace Commands {
     public:
         void submitKeywordsForWarningsCheck(Models::ArtworkMetadata *item) const;
         void submitForWarningsCheck(Models::ArtworkMetadata *item, Common::WarningsCheckFlags flags = Common::WarningsCheckFlags::All) const;
-        void submitForWarningsCheck(const QVector<Models::ArtworkMetadata*> &items) const;
+        void submitForWarningsCheck(const MetadataIO::WeakArtworksSnapshot &items) const;
 
     private:
         void submitForWarningsCheck(const QVector<Common::IBasicArtwork *> &items) const;
 
     public:
         void saveArtworkBackup(Models::ArtworkMetadata *metadata) const;
-        void saveArtworksBackups(const QVector<Models::ArtworkMetadata *> &artworks) const;
-        void reportUserAction(Conectivity::UserAction userAction) const;
-        void cleanupLocalLibraryAsync() const;
+        void saveArtworksBackups(const MetadataIO::WeakArtworksSnapshot &artworks) const;
+        void reportUserAction(Connectivity::UserAction userAction) const;
         void afterConstructionCallback();
 
     private:
@@ -250,7 +253,6 @@ namespace Commands {
 #ifdef INTEGRATION_TESTS
         int restoreSessionForTest();
 #endif
-        void saveSession() const;
         void saveSessionInBackground();
 
     public:
@@ -283,7 +285,7 @@ namespace Commands {
         virtual Suggestion::KeywordsSuggestor *getKeywordsSuggestor() const { return m_KeywordsSuggestor; }
         virtual Models::SettingsModel *getSettingsModel() const { return m_SettingsModel; }
         virtual SpellCheck::SpellCheckerService *getSpellCheckerService() const { return m_SpellCheckerService; }
-        virtual MetadataIO::BackupSaverService *getBackupSaverService() const { return m_MetadataSaverService; }
+        virtual MetadataIO::MetadataIOService *getMetadataIOService() const { return m_MetadataIOService; }
         virtual UndoRedo::UndoRedoManager *getUndoRedoManager() const { return m_UndoRedoManager; }
         virtual QMLExtensions::ColorsModel *getColorsModel() const { return m_ColorsModel; }
         virtual Models::FilteredArtItemsProxyModel *getFilteredArtItemsModel() const { return m_FilteredItemsModel; }
@@ -300,10 +302,14 @@ namespace Commands {
         virtual Models::RecentDirectoriesModel *getRecentDirectories() const { return m_RecentDirectories; }
         virtual Models::RecentFilesModel *getRecentFiles() const { return m_RecentFiles; }
         virtual Maintenance::MaintenanceService *getMaintenanceService() const { return m_MaintenanceService; }
+        virtual QMLExtensions::ImageCachingService *getImageCachingService() const { return m_ImageCachingService; }
+        virtual QMLExtensions::ArtworksUpdateHub *getArtworksUpdateHub() const { return m_ArtworksUpdateHub; }
+        virtual Models::ArtworkProxyModel *getArtworkProxyModel() const { return m_ArtworkProxyModel; }
         virtual Models::SessionManager *getSessionManager() const { return m_SessionManager; }
         virtual Warnings::WarningsModel *getWarningsModel() const { return m_WarningsModel; }
         virtual Models::SwitcherModel *getSwitcherModel() const { return m_SwitcherModel; }
-        virtual Conectivity::RequestsService *getRequestsService() const { return m_RequestsService; }
+        virtual Connectivity::RequestsService *getRequestsService() const { return m_RequestsService; }
+        virtual Helpers::DatabaseManager *getDatabaseManager() const { return m_DatabaseManager; }
 
 #ifdef INTEGRATION_TESTS
         virtual Translation::TranslationManager *getTranslationManager() const { return m_TranslationManager; }
@@ -316,6 +322,7 @@ namespace Commands {
 
     private:
         Helpers::AsyncCoordinator m_InitCoordinator;
+
         Models::ArtworksRepository *m_ArtworksRepository;
         Models::ArtItemsModel *m_ArtItemsModel;
         Models::FilteredArtItemsProxyModel *m_FilteredItemsModel;
@@ -332,11 +339,10 @@ namespace Commands {
         Models::RecentFilesModel *m_RecentFiles;
         SpellCheck::SpellCheckerService *m_SpellCheckerService;
         SpellCheck::SpellCheckSuggestionModel *m_SpellCheckSuggestionModel;
-        MetadataIO::BackupSaverService *m_MetadataSaverService;
-        Conectivity::TelemetryService *m_TelemetryService;
-        Conectivity::UpdateService *m_UpdateService;
+        MetadataIO::MetadataIOService *m_MetadataIOService;
+        Connectivity::TelemetryService *m_TelemetryService;
+        Connectivity::UpdateService *m_UpdateService;
         Models::LogsModel *m_LogsModel;
-        Suggestion::LocalLibrary *m_LocalLibrary;
         MetadataIO::MetadataIOCoordinator *m_MetadataIOCoordinator;
         Plugins::PluginManager *m_PluginManager;
         Models::LanguagesModel *m_LanguagesModel;
@@ -356,8 +362,11 @@ namespace Commands {
         Warnings::WarningsModel *m_WarningsModel;
         QuickBuffer::QuickBuffer *m_QuickBuffer;
         Maintenance::MaintenanceService *m_MaintenanceService;
+        QMLExtensions::VideoCachingService *m_VideoCachingService;
+        QMLExtensions::ArtworksUpdateHub *m_ArtworksUpdateHub;
         Models::SwitcherModel *m_SwitcherModel;
-        Conectivity::RequestsService *m_RequestsService;
+        Connectivity::RequestsService *m_RequestsService;
+        Helpers::DatabaseManager *m_DatabaseManager;
 
         QVector<Common::IServiceBase<Common::IBasicArtwork, Common::WarningsCheckFlags> *> m_WarningsCheckers;
         QVector<Helpers::IFileNotAvailableModel*> m_AvailabilityListeners;

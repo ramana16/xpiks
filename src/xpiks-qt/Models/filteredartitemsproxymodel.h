@@ -17,6 +17,7 @@
 #include <functional>
 #include "../Common/flags.h"
 #include "../Common/baseentity.h"
+#include "../MetadataIO/artworkssnapshot.h"
 
 namespace Models {
     class ArtworkMetadata;
@@ -114,7 +115,7 @@ namespace Models {
         void invertFilteredItemsSelected();
 
         QVector<ArtworkMetadata *> getSelectedOriginalItems() const;
-
+        MetadataIO::ArtworksSnapshot::Container getSelectedArtworksSnapshot() const;
         std::vector<MetadataElement> getSelectedOriginalItemsWithIndices() const;
 
         std::vector<MetadataElement> getAllItemsWithIndices() const;

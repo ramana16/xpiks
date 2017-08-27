@@ -18,6 +18,7 @@
 #include "commandbase.h"
 #include "../Models/metadataelement.h"
 #include "../Common/flags.h"
+#include "../MetadataIO/artworkssnapshot.h"
 
 namespace Models {
     class ArtworkMetadata;
@@ -67,8 +68,8 @@ namespace Commands {
 
     class CombinedEditCommandResult : public CommandResult {
     public:
-        CombinedEditCommandResult(const QVector<Models::ArtworkMetadata *> &affectedItems,
-                                  const QVector<Models::ArtworkMetadata *> &itemsToSave,
+        CombinedEditCommandResult(const MetadataIO::WeakArtworksSnapshot &affectedItems,
+                                  const MetadataIO::WeakArtworksSnapshot &itemsToSave,
                                   const QVector<int> &indicesToUpdate) :
             m_AffectedItems(affectedItems),
             m_ItemsToSave(itemsToSave),
@@ -84,8 +85,8 @@ namespace Commands {
 #else
     public:
 #endif
-        QVector<Models::ArtworkMetadata *> m_AffectedItems;
-        QVector<Models::ArtworkMetadata *> m_ItemsToSave;
+        MetadataIO::WeakArtworksSnapshot m_AffectedItems;
+        MetadataIO::WeakArtworksSnapshot m_ItemsToSave;
         QVector<int> m_IndicesToUpdate;
     };
 }

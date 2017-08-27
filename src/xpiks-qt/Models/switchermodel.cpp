@@ -10,28 +10,24 @@
 
 #include "switchermodel.h"
 #include <QDir>
+#include <QUuid>
 #include "../Common/defines.h"
+#include "../Helpers/stringhelper.h"
 
 namespace Models {
-#ifdef QT_DEBUG
-    #ifdef INTEGRATION_TESTS
-        #define ENGAGEMENT_CONFIG "integration_engagement.json"
-    #else
-        #define ENGAGEMENT_CONFIG "debug_engagement.json"
-    #endif
-#else
-    #define ENGAGEMENT_CONFIG "engagement.json"
-#endif
-
-#define DONATE_CAMPAIGN1_CLICKED QLatin1String("DonateCampaign1Clicked")
+#define DONATE_CAMPAIGN1_CLICKED "DonateCampaign1Clicked"
+#define SWITCHER_SESSION_TOKEN "SessionToken"
+#define SWITCHER_SESSION_START "SessionStart"
 #define SWITCHER_TIMER_DELAY 2000
 
     SwitcherModel::SwitcherModel(QObject *parent):
         QObject(parent),
         Common::BaseEntity(),
-        m_DonateCampaign1LinkClicked(false)
+        Common::StatefulEntity("switcher"),
+        // effectively meaning all features are OFF
+        m_Threshold(100)
     {
-        QObject::connect(&m_Config, &Conectivity::SwitcherConfig::switchesUpdated,
+        QObject::connect(&m_Config, &Connectivity::SwitcherConfig::switchesUpdated,
                          this, &SwitcherModel::configUpdated);
 
         m_DelayTimer.setSingleShot(true);
@@ -43,18 +39,21 @@ namespace Models {
         m_Config.setCommandManager(commandManager);
     }
 
-    void SwitcherModel::initEngagement() {
-        LOG_DEBUG << "#";
+    void SwitcherModel::initialize() {
+        initState();
+        ensureSessionTokenValid();
 
-        QString appDataPath = XPIKS_USERDATA_PATH;
-        if (!appDataPath.isEmpty()) {
-            QDir appDataDir(appDataPath);
-            m_EngagementConfigPath = appDataDir.filePath(ENGAGEMENT_CONFIG);
+        QString sessionToken = getStateString(SWITCHER_SESSION_TOKEN);
+        if (!sessionToken.isEmpty()) {
+            quint32 hash = Helpers::switcherHash(sessionToken);
+            quint32 threshold = hash % 100;
+            m_Threshold = (int)threshold;
         } else {
-            m_EngagementConfigPath = ENGAGEMENT_CONFIG;
+            // effectively meaning all features are OFF
+            m_Threshold = 100;
         }
 
-        readEngagementConfig();
+        LOG_INFO << "Current threshold is" << m_Threshold;
     }
 
     void SwitcherModel::updateConfigs() {
@@ -67,24 +66,60 @@ namespace Models {
         m_DelayTimer.start(SWITCHER_TIMER_DELAY);
     }
 
+    void SwitcherModel::ensureSessionTokenValid() {
+        LOG_DEBUG << "#";
+        bool canKeepToken = false;
+        const QDateTime dtNow = QDateTime::currentDateTime();
+
+        do {
+            if (!containsState(SWITCHER_SESSION_TOKEN)) {
+                LOG_DEBUG << "Token not found in the state config";
+                break;
+            }
+
+            const QString sessionStart = getStateString(SWITCHER_SESSION_START);
+            const QDateTime sessionStartDateTime = QDateTime::fromString(sessionStart, Qt::ISODate);
+            if (!sessionStartDateTime.isValid()) {
+                LOG_WARNING << "Cannot parse session start datetime:" << sessionStart;
+                break;
+            }
+
+            qint64 daysPassed = sessionStartDateTime.daysTo(dtNow);
+            LOG_DEBUG << "Token is valid already for" << daysPassed << "day(s)";
+
+            if ((daysPassed < 0) || (daysPassed > 30)) {
+                break;
+            }
+
+            canKeepToken = true;
+        } while (false);
+
+        if (!canKeepToken) {
+            LOG_INFO << "Updating switcher token";
+
+            QUuid uuid = QUuid::createUuid();
+            setStateValue(SWITCHER_SESSION_TOKEN, uuid.toString());
+            QString dateTimeString = dtNow.toString(Qt::ISODate);
+            setStateValue(SWITCHER_SESSION_START, dateTimeString);
+
+            syncState();
+        }
+    }
+
+    bool SwitcherModel::getDonateCampaign1LinkClicked() const {
+        bool clicked = getStateBool(DONATE_CAMPAIGN1_CLICKED, false);
+        return clicked;
+    }
+
     void SwitcherModel::setDonateCampaign1LinkClicked() {
         LOG_DEBUG << "#";
-        if (m_DonateCampaign1LinkClicked) { return; }
+        if (getDonateCampaign1LinkClicked()) { return; }
 
-        m_DonateCampaign1LinkClicked = true;
+        setStateValue(DONATE_CAMPAIGN1_CLICKED, true);
         emit donateCampaign1LinkClicked();
 
-        QJsonDocument &doc = m_EngagementConfig.getConfig();
-        QJsonObject object;
-        if (doc.isObject()) {
-            object = doc.object();
-        }
-
-        object[DONATE_CAMPAIGN1_CLICKED] = m_DonateCampaign1LinkClicked;
-
-        doc.setObject(object);
-
-        m_EngagementConfig.saveToFile();
+        // save config
+        syncState();
     }
 
     void SwitcherModel::configUpdated() {
@@ -103,22 +138,5 @@ namespace Models {
                 !getDonateCampaign1LinkClicked()) {
             emit donateDialogRequested();
         }
-    }
-
-    void SwitcherModel::readEngagementConfig() {
-        LOG_DEBUG << "#";
-
-        m_EngagementConfig.initConfig(m_EngagementConfigPath);
-
-        const QJsonDocument &doc = m_EngagementConfig.getConfig();
-        if (!doc.isObject()) { return; }
-
-        QJsonObject object = doc.object();
-        QJsonValue campaign1Clicked = object[DONATE_CAMPAIGN1_CLICKED];
-        if (campaign1Clicked.isBool()) {
-            m_DonateCampaign1LinkClicked = campaign1Clicked.toBool();
-        }
-
-        LOG_DEBUG << "Donate Campaign #1 link clicked =" << m_DonateCampaign1LinkClicked;
     }
 }

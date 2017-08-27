@@ -79,6 +79,8 @@
         <file>CollapserTabs/QuickBufferTab.qml</file>
         <file>Dialogs/UserDictEditDialog.qml</file>
         <file>Components/LoaderIcon.qml</file>
+        <file>Graphics/video-icon.svg</file>
+        <file>Graphics/video-icon-s.png</file>
         <file>Graphics/Icon_donate_black.svg</file>
         <file>Graphics/Icon_donate_slategray.svg</file>
         <file>Dialogs/DonateDialog.qml</file>

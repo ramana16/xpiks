@@ -22,7 +22,7 @@ namespace UndoRedo {
     public:
         ArtworkMetadataBackup(Models::ArtworkMetadata *metadata);
         ArtworkMetadataBackup(const ArtworkMetadataBackup &copy);
-        ~ArtworkMetadataBackup() {}
+        virtual ~ArtworkMetadataBackup() {}
 
     public:
         void restore(Models::ArtworkMetadata *metadata) const;

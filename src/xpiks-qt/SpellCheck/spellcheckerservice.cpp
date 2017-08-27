@@ -236,7 +236,7 @@ namespace SpellCheck {
             return;
         }
 
-        m_SpellCheckWorker->cancelCurrentBatch();
+        m_SpellCheckWorker->cancelPendingJobs();
     }
 
     bool SpellCheckerService::hasAnyPending() {
