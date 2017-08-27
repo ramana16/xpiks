@@ -18,12 +18,15 @@ namespace Maintenance {
     bool tryGetExiftoolVersion(const QString &path, QString &version) {
         QProcess process;
         process.start(path, QStringList() << "-ver");
-        bool success = process.waitForFinished(3000);
+        const bool finishedInTime = process.waitForFinished(3000);
+        if (!finishedInTime) {
+            LOG_WARNING << "Exiftool did not finish in time";
+        }
 
         const int exitCode = process.exitCode();
         const QProcess::ExitStatus exitStatus = process.exitStatus();
 
-        success = success &&
+        bool success = finishedInTime &&
                 (exitCode == 0) &&
                 (exitStatus == QProcess::NormalExit);
 
@@ -31,10 +34,10 @@ namespace Maintenance {
 
         if (success) {
             version = QString::fromUtf8(process.readAll());
-        }
-
-        if (process.state() != QProcess::NotRunning) {
-            process.kill();
+        } else {
+            if (process.state() != QProcess::NotRunning) {
+                process.kill();
+            }
         }
 
         return success;
