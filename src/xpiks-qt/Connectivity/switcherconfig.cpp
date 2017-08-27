@@ -200,6 +200,9 @@ namespace Connectivity {
                 if ((0 <= intThreshold) && (intThreshold <= 100)) {
                     value.m_Threshold = intThreshold;
                 }
+            } else {
+                // allowed by default
+                value.m_Threshold = 100;
             }
         }
     }
