@@ -10,6 +10,7 @@
 
 #include "videoartwork.h"
 #include <QFileInfo>
+#include "../MetadataIO/cachedartwork.h"
 #include "../Common/defines.h"
 
 namespace Models {
@@ -52,6 +53,10 @@ namespace Models {
     }
 
     bool VideoArtwork::initFromStorageUnsafe(const MetadataIO::CachedArtwork &cachedArtwork) {
-
+        // this time we need to overwrite from storage
+        // if (m_CodecName.isEmpty()) {
+        if (!cachedArtwork.m_CodecName.isEmpty()) {
+            m_CodecName = cachedArtwork.m_CodecName;
+        }
     }
 }
