@@ -12,6 +12,9 @@
 #include <QQmlEngine>
 #include "../Common/defines.h"
 #include "../Models/artitemsmodel.h"
+#include "../Maintenance/maintenanceservice.h"
+#include "../MetadataIO/metadataiocoordinator.h"
+#include "../Commands/commandmanager.h"
 
 #ifdef Q_OS_MAC
 #  define DEFAULT_EXIFTOOL "/usr/bin/exiftool"
@@ -79,7 +82,40 @@
     #define DEFAULT_VERBOSE_UPLOAD false
 #endif
 
-namespace Models {
+namespace Models {    
+    int ensureInBounds(int value, int boundA, int boundB) {
+        Q_ASSERT(boundA <= boundB);
+
+        if (value < boundA) {
+            value = boundA;
+        }
+
+        if (value > boundB) {
+            value = boundB;
+        }
+
+        return value;
+    }
+
+    double ensureInBounds(double value, double boundA, double boundB) {
+        Q_ASSERT(boundA <= boundB);
+
+        // double nan
+        if (value != value) {
+            value = boundA;
+        }
+
+        if (value < boundA) {
+            value = boundA;
+        }
+
+        if (value > boundB) {
+            value = boundB;
+        }
+
+        return value;
+    }
+
     SettingsModel::SettingsModel(QObject *parent) :
         QObject(parent),
         m_ExifToolPath(DEFAULT_EXIFTOOL),
@@ -115,6 +151,20 @@ namespace Models {
         m_ProgressiveSuggestionIncrement(DEFAULT_PROGRESSIVE_SUGGESTION_INCREMENT),
         m_UseDirectExiftoolExport(DEFAULT_USE_DIRECT_EXIFTOOL_EXPORT)
     {
+    }
+
+    void SettingsModel::saveExiftool() {
+        LOG_DEBUG << "#";
+        setValue(Constants::pathToExifTool, m_ExifToolPath);
+        sync();
+    }
+
+    void SettingsModel::saveLocale() {
+        LOG_DEBUG << "#";
+        QMutexLocker locker(&m_SettingsMutex);
+        Q_UNUSED(locker);
+        setValue(Constants::selectedLocale, m_SelectedLocale);
+        sync();
     }
 
     void SettingsModel::initializeConfigs() {
@@ -251,35 +301,6 @@ namespace Models {
         emit recentFilesUpdated(getRecentFiles());
     }
 
-    void SettingsModel::sync() {
-        LOG_DEBUG << "Syncing settings";
-
-        Helpers::LocalConfigDropper dropper(&m_Config);
-        Q_UNUSED(dropper);
-
-        m_SettingsJson[EXPERIMENTAL_KEY] = m_ExperimentalJson;
-
-        QJsonDocument doc;
-        doc.setObject(m_SettingsJson);
-
-        m_Config.setConfig(doc);
-        m_Config.saveToFile();
-    }
-
-    void SettingsModel::saveExiftool() {
-        LOG_DEBUG << "#";
-        setValue(Constants::pathToExifTool, m_ExifToolPath);
-        sync();
-    }
-
-    void SettingsModel::saveLocale() {
-        LOG_DEBUG << "#";
-        QMutexLocker locker(&m_SettingsMutex);
-        Q_UNUSED(locker);
-        setValue(Constants::selectedLocale, m_SelectedLocale);
-        sync();
-    }
-
     ProxySettings *SettingsModel::retrieveProxySettings() {
         ProxySettings *result = nullptr;
 
@@ -288,15 +309,6 @@ namespace Models {
         }
 
         return result;
-    }
-
-    void SettingsModel::deserializeProxyFromSettings(const QString &serialized) {
-        QByteArray originalData;
-        originalData.append(serialized.toLatin1());
-        QByteArray serializedBA = QByteArray::fromBase64(originalData);
-
-        QDataStream ds(&serializedBA, QIODevice::ReadOnly);
-        ds >> m_ProxySettings;
     }
 
     void SettingsModel::resetAllValues() {
@@ -350,46 +362,6 @@ namespace Models {
         doRetrieveAllValues();
     }
 
-    void SettingsModel::resetToDefault() {
-        LOG_DEBUG << "#";
-        QMutexLocker locker(&m_SettingsMutex);
-        Q_UNUSED(locker);
-        doResetToDefault();
-    }
-
-    int ensureInBounds(int value, int boundA, int boundB) {
-        Q_ASSERT(boundA <= boundB);
-
-        if (value < boundA) {
-            value = boundA;
-        }
-
-        if (value > boundB) {
-            value = boundB;
-        }
-
-        return value;
-    }
-
-    double ensureInBounds(double value, double boundA, double boundB) {
-        Q_ASSERT(boundA <= boundB);
-
-        // double nan
-        if (value != value) {
-            value = boundA;
-        }
-
-        if (value < boundA) {
-            value = boundA;
-        }
-
-        if (value > boundB) {
-            value = boundB;
-        }
-
-        return value;
-    }
-
     void SettingsModel::saveProxySetting(const QString &address, const QString &user,
                                          const QString &password, const QString &port) {
         QString tAddress = address.trimmed();
@@ -416,13 +388,6 @@ namespace Models {
             m_ProxySettings.m_Port = tPort;
             emit proxyPortChanged(tPort);
         }
-    }
-
-    QString SettingsModel::serializeProxyForSettings(ProxySettings &settings) {
-        QByteArray raw;
-        QDataStream ds(&raw, QIODevice::WriteOnly);
-        ds << settings;
-        return QString::fromLatin1(raw.toBase64());
     }
 
     void SettingsModel::saveArtworkEditUISettings() {
@@ -662,11 +627,7 @@ namespace Models {
         }
 #endif
 
-#ifdef Q_OS_MAC
-        if (m_UseExifTool) {
-            m_CommandManager->autoDiscoverExiftool();
-        }
-#endif
+        m_CommandManager->autoDiscoverExiftool();
 
         emit keywordSizeScaleChanged(m_KeywordSizeScale);
         emit settingsUpdated();
@@ -741,6 +702,26 @@ namespace Models {
         return text;
     }
 
+    void SettingsModel::setExifToolPath(QString exifToolPath) {
+        if (m_ExifToolPath == exifToolPath)
+            return;
+
+        m_ExifToolPath = exifToolPath;
+        emit exifToolPathChanged(exifToolPath);
+    }
+
+    void SettingsModel::resetToDefault() {
+        LOG_DEBUG << "#";
+        QMutexLocker locker(&m_SettingsMutex);
+        Q_UNUSED(locker);
+        doResetToDefault();
+    }
+
+    void SettingsModel::resetProxySetting() {
+        QString empty = "";
+        SettingsModel::saveProxySetting(empty, empty, empty, empty);
+    }
+
     void SettingsModel::protectTelemetry() {
         bool telemetryEnabled = this->boolValue(Constants::userStatistics, false);
 
@@ -761,9 +742,35 @@ namespace Models {
         }
     }
 
-    void SettingsModel::resetProxySetting() {
-        QString empty = "";
-        SettingsModel::saveProxySetting(empty, empty, empty, empty);
+    void SettingsModel::sync() {
+        LOG_DEBUG << "Syncing settings";
+
+        Helpers::LocalConfigDropper dropper(&m_Config);
+        Q_UNUSED(dropper);
+
+        m_SettingsJson[EXPERIMENTAL_KEY] = m_ExperimentalJson;
+
+        QJsonDocument doc;
+        doc.setObject(m_SettingsJson);
+
+        m_Config.setConfig(doc);
+        m_Config.saveToFile();
+    }
+
+    QString SettingsModel::serializeProxyForSettings(ProxySettings &settings) {
+        QByteArray raw;
+        QDataStream ds(&raw, QIODevice::WriteOnly);
+        ds << settings;
+        return QString::fromLatin1(raw.toBase64());
+    }
+
+    void SettingsModel::deserializeProxyFromSettings(const QString &serialized) {
+        QByteArray originalData;
+        originalData.append(serialized.toLatin1());
+        QByteArray serializedBA = QByteArray::fromBase64(originalData);
+
+        QDataStream ds(&serializedBA, QIODevice::ReadOnly);
+        ds >> m_ProxySettings;
     }
 }
 

@@ -310,10 +310,10 @@ namespace Commands {
         virtual Models::SwitcherModel *getSwitcherModel() const { return m_SwitcherModel; }
         virtual Connectivity::RequestsService *getRequestsService() const { return m_RequestsService; }
         virtual Helpers::DatabaseManager *getDatabaseManager() const { return m_DatabaseManager; }
+        virtual MetadataIO::MetadataIOCoordinator *getMetadataIOCoordinator() const { return m_MetadataIOCoordinator; }
 
 #ifdef INTEGRATION_TESTS
         virtual Translation::TranslationManager *getTranslationManager() const { return m_TranslationManager; }
-        virtual MetadataIO::MetadataIOCoordinator *getMetadataIOCoordinator() const { return m_MetadataIOCoordinator; }
         virtual Models::CombinedArtworksModel *getCombinedArtworksModel() const { return m_CombinedArtworksModel; }
         virtual AutoComplete::AutoCompleteService *getAutoCompleteService() const { return m_AutoCompleteService; }
         virtual Warnings::WarningsService *getWarningsService() const { return m_WarningsService; }

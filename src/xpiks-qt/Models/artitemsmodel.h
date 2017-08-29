@@ -168,8 +168,8 @@ namespace Models {
 
     public:
         void syncArtworksIndices();
-        void insertArtwork(int index, ArtworkMetadata *metadata);
-        void appendMetadata(ArtworkMetadata *metadata);
+        void insertArtwork(int index, ArtworkMetadata *artwork);
+        void appendArtwork(ArtworkMetadata *artwork);
         void removeArtworks(const QVector<QPair<int, int> > &ranges);
         ArtworkMetadata *getArtwork(size_t index) const;
         void raiseArtworksAdded(int imagesCount, int vectorsCount);

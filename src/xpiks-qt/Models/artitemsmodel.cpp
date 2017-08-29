@@ -884,16 +884,17 @@ namespace Models {
         }
     }
 
-    void ArtItemsModel::insertArtwork(int index, ArtworkMetadata *metadata) {
+    void ArtItemsModel::insertArtwork(int index, ArtworkMetadata *artwork) {
         Q_ASSERT(index >= 0 && index <= getArtworksCount());
-        Q_ASSERT(metadata != NULL);
-        m_ArtworkList.insert(m_ArtworkList.begin() + index, metadata);
+        Q_ASSERT(artwork != NULL);
+        m_ArtworkList.insert(m_ArtworkList.begin() + index, artwork);
+        artwork->setCurrentIndex(index);
     }
 
-    void ArtItemsModel::appendMetadata(ArtworkMetadata *metadata) {
-        Q_ASSERT(metadata != NULL);
-        m_ArtworkList.push_back(metadata);
-        metadata->setCurrentIndex(m_ArtworkList.size() - 1);
+    void ArtItemsModel::appendArtwork(ArtworkMetadata *artwork) {
+        Q_ASSERT(artwork != NULL);
+        m_ArtworkList.push_back(artwork);
+        artwork->setCurrentIndex(m_ArtworkList.size() - 1);
     }
 
     void ArtItemsModel::removeArtworks(const QVector<QPair<int, int> > &ranges) {

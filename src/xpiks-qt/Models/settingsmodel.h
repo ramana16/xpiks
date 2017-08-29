@@ -395,13 +395,7 @@ namespace Models {
         void progressiveSuggestionIncrementChanged(int progressiveSuggestionIncrement);
 
     public:
-        void setExifToolPath(QString exifToolPath) {
-            if (m_ExifToolPath == exifToolPath)
-                return;
-
-            m_ExifToolPath = exifToolPath;
-            emit exifToolPathChanged(exifToolPath);
-        }
+        void setExifToolPath(QString exifToolPath);
 
         void setUploadTimeout(int uploadTimeout) {
             if (m_UploadTimeout == uploadTimeout)

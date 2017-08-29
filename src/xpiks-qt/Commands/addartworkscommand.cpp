@@ -107,7 +107,7 @@ std::shared_ptr<Commands::ICommandResult> Commands::AddArtworksCommand::execute(
 
                 LOG_INTEGRATION_TESTS << "Added file:" << filename;
 
-                artItemsModel->appendMetadata(metadata);
+                artItemsModel->appendArtwork(metadata);
                 artworksToImport.append(metadata);
                 filesToWatch.append(filename);
             } else {
