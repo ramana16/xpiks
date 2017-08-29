@@ -17,6 +17,7 @@
 namespace MetadataIO {
 
     CachedArtwork::CachedArtwork():
+        m_Version(0),
         m_ArtworkType(Unknown),
         m_Flags(0),
         m_FilesizeBytes(0),
@@ -27,6 +28,7 @@ namespace MetadataIO {
     }
 
     CachedArtwork::CachedArtwork(Models::ArtworkMetadata *metadata):
+        m_Version(0),
         m_Flags(0),
         m_CategoryID_1(0),
         m_CategoryID_2(0)
