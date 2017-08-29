@@ -120,9 +120,9 @@ namespace MetadataIO {
         out << v.m_Filepath;
         out << v.m_Title;
         out << v.m_Description;
-        out << v.m_ThumbnailPath;
 
         if (v.m_ArtworkType == CachedArtwork::Video) {
+            out << v.m_ThumbnailPath;
             out << v.m_CodecName;
         }
 
@@ -159,9 +159,9 @@ namespace MetadataIO {
         in >> v.m_Filepath;
         in >> v.m_Title;
         in >> v.m_Description;
-        in >> v.m_ThumbnailPath;
 
         if (v.m_ArtworkType == CachedArtwork::Video) {
+            in >> v.m_ThumbnailPath;
             in >> v.m_CodecName;
         }
 
