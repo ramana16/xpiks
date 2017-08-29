@@ -249,11 +249,9 @@ BOOL CALLBACK MyMiniDumpCallback(
 
 }
 
-DWORD CALLBACK MiniDumpThreadCallback( LPVOID inParam )
+BOOL DoWriteMiniDump(EXCEPTION_POINTERS * pep)
 {
-    EXCEPTION_POINTERS* pep = (EXCEPTION_POINTERS *)inParam;
-    DWORD result = 0;
-
+    BOOL rv = FALSE;
     // Open the file
 
     HANDLE hFile = CreateFile( _T(STRINGIZE(APPNAME))_T(".dmp"), GENERIC_READ | GENERIC_WRITE,
@@ -274,23 +272,20 @@ DWORD CALLBACK MiniDumpThreadCallback( LPVOID inParam )
         mci.CallbackRoutine     = (MINIDUMP_CALLBACK_ROUTINE)MyMiniDumpCallback;
         mci.CallbackParam       = 0;
 
-        MINIDUMP_TYPE mdt       = (MINIDUMP_TYPE)(MiniDumpNormal |
-                                                  MiniDumpWithPrivateReadWriteMemory |
+        MINIDUMP_TYPE mdt       = (MINIDUMP_TYPE)(MiniDumpWithPrivateReadWriteMemory |
                                                   MiniDumpWithDataSegs |
                                                   MiniDumpWithHandleData |
                                                   MiniDumpWithFullMemoryInfo |
                                                   MiniDumpWithThreadInfo |
                                                   MiniDumpWithUnloadedModules );
 
-        BOOL rv = MiniDumpWriteDump( GetCurrentProcess(), GetCurrentProcessId(),
+        rv = MiniDumpWriteDump( GetCurrentProcess(), GetCurrentProcessId(),
                                      hFile, mdt, (pep != 0) ? &mdei : 0, 0, &mci );
 
         if( !rv )
             _tprintf( _T("MiniDumpWriteDump failed. Error: %u \n"), GetLastError() );
         else
             _tprintf( _T("Minidump created.\n") );
-
-        result = rv ? 1 : 0;
 
         // Close the file
 
@@ -305,10 +300,21 @@ DWORD CALLBACK MiniDumpThreadCallback( LPVOID inParam )
     fflush(stdout);
     fflush(stderr);
 
+    return rv;
+}
+
+DWORD CALLBACK MiniDumpThreadCallback( LPVOID inParam )
+{
+    EXCEPTION_POINTERS* pep = (EXCEPTION_POINTERS *)inParam;
+    DWORD result = 0;
+
+    BOOL rv = DoWriteMiniDump(pep);
+    if (rv) { result = 1; }
+
     return result;
 }
 
-bool CreateMiniDump( EXCEPTION_POINTERS* pep )
+bool CreateMiniDumpWithThread( EXCEPTION_POINTERS* pep )
 {
     DWORD threadId = 0;
     HANDLE hThread = ::CreateThread( NULL, 0, MiniDumpThreadCallback, pep, CREATE_SUSPENDED, &threadId );
@@ -344,6 +350,29 @@ bool CreateMiniDump( EXCEPTION_POINTERS* pep )
     return false;
 }
 
+void CreateMiniDump(EXCEPTION_POINTERS* pep)
+{
+    DoWriteMiniDump(pep);
+}
+
+void DoHandleCrash(EXCEPTION_POINTERS* pExPtrs)
+{
+    {
+        CreateMiniDump(pExPtrs);
+    }
+
+    {
+        StackWalkerToConsole sw;  // output to console
+        sw.ShowCallstack(GetCurrentThread(), pExPtrs->ContextRecord);
+        fflush(stdout);
+    }
+
+    {
+        Helpers::Logger &logger = Helpers::Logger::getInstance();
+        logger.flush();
+    }
+}
+
 static BOOL s_bUnhandledExeptionFilterSet = FALSE;
 static LONG __stdcall CrashHandlerExceptionFilter(EXCEPTION_POINTERS* pExPtrs)
 {
@@ -362,15 +391,7 @@ static LONG __stdcall CrashHandlerExceptionFilter(EXCEPTION_POINTERS* pExPtrs)
 
   printf("UNHANDLED EXCEPTION FILTER\r\n");
 
-  {
-      StackWalkerToConsole sw;  // output to console
-      sw.ShowCallstack(GetCurrentThread(), pExPtrs->ContextRecord);
-      fflush(stdout);
-  }
-
-  {
-      CreateMiniDump(pExPtrs);
-  }
+  DoHandleCrash(pExPtrs);
 
   return EXCEPTION_CONTINUE_SEARCH;
 }
@@ -562,21 +583,7 @@ void __cdecl WindowsCrashHandler::TerminateHandler()
     EXCEPTION_POINTERS* pExceptionPtrs = NULL;
     GetExceptionPointers(0, &pExceptionPtrs);
 
-    {
-        StackWalkerToConsole sw;  // output to console
-        sw.ShowCallstack(GetCurrentThread(), pExceptionPtrs->ContextRecord);
-        fflush(stdout);
-    }
-
-    {
-        // Write minidump file
-        CreateMiniDump(pExceptionPtrs);
-    }
-
-    {
-        Helpers::Logger &logger = Helpers::Logger::getInstance();
-        logger.flush();
-    }
+    DoHandleCrash(pExceptionPtrs);
 
     // Terminate process
     TerminateProcess(GetCurrentProcess(), 1);
@@ -591,21 +598,7 @@ void __cdecl WindowsCrashHandler::UnexpectedHandler()
     EXCEPTION_POINTERS* pExceptionPtrs = NULL;
     GetExceptionPointers(0, &pExceptionPtrs);
 
-    {
-        StackWalkerToConsole sw;  // output to console
-        sw.ShowCallstack(GetCurrentThread(), pExceptionPtrs->ContextRecord);
-        fflush(stdout);
-    }
-
-    {
-        // Write minidump file
-        CreateMiniDump(pExceptionPtrs);
-    }
-
-    {
-        Helpers::Logger &logger = Helpers::Logger::getInstance();
-        logger.flush();
-    }
+    DoHandleCrash(pExceptionPtrs);
 
     // Terminate process
     TerminateProcess(GetCurrentProcess(), 1);
@@ -620,21 +613,7 @@ void __cdecl WindowsCrashHandler::PureCallHandler()
     EXCEPTION_POINTERS* pExceptionPtrs = NULL;
     GetExceptionPointers(0, &pExceptionPtrs);
 
-    {
-        StackWalkerToConsole sw;  // output to console
-        sw.ShowCallstack(GetCurrentThread(), pExceptionPtrs->ContextRecord);
-        fflush(stdout);
-    }
-
-    {
-        // Write minidump file
-        CreateMiniDump(pExceptionPtrs);
-    }
-
-    {
-        Helpers::Logger &logger = Helpers::Logger::getInstance();
-        logger.flush();
-    }
+    DoHandleCrash(pExceptionPtrs);
 
     // Terminate process
     TerminateProcess(GetCurrentProcess(), 1);
@@ -655,21 +634,7 @@ void __cdecl WindowsCrashHandler::InvalidParameterHandler(
     EXCEPTION_POINTERS* pExceptionPtrs = NULL;
     GetExceptionPointers(0, &pExceptionPtrs);
 
-    {
-        StackWalkerToConsole sw;  // output to console
-        sw.ShowCallstack(GetCurrentThread(), pExceptionPtrs->ContextRecord);
-        fflush(stdout);
-    }
-
-    {
-        // Write minidump file
-        CreateMiniDump(pExceptionPtrs);
-    }
-
-    {
-        Helpers::Logger &logger = Helpers::Logger::getInstance();
-        logger.flush();
-    }
+    DoHandleCrash(pExceptionPtrs);
 
     // Terminate process
     TerminateProcess(GetCurrentProcess(), 1);
@@ -685,21 +650,7 @@ int __cdecl WindowsCrashHandler::NewHandler(size_t)
     EXCEPTION_POINTERS* pExceptionPtrs = NULL;
     GetExceptionPointers(0, &pExceptionPtrs);
 
-    {
-        StackWalkerToConsole sw;  // output to console
-        sw.ShowCallstack(GetCurrentThread(), pExceptionPtrs->ContextRecord);
-        fflush(stdout);
-    }
-
-    {
-        // Write minidump file
-        CreateMiniDump(pExceptionPtrs);
-    }
-
-    {
-        Helpers::Logger &logger = Helpers::Logger::getInstance();
-        logger.flush();
-    }
+    DoHandleCrash(pExceptionPtrs);
 
     // Terminate process
     TerminateProcess(GetCurrentProcess(), 1);
@@ -717,21 +668,7 @@ void WindowsCrashHandler::SigabrtHandler(int)
     EXCEPTION_POINTERS* pExceptionPtrs = NULL;
     GetExceptionPointers(0, &pExceptionPtrs);
 
-    {
-        StackWalkerToConsole sw;  // output to console
-        sw.ShowCallstack(GetCurrentThread(), pExceptionPtrs->ContextRecord);
-        fflush(stdout);
-    }
-
-    {
-        // Write minidump file
-        CreateMiniDump(pExceptionPtrs);
-    }
-
-    {
-        Helpers::Logger &logger = Helpers::Logger::getInstance();
-        logger.flush();
-    }
+    DoHandleCrash(pExceptionPtrs);
 
     // Terminate process
     TerminateProcess(GetCurrentProcess(), 1);
@@ -745,21 +682,7 @@ void WindowsCrashHandler::SigfpeHandler(int /*code*/, int subcode)
 
     EXCEPTION_POINTERS* pExceptionPtrs = (PEXCEPTION_POINTERS)_pxcptinfoptrs;
 
-    {
-        StackWalkerToConsole sw;  // output to console
-        sw.ShowCallstack(GetCurrentThread(), pExceptionPtrs->ContextRecord);
-        fflush(stdout);
-    }
-
-    {
-        // Write minidump file
-        CreateMiniDump(pExceptionPtrs);
-    }
-
-    {
-        Helpers::Logger &logger = Helpers::Logger::getInstance();
-        logger.flush();
-    }
+    DoHandleCrash(pExceptionPtrs);
 
     // Terminate process
     TerminateProcess(GetCurrentProcess(), 1);
@@ -775,21 +698,7 @@ void WindowsCrashHandler::SigillHandler(int)
     EXCEPTION_POINTERS* pExceptionPtrs = NULL;
     GetExceptionPointers(0, &pExceptionPtrs);
 
-    {
-        StackWalkerToConsole sw;  // output to console
-        sw.ShowCallstack(GetCurrentThread(), pExceptionPtrs->ContextRecord);
-        fflush(stdout);
-    }
-
-    {
-        // Write minidump file
-        CreateMiniDump(pExceptionPtrs);
-    }
-
-    {
-        Helpers::Logger &logger = Helpers::Logger::getInstance();
-        logger.flush();
-    }
+    DoHandleCrash(pExceptionPtrs);
 
     // Terminate process
     TerminateProcess(GetCurrentProcess(), 1);
@@ -805,21 +714,7 @@ void WindowsCrashHandler::SigintHandler(int)
     EXCEPTION_POINTERS* pExceptionPtrs = NULL;
     GetExceptionPointers(0, &pExceptionPtrs);
 
-    {
-        StackWalkerToConsole sw;  // output to console
-        sw.ShowCallstack(GetCurrentThread(), pExceptionPtrs->ContextRecord);
-        fflush(stdout);
-    }
-
-    {
-        // Write minidump file
-        CreateMiniDump(pExceptionPtrs);
-    }
-
-    {
-        Helpers::Logger &logger = Helpers::Logger::getInstance();
-        logger.flush();
-    }
+    DoHandleCrash(pExceptionPtrs);
 
     // Terminate process
     TerminateProcess(GetCurrentProcess(), 1);
@@ -833,21 +728,7 @@ void WindowsCrashHandler::SigsegvHandler(int)
 
     PEXCEPTION_POINTERS pExceptionPtrs = (PEXCEPTION_POINTERS)_pxcptinfoptrs;
 
-    {
-        StackWalkerToConsole sw;  // output to console
-        sw.ShowCallstack(GetCurrentThread(), pExceptionPtrs->ContextRecord);
-        fflush(stdout);
-    }
-
-    {
-        // Write minidump file
-        CreateMiniDump(pExceptionPtrs);
-    }
-
-    {
-        Helpers::Logger &logger = Helpers::Logger::getInstance();
-        logger.flush();
-    }
+    DoHandleCrash(pExceptionPtrs);
 
     // Terminate process
     TerminateProcess(GetCurrentProcess(), 1);
@@ -863,21 +744,7 @@ void WindowsCrashHandler::SigtermHandler(int)
     EXCEPTION_POINTERS* pExceptionPtrs = NULL;
     GetExceptionPointers(0, &pExceptionPtrs);
 
-    {
-        StackWalkerToConsole sw;  // output to console
-        sw.ShowCallstack(GetCurrentThread(), pExceptionPtrs->ContextRecord);
-        fflush(stdout);
-    }
-
-    {
-        // Write minidump file
-        CreateMiniDump(pExceptionPtrs);
-    }
-
-    {
-        Helpers::Logger &logger = Helpers::Logger::getInstance();
-        logger.flush();
-    }
+    DoHandleCrash(pExceptionPtrs);
 
     // Terminate process
     TerminateProcess(GetCurrentProcess(), 1);
