@@ -177,7 +177,6 @@ BOOL CALLBACK MyMiniDumpCallback(
     if( pOutput == 0 )
         return FALSE;
 
-
     // Process the callbacks
 
     switch( pInput->CallbackType )
@@ -638,7 +637,6 @@ void __cdecl WindowsCrashHandler::InvalidParameterHandler(
 
     // Terminate process
     TerminateProcess(GetCurrentProcess(), 1);
-
 }
 
 // CRT new operator fault handler
@@ -672,7 +670,6 @@ void WindowsCrashHandler::SigabrtHandler(int)
 
     // Terminate process
     TerminateProcess(GetCurrentProcess(), 1);
-
 }
 
 // CRT SIGFPE signal handler
@@ -686,7 +683,6 @@ void WindowsCrashHandler::SigfpeHandler(int /*code*/, int subcode)
 
     // Terminate process
     TerminateProcess(GetCurrentProcess(), 1);
-
 }
 
 // CRT sigill signal handler
@@ -702,7 +698,6 @@ void WindowsCrashHandler::SigillHandler(int)
 
     // Terminate process
     TerminateProcess(GetCurrentProcess(), 1);
-
 }
 
 // CRT sigint signal handler
@@ -718,7 +713,6 @@ void WindowsCrashHandler::SigintHandler(int)
 
     // Terminate process
     TerminateProcess(GetCurrentProcess(), 1);
-
 }
 
 // CRT SIGSEGV signal handler
@@ -732,7 +726,6 @@ void WindowsCrashHandler::SigsegvHandler(int)
 
     // Terminate process
     TerminateProcess(GetCurrentProcess(), 1);
-
 }
 
 // CRT SIGTERM signal handler

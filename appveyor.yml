@@ -111,3 +111,5 @@ test_script:
 
 on_failure:
   - ps: Get-ChildItem .\*.dmp | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
+  - if defined INTEGRATION_TESTS appveyor PushArtifact %configuration%\xpiks-tests-integration.exe
+  - if defined INTEGRATION_TESTS appveyor PushArtifact %configuration%\xpiks-tests-integration.pdb
