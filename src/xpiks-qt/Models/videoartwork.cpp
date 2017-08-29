@@ -23,28 +23,34 @@ namespace Models {
         m_ThumbnailPath = ":/Graphics/video-icon.svg";
     }
 
-    void VideoArtwork::setThumbnailPath(const QString &filepath) {
+    void VideoArtwork::setThumbnailPath(const QString &filepath) {        
         LOG_INFO << filepath;
-
         Q_ASSERT(!filepath.isEmpty());
+
+        QMutexLocker locker(&m_ThumbnailLock);
+        Q_UNUSED(locker);
 
         if (QFileInfo(filepath).exists()) {
             m_ThumbnailPath = filepath;
             setThumbnailGeneratedFlag(true);
             emit thumbnailUpdated();
         } else {
-            LOG_WARNING << "Wrong thumbnail filepath";
+            LOG_WARNING << "Wrong thumbnail filepath:" << filepath;
         }
     }
 
     void VideoArtwork::initializeThumbnailPath(const QString &filepath) {
-        if (getThumbnailGeneratedFlag()) { return; }
         if (filepath.isEmpty()) { return; }
+
+        QMutexLocker locker(&m_ThumbnailLock);
+        Q_UNUSED(locker);
+
+        if (getThumbnailGeneratedFlag()) { return; }
 
         if (QFileInfo(filepath).exists()) {
             m_ThumbnailPath = filepath;
         } else {
-            LOG_WARNING << "Wrong thumbnail filepath";
+            LOG_WARNING << "Wrong thumbnail filepath:" << filepath;
         }
     }
 
@@ -58,6 +64,8 @@ namespace Models {
         if (!cachedArtwork.m_CodecName.isEmpty()) {
             m_CodecName = cachedArtwork.m_CodecName;
         }
+
+        initializeThumbnailPath(cachedArtwork.m_ThumbnailPath);
 
         return false;
     }

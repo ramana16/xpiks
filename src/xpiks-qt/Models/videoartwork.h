@@ -13,6 +13,8 @@
 
 #include "artworkmetadata.h"
 #include <QString>
+#include <QReadWriteLock>
+#include <QMutex>
 #include <QSize>
 #include "../Common/flags.h"
 
@@ -28,11 +30,17 @@ namespace Models {
             FlagThumbnailGenerated = 1 << 0
         };
 
-        inline bool getThumbnailGeneratedFlag() const { return Common::HasFlag(m_VideoFlags, FlagThumbnailGenerated); }
-        inline void setThumbnailGeneratedFlag(bool value) { Common::ApplyFlag(m_VideoFlags, value, FlagThumbnailGenerated); }
+#define PROTECT_FLAGS_READ QReadLocker rlocker(&m_FlagsLock); Q_UNUSED(rlocker);
+#define PROTECT_FLAGS_WRITE QWriteLocker wlocker(&m_FlagsLock); Q_UNUSED(wlocker);
+
+        inline bool getThumbnailGeneratedFlag() { PROTECT_FLAGS_READ; return Common::HasFlag(m_VideoFlags, FlagThumbnailGenerated); }
+        inline void setThumbnailGeneratedFlag(bool value) { PROTECT_FLAGS_WRITE; Common::ApplyFlag(m_VideoFlags, value, FlagThumbnailGenerated); }
+
+#undef PROTECT_FLAGS_READ
+#undef PROTECT_FLAGS_WRITE
 
     public:
-        bool isThumbnailGenerated() const { return getThumbnailGeneratedFlag(); }
+        bool isThumbnailGenerated() { return getThumbnailGeneratedFlag(); }
         virtual const QString &getThumbnailPath() const override { return m_ThumbnailPath; }
         const QString &getCodecName() const { return m_CodecName; }
 
@@ -45,7 +53,9 @@ namespace Models {
         virtual bool initFromStorageUnsafe(const MetadataIO::CachedArtwork &cachedArtwork) override;
 
     private:
+        QMutex m_ThumbnailLock;
         QString m_ThumbnailPath;
+        QReadWriteLock m_FlagsLock;
         volatile Common::flag_t m_VideoFlags;
         QString m_CodecName;
         QSize m_ImageSize;

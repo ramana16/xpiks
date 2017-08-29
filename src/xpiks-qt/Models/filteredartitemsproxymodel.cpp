@@ -178,11 +178,11 @@ namespace Models {
         m_CommandManager->reportUserAction(Connectivity::UserAction::SpellCheck);
     }
 
-    int FilteredArtItemsProxyModel::getModifiedSelectedCount(bool overwriteAll) const {
+    int FilteredArtItemsProxyModel::getModifiedSelectedCount(bool overwriteAll) {
         QVector<ArtworkMetadata *> selectedArtworks = getSelectedOriginalItems();
         int modifiedCount = 0;
 
-        foreach(const ArtworkMetadata *metadata, selectedArtworks) {
+        foreach(ArtworkMetadata *metadata, selectedArtworks) {
             if (metadata->isModified() || overwriteAll) {
                 modifiedCount++;
             }
