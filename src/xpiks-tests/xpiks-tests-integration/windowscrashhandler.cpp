@@ -274,7 +274,8 @@ DWORD CALLBACK MiniDumpThreadCallback( LPVOID inParam )
         mci.CallbackRoutine     = (MINIDUMP_CALLBACK_ROUTINE)MyMiniDumpCallback;
         mci.CallbackParam       = 0;
 
-        MINIDUMP_TYPE mdt       = (MINIDUMP_TYPE)(MiniDumpWithPrivateReadWriteMemory |
+        MINIDUMP_TYPE mdt       = (MINIDUMP_TYPE)(MiniDumpNormal |
+                                                  MiniDumpWithPrivateReadWriteMemory |
                                                   MiniDumpWithDataSegs |
                                                   MiniDumpWithHandleData |
                                                   MiniDumpWithFullMemoryInfo |
