@@ -46,4 +46,12 @@ namespace Models {
             LOG_WARNING << "Wrong thumbnail filepath";
         }
     }
+
+    bool VideoArtwork::initFromOriginUnsafe(const MetadataIO::OriginalMetadata &originalMetadata) {
+
+    }
+
+    bool VideoArtwork::initFromStorageUnsafe(const MetadataIO::CachedArtwork &cachedArtwork) {
+
+    }
 }

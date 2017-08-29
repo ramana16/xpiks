@@ -45,7 +45,9 @@ namespace QMLExtensions {
     QDataStream &operator<<(QDataStream &out, const CachedVideo &v) {
         // TODO: update before release to Qt 5.9
         Q_ASSERT(XPIKS_VERSION_CHECK(1, 5, 0));
+#ifndef TRAVIS_CI
         out.setVersion(QDataStream::Qt_5_6);
+#endif
 
         out << v.m_Version;
         out << v.m_Filename;
@@ -61,7 +63,9 @@ namespace QMLExtensions {
     QDataStream &operator>>(QDataStream &in, CachedVideo &v) {
         // TODO: update before release to Qt 5.9
         Q_ASSERT(XPIKS_VERSION_CHECK(1, 5, 0));
+#ifndef TRAVIS_CI
         in.setVersion(QDataStream::Qt_5_6);
+#endif
 
         in >> v.m_Version;
         in >> v.m_Filename;

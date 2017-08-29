@@ -40,6 +40,10 @@ namespace Models {
         void setThumbnailPath(const QString &filepath);
         void initializeThumbnailPath(const QString &filepath);
 
+    protected:
+        virtual bool initFromOriginUnsafe(const MetadataIO::OriginalMetadata &originalMetadata) override;
+        virtual bool initFromStorageUnsafe(const MetadataIO::CachedArtwork &cachedArtwork) override;
+
     private:
         QString m_ThumbnailPath;
         volatile Common::flag_t m_VideoFlags;
