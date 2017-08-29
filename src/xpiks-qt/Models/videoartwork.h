@@ -13,6 +13,7 @@
 
 #include "artworkmetadata.h"
 #include <QString>
+#include <QSize>
 #include "../Common/flags.h"
 
 namespace Models {
@@ -33,12 +34,19 @@ namespace Models {
     public:
         bool isThumbnailGenerated() const { return getThumbnailGeneratedFlag(); }
         virtual const QString &getThumbnailPath() const override { return m_ThumbnailPath; }
+        const QString &getCodecName() const { return m_CodecName; }
+
+    public:
         void setThumbnailPath(const QString &filepath);
         void initializeThumbnailPath(const QString &filepath);
 
     private:
         QString m_ThumbnailPath;
         volatile Common::flag_t m_VideoFlags;
+        QString m_CodecName;
+        QSize m_ImageSize;
+        int m_BitRate;
+        double m_FrameRate;
     };
 }
 

@@ -37,6 +37,7 @@ namespace MetadataIO {
         CachedArtwork(const CachedArtwork &from);
         CachedArtwork &operator=(const CachedArtwork &other);
 
+        // quint8 m_Version; // instead use AdditionalData
         quint32 m_ArtworkType; // 32-bit for allignment
         Common::flag_t m_Flags;
         quint64 m_FilesizeBytes;
@@ -45,12 +46,13 @@ namespace MetadataIO {
         QString m_Filepath;
         QString m_Title;
         QString m_Description;
-        QString m_AttachedVector;
         QString m_ThumbnailPath;
+        QString m_CodecName;
+        QString m_AttachedVector;
+        QDateTime m_CreationTime;
         QStringList m_Keywords;
         QVector<quint16> m_ModelReleases;
         QVector<quint16> m_PropertyReleases;
-        QDateTime m_CreationTime;
         // reserved for future demands
         QHash<qint32, QByteArray> m_AdditionalData;
 

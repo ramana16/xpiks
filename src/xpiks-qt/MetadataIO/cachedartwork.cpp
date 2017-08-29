@@ -45,8 +45,8 @@ namespace MetadataIO {
             m_CreationTime = image->getDateTimeOriginal();
         } else {
             Models::VideoArtwork *video = dynamic_cast<Models::VideoArtwork*>(metadata);
-            Q_UNUSED(video);
             m_ArtworkType = Video;
+            m_CodecName = video->getCodecName();
         }
     }
 
@@ -59,12 +59,13 @@ namespace MetadataIO {
         m_Filepath(from.m_Filepath),
         m_Title(from.m_Title),
         m_Description(from.m_Description),
-        m_AttachedVector(from.m_AttachedVector),
         m_ThumbnailPath(from.m_ThumbnailPath),
+        m_CodecName(from.m_CodecName),
+        m_AttachedVector(from.m_AttachedVector),
+        m_CreationTime(from.m_CreationTime),
         m_Keywords(from.m_Keywords),
         m_ModelReleases(from.m_ModelReleases),
         m_PropertyReleases(from.m_PropertyReleases),
-        m_CreationTime(from.m_CreationTime),
         m_AdditionalData(from.m_AdditionalData)
     {
     }
@@ -78,31 +79,62 @@ namespace MetadataIO {
         m_Filepath = other.m_Filepath;
         m_Title = other.m_Title;
         m_Description = other.m_Description;
-        m_AttachedVector = other.m_AttachedVector;
         m_ThumbnailPath = other.m_ThumbnailPath;
+        m_CodecName = other.m_CodecName;
+        m_AttachedVector = other.m_AttachedVector;
+        m_CreationTime = other.m_CreationTime;
         m_Keywords = other.m_Keywords;
         m_ModelReleases = other.m_ModelReleases;
         m_PropertyReleases = other.m_PropertyReleases;
-        m_CreationTime = other.m_CreationTime;
         m_AdditionalData = other.m_AdditionalData;
 
         return *this;
     }
 
     QDataStream &operator<<(QDataStream &out, const CachedArtwork &v) {
-        out << v.m_ArtworkType << v.m_Flags << v.m_FilesizeBytes << v.m_CategoryID_1 <<
-               v.m_CategoryID_2 << v.m_Filepath << v.m_Title << v.m_Description <<
-               v.m_AttachedVector << v.m_ThumbnailPath << v.m_Keywords << v.m_ModelReleases <<
-               v.m_PropertyReleases << v.m_CreationTime << v.m_AdditionalData;
+        out <<
+               v.m_ArtworkType <<
+               v.m_Flags <<
+               v.m_FilesizeBytes <<
+               v.m_CategoryID_1 <<
+               v.m_CategoryID_2 <<
+               v.m_Filepath <<
+               v.m_Title <<
+               v.m_Description <<
+               v.m_ThumbnailPath <<
+               v.m_CodecName <<
+               v.m_AttachedVector <<
+               v.m_CreationTime <<
+               v.m_Keywords <<
+               v.m_ModelReleases <<
+               v.m_PropertyReleases <<
+               v.m_AdditionalData;
+
+        Q_ASSERT(out.status() == QDataStream::Ok);
 
         return out;
     }
 
     QDataStream &operator>>(QDataStream &in, CachedArtwork &v) {
-        in >> v.m_ArtworkType >> v.m_Flags >> v.m_FilesizeBytes >> v.m_CategoryID_1 >>
-                v.m_CategoryID_2 >> v.m_Filepath >> v.m_Title >> v.m_Description >>
-                v.m_AttachedVector >> v.m_ThumbnailPath >> v.m_Keywords >> v.m_ModelReleases >>
-                v.m_PropertyReleases >> v.m_CreationTime >> v.m_AdditionalData;
+        in >>
+                v.m_ArtworkType >>
+                v.m_Flags >>
+                v.m_FilesizeBytes >>
+                v.m_CategoryID_1 >>
+                v.m_CategoryID_2 >>
+                v.m_Filepath >>
+                v.m_Title >>
+                v.m_Description >>
+                v.m_ThumbnailPath >>
+                v.m_CodecName >>
+                v.m_AttachedVector >>
+                v.m_CreationTime >>
+                v.m_Keywords >>
+                v.m_ModelReleases >>
+                v.m_PropertyReleases >>
+                v.m_AdditionalData;
+
+        Q_ASSERT(out.status() == QDataStream::Ok);
 
         return in;
     }
