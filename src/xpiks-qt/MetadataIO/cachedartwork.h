@@ -37,7 +37,10 @@ namespace MetadataIO {
         CachedArtwork(const CachedArtwork &from);
         CachedArtwork &operator=(const CachedArtwork &other);
 
-        // quint8 m_Version; // instead use AdditionalData
+        void initSerializationVersion();
+
+        quint8 m_Version;
+        // BEGIN of version 1 data
         quint32 m_ArtworkType; // 32-bit for allignment
         Common::flag_t m_Flags;
         quint64 m_FilesizeBytes;
@@ -47,16 +50,13 @@ namespace MetadataIO {
         QString m_Title;
         QString m_Description;
         QString m_ThumbnailPath;
-        QString m_CodecName;
-        QString m_AttachedVector;
-        QDateTime m_CreationTime;
+        /*VIDEO*/QString m_CodecName;
+        /*VECTOR*/QString m_AttachedVector;
+        /*PHOTO*/QDateTime m_CreationTime;
         QStringList m_Keywords;
-        QVector<quint16> m_ModelReleases;
-        QVector<quint16> m_PropertyReleases;
-        // reserved for future demands
-        QHash<qint32, QByteArray> m_AdditionalData;
-
-        // temporary data
+        QVector<quint16> m_ModelReleaseIDs;
+        QVector<quint16> m_PropertyReleaseIDs;
+        // END of version 1 data
     };
 
     QDataStream &operator<<(QDataStream &out, const CachedArtwork &v);
