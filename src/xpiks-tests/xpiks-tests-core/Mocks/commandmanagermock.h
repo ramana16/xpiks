@@ -55,7 +55,7 @@ namespace Mocks {
                         image->attachVector(vectorname);
                     }
 
-                    artItemsModel->appendMetadata(artwork);
+                    artItemsModel->appendArtwork(artwork);
                 } else {
                     Q_ASSERT(false);
                 }
