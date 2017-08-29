@@ -23,12 +23,13 @@ namespace QMLExtensions {
         CachedImage(const CachedImage &from);
         CachedImage &operator=(const CachedImage &other);
 
+        quint32 m_Version; // 32-bit for allignment
+        // BEGIN of data version 1
         QDateTime m_LastModified;
         QString m_Filename;
         QSize m_Size;
         quint64 m_RequestsServed;
-        // reserved for future demands
-        QHash<qint32, QByteArray> m_AdditionalData;
+        // END of data version 1
     };
 
     QDataStream &operator<<(QDataStream &out, const CachedImage &v);

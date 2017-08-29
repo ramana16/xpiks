@@ -25,10 +25,10 @@
 #define THUMBNAIL_JPG_QUALITY 80
 
 namespace QMLExtensions {
-    QString getVideoPathHash(const QString &path, bool isSmartThumbnail) {
+    QString getVideoPathHash(const QString &path, bool isQuickThumbnail) {
         QString hash = QString::fromLatin1(QCryptographicHash::hash(path.toUtf8(), QCryptographicHash::Sha256).toHex());
         // TODO: in the video cache cleanup remove all with same hash without _s
-        if (isSmartThumbnail) { hash.append(QChar('s')); }
+        if (!isQuickThumbnail) { hash.append(QChar('s')); }
         return hash;
     }
 
@@ -162,18 +162,18 @@ namespace QMLExtensions {
         this->submitItem(separatorItem);
     }
 
-    bool VideoCachingWorker::saveThumbnail(QImage &image, const QString &originalPath, bool isSmartThumbnail, QString &thumbnailPath) {
+    bool VideoCachingWorker::saveThumbnail(QImage &image, const QString &originalPath, bool isQuickThumbnail, QString &thumbnailPath) {
         bool success = false;
 
         QFileInfo fi(originalPath);
-        QString pathHash = getVideoPathHash(originalPath, isSmartThumbnail) + ".jpg";
+        QString pathHash = getVideoPathHash(originalPath, isQuickThumbnail) + ".jpg";
         QString cachedFilepath = QDir::cleanPath(m_VideosCacheDir + QDir::separator() + pathHash);
 
         if (image.save(cachedFilepath, "JPG", THUMBNAIL_JPG_QUALITY)) {
             CachedVideo cachedVideo;
             cachedVideo.m_Filename = pathHash;
             cachedVideo.m_LastModified = fi.lastModified();
-            cachedVideo.m_IsSmartThumbnail = isSmartThumbnail;
+            cachedVideo.m_IsQuickThumbnail = isQuickThumbnail;
 
             m_Cache.update(originalPath, cachedVideo);
 

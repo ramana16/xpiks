@@ -39,9 +39,9 @@ namespace MetadataIO {
 
         void initSerializationVersion();
 
-        quint8 m_Version;
+        quint16 m_Version;
         // BEGIN of version 1 data
-        quint32 m_ArtworkType; // 32-bit for allignment
+        quint16 m_ArtworkType;
         Common::flag_t m_Flags;
         quint64 m_FilesizeBytes;
         quint16 m_CategoryID_1;

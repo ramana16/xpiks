@@ -72,8 +72,7 @@ namespace MetadataIO {
         m_CreationTime(from.m_CreationTime),
         m_Keywords(from.m_Keywords),
         m_ModelReleaseIDs(from.m_ModelReleaseIDs),
-        m_PropertyReleaseIDs(from.m_PropertyReleaseIDs),
-        m_AdditionalData(from.m_AdditionalData)
+        m_PropertyReleaseIDs(from.m_PropertyReleaseIDs)
     {
     }
 
@@ -94,13 +93,13 @@ namespace MetadataIO {
         m_Keywords = other.m_Keywords;
         m_ModelReleaseIDs = other.m_ModelReleaseIDs;
         m_PropertyReleaseIDs = other.m_PropertyReleaseIDs;
-        m_AdditionalData = other.m_AdditionalData;
 
         return *this;
     }
 
     void CachedArtwork::initSerializationVersion() {
-        if (XPIKS_MAJOR_VERSION_CHECK(1, 5)) {
+        if (XPIKS_MAJOR_VERSION_CHECK(1, 5) ||
+                XPIKS_MAJOR_VERSION_CHECK(1, 4)) {
             m_Version = 1;
         }
     }

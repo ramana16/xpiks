@@ -23,13 +23,14 @@ namespace QMLExtensions {
         CachedVideo(const CachedVideo &from);
         CachedVideo &operator=(const CachedVideo &other);
 
+        quint32 m_Version; // 32-bit for allignment
+        // BEGIN of data version 1
         QDateTime m_LastModified;
         QString m_Filename;
         quint64 m_RequestsServed;
-        // quick vs smart thumbnail (see docs of libavthumbnailer)
-        bool m_IsSmartThumbnail;
-        // reserved for future demands
-        QHash<qint32, QByteArray> m_AdditionalData;
+        // quick vs good quality thumbnail
+        bool m_IsQuickThumbnail;
+        // END of data version 1
     };
 
     QDataStream &operator<<(QDataStream &out, const CachedVideo &v);
