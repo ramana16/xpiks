@@ -457,6 +457,11 @@ LIBS += -lxpks
 BUILDNO=$$system(git log -n 1 --pretty=format:"%h")
 BRANCH_NAME=$$system(git rev-parse --abbrev-ref HEAD)
 
+win* {
+   QMAKE_CXXFLAGS_EXCEPTIONS_ON = /EHa
+   QMAKE_CXXFLAGS_STL_ON = /EHa
+}
+
 macx {
     INCLUDEPATH += "../../../vendors/quazip"
     INCLUDEPATH += "../../../vendors/libcurl/include"
