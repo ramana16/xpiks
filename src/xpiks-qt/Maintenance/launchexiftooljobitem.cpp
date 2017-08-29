@@ -18,7 +18,7 @@ namespace Maintenance {
     bool tryGetExiftoolVersion(const QString &path, QString &version) {
         QProcess process;
         process.start(path, QStringList() << "-ver");
-        const bool finishedInTime = process.waitForFinished(3000);
+        const bool finishedInTime = process.waitForFinished(1000);
         if (!finishedInTime) {
             LOG_WARNING << "Exiftool did not finish in time";
         }
