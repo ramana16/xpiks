@@ -49,7 +49,7 @@ namespace Models {
     }
 
     bool VideoArtwork::initFromOriginUnsafe(const MetadataIO::OriginalMetadata &originalMetadata) {
-
+        return false;
     }
 
     bool VideoArtwork::initFromStorageUnsafe(const MetadataIO::CachedArtwork &cachedArtwork) {
@@ -58,5 +58,7 @@ namespace Models {
         if (!cachedArtwork.m_CodecName.isEmpty()) {
             m_CodecName = cachedArtwork.m_CodecName;
         }
+
+        return false;
     }
 }
