@@ -25,6 +25,20 @@
 #define _tcscat_s _tcscat
 #endif
 
+#define CR_SEH_EXCEPTION                0    //!< SEH exception.
+#define CR_CPP_TERMINATE_CALL           1    //!< C++ terminate() call.
+#define CR_CPP_UNEXPECTED_CALL          2    //!< C++ unexpected() call.
+#define CR_CPP_PURE_CALL                3    //!< C++ pure virtual function call (VS .NET and later).
+#define CR_CPP_NEW_OPERATOR_ERROR       4    //!< C++ new operator fault (VS .NET and later).
+#define CR_CPP_SECURITY_ERROR           5    //!< Buffer overrun error (VS .NET only).
+#define CR_CPP_INVALID_PARAMETER        6    //!< Invalid parameter exception (VS 2005 and later).
+#define CR_CPP_SIGABRT                  7    //!< C++ SIGABRT signal (abort).
+#define CR_CPP_SIGFPE                   8    //!< C++ SIGFPE signal (flotating point exception).
+#define CR_CPP_SIGILL                   9    //!< C++ SIGILL signal (illegal instruction).
+#define CR_CPP_SIGINT                   10   //!< C++ SIGINT signal (CTRL+C).
+#define CR_CPP_SIGSEGV                  11   //!< C++ SIGSEGV signal (invalid storage access).
+#define CR_CPP_SIGTERM                  12   //!< C++ SIGTERM signal (termination request).
+
 // Specialized stackwalker-output classes
 // Console (printf):
 class StackWalkerToConsole : public StackWalker
@@ -45,48 +59,28 @@ LPTOP_LEVEL_EXCEPTION_FILTER WINAPI
 
 BOOL PreventSetUnhandledExceptionFilter()
 {
-  HMODULE hKernel32 = LoadLibrary(_T("kernel32.dll"));
-  if (hKernel32 == NULL) return FALSE;
-  void *pOrgEntry = GetProcAddress(hKernel32,
-    "SetUnhandledExceptionFilter");
-  if(pOrgEntry == NULL) return FALSE;
+    HMODULE hKernel32 = LoadLibrary(_T("kernel32.dll"));
+    if (hKernel32 == NULL) return FALSE;
+    void *pOrgEntry = GetProcAddress(hKernel32, "SetUnhandledExceptionFilter");
+    if (pOrgEntry == NULL) return FALSE;
 
-  DWORD dwOldProtect = 0;
-  SIZE_T jmpSize = 5;
-#ifdef _M_X64
-  jmpSize = 13;
-#endif
-  BOOL bProt = VirtualProtect(pOrgEntry, jmpSize,
-    PAGE_EXECUTE_READWRITE, &dwOldProtect);
-  BYTE newJump[20];
-  void *pNewFunc = &MyDummySetUnhandledExceptionFilter;
 #ifdef _M_IX86
-  DWORD dwOrgEntryAddr = (DWORD) pOrgEntry;
-  dwOrgEntryAddr += jmpSize; // add 5 for 5 op-codes for jmp rel32
-  DWORD dwNewEntryAddr = (DWORD) pNewFunc;
-  DWORD dwRelativeAddr = dwNewEntryAddr - dwOrgEntryAddr;
-  // JMP rel32: Jump near, relative, displacement relative to next instruction.
-  newJump[0] = 0xE9;  // JMP rel32
-  memcpy(&newJump[1], &dwRelativeAddr, sizeof(pNewFunc));
+    // Code for x86:
+    // 33 C0                xor         eax,eax
+    // C2 04 00             ret         4
+    unsigned char szExecute[] = { 0x33, 0xC0, 0xC2, 0x04, 0x00 };
 #elif _M_X64
-  newJump[0] = 0x49;  // MOV R15, ...
-  newJump[1] = 0xBF;  // ...
-  memcpy(&newJump[2], &pNewFunc, sizeof (pNewFunc));
-  //pCur += sizeof (ULONG_PTR);
-  newJump[10] = 0x41;  // JMP R15, ...
-  newJump[11] = 0xFF;  // ...
-  newJump[12] = 0xE7;  // ...
+    // 33 C0                xor         eax,eax
+    // C3                   ret
+    unsigned char szExecute[] = { 0x33, 0xC0, 0xC3 };
+#else
+#error "The following code only works for x86 and x64!"
 #endif
-  SIZE_T bytesWritten;
-  BOOL bRet = WriteProcessMemory(GetCurrentProcess(),
-    pOrgEntry, newJump, jmpSize, &bytesWritten);
 
-  if (bProt != FALSE)
-  {
-    DWORD dwBuf;
-    VirtualProtect(pOrgEntry, jmpSize, dwOldProtect, &dwBuf);
-  }
-  return bRet;
+    SIZE_T bytesWritten = 0;
+    BOOL bRet = WriteProcessMemory(GetCurrentProcess(),
+                                   pOrgEntry, szExecute, sizeof(szExecute), &bytesWritten);
+    return bRet;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -272,6 +266,73 @@ BOOL CreateMiniDump(EXCEPTION_POINTERS * pep)
     return rv;
 }
 
+// The following code gets exception pointers using a workaround found in CRT code.
+void GetExceptionPointers(DWORD dwExceptionCode,
+                          EXCEPTION_POINTERS** ppExceptionPointers)
+{
+    // The following code was taken from VC++ 8.0 CRT (invarg.c: line 104)
+
+    EXCEPTION_RECORD ExceptionRecord;
+    CONTEXT ContextRecord;
+    memset(&ContextRecord, 0, sizeof(CONTEXT));
+
+#ifdef _X86_
+
+    __asm {
+        mov dword ptr [ContextRecord.Eax], eax
+            mov dword ptr [ContextRecord.Ecx], ecx
+            mov dword ptr [ContextRecord.Edx], edx
+            mov dword ptr [ContextRecord.Ebx], ebx
+            mov dword ptr [ContextRecord.Esi], esi
+            mov dword ptr [ContextRecord.Edi], edi
+            mov word ptr [ContextRecord.SegSs], ss
+            mov word ptr [ContextRecord.SegCs], cs
+            mov word ptr [ContextRecord.SegDs], ds
+            mov word ptr [ContextRecord.SegEs], es
+            mov word ptr [ContextRecord.SegFs], fs
+            mov word ptr [ContextRecord.SegGs], gs
+            pushfd
+            pop [ContextRecord.EFlags]
+    }
+
+    ContextRecord.ContextFlags = CONTEXT_CONTROL;
+#pragma warning(push)
+#pragma warning(disable:4311)
+    ContextRecord.Eip = (ULONG)_ReturnAddress();
+    ContextRecord.Esp = (ULONG)_AddressOfReturnAddress();
+#pragma warning(pop)
+    ContextRecord.Ebp = *((ULONG *)_AddressOfReturnAddress()-1);
+
+
+#elif defined (_IA64_) || defined (_AMD64_)
+
+    /* Need to fill up the Context in IA64 and AMD64. */
+    RtlCaptureContext(&ContextRecord);
+
+#else  /* defined (_IA64_) || defined (_AMD64_) */
+
+    ZeroMemory(&ContextRecord, sizeof(ContextRecord));
+
+#endif  /* defined (_IA64_) || defined (_AMD64_) */
+
+    ZeroMemory(&ExceptionRecord, sizeof(EXCEPTION_RECORD));
+
+    ExceptionRecord.ExceptionCode = dwExceptionCode;
+    ExceptionRecord.ExceptionAddress = _ReturnAddress();
+
+    ///
+
+    EXCEPTION_RECORD* pExceptionRecord = new EXCEPTION_RECORD;
+    memcpy(pExceptionRecord, &ExceptionRecord, sizeof(EXCEPTION_RECORD));
+    CONTEXT* pContextRecord = new CONTEXT;
+    memcpy(pContextRecord, &ContextRecord, sizeof(CONTEXT));
+
+    *ppExceptionPointers = new EXCEPTION_POINTERS;
+    (*ppExceptionPointers)->ExceptionRecord = pExceptionRecord;
+    (*ppExceptionPointers)->ContextRecord = pContextRecord;
+}
+
+
 void DoHandleCrash(EXCEPTION_POINTERS* pExPtrs)
 {
     {
@@ -384,6 +445,7 @@ void WindowsCrashHandler::SetProcessExceptionHandlers()
 
     // Set up C++ signal handlers
 
+    _set_abort_behavior(0, _WRITE_ABORT_MSG);
     _set_abort_behavior(_CALL_REPORTFAULT, _CALL_REPORTFAULT);
 
     // Catch an abnormal program termination
@@ -425,72 +487,6 @@ void WindowsCrashHandler::SetThreadExceptionHandlers()
 
 }
 
-// The following code gets exception pointers using a workaround found in CRT code.
-void WindowsCrashHandler::GetExceptionPointers(DWORD dwExceptionCode,
-                                         EXCEPTION_POINTERS** ppExceptionPointers)
-{
-    // The following code was taken from VC++ 8.0 CRT (invarg.c: line 104)
-
-    EXCEPTION_RECORD ExceptionRecord;
-    CONTEXT ContextRecord;
-    memset(&ContextRecord, 0, sizeof(CONTEXT));
-
-#ifdef _X86_
-
-    __asm {
-        mov dword ptr [ContextRecord.Eax], eax
-            mov dword ptr [ContextRecord.Ecx], ecx
-            mov dword ptr [ContextRecord.Edx], edx
-            mov dword ptr [ContextRecord.Ebx], ebx
-            mov dword ptr [ContextRecord.Esi], esi
-            mov dword ptr [ContextRecord.Edi], edi
-            mov word ptr [ContextRecord.SegSs], ss
-            mov word ptr [ContextRecord.SegCs], cs
-            mov word ptr [ContextRecord.SegDs], ds
-            mov word ptr [ContextRecord.SegEs], es
-            mov word ptr [ContextRecord.SegFs], fs
-            mov word ptr [ContextRecord.SegGs], gs
-            pushfd
-            pop [ContextRecord.EFlags]
-    }
-
-    ContextRecord.ContextFlags = CONTEXT_CONTROL;
-#pragma warning(push)
-#pragma warning(disable:4311)
-    ContextRecord.Eip = (ULONG)_ReturnAddress();
-    ContextRecord.Esp = (ULONG)_AddressOfReturnAddress();
-#pragma warning(pop)
-    ContextRecord.Ebp = *((ULONG *)_AddressOfReturnAddress()-1);
-
-
-#elif defined (_IA64_) || defined (_AMD64_)
-
-    /* Need to fill up the Context in IA64 and AMD64. */
-    RtlCaptureContext(&ContextRecord);
-
-#else  /* defined (_IA64_) || defined (_AMD64_) */
-
-    ZeroMemory(&ContextRecord, sizeof(ContextRecord));
-
-#endif  /* defined (_IA64_) || defined (_AMD64_) */
-
-    ZeroMemory(&ExceptionRecord, sizeof(EXCEPTION_RECORD));
-
-    ExceptionRecord.ExceptionCode = dwExceptionCode;
-    ExceptionRecord.ExceptionAddress = _ReturnAddress();
-
-    ///
-
-    EXCEPTION_RECORD* pExceptionRecord = new EXCEPTION_RECORD;
-    memcpy(pExceptionRecord, &ExceptionRecord, sizeof(EXCEPTION_RECORD));
-    CONTEXT* pContextRecord = new CONTEXT;
-    memcpy(pContextRecord, &ContextRecord, sizeof(CONTEXT));
-
-    *ppExceptionPointers = new EXCEPTION_POINTERS;
-    (*ppExceptionPointers)->ExceptionRecord = pExceptionRecord;
-    (*ppExceptionPointers)->ContextRecord = pContextRecord;
-}
-
 // CRT terminate() call handler
 void __cdecl WindowsCrashHandler::TerminateHandler()
 {
@@ -498,7 +494,7 @@ void __cdecl WindowsCrashHandler::TerminateHandler()
 
     // Retrieve exception information
     EXCEPTION_POINTERS* pExceptionPtrs = NULL;
-    GetExceptionPointers(0, &pExceptionPtrs);
+    GetExceptionPointers(CR_CPP_TERMINATE_CALL, &pExceptionPtrs);
 
     DoHandleCrash(pExceptionPtrs);
 
@@ -513,7 +509,7 @@ void __cdecl WindowsCrashHandler::UnexpectedHandler()
 
     // Retrieve exception information
     EXCEPTION_POINTERS* pExceptionPtrs = NULL;
-    GetExceptionPointers(0, &pExceptionPtrs);
+    GetExceptionPointers(CR_CPP_UNEXPECTED_CALL, &pExceptionPtrs);
 
     DoHandleCrash(pExceptionPtrs);
 
@@ -528,7 +524,7 @@ void __cdecl WindowsCrashHandler::PureCallHandler()
 
     // Retrieve exception information
     EXCEPTION_POINTERS* pExceptionPtrs = NULL;
-    GetExceptionPointers(0, &pExceptionPtrs);
+    GetExceptionPointers(CR_CPP_PURE_CALL, &pExceptionPtrs);
 
     DoHandleCrash(pExceptionPtrs);
 
@@ -549,7 +545,7 @@ void __cdecl WindowsCrashHandler::InvalidParameterHandler(
 
     // Retrieve exception information
     EXCEPTION_POINTERS* pExceptionPtrs = NULL;
-    GetExceptionPointers(0, &pExceptionPtrs);
+    GetExceptionPointers(CR_CPP_INVALID_PARAMETER, &pExceptionPtrs);
 
     DoHandleCrash(pExceptionPtrs);
 
@@ -564,7 +560,7 @@ int __cdecl WindowsCrashHandler::NewHandler(size_t)
 
     // Retrieve exception information
     EXCEPTION_POINTERS* pExceptionPtrs = NULL;
-    GetExceptionPointers(0, &pExceptionPtrs);
+    GetExceptionPointers(CR_CPP_NEW_OPERATOR_ERROR, &pExceptionPtrs);
 
     DoHandleCrash(pExceptionPtrs);
 
@@ -582,7 +578,7 @@ void WindowsCrashHandler::SigabrtHandler(int)
 
     // Retrieve exception information
     EXCEPTION_POINTERS* pExceptionPtrs = NULL;
-    GetExceptionPointers(0, &pExceptionPtrs);
+    GetExceptionPointers(CR_CPP_SIGABRT, &pExceptionPtrs);
 
     DoHandleCrash(pExceptionPtrs);
 
@@ -610,7 +606,7 @@ void WindowsCrashHandler::SigillHandler(int)
 
     // Retrieve exception information
     EXCEPTION_POINTERS* pExceptionPtrs = NULL;
-    GetExceptionPointers(0, &pExceptionPtrs);
+    GetExceptionPointers(CR_CPP_SIGILL, &pExceptionPtrs);
 
     DoHandleCrash(pExceptionPtrs);
 
@@ -625,7 +621,7 @@ void WindowsCrashHandler::SigintHandler(int)
 
     // Retrieve exception information
     EXCEPTION_POINTERS* pExceptionPtrs = NULL;
-    GetExceptionPointers(0, &pExceptionPtrs);
+    GetExceptionPointers(CR_CPP_SIGINT, &pExceptionPtrs);
 
     DoHandleCrash(pExceptionPtrs);
 
@@ -653,7 +649,7 @@ void WindowsCrashHandler::SigtermHandler(int)
 
     // Retrieve exception information
     EXCEPTION_POINTERS* pExceptionPtrs = NULL;
-    GetExceptionPointers(0, &pExceptionPtrs);
+    GetExceptionPointers(CR_CPP_SIGTERM, &pExceptionPtrs);
 
     DoHandleCrash(pExceptionPtrs);
 

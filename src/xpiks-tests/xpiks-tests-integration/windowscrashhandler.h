@@ -29,11 +29,6 @@ public:
     // Installs C++ exception handlers that function on per-thread basis
     void SetThreadExceptionHandlers();
 
-    // Collects current process state.
-    static void GetExceptionPointers(
-        DWORD dwExceptionCode,
-        EXCEPTION_POINTERS** pExceptionPointers);
-
     /* Exception handler functions. */
 
     static void __cdecl TerminateHandler();
