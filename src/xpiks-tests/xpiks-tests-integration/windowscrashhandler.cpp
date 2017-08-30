@@ -493,8 +493,10 @@ void __cdecl WindowsCrashHandler::TerminateHandler()
     // Abnormal program termination (terminate() function was called)
 
     // Retrieve exception information
-    EXCEPTION_POINTERS* pExceptionPtrs = NULL;
-    GetExceptionPointers(CR_CPP_TERMINATE_CALL, &pExceptionPtrs);
+    EXCEPTION_POINTERS* pExceptionPtrs = (PEXCEPTION_POINTERS)_pxcptinfoptrs;
+    if (pExceptionPtrs == nullptr) {
+        GetExceptionPointers(CR_CPP_TERMINATE_CALL, &pExceptionPtrs);
+    }
 
     DoHandleCrash(pExceptionPtrs);
 
@@ -508,8 +510,10 @@ void __cdecl WindowsCrashHandler::UnexpectedHandler()
     // Unexpected error (unexpected() function was called)
 
     // Retrieve exception information
-    EXCEPTION_POINTERS* pExceptionPtrs = NULL;
-    GetExceptionPointers(CR_CPP_UNEXPECTED_CALL, &pExceptionPtrs);
+    EXCEPTION_POINTERS* pExceptionPtrs = (PEXCEPTION_POINTERS)_pxcptinfoptrs;
+    if (pExceptionPtrs == nullptr) {
+        GetExceptionPointers(CR_CPP_UNEXPECTED_CALL, &pExceptionPtrs);
+    }
 
     DoHandleCrash(pExceptionPtrs);
 
@@ -523,8 +527,10 @@ void __cdecl WindowsCrashHandler::PureCallHandler()
     // Pure virtual function call
 
     // Retrieve exception information
-    EXCEPTION_POINTERS* pExceptionPtrs = NULL;
-    GetExceptionPointers(CR_CPP_PURE_CALL, &pExceptionPtrs);
+    EXCEPTION_POINTERS* pExceptionPtrs = (PEXCEPTION_POINTERS)_pxcptinfoptrs;
+    if (pExceptionPtrs == nullptr) {
+        GetExceptionPointers(CR_CPP_PURE_CALL, &pExceptionPtrs);
+    }
 
     DoHandleCrash(pExceptionPtrs);
 
@@ -577,8 +583,10 @@ void WindowsCrashHandler::SigabrtHandler(int)
     // Caught SIGABRT C++ signal
 
     // Retrieve exception information
-    EXCEPTION_POINTERS* pExceptionPtrs = NULL;
-    GetExceptionPointers(CR_CPP_SIGABRT, &pExceptionPtrs);
+    EXCEPTION_POINTERS* pExceptionPtrs = (PEXCEPTION_POINTERS)_pxcptinfoptrs;
+    if (pExceptionPtrs == nullptr) {
+        GetExceptionPointers(CR_CPP_SIGABRT, &pExceptionPtrs);
+    }
 
     DoHandleCrash(pExceptionPtrs);
 
@@ -605,8 +613,10 @@ void WindowsCrashHandler::SigillHandler(int)
     // Illegal instruction (SIGILL)
 
     // Retrieve exception information
-    EXCEPTION_POINTERS* pExceptionPtrs = NULL;
-    GetExceptionPointers(CR_CPP_SIGILL, &pExceptionPtrs);
+    EXCEPTION_POINTERS* pExceptionPtrs = (PEXCEPTION_POINTERS)_pxcptinfoptrs;
+    if (pExceptionPtrs == nullptr) {
+        GetExceptionPointers(CR_CPP_SIGILL, &pExceptionPtrs);
+    }
 
     DoHandleCrash(pExceptionPtrs);
 
@@ -620,8 +630,10 @@ void WindowsCrashHandler::SigintHandler(int)
     // Interruption (SIGINT)
 
     // Retrieve exception information
-    EXCEPTION_POINTERS* pExceptionPtrs = NULL;
-    GetExceptionPointers(CR_CPP_SIGINT, &pExceptionPtrs);
+    EXCEPTION_POINTERS* pExceptionPtrs = (PEXCEPTION_POINTERS)_pxcptinfoptrs;
+    if (pExceptionPtrs == nullptr) {
+        GetExceptionPointers(CR_CPP_SIGINT, &pExceptionPtrs);
+    }
 
     DoHandleCrash(pExceptionPtrs);
 
@@ -648,8 +660,10 @@ void WindowsCrashHandler::SigtermHandler(int)
     // Termination request (SIGTERM)
 
     // Retrieve exception information
-    EXCEPTION_POINTERS* pExceptionPtrs = NULL;
-    GetExceptionPointers(CR_CPP_SIGTERM, &pExceptionPtrs);
+    EXCEPTION_POINTERS* pExceptionPtrs = (PEXCEPTION_POINTERS)_pxcptinfoptrs;
+    if (pExceptionPtrs == nullptr) {
+        GetExceptionPointers(CR_CPP_SIGTERM, &pExceptionPtrs);
+    }
 
     DoHandleCrash(pExceptionPtrs);
 
