@@ -43,36 +43,6 @@ LPTOP_LEVEL_EXCEPTION_FILTER WINAPI
   return NULL;
 }
 
-void EnumerateThreads( DWORD (WINAPI *inCallback)( HANDLE ), DWORD inExceptThisOne )
-{
-    // Create a snapshot of all the threads in the process, and walk over
-    // them, calling the callback function on each of them, except for
-    // the thread identified by the inExceptThisOne parameter.
-    HANDLE hSnapshot = ::CreateToolhelp32Snapshot( TH32CS_SNAPTHREAD, 0 );
-    if (INVALID_HANDLE_VALUE != hSnapshot) {
-        THREADENTRY32 thread;
-        thread.dwSize = sizeof( thread );
-        if (::Thread32First( hSnapshot, &thread )) {
-            do {
-                if (thread.th32OwnerProcessID == ::GetCurrentProcessId() &&
-                    thread.th32ThreadID != inExceptThisOne &&
-                    thread.th32ThreadID != ::GetCurrentThreadId()) {
-                    // We're making a big assumption that this call will only
-                    // be used to suspend or resume a thread, and so we know
-                    // that we only require the THREAD_SUSPEND_RESUME access right.
-                    HANDLE hThread = ::OpenThread( THREAD_SUSPEND_RESUME, FALSE, thread.th32ThreadID );
-                    if (hThread) {
-                        inCallback( hThread );
-                        ::CloseHandle( hThread );
-                    }
-                }
-            } while (::Thread32Next( hSnapshot, &thread ) );
-        }
-
-        ::CloseHandle( hSnapshot );
-    }
-}
-
 BOOL PreventSetUnhandledExceptionFilter()
 {
   HMODULE hKernel32 = LoadLibrary(_T("kernel32.dll"));
@@ -248,7 +218,7 @@ BOOL CALLBACK MyMiniDumpCallback(
 
 }
 
-BOOL DoWriteMiniDump(EXCEPTION_POINTERS * pep)
+BOOL CreateMiniDump(EXCEPTION_POINTERS * pep)
 {
     BOOL rv = FALSE;
     // Open the file
@@ -300,58 +270,6 @@ BOOL DoWriteMiniDump(EXCEPTION_POINTERS * pep)
     fflush(stderr);
 
     return rv;
-}
-
-DWORD CALLBACK MiniDumpThreadCallback( LPVOID inParam )
-{
-    EXCEPTION_POINTERS* pep = (EXCEPTION_POINTERS *)inParam;
-    DWORD result = 0;
-
-    BOOL rv = DoWriteMiniDump(pep);
-    if (rv) { result = 1; }
-
-    return result;
-}
-
-bool CreateMiniDumpWithThread( EXCEPTION_POINTERS* pep )
-{
-    DWORD threadId = 0;
-    HANDLE hThread = ::CreateThread( NULL, 0, MiniDumpThreadCallback, pep, CREATE_SUSPENDED, &threadId );
-
-    if (hThread) {
-        // Having created the thread successfully, we need to put all of the other
-        // threads in the process into a suspended state, making sure not to suspend
-        // our newly-created thread.  We do this because we want this function to
-        // behave as a snapshot, and that means other threads should not continue
-        // to perform work while we're creating the minidump.
-        EnumerateThreads( ::SuspendThread, threadId );
-
-        // Now we can resume our worker thread
-        ::ResumeThread( hThread );
-
-        // Wait for the thread to finish working, without allowing the current
-        // thread to continue working.  This ensures that the current thread won't
-        // do anything interesting while we're writing the debug information out.
-        // This also means that the minidump will show this as the current callstack.
-        ::WaitForSingleObject( hThread, INFINITE );
-
-        // The thread exit code tells us whether we were able to create the minidump
-        DWORD code = 0;
-        ::GetExitCodeThread( hThread, &code );
-        ::CloseHandle( hThread );
-
-        // If we suspended other threads, now is the time to wake them up
-        EnumerateThreads( ::ResumeThread, threadId );
-
-        return code != 0;
-    }
-
-    return false;
-}
-
-void CreateMiniDump(EXCEPTION_POINTERS* pep)
-{
-    DoWriteMiniDump(pep);
 }
 
 void DoHandleCrash(EXCEPTION_POINTERS* pExPtrs)
@@ -447,7 +365,7 @@ WindowsCrashHandler::WindowsCrashHandler()
 
 void WindowsCrashHandler::SetProcessExceptionHandlers()
 {
-    SetErrorMode(SEM_FAILCRITICALERRORS);
+    // SetErrorMode(SEM_FAILCRITICALERRORS);
     EnableCrashingOnCrashes();
     InitUnhandledExceptionFilter();
 
