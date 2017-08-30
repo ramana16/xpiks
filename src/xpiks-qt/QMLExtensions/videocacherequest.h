@@ -14,6 +14,7 @@
 #include <QString>
 #include "../Models/videoartwork.h"
 #include "../Common/flags.h"
+#include <videofilemetadata.h>
 
 namespace QMLExtensions {
     class VideoCacheRequest {
@@ -66,6 +67,7 @@ namespace QMLExtensions {
     public:
         void setGoodQualityRequest() { Common::ApplyFlag(m_Flags, false, QuickThumbnailFlag); }
         void setThumbnailPath(const QString &path) { m_VideoArtwork->setThumbnailPath(path); }
+        void setVideoMetadata(const VideoFileMetadata &metadata) { m_VideoArtwork->setVideoMetadata(metadata); }
 
     private:
         Models::VideoArtwork *m_VideoArtwork;

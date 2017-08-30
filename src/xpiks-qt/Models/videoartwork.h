@@ -17,6 +17,7 @@
 #include <QMutex>
 #include <QSize>
 #include "../Common/flags.h"
+#include <videofilemetadata.h>
 
 namespace Models {
     class VideoArtwork: public ArtworkMetadata
@@ -42,10 +43,11 @@ namespace Models {
     public:
         bool isThumbnailGenerated() { return getThumbnailGeneratedFlag(); }
         virtual const QString &getThumbnailPath() const override { return m_ThumbnailPath; }
-        const QString &getCodecName() const { return m_CodecName; }
+        const std::string &getCodecName() const { return m_VideoMetadata.m_CodecName; }
 
     public:
         void setThumbnailPath(const QString &filepath);
+        void setVideoMetadata(const VideoFileMetadata &metadata);
         void initializeThumbnailPath(const QString &filepath);
 
     protected:
@@ -57,7 +59,7 @@ namespace Models {
         QString m_ThumbnailPath;
         QReadWriteLock m_FlagsLock;
         volatile Common::flag_t m_VideoFlags;
-        QString m_CodecName;
+        VideoFileMetadata m_VideoMetadata;
         QSize m_ImageSize;
         int m_BitRate;
         double m_FrameRate;

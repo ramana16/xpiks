@@ -96,6 +96,8 @@ namespace QMLExtensions {
         }
 
         if (thumbnailCreated) {
+            item->setVideoMetadata(thumbnailCreator.getMetadata());
+
             QString thumbnailPath;
             QImage image((unsigned char*)&buffer[0], width, height, QImage::Format_RGB888);
             bool needsRefresh = false;

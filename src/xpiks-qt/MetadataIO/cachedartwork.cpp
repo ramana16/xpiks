@@ -52,7 +52,7 @@ namespace MetadataIO {
         } else {
             Models::VideoArtwork *video = dynamic_cast<Models::VideoArtwork*>(metadata);
             m_ArtworkType = Video;
-            m_CodecName = video->getCodecName();
+            m_CodecName = QString::fromStdString(video->getCodecName());
         }
     }
 

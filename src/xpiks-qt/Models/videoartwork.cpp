@@ -12,6 +12,7 @@
 #include <QFileInfo>
 #include "../MetadataIO/cachedartwork.h"
 #include "../Common/defines.h"
+#include <videofilemetadata.h>
 
 namespace Models {
     VideoArtwork::VideoArtwork(const QString &filepath, qint64 ID, qint64 directoryID):
@@ -39,6 +40,15 @@ namespace Models {
         }
     }
 
+    void VideoArtwork::setVideoMetadata(const VideoFileMetadata &metadata) {
+        LOG_DEBUG << "#";
+
+        m_VideoMetadata.m_CodecName = metadata.m_CodecName;
+        m_VideoMetadata.m_BitRate = metadata.m_BitRate;
+        m_VideoMetadata.m_Duration = metadata.m_Duration;
+        m_VideoMetadata.m_FrameRate = metadata.m_FrameRate;
+    }
+
     void VideoArtwork::initializeThumbnailPath(const QString &filepath) {
         if (filepath.isEmpty()) { return; }
 
@@ -62,7 +72,7 @@ namespace Models {
         // this time we need to overwrite from storage
         // if (m_CodecName.isEmpty()) {
         if (!cachedArtwork.m_CodecName.isEmpty()) {
-            m_CodecName = cachedArtwork.m_CodecName;
+            m_VideoMetadata.m_CodecName = cachedArtwork.m_CodecName.toStdString();
         }
 
         initializeThumbnailPath(cachedArtwork.m_ThumbnailPath);
