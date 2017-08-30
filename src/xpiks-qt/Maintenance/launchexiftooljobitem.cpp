@@ -14,11 +14,13 @@
 #include "../MetadataIO/metadataiocoordinator.h"
 #include "launchexiftooljobitem.h"
 
+#define EXIFTOOL_VERSION_TIMEOUT 3000
+
 namespace Maintenance {    
     bool tryGetExiftoolVersion(const QString &path, QString &version) {
         QProcess process;
         process.start(path, QStringList() << "-ver");
-        const bool finishedInTime = process.waitForFinished(1000);
+        const bool finishedInTime = process.waitForFinished(EXIFTOOL_VERSION_TIMEOUT);
         if (!finishedInTime) {
             LOG_WARNING << "Exiftool did not finish in time";
         }
@@ -37,6 +39,7 @@ namespace Maintenance {
         } else {
             if (process.state() != QProcess::NotRunning) {
                 process.kill();
+                process.waitForFinished(EXIFTOOL_VERSION_TIMEOUT);
             }
         }
 
