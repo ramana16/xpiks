@@ -147,11 +147,16 @@ namespace SpellCheck {
         }
 
         if (anyChanged) {
-            for (auto &pair: m_ItemsPairs) {
-                auto *item = pair.first;
-                item->afterReplaceCallback();
-                m_CommandManager->submitItemForSpellCheck(item->getBasicKeywordsModel());
-            }
+             QVector<Common::BasicKeywordsModel *> itemsToSubmit;
+             itemsToSubmit.reserve((int)m_ItemsPairs.size());
+
+             for (auto &pair: m_ItemsPairs) {
+                 auto *item = pair.first;
+                 item->afterReplaceCallback();
+                 itemsToSubmit.append(item->getBasicKeywordsModel());
+             }
+
+             m_CommandManager->submitForSpellCheck(itemsToSubmit);
         }
 
         updateItems();
