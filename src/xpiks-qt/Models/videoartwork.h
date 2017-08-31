@@ -17,7 +17,10 @@
 #include <QMutex>
 #include <QSize>
 #include "../Common/flags.h"
-#include <videofilemetadata.h>
+
+namespace libthmbnlr {
+    struct VideoFileMetadata;
+}
 
 namespace Models {
     class VideoArtwork: public ArtworkMetadata
@@ -47,7 +50,7 @@ namespace Models {
 
     public:
         void setThumbnailPath(const QString &filepath);
-        void setVideoMetadata(const VideoFileMetadata &metadata);
+        void setVideoMetadata(const libthmbnlr::VideoFileMetadata &metadata);
         void initializeThumbnailPath(const QString &filepath);
 
     protected:

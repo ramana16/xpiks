@@ -40,7 +40,7 @@ namespace Models {
         }
     }
 
-    void VideoArtwork::setVideoMetadata(const VideoFileMetadata &metadata) {
+    void VideoArtwork::setVideoMetadata(const libthmbnlr::VideoFileMetadata &metadata) {
         LOG_DEBUG << "#";
 
         m_CodecName = QString::fromStdString(metadata.m_CodecName);

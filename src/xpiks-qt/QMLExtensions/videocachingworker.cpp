@@ -79,16 +79,16 @@ namespace QMLExtensions {
 
         const QString filepath = QDir::toNativeSeparators(originalPath);
 #ifdef Q_OS_WIN
-        ThumbnailCreator thumbnailCreator(filepath.toStdWString());
+        libthmbnlr::ThumbnailCreator thumbnailCreator(filepath.toStdWString());
 #else
-        ThumbnailCreator thumbnailCreator(filepath.toStdString());
+        libthmbnlr::ThumbnailCreator thumbnailCreator(filepath.toStdString());
 #endif
         std::vector<uint8_t> buffer;
         int width, height;
         bool thumbnailCreated = false;
 
         try {
-            ThumbnailCreator::CreationOption option = item->getIsQuickThumbnail() ? ThumbnailCreator::Quick : ThumbnailCreator::GoodQuality;
+            libthmbnlr::ThumbnailCreator::CreationOption option = item->getIsQuickThumbnail() ?libthmbnlr:: ThumbnailCreator::Quick : libthmbnlr::ThumbnailCreator::GoodQuality;
             thumbnailCreator.setCreationOption(option);
             thumbnailCreated = thumbnailCreator.createThumbnail(buffer, width, height);
         } catch (...) {

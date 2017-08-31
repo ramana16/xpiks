@@ -4,11 +4,13 @@
 #include <string>
 #include <cstdint>
 
-struct VideoFileMetadata {
-    std::string m_CodecName;
-    double m_Duration;
-    int64_t m_BitRate;
-    double m_FrameRate;
-};
+namespace libthmbnlr {
+    struct VideoFileMetadata {
+        std::string m_CodecName;
+        double m_Duration;
+        int64_t m_BitRate;
+        double m_FrameRate;
+    };
+}
 
 #endif // VIDEOFILEMETADATA_H
