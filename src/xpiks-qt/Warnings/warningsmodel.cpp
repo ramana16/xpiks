@@ -20,7 +20,7 @@
 #include "warningssettingsmodel.h"
 
 namespace Warnings {
-    void describeWarningFlags(Common::WarningFlags warningsFlags,
+    void describeWarningFlags(Common::flag_t warningsFlags,
                               Models::ArtworkMetadata *metadata,
                               const WarningsSettingsModel *settingsModel,
                               QStringList &descriptions) {
@@ -135,7 +135,7 @@ namespace Warnings {
             Models::ArtworkMetadata *metadata = artItemsModel->getArtwork(row);
 
             if (metadata != NULL) {
-                Common::WarningFlags warningsFlags = metadata->getWarningsFlags();
+                Common::flag_t warningsFlags = metadata->getWarningsFlags();
                 describeWarningFlags(warningsFlags, metadata, m_WarningsSettingsModel, descriptions);
             }
         }
@@ -204,8 +204,8 @@ namespace Warnings {
         bool rowIsOk = false;
 
         if (metadata != NULL) {
-            Common::WarningFlags warningsFlags = metadata->getWarningsFlags();
-            bool anyWarnings = warningsFlags != Common::WarningFlags::None;
+            Common::flag_t warningsFlags = metadata->getWarningsFlags();
+            const bool anyWarnings = warningsFlags != 0;
 
             rowIsOk = anyWarnings;
 

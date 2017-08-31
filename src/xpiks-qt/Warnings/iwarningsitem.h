@@ -18,7 +18,7 @@ namespace Warnings {
     public:
         virtual ~IWarningsItem() {}
 
-        virtual void submitWarnings(Common::WarningFlags warningsFlags) = 0;
+        virtual void submitWarnings(Common::flag_t warningsFlags) = 0;
     };
 }
 

@@ -54,7 +54,7 @@ namespace Warnings {
     }
 
     void WarningsCheckingWorker::processWarningsItem(std::shared_ptr<WarningsItem> &item) {
-        Common::WarningFlags warningsFlags = Common::WarningFlags::None;
+        Common::flag_t warningsFlags = 0;
 
         if (item->needCheckAll()) {
             warningsFlags |= checkDimensions(item);
@@ -86,13 +86,13 @@ namespace Warnings {
         item->submitWarnings(warningsFlags);
     }
 
-    Common::WarningFlags WarningsCheckingWorker::checkDimensions(std::shared_ptr<WarningsItem> &wi) const {
+    Common::flag_t WarningsCheckingWorker::checkDimensions(std::shared_ptr<WarningsItem> &wi) const {
         LOG_INTEGRATION_TESTS << "#";
         const QString &allowedFilenameCharacters = m_WarningsSettingsModel->getAllowedFilenameCharacters();
         double minimumMegapixels = m_WarningsSettingsModel->getMinMegapixels();
 
         Models::ArtworkMetadata *item = wi->getCheckableItem();
-        Common::WarningFlags warningsInfo = Common::WarningFlags::None;
+        Common::flag_t warningsInfo = 0;
 
         Models::ImageArtwork *image = dynamic_cast<Models::ImageArtwork *>(item);
         if (image != NULL) {
@@ -128,11 +128,11 @@ namespace Warnings {
         return warningsInfo;
     }
 
-    Common::WarningFlags WarningsCheckingWorker::checkKeywords(std::shared_ptr<WarningsItem> &wi) const {
+    Common::flag_t WarningsCheckingWorker::checkKeywords(std::shared_ptr<WarningsItem> &wi) const {
         LOG_INTEGRATION_TESTS << "#";
         int minimumKeywordsCount = m_WarningsSettingsModel->getMinKeywordsCount();
         int maximumKeywordsCount = m_WarningsSettingsModel->getMaxKeywordsCount();
-        Common::WarningFlags warningsInfo = Common::WarningFlags::None;
+        Common::flag_t warningsInfo = 0;
         Models::ArtworkMetadata *item = wi->getCheckableItem();
         Common::BasicKeywordsModel *keywordsModel = item->getBasicModel();
 
@@ -157,10 +157,10 @@ namespace Warnings {
         return warningsInfo;
     }
 
-    Common::WarningFlags WarningsCheckingWorker::checkDescription(std::shared_ptr<WarningsItem> &wi) const {
+    Common::flag_t WarningsCheckingWorker::checkDescription(std::shared_ptr<WarningsItem> &wi) const {
         LOG_INTEGRATION_TESTS << "#";
         int maximumDescriptionLength = m_WarningsSettingsModel->getMaxDescriptionLength();
-        Common::WarningFlags warningsInfo = Common::WarningFlags::None;
+        Common::flag_t warningsInfo = 0;
         Models::ArtworkMetadata *item = wi->getCheckableItem();
 
         int descriptionLength = wi->getDescription().length();
@@ -197,10 +197,10 @@ namespace Warnings {
         return warningsInfo;
     }
 
-    Common::WarningFlags WarningsCheckingWorker::checkTitle(std::shared_ptr<WarningsItem> &wi) const {
+    Common::flag_t WarningsCheckingWorker::checkTitle(std::shared_ptr<WarningsItem> &wi) const {
         LOG_INTEGRATION_TESTS << "#";
 
-        Common::WarningFlags warningsInfo = Common::WarningFlags::None;
+        Common::flag_t warningsInfo = 0;
         Models::ArtworkMetadata *item = wi->getCheckableItem();
 
         int titleLength = wi->getTitle().length();
@@ -237,10 +237,10 @@ namespace Warnings {
         return warningsInfo;
     }
 
-    Common::WarningFlags WarningsCheckingWorker::checkSpelling(std::shared_ptr<WarningsItem> &wi) const {
+    Common::flag_t WarningsCheckingWorker::checkSpelling(std::shared_ptr<WarningsItem> &wi) const {
         LOG_INTEGRATION_TESTS << "#";
 
-        Common::WarningFlags warningsInfo = Common::WarningFlags::None;
+        Common::flag_t warningsInfo = 0;
         Models::ArtworkMetadata *item = wi->getCheckableItem();
         auto *keywordsModel = item->getBasicModel();
 
@@ -262,8 +262,8 @@ namespace Warnings {
         return warningsInfo;
     }
 
-    Common::WarningFlags WarningsCheckingWorker::checkDuplicates(std::shared_ptr<WarningsItem> &wi) const {
-        Common::WarningFlags warningsInfo = Common::WarningFlags::None;
+    Common::flag_t WarningsCheckingWorker::checkDuplicates(std::shared_ptr<WarningsItem> &wi) const {
+        Common::flag_t warningsInfo = 0;
         Models::ArtworkMetadata *item = wi->getCheckableItem();
         Common::BasicKeywordsModel *keywordsModel = item->getBasicModel();
 

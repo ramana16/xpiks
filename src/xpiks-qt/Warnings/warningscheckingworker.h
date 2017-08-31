@@ -14,6 +14,7 @@
 #include <QObject>
 #include "../Common/itemprocessingworker.h"
 #include "iwarningsitem.h"
+#include "../Common/flags.h"
 
 namespace Warnings {
     class WarningsSettingsModel;
@@ -48,12 +49,12 @@ namespace Warnings {
         void queueIsEmpty();
 
     private:
-        Common::WarningFlags checkDimensions(std::shared_ptr<WarningsItem> &wi) const;
-        Common::WarningFlags checkKeywords(std::shared_ptr<WarningsItem> &wi) const;
-        Common::WarningFlags checkDescription(std::shared_ptr<WarningsItem> &wi) const;
-        Common::WarningFlags checkTitle(std::shared_ptr<WarningsItem> &wi) const;
-        Common::WarningFlags checkSpelling(std::shared_ptr<WarningsItem> &wi) const;
-        Common::WarningFlags checkDuplicates(std::shared_ptr<WarningsItem> &wi) const;
+        Common::flag_t checkDimensions(std::shared_ptr<WarningsItem> &wi) const;
+        Common::flag_t checkKeywords(std::shared_ptr<WarningsItem> &wi) const;
+        Common::flag_t checkDescription(std::shared_ptr<WarningsItem> &wi) const;
+        Common::flag_t checkTitle(std::shared_ptr<WarningsItem> &wi) const;
+        Common::flag_t checkSpelling(std::shared_ptr<WarningsItem> &wi) const;
+        Common::flag_t checkDuplicates(std::shared_ptr<WarningsItem> &wi) const;
 
     private:
         WarningsSettingsModel *m_WarningsSettingsModel;

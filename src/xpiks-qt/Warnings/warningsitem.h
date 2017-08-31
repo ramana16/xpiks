@@ -23,7 +23,7 @@
 namespace Warnings {
     class EmptyWarningsItem: public IWarningsItem {
     public:
-        virtual void submitWarnings(Common::WarningFlags) override { /* BUMP */ }
+        virtual void submitWarnings(Common::flag_t) override { /* BUMP */ }
     };
 
     class WarningsItem: public IWarningsItem {
@@ -45,7 +45,7 @@ namespace Warnings {
         }
 
     public:
-        virtual void submitWarnings(Common::WarningFlags warningsFlags) override {
+        virtual void submitWarnings(Common::flag_t warningsFlags) override {
             if (m_CheckingFlags == Common::WarningsCheckFlags::All) {
                 m_CheckableItem->setWarningsFlags(warningsFlags);
             } else {
@@ -71,8 +71,8 @@ namespace Warnings {
                     break;
                 }
 
-                m_CheckableItem->dropWarningsFlags(flagsToDrop);
-                m_CheckableItem->addWarningsFlags(warningsFlags);
+                m_CheckableItem->dropWarningsFlags((Common::flag_t)flagsToDrop);
+                m_CheckableItem->addWarningsFlags((Common::flag_t)warningsFlags);
             }
         }
 
