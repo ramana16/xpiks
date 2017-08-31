@@ -16,4 +16,3 @@ moc_*.cpp
 *.exe
 installer/packages/xpiks/data/
 *.qm
-src/xpiks-tests/main.cpp
