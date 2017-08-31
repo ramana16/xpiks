@@ -26,7 +26,12 @@ namespace MetadataIO {
         QStringList m_Keywords;
         QSize m_ImageSize;
         qint64 m_FileSize;
-        QDateTime m_DateTimeOriginal;
+
+        /*PHOTO*/QDateTime m_DateTimeOriginal;
+
+        /*VIDEO*/double m_VideoFrameRate;
+        /*VIDEO*/int m_BitRate;
+        /*VIDEO*/double m_Duration;
     };
 }
 

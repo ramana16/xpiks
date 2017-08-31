@@ -12,6 +12,7 @@
 #include <QFileInfo>
 #include "../MetadataIO/cachedartwork.h"
 #include "../Common/defines.h"
+#include "../MetadataIO/originalmetadata.h"
 #include <videofilemetadata.h>
 
 namespace Models {
@@ -65,6 +66,9 @@ namespace Models {
     }
 
     bool VideoArtwork::initFromOriginUnsafe(const MetadataIO::OriginalMetadata &originalMetadata) {
+        m_FrameRate = originalMetadata.m_VideoFrameRate;
+        m_BitRate = originalMetadata.m_BitRate;
+        m_Duration = originalMetadata.m_Duration;
         return false;
     }
 
