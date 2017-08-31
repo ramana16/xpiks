@@ -19,8 +19,10 @@ win32:QT += winextras
 
 INCLUDEPATH += ../../../vendors/tiny-aes
 win32:INCLUDEPATH += ../../xpiks-qt/Encryption
-INCLUDEPATH += "../../../vendors/hunspell-1.6.0/src"
-INCLUDEPATH += "../../../vendors/ssdll/src/ssdll"
+INCLUDEPATH += ../../../vendors/hunspell-1.6.0/src
+INCLUDEPATH += ../../../vendors/ssdll/src/ssdll
+INCLUDEPATH += ../../vendors/libxpks
+
 DEFINES += HUNSPELL_STATIC
 DEFINES += CORE_TESTS
 
@@ -33,6 +35,7 @@ CONFIG(debug, debug|release)  {
 } else {
     LIBS += -L"$$PWD/../../../libs/release"
 }
+
 LIBS += -lhunspell
 LIBS += -lssdll
 
