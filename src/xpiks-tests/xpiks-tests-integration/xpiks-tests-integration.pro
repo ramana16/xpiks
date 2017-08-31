@@ -198,7 +198,8 @@ SOURCES += main.cpp \
     ../../xpiks-qt/MetadataIO/metadatacache.cpp \
     savefilelegacytest.cpp \
     ../../xpiks-qt/Common/statefulentity.cpp \
-    locallibrarysearchtest.cpp
+    locallibrarysearchtest.cpp \
+    metadatacachesavetest.cpp
 
 RESOURCES +=
 
@@ -432,7 +433,8 @@ HEADERS += \
     ../../xpiks-qt/Suggestion/searchquery.h \
     savefilelegacytest.h \
     ../../xpiks-qt/Common/statefulentity.h \
-    locallibrarysearchtest.h
+    locallibrarysearchtest.h \
+    metadatacachesavetest.h
 
 INCLUDEPATH += ../../../vendors/tiny-aes
 INCLUDEPATH += ../../../vendors/cpp-libface

@@ -84,6 +84,45 @@ namespace MetadataIO {
         }
     }
 
+#ifdef QT_DEBUG
+    void MetadataCache::dumpToLog() {
+        m_DbCacheIndex->foreachRow([&](QByteArray &, QByteArray &rawValue) {
+            CachedArtwork value;
+            QDataStream ds(&rawValue, QIODevice::ReadOnly);
+            ds >> value;
+
+            LOG_DEBUG << value.m_Filepath << "|" << value.m_Title << "|" << value.m_Description << "|" << value.m_Keywords;
+            return true; // just continue
+        });
+    }
+
+    void MetadataCache::dumpToArray(QVector<MetadataIO::CachedArtwork> &cachedArtworks) {
+        m_DbCacheIndex->foreachRow([&](QByteArray &, QByteArray &rawValue) {
+            CachedArtwork value;
+            QDataStream ds(&rawValue, QIODevice::ReadOnly);
+            ds >> value;
+
+            cachedArtworks.push_back(value);
+            return true; // just continue
+        });
+    }
+
+    int MetadataCache::retrieveRecordsCount() {
+        int count = 0;
+
+        // this craziness is used only for tests
+        // in order not to create yet another query
+        // in sqlite class used only for 1 case
+        m_DbCacheIndex->foreachRow([&count](QByteArray &, QByteArray &) {
+            count++;
+            return true; // just continue
+        });
+
+        return count;
+    }
+
+#endif
+
     bool MetadataCache::read(Models::ArtworkMetadata *metadata) {
         Q_ASSERT(metadata != nullptr);
         if (metadata == nullptr) { return false; }
@@ -131,12 +170,16 @@ namespace MetadataIO {
     }
 
     void MetadataCache::search(const Suggestion::SearchQuery &query, QVector<CachedArtwork> &results) {
+        Q_ASSERT(results.empty());
+        LOG_INTEGR_TESTS_OR_DEBUG << query.m_SearchTerms;
         CachedArtwork::CachedArtworkType searchType = queryFlagToCachedType(query.m_Flags);
 
         m_DbCacheIndex->foreachRow([&](QByteArray &rawKey, QByteArray &rawValue) {
             CachedArtwork value;
             QDataStream ds(&rawValue, QIODevice::ReadOnly);
             ds >> value;
+
+            LOG_INTEGRATION_TESTS << value.m_Filepath << "|" << value.m_Title << "|" << value.m_Description << "|" << value.m_Keywords;
 
             if (ds.status() != QDataStream::Ok) { /*continue;*/ return true; }
             if ((searchType != CachedArtwork::Unknown) && (value.m_ArtworkType != searchType)) { /*continue;*/ return true; }
@@ -170,9 +213,11 @@ namespace MetadataIO {
                 }
             }
 
-            const bool shouldStop = results.size() >= query.m_MaxResults;
-            return !shouldStop;
+            const bool canContinue = results.size() < query.m_MaxResults;
+            return canContinue;
         });
+
+        LOG_DEBUG << "Found" << results.size() << "matches";
     }
 
     void MetadataCache::flushWAL() {

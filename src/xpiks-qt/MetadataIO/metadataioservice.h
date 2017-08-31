@@ -46,6 +46,11 @@ namespace MetadataIO {
     public:
         void searchArtworks(Suggestion::LocalLibraryQuery *query);
 
+#ifdef INTEGRATION_TESTS
+    public:
+        MetadataIOWorker *getWorker() { return m_MetadataIOWorker; }
+#endif
+
     private slots:
         void workerFinished();
 

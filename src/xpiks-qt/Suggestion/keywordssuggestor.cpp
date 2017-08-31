@@ -86,12 +86,16 @@ namespace Suggestion {
         m_SuggestedKeywords.clearKeywords();
         m_AllOtherKeywords.clearKeywords();
 
-        Models::SwitcherModel *switcher = m_CommandManager->getSwitcherModel();
         Models::SettingsModel *settingsModel = m_CommandManager->getSettingsModel();
+#if !defined(INTEGRATION_TESTS) && !defined(CORE_TESTS)
+        Models::SwitcherModel *switcher = m_CommandManager->getSwitcherModel();
         const bool sequentialLoading =
                 (switcher->getProgressiveSuggestionPreviewsOn() ||
                  settingsModel->getUseProgressiveSuggestionPreviews()) &&
                 (!getIsLocalSearch());
+#else
+        const bool sequentialLoading = false;
+#endif
         LOG_INFO << "With sequential loading:" << sequentialLoading;
 
         if (sequentialLoading) {

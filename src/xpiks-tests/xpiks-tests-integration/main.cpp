@@ -96,6 +96,7 @@
 #include "restoresessiontest.h"
 #include "savefilelegacytest.h"
 #include "locallibrarysearchtest.h"
+#include "metadatacachesavetest.h"
 
 #if defined(WITH_LOGS)
 #undef WITH_LOGS
@@ -292,6 +293,8 @@ int main(int argc, char *argv[]) {
 
     QVector<IntegrationTestBase*> integrationTests;
 
+    // always the first one
+    integrationTests.append(new MetadataCacheSaveTest(&commandManager));
     integrationTests.append(new AddFilesBasicTest(&commandManager));
     integrationTests.append(new AutoAttachVectorsTest(&commandManager));
     integrationTests.append(new SaveFileBasicTest(&commandManager));

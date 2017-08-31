@@ -233,9 +233,13 @@ namespace Models {
         void fillStandardRoles(QVector<int> &roles) const;
 
 #ifdef CORE_TESTS
-
     public:
         const std::deque<ArtworkMetadata *> &getFinalizationList() const { return m_FinalizationList; }
+#endif
+
+#ifdef INTEGRATION_TESTS
+    public:
+        ArtworkMetadata *findArtworkByFilepath(const QString &filepath);
 #endif
 
     public:

@@ -90,6 +90,7 @@ namespace MetadataIO {
     void MetadataIOWorker::processSearchItem(std::shared_ptr<MetadataSearchTask> &item) {
         auto *localLibraryQuery = item->getQuery();
         m_MetadataCache.search(localLibraryQuery->getSearchQuery(), localLibraryQuery->getResults());
+        localLibraryQuery->notifyResultsReady();
     }
 
     void MetadataIOWorker::workerStopped() {

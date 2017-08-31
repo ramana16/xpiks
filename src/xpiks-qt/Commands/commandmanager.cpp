@@ -1184,6 +1184,7 @@ void Commands::CommandManager::cleanup() {
     LOG_INTEGRATION_TESTS << "#";
     m_SpellCheckerService->cancelCurrentBatch();
     m_WarningsService->cancelCurrentBatch();
+    m_ArtworksUpdateHub->clear();
 
     m_CombinedArtworksModel->resetModel();
     m_ZipArchiver->resetModel();

@@ -67,6 +67,15 @@ namespace QMLExtensions {
         emit updateRequested();
     }
 
+#ifdef INTEGRATION_TESTS
+        void ArtworksUpdateHub::clear() {
+            {
+                QMutexLocker locker(&m_Lock);
+                m_UpdateRequests.clear();
+            }
+        }
+#endif
+
     void ArtworksUpdateHub::onUpdateRequested() {
         LOG_DEBUG << "#";
 

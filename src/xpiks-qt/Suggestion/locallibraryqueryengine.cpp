@@ -45,6 +45,7 @@ namespace Suggestion {
         }
 
         setResults(results);
+        cachedArtworks.clear();
         emit resultsAvailable();
     }
 }

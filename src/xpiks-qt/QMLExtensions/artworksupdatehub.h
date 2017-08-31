@@ -43,6 +43,11 @@ namespace QMLExtensions {
         void setHighFrequencyMode() { m_HighFrequencyMode = true; }
         void resetHighFrequencyMode() { m_HighFrequencyMode = false; }
 
+#ifdef INTEGRATION_TESTS
+    public:
+        void clear();
+#endif
+
     signals:
         void updateRequested();
 

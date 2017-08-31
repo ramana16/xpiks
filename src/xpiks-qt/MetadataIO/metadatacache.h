@@ -50,6 +50,13 @@ namespace MetadataIO {
         void finalize();
         void sync();
 
+#ifdef QT_DEBUG
+    public:
+        void dumpToLog();
+        void dumpToArray(QVector<MetadataIO::CachedArtwork> &cachedArtworks);
+        int retrieveRecordsCount();
+#endif
+
     public:
         bool read(Models::ArtworkMetadata *metadata);
         void save(Models::ArtworkMetadata *metadata, bool overwrite = true);

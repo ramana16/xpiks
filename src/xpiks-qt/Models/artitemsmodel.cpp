@@ -1022,6 +1022,7 @@ namespace Models {
                 indicesToUpdate << (int)index;
                 rolesToUpdateSet.unite(request->getRolesToUpdate());
             } else {
+                LOG_INTEGRATION_TESTS << "Cache miss. Found" << (artwork ? artwork->getItemID() : -1) << "instead of" << request->getArtworkID();
                 request->setCacheMiss();
                 cacheMisses++;
             }
@@ -1397,4 +1398,18 @@ namespace Models {
 
         m_CommandManager->submitForSpellCheck(itemsToCheck);
     }
+
+#ifdef INTEGRATION_TESTS
+    ArtworkMetadata *ArtItemsModel::findArtworkByFilepath(const QString &filepath) {
+        const size_t size = m_ArtworkList.size();
+        for (size_t i = 0; i < size; i++) {
+            ArtworkMetadata *metadata = getArtwork(i);
+            if (metadata->getFilepath() == filepath) {
+                return metadata;
+            }
+        }
+        return nullptr;
+    }
+
+#endif
 }

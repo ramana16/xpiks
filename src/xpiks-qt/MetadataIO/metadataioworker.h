@@ -32,6 +32,11 @@ namespace MetadataIO {
     public:
         explicit MetadataIOWorker(Helpers::DatabaseManager *dbManager, QMLExtensions::ArtworksUpdateHub *artworksUpdateHub, QObject *parent = 0);
 
+#ifdef INTEGRATION_TESTS
+    public:
+        MetadataCache &getMetadataCache() { return m_MetadataCache; }
+#endif
+
     protected:
         virtual bool initWorker() override;
         virtual void processOneItem(std::shared_ptr<MetadataIOTaskBase> &item) override;

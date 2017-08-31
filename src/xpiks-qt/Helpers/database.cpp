@@ -381,6 +381,8 @@ namespace Helpers {
             success = true;
         } while (false);
 
+        LOG_INTEGRATION_TESTS << key << "set";
+
         cleanupSqliteStatement(m_SetStatement);
 
         return success;
@@ -410,6 +412,8 @@ namespace Helpers {
 
             success = true;
         } while (false);
+
+        LOG_INTEGRATION_TESTS << key << "added";
 
         cleanupSqliteStatement(m_AddStatement);
 
