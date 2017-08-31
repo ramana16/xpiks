@@ -58,7 +58,7 @@ int RestoreSessionTest::doTest() {
     }
     VERIFY(!ioCoordinator->getHasErrors(), "Errors in IO Coordinator while reading");
 
-    sleepWait(10, [&]() {
+    sleepWaitUntil(10, [&]() {
         return sessionManager->itemsCount() == files.length();
     });
     VERIFY(sessionManager->itemsCount() == files.length(), "Session does not contain all files");

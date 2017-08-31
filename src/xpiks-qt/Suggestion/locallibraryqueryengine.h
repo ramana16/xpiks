@@ -29,6 +29,7 @@ namespace Suggestion {
 
         // ISuggestionQueryEngine interface
     public:
+        virtual int getMaxResults() const override { return 200; }
         virtual void submitQuery(const SearchQuery &query) override;
         virtual QString getName() const override { return tr("Local files"); }
 

@@ -62,7 +62,7 @@ int PlainTextEditTest::doTest() {
 
     combinedModel->plainTextEdit("test, keyword, abbreviatoe");
 
-    sleepWait(5, [&]() {
+    sleepWaitUntil(5, [&]() {
         return (!spellCheckService->isBusy()) && basicModel->hasKeywordsSpellError();
     });
 

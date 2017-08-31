@@ -184,6 +184,7 @@ namespace MetadataIO {
 
     void MetadataIOCoordinator::readingFinishedHandler(bool ignoreBackups) {
         Q_ASSERT(m_CanProcessResults);
+        Q_ASSERT(m_ReadingWorker != nullptr);
         m_CanProcessResults = false;
 
         LOG_DEBUG << "Setting imported metadata. Ignore backups:" << ignoreBackups;

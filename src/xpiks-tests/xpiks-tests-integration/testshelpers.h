@@ -3,6 +3,6 @@
 
 #include <functional>
 
-void sleepWait(int seconds, const std::function<bool ()> &condition);
+void sleepWaitUntil(int seconds, const std::function<bool ()> &condition);
 
 #endif // TESTSHELPERS_H

@@ -3,7 +3,7 @@
 #include <QCoreApplication>
 #include <QDebug>
 
-void sleepWait(int seconds, const std::function<bool ()> &condition) {
+void sleepWaitUntil(int seconds, const std::function<bool ()> &condition) {
     int times = 0;
     bool becameTrue = false;
 

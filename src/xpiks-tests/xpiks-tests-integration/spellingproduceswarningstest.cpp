@@ -51,7 +51,7 @@ int SpellingProducesWarningsTest::doTest() {
     Models::ArtworkMetadata *artwork = artItemsModel->getArtwork(0);
     VERIFY(artwork->isInitialized(), "Artwork is not initialized after import");
 
-    sleepWait(3, [artwork]() {
+    sleepWaitUntil(3, [artwork]() {
         return !Common::HasFlag(artwork->getWarningsFlags(), Common::WarningFlags::SpellErrorsInTitle) &&
                 !Common::HasFlag(artwork->getWarningsFlags(), Common::WarningFlags::SpellErrorsInDescription) &&
                 !Common::HasFlag(artwork->getWarningsFlags(), Common::WarningFlags::SpellErrorsInKeywords);
@@ -81,7 +81,7 @@ int SpellingProducesWarningsTest::doTest() {
 
     LOG_INFO << "Spellchecking finished. Waiting for warnings...";
 
-    sleepWait(5, [=]() {
+    sleepWaitUntil(5, [=]() {
         return Common::HasFlag(artwork->getWarningsFlags(), Common::WarningFlags::SpellErrorsInTitle) &&
                 Common::HasFlag(artwork->getWarningsFlags(), Common::WarningFlags::SpellErrorsInDescription) &&
                 Common::HasFlag(artwork->getWarningsFlags(), Common::WarningFlags::SpellErrorsInKeywords);

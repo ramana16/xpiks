@@ -121,7 +121,7 @@ namespace Suggestion {
 
         urlQuery.addQueryItem("search_parameters[language_id]", "2");
         urlQuery.addQueryItem("search_parameters[thumbnail_size]", "160");
-        urlQuery.addQueryItem("search_parameters[limit]", "100");
+        urlQuery.addQueryItem("search_parameters[limit]", QString::number(query.m_MaxResults));
         urlQuery.addQueryItem("search_parameters[order]", "nb_downloads");
         urlQuery.addQueryItem("search_parameters[words]", query.m_SearchTerms.join(' '));
         urlQuery.addQueryItem("result_columns[0]", "nb_results");

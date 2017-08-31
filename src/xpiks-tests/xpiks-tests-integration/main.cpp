@@ -95,6 +95,7 @@
 #include "weirdnamesreadtest.h"
 #include "restoresessiontest.h"
 #include "savefilelegacytest.h"
+#include "locallibrarysearchtest.h"
 
 #if defined(WITH_LOGS)
 #undef WITH_LOGS
@@ -149,7 +150,7 @@ void myMessageHandler(QtMsgType type, const QMessageLogContext &context, const Q
 }
 
 int main(int argc, char *argv[]) {
-#ifdef Q_OS_WIN
+#if defined(Q_OS_WIN) && defined(APPVEYOR)
     WindowsCrashHandler crashHandler;
     crashHandler.SetProcessExceptionHandlers();
     crashHandler.SetThreadExceptionHandlers();
@@ -319,6 +320,9 @@ int main(int argc, char *argv[]) {
     integrationTests.append(new UserDictEditTest(&commandManager));
     integrationTests.append(new WeirdNamesReadTest(&commandManager));
     integrationTests.append(new RestoreSessionTest(&commandManager));
+    // always the last one. insert new tests above
+    integrationTests.append(new LocalLibrarySearchTest(&commandManager));
+
 
     qDebug("\n");
     int succeededTestsCount = 0, failedTestsCount = 0;

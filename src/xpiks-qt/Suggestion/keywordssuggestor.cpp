@@ -280,7 +280,7 @@ namespace Suggestion {
             setInProgress();
 
             SuggestionQueryEngineBase *engine = m_QueryEngines.at(m_SelectedSourceIndex);
-            SearchQuery query(searchTerm, resultsType);
+            SearchQuery query(searchTerm, resultsType, engine->getMaxResults());
             engine->submitQuery(query);
 
             if (dynamic_cast<LocalLibraryQueryEngine*>(engine) == NULL) {

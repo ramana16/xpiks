@@ -171,7 +171,7 @@ namespace MetadataIO {
             }
 
             const bool shouldStop = results.size() >= query.m_MaxResults;
-            return shouldStop;
+            return !shouldStop;
         });
     }
 

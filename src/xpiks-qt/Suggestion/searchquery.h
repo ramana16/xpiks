@@ -30,7 +30,10 @@ namespace Suggestion {
             m_MaxResults(0)
         {}
 
-        SearchQuery(const QString &searchTerm, int resultType) {
+        SearchQuery(const QString &searchTerm, int resultType, int maxResults):
+            m_Flags(0),
+            m_MaxResults(maxResults)
+        {
             // "All Images"
             // "Photos"
             // "Vectors"

@@ -82,7 +82,7 @@ int AddToUserDictionaryTest::doTest() {
         VERIFY(false, "Timeout for waiting for spellcheck results");
     }
 
-    sleepWait(5, [=]() {
+    sleepWaitUntil(5, [=]() {
         return !basicKeywordsModel->hasDescriptionSpellError() &&
                 !basicKeywordsModel->hasTitleSpellError() &&
                 !basicKeywordsModel->hasKeywordsSpellError();

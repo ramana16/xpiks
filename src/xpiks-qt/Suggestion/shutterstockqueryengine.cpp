@@ -137,7 +137,7 @@ namespace Suggestion {
 
         urlQuery.addQueryItem("language", "en");
         urlQuery.addQueryItem("view", "full");
-        urlQuery.addQueryItem("per_page", "100");
+        urlQuery.addQueryItem("per_page", QString::number(query.m_MaxResults));
         urlQuery.addQueryItem("sort", "popular");
         urlQuery.addQueryItem("query", query.m_SearchTerms.join(' '));
 

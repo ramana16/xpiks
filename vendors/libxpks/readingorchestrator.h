@@ -17,6 +17,7 @@ namespace Models {
 namespace libxpks {
     namespace io {
         class ExiftoolImageReadingWorker;
+        class ExiftoolVideoReadingWorker;
 
         class ReadingOrchestrator : public QObject, public MetadataIO::IMetadataReader
         {
@@ -50,7 +51,7 @@ namespace libxpks {
 
         private:
             ExiftoolImageReadingWorker *m_ImageReadingWorker;
-            // placeholder for video reading worker
+            ExiftoolVideoReadingWorker *m_VideoReadingWorker;
             MetadataIO::ArtworksSnapshot m_ItemsToReadSnapshot;
             QVector<QHash<QString, MetadataIO::OriginalMetadata> > m_ImportResults;
             Models::SettingsModel *m_SettingsModel;

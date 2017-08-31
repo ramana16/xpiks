@@ -187,7 +187,7 @@ namespace Suggestion {
         urlQuery.addQueryItem("fields", "keywords,preview,title,id,caption");
         urlQuery.addQueryItem("phrase", query.m_SearchTerms.join(' '));
         urlQuery.addQueryItem("page", "1");
-        urlQuery.addQueryItem("page_size", "100");
+        urlQuery.addQueryItem("page_size", QString::number(query.m_MaxResults));
         urlQuery.addQueryItem("sort_order", "most_popular");
 
         if (!Common::HasFlag(query.m_Flags, Suggestion::AllImages)) {

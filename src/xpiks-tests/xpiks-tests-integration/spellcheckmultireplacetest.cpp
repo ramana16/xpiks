@@ -75,7 +75,7 @@ int SpellCheckMultireplaceTest::doTest() {
     VERIFY(basicKeywordsModel->hasTitleSpellError(), "Title spell error not detected");
     VERIFY(basicKeywordsModel->hasKeywordsSpellError(), "Keywords spell error not detected");
 
-    sleepWait(5, [=]() {
+    sleepWaitUntil(5, [=]() {
         return spellCheckService->getSuggestionsCount() > 0;
     });
 

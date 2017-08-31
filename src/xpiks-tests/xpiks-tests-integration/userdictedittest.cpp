@@ -84,7 +84,7 @@ int UserDictEditTest::doTest() {
     m_UserDictEditModel->appendKeyword(wrongWord);
     m_UserDictEditModel->saveUserDict();
 
-    sleepWait(5, [=]() {
+    sleepWaitUntil(5, [=]() {
         return !basicKeywordsModel->hasDescriptionSpellError() &&
                 !basicKeywordsModel->hasTitleSpellError() &&
                 !basicKeywordsModel->hasKeywordsSpellError() &&

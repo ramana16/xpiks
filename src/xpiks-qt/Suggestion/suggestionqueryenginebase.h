@@ -36,6 +36,7 @@ namespace Suggestion {
         virtual ~SuggestionQueryEngineBase() { }
 
     public:
+        virtual int getMaxResults() const { return 100; }
         virtual void submitQuery(const SearchQuery &query) = 0;
         virtual QString getName() const = 0;
 
