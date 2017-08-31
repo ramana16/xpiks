@@ -21,7 +21,7 @@ INCLUDEPATH += ../../../vendors/tiny-aes
 win32:INCLUDEPATH += ../../xpiks-qt/Encryption
 INCLUDEPATH += ../../../vendors/hunspell-1.6.0/src
 INCLUDEPATH += ../../../vendors/ssdll/src/ssdll
-INCLUDEPATH += ../../vendors/libxpks
+INCLUDEPATH += ../../../vendors/libthmbnlr
 
 DEFINES += HUNSPELL_STATIC
 DEFINES += CORE_TESTS
