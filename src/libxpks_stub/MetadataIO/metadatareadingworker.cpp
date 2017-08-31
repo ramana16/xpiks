@@ -40,6 +40,8 @@
 #define SUBJECT QLatin1String("Subject")
 #define DATETAKEN QLatin1String("DateTimeOriginal")
 #define TIMEZONE QLatin1String("TimeZoneOffset")
+#define IMAGEWIDTH QLatin1String("ImageWidth")
+#define IMAGEHEIGHT QLatin1String("ImageHeight")
 
 namespace libxpks {
     namespace io {
@@ -131,6 +133,14 @@ namespace libxpks {
                     QString keywordsStr = object.value(SUBJECT).toString().trimmed();
                     parseStringKeywords(keywordsStr, result);
                 }
+            }
+
+            if (object.contains(IMAGEWIDTH)) {
+                result.m_ImageSize.setWidth((int)object.value(IMAGEWIDTH).toDouble(0));
+            }
+
+            if (object.contains(IMAGEHEIGHT)) {
+                result.m_ImageSize.setWidth((int)object.value(IMAGEHEIGHT).toDouble(0));
             }
         }
 
@@ -264,6 +274,7 @@ namespace libxpks {
             arguments << "-ImageDescription" << "-Description" << "-Caption-Abstract";
             arguments << "-Keywords" << "-Subject";
             arguments << "-DateTimeOriginal" << "-TimeZoneOffset";
+            arguments << "-ImageWidth" << "-ImageHeight";
             size_t size = m_ItemsToReadSnapshot.size();
             for (size_t i = 0; i < size; ++i) {
                 Models::ArtworkMetadata *metadata = m_ItemsToReadSnapshot.get(i);
