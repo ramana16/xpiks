@@ -43,10 +43,10 @@ namespace Models {
     void VideoArtwork::setVideoMetadata(const VideoFileMetadata &metadata) {
         LOG_DEBUG << "#";
 
-        m_VideoMetadata.m_CodecName = metadata.m_CodecName;
-        m_VideoMetadata.m_BitRate = metadata.m_BitRate;
-        m_VideoMetadata.m_Duration = metadata.m_Duration;
-        m_VideoMetadata.m_FrameRate = metadata.m_FrameRate;
+        m_CodecName = QString::fromStdString(metadata.m_CodecName);
+        m_BitRate = metadata.m_BitRate;
+        m_Duration = metadata.m_Duration;
+        m_FrameRate = metadata.m_FrameRate;
     }
 
     void VideoArtwork::initializeThumbnailPath(const QString &filepath) {
@@ -72,7 +72,7 @@ namespace Models {
         // this time we need to overwrite from storage
         // if (m_CodecName.isEmpty()) {
         if (!cachedArtwork.m_CodecName.isEmpty()) {
-            m_VideoMetadata.m_CodecName = cachedArtwork.m_CodecName.toStdString();
+            m_CodecName = cachedArtwork.m_CodecName;
         }
 
         initializeThumbnailPath(cachedArtwork.m_ThumbnailPath);

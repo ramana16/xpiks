@@ -43,7 +43,7 @@ namespace Models {
     public:
         bool isThumbnailGenerated() { return getThumbnailGeneratedFlag(); }
         virtual const QString &getThumbnailPath() const override { return m_ThumbnailPath; }
-        const std::string &getCodecName() const { return m_VideoMetadata.m_CodecName; }
+        const QString &getCodecName() const { return m_CodecName; }
 
     public:
         void setThumbnailPath(const QString &filepath);
@@ -59,9 +59,10 @@ namespace Models {
         QString m_ThumbnailPath;
         QReadWriteLock m_FlagsLock;
         volatile Common::flag_t m_VideoFlags;
-        VideoFileMetadata m_VideoMetadata;
         QSize m_ImageSize;
-        int m_BitRate;
+        QString m_CodecName;
+        double m_Duration;
+        int64_t m_BitRate;
         double m_FrameRate;
     };
 }
