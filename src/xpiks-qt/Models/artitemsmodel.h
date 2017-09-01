@@ -86,12 +86,12 @@ namespace Models {
         void updateModifiedCount() { emit modifiedArtworksCountChanged(); }
         void updateItems(const QVector<int> &indices, const QVector<int> &roles);
         void forceUnselectAllItems() const;
-        Q_INVOKABLE void updateAllItems();
         virtual bool removeUnavailableItems() override;
         void generateAboutToBeRemoved();
         int getMinChangedItemsCountForReset() const { return getRangesLengthForReset(); }
 
     public:
+        Q_INVOKABLE void updateAllItems();
         /*Q_INVOKABLE*/ void removeArtworksDirectory(int index);
         Q_INVOKABLE void removeKeywordAt(int metadataIndex, int keywordIndex);
         Q_INVOKABLE void removeLastKeyword(int metadataIndex);

@@ -142,34 +142,6 @@ namespace Models {
         }
     }
 
-    void ArtItemsModel::updateAllItems() {
-        updateItemsInRanges(QVector<QPair<int, int> >() << qMakePair(0, (int)getArtworksCount() - 1));
-    }
-
-    void ArtItemsModel::removeArtworksDirectory(int index) {
-        LOG_INFO << "Remove artworks directory at" << index;
-        const QString &directory = m_CommandManager->getArtworksRepository()->getDirectory(index);
-        LOG_CORE_TESTS << "Removing directory:" << directory;
-
-        QDir dir(directory);
-        QString directoryAbsolutePath = dir.absolutePath();
-
-        QVector<int> indicesToRemove;
-        size_t size = m_ArtworkList.size();
-        indicesToRemove.reserve((int)size);
-
-        for (size_t i = 0; i < size; ++i) {
-            ArtworkMetadata *metadata = accessArtwork(i);
-            if (metadata->isInDirectory(directoryAbsolutePath)) {
-                indicesToRemove.append((int)i);
-            }
-        }
-
-        doRemoveItemsAtIndices(indicesToRemove);
-
-        emit modifiedArtworksCountChanged();
-    }
-
     bool ArtItemsModel::removeUnavailableItems() {
         LOG_DEBUG << "#";
         QVector<int> indicesToRemove;
@@ -200,6 +172,34 @@ namespace Models {
                 keywordsModel->notifyAboutToBeRemoved();
             }
         }
+    }
+
+    void ArtItemsModel::updateAllItems() {
+        updateItemsInRanges(QVector<QPair<int, int> >() << qMakePair(0, (int)getArtworksCount() - 1));
+    }
+
+    void ArtItemsModel::removeArtworksDirectory(int index) {
+        LOG_INFO << "Remove artworks directory at" << index;
+        const QString &directory = m_CommandManager->getArtworksRepository()->getDirectory(index);
+        LOG_CORE_TESTS << "Removing directory:" << directory;
+
+        QDir dir(directory);
+        QString directoryAbsolutePath = dir.absolutePath();
+
+        QVector<int> indicesToRemove;
+        size_t size = m_ArtworkList.size();
+        indicesToRemove.reserve((int)size);
+
+        for (size_t i = 0; i < size; ++i) {
+            ArtworkMetadata *metadata = accessArtwork(i);
+            if (metadata->isInDirectory(directoryAbsolutePath)) {
+                indicesToRemove.append((int)i);
+            }
+        }
+
+        doRemoveItemsAtIndices(indicesToRemove);
+
+        emit modifiedArtworksCountChanged();
     }
 
     void ArtItemsModel::removeKeywordAt(int metadataIndex, int keywordIndex) {
@@ -470,20 +470,6 @@ namespace Models {
         return metadata->getFilepath();
     }
 
-    QString ArtItemsModel::getArtworkDateTaken(int metadataIndex) const {
-        if (metadataIndex < 0 || metadataIndex >= getArtworksCount()) {
-            return QLatin1String("");
-        }
-
-        ArtworkMetadata *metadata = accessArtwork(metadataIndex);
-        ImageArtwork *image = dynamic_cast<ImageArtwork *>(metadata);
-        if (image != NULL) {
-            return image->getDateTaken();
-        } else {
-            return QLatin1String("");
-        }
-    }
-
     QString ArtItemsModel::getAttachedVectorPath(int metadataIndex) const {
         if (metadataIndex < 0 || metadataIndex >= getArtworksCount()) {
             return QLatin1String("");
@@ -493,6 +479,20 @@ namespace Models {
         ImageArtwork *image = dynamic_cast<ImageArtwork *>(metadata);
         if (image != NULL) {
             return image->getAttachedVectorPath();
+        } else {
+            return QLatin1String("");
+        }
+    }
+
+    QString ArtItemsModel::getArtworkDateTaken(int metadataIndex) const {
+        if (metadataIndex < 0 || metadataIndex >= getArtworksCount()) {
+            return QLatin1String("");
+        }
+
+        ArtworkMetadata *metadata = accessArtwork(metadataIndex);
+        ImageArtwork *image = dynamic_cast<ImageArtwork *>(metadata);
+        if (image != NULL) {
+            return image->getDateTaken();
         } else {
             return QLatin1String("");
         }
@@ -847,6 +847,106 @@ namespace Models {
         {
             m_CommandManager->submitForWarningsCheck(item, Common::WarningsCheckFlags::Spelling);
         }
+    }
+
+    void ArtItemsModel::onFilesUnavailableHandler() {
+        LOG_DEBUG << "#";
+        Models::ArtworksRepository *artworksRepository = m_CommandManager->getArtworksRepository();
+        size_t count = getArtworksCount();
+
+        bool anyArtworkUnavailable = false;
+        bool anyVectorUnavailable = false;
+
+        for (size_t i = 0; i < count; ++i) {
+            ArtworkMetadata *artwork = accessArtwork(i);
+            ImageArtwork *image = dynamic_cast<ImageArtwork *>(artwork);
+            const QString &path = artwork->getFilepath();
+
+            if (artworksRepository->isFileUnavailable(path)) {
+                artwork->setUnavailable();
+                anyArtworkUnavailable = true;
+            } else if (image != NULL && image->hasVectorAttached()) {
+                const QString &vectorPath = image->getAttachedVectorPath();
+                if (artworksRepository->isFileUnavailable(vectorPath)) {
+                    image->detachVector();
+                    anyVectorUnavailable = true;
+                }
+            }
+        }
+
+        if (anyArtworkUnavailable) {
+            emit unavailableArtworksFound();
+        } else if (anyVectorUnavailable) {
+            emit unavailableVectorsFound();
+        }
+    }
+
+    void ArtItemsModel::artworkBackupRequested() {
+        LOG_DEBUG << "#";
+        ArtworkMetadata *metadata = qobject_cast<ArtworkMetadata *>(sender());
+        Q_ASSERT(metadata != nullptr);
+        if (metadata != NULL) {
+            m_CommandManager->saveArtworkBackup(metadata);
+        }
+    }
+
+    void ArtItemsModel::onUndoStackEmpty() {
+        LOG_DEBUG << "#";
+        if (m_ArtworkList.empty()) {
+            if (!m_FinalizationList.empty()) {
+                LOG_DEBUG << "Clearing the finalization list";
+                for (auto *item: m_FinalizationList) {
+                    item->deepDisconnect();
+                    item->deleteLater();
+                }
+                m_FinalizationList.clear();
+            }
+        }
+    }
+
+    void ArtItemsModel::userDictUpdateHandler(const QStringList &keywords, bool overwritten) {
+        LOG_DEBUG << "#";
+        LOG_INTEGRATION_TESTS << keywords;
+        size_t size = m_ArtworkList.size();
+
+        Q_ASSERT(!keywords.isEmpty());
+
+        QVector<Common::BasicKeywordsModel *> itemsToCheck;
+        itemsToCheck.reserve((int)size);
+
+        for (size_t i = 0; i < size; i++) {
+            ArtworkMetadata *metadata = accessArtwork(i);
+            auto *metadataModel = metadata->getBasicModel();
+            SpellCheck::SpellCheckItemInfo *info = metadataModel->getSpellCheckInfo();
+            if(!overwritten) {
+                info->removeWordsFromErrors(keywords);
+            } else {
+                info->clear();
+            }
+
+            itemsToCheck.append(metadataModel);
+        }
+
+        if(!overwritten) {
+            m_CommandManager->submitForSpellCheck(itemsToCheck, keywords);
+        }
+        else {
+            m_CommandManager->submitForSpellCheck(itemsToCheck);
+        }
+    }
+
+    void ArtItemsModel::userDictClearedHandler() {
+        size_t size = m_ArtworkList.size();
+        QVector<Common::BasicKeywordsModel *> itemsToCheck;
+        itemsToCheck.reserve((int)size);
+
+        for (size_t i = 0; i < size; i++) {
+            ArtworkMetadata *metadata = accessArtwork(i);
+            auto *keywordsModel = metadata->getBasicModel();
+            itemsToCheck.append(keywordsModel);
+        }
+
+        m_CommandManager->submitForSpellCheck(itemsToCheck);
     }
 
     void ArtItemsModel::removeItemsAtIndices(const QVector<QPair<int, int> > &ranges) {
@@ -1297,106 +1397,6 @@ namespace Models {
     void ArtItemsModel::fillStandardRoles(QVector<int> &roles) const {
         roles << ArtworkDescriptionRole << IsModifiedRole <<
             ArtworkTitleRole << KeywordsCountRole << HasVectorAttachedRole;
-    }
-
-    void ArtItemsModel::onFilesUnavailableHandler() {
-        LOG_DEBUG << "#";
-        Models::ArtworksRepository *artworksRepository = m_CommandManager->getArtworksRepository();
-        size_t count = getArtworksCount();
-
-        bool anyArtworkUnavailable = false;
-        bool anyVectorUnavailable = false;
-
-        for (size_t i = 0; i < count; ++i) {
-            ArtworkMetadata *artwork = accessArtwork(i);
-            ImageArtwork *image = dynamic_cast<ImageArtwork *>(artwork);
-            const QString &path = artwork->getFilepath();
-
-            if (artworksRepository->isFileUnavailable(path)) {
-                artwork->setUnavailable();
-                anyArtworkUnavailable = true;
-            } else if (image != NULL && image->hasVectorAttached()) {
-                const QString &vectorPath = image->getAttachedVectorPath();
-                if (artworksRepository->isFileUnavailable(vectorPath)) {
-                    image->detachVector();
-                    anyVectorUnavailable = true;
-                }
-            }
-        }
-
-        if (anyArtworkUnavailable) {
-            emit unavailableArtworksFound();
-        } else if (anyVectorUnavailable) {
-            emit unavailableVectorsFound();
-        }
-    }
-
-    void ArtItemsModel::artworkBackupRequested() {
-        LOG_DEBUG << "#";
-        ArtworkMetadata *metadata = qobject_cast<ArtworkMetadata *>(sender());
-        Q_ASSERT(metadata != nullptr);
-        if (metadata != NULL) {
-            m_CommandManager->saveArtworkBackup(metadata);
-        }
-    }
-
-    void ArtItemsModel::onUndoStackEmpty() {
-        LOG_DEBUG << "#";
-        if (m_ArtworkList.empty()) {
-            if (!m_FinalizationList.empty()) {
-                LOG_DEBUG << "Clearing the finalization list";
-                for (auto *item: m_FinalizationList) {
-                    item->deepDisconnect();
-                    item->deleteLater();
-                }
-                m_FinalizationList.clear();
-            }
-        }
-    }
-
-    void ArtItemsModel::userDictUpdateHandler(const QStringList &keywords, bool overwritten) {
-        LOG_DEBUG << "#";
-        LOG_INTEGRATION_TESTS << keywords;
-        size_t size = m_ArtworkList.size();
-
-        Q_ASSERT(!keywords.isEmpty());
-
-        QVector<Common::BasicKeywordsModel *> itemsToCheck;
-        itemsToCheck.reserve((int)size);
-
-        for (size_t i = 0; i < size; i++) {
-            ArtworkMetadata *metadata = accessArtwork(i);
-            auto *metadataModel = metadata->getBasicModel();
-            SpellCheck::SpellCheckItemInfo *info = metadataModel->getSpellCheckInfo();
-            if(!overwritten) {
-                info->removeWordsFromErrors(keywords);
-            } else {
-                info->clear();
-            }
-
-            itemsToCheck.append(metadataModel);
-        }
-
-        if(!overwritten) {
-            m_CommandManager->submitForSpellCheck(itemsToCheck, keywords);
-        } 
-		else {
-            m_CommandManager->submitForSpellCheck(itemsToCheck);
-        }
-    }
-
-    void ArtItemsModel::userDictClearedHandler() {
-        size_t size = m_ArtworkList.size();
-        QVector<Common::BasicKeywordsModel *> itemsToCheck;
-        itemsToCheck.reserve((int)size);
-
-        for (size_t i = 0; i < size; i++) {
-            ArtworkMetadata *metadata = accessArtwork(i);
-            auto *keywordsModel = metadata->getBasicModel();
-            itemsToCheck.append(keywordsModel);
-        }
-
-        m_CommandManager->submitForSpellCheck(itemsToCheck);
     }
 
 #ifdef INTEGRATION_TESTS
