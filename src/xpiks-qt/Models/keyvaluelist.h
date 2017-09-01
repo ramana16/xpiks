@@ -73,7 +73,7 @@ namespace Models {
             CodecProperty,
             FrameSizeProperty,
             VideoDurationProperty,
-            FPSProperty,
+            FrameRateProperty,
             AspectRatioProperty,
             NUM_VIDEO_PROPERTIES
         };

@@ -83,7 +83,20 @@ namespace Models {
     }
 
     void ArtworkPropertiesMap::setForTheVideo(VideoArtwork *videoArtwork) {
-        // TODO: FIXME:
+        m_ValuesHash[int(VideoProperties::FilePathProperty)] = videoArtwork->getFilepath();
+        m_ValuesHash[int(VideoProperties::FileSizeProperty)] = Helpers::describeFileSize(videoArtwork->getFileSize());
+
+        QSize size;
+        if (videoArtwork->isInitialized()) {
+            size = videoArtwork->getImageSize();
+        } else {
+            QImageReader reader(videoArtwork->getFilepath());
+            size = reader.size();
+        }
+        m_ValuesHash[int(VideoProperties::FrameSizeProperty)] = QString("W %1 x H %2").arg(size.width()).arg(size.height());
+
+        m_ValuesHash[int(VideoProperties::VideoDurationProperty)] = videoArtwork->getDuration();
+        m_ValuesHash[int(VideoProperties::FrameRateProperty)] = QString::number(videoArtwork->getFrameRate());
     }
 
     QString ArtworkPropertiesMap::getKey(int index) const {
@@ -101,8 +114,8 @@ namespace Models {
             /*CodecProperty*/ QT_TRANSLATE_NOOP("VideoProperties", "Codec"),
             /*FrameSizeProperty*/QT_TRANSLATE_NOOP("VideoProperties", "Frame size"),
             /*VideoDurationProperty*/QT_TRANSLATE_NOOP("VideoProperties", "Duration"),
-            /*FPSProperty*/QT_TRANSLATE_NOOP("VideoProperties", "FPS"),
-            /*AspectRatioProperty*/QT_TRANSLATE_NOOP("VideoProperties", "Aspect ratio"),
+            /*FrameRateProperty*/QT_TRANSLATE_NOOP("VideoProperties", "Frame rate")
+            ///*AspectRatioProperty*/QT_TRANSLATE_NOOP("VideoProperties", "Aspect ratio"),
         };
 
         if (m_IsImage) {

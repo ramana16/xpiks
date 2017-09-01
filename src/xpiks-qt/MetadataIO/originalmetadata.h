@@ -31,8 +31,7 @@ namespace MetadataIO {
 
         /*VIDEO*/double m_VideoFrameRate;
         /*VIDEO*/int m_VideoBitRate;
-        // currently in seconds
-        /*VIDEO*/double m_VideoDuration;
+        /*VIDEO*/QString m_VideoDuration;
     };
 }
 
