@@ -22,7 +22,9 @@ namespace Models {
         m_BitRate(0),
         m_FrameRate(0.0)
     {
-        m_ThumbnailPath = ":/Graphics/video-icon.svg";
+        // this is a safer way than generating empty images and
+        // handling empty thumbnail paths along everywhere
+        m_ThumbnailPath = ":/Graphics/video-default-thumbnail.png";
     }
 
     void VideoArtwork::setThumbnailPath(const QString &filepath) {        

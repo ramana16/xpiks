@@ -9,8 +9,10 @@
  */
 
 #include "../Common/defines.h"
+#include <QDir>
 #include <QProcess>
 #include <QFileInfo>
+#include <QStandardPaths>
 #include "../MetadataIO/metadataiocoordinator.h"
 #include "launchexiftooljobitem.h"
 
@@ -59,6 +61,8 @@ namespace Maintenance {
         possiblePaths << "/usr/bin/exiftool" << "/usr/local/bin/exiftool";
 #elif defined(Q_OS_WIN)
         possiblePaths << "c:/exiftool.exe";
+        QDir downloadsDir(QStandardPaths::writableLocation(QStandardPaths::DownloadLocation));
+        possiblePaths << downloadsDir.filePath("exiftool.exe");
 #elif defined(Q_OS_LINUX)
         possiblePaths << "/usr/bin/exiftool" << "/usr/local/bin/exiftool";
         // TODO: add path inside AppImage

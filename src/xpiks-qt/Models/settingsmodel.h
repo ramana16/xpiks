@@ -183,20 +183,28 @@ namespace Models {
 
     public:
         Q_INVOKABLE bool needToShowWhatsNew() {
+#ifndef QT_DEBUG
             int lastVersion = intValue(Constants::installedVersion, 0);
             int installedMajorPart = lastVersion / XPIKS_VERSION_MAJOR_DIVISOR;
             int currentMajorPart = XPIKS_FULL_VERSION_INT / XPIKS_VERSION_MAJOR_DIVISOR;
             bool result = currentMajorPart > installedMajorPart;
             return result;
+#else
+            return false;
+#endif
         }
 
         Q_INVOKABLE bool needToShowTextWhatsNew() {
+#ifndef QT_DEBUG
             int lastVersion = intValue(Constants::installedVersion, 0);
             int installedMajorPart = lastVersion / XPIKS_VERSION_MAJOR_DIVISOR;
             int currentMajorPart = XPIKS_FULL_VERSION_INT / XPIKS_VERSION_MAJOR_DIVISOR;
             bool result = (currentMajorPart == installedMajorPart) &&
                     (XPIKS_FULL_VERSION_INT > lastVersion);
             return result;
+#else
+            return false;
+#endif
         }
 
         Q_INVOKABLE void saveCurrentVersion() {
@@ -205,8 +213,12 @@ namespace Models {
         }
 
         Q_INVOKABLE bool needToShowTermsAndConditions() {
+#ifndef QT_DEBUG
             bool haveConsent = boolValue(Constants::userConsent, false);
             return !haveConsent;
+#else
+            return false;
+#endif
         }
 
         Q_INVOKABLE void userAgreeHandler() {

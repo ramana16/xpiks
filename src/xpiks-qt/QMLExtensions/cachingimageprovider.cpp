@@ -16,6 +16,9 @@
 
 namespace QMLExtensions {
     QImage CachingImageProvider::requestImage(const QString &url, QSize *size, const QSize &requestedSize) {
+        Q_ASSERT(!url.isEmpty());
+        if (url.isEmpty()) { return QImage(); }
+
         QString id;
 
         if (url.contains(QChar('%'))) {
