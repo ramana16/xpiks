@@ -16,19 +16,17 @@
 #include <QImage>
 #include <QSet>
 #include "../Common/itemprocessingworker.h"
+#include "../Common/baseentity.h"
 #include "videocacherequest.h"
 #include "cachedvideo.h"
 #include "dbvideocacheindex.h"
 
 namespace QMLExtensions {
-    class ImageCachingService;
-    class ArtworksUpdateHub;
-
-    class VideoCachingWorker : public QObject, public Common::ItemProcessingWorker<VideoCacheRequest>
+    class VideoCachingWorker : public QObject, public Common::BaseEntity, public Common::ItemProcessingWorker<VideoCacheRequest>
     {
         Q_OBJECT
     public:
-        explicit VideoCachingWorker(ImageCachingService *imageCachingService, ArtworksUpdateHub *artworksUpdateHub, Helpers::DatabaseManager *dbManager, QObject *parent = 0);
+        explicit VideoCachingWorker(Helpers::DatabaseManager *dbManager, QObject *parent = 0);
 
     protected:
         virtual bool initWorker() override;
@@ -52,13 +50,12 @@ namespace QMLExtensions {
 
     private:
         bool saveThumbnail(QImage &image, const QString &originalPath, bool isQuickThumbnail, QString &thumbnailPath);
+        void applyThumbnail(std::shared_ptr<VideoCacheRequest> &item, const QString &thumbnailPath);
         void saveIndex();
         bool isProcessed(std::shared_ptr<VideoCacheRequest> &item);
         bool isSeparator(const std::shared_ptr<VideoCacheRequest> &item);
 
     private:
-        ImageCachingService *m_ImageCachingService;
-        ArtworksUpdateHub *m_ArtworksUpdateHub;
         volatile int m_ProcessedItemsCount;
         qreal m_Scale;
         QString m_VideosCacheDir;

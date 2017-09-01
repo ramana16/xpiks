@@ -28,11 +28,10 @@ namespace QMLExtensions {
     }
 
     void VideoCachingService::startService() {
-        QMLExtensions::ImageCachingService *imageCachingService = m_CommandManager->getImageCachingService();
-        QMLExtensions::ArtworksUpdateHub *artworksUpdateHub = m_CommandManager->getArtworksUpdateHub();
         Helpers::DatabaseManager *dbManager = m_CommandManager->getDatabaseManager();
 
-        m_CachingWorker = new VideoCachingWorker(imageCachingService, artworksUpdateHub, dbManager);
+        m_CachingWorker = new VideoCachingWorker(dbManager);
+        m_CachingWorker->setCommandManager(m_CommandManager);
 
         QThread *thread = new QThread();
         m_CachingWorker->moveToThread(thread);

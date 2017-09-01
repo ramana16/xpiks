@@ -71,6 +71,7 @@ namespace QMLExtensions {
         void setGoodQualityRequest() { Common::ApplyFlag(m_Flags, false, QuickThumbnailFlag); }
         void setThumbnailPath(const QString &path) { m_VideoArtwork->setThumbnailPath(path); }
         void setVideoMetadata(const libthmbnlr::VideoFileMetadata &metadata) { m_VideoArtwork->setVideoMetadata(metadata); }
+        Models::VideoArtwork *getArtwork() { return m_VideoArtwork; }
 
     private:
         Models::VideoArtwork *m_VideoArtwork;
