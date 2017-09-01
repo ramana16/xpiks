@@ -30,8 +30,9 @@ namespace MetadataIO {
         /*PHOTO*/QDateTime m_DateTimeOriginal;
 
         /*VIDEO*/double m_VideoFrameRate;
-        /*VIDEO*/int m_BitRate;
-        /*VIDEO*/double m_Duration;
+        /*VIDEO*/int m_VideoBitRate;
+        // currently in seconds
+        /*VIDEO*/double m_VideoDuration;
     };
 }
 

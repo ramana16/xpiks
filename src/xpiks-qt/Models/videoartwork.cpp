@@ -67,8 +67,8 @@ namespace Models {
 
     bool VideoArtwork::initFromOriginUnsafe(const MetadataIO::OriginalMetadata &originalMetadata) {
         m_FrameRate = originalMetadata.m_VideoFrameRate;
-        m_BitRate = originalMetadata.m_BitRate;
-        m_Duration = originalMetadata.m_Duration;
+        m_BitRate = originalMetadata.m_VideoBitRate;
+        m_Duration = originalMetadata.m_VideoDuration;
         return false;
     }
 
