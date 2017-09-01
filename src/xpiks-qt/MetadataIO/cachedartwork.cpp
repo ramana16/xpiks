@@ -45,12 +45,13 @@ namespace MetadataIO {
         m_ThumbnailPath = metadata->getThumbnailPath();
 
         Models::ImageArtwork *image = dynamic_cast<Models::ImageArtwork*>(metadata);
-        if (metadata != nullptr) {
+        if (image != nullptr) {
             m_ArtworkType = image->hasVectorAttached() ? Vector : Image;
             m_AttachedVector = image->getAttachedVectorPath();
             m_CreationTime = image->getDateTimeOriginal();
         } else {
             Models::VideoArtwork *video = dynamic_cast<Models::VideoArtwork*>(metadata);
+            Q_ASSERT(video != nullptr);
             m_ArtworkType = Video;
             m_CodecName = video->getCodecName();
         }
