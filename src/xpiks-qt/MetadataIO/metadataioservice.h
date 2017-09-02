@@ -13,6 +13,7 @@
 
 #include <QObject>
 #include <QVector>
+#include <QTimer>
 #include "../Common/baseentity.h"
 #include "../Suggestion/locallibraryquery.h"
 #include "artworkssnapshot.h"
@@ -38,13 +39,16 @@ namespace MetadataIO {
 
     public:
         void readArtwork(Models::ArtworkMetadata *metadata) const;
-        void writeArtwork(Models::ArtworkMetadata *metadata) const;
+        void writeArtwork(Models::ArtworkMetadata *metadata);
         quint32 readArtworks(const ArtworksSnapshot &snapshot) const;
         void writeArtworks(const QVector<Models::ArtworkMetadata *> &artworks) const;
         void addArtworks(const QVector<Models::ArtworkMetadata *> &artworks) const;
 
     public:
         void searchArtworks(Suggestion::LocalLibraryQuery *query);
+
+    private:
+        void requestCacheSync();
 
 #ifdef INTEGRATION_TESTS
     public:
@@ -53,8 +57,11 @@ namespace MetadataIO {
 
     private slots:
         void workerFinished();
+        void onSaverTimer();
 
     private:
+        QTimer m_SaverTimer;
+        volatile int m_RestartsCount;
         MetadataIOWorker *m_MetadataIOWorker;
     };
 }

@@ -15,11 +15,16 @@
 #include "../Commands/commandmanager.h"
 #include "../Helpers/database.h"
 
+#define SAVER_TIMER_TIMEOUT 3000
+#define SAVER_TIMER_MAX_RESTARTS 5
+
 namespace MetadataIO {
     MetadataIOService::MetadataIOService(QObject *parent):
         QObject(parent),
+        m_RestartsCount(0),
         m_MetadataIOWorker(nullptr)
     {
+        QObject::connect(&m_SaverTimer, &QTimer::timeout, this, &MetadataIOService::onSaverTimer);
     }
 
     void MetadataIOService::startService() {
@@ -63,11 +68,13 @@ namespace MetadataIO {
         m_MetadataIOWorker->submitItem(jobItem);
     }
 
-    void MetadataIOService::writeArtwork(Models::ArtworkMetadata *metadata) const {
+    void MetadataIOService::writeArtwork(Models::ArtworkMetadata *metadata) {
         Q_ASSERT(metadata != nullptr);
 
         std::shared_ptr<MetadataIOTaskBase> jobItem(new MetadataReadWriteTask(metadata, MetadataReadWriteTask::Write));
         m_MetadataIOWorker->submitItem(jobItem);
+
+        requestCacheSync();
     }
 
     quint32 MetadataIOService::readArtworks(const ArtworksSnapshot &snapshot) const {
@@ -132,7 +139,25 @@ namespace MetadataIO {
         m_MetadataIOWorker->submitFirst(jobItem);
     }
 
+    void MetadataIOService::requestCacheSync() {
+        if (m_RestartsCount < SAVER_TIMER_MAX_RESTARTS) {
+            m_SaverTimer.start(SAVER_TIMER_TIMEOUT);
+            m_RestartsCount++;
+        } else {
+            LOG_INFO << "Maximum backup delays occured, forcing backup";
+            Q_ASSERT(m_SaverTimer.isActive());
+        }
+    }
+
     void MetadataIOService::workerFinished() {
         LOG_INFO << "#";
+    }
+
+    void MetadataIOService::onSaverTimer() {
+        LOG_DEBUG << "#";
+        m_RestartsCount = 0;
+
+        std::shared_ptr<MetadataIOTaskBase> syncItem(new MetadataCacheSyncTask());
+        m_MetadataIOWorker->submitItem(syncItem);
     }
 }
