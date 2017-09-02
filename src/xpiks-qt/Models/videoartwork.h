@@ -50,7 +50,7 @@ namespace Models {
         const QString &getCodecName() const { return m_CodecName; }
         int getBitRate() const { return m_BitRate / 1000000; }
         double getFrameRate() const { return m_FrameRate; }
-        const QString &getDuration() const { return m_Duration; }
+        const double &getDuration() const { return m_Duration; }
 
     public:
         void setThumbnailPath(const QString &filepath);
@@ -68,7 +68,7 @@ namespace Models {
         volatile Common::flag_t m_VideoFlags;
         QSize m_ImageSize;
         QString m_CodecName;
-        QString m_Duration;
+        double m_Duration;
         int64_t m_BitRate;
         double m_FrameRate;
     };

@@ -200,6 +200,7 @@ namespace QMLExtensions {
     }
 
     void VideoCachingWorker::saveIndex() {
+        LOG_DEBUG << "#";
         m_Cache.sync();
     }
 

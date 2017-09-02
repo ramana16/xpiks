@@ -17,6 +17,21 @@
 #include "../Helpers/filehelpers.h"
 
 namespace Models {
+    QString secondsToString(double seconds) {
+        if (seconds <= 60.0) {
+            return QString("%1 s").arg((int)seconds);
+        } else {
+            int64_t time = (int64_t)seconds;
+            const int secondsInt = time % 60;
+            time /= 60;
+            const int minutesInt = time % 60;
+            time /= 60;
+            const int hoursInt = time % 60;
+            Q_ASSERT(time <= 60);
+            return QString("%1:%2:%3").arg(hoursInt).arg(minutesInt).arg(secondsInt);
+        }
+    }
+
     KeyValueList::KeyValueList():
         QAbstractListModel()
     {
@@ -95,7 +110,7 @@ namespace Models {
         }
         m_ValuesHash[int(VideoProperties::FrameSizeProperty)] = QString("W %1 x H %2").arg(size.width()).arg(size.height());
 
-        m_ValuesHash[int(VideoProperties::VideoDurationProperty)] = videoArtwork->getDuration();
+        m_ValuesHash[int(VideoProperties::VideoDurationProperty)] = secondsToString(videoArtwork->getDuration());
         m_ValuesHash[int(VideoProperties::FrameRateProperty)] = QString::number(videoArtwork->getFrameRate());
     }
 

@@ -43,27 +43,12 @@ namespace Models {
         }
     }
 
-    QString secondsToString(double seconds) {
-        if (seconds <= 60.0) {
-            return QString("%1 s").arg((int)seconds);
-        } else {
-            int64_t time = (int64_t)seconds;
-            const int secondsInt = time % 60;
-            time /= 60;
-            const int minutesInt = time % 60;
-            time /= 60;
-            const int hoursInt = time % 60;
-            Q_ASSERT(time <= 60);
-            return QString("%1:%2:%3").arg(hoursInt).arg(minutesInt).arg(secondsInt);
-        }
-    }
-
     void VideoArtwork::setVideoMetadata(const libthmbnlr::VideoFileMetadata &metadata) {
         LOG_DEBUG << "#";
 
         m_CodecName = QString::fromStdString(metadata.m_CodecName);
         m_BitRate = metadata.m_BitRate;
-        m_Duration = secondsToString(metadata.m_Duration);
+        m_Duration = metadata.m_Duration;
         m_FrameRate = metadata.m_FrameRate;
     }
 
