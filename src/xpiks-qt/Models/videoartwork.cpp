@@ -71,6 +71,8 @@ namespace Models {
         m_FrameRate = originalMetadata.m_VideoFrameRate;
         m_BitRate = originalMetadata.m_VideoBitRate;
         m_Duration = originalMetadata.m_VideoDuration;
+        m_ImageSize = originalMetadata.m_ImageSize;
+
         return false;
     }
 
