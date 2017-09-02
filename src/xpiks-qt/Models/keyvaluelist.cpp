@@ -112,6 +112,7 @@ namespace Models {
 
         m_ValuesHash[int(VideoProperties::VideoDurationProperty)] = secondsToString(videoArtwork->getDuration());
         m_ValuesHash[int(VideoProperties::FrameRateProperty)] = QString::number(videoArtwork->getFrameRate());
+        m_ValuesHash[int(VideoProperties::CodecProperty)] = videoArtwork->getCodecName();
     }
 
     QString ArtworkPropertiesMap::getKey(int index) const {
