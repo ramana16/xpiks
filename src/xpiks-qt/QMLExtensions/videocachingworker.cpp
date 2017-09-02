@@ -68,7 +68,7 @@ namespace QMLExtensions {
     }
 
     void VideoCachingWorker::processOneItem(std::shared_ptr<VideoCacheRequest> &item) {
-        if (isProcessed(item)) { return; }
+        if (checkProcessed(item)) { return; }
         if (isSeparator(item)) { saveIndex(); return; }
 
         const QString &originalPath = item->getFilepath();
@@ -101,7 +101,9 @@ namespace QMLExtensions {
             bool needsRefresh = false;
 
             if (saveThumbnail(image, originalPath, item->getIsQuickThumbnail(), thumbnailPath)) {
+                cacheImage(thumbnailPath);
                 applyThumbnail(item, thumbnailPath);
+                saveArtwork(item);
 
                 if (m_ProcessedItemsCount % VIDEO_INDEX_BACKUP_STEP == 0) {
                     saveIndex();
@@ -185,15 +187,19 @@ namespace QMLExtensions {
         return success;
     }
 
+    void VideoCachingWorker::cacheImage(const QString &thumbnailPath) {
+        auto *imageCachingService = m_CommandManager->getImageCachingService();
+        imageCachingService->cacheImage(thumbnailPath);
+    }
+
     void VideoCachingWorker::applyThumbnail(std::shared_ptr<VideoCacheRequest> &item, const QString &thumbnailPath) {
         item->setThumbnailPath(thumbnailPath);
 
-        auto *imageCachingService = m_CommandManager->getImageCachingService();
-        imageCachingService->cacheImage(thumbnailPath);
-
         auto *updateHub = m_CommandManager->getArtworksUpdateHub();
         updateHub->updateArtwork(item->getArtworkID(), item->getLastKnownIndex(), m_RolesToUpdate);
+    }
 
+    void VideoCachingWorker::saveArtwork(std::shared_ptr<VideoCacheRequest> &item) {
         // write video metadata set to the artwork
         auto *metadataIOService = m_CommandManager->getMetadataIOService();
         metadataIOService->writeArtwork(item->getArtwork());
@@ -204,7 +210,7 @@ namespace QMLExtensions {
         m_Cache.sync();
     }
 
-    bool VideoCachingWorker::isProcessed(std::shared_ptr<VideoCacheRequest> &item) {
+    bool VideoCachingWorker::checkProcessed(std::shared_ptr<VideoCacheRequest> &item) {
         if (item->getNeedRecache()) { return false; }
 
         const QString &originalPath = item->getFilepath();
@@ -214,6 +220,11 @@ namespace QMLExtensions {
         bool needsUpdate = false;
         if (this->tryGetVideoThumbnail(originalPath, cachedPath, needsUpdate)) {
             isAlreadyProcessed = !needsUpdate;
+
+            if (item->getThumbnailPath() != cachedPath) {
+                LOG_DEBUG << "Updating outdated thumbnail of artwork #" << item->getArtworkID();
+                applyThumbnail(item, cachedPath);
+            }
         }
 
         return isAlreadyProcessed;

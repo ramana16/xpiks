@@ -66,6 +66,7 @@ namespace QMLExtensions {
         Common::ID_t getArtworkID() const { return m_VideoArtwork->getItemID(); }
         size_t getLastKnownIndex() const { return m_VideoArtwork->getLastKnownIndex(); }
         bool isSeparator() const { return (m_VideoArtwork == NULL); }
+        const QString &getThumbnailPath() const { return m_VideoArtwork->getThumbnailPath(); }
 
     public:
         void setGoodQualityRequest() { Common::ApplyFlag(m_Flags, false, QuickThumbnailFlag); }
