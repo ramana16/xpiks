@@ -417,7 +417,7 @@ ApplicationWindow {
 
                 MenuItem {
                     id: saveSessionMenu
-                    text: i18.n + qsTr("Open files from last time")
+                    text: i18.n + qsTr("Restore last session on startup")
                     checkable: true
 
                     onCheckedChanged: {

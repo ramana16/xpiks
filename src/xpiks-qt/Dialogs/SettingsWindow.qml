@@ -347,7 +347,7 @@ ApplicationWindow {
 
                         StyledCheckbox {
                             id: saveSessionCheckbox
-                            text: i18.n + qsTr("Save session")
+                            text: i18.n + qsTr("Restore last session on startup")
                             onCheckedChanged: {
                                 settingsModel.saveSession = checked
                             }
