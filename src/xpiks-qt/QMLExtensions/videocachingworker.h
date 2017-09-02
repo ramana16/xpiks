@@ -52,7 +52,6 @@ namespace QMLExtensions {
         bool saveThumbnail(QImage &image, const QString &originalPath, bool isQuickThumbnail, QString &thumbnailPath);
         void cacheImage(const QString &thumbnailPath);
         void applyThumbnail(std::shared_ptr<VideoCacheRequest> &item, const QString &thumbnailPath);
-        void saveArtwork(std::shared_ptr<VideoCacheRequest> &item);
         void saveIndex();
         bool checkProcessed(std::shared_ptr<VideoCacheRequest> &item);
         bool isSeparator(const std::shared_ptr<VideoCacheRequest> &item);

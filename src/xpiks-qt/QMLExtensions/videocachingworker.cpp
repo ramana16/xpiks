@@ -103,7 +103,6 @@ namespace QMLExtensions {
             if (saveThumbnail(image, originalPath, item->getIsQuickThumbnail(), thumbnailPath)) {
                 cacheImage(thumbnailPath);
                 applyThumbnail(item, thumbnailPath);
-                saveArtwork(item);
 
                 if (m_ProcessedItemsCount % VIDEO_INDEX_BACKUP_STEP == 0) {
                     saveIndex();
@@ -197,9 +196,7 @@ namespace QMLExtensions {
 
         auto *updateHub = m_CommandManager->getArtworksUpdateHub();
         updateHub->updateArtwork(item->getArtworkID(), item->getLastKnownIndex(), m_RolesToUpdate);
-    }
 
-    void VideoCachingWorker::saveArtwork(std::shared_ptr<VideoCacheRequest> &item) {
         // write video metadata set to the artwork
         auto *metadataIOService = m_CommandManager->getMetadataIOService();
         metadataIOService->writeArtwork(item->getArtwork());
