@@ -43,7 +43,9 @@ namespace QMLExtensions {
             m_VideoArtwork(videoArtwork),
             m_Flags(0)
         {
-            m_VideoArtwork->acquire();
+            if (m_VideoArtwork != nullptr) {
+                m_VideoArtwork->acquire();
+            }
 
             Common::ApplyFlag(m_Flags, recache, RecacheFlag);
             Common::ApplyFlag(m_Flags, quickThumbnail, QuickThumbnailFlag);

@@ -72,8 +72,9 @@ namespace QMLExtensions {
         if (isSeparator(item)) { saveIndex(); return; }
 
         const QString &originalPath = item->getFilepath();
+        const bool isQuickThumbnail = item->getIsQuickThumbnail();
         LOG_INFO << (item->getNeedRecache() ? "Recaching" : "Caching") << originalPath;
-        LOG_INFO << (item->getIsQuickThumbnail() ? "Good thumbnail" : "Quick thumbnail") << "requested";
+        LOG_INFO << (isQuickThumbnail ? "Quick thumbnail" : "Good thumbnail") << "requested";
 
         const QString filepath = QDir::toNativeSeparators(originalPath);
 #ifdef Q_OS_WIN
@@ -86,9 +87,11 @@ namespace QMLExtensions {
         bool thumbnailCreated = false;
 
         try {
-            libthmbnlr::ThumbnailCreator::CreationOption option = item->getIsQuickThumbnail() ?libthmbnlr:: ThumbnailCreator::Quick : libthmbnlr::ThumbnailCreator::GoodQuality;
+            const libthmbnlr::ThumbnailCreator::CreationOption option = isQuickThumbnail ? libthmbnlr::ThumbnailCreator::Quick : libthmbnlr::ThumbnailCreator::GoodQuality;
             thumbnailCreator.setCreationOption(option);
+            thumbnailCreator.setSeekPercentage(50);
             thumbnailCreated = thumbnailCreator.createThumbnail(buffer, width, height);
+            LOG_INTEGR_TESTS_OR_DEBUG << "Thumb generated for" << originalPath;
         } catch (...) {
             LOG_WARNING << "Unknown exception while creating thumbnail";
         }
@@ -100,7 +103,7 @@ namespace QMLExtensions {
             QImage image((unsigned char*)&buffer[0], width, height, QImage::Format_RGB888);
             bool needsRefresh = false;
 
-            if (saveThumbnail(image, originalPath, item->getIsQuickThumbnail(), thumbnailPath)) {
+            if (saveThumbnail(image, originalPath, isQuickThumbnail, thumbnailPath)) {
                 cacheImage(thumbnailPath);
                 applyThumbnail(item, thumbnailPath);
 
@@ -113,7 +116,8 @@ namespace QMLExtensions {
                     QThread::msleep(VIDEO_WORKER_SLEEP_DELAY);
                 }
 
-                if (item->getIsQuickThumbnail() && item->getGoodQualityAllowed()) {
+                if (isQuickThumbnail && item->getGoodQualityAllowed()) {
+                    LOG_INTEGR_TESTS_OR_DEBUG << "Regenerating good quality thumb for" << originalPath;
                     item->setGoodQualityRequest();
                     needsRefresh = true;
                 }

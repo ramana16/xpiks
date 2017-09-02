@@ -73,7 +73,7 @@ namespace QMLExtensions {
             Models::VideoArtwork *videoArtwork = dynamic_cast<Models::VideoArtwork *>(artwork);
             if (videoArtwork != nullptr) {
                 const bool withDelay = j % 2 == 0;
-                const bool quickThumbnail = false, dontRecache = false;
+                const bool quickThumbnail = true, dontRecache = false;
                 requests.emplace_back(new VideoCacheRequest(videoArtwork,
                                                             dontRecache,
                                                             quickThumbnail,

@@ -16,9 +16,9 @@
 #include "../Common/defines.h"
 
 #define MAX_NOT_UPDATED_ARTWORKS_TO_HOLD 50
-#define MAX_UPDATE_TIMER_DELAYS 5
-#define UPDATE_TIMER_DELAY 2000
-#define UPDATE_TIMER_HIGH_FREQ_DELAY 500
+#define MAX_UPDATE_TIMER_DELAYS 2
+#define UPDATE_TIMER_DELAY 1000
+#define UPDATE_TIMER_HIGH_FREQ_DELAY 300
 
 namespace QMLExtensions {
     ArtworksUpdateHub::ArtworksUpdateHub(QObject *parent) :
