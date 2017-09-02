@@ -47,8 +47,8 @@ namespace MetadataIO {
     public:
         void searchArtworks(Suggestion::LocalLibraryQuery *query);
 
-    private:
-        void requestCacheSync();
+    signals:
+        void cacheSyncRequest();
 
 #ifdef INTEGRATION_TESTS
     public:
@@ -56,6 +56,7 @@ namespace MetadataIO {
 #endif
 
     private slots:
+        void onCacheSyncRequest();
         void workerFinished();
         void onSaverTimer();
 

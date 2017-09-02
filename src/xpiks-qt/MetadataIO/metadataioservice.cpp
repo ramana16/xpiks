@@ -24,7 +24,10 @@ namespace MetadataIO {
         m_RestartsCount(0),
         m_MetadataIOWorker(nullptr)
     {
+        m_SaverTimer.setSingleShot(true);
         QObject::connect(&m_SaverTimer, &QTimer::timeout, this, &MetadataIOService::onSaverTimer);
+
+        QObject::connect(this, &MetadataIOService::cacheSyncRequest, this, &MetadataIOService::onCacheSyncRequest);
     }
 
     void MetadataIOService::startService() {
@@ -74,7 +77,7 @@ namespace MetadataIO {
         std::shared_ptr<MetadataIOTaskBase> jobItem(new MetadataReadWriteTask(metadata, MetadataReadWriteTask::Write));
         m_MetadataIOWorker->submitItem(jobItem);
 
-        requestCacheSync();
+        emit cacheSyncRequest();
     }
 
     quint32 MetadataIOService::readArtworks(const ArtworksSnapshot &snapshot) const {
@@ -139,7 +142,9 @@ namespace MetadataIO {
         m_MetadataIOWorker->submitFirst(jobItem);
     }
 
-    void MetadataIOService::requestCacheSync() {
+    void MetadataIOService::onCacheSyncRequest() {
+        LOG_DEBUG << "#";
+
         if (m_RestartsCount < SAVER_TIMER_MAX_RESTARTS) {
             m_SaverTimer.start(SAVER_TIMER_TIMEOUT);
             m_RestartsCount++;
