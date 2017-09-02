@@ -18,7 +18,7 @@
 
 namespace Models {
     QString secondsToString(double seconds) {
-        if (seconds <= 60.0) {
+        if (seconds < 60.0) {
             return QString("%1 s").arg((int)seconds);
         } else {
             int64_t time = (int64_t)seconds;
@@ -28,8 +28,17 @@ namespace Models {
             time /= 60;
             const int hoursInt = time % 60;
             Q_ASSERT(time <= 60);
-            return QString("%1:%2:%3").arg(hoursInt).arg(minutesInt).arg(secondsInt);
+            QString result = QString("%1:%2:%3").
+                    arg(hoursInt, 2, 10, QLatin1Char('0')).
+                    arg(minutesInt, 2, 10, QLatin1Char('0')).
+                    arg(secondsInt, 2, 10, QLatin1Char('0'));
+            return result;
         }
+    }
+
+    QString bitrateToString(double bitrate) {
+        QString result = QString::number(bitrate, 'f', 2) + " Mbps";
+        return result;
     }
 
     KeyValueList::KeyValueList():
@@ -113,6 +122,7 @@ namespace Models {
         m_ValuesHash[int(VideoProperties::VideoDurationProperty)] = secondsToString(videoArtwork->getDuration());
         m_ValuesHash[int(VideoProperties::FrameRateProperty)] = QString::number(videoArtwork->getFrameRate());
         m_ValuesHash[int(VideoProperties::CodecProperty)] = videoArtwork->getCodecName();
+        m_ValuesHash[int(VideoProperties::BitRateProperty)] = bitrateToString(videoArtwork->getBitRate());
     }
 
     QString ArtworkPropertiesMap::getKey(int index) const {
@@ -130,8 +140,8 @@ namespace Models {
             /*CodecProperty*/ QT_TRANSLATE_NOOP("VideoProperties", "Codec"),
             /*FrameSizeProperty*/QT_TRANSLATE_NOOP("VideoProperties", "Frame size"),
             /*VideoDurationProperty*/QT_TRANSLATE_NOOP("VideoProperties", "Duration"),
-            /*FrameRateProperty*/QT_TRANSLATE_NOOP("VideoProperties", "Frame rate")
-            ///*AspectRatioProperty*/QT_TRANSLATE_NOOP("VideoProperties", "Aspect ratio"),
+            /*FrameRateProperty*/QT_TRANSLATE_NOOP("VideoProperties", "Framerate"),
+            /*BitRateProperty*/QT_TRANSLATE_NOOP("VideoProperties", "Bitrate")
         };
 
         if (m_IsImage) {

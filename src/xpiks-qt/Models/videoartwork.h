@@ -48,7 +48,7 @@ namespace Models {
         virtual const QString &getThumbnailPath() const override { return m_ThumbnailPath; }
         QSize getImageSize() const { return m_ImageSize; }
         const QString &getCodecName() const { return m_CodecName; }
-        int getBitRate() const { return m_BitRate / 1000000; }
+        double getBitRate() const { return m_BitRate / 1000000.0; }
         double getFrameRate() const { return m_FrameRate; }
         const double &getDuration() const { return m_Duration; }
 

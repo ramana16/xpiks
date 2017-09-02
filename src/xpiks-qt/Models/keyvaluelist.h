@@ -74,6 +74,7 @@ namespace Models {
             FrameSizeProperty,
             VideoDurationProperty,
             FrameRateProperty,
+            BitRateProperty,
             NUM_VIDEO_PROPERTIES
         };
 

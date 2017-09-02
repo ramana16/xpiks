@@ -20,6 +20,15 @@
 namespace MetadataIO {
     // metadata read directly from file by exiftool/etc.
     struct OriginalMetadata {
+        OriginalMetadata():
+            m_ImageSize(0, 0),
+            m_FileSize(0),
+            m_DateTimeOriginal(),
+            m_VideoFrameRate(0.0),
+            m_VideoBitRate(0),
+            m_VideoDuration(0.0)
+        { }
+
         QString m_FilePath;
         QString m_Title;
         QString m_Description;
@@ -30,7 +39,7 @@ namespace MetadataIO {
         /*PHOTO*/QDateTime m_DateTimeOriginal;
 
         /*VIDEO*/double m_VideoFrameRate;
-        /*VIDEO*/int m_VideoBitRate;
+        /*VIDEO*/qint64 m_VideoBitRate;
         /*VIDEO*/double m_VideoDuration;
     };
 }
