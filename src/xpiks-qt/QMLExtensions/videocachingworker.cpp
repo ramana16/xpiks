@@ -76,29 +76,10 @@ namespace QMLExtensions {
         LOG_INFO << (item->getNeedRecache() ? "Recaching" : "Caching") << originalPath;
         LOG_INFO << (isQuickThumbnail ? "Quick thumbnail" : "Good thumbnail") << "requested";
 
-        const QString filepath = QDir::toNativeSeparators(originalPath);
-#ifdef Q_OS_WIN
-        libthmbnlr::ThumbnailCreator thumbnailCreator(filepath.toStdWString());
-#else
-        libthmbnlr::ThumbnailCreator thumbnailCreator(filepath.toStdString());
-#endif
         std::vector<uint8_t> buffer;
-        int width, height;
-        bool thumbnailCreated = false;
+        int width = 0, height = 0;
 
-        try {
-            const libthmbnlr::ThumbnailCreator::CreationOption option = isQuickThumbnail ? libthmbnlr::ThumbnailCreator::Quick : libthmbnlr::ThumbnailCreator::GoodQuality;
-            thumbnailCreator.setCreationOption(option);
-            thumbnailCreator.setSeekPercentage(50);
-            thumbnailCreated = thumbnailCreator.createThumbnail(buffer, width, height);
-            LOG_INTEGR_TESTS_OR_DEBUG << "Thumb generated for" << originalPath;
-        } catch (...) {
-            LOG_WARNING << "Unknown exception while creating thumbnail";
-        }
-
-        if (thumbnailCreated) {
-            item->setVideoMetadata(thumbnailCreator.getMetadata());
-
+        if (createThumbnail(item, buffer, width, height)) {
             QString thumbnailPath;
             QImage image((unsigned char*)&buffer[0], width, height, QImage::Format_RGB888);
             bool needsRefresh = false;
@@ -131,6 +112,32 @@ namespace QMLExtensions {
                 this->submitItem(item);
             }
         }
+    }
+
+    bool VideoCachingWorker::createThumbnail(std::shared_ptr<VideoCacheRequest> &item, std::vector<uint8_t> &buffer, int &width, int &height) {
+        bool thumbnailCreated = false;
+
+        const QString &originalPath = item->getFilepath();
+        const QString filepath = QDir::toNativeSeparators(originalPath);
+#ifdef Q_OS_WIN
+        libthmbnlr::ThumbnailCreator thumbnailCreator(filepath.toStdWString());
+#else
+        libthmbnlr::ThumbnailCreator thumbnailCreator(filepath.toStdString());
+#endif
+        try {
+            const libthmbnlr::ThumbnailCreator::CreationOption option = item->getIsQuickThumbnail() ? libthmbnlr::ThumbnailCreator::Quick : libthmbnlr::ThumbnailCreator::GoodQuality;
+            thumbnailCreator.setCreationOption(option);
+            thumbnailCreator.setSeekPercentage(50);
+            thumbnailCreated = thumbnailCreator.createThumbnail(buffer, width, height);
+            LOG_INTEGR_TESTS_OR_DEBUG << "Thumb generated for" << originalPath;
+            if (thumbnailCreated) {
+                item->setVideoMetadata(thumbnailCreator.getMetadata());
+            }
+        } catch (...) {
+            LOG_WARNING << "Unknown exception while creating thumbnail";
+        }
+
+        return thumbnailCreated;
     }
 
     void VideoCachingWorker::workerStopped() {

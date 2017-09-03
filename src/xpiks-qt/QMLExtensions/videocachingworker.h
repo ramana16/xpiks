@@ -15,6 +15,7 @@
 #include <QString>
 #include <QImage>
 #include <QSet>
+#include <vector>
 #include "../Common/itemprocessingworker.h"
 #include "../Common/baseentity.h"
 #include "videocacherequest.h"
@@ -31,6 +32,9 @@ namespace QMLExtensions {
     protected:
         virtual bool initWorker() override;
         virtual void processOneItem(std::shared_ptr<VideoCacheRequest> &item) override;
+
+    private:
+        bool createThumbnail(std::shared_ptr<VideoCacheRequest> &item, std::vector<uint8_t> &buffer, int &width, int &height);
 
     protected:
         virtual void onQueueIsEmpty() override { emit queueIsEmpty(); }

@@ -771,15 +771,12 @@ void Commands::CommandManager::autoDiscoverExiftool() const {
 
 void Commands::CommandManager::generatePreviews(const MetadataIO::ArtworksSnapshot &snapshot) const {
 #ifndef CORE_TESTS
-    if (m_SettingsModel != NULL &&
-            m_SettingsModel->getAutoCacheImages()) {
-        if (m_ImageCachingService != NULL) {
-            m_ImageCachingService->generatePreviews(snapshot);
-        }
+    if (m_ImageCachingService != NULL) {
+        m_ImageCachingService->generatePreviews(snapshot);
+    }
 
-        if (m_VideoCachingService != NULL) {
-            m_VideoCachingService->generateThumbnails(snapshot);
-        }
+    if (m_VideoCachingService != NULL) {
+        m_VideoCachingService->generateThumbnails(snapshot);
     }
 #else
     Q_UNUSED(snapshot);
