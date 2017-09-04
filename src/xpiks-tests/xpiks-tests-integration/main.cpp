@@ -157,7 +157,7 @@ void myMessageHandler(QtMsgType type, const QMessageLogContext &context, const Q
 #if defined(Q_OS_LINUX) && defined(QT_DEBUG)
 void linuxAbortHandler(int signalNumber) {
     Helpers::Logger &logger = Helpers::Logger::getInstance();
-    logger.flush();
+    logger.emergencyFlush();
 }
 #endif
 

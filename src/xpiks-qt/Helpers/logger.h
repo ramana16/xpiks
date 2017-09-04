@@ -38,6 +38,11 @@ namespace Helpers {
         void flush();
         void stop();
 
+#ifdef INTEGRATION_TESTS
+    public:
+        void emergencyFlush();
+#endif
+
     private:
         void doLog(const QString &message);
         void flushStream(QStringList *logItems);

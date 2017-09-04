@@ -75,6 +75,13 @@ namespace Helpers {
         flushStream(m_QueueFlushFrom);
     }
 
+#ifdef INTEGRATION_TESTS
+    void Logger::emergencyFlush() {
+        flushStream(m_QueueLogTo);
+        flushStream(m_QueueFlushFrom);
+    }
+#endif
+
     void Logger::doLog(const QString &message) {
         QMutexLocker locker(&m_LogMutex);
         m_QueueLogTo->append(message);

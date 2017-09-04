@@ -337,7 +337,7 @@ void DoHandleCrash(EXCEPTION_POINTERS* pExPtrs)
 {
     {
         Helpers::Logger &logger = Helpers::Logger::getInstance();
-        logger.flush();
+        logger.emergencyFlush();
     }
 
     {
