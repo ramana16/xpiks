@@ -336,6 +336,11 @@ void GetExceptionPointers(DWORD dwExceptionCode,
 void DoHandleCrash(EXCEPTION_POINTERS* pExPtrs)
 {
     {
+        Helpers::Logger &logger = Helpers::Logger::getInstance();
+        logger.flush();
+    }
+
+    {
         CreateMiniDump(pExPtrs);
     }
 
@@ -343,11 +348,6 @@ void DoHandleCrash(EXCEPTION_POINTERS* pExPtrs)
         StackWalkerToConsole sw;  // output to console
         sw.ShowCallstack(GetCurrentThread(), pExPtrs->ContextRecord);
         fflush(stdout);
-    }
-
-    {
-        Helpers::Logger &logger = Helpers::Logger::getInstance();
-        logger.flush();
     }
 }
 
