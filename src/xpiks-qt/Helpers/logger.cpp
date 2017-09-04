@@ -77,8 +77,8 @@ namespace Helpers {
 
 #ifdef INTEGRATION_TESTS
     void Logger::emergencyFlush() {
-        flushStream(m_LogsStorage[0]);
-        flushStream(m_LogsStorage[1]);
+        flushStream(&m_LogsStorage[0]);
+        flushStream(&m_LogsStorage[1]);
     }
 #endif
 
