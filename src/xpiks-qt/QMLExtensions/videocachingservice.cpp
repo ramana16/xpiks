@@ -61,8 +61,12 @@ namespace QMLExtensions {
         Q_ASSERT(m_CachingWorker != nullptr);
         LOG_INFO << snapshot.size() << "artworks";
 
+#ifndef INTEGRATION_TESTS
         Models::SwitcherModel *switcher = m_CommandManager->getSwitcherModel();
         const bool goodQualityAllowed = switcher->getGoodQualityVideoPreviews();
+#else
+        const bool goodQualityAllowed = false;
+#endif
 
         const size_t size = snapshot.size();
         std::vector<std::shared_ptr<VideoCacheRequest> > requests;
