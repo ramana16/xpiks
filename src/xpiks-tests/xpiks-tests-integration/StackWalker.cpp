@@ -227,8 +227,9 @@ DWORD64
 #define INVALID_FILE_ATTRIBUTES ((DWORD)-1)
 #endif  
 
-#if _MSC_VER < 1400
+
 // secure-CRT_functions are only available starting with VC8
+#if _MSC_VER < 1400
 #define strcpy_s(dst, len, src) strcpy(dst, src)
 #define strncpy_s(dst, len, src, maxLen) strncpy(dst, len, src)
 #define strcat_s(dst, len, src) strcat(dst, src)
@@ -1046,6 +1047,11 @@ BOOL StackWalker::ShowCallstack(HANDLE hThread, const CONTEXT *context, PReadPro
       SuspendThread(hThread);
       memset(&c, 0, sizeof(CONTEXT));
       c.ContextFlags = USED_CONTEXT_FLAGS;
+
+      // TODO: Detect if you want to get a thread context of a different process, which is running a different processor architecture...
+      // This does only work if we are x64 and the target process is x64 or x86;
+      // It cannnot work, if this process is x64 and the target process is x64... this is not supported...
+      // See also: http://www.howzatt.demon.co.uk/articles/DebuggingInWin64.html
       if (GetThreadContext(hThread, &c) == FALSE)
       {
         ResumeThread(hThread);
@@ -1336,6 +1342,10 @@ void StackWalker::OnSymInit(LPCSTR szSearchPath, DWORD symOptions, LPCSTR szUser
   OSVERSIONINFOEXA ver;
   ZeroMemory(&ver, sizeof(OSVERSIONINFOEXA));
   ver.dwOSVersionInfoSize = sizeof(ver);
+#if _MSC_VER >= 1900
+#pragma warning(push)
+#pragma warning(disable: 4996)
+#endif
   if (GetVersionExA( (OSVERSIONINFOA*) &ver) != FALSE)
   {
     _snprintf_s(buffer, STACKWALK_MAX_NAMELEN, "OS-Version: %d.%d.%d (%s) 0x%x-0x%x\n", 
@@ -1343,6 +1353,9 @@ void StackWalker::OnSymInit(LPCSTR szSearchPath, DWORD symOptions, LPCSTR szUser
       ver.szCSDVersion, ver.wSuiteMask, ver.wProductType);
     OnOutput(buffer);
   }
+#if _MSC_VER >= 1900
+#pragma warning(pop)
+#endif
 #endif
 }
 

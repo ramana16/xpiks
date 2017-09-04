@@ -43,6 +43,10 @@
 // Console (printf):
 class StackWalkerToConsole : public StackWalker
 {
+public:
+    StackWalkerToConsole():
+        StackWalker(RetrieveVerbose | SymBuildPath)
+    { }
 protected:
   virtual void OnOutput(LPCSTR szText)
   {
