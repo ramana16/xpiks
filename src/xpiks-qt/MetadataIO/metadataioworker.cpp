@@ -54,11 +54,6 @@ namespace MetadataIO {
                 break;
             }
 
-            std::shared_ptr<UpdateHubHighFrequencyModeTask> updateHubTask = std::dynamic_pointer_cast<UpdateHubHighFrequencyModeTask>(item);
-            if (updateHubTask) {
-                break;
-            }
-
             LOG_WARNING << "Unknown task";
             Q_ASSERT(false);
         } while(false);

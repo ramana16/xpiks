@@ -167,9 +167,6 @@ namespace MetadataIO {
             }
         }
 
-        QMLExtensions::ArtworksUpdateHub *updateHub = m_CommandManager->getArtworksUpdateHub();
-        updateHub->resetHighFrequencyMode();
-
         emit metadataReadingSkipped();
     }
 
@@ -215,9 +212,6 @@ namespace MetadataIO {
         }
 
         afterImportHandler(snapshot.getWeakSnapshot(), ignoreBackups);
-
-        QMLExtensions::ArtworksUpdateHub *updateHub = m_CommandManager->getArtworksUpdateHub();
-        updateHub->resetHighFrequencyMode();
 
         emit metadataReadingFinished();
         LOG_DEBUG << "Metadata import finished";

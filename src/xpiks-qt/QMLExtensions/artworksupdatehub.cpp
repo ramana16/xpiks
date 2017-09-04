@@ -17,15 +17,13 @@
 
 #define MAX_NOT_UPDATED_ARTWORKS_TO_HOLD 50
 #define MAX_UPDATE_TIMER_DELAYS 2
-#define UPDATE_TIMER_DELAY 1000
-#define UPDATE_TIMER_HIGH_FREQ_DELAY 300
+#define UPDATE_TIMER_DELAY 400
 
 namespace QMLExtensions {
     ArtworksUpdateHub::ArtworksUpdateHub(QObject *parent) :
         QObject(parent),
         Common::BaseEntity(),
-        m_TimerRestartedCount(0),
-        m_HighFrequencyMode(false)
+        m_TimerRestartedCount(0)
     {
         m_UpdateTimer.setSingleShot(true);
 
@@ -80,8 +78,7 @@ namespace QMLExtensions {
         LOG_DEBUG << "#";
 
         if (m_TimerRestartedCount < MAX_UPDATE_TIMER_DELAYS) {
-            int msec = m_HighFrequencyMode ? UPDATE_TIMER_HIGH_FREQ_DELAY : UPDATE_TIMER_DELAY;
-            m_UpdateTimer.start(msec);
+            m_UpdateTimer.start(UPDATE_TIMER_DELAY);
 
             QMutexLocker locker(&m_Lock);
             Q_UNUSED(locker);

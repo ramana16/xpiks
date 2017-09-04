@@ -40,8 +40,6 @@ namespace QMLExtensions {
         void updateArtwork(qint64 artworkID, size_t lastKnownIndex, const QSet<int> &rolesToUpdate = QSet<int>());
         void updateArtwork(Models::ArtworkMetadata *artwork);
         void forceUpdate();
-        void setHighFrequencyMode() { m_HighFrequencyMode = true; }
-        void resetHighFrequencyMode() { m_HighFrequencyMode = false; }
 
 #ifdef INTEGRATION_TESTS
     public:
@@ -61,7 +59,6 @@ namespace QMLExtensions {
         std::vector<std::shared_ptr<ArtworkUpdateRequest> > m_UpdateRequests;
         QTimer m_UpdateTimer;
         int m_TimerRestartedCount;
-        volatile bool m_HighFrequencyMode;
     };
 }
 

@@ -95,10 +95,6 @@ namespace MetadataIO {
         MetadataIOWorker::batch_id_t batchID = m_MetadataIOWorker->submitItems(jobs);
         LOG_INFO << "Batch ID is" << batchID;
 
-        QMLExtensions::ArtworksUpdateHub *updateHub = m_CommandManager->getArtworksUpdateHub();
-        std::shared_ptr<MetadataIOTaskBase> updateHubTask(new UpdateHubHighFrequencyModeTask(updateHub));
-        m_MetadataIOWorker->submitItem(updateHubTask);
-
         return batchID;
     }
 

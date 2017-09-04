@@ -13,7 +13,6 @@
 
 #include "../Models/artworkmetadata.h"
 #include "../Suggestion/locallibraryquery.h"
-#include "../QMLExtensions/artworksupdatehub.h"
 
 namespace MetadataIO {
     class MetadataIOTaskBase: public Models::ArtworkMetadataLocker
@@ -23,25 +22,6 @@ namespace MetadataIO {
             Models::ArtworkMetadataLocker(metadata)
         {
         }
-    };
-
-    class UpdateHubHighFrequencyModeTask: public MetadataIOTaskBase {
-    public:
-        UpdateHubHighFrequencyModeTask(QMLExtensions::ArtworksUpdateHub *updateHub):
-            MetadataIOTaskBase(nullptr),
-            m_UpdateHub(updateHub)
-        {
-            Q_ASSERT(updateHub != nullptr);
-            updateHub->setHighFrequencyMode();
-        }
-
-        virtual ~UpdateHubHighFrequencyModeTask() {
-            Q_ASSERT(m_UpdateHub != nullptr);
-            m_UpdateHub->resetHighFrequencyMode();
-        }
-
-    private:
-        QMLExtensions::ArtworksUpdateHub *m_UpdateHub;
     };
 
     class MetadataSearchTask: public MetadataIOTaskBase {
