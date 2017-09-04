@@ -337,24 +337,18 @@ int main(int argc, char *argv[]) {
         qDebug("---------------------------------------------------------");
         qInfo("Running test: %s", test->testName().toStdString().c_str());
 
-        try {
-            test->setup();
-            int testResult = test->doTest();
-            test->teardown();
+        test->setup();
+        const int testResult = test->doTest();
+        test->teardown();
 
-            result += testResult;
-            if (testResult == 0) {
-                succeededTestsCount++;
-                qInfo("Test %s PASSED", test->testName().toStdString().c_str());
-            } else {
-                failedTestsCount++;
-                qInfo("Test %s FAILED", test->testName().toStdString().c_str());
-                failedTests.append(test->testName());
-            }
-        }
-        catch (...) {
-            qInfo("Test %s CRASHED", test->testName().toStdString().c_str());
-            result += 1;
+        result += testResult;
+        if (testResult == 0) {
+            succeededTestsCount++;
+            qInfo("Test %s PASSED", test->testName().toStdString().c_str());
+        } else {
+            failedTestsCount++;
+            qInfo("Test %s FAILED", test->testName().toStdString().c_str());
+            failedTests.append(test->testName());
         }
 
         qDebug("\n");
