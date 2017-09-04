@@ -9,7 +9,6 @@ platform:
 environment:
   QTDIR: C:\Qt\5.6\msvc2015_64
   QT_FATAL_WARNINGS: true
-  APPVEYOR_RDP_PASSWORD: Xpiks_Password123
   matrix:
     - XPIKS_BINARY: true
     - CORE_TESTS: true
