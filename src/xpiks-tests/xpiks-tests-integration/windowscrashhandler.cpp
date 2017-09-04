@@ -341,13 +341,13 @@ void DoHandleCrash(EXCEPTION_POINTERS* pExPtrs)
     }
 
     {
-        CreateMiniDump(pExPtrs);
-    }
-
-    {
         StackWalkerToConsole sw;  // output to console
         sw.ShowCallstack(GetCurrentThread(), pExPtrs->ContextRecord);
         fflush(stdout);
+    }
+
+    {
+        CreateMiniDump(pExPtrs);
     }
 }
 
