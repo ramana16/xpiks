@@ -149,7 +149,7 @@ void myMessageHandler(QtMsgType type, const QMessageLogContext &context, const Q
     logger.log(logLine);
 
     if (type == QtFatalMsg) {
-        logger.flush();
+        logger.emergencyFlush();
         abort();
     }
 }
@@ -171,7 +171,6 @@ int main(int argc, char *argv[]) {
 #if defined(Q_OS_LINUX) && defined(QT_DEBUG)
     signal(SIGABRT, &linuxAbortHandler);
 #endif
-
 
     std::cout << "Started integration tests" << std::endl;
     std::cout << "Current working directory: " << QDir::currentPath().toStdString() << std::endl;

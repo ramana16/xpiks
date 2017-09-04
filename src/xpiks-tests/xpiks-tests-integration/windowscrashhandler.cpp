@@ -336,8 +336,8 @@ void GetExceptionPointers(DWORD dwExceptionCode,
 void DoHandleCrash(EXCEPTION_POINTERS* pExPtrs)
 {
     {
-        Helpers::Logger &logger = Helpers::Logger::getInstance();
-        logger.emergencyFlush();
+        //Helpers::Logger &logger = Helpers::Logger::getInstance();
+        //logger.emergencyFlush();
     }
 
     {
@@ -347,7 +347,7 @@ void DoHandleCrash(EXCEPTION_POINTERS* pExPtrs)
     }
 
     {
-        CreateMiniDump(pExPtrs);
+        //CreateMiniDump(pExPtrs);
     }
 }
 

@@ -9,6 +9,7 @@ platform:
 environment:
   QTDIR: C:\Qt\5.6\msvc2015_64
   QT_FATAL_WARNINGS: true
+  APPVEYOR_RDP_PASSWORD: xpks
   matrix:
     - XPIKS_BINARY: true
     - CORE_TESTS: true
@@ -40,6 +41,9 @@ matrix:
   fast_finish: true
   allow_failures:
     - configuration: release
+
+init:
+  - ps: iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
 install:
   - if %QTDIR:_64=%==%QTDIR% ( set ARCH=x86 ) else set ARCH=x64
