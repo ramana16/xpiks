@@ -92,6 +92,11 @@ namespace QMLExtensions {
         const bool isInResources = originalPath.startsWith(":/");
 
         QImage img(originalPath);
+        if (img.isNull()) {
+            LOG_WARNING << "Image" << originalPath << "is null image";
+            return;
+        }
+
         QImage resizedImage = img.scaled(requestedSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
 
         QFileInfo fi(originalPath);
