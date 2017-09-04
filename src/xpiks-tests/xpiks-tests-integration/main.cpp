@@ -66,6 +66,10 @@
 #include "windowscrashhandler.h"
 #endif
 
+#ifdef Q_OS_LINUX
+#include <signal.h>
+#endif
+
 #include "integrationtestbase.h"
 #include "addfilesbasictest.h"
 #include "autoattachvectorstest.h"
@@ -150,12 +154,24 @@ void myMessageHandler(QtMsgType type, const QMessageLogContext &context, const Q
     }
 }
 
+#if defined(Q_OS_LINUX) && defined(QT_DEBUG)
+void linuxAbortHandler(int signalNumber) {
+    Helpers::Logger &logger = Helpers::Logger::getInstance();
+    logger.log(logLine);
+}
+#endif
+
 int main(int argc, char *argv[]) {
 #if defined(Q_OS_WIN) && defined(APPVEYOR)
     WindowsCrashHandler crashHandler;
     crashHandler.SetProcessExceptionHandlers();
     crashHandler.SetThreadExceptionHandlers();
 #endif
+
+#if defined(Q_OS_LINUX) && defined(QT_DEBUG)
+    signal(SIGABRT, &linuxAbortHandler);
+#endif
+
 
     std::cout << "Started integration tests" << std::endl;
     std::cout << "Current working directory: " << QDir::currentPath().toStdString() << std::endl;
