@@ -14,40 +14,35 @@
 #include <QMutexLocker>
 #include <Models/artworkmetadata.h>
 #include <Common/defines.h>
+#include <MetadataIO/metadatareadinghub.h>
 #include "metadatareadingworker.h"
 
 namespace libxpks {
     namespace io {
         ReadingOrchestrator::ReadingOrchestrator(const MetadataIO::ArtworksSnapshot &artworksToRead,
-                                                 Models::SettingsModel *settingsModel,
-                                                 quint32 storageReadBatchID,
-                                                 QObject *parent) :
-            QObject(parent),
-            m_ImageReadingWorker(nullptr),
+                                                 MetadataIO::MetadataReadingHub *readingHub,
+                                                 Models::SettingsModel *settingsModel):
             m_ItemsToReadSnapshot(artworksToRead),
-            m_SettingsModel(settingsModel),
-            m_StorageReadBatchID(storageReadBatchID),
-            m_AnyError(false)
-
+            m_ReadingHub(readingHub),
+            m_SettingsModel(settingsModel)
         {
-            QObject::connect(&m_AsyncCoordinator, &Helpers::AsyncCoordinator::statusReported,
-                                         this, &ReadingOrchestrator::onAllWorkersFinished);
         }
 
         ReadingOrchestrator::~ReadingOrchestrator() {
-            LOG_DEBUG << "destroyed";
         }
 
         void ReadingOrchestrator::startReading() {
-            Helpers::AsyncCoordinatorStarter deferredStarter(&m_AsyncCoordinator, -1);
+            auto *asyncCoordinator = m_ReadingHub->getCoordinator();
+
+            Helpers::AsyncCoordinatorStarter deferredStarter(asyncCoordinator, -1);
             Q_UNUSED(deferredStarter);
 
-            Helpers::AsyncCoordinatorLocker locker(&m_AsyncCoordinator);
+            Helpers::AsyncCoordinatorLocker locker(asyncCoordinator);
             Q_UNUSED(locker);
 
             ExiftoolImageReadingWorker *readingWorker = new ExiftoolImageReadingWorker(m_ItemsToReadSnapshot,
                                                                                        m_SettingsModel,
-                                                                                       &m_AsyncCoordinator);
+                                                                                       m_ReadingHub);
             QThread *thread = new QThread();
             readingWorker->moveToThread(thread);
 
@@ -59,22 +54,6 @@ namespace libxpks {
 
             LOG_DEBUG << "Starting thread...";
             thread->start();
-
-            m_ImageReadingWorker = readingWorker;
-
-            emit allStarted();
-        }
-
-        void ReadingOrchestrator::onAllWorkersFinished(int status) {
-            const bool success = status == Helpers::AsyncCoordinator::AllDone;
-            m_AnyError = !success || !m_ImageReadingWorker->success();
-            LOG_INFO << "status:" << status << "any error:" << m_AnyError;
-
-            m_ImportResults.append(m_ImageReadingWorker->getImportResult());
-
-            m_ImageReadingWorker->dismiss();
-
-            emit allFinished(!m_AnyError);
         }
     }
 }

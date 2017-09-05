@@ -19,6 +19,7 @@
 #include <Models/settingsmodel.h>
 #include <Models/artworkmetadata.h>
 #include <Helpers/asynccoordinator.h>
+#include <MetadataIO/metadatareadinghub.h>
 #include <Helpers/constants.h>
 #include <Common/defines.h>
 
@@ -45,7 +46,7 @@
 
 namespace libxpks {
     namespace io {
-        void parseJsonKeywords(const QJsonArray &array, MetadataIO::OriginalMetadata &result) {
+        void parseJsonKeywords(const QJsonArray &array, MetadataIO::OriginalMetadata *result) {
             int size = array.size();
             QStringList keywords;
             keywords.reserve(size);
@@ -54,10 +55,10 @@ namespace libxpks {
                 keywords.append(array.at(i).toString());
             }
 
-            result.m_Keywords = keywords;
+            result->m_Keywords = keywords;
         }
 
-        bool parseStringKeywords(QString &keywords, MetadataIO::OriginalMetadata &result) {
+        bool parseStringKeywords(QString &keywords, MetadataIO::OriginalMetadata *result) {
             bool parsed = false;
             if (!keywords.isEmpty()) {
                 // old Xpiks bug when it called exiftool with wrong arguments
@@ -65,7 +66,7 @@ namespace libxpks {
                     keywords = keywords.mid(1, keywords.length() - 2);
                 }
 
-                result.m_Keywords = keywords.split(QChar(','), QString::SkipEmptyParts);
+                result->m_Keywords = keywords.split(QChar(','), QString::SkipEmptyParts);
                 parsed = true;
             }
 
@@ -87,28 +88,28 @@ namespace libxpks {
             return timeZoneOffset;
         }
 
-        void jsonObjectToImportResult(const QJsonObject &object, MetadataIO::OriginalMetadata &result) {
+        void jsonObjectToImportResult(const QJsonObject &object, MetadataIO::OriginalMetadata *result) {
             if (object.contains(SOURCEFILE)) {
-                result.m_FilePath = object.value(SOURCEFILE).toString();
+                result->m_FilePath = object.value(SOURCEFILE).toString();
             }
 
             if (object.contains(TITLE)) {
-                result.m_Title = object.value(TITLE).toString();
+                result->m_Title = object.value(TITLE).toString();
             } else if (object.contains(OBJECTNAME)) {
-                result.m_Title = object.value(OBJECTNAME).toString();
+                result->m_Title = object.value(OBJECTNAME).toString();
             }
 
             if (object.contains(DESCRIPTION)) {
-                result.m_Description = object.value(DESCRIPTION).toString();
+                result->m_Description = object.value(DESCRIPTION).toString();
             } else if (object.contains(CAPTIONABSTRACT)) {
-                result.m_Description = object.value(CAPTIONABSTRACT).toString();
+                result->m_Description = object.value(CAPTIONABSTRACT).toString();
             } else if (object.contains(IMAGEDESCRIPTION)) {
-                result.m_Description = object.value(IMAGEDESCRIPTION).toString();
+                result->m_Description = object.value(IMAGEDESCRIPTION).toString();
             }
 
             if (object.contains(DATETAKEN)) {
                 QString dateTime = object.value(DATETAKEN).toString();
-                result.m_DateTimeOriginal = QDateTime::fromString(dateTime, Qt::ISODate);
+                result->m_DateTimeOriginal = QDateTime::fromString(dateTime, Qt::ISODate);
             }
 
             bool keywordsSet = false;
@@ -136,19 +137,19 @@ namespace libxpks {
             }
 
             if (object.contains(IMAGEWIDTH)) {
-                result.m_ImageSize.setWidth((int)object.value(IMAGEWIDTH).toDouble(0));
+                result->m_ImageSize.setWidth((int)object.value(IMAGEWIDTH).toDouble(0));
             }
 
             if (object.contains(IMAGEHEIGHT)) {
-                result.m_ImageSize.setWidth((int)object.value(IMAGEHEIGHT).toDouble(0));
+                result->m_ImageSize.setWidth((int)object.value(IMAGEHEIGHT).toDouble(0));
             }
         }
 
         ExiftoolImageReadingWorker::ExiftoolImageReadingWorker(const MetadataIO::ArtworksSnapshot &artworksToRead,
                                                                Models::SettingsModel *settingsModel,
-                                                               Helpers::AsyncCoordinator *asyncCoordinator):
+                                                               MetadataIO::MetadataReadingHub *readingHub):
             m_ItemsToReadSnapshot(artworksToRead),
-            m_AsyncCoordinator(asyncCoordinator),
+            m_ReadingHub(readingHub),
             m_ExiftoolProcess(nullptr),
             m_SettingsModel(settingsModel),
             m_ReadSuccess(false)
@@ -160,7 +161,9 @@ namespace libxpks {
         }
 
         void ExiftoolImageReadingWorker::process() {
-            Helpers::AsyncCoordinatorUnlocker unlocker(m_AsyncCoordinator);
+            auto *asyncCoordinator = m_ReadingHub->getCoordinator();
+            Helpers::AsyncCoordinatorUnlocker unlocker(asyncCoordinator);
+
             Q_UNUSED(unlocker);
 
             bool success = false;
@@ -228,11 +231,10 @@ namespace libxpks {
 
                 QByteArray stdoutByteArray = m_ExiftoolProcess->readAllStandardOutput();
                 parseExiftoolOutput(stdoutByteArray);
-
-                readSizes();
             }
 
             m_ReadSuccess = success;
+            emit stopped();
         }
 
         void ExiftoolImageReadingWorker::cancel() {
@@ -295,36 +297,24 @@ namespace libxpks {
                     const QJsonValue &fileJson = filesArray.at(i);
                     if (fileJson.isObject()) {
                         QJsonObject fileObject = fileJson.toObject();
-                        MetadataIO::OriginalMetadata result;
-                        jsonObjectToImportResult(fileObject, result);
+                        std::shared_ptr<MetadataIO::OriginalMetadata> result(new MetadataIO::OriginalMetadata());
+                        jsonObjectToImportResult(fileObject, result.get());
 
-                        Q_ASSERT(!result.m_FilePath.isEmpty());
-                        Q_ASSERT(!m_ImportResult.contains(result.m_FilePath));
+                        Q_ASSERT(!result->m_FilePath.isEmpty());
 
-                        m_ImportResult.insert(result.m_FilePath, result);
-                        LOG_DEBUG << "Parsed file:" << result.m_FilePath;
+                        QImageReader reader(result->m_FilePath);
+                        result->m_ImageSize = reader.size();
+
+                        QFileInfo fi(result->m_FilePath);
+                        result->m_FileSize = fi.size();
+
+                        m_ReadingHub->push(result);
+
+                        LOG_DEBUG << "Parsed file:" << result->m_FilePath;
                     }
                 }
             } else {
                 LOG_WARNING << "Exiftool Output Parsing Error";
-            }
-        }
-
-        void ExiftoolImageReadingWorker::readSizes() {
-            LOG_DEBUG << "#";
-            size_t size = m_ItemsToReadSnapshot.size();
-            for (size_t i = 0; i < size; ++i) {
-                Models::ArtworkMetadata *metadata = m_ItemsToReadSnapshot.get(i);
-                const QString &filepath = metadata->getFilepath();
-
-                Q_ASSERT(m_ImportResult.contains(filepath));
-                MetadataIO::OriginalMetadata &importResultItem = m_ImportResult[filepath];
-
-                QImageReader reader(filepath);
-                importResultItem.m_ImageSize = reader.size();
-
-                QFileInfo fi(filepath);
-                importResultItem.m_FileSize = fi.size();
             }
         }
     }

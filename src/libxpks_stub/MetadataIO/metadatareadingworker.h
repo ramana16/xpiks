@@ -21,15 +21,15 @@
 #include <QHash>
 #include <QSize>
 #include <MetadataIO/originalmetadata.h>
-#include <MetadataIO/imetadatareader.h>
-
-namespace Helpers {
-    class AsyncCoordinator;
-}
+#include <MetadataIO/artworkssnapshot.h>
 
 namespace Models {
     class ArtworkMetadata;
     class SettingsModel;
+}
+
+namespace MetadataIO {
+    class MetadataReadingHub;
 }
 
 namespace libxpks {
@@ -40,7 +40,7 @@ namespace libxpks {
         public:
             explicit ExiftoolImageReadingWorker(const MetadataIO::ArtworksSnapshot &artworksToRead,
                                                 Models::SettingsModel *settingsModel,
-                                                Helpers::AsyncCoordinator *asyncCoordinator);
+                                                MetadataIO::MetadataReadingHub *readingHub);
             virtual ~ExiftoolImageReadingWorker();
 
         signals:
@@ -57,7 +57,6 @@ namespace libxpks {
         public:
             void dismiss() { emit stopped(); }
             bool success() const { return m_ReadSuccess; }
-            const QHash<QString, MetadataIO::OriginalMetadata> &getImportResult() const { return m_ImportResult; }
 
         private:
             void initWorker();
@@ -67,8 +66,7 @@ namespace libxpks {
 
         private:
             MetadataIO::ArtworksSnapshot m_ItemsToReadSnapshot;
-            Helpers::AsyncCoordinator *m_AsyncCoordinator;
-            QHash<QString, MetadataIO::OriginalMetadata> m_ImportResult;
+            MetadataIO::MetadataReadingHub *m_ReadingHub;
             QProcess *m_ExiftoolProcess;
             Models::SettingsModel *m_SettingsModel;
             volatile bool m_ReadSuccess;

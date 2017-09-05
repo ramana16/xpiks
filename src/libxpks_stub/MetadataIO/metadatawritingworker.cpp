@@ -178,6 +178,7 @@ namespace libxpks {
             }
 
             m_WriteSuccess = success;
+            emit stopped();
         }
 
         void ExiftoolImageWritingWorker::innerProcessFinished(int exitCode, QProcess::ExitStatus exitStatus) {
@@ -220,6 +221,14 @@ namespace libxpks {
             }
 
             return arguments;
+        }
+
+        void ExiftoolImageWritingWorker::setArtworksSaved() {
+            auto &items = m_ItemsToWriteSnapshot.getRawData();
+            for (auto &item: items) {
+                Models::ArtworkMetadata *artwork = item->getArtworkMetadata();
+                artwork->resetModified();
+            }
         }
     }
 }

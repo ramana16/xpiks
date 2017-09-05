@@ -15,37 +15,32 @@
 #include <Models/artworkmetadata.h>
 #include <Common/defines.h>
 #include "metadatawritingworker.h"
+#include <Helpers/asynccoordinator.h>
 
 namespace libxpks {
     namespace io {
         WritingOrchestrator::WritingOrchestrator(const MetadataIO::ArtworksSnapshot &artworksToWrite,
-                                                 Models::SettingsModel *settingsModel,
-                                                 QObject *parent) :
-            QObject(parent),
-            m_ImageWritingWorker(nullptr),
+                                                 Helpers::AsyncCoordinator *asyncCoordinator,
+                                                 Models::SettingsModel *settingsModel):
             m_ItemsToWriteSnapshot(artworksToWrite),
             m_SettingsModel(settingsModel),
-            m_AnyError(false)
+            m_AsyncCoordinator(asyncCoordinator)
         {
-            QObject::connect(&m_AsyncCoordinator, &Helpers::AsyncCoordinator::statusReported,
-                                         this, &WritingOrchestrator::onAllWorkersFinished);
         }
 
         WritingOrchestrator::~WritingOrchestrator() {
             LOG_DEBUG << "destroyed";
         }
 
-        void WritingOrchestrator::startWriting(bool useBackups, bool) {
-            LOG_DEBUG << "#";
+        void WritingOrchestrator::startWriting(bool useBackups, bool useDirectExport) {
+            LOG_DEBUG << "use direct export =" << useDirectExport;
 
-            Helpers::AsyncCoordinatorStarter deferredStarter(&m_AsyncCoordinator, -1);
+            Helpers::AsyncCoordinatorStarter deferredStarter(m_AsyncCoordinator, -1);
             Q_UNUSED(deferredStarter);
 
-            Helpers::AsyncCoordinatorLocker locker(&m_AsyncCoordinator);
-            Q_UNUSED(locker);
 
             auto *writingWorker = new ExiftoolImageWritingWorker(m_ItemsToWriteSnapshot,
-                                                                 &m_AsyncCoordinator,
+                                                                 m_AsyncCoordinator,
                                                                  m_SettingsModel,
                                                                  useBackups);
             QThread *thread = new QThread();
@@ -57,22 +52,8 @@ namespace libxpks {
             QObject::connect(writingWorker, &ExiftoolImageWritingWorker::stopped, writingWorker, &ExiftoolImageWritingWorker::deleteLater);
             QObject::connect(thread, &QThread::finished, thread, &QThread::deleteLater);
 
-            m_ImageWritingWorker = writingWorker;
-
             thread->start();
             LOG_INFO << "Started image writing worker...";
-
-            emit allStarted();
-        }
-
-        void WritingOrchestrator::onAllWorkersFinished(int status) {
-            const bool success = status == Helpers::AsyncCoordinator::AllDone;
-            m_AnyError = !success || !m_ImageWritingWorker->success();
-            LOG_INFO << "status:" << status << "any error:" << m_AnyError;
-
-            m_ImageWritingWorker->dismiss();
-
-            emit allFinished(!m_AnyError);
         }
     }
 }

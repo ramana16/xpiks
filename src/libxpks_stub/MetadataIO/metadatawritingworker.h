@@ -14,7 +14,7 @@
 #include <QObject>
 #include <QVector>
 #include <QProcess>
-#include <MetadataIO/imetadatawriter.h>
+#include <MetadataIO/artworkssnapshot.h>
 
 namespace Helpers {
     class AsyncCoordinator;
@@ -55,6 +55,7 @@ namespace libxpks {
         private:
             void initWorker();
             QStringList createArgumentsList(const QString &jsonFilePath);
+            void setArtworksSaved();
 
         private:
             QProcess *m_ExiftoolProcess;
