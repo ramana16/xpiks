@@ -101,6 +101,7 @@
 #include "savefilelegacytest.h"
 #include "locallibrarysearchtest.h"
 #include "metadatacachesavetest.h"
+#include "savevideobasictest.h"
 
 #if defined(WITH_LOGS)
 #undef WITH_LOGS
@@ -310,10 +311,14 @@ int main(int argc, char *argv[]) {
 
     // always the first one
     integrationTests.append(new MetadataCacheSaveTest(&commandManager));
+    // and all others
     integrationTests.append(new AddFilesBasicTest(&commandManager));
     integrationTests.append(new AutoAttachVectorsTest(&commandManager));
     integrationTests.append(new SaveFileBasicTest(&commandManager));
     integrationTests.append(new SaveFileLegacyTest(&commandManager));
+#ifndef TRAVIS_CI
+    integrationTests.append(new SaveVideoBasicTest(&commandManager));
+#endif
     integrationTests.append(new SpellCheckMultireplaceTest(&commandManager));
     integrationTests.append(new SpellCheckCombinedModelTest(&commandManager));
     integrationTests.append(new ZipArtworksTest(&commandManager));

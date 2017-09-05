@@ -200,7 +200,8 @@ SOURCES += main.cpp \
     ../../xpiks-qt/Common/statefulentity.cpp \
     locallibrarysearchtest.cpp \
     metadatacachesavetest.cpp \
-    ../../xpiks-qt/MetadataIO/metadatareadinghub.cpp
+    ../../xpiks-qt/MetadataIO/metadatareadinghub.cpp \
+    savevideobasictest.cpp
 
 RESOURCES +=
 
@@ -435,7 +436,8 @@ HEADERS += \
     locallibrarysearchtest.h \
     metadatacachesavetest.h \
     ../../xpiks-qt/MetadataIO/metadatareadinghub.h \
-    ../../xpiks-qt/Common/readerwriterqueue.h
+    ../../xpiks-qt/Common/readerwriterqueue.h \
+    savevideobasictest.h
 
 INCLUDEPATH += ../../../vendors/tiny-aes
 INCLUDEPATH += ../../../vendors/cpp-libface
