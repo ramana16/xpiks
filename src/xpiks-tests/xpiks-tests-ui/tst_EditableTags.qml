@@ -2,6 +2,7 @@ import QtQuick 2.0
 import QtTest 1.1
 import xpiks 1.0
 import "../../xpiks-qt/Components"
+import "FakeColors.js" as Colors
 
 Item {
     id: root
@@ -23,6 +24,17 @@ Item {
         function isKeywordValid(keyword) {
             return keyword.length >= 2 || keyword === "$"
         }
+    }
+
+    QtObject {
+        id: acSource
+        property bool isActive: false
+
+        function moveSelectionUp() {}
+        function cancelCompletion() {}
+        function moveSelectionDown() {}
+        function acceptSelected(str) {}
+        function hasSelectedCompletion() { return false }
     }
 
     EditableTags {
@@ -100,9 +112,13 @@ Item {
             removeLastSpy.clear()
 
             input.text = "1"
+            // need to set focus
             input.forceActiveFocus()
+            input.cursorPosition = 1
             keyClick(Qt.Key_Backspace)
+
             compare(removeLastSpy.count, 0)
+            compare(input.length, 0)
 
             keyClick(Qt.Key_Backspace)
             compare(removeLastSpy.count, 1)
