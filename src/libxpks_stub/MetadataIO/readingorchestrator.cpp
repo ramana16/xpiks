@@ -25,6 +25,8 @@ namespace libxpks {
             m_ReadingHub(readingHub),
             m_SettingsModel(settingsModel)
         {
+            Q_ASSERT(readingHub != nullptr);
+            Q_ASSERT(settingsModel != nullptr);
         }
 
         ReadingOrchestrator::~ReadingOrchestrator() {

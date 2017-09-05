@@ -154,6 +154,9 @@ namespace libxpks {
             m_SettingsModel(settingsModel),
             m_ReadSuccess(false)
         {
+            Q_ASSERT(readingHub != nullptr);
+            Q_ASSERT(settingsModel != nullptr);
+            Q_ASSERT(!m_ItemsToReadSnapshot.empty());
         }
 
         ExiftoolImageReadingWorker::~ExiftoolImageReadingWorker() {
@@ -235,15 +238,6 @@ namespace libxpks {
 
             m_ReadSuccess = success;
             emit stopped();
-        }
-
-        void ExiftoolImageReadingWorker::cancel() {
-            LOG_INFO << "Cancelling...";
-
-            if (m_ExiftoolProcess && m_ExiftoolProcess->state() != QProcess::NotRunning) {
-                m_ExiftoolProcess->kill();
-                LOG_INFO << "Exiftool process killed";
-            }
         }
 
         void ExiftoolImageReadingWorker::innerProcessFinished(int exitCode, QProcess::ExitStatus exitStatus) {

@@ -27,7 +27,7 @@ namespace libxpks {
             void startWriting(bool useBackups, bool useDirectExport=true);
 
         private:
-            MetadataIO::ArtworksSnapshot m_ItemsToWriteSnapshot;
+            const MetadataIO::ArtworksSnapshot &m_ItemsToWriteSnapshot;
             Models::SettingsModel *m_SettingsModel;
             Helpers::AsyncCoordinator *m_AsyncCoordinator;
         };

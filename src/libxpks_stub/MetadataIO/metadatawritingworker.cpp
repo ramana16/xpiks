@@ -97,6 +97,7 @@ namespace libxpks {
         {
             Q_ASSERT(asyncCoordinator != nullptr);
             Q_ASSERT(settingsModel != nullptr);
+            Q_ASSERT(!m_ItemsToWriteSnapshot.empty());
         }
 
         ExiftoolImageWritingWorker::~ExiftoolImageWritingWorker() {

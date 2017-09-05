@@ -434,7 +434,8 @@ HEADERS += \
     ../../xpiks-qt/Common/statefulentity.h \
     locallibrarysearchtest.h \
     metadatacachesavetest.h \
-    ../../xpiks-qt/MetadataIO/metadatareadinghub.h
+    ../../xpiks-qt/MetadataIO/metadatareadinghub.h \
+    ../../xpiks-qt/Common/readerwriterqueue.h
 
 INCLUDEPATH += ../../../vendors/tiny-aes
 INCLUDEPATH += ../../../vendors/cpp-libface
