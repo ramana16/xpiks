@@ -199,7 +199,8 @@ SOURCES += main.cpp \
     savefilelegacytest.cpp \
     ../../xpiks-qt/Common/statefulentity.cpp \
     locallibrarysearchtest.cpp \
-    metadatacachesavetest.cpp
+    metadatacachesavetest.cpp \
+    ../../xpiks-qt/MetadataIO/metadatareadinghub.cpp
 
 RESOURCES +=
 
@@ -342,9 +343,7 @@ HEADERS += \
     ../../xpiks-qt/Common/hold.h \
     ../../xpiks-qt/Models/imageartwork.h \
     undoaddwithvectorstest.h \
-    ../../xpiks-qt/MetadataIO/imetadatareader.h \
     ../../xpiks-qt/MetadataIO/originalmetadata.h \
-    ../../xpiks-qt/MetadataIO/imetadatawriter.h \
     readlegacysavedtest.h \
     ../../xpiks-qt/QMLExtensions/imagecacherequest.h \
     ../../xpiks-qt/QMLExtensions/imagecachingservice.h \
@@ -434,7 +433,8 @@ HEADERS += \
     savefilelegacytest.h \
     ../../xpiks-qt/Common/statefulentity.h \
     locallibrarysearchtest.h \
-    metadatacachesavetest.h
+    metadatacachesavetest.h \
+    ../../xpiks-qt/MetadataIO/metadatareadinghub.h
 
 INCLUDEPATH += ../../../vendors/tiny-aes
 INCLUDEPATH += ../../../vendors/cpp-libface
