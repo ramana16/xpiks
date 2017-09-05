@@ -31,7 +31,7 @@ namespace libxpks {
         {
             Q_OBJECT
         public:
-            explicit ExiftoolImageWritingWorker(MetadataIO::ArtworksSnapshot &artworksToWrite,
+            explicit ExiftoolImageWritingWorker(const MetadataIO::ArtworksSnapshot &artworksToWrite,
                                                 Helpers::AsyncCoordinator *asyncCoordinator,
                                                 Models::SettingsModel *settingsModel,
                                                 bool useBackups);

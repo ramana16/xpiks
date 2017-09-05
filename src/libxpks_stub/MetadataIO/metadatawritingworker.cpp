@@ -84,12 +84,12 @@ namespace libxpks {
             }
         }
 
-        ExiftoolImageWritingWorker::ExiftoolImageWritingWorker(MetadataIO::ArtworksSnapshot &artworksToWrite,
+        ExiftoolImageWritingWorker::ExiftoolImageWritingWorker(const MetadataIO::ArtworksSnapshot &artworksToWrite,
                                                                Helpers::AsyncCoordinator *asyncCoordinator,
                                                                Models::SettingsModel *settingsModel,
                                                                bool useBackups):
             m_ExiftoolProcess(nullptr),
-            m_ItemsToWriteSnapshot(std::move(artworksToWrite)),
+            m_ItemsToWriteSnapshot(artworksToWrite),
             m_AsyncCoordinator(asyncCoordinator),
             m_SettingsModel(settingsModel),
             m_UseBackups(useBackups),
