@@ -26,6 +26,8 @@ namespace libxpks {
             m_SettingsModel(settingsModel),
             m_AsyncCoordinator(asyncCoordinator)
         {
+            Q_ASSERT(settingsModel != nullptr);
+            Q_ASSERT(asyncCoordinator != nullptr);
         }
 
         WritingOrchestrator::~WritingOrchestrator() {
@@ -38,6 +40,8 @@ namespace libxpks {
             Helpers::AsyncCoordinatorStarter deferredStarter(m_AsyncCoordinator, -1);
             Q_UNUSED(deferredStarter);
 
+            Helpers::AsyncCoordinatorLocker locker(m_AsyncCoordinator);
+            Q_UNUSED(locker);
 
             auto *writingWorker = new ExiftoolImageWritingWorker(m_ItemsToWriteSnapshot,
                                                                  m_AsyncCoordinator,

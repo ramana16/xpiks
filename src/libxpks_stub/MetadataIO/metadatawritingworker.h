@@ -31,23 +31,20 @@ namespace libxpks {
         {
             Q_OBJECT
         public:
-            explicit ExiftoolImageWritingWorker(const MetadataIO::ArtworksSnapshot &artworksToWrite,
+            explicit ExiftoolImageWritingWorker(MetadataIO::ArtworksSnapshot &artworksToWrite,
                                                 Helpers::AsyncCoordinator *asyncCoordinator,
                                                 Models::SettingsModel *settingsModel,
                                                 bool useBackups);
             virtual ~ExiftoolImageWritingWorker();
 
         public:
-            void dismiss() { emit stopped(); }
             bool success() const { return m_WriteSuccess; }
 
         signals:
             void stopped();
-            void finished(bool success);
 
         public slots:
             void process();
-            //void cancel();
 
         private slots:
             void innerProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);

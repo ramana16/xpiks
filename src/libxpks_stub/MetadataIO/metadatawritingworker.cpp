@@ -84,17 +84,19 @@ namespace libxpks {
             }
         }
 
-        ExiftoolImageWritingWorker::ExiftoolImageWritingWorker(const MetadataIO::ArtworksSnapshot &artworksToWrite,
+        ExiftoolImageWritingWorker::ExiftoolImageWritingWorker(MetadataIO::ArtworksSnapshot &artworksToWrite,
                                                                Helpers::AsyncCoordinator *asyncCoordinator,
                                                                Models::SettingsModel *settingsModel,
                                                                bool useBackups):
             m_ExiftoolProcess(nullptr),
-            m_ItemsToWriteSnapshot(artworksToWrite),
+            m_ItemsToWriteSnapshot(std::move(artworksToWrite)),
             m_AsyncCoordinator(asyncCoordinator),
             m_SettingsModel(settingsModel),
             m_UseBackups(useBackups),
             m_WriteSuccess(false)
         {
+            Q_ASSERT(asyncCoordinator != nullptr);
+            Q_ASSERT(settingsModel != nullptr);
         }
 
         ExiftoolImageWritingWorker::~ExiftoolImageWritingWorker() {
@@ -173,6 +175,8 @@ namespace libxpks {
 
                     if (!success) {
                         LOG_WARNING << "Exiftool error string:" << m_ExiftoolProcess->errorString();
+                    } else {
+                        setArtworksSaved();
                     }
                 }
             }

@@ -45,11 +45,9 @@ namespace libxpks {
 
         signals:
             void stopped();
-            void finished(bool success);
 
         public slots:
             void process();
-            void cancel();
 
         private slots:
             void innerProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);

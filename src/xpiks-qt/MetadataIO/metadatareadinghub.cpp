@@ -42,11 +42,13 @@ namespace MetadataIO {
     }
 
     void MetadataReadingHub::proceedImport(bool ignoreBackups) {
+        LOG_DEBUG << "ignore backups =" << ignoreBackups;
         m_IgnoreBackupsAtImport = ignoreBackups;
         m_AsyncCoordinator.justEnded();
     }
 
     void MetadataReadingHub::cancelImport() {
+        LOG_DEBUG << "#";
         m_InitAsEmpty = true;
         m_AsyncCoordinator.justEnded();
     }
@@ -82,6 +84,7 @@ namespace MetadataIO {
     }
 
     void MetadataReadingHub::initializeArtworks(bool ignoreBackups, bool initAsEmpty) {
+        LOG_DEBUG << "ignore backups =" << ignoreBackups << ", init empty =" << initAsEmpty;
         QHash<QString, size_t> filepathToIndexMap;
 
         std::vector<std::shared_ptr<MetadataIO::OriginalMetadata> > metadataToImport;
