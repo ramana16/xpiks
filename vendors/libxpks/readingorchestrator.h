@@ -5,8 +5,6 @@
 #include <QVector>
 #include <QMutex>
 #include <QHash>
-#include <MetadataIO/imetadatareader.h>
-#include <Helpers/asynccoordinator.h>
 #include <MetadataIO/artworkssnapshot.h>
 
 namespace Models {
@@ -14,25 +12,24 @@ namespace Models {
     class SettingsModel;
 }
 
+namespace MetadataIO {
+    class MetadataReadingHub;
+}
+
 namespace libxpks {
     namespace io {
         class ExiftoolImageReadingWorker;
         class ExiftoolVideoReadingWorker;
 
-        class ReadingOrchestrator : public QObject, public MetadataIO::IMetadataReader
+        class ReadingOrchestrator : public QObject
         {
             Q_OBJECT
         public:
             explicit ReadingOrchestrator(const MetadataIO::ArtworksSnapshot &artworksToRead,
+                                         MetadataIO::MetadataReadingHub *readingHub,
                                          Models::SettingsModel *settingsModel,
-                                         quint32 storageReadBatchID,
                                          QObject *parent = 0);
             virtual ~ReadingOrchestrator();
-
-        public:
-            virtual const QVector<QHash<QString, MetadataIO::OriginalMetadata> > &getImportResults() const override { return m_ImportResults; }
-            virtual const MetadataIO::ArtworksSnapshot &getArtworksSnapshot() const override { return m_ItemsToReadSnapshot; }
-            virtual quint32 getReadingBatchID() const override { return m_StorageReadBatchID; }
 
         public:
             void startReading();
@@ -41,23 +38,10 @@ namespace libxpks {
             void startReadingImages(MetadataIO::ArtworksSnapshot::Container &rawSnapshot);
             void startReadingVideos(MetadataIO::ArtworksSnapshot::Container &rawSnapshot);
 
-        signals:
-            void allStarted();
-            void allFinished(bool success);
-            void cancelReading();
-
-        private slots:
-            void onAllWorkersFinished(int status);
-
         private:
-            ExiftoolImageReadingWorker *m_ImageReadingWorker;
-            ExiftoolVideoReadingWorker *m_VideoReadingWorker;
             MetadataIO::ArtworksSnapshot m_ItemsToReadSnapshot;
-            QVector<QHash<QString, MetadataIO::OriginalMetadata> > m_ImportResults;
+            MetadataIO::MetadataReadingHub *m_ReadingHub;
             Models::SettingsModel *m_SettingsModel;
-            Helpers::AsyncCoordinator m_AsyncCoordinator;
-            quint32 m_StorageReadBatchID;
-            volatile bool m_AnyError;
         };
     }
 }

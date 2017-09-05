@@ -18,14 +18,13 @@
 #include "../Common/defines.h"
 #include "../Common/readerwriterqueue.h"
 #include "originalmetadata.h"
+#include "metadatareadinghub.h"
 
 namespace Models {
     class ArtworkMetadata;
 }
 
 namespace MetadataIO {
-    class IMetadataReader;
-    class IMetadataWriter;
     class MetadataWritingWorker;
     class ArtworksSnapshot;
 
@@ -85,19 +84,14 @@ namespace MetadataIO {
         Q_INVOKABLE void continueWithoutReading();
 
     private:
-        void initializeImport(int itemsCount);
+        void initializeImport(const ArtworksSnapshot &artworksToRead, quint32 storageReadBatchID);
         void readingFinishedHandler(bool ignoreBackups);
         void afterImportHandler(const QVector<Models::ArtworkMetadata*> &itemsToRead, bool ignoreBackups);
 
     private:
-        IMetadataReader *m_ReadingWorker;
-        IMetadataWriter *m_WritingWorker;
+        MetadataReadingHub m_ReadingHub;
         QString m_RecommendedExiftoolPath;
         volatile int m_ProcessingItemsCount;
-        QAtomicInt m_FinishedCount;
-        volatile bool m_IsImportInProgress;
-        volatile bool m_CanProcessResults;
-        volatile bool m_IgnoreBackupsAtImport;
         volatile bool m_HasErrors;
         volatile bool m_ExiftoolNotFound;
     };

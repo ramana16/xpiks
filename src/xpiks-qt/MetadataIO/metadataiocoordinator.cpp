@@ -30,12 +30,9 @@
 namespace MetadataIO {
     MetadataIOCoordinator::MetadataIOCoordinator():
         Common::BaseEntity(),
-        m_ReadingWorker(NULL),
-        m_WritingWorker(NULL),
         m_ProcessingItemsCount(0),
         m_IsImportInProgress(false),
         m_CanProcessResults(false),
-        m_IgnoreBackupsAtImport(false),
         m_HasErrors(false),
         m_ExiftoolNotFound(false)
     {
@@ -81,17 +78,12 @@ namespace MetadataIO {
     }
 
     void MetadataIOCoordinator::readMetadataExifTool(const ArtworksSnapshot &artworksToRead, quint32 storageReadBatchID) {
-        libxpks::io::ReadingOrchestrator *readingOrchestrator = new libxpks::io::ReadingOrchestrator(artworksToRead,
-                                                                                                     m_CommandManager->getSettingsModel(),
-                                                                                                     storageReadBatchID);
+        initializeImport(artworksToRead, storageReadBatchID);
 
-        QObject::connect(readingOrchestrator, &libxpks::io::ReadingOrchestrator::allFinished, this, &MetadataIOCoordinator::readingFinished);
-        QObject::connect(this, &MetadataIOCoordinator::metadataReadingFinished, readingOrchestrator, &libxpks::io::ReadingOrchestrator::deleteLater);
-        QObject::connect(this, &MetadataIOCoordinator::metadataReadingSkipped, readingOrchestrator, &libxpks::io::ReadingOrchestrator::deleteLater);
-
-        initializeImport((int)artworksToRead.size());
-        m_ReadingWorker = readingOrchestrator;
-
+        auto *readingOrchestrator = new libxpks::io::ReadingOrchestrator(artworksToRead,
+                                                                         &m_ReadingHub,
+                                                                         m_CommandManager->getSettingsModel(),
+                                                                         storageReadBatchID);
         readingOrchestrator->startReading();
     }
 
@@ -125,58 +117,19 @@ namespace MetadataIO {
     }
 
     void MetadataIOCoordinator::continueReading(bool ignoreBackups) {
-        m_CanProcessResults = true;
-        const bool isInProgress = m_IsImportInProgress;
-
-        LOG_DEBUG << "Is in progress:" << isInProgress;
-
-        if (!isInProgress) {
-            readingFinishedHandler(ignoreBackups);
-        } else {
-            m_IgnoreBackupsAtImport = ignoreBackups;
-        }
+        m_ReadingHub.setIgnoreBackups(ignoreBackups);
+        m_ReadingHub.proceedImport();
     }
 
     void MetadataIOCoordinator::continueWithoutReading() {
-        LOG_DEBUG << "Setting technical data";
-
-        quint32 batchID = m_ReadingWorker->getReadingBatchID();
-        MetadataIOService *metadataIOService = m_CommandManager->getMetadataIOService();
-        metadataIOService->cancelBatch(batchID);
-
-        auto &importResults = m_ReadingWorker->getImportResults();
-        auto &snapshot = m_ReadingWorker->getArtworksSnapshot();
-        auto &items = snapshot.getRawData();
-
-        for (const auto &item: items) {
-            Models::ArtworkMetadata *metadata = item->getArtworkMetadata();
-            const QString &filepath = metadata->getFilepath();
-
-            bool found = false;
-            for (auto &importResult: importResults) {
-                if (importResult.contains(filepath)) {
-                    const OriginalMetadata &importResultItem = importResult.value(filepath);
-                    metadata->initAsEmpty(importResultItem);
-                    found = true;
-                    break;
-                }
-            }
-
-            if (!found) {
-                metadata->initAsEmpty();
-            }
-        }
-
-        emit metadataReadingSkipped();
+        m_ReadingHub.setInitAsEmpty();
+        m_ReadingHub.cancelImport();
     }
 
-    void MetadataIOCoordinator::initializeImport(int itemsCount) {
-        LOG_INFO << itemsCount;
-        m_CanProcessResults = false;
-        m_IgnoreBackupsAtImport = false;
-        m_IsImportInProgress = true;
+    void MetadataIOCoordinator::initializeImport(const ArtworksSnapshot &artworksToRead, quint32 storageReadBatchID) {
+        m_ReadingHub.initializeImport(artworksToRead, storageReadBatchID);
         setHasErrors(false);
-        setProcessingItemsCount(itemsCount);
+        setProcessingItemsCount((int)artworksToRead.size());
     }
 
     void MetadataIOCoordinator::readingFinishedHandler(bool ignoreBackups) {
@@ -188,12 +141,6 @@ namespace MetadataIO {
 
         auto &importResults = m_ReadingWorker->getImportResults();
         auto &snapshot = m_ReadingWorker->getArtworksSnapshot();
-
-        if (ignoreBackups) {
-            quint32 batchID = m_ReadingWorker->getReadingBatchID();
-            MetadataIOService *metadataIOService = m_CommandManager->getMetadataIOService();
-            metadataIOService->cancelBatch(batchID);
-        }
 
         const bool shouldOverwrite = ignoreBackups;
         auto &items = snapshot.getRawData();

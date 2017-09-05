@@ -159,7 +159,8 @@ SOURCES += main.cpp \
     MetadataIO/metadataioworker.cpp \
     MetadataIO/metadataioservice.cpp \
     MetadataIO/artworkssnapshot.cpp \
-    Connectivity/connectivityrequest.cpp
+    Connectivity/connectivityrequest.cpp \
+    MetadataIO/metadatareadinghub.cpp
 
 RESOURCES += qml.qrc
 
@@ -286,8 +287,6 @@ HEADERS += \
     AutoComplete/stringfilterproxymodel.h \
     Models/imageartwork.h \
     Common/hold.h \
-    MetadataIO/imetadatareader.h \
-    MetadataIO/imetadatawriter.h \
     Models/proxysettings.h \
     QMLExtensions/imagecachingworker.h \
     QMLExtensions/imagecacherequest.h \
@@ -380,7 +379,8 @@ HEADERS += \
     Suggestion/searchquery.h \
     Suggestion/locallibraryquery.h \
     MetadataIO/artworkssnapshot.h \
-    Connectivity/connectivityrequest.h
+    Connectivity/connectivityrequest.h \
+    MetadataIO/metadatareadinghub.h
 
 DISTFILES += \
     Components/CloseIcon.qml \

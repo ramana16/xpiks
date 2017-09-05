@@ -31,6 +31,43 @@ namespace Common {
             m_WriteQueue.push_back(item);
         }
 
+        void reservePush(size_t n) {
+            QMutexLocker writeLocker(&m_WriteMutex);
+            Q_UNUSED(writeLocker);
+
+            m_WriteQueue.reserve(n);
+        }
+
+        bool popAll(std::vector<std::shared_ptr<T> > &out) {
+            bool success = false;
+
+            {
+                QMutexLocker readLocker(&m_ReadMutex);
+                Q_UNUSED(readLocker);
+
+                if (m_ReadQueue.empty()) {
+                    QMutexLocker writeLocker(&m_WriteMutex);
+                    Q_UNUSED(writeLocker);
+
+                    rebalanceUnsafe();
+                }
+
+                if (!m_ReadQueue.empty()) {
+                    m_ReadQueue.swap(out);
+                    success = !out.empty();
+                }
+            }
+
+            return success;
+        }
+
+        bool empty() {
+            QMutexLocker readLocker(&m_ReadMutex);
+            Q_UNUSED(readLocker);
+
+            return m_ReadQueue.empty();
+        }
+
         std::shared_ptr<T> top() {
             std::shared_ptr<T> result;
 
@@ -85,6 +122,19 @@ namespace Common {
                 Q_UNUSED(writeLocker);
 
                 rebalanceUnsafe();
+            }
+        }
+
+        void clear() {
+            QMutexLocker readLocker(&m_ReadMutex);
+            Q_UNUSED(readLocker);
+
+            {
+                QMutexLocker writeLocker(&m_WriteMutex);
+                Q_UNUSED(writeLocker);
+
+                m_ReadQueue.clear();
+                m_WriteQueue.clear();
             }
         }
 
