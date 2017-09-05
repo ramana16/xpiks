@@ -17,7 +17,7 @@
 #include "artworkssnapshot.h"
 #include "originalmetadata.h"
 #include "../Helpers/asynccoordinator.h"
-#include <Common/baseentity.h>
+#include "../Common/baseentity.h"
 
 namespace MetadataIO {
     class MetadataReadingHub: public QObject, public Common::BaseEntity
