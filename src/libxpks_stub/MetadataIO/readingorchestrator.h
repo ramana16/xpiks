@@ -5,7 +5,6 @@
 #include <QVector>
 #include <QMutex>
 #include <QHash>
-#include <MetadataIO/artworkssnapshot.h>
 
 namespace Models {
     class ArtworkMetadata;
@@ -14,6 +13,7 @@ namespace Models {
 
 namespace MetadataIO {
     class MetadataReadingHub;
+    class ArtworksSnapshot;
 }
 
 namespace libxpks {
@@ -21,8 +21,7 @@ namespace libxpks {
         class ReadingOrchestrator
         {
         public:
-            explicit ReadingOrchestrator(const MetadataIO::ArtworksSnapshot &artworksToRead,
-                                         MetadataIO::MetadataReadingHub *readingHub,
+            explicit ReadingOrchestrator(MetadataIO::MetadataReadingHub *readingHub,
                                          Models::SettingsModel *settingsModel);
             virtual ~ReadingOrchestrator();
 

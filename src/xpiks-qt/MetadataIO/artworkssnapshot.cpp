@@ -70,6 +70,10 @@ namespace MetadataIO {
         copy(other);
     }
 
+    ArtworksSnapshot::~ArtworksSnapshot() {
+        LOG_DEBUG << "Destroying snapshot of" << m_ArtworksSnapshot.size() << "artwork(s)";
+    }
+
     void ArtworksSnapshot::append(const WeakArtworksSnapshot &artworks) {
         m_RawArtworks.append(artworks);
 

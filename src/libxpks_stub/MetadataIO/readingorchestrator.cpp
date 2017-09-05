@@ -19,10 +19,9 @@
 
 namespace libxpks {
     namespace io {
-        ReadingOrchestrator::ReadingOrchestrator(const MetadataIO::ArtworksSnapshot &artworksToRead,
-                                                 MetadataIO::MetadataReadingHub *readingHub,
+        ReadingOrchestrator::ReadingOrchestrator(MetadataIO::MetadataReadingHub *readingHub,
                                                  Models::SettingsModel *settingsModel):
-            m_ItemsToReadSnapshot(artworksToRead),
+            m_ItemsToReadSnapshot(readingHub->getSnapshot()),
             m_ReadingHub(readingHub),
             m_SettingsModel(settingsModel)
         {

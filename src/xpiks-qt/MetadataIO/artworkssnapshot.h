@@ -71,6 +71,7 @@ namespace MetadataIO {
         ArtworksSnapshot &operator=(ArtworksSnapshot &&other);
         ArtworksSnapshot &operator=(const ArtworksSnapshot &other);
         ArtworksSnapshot(const ArtworksSnapshot &other);
+        virtual ~ArtworksSnapshot();
 
     public:
         const Container &getRawData() const { return m_ArtworksSnapshot; }

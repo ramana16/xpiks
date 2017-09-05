@@ -71,8 +71,7 @@ namespace MetadataIO {
     void MetadataIOCoordinator::readMetadataExifTool(const ArtworksSnapshot &artworksToRead, quint32 storageReadBatchID) {
         initializeImport(artworksToRead, storageReadBatchID);
 
-        libxpks::io::ReadingOrchestrator readingOrchestrator(artworksToRead,
-                                                             &m_ReadingHub,
+        libxpks::io::ReadingOrchestrator readingOrchestrator(&m_ReadingHub,
                                                              m_CommandManager->getSettingsModel());
         readingOrchestrator.startReading();
     }
