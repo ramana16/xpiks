@@ -66,4 +66,40 @@ namespace Helpers {
         }
     }
 
+    int retrieveImagesCount(const std::vector<std::shared_ptr<Models::ArtworkMetadataLocker> > &rawSnapshot) {
+        int count = 0;
+
+        for (auto &locker: rawSnapshot) {
+            Models::ArtworkMetadata *artwork = locker->getArtworkMetadata();
+
+            Q_ASSERT(artwork != nullptr);
+            if (artwork == nullptr) { continue; }
+
+            Models::ImageArtwork *imageArtwork = dynamic_cast<Models::ImageArtwork*>(artwork);
+            if (imageArtwork != nullptr) {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    int retrieveVideosCount(const std::vector<std::shared_ptr<Models::ArtworkMetadataLocker> > &rawSnapshot) {
+        int count = 0;
+
+        for (auto &locker: rawSnapshot) {
+            Models::ArtworkMetadata *artwork = locker->getArtworkMetadata();
+
+            Q_ASSERT(artwork != nullptr);
+            if (artwork == nullptr) { continue; }
+
+            Models::VideoArtwork *imageArtwork = dynamic_cast<Models::VideoArtwork*>(artwork);
+            if (imageArtwork != nullptr) {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
 }

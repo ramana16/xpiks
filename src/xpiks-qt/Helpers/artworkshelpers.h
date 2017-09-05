@@ -27,6 +27,8 @@ namespace Helpers {
     void splitImagesVideo(const std::vector<std::shared_ptr<Models::ArtworkMetadataLocker> > &rawSnapshot,
                           std::vector<std::shared_ptr<Models::ArtworkMetadataLocker> > &imagesRawSnapshot,
                           std::vector<std::shared_ptr<Models::ArtworkMetadataLocker> > &videoRawSnapshot);
+    int retrieveImagesCount(const std::vector<std::shared_ptr<Models::ArtworkMetadataLocker> > &rawSnapshot);
+    int retrieveVideosCount(const std::vector<std::shared_ptr<Models::ArtworkMetadataLocker> > &rawSnapshot);
 }
 
 #endif // ARTWORKSHELPERS_H

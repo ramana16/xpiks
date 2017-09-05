@@ -11,6 +11,7 @@
 #ifndef METADATAREADINGHUB_H
 #define METADATAREADINGHUB_H
 
+#include <QObject>
 #include <QAtomicInt>
 #include "../Common/readerwriterqueue.h"
 #include "artworkssnapshot.h"
@@ -19,8 +20,9 @@
 #include <Common/baseentity.h>
 
 namespace MetadataIO {
-    class MetadataReadingHub: public Common::BaseEntity
+    class MetadataReadingHub: public QObject, public Common::BaseEntity
     {
+        Q_OBJECT
     public:
         MetadataReadingHub();
 
@@ -29,7 +31,7 @@ namespace MetadataIO {
         void finalizeImport();
 
     public:
-        Helpers::AsyncCoordinator *getCoordinator() { return m_AsyncCoordinator; }
+        Helpers::AsyncCoordinator *getCoordinator() { return &m_AsyncCoordinator; }
 
     public:
         void proceedImport(bool ignoreBackups);
@@ -41,9 +43,11 @@ namespace MetadataIO {
     private slots:
         void onCanInitialize(int status);
 
+    signals:
+        void readingFinished();
+
     private:
-        void initializeArtworks();
-        void initEmpty();
+        void initializeArtworks(bool ignoreBackups, bool initEmpty);
 
     private:
         ArtworksSnapshot m_ArtworksToRead;

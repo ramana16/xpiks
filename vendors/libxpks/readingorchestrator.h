@@ -18,28 +18,23 @@ namespace MetadataIO {
 
 namespace libxpks {
     namespace io {
-        class ExiftoolImageReadingWorker;
-        class ExiftoolVideoReadingWorker;
-
-        class ReadingOrchestrator : public QObject
+        class ReadingOrchestrator
         {
-            Q_OBJECT
         public:
             explicit ReadingOrchestrator(const MetadataIO::ArtworksSnapshot &artworksToRead,
                                          MetadataIO::MetadataReadingHub *readingHub,
-                                         Models::SettingsModel *settingsModel,
-                                         QObject *parent = 0);
+                                         Models::SettingsModel *settingsModel);
             virtual ~ReadingOrchestrator();
 
         public:
             void startReading();
 
         private:
-            void startReadingImages(MetadataIO::ArtworksSnapshot::Container &rawSnapshot);
-            void startReadingVideos(MetadataIO::ArtworksSnapshot::Container &rawSnapshot);
+            void startReadingImages();
+            void startReadingVideos();
 
         private:
-            MetadataIO::ArtworksSnapshot m_ItemsToReadSnapshot;
+            const MetadataIO::ArtworksSnapshot &m_ItemsToReadSnapshot;
             MetadataIO::MetadataReadingHub *m_ReadingHub;
             Models::SettingsModel *m_SettingsModel;
         };

@@ -45,7 +45,7 @@ namespace Common {
                 QMutexLocker readLocker(&m_ReadMutex);
                 Q_UNUSED(readLocker);
 
-                if (m_ReadQueue.empty()) {
+                {
                     QMutexLocker writeLocker(&m_WriteMutex);
                     Q_UNUSED(writeLocker);
 

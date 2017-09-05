@@ -20,6 +20,11 @@ namespace Helpers {
         QObject::connect(&m_Timer, &QTimer::timeout, this, &AsyncCoordinator::onTimeout);
     }
 
+    void AsyncCoordinator::reset() {
+        m_OpCount.store(1);
+        m_StatusReported.store(0);
+    }
+
     void AsyncCoordinator::allBegun(int timeoutSeconds) {
         if (timeoutSeconds != -1) {
             m_Timer.start(timeoutSeconds*1000);

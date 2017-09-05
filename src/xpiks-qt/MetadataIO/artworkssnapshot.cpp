@@ -57,11 +57,17 @@ namespace MetadataIO {
         return *this;
     }
 
-    ArtworksSnapshot::ArtworksSnapshot(const ArtworksSnapshot &other):
-        m_ArtworksSnapshot(other.m_ArtworksSnapshot),
-        m_RawArtworks(other.m_RawArtworks)
+    ArtworksSnapshot &ArtworksSnapshot::operator=(const ArtworksSnapshot &other) {
+        if (this != &other) {
+            copy(other);
+        }
+
+        return *this;
+    }
+
+    ArtworksSnapshot::ArtworksSnapshot(const ArtworksSnapshot &other)
     {
-        LOG_DEBUG << "Copying snapshot of" << other.m_ArtworksSnapshot.size() << "item(s)";
+        copy(other);
     }
 
     void ArtworksSnapshot::append(const WeakArtworksSnapshot &artworks) {
@@ -94,6 +100,14 @@ namespace MetadataIO {
         }
 
         m_ArtworksSnapshot = std::move(rawSnapshot);
+    }
+
+    void ArtworksSnapshot::copy(const ArtworksSnapshot &other) {
+        clear();
+        LOG_DEBUG << "Copying snapshot of" << other.m_ArtworksSnapshot.size() << "item(s)";
+
+        m_RawArtworks.append(other.m_RawArtworks);
+        m_ArtworksSnapshot = other.m_ArtworksSnapshot;
     }
 
     void ArtworksSnapshot::clear() {

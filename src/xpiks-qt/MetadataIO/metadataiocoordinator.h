@@ -37,17 +37,15 @@ namespace MetadataIO {
     public:
         MetadataIOCoordinator();
 
+    public:
+        virtual void setCommandManager(Commands::CommandManager *commandManager) override;
+
     signals:
         void metadataReadingFinished();
-        void metadataReadingSkipped();
         void metadataWritingFinished();
         void processingItemsCountChanged(int value);
         void hasErrorsChanged(bool value);
         void exiftoolNotFoundChanged();
-
-    private slots:
-        void readingFinished(bool success);
-        void writingFinished(bool success);
 
     public:
         bool getExiftoolNotFound() const { return m_ExiftoolNotFound; }
@@ -83,6 +81,9 @@ namespace MetadataIO {
         Q_INVOKABLE void continueReading(bool ignoreBackups);
         Q_INVOKABLE void continueWithoutReading();
 
+    private slots:
+        void writingWorkersFinished(int status);
+
     private:
         void initializeImport(const ArtworksSnapshot &artworksToRead, quint32 storageReadBatchID);
         void readingFinishedHandler(bool ignoreBackups);
@@ -90,6 +91,7 @@ namespace MetadataIO {
 
     private:
         MetadataReadingHub m_ReadingHub;
+        Helpers::AsyncCoordinator m_WritingAsyncCoordinator;
         QString m_RecommendedExiftoolPath;
         volatile int m_ProcessingItemsCount;
         volatile bool m_HasErrors;

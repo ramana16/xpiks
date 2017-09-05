@@ -31,31 +31,21 @@ namespace MetadataIO {
     MetadataIOCoordinator::MetadataIOCoordinator():
         Common::BaseEntity(),
         m_ProcessingItemsCount(0),
-        m_IsImportInProgress(false),
-        m_CanProcessResults(false),
         m_HasErrors(false),
         m_ExiftoolNotFound(false)
     {
-        LOG_INFO << "Supported image formats:" << QImageReader::supportedImageFormats();
+        LOG_INFO << "Supported image formats:" << QImageReader::supportedImageFormats();        
+
+        QObject::connect(&m_WritingAsyncCoordinator, &Helpers::AsyncCoordinator::statusReported,
+                         this, &MetadataIOCoordinator::writingWorkersFinished);
+
+        QObject::connect(&m_ReadingHub, &MetadataReadingHub::readingFinished,
+                         this, &MetadataIOCoordinator::metadataReadingFinished);
     }
 
-    void MetadataIOCoordinator::readingFinished(bool success) {
-        LOG_INFO << "Success:" << success;
-        setHasErrors(!success);
-
-        if (m_CanProcessResults) {
-            readingFinishedHandler(m_IgnoreBackupsAtImport);
-        } else {
-            LOG_INFO << "Can't process results. Waiting for user interaction...";
-        }
-
-        m_IsImportInProgress = false;
-    }
-
-    void MetadataIOCoordinator::writingFinished(bool success) {
-        LOG_INFO << success;
-        setHasErrors(!success);
-        emit metadataWritingFinished();
+    void MetadataIOCoordinator::setCommandManager(Commands::CommandManager *commandManager) {
+        Common::BaseEntity::setCommandManager(commandManager);
+        m_ReadingHub.setCommandManager(commandManager);
     }
 
     void MetadataIOCoordinator::setRecommendedExiftoolPath(const QString &recommendedExiftool) {
@@ -80,20 +70,18 @@ namespace MetadataIO {
     void MetadataIOCoordinator::readMetadataExifTool(const ArtworksSnapshot &artworksToRead, quint32 storageReadBatchID) {
         initializeImport(artworksToRead, storageReadBatchID);
 
-        auto *readingOrchestrator = new libxpks::io::ReadingOrchestrator(artworksToRead,
-                                                                         &m_ReadingHub,
-                                                                         m_CommandManager->getSettingsModel(),
-                                                                         storageReadBatchID);
-        readingOrchestrator->startReading();
+        libxpks::io::ReadingOrchestrator readingOrchestrator(artworksToRead,
+                                                             &m_ReadingHub,
+                                                             m_CommandManager->getSettingsModel());
+        readingOrchestrator.startReading();
     }
 
     void MetadataIOCoordinator::writeMetadataExifTool(const ArtworksSnapshot &artworksToWrite, bool useBackups) {
-        libxpks::io::WritingOrchestrator *writingOrchestrator = new libxpks::io::WritingOrchestrator(artworksToWrite,
-                                                                                                     m_CommandManager->getSettingsModel());
+        m_WritingAsyncCoordinator.reset();
 
-        QObject::connect(writingOrchestrator, &libxpks::io::WritingOrchestrator::allFinished, this, &MetadataIOCoordinator::writingFinished);
-        QObject::connect(this, &MetadataIOCoordinator::metadataWritingFinished, writingOrchestrator, &libxpks::io::WritingOrchestrator::deleteLater);
-        m_WritingWorker = writingOrchestrator;
+        libxpks::io::WritingOrchestrator writingOrchestrator(artworksToWrite,
+                                                             &m_WritingAsyncCoordinator,
+                                                             m_CommandManager->getSettingsModel());
 
 #ifndef INTEGRATION_TESTS
         auto *switcher = m_CommandManager->getSwitcherModel();
@@ -105,7 +93,7 @@ namespace MetadataIO {
         auto *settingsModel = m_CommandManager->getSettingsModel();
         const bool useDirectExport = settingsModel->getUseDirectExiftoolExport();
 
-        writingOrchestrator->startWriting(useBackups, useDirectExport || directExportOn);
+        writingOrchestrator.startWriting(useBackups, useDirectExport || directExportOn);
     }
 
     void MetadataIOCoordinator::autoDiscoverExiftool() {
@@ -117,62 +105,21 @@ namespace MetadataIO {
     }
 
     void MetadataIOCoordinator::continueReading(bool ignoreBackups) {
-        m_ReadingHub.setIgnoreBackups(ignoreBackups);
-        m_ReadingHub.proceedImport();
+        m_ReadingHub.proceedImport(ignoreBackups);
     }
 
     void MetadataIOCoordinator::continueWithoutReading() {
-        m_ReadingHub.setInitAsEmpty();
         m_ReadingHub.cancelImport();
+    }
+
+    void MetadataIOCoordinator::writingWorkersFinished(int status) {
+        LOG_DEBUG << status;
+        emit metadataWritingFinished();
     }
 
     void MetadataIOCoordinator::initializeImport(const ArtworksSnapshot &artworksToRead, quint32 storageReadBatchID) {
         m_ReadingHub.initializeImport(artworksToRead, storageReadBatchID);
         setHasErrors(false);
         setProcessingItemsCount((int)artworksToRead.size());
-    }
-
-    void MetadataIOCoordinator::readingFinishedHandler(bool ignoreBackups) {
-        Q_ASSERT(m_CanProcessResults);
-        Q_ASSERT(m_ReadingWorker != nullptr);
-        m_CanProcessResults = false;
-
-        LOG_DEBUG << "Setting imported metadata. Ignore backups:" << ignoreBackups;
-
-        auto &importResults = m_ReadingWorker->getImportResults();
-        auto &snapshot = m_ReadingWorker->getArtworksSnapshot();
-
-        const bool shouldOverwrite = ignoreBackups;
-        auto &items = snapshot.getRawData();
-        LOG_INFO << "Initializing" << items.size() << "artwork(s)";
-        for (auto &item: items) {
-            Models::ArtworkMetadata *artwork = item->getArtworkMetadata();
-            const QString &filepath = artwork->getFilepath();
-
-            for (const auto &importResult: importResults) {
-                if (importResult.contains(filepath)) {
-                    const OriginalMetadata &importResultItem = importResult.value(filepath);
-                    artwork->initFromOrigin(importResultItem, shouldOverwrite);
-                    break;
-                }
-            }
-        }
-
-        afterImportHandler(snapshot.getWeakSnapshot(), ignoreBackups);
-
-        emit metadataReadingFinished();
-        LOG_DEBUG << "Metadata import finished";
-    }
-
-    void MetadataIOCoordinator::afterImportHandler(const QVector<Models::ArtworkMetadata*> &itemsToRead, bool ignoreBackups) {
-        if (!getHasErrors()) {
-            m_CommandManager->addToLibrary(itemsToRead);
-        }
-
-        Q_UNUSED(ignoreBackups);
-
-        m_CommandManager->updateArtworks(itemsToRead);
-        m_CommandManager->submitForSpellCheck(itemsToRead);
-        m_CommandManager->submitForWarningsCheck(itemsToRead);
     }
 }

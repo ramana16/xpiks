@@ -69,6 +69,7 @@ namespace MetadataIO {
         ArtworksSnapshot(Container &rawSnapshot);
         ArtworksSnapshot(ArtworksSnapshot &&other);
         ArtworksSnapshot &operator=(ArtworksSnapshot &&other);
+        ArtworksSnapshot &operator=(const ArtworksSnapshot &other);
         ArtworksSnapshot(const ArtworksSnapshot &other);
 
     public:
@@ -85,6 +86,7 @@ namespace MetadataIO {
         void append(const WeakArtworksSnapshot &artworks);
         void append(const std::deque<Models::ArtworkMetadata *> &artworks);
         void set(Container &rawSnapshot);
+        void copy(const ArtworksSnapshot &other);
         Models::ArtworkMetadata *get(size_t i) const { Q_ASSERT(i < m_ArtworksSnapshot.size()); return m_ArtworksSnapshot.at(i)->getArtworkMetadata(); }
         const std::shared_ptr<Models::ArtworkMetadataLocker> &at(size_t i) const { Q_ASSERT(i < m_ArtworksSnapshot.size()); return m_ArtworksSnapshot.at(i); }
         void clear();
