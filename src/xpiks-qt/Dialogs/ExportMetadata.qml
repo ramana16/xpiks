@@ -204,9 +204,6 @@ Item {
                                 metadataExportComponent.isInProgress = false
 
                                 if (!metadataIOCoordinator.hasErrors) {
-                                    filteredArtItemsModel.setSelectedItemsSaved()
-                                    filteredArtItemsModel.updateSelectedArtworks()
-
                                     exportButton.text = i18.n + qsTr("Start Export")
                                     closePopup()
                                 } else {

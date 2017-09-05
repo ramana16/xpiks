@@ -109,6 +109,7 @@ namespace Models {
         /*Q_INVOKABLE*/ void removeSelectedArtworks(QVector<int> &selectedIndices);
 
         /*Q_INVOKABLE*/ void updateSelectedArtworks(const QVector<int> &selectedIndices);
+        /*Q_INVOKABLE*/ void updateSelectedArtworksEx(const QVector<int> &selectedIndices, const QVector<int> roles);
 
         /*Q_INVOKABLE*/ void saveSelectedArtworks(const QVector<int> &selectedIndices, bool overwriteAll, bool useBackups);
 

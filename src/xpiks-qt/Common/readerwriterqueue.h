@@ -140,12 +140,12 @@ namespace Common {
 
     private:
         void rebalanceUnsafe() {
-            Q_ASSERT(m_ReadQueue.empty());
+            //Q_ASSERT(m_ReadQueue.empty());
 
             const size_t size = m_WriteQueue.size();
             if (size == 0) { return; }
 
-            m_ReadQueue.reserve(size);
+            m_ReadQueue.reserve(size + m_ReadQueue.size());
 
             // reverse in order to use pop_back() in read
             for (size_t i = size; i >= 1; i--) {

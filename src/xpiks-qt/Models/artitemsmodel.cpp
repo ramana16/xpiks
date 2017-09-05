@@ -367,10 +367,15 @@ namespace Models {
     }
 
     void ArtItemsModel::updateSelectedArtworks(const QVector<int> &selectedIndices) {
-        QVector<QPair<int, int> > rangesToUpdate;
-        Helpers::indicesToRanges(selectedIndices, rangesToUpdate);
         QVector<int> roles;
         fillStandardRoles(roles);
+        updateSelectedArtworksEx(selectedIndices, roles);
+    }
+
+    void ArtItemsModel::updateSelectedArtworksEx(const QVector<int> &selectedIndices, const QVector<int> roles) {
+        QVector<QPair<int, int> > rangesToUpdate;
+        Helpers::indicesToRanges(selectedIndices, rangesToUpdate);
+
         AbstractListModel::updateItemsInRanges(rangesToUpdate, roles);
 
         emit artworksChanged(false);

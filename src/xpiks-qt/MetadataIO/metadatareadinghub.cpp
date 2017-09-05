@@ -32,6 +32,8 @@ namespace MetadataIO {
         m_InitAsEmpty = false;
         m_AsyncCoordinator.reset();
         LOG_DEBUG << "ReadingHub bound to batch ID" << m_StorageReadBatchID;
+        // add 1 for the user to click a button
+        m_AsyncCoordinator.aboutToBegin();
     }
 
     void MetadataReadingHub::finalizeImport() {
@@ -83,14 +85,20 @@ namespace MetadataIO {
         QHash<QString, size_t> filepathToIndexMap;
 
         std::vector<std::shared_ptr<MetadataIO::OriginalMetadata> > metadataToImport;
+        // popAll() returns queue in reversed order for performance reasons
         m_ImportQueue.popAll(metadataToImport);
 
         const size_t size = metadataToImport.size();
         filepathToIndexMap.reserve((int)size);
 
+        // reverse order to simulate pop() for each element
+        // instead of calling popAll() above
+        // more recent ones will overwrite more old ones
+        // because of retrying in reading workers
         for (size_t i = 0; i < size; i++) {
-            auto &originalMetadata = metadataToImport[i];
-            filepathToIndexMap.insert(originalMetadata->m_FilePath, i);
+            const size_t j = size - 1 - i;
+            auto &originalMetadata = metadataToImport[j];
+            filepathToIndexMap.insert(originalMetadata->m_FilePath, j);
         }
 
         const bool shouldOverwrite = ignoreBackups;

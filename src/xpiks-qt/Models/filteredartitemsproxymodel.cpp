@@ -143,6 +143,13 @@ namespace Models {
         artItemsModel->updateSelectedArtworks(indices);
     }
 
+    void FilteredArtItemsProxyModel::updateSelectedArtworksEx(const QVector<int> &roles) {
+        LOG_DEBUG << "#";
+        QVector<int> indices = getSelectedOriginalIndices();
+        ArtItemsModel *artItemsModel = getArtItemsModel();
+        artItemsModel->updateSelectedArtworksEx(indices, roles);
+    }
+
     void FilteredArtItemsProxyModel::saveSelectedArtworks(bool overwriteAll, bool useBackups) {
         LOG_INFO << "ovewriteAll:" << overwriteAll << "useBackups:" << useBackups;
         // former patchSelectedArtworks

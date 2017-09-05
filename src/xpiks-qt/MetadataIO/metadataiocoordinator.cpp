@@ -26,6 +26,7 @@
 #include <writingorchestrator.h>
 #include "../Models/switchermodel.h"
 #include "../QMLExtensions/artworksupdatehub.h"
+#include "../Models/filteredartitemsproxymodel.h"
 
 namespace MetadataIO {
     MetadataIOCoordinator::MetadataIOCoordinator():
@@ -114,6 +115,8 @@ namespace MetadataIO {
 
     void MetadataIOCoordinator::writingWorkersFinished(int status) {
         LOG_DEBUG << status;
+        Models::FilteredArtItemsProxyModel *filteredModel = m_CommandManager->getFilteredArtItemsModel();
+        filteredModel->updateSelectedArtworksEx(QVector<int>() << Models::ArtItemsModel::IsModifiedRole);
         emit metadataWritingFinished();
     }
 
