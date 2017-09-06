@@ -16,6 +16,7 @@ env:
   - XPIKS_BINARY=binary
   - CORE_TESTS=tests QT_FATAL_WARNINGS=true
   - INTEGRATION_TESTS=tests QT_FATAL_WARNINGS=true
+  - UI_TESTS=tests
 
 addons:
   apt:
@@ -44,6 +45,9 @@ before_script:
   - export COMPILER=g++-5
   - g++ --version
   - ulimit -c unlimited -S       # enable core dumps
+  - if [ -n "$UI_TESTS" ]; then export DISPLAY=:99.0; fi
+  - if [ -n "$UI_TESTS" ]; then sh -e /etc/init.d/xvfb start; fi
+  - if [ -n "$UI_TESTS" ]; then sleep 3; fi # give xvfb some time to start
 
 script:
   - cd vendors/
@@ -85,9 +89,11 @@ script:
   - if [ -n "$XPIKS_BINARY" ]; then cd xpiks-qt/; fi
   - if [ -n "$CORE_TESTS" ]; then cd xpiks-tests/xpiks-tests-core; fi
   - if [ -n "$INTEGRATION_TESTS" ]; then cd xpiks-tests/xpiks-tests-integration; fi
+  - if [ -n "$UI_TESTS" ]; then cd xpiks-tests/xpiks-tests-ui; fi
   - if [ -n "$XPIKS_BINARY" ]; then qmake "CONFIG+= debug travis-ci" xpiks-qt.pro; fi
   - if [ -n "$CORE_TESTS" ]; then qmake "CONFIG+=debug travis-ci" xpiks-tests-core.pro; fi
   - if [ -n "$INTEGRATION_TESTS" ]; then qmake "CONFIG+=debug travis-ci" xpiks-tests-integration.pro; fi
+  - if [ -n "$UI_TESTS" ]; then qmake "CONFIG+=debug travis-ci" xpiks-tests-ui.pro; fi
   - make
   - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../../../libs/
   - if [ -n "$CORE_TESTS" ]; then ./xpiks-tests-core; fi
