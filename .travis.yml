@@ -57,7 +57,7 @@ script:
   - if [ -n "$XPIKS_BINARY" ]; then cd xpiks-qt/; fi
   - if [ -n "$CORE_TESTS" ]; then cd xpiks-tests/xpiks-tests-core; fi
   - if [ -n "$INTEGRATION_TESTS" ]; then cd xpiks-tests/xpiks-tests-integration; fi
-  - if [ -n "$UI_TESTS" ]; then sed -i "s/import Qt.Quick 2.6/import Qt.Quick 2.5/" xpiks-qt/Components/EditableTags.qml; fi
+  - if [ -n "$UI_TESTS" ]; then sed -i "s/import QtQuick 2.6/import QtQuick 2.5/" xpiks-qt/Components/EditableTags.qml; fi
   - if [ -n "$UI_TESTS" ]; then cd xpiks-tests/xpiks-tests-ui; fi
   - if [ -n "$XPIKS_BINARY" ]; then qmake "CONFIG+= debug travis-ci" xpiks-qt.pro; fi
   - if [ -n "$CORE_TESTS" ]; then qmake "CONFIG+=debug travis-ci" xpiks-tests-core.pro; fi
