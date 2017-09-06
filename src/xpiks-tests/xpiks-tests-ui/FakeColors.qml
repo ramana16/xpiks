@@ -1,34 +1,57 @@
 import QtQuick 2.0
 
 QtObject {
-    property color defaultDarkColor: "#1e1e1e";
-    property color defaultControlColor: "#292929";
+    property color defaultDarkerColor: "#121212"
+    property color defaultDarkColor: "#1e1e1e"
+    property color defaultControlColor: "#292929"
+    property color inactiveControlColor: "#404040"
+    property color panelColor: "#242424"
+    property color panelSelectedColor: "#5d5d5d"
+    property color whiteColor: "#ffffff"
+    property color goldColor: "#f49c12"
 
-    property color defaultLightColor: "#E0E0E0";
-    property color defaultLightGrayColor: "#D0D0D0";
+    property color inputBackgroundColor: panelSelectedColor
+    property color inputInactiveBackground: panelColor
+    property color inputForegroundColor: whiteColor
+    property color inputInactiveForeground: labelActiveForeground
+    property color labelActiveForeground: "#c9c9c9"
+    property color labelInactiveForeground: "#939393"
+    property color inputHintForeground: inactiveControlColor
 
-    property color itemsSourceBackground: "#232323";
-    property color itemsSourceSelected: "#333333";
-    property color itemsSourceForeground: "#e6e6e6";
-
-    property color buttonHoverBackground: "#12b9bc";
-    property color buttonPressedBackground: "#41b1b7";
-    property color buttonDisabledForeground: "#283c3f";
-    property color buttonPressedForeground: "#283c3f";
-
-    property color artworkBackground: "#031619";
-    property color artworkImageBackground: "#071215";
-    property color artworkModifiedColor: "#f49c12";
-    property color artworkSavedColor: "#435151";
+    property color artworkBackground: "#181818"
+    property color artworkModifiedColor: goldColor
+    property color artworkSavedColor: "#435151"
     property color artworkActiveColor: "#12b9bc"
 
-    property color selectedArtworkColor: "#545456";
-    property color selectedMetadataColor: "#5d5d5d";
-    property color checkboxCheckedColor: "#ffffff";
-    property color defaultInputBackground: "#999999";
+    property color buttonDefaultBackground: "#12b9bc"
+    property color buttonDefaultForeground: labelActiveForeground
+    property color buttonHoverBackground: "#283c3f"
+    property color buttonPressedBackground: "#283c3f"
+    property color buttonPressedForeground: whiteColor
+    property color buttonDisabledForeground: inputBackgroundColor
 
-    property color destructiveColor: "#d10b0b";
-    property color greenColor: "#2daf02";
+    property color inactiveKeywordBackground: inactiveControlColor
+    property color inactiveKeywordForeground: labelActiveForeground
+    property color closeIconActiveColor: inactiveControlColor
+    property color closeIconInactiveColor: labelActiveForeground
+    property color closeIconDisabledColor: inactiveControlColor
 
-    property color inputForegroundColor: "#ffffff";
+    property color listSeparatorColor: labelActiveForeground
+
+    property color linkClickedColor: whiteColor
+
+    property color selectedArtworkBackground: inactiveControlColor
+    property color checkboxCheckedColor: "#ffffff"
+
+    property color itemsSourceBackground: inactiveControlColor
+    property color itemsSourceSelected: inputBackgroundColor
+    property color itemsSourceForeground: inputInactiveForeground
+
+    property color destructiveColor: "#e81313"
+    property color greenColor: "#2daf02"
+
+    property color statusBarColor: defaultDarkerColor
+    property color leftSliderColor: artworkBackground
+    property color popupBackgroundColor: inactiveControlColor
+    property color popupDarkInputBackground: inputInactiveBackground
 }
