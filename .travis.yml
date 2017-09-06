@@ -98,6 +98,7 @@ script:
   - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../../../libs/
   - if [ -n "$CORE_TESTS" ]; then ./xpiks-tests-core; fi
   - if [ -n "$INTEGRATION_TESTS" ]; then ./xpiks-tests-integration; fi
+  - if [ -n "$UI_TESTS" ]; then ./xpiks-tests-ui; fi
 
 after_failure:
   - if [ -n "$CORE_TESTS" ]; then for i in $(find ./ -maxdepth 1 -name 'core*' -print); do gdb $(pwd)/xpiks-tests-core core* -ex "thread apply all bt" -ex "set pagination 0" -batch; done; fi
