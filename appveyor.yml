@@ -13,6 +13,7 @@ environment:
     - XPIKS_BINARY: true
     - CORE_TESTS: true
     - INTEGRATION_TESTS: true
+    - UI_TESTS: true
 
 branches:
   # blacklist
@@ -66,23 +67,26 @@ before_build:
 
 build_script:
   - cmd: 'echo %cd%'
-  - cmd: 'cd vendors'
-  - cmd: 'cd cpp-libface\libface-project'
-  - qmake "CONFIG+=%configuration%" libface.pro
-  - nmake.exe
-  - cmd: 'copy %configuration%\face.* ..\..\..\libs'
-  - cmd: 'cd ..\..'
-  - cmd: 'cd ssdll\src\ssdll'
-  - qmake "CONFIG+=%configuration% appveyor" ssdll.pro
-  - nmake.exe
-  - cmd: 'copy %configuration%\ssdll.* ..\..\..\..\libs'
-  - cmd: 'cd ..\..\..\..\src'
+  - if not defined UI_TESTS cd vendors
+  - if not defined UI_TESTS cd cpp-libface\libface-project
+  - if not defined UI_TESTS qmake "CONFIG+=%configuration%" libface.pro
+  - if not defined UI_TESTS nmake.exe
+  - if not defined UI_TESTS copy %configuration%\face.* ..\..\..\libs
+  - if not defined UI_TESTS cd ..\..
+  - if not defined UI_TESTS cd ssdll\src\ssdll
+  - if not defined UI_TESTS qmake "CONFIG+=%configuration% appveyor" ssdll.pro
+  - if not defined UI_TESTS nmake.exe
+  - if not defined UI_TESTS copy %configuration%\ssdll.* ..\..\..\..\libs
+  - if not defined UI_TESTS cd ..\..\..\..\src
+  - if defined UI_TESTS cd src
   - if defined XPIKS_BINARY cd xpiks-qt
   - if defined CORE_TESTS cd xpiks-tests\xpiks-tests-core
   - if defined INTEGRATION_TESTS cd xpiks-tests\xpiks-tests-integration
+  - if defined UI_TESTS qmake xpiks-tests\xpiks-tests-ui
   - if defined XPIKS_BINARY qmake "CONFIG+=%configuration% appveyor" xpiks-qt.pro
   - if defined CORE_TESTS qmake "CONFIG+=%configuration% appveyor" xpiks-tests-core.pro
   - if defined INTEGRATION_TESTS qmake "CONFIG+=%configuration% appveyor" xpiks-tests-integration.pro
+  - if defined UI_TESTS qmake "CONFIG+=%configuration% appveyor" xpiks-tests-ui.pro
   - nmake.exe
 
 after_build:

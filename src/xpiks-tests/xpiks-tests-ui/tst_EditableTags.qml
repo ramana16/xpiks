@@ -32,12 +32,29 @@ Item {
     QtObject {
         id: acSource
         property bool isActive: false
+        property bool tryExpandPresetFlag: false
+        property bool isCancelled: false
+        property bool isAccepted: false
+        property bool isAnySelected: false
 
         function moveSelectionUp() {}
-        function cancelCompletion() {}
+        function cancelCompletion() { isCancelled = true }
         function moveSelectionDown() {}
-        function acceptSelected(str) {}
-        function hasSelectedCompletion() { return false }
+
+        function acceptSelected(tryExpandPreset) {
+            tryExpandPresetFlag = tryExpandPreset
+            isAccepted = true
+        }
+
+        function hasSelectedCompletion() { return isAnySelected }
+
+        function clear() {
+            isActive = false
+            isCancelled = false
+            tryExpandPresetFlag = false
+            isAccepted = false
+            isAnySelected = false
+        }
     }
 
     EditableTags {
@@ -68,6 +85,12 @@ Item {
         signalName: "copyRequest"
     }
 
+    SignalSpy {
+        id: completionRequestedSpy
+        target: editableTags
+        signalName: "completionRequested"
+    }
+
     ClipboardHelper {
         id: clipboard
     }
@@ -83,6 +106,7 @@ Item {
 
         function test_PressCommaAddsKeyword() {
             tagAddedSpy.clear()
+            acSource.clear()
             compare(tagAddedSpy.count, 0)
 
             input.text = "next_keyword"
@@ -90,6 +114,7 @@ Item {
             keyClick(Qt.Key_Comma)
 
             compare(tagAddedSpy.count, 1)
+            compare(acSource.isCancelled, true)
         }
 
         function test_GetTextAPI() {
@@ -210,6 +235,133 @@ Item {
 
             compare(input.text, "")
             compare(copyAllSpy.count, 1)
+        }
+
+        function test_AutoCompleteFromThreeChars() {
+            completionRequestedSpy.clear()
+            input.text = ""
+            input.forceActiveFocus()
+
+            keyClick(Qt.Key_A)
+            compare(completionRequestedSpy.count, 0)
+
+            keyClick(Qt.Key_B)
+            compare(completionRequestedSpy.count, 0)
+
+            keyClick(Qt.Key_C)
+            compare(completionRequestedSpy.count, 1)
+        }
+
+        function test_AutoCompleteBasicCtrlSpace() {
+            completionRequestedSpy.clear()
+            input.text = ""
+            input.forceActiveFocus()
+
+            input.text = "abc"
+            input.cursorPosition = 3
+
+            compare(completionRequestedSpy.count, 0)
+
+            keyClick(Qt.Key_Space, Qt.ControlModifier)
+
+            compare(completionRequestedSpy.count, 1)
+        }
+
+        function test_AutoCompleteCtrlSpaceTooShort() {
+            completionRequestedSpy.clear()
+            input.text = ""
+            input.forceActiveFocus()
+
+            input.text = "ab"
+            input.cursorPosition = 2
+
+            compare(completionRequestedSpy.count, 0)
+
+            keyClick(Qt.Key_Space, Qt.ControlModifier)
+
+            compare(completionRequestedSpy.count, 0)
+        }
+
+        function test_AutoCompletionCancelOnSpace() {
+            completionRequestedSpy.clear()
+            acSource.clear()
+
+            input.text = ""
+            input.forceActiveFocus()
+
+            input.text = "abc"
+            input.cursorPosition = 3
+
+            compare(acSource.isCancelled, false)
+            compare(completionRequestedSpy.count, 0)
+
+            keyClick(Qt.Key_Space)
+
+            compare(completionRequestedSpy.count, 0)
+            compare(acSource.isCancelled, true)
+        }
+
+        function test_AcceptWithActiveAutoComplete() {
+            completionRequestedSpy.clear()
+            acSource.clear()
+
+            input.text = ""
+            input.forceActiveFocus()
+
+            keyClick(Qt.Key_A)
+            keyClick(Qt.Key_B)
+            keyClick(Qt.Key_C)
+
+            compare(acSource.isAccepted, false)
+            acSource.isActive = true
+
+            keyClick(Qt.Key_Return)
+
+            compare(acSource.isAccepted, true)
+        }
+
+        function test_AcceptNoSelectedWithActiveAC() {
+            tagAddedSpy.clear()
+            completionRequestedSpy.clear()
+            acSource.clear()
+
+            input.text = ""
+            input.forceActiveFocus()
+
+            keyClick(Qt.Key_A)
+            keyClick(Qt.Key_B)
+            keyClick(Qt.Key_C)
+
+            compare(acSource.isAccepted, false)
+            compare(tagAddedSpy.count, 0)
+            acSource.isActive = true
+            acSource.isAnySelected = false
+
+            keyClick(Qt.Key_Return)
+
+            compare(acSource.isAccepted, true)
+            compare(tagAddedSpy.count, 1)
+        }
+
+        function test_AutoCompletePreset() {
+            completionRequestedSpy.clear()
+            acSource.clear()
+
+            input.text = ""
+            input.forceActiveFocus()
+
+            keyClick(Qt.Key_A)
+            keyClick(Qt.Key_B)
+            keyClick(Qt.Key_C)
+
+            compare(acSource.isAccepted, false)
+            compare(acSource.tryExpandPresetFlag, false)
+            acSource.isActive = true
+
+            keyClick(Qt.Key_Return, Qt.ControlModifier)
+
+            compare(acSource.isAccepted, true)
+            compare(acSource.tryExpandPresetFlag, true)
         }
     }
 }
