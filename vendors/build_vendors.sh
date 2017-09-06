@@ -8,6 +8,8 @@ tar xzf /tmp/hunspell.tar.gz
 cd hunspell/
 qmake "CONFIG+=debug" hunspell.pro
 make
+pwd
+ls -la
 cp libhunspell.a ../../libs/
 cd ../
 
