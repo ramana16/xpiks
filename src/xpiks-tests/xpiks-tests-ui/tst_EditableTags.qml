@@ -2,12 +2,15 @@ import QtQuick 2.0
 import QtTest 1.1
 import xpiks 1.0
 import "../../xpiks-qt/Components"
-import "FakeColors.js" as Colors
 
 Item {
     id: root
     width: 800
     height: 600
+
+    FakeColors {
+        id: uiColors
+    }
 
     QtObject {
         id: settingsModel

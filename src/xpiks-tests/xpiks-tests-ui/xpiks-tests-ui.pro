@@ -3,6 +3,7 @@ TEMPLATE = app
 QT += qml quick
 CONFIG += qmltestcase
 TARGET = xpiks-tests-ui
+DEFINES += QML_IMPORT_TRACE
 
 SOURCES += main.cpp
 
@@ -15,7 +16,7 @@ include(deployment.pri)
 DISTFILES += \
     ../../xpiks-qt/Components/EditableTags.qml \
     tst_EditableTags.qml \
-    FakeColors.js
+    FakeColors.qml
 
 HEADERS += \
     ../../xpiks-qt/Helpers/clipboardhelper.h
