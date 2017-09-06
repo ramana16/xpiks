@@ -9,10 +9,10 @@ cd hunspell/
 qmake "CONFIG+=debug" hunspell.pro
 make
 cp libhunspell.a ../../libs/
+cd ../
 
 ##########
 
-cd ../
 cd quazip/quazip/
 qmake "CONFIG+=debug" quazip.pro
 make
@@ -44,16 +44,13 @@ cd ../../../../libs
 ln -s libssdll.so.1.0.0 libssdll.so
 ln -s libssdll.so.1.0.0 libssdll.so.1
 ln -s libssdll.so.1.0.0 libssdll.so.1.0
+cd ../src
 
 ##########
 
-cd ../src
 cd libxpks_stub
 qmake "CONFIG+=debug" libxpks_stub.pro
 make
 cp libxpks.a ../../libs/
 
 ##########
-
-cd ../
-pwd
