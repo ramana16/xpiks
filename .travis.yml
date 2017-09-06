@@ -50,7 +50,7 @@ before_script:
   - if [ -n "$UI_TESTS" ]; then sleep 3; fi # give xvfb some time to start
 
 script:
-  - if [ -z "${UI_TESTS+xxx}" ]; then sh vendors/build_vendors.sh; fi
+  - if [ -z "${UI_TESTS+xxx}" ]; then vendors/build_vendors.sh; fi
   - ls -la ../libs/
   - if [ -n "$XPIKS_BINARY" ]; then cd xpiks-qt/; fi
   - if [ -n "$CORE_TESTS" ]; then cd xpiks-tests/xpiks-tests-core; fi
