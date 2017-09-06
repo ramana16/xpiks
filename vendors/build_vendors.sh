@@ -56,3 +56,4 @@ cp libxpks.a ../../libs/
 ##########
 
 cd ../
+pwd
