@@ -103,7 +103,7 @@ Item {
             anchors.bottomMargin: -glowRadius/2
             glowRadius: 4
             spread: 0.0
-            color: Colors.defaultControlColor
+            color: uiColors.defaultControlColor
             cornerRadius: glowRadius
         }
 
@@ -112,7 +112,7 @@ Item {
             id: dialogWindow
             width: 240
             height: childrenRect.height + 40
-            color: Colors.popupBackgroundColor
+            color: uiColors.popupBackgroundColor
             anchors.centerIn: parent
             Component.onCompleted: anchors.centerIn = undefined
 
@@ -125,9 +125,9 @@ Item {
                 spacing: 20
 
                 Rectangle {
-                    color: enabled ? Colors.inputBackgroundColor : Colors.inputInactiveBackground
+                    color: enabled ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
                     border.width: keywordInput.activeFocus ? 1 : 0
-                    border.color: editKeywordComponent.anyError ? Colors.artworkModifiedColor : Colors.artworkActiveColor
+                    border.color: editKeywordComponent.anyError ? uiColors.artworkModifiedColor : uiColors.artworkActiveColor
                     width: 200
                     height: 30
                     clip: true

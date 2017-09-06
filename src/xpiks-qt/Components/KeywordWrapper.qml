@@ -30,7 +30,7 @@ Rectangle {
     signal actionRightClicked();
     signal spellSuggestionRequested();
 
-    color: isHighlighted ? Colors.inputForegroundColor : Colors.inactiveKeywordBackground
+    color: isHighlighted ? uiColors.inputForegroundColor : uiColors.inactiveKeywordBackground
 
     width: childrenRect.width
     height: childrenRect.height
@@ -52,7 +52,7 @@ Rectangle {
                 anchors.bottom: parent.bottom
                 verticalAlignment: Text.AlignVCenter
                 text: itemWrapper.keywordText
-                color: itemWrapper.isHighlighted ? Colors.inactiveControlColor : Colors.inactiveKeywordForeground
+                color: itemWrapper.isHighlighted ? uiColors.inactiveControlColor : uiColors.inactiveKeywordForeground
                 font.pixelSize: UIConfig.fontPixelSize * settingsModel.keywordSizeScale
             }
 
@@ -93,7 +93,7 @@ Rectangle {
         anchors.left: row.left
         anchors.right: row.right
         anchors.bottom: row.bottom
-        color: Colors.destructiveColor
+        color: uiColors.destructiveColor
         visible: itemWrapper.hasSpellCheckError
     }
 }

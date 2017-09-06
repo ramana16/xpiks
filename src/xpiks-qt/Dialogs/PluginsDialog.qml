@@ -163,7 +163,7 @@ Item {
             anchors.bottomMargin: -glowRadius/2
             glowRadius: 4
             spread: 0.0
-            color: Colors.defaultControlColor
+            color: uiColors.defaultControlColor
             cornerRadius: glowRadius
         }
 
@@ -172,7 +172,7 @@ Item {
             id: dialogWindow
             width: 500
             height: 400
-            color: Colors.popupBackgroundColor
+            color: uiColors.popupBackgroundColor
             anchors.centerIn: parent
             Component.onCompleted: anchors.centerIn = undefined
 
@@ -194,7 +194,7 @@ Item {
                 anchors.topMargin: 10
                 anchors.bottom: footer.top
                 anchors.bottomMargin: 20
-                color: Colors.defaultControlColor
+                color: uiColors.defaultControlColor
 
                 StyledScrollView {
                     id: scrollView
@@ -208,7 +208,7 @@ Item {
 
                         delegate: Rectangle {
                             id: wrapper
-                            color: Colors.panelColor                            
+                            color: uiColors.panelColor                            
                             property int delegateIndex: index
                             anchors.left: parent.left
                             anchors.right: parent.right

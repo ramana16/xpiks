@@ -69,7 +69,7 @@ Item {
             anchors.bottomMargin: -glowRadius/2
             glowRadius: 4
             spread: 0.0
-            color: Colors.defaultControlColor
+            color: uiColors.defaultControlColor
             cornerRadius: glowRadius
         }
 
@@ -78,7 +78,7 @@ Item {
             id: dialogWindow
             width: 700
             height: 400
-            color: Colors.popupBackgroundColor
+            color: uiColors.popupBackgroundColor
             anchors.centerIn: parent
             Component.onCompleted: anchors.centerIn = undefined
 
@@ -100,7 +100,7 @@ Item {
                 anchors.topMargin: 10
                 anchors.bottom: footer.top
                 anchors.bottomMargin: 20
-                color: Colors.popupDarkInputBackground
+                color: uiColors.popupDarkInputBackground
 
                 StyledScrollView {
                     id: scrollView
@@ -112,7 +112,7 @@ Item {
                         width: 600
                         text: termsComponent.termsText
                         wrapMode: TextEdit.Wrap
-                        selectionColor: Colors.inputBackgroundColor
+                        selectionColor: uiColors.inputBackgroundColor
                         readOnly: true
                     }
                 }

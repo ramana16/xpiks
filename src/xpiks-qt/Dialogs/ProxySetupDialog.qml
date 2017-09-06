@@ -103,7 +103,7 @@ Item {
             anchors.bottomMargin: -glowRadius / 2
             glowRadius: 4
             spread: 0.0
-            color: Colors.defaultControlColor
+            color: uiColors.defaultControlColor
             cornerRadius: glowRadius
         }
 
@@ -112,7 +112,7 @@ Item {
             id: dialogWindow
             width: 280
             height: 280
-            color: Colors.popupBackgroundColor
+            color: uiColors.popupBackgroundColor
             anchors.centerIn: parent
             Component.onCompleted: anchors.centerIn = undefined
 
@@ -138,9 +138,9 @@ Item {
                     }
 
                     Rectangle {
-                        color: enabled ? Colors.inputBackgroundColor : Colors.inputInactiveBackground
+                        color: enabled ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
                         border.width: (proxyAddress.activeFocus) ? 1 : 0
-                        border.color: Colors.artworkActiveColor
+                        border.color: uiColors.artworkActiveColor
                         width: 135
                         height: UIConfig.textInputHeight
                         clip: true
@@ -170,9 +170,9 @@ Item {
                     }
 
                     Rectangle {
-                        color: enabled ? Colors.inputBackgroundColor : Colors.inputInactiveBackground
+                        color: enabled ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
                         border.width: (proxyUser.activeFocus) ? 1 : 0
-                        border.color: Colors.artworkActiveColor
+                        border.color: uiColors.artworkActiveColor
                         width: 135
                         height: UIConfig.textInputHeight
                         clip: true
@@ -204,9 +204,9 @@ Item {
                     }
 
                     Rectangle {
-                        color: enabled ? Colors.inputBackgroundColor : Colors.inputInactiveBackground
+                        color: enabled ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
                         border.width: (proxyPassword.activeFocus) ? 1 : 0
-                        border.color: Colors.artworkActiveColor
+                        border.color: uiColors.artworkActiveColor
                         width: 135
                         height: UIConfig.textInputHeight
                         clip: true
@@ -239,9 +239,9 @@ Item {
                     }
 
                     Rectangle {
-                        color: enabled ? Colors.inputBackgroundColor : Colors.inputInactiveBackground
+                        color: enabled ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
                         border.width: (proxyPort.activeFocus) ? 1 : 0
-                        border.color: Colors.artworkActiveColor
+                        border.color: uiColors.artworkActiveColor
                         width: 135
                         height: UIConfig.textInputHeight
                         clip: true

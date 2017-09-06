@@ -29,7 +29,7 @@ ScrollView {
             Rectangle {
                 anchors.fill: parent
                 radius: 5
-                color: Colors.artworkActiveColor
+                color: uiColors.artworkActiveColor
                 opacity: styleData.pressed ? 1 : (styleData.hovered ? 0.9 : 0.8)
             }
         }

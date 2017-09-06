@@ -130,7 +130,7 @@ CloseRequested")
             anchors.bottomMargin: -glowRadius/2
             glowRadius: 4
             spread: 0.0
-            color: Colors.defaultControlColor
+            color: uiColors.defaultControlColor
             cornerRadius: glowRadius
         }
 
@@ -139,7 +139,7 @@ CloseRequested")
             id: dialogWindow
             width: 730
             height: 610
-            color: Colors.popupBackgroundColor
+            color: uiColors.popupBackgroundColor
             anchors.centerIn: parent
             Component.onCompleted: anchors.centerIn = undefined
 
@@ -222,7 +222,7 @@ CloseRequested")
 
                     Rectangle {
                         anchors.fill: parent
-                        color: Colors.defaultControlColor
+                        color: uiColors.defaultControlColor
 
                         StyledScrollView {
                             id: imagesScrollView
@@ -290,7 +290,7 @@ CloseRequested")
 
                                     Rectangle {
                                         anchors.fill: parent
-                                        color: Colors.defaultControlColor
+                                        color: uiColors.defaultControlColor
                                         opacity: isselected ? (mouseArea.containsMouse ? 0.6 : 0.7) : (mouseArea.containsMouse ? 0.4 : 0)
                                     }
 
@@ -357,12 +357,12 @@ CloseRequested")
 
                         Rectangle {
                             id: keywordsToDeleteWrapper
-                            border.color: Colors.artworkActiveColor
+                            border.color: uiColors.artworkActiveColor
                             border.width: flv.isFocused ? 1 : 0
                             height: 80
                             anchors.rightMargin: 20
                             Layout.fillWidth: true
-                            color: enabled ? Colors.inputBackgroundColor : Colors.inputInactiveBackground
+                            color: enabled ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
                             property var keywordsModel: deleteKeywordsModel.getKeywordsToDeleteModel()
 
                             function removeKeyword(index) {
@@ -444,7 +444,7 @@ CloseRequested")
                                 anchors.right: parent.right
                                 text: i18.n + qsTr("Clear")
                                 enabled: deleteKeywordsModel.keywordsToDeleteCount > 0
-                                color: enabled ? (clearKeywordsMA.pressed ? Colors.linkClickedColor : Colors.artworkActiveColor) : Colors.labelActiveForeground
+                                color: enabled ? (clearKeywordsMA.pressed ? uiColors.linkClickedColor : uiColors.artworkActiveColor) : uiColors.labelActiveForeground
 
                                 MouseArea {
                                     id: clearKeywordsMA
@@ -497,7 +497,7 @@ CloseRequested")
                             height: 155
                             anchors.rightMargin: 20
                             Layout.fillWidth: true
-                            color: Colors.inputInactiveBackground
+                            color: uiColors.inputInactiveBackground
                             property var keywordsModel: deleteKeywordsModel.getCommonKeywordsModel()
 
                             function removeKeyword(index) {

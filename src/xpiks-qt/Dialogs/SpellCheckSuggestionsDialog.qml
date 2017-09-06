@@ -87,7 +87,7 @@ Item {
             anchors.bottomMargin: -glowRadius/2
             glowRadius: 4
             spread: 0.0
-            color: Colors.defaultControlColor
+            color: uiColors.defaultControlColor
             cornerRadius: glowRadius
         }
 
@@ -96,7 +96,7 @@ Item {
             id: dialogWindow
             width: 730
             height: 610
-            color: Colors.popupBackgroundColor
+            color: uiColors.popupBackgroundColor
             anchors.centerIn: parent
             Component.onCompleted: anchors.centerIn = undefined
 
@@ -129,7 +129,7 @@ Item {
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    color: Colors.defaultControlColor
+                    color: uiColors.defaultControlColor
 
                     Item {
                         visible: suggestionsListView.count == 0
@@ -156,7 +156,7 @@ Item {
                             delegate: Rectangle {
                                 id: suggestionsWrapper
                                 property int delegateIndex: index
-                                color: Colors.panelColor
+                                color: uiColors.panelColor
                                 width: parent.width - 10
                                 height: suggestionsListRect.height
 
@@ -176,7 +176,7 @@ Item {
                                             verticalAlignment: Text.AlignVCenter
                                             text: word
                                             font.pixelSize: UIConfig.fontPixelSize * settingsModel.keywordSizeScale
-                                            color: Colors.artworkModifiedColor
+                                            color: uiColors.artworkModifiedColor
                                             elide: Text.ElideMiddle
                                         }
 
@@ -186,7 +186,7 @@ Item {
                                             visible: replacementorigin != word
                                             text: replacementorigin
                                             font.pixelSize: 11
-                                            color: Colors.selectedArtworkBackground
+                                            color: uiColors.selectedArtworkBackground
                                             elide: Text.ElideMiddle
                                         }
                                     }

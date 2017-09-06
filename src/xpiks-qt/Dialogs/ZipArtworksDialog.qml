@@ -95,7 +95,7 @@ Item {
             anchors.bottomMargin: -glowRadius/2
             glowRadius: 4
             spread: 0.0
-            color: Colors.defaultControlColor
+            color: uiColors.defaultControlColor
             cornerRadius: glowRadius
         }
 
@@ -104,7 +104,7 @@ Item {
             id: dialogWindow
             width: 480
             height: childrenRect.height + 40
-            color: Colors.popupBackgroundColor
+            color: uiColors.popupBackgroundColor
             anchors.centerIn: parent
             Component.onCompleted: anchors.centerIn = undefined
 
@@ -151,7 +151,7 @@ Item {
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width
                     height: 20
-                    color: zipArchiver.isError ? Colors.destructiveColor : Colors.artworkActiveColor
+                    color: zipArchiver.isError ? uiColors.destructiveColor : uiColors.artworkActiveColor
                     value: zipArchiver.percent
                 }
 

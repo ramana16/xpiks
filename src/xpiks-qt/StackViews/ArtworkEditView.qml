@@ -22,7 +22,7 @@ import "../Constants/UIConfig.js" as UIConfig
 
 Rectangle {
     id: artworkEditComponent
-    color: Colors.defaultDarkerColor
+    color: uiColors.defaultDarkerColor
 
     property variant componentParent
     property var autoCompleteBox
@@ -299,7 +299,7 @@ Rectangle {
 
         handleDelegate: Rectangle {
             width: 0
-            color: Colors.selectedArtworkBackground
+            color: uiColors.selectedArtworkBackground
         }
 
         onResizingChanged: {
@@ -318,7 +318,7 @@ Rectangle {
                 anchors.right: parent.right
                 anchors.top: parent.top
                 height: 45
-                color: Colors.defaultDarkColor
+                color: uiColors.defaultDarkColor
 
                 RowLayout {
                     anchors.leftMargin: 10
@@ -410,7 +410,7 @@ Rectangle {
                     anchors.right: parent.right
                     width: 50
                     height: 50
-                    color: Colors.defaultDarkColor
+                    color: uiColors.defaultDarkColor
 
                     ZoomAmplifier {
                         id: zoomIcon
@@ -458,11 +458,11 @@ Rectangle {
                         property int delegateIndex: index
                         tabIndex: delegateIndex
                         isSelected: tabIndex === editTabView.currentIndex
-                        color: isSelected ? Colors.selectedArtworkBackground : Colors.inputInactiveBackground
+                        color: isSelected ? uiColors.selectedArtworkBackground : uiColors.inputInactiveBackground
                         hovered: tabMA.containsMouse
 
                         StyledText {
-                            color: parent.isSelected ? Colors.artworkActiveColor : (parent.hovered ? Colors.labelActiveForeground : Colors.labelInactiveForeground)
+                            color: parent.isSelected ? uiColors.artworkActiveColor : (parent.hovered ? uiColors.labelActiveForeground : uiColors.labelInactiveForeground)
                             text: modelData
                             anchors.centerIn: parent
                         }
@@ -499,7 +499,7 @@ Rectangle {
 
                 Rectangle {
                     id: editTab
-                    color: Colors.selectedArtworkBackground
+                    color: uiColors.selectedArtworkBackground
                     anchors.fill: parent
 
                     ColumnLayout {
@@ -536,8 +536,8 @@ Rectangle {
                             anchors.left: parent.left
                             anchors.right: parent.right
                             height: 25
-                            color: Colors.inputBackgroundColor
-                            border.color: Colors.artworkActiveColor
+                            color: uiColors.inputBackgroundColor
+                            border.color: uiColors.artworkActiveColor
                             border.width: titleTextInput.activeFocus ? 1 : 0
                             clip: true
 
@@ -652,8 +652,8 @@ Rectangle {
                             anchors.left: parent.left
                             anchors.right: parent.right
                             height: 70
-                            color: Colors.inputBackgroundColor
-                            border.color: Colors.artworkActiveColor
+                            color: uiColors.inputBackgroundColor
+                            border.color: uiColors.artworkActiveColor
                             border.width: descriptionTextInput.activeFocus ? 1 : 0
                             clip: true
 
@@ -775,12 +775,12 @@ Rectangle {
 
                         Rectangle {
                             id: keywordsWrapper
-                            border.color: Colors.artworkActiveColor
+                            border.color: uiColors.artworkActiveColor
                             border.width: flv.isFocused ? 1 : 0
                             Layout.fillHeight: true
                             anchors.left: parent.left
                             anchors.right: parent.right
-                            color: Colors.inputBackgroundColor
+                            color: uiColors.inputBackgroundColor
 
                             function removeKeyword(index) {
                                 artworkProxy.removeKeywordAt(index)
@@ -907,7 +907,7 @@ Rectangle {
                             StyledText {
                                 text: i18.n + qsTr("Fix spelling")
                                 enabled: artworkEditComponent.keywordsModel ? artworkEditComponent.keywordsModel.hasSpellErrors : false
-                                color: enabled ? (fixSpellingMA.pressed ? Colors.linkClickedColor : Colors.artworkActiveColor) : Colors.labelActiveForeground
+                                color: enabled ? (fixSpellingMA.pressed ? uiColors.linkClickedColor : uiColors.artworkActiveColor) : uiColors.labelActiveForeground
 
                                 MouseArea {
                                     id: fixSpellingMA
@@ -930,7 +930,7 @@ Rectangle {
 
                             StyledText {
                                 text: i18.n + qsTr("Suggest")
-                                color: enabled ? (suggestKeywordsMA.pressed ? Colors.linkClickedColor : Colors.artworkActiveColor) : Colors.labelActiveForeground
+                                color: enabled ? (suggestKeywordsMA.pressed ? uiColors.linkClickedColor : uiColors.artworkActiveColor) : uiColors.labelActiveForeground
 
                                 MouseArea {
                                     id: suggestKeywordsMA
@@ -961,7 +961,7 @@ Rectangle {
                             StyledText {
                                 text: i18.n + qsTr("Copy")
                                 enabled: artworkProxy.keywordsCount > 0
-                                color: enabled ? (copyKeywordsMA.pressed ? Colors.linkClickedColor : Colors.artworkActiveColor) : Colors.labelActiveForeground
+                                color: enabled ? (copyKeywordsMA.pressed ? uiColors.linkClickedColor : uiColors.artworkActiveColor) : uiColors.labelActiveForeground
 
                                 MouseArea {
                                     id: copyKeywordsMA
@@ -979,7 +979,7 @@ Rectangle {
                             StyledText {
                                 text: i18.n + qsTr("Clear")
                                 enabled: artworkProxy.keywordsCount > 0
-                                color: enabled ? (clearKeywordsMA.pressed ? Colors.linkClickedColor : Colors.artworkActiveColor) : Colors.labelActiveForeground
+                                color: enabled ? (clearKeywordsMA.pressed ? uiColors.linkClickedColor : uiColors.artworkActiveColor) : uiColors.labelActiveForeground
 
                                 MouseArea {
                                     id: clearKeywordsMA
@@ -997,7 +997,7 @@ Rectangle {
                         StyledText {
                             id: plainTextText
                             text: i18.n + qsTr("<u>edit in plain text</u>")
-                            color: plainTextMA.containsMouse ? Colors.linkClickedColor : Colors.labelActiveForeground
+                            color: plainTextMA.containsMouse ? uiColors.linkClickedColor : uiColors.labelActiveForeground
 
                             MouseArea {
                                 id: plainTextMA
@@ -1032,7 +1032,7 @@ Rectangle {
                 Rectangle {
                     id: infoTab
                     visible: false
-                    color: Colors.selectedArtworkBackground
+                    color: uiColors.selectedArtworkBackground
                     anchors.fill: parent
 
                     ListView {
@@ -1143,7 +1143,7 @@ Rectangle {
         anchors.right: parent.right
         anchors.bottom: parent.bottom
         height: 110
-        color: Colors.panelColor
+        color: uiColors.panelColor
 
         Item {
             id: selectPrevButton
@@ -1155,7 +1155,7 @@ Rectangle {
 
             Rectangle {
                 anchors.fill: parent
-                color: enabled ? (prevButtonMA.containsMouse ? Colors.defaultControlColor : Colors.leftSliderColor) : Colors.panelColor
+                color: enabled ? (prevButtonMA.containsMouse ? uiColors.defaultControlColor : uiColors.leftSliderColor) : uiColors.panelColor
             }
 
             TriangleElement {
@@ -1167,9 +1167,9 @@ Rectangle {
                 isFlipped: true
                 color: {
                     if (enabled) {
-                        return prevButtonMA.pressed ? Colors.inputForegroundColor : Colors.artworkActiveColor
+                        return prevButtonMA.pressed ? uiColors.inputForegroundColor : uiColors.artworkActiveColor
                     } else {
-                        return Colors.inputBackgroundColor
+                        return uiColors.inputBackgroundColor
                     }
                 }
             }
@@ -1216,12 +1216,12 @@ Rectangle {
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
                 width: bottomPane.height
-                color: ListView.isCurrentItem ? Colors.panelSelectedColor : "transparent"
+                color: ListView.isCurrentItem ? uiColors.panelSelectedColor : "transparent"
 
                 Rectangle {
                     anchors.fill: parent
                     visible: imageMA.containsMouse
-                    color: Colors.panelSelectedColor
+                    color: uiColors.panelSelectedColor
                     opacity: 0.6
                 }
 
@@ -1313,7 +1313,7 @@ Rectangle {
 
             Rectangle {
                 anchors.fill: parent
-                color: enabled ? (nextButtonMA.containsMouse ? Colors.defaultControlColor : Colors.leftSliderColor) : Colors.panelColor
+                color: enabled ? (nextButtonMA.containsMouse ? uiColors.defaultControlColor : uiColors.leftSliderColor) : uiColors.panelColor
             }
 
             TriangleElement {
@@ -1324,9 +1324,9 @@ Rectangle {
                 isVertical: true
                 color: {
                     if (enabled) {
-                        return nextButtonMA.pressed ? Colors.inputForegroundColor : Colors.artworkActiveColor
+                        return nextButtonMA.pressed ? uiColors.inputForegroundColor : uiColors.artworkActiveColor
                     } else {
-                        return Colors.inputBackgroundColor
+                        return uiColors.inputBackgroundColor
                     }
                 }
             }

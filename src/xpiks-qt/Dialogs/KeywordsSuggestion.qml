@@ -137,7 +137,7 @@ Item {
             anchors.bottomMargin: -glowRadius/2
             glowRadius: 4
             spread: 0.0
-            color: Colors.defaultControlColor
+            color: uiColors.defaultControlColor
             cornerRadius: glowRadius
         }
 
@@ -147,7 +147,7 @@ Item {
             property bool isTooNarrow: parent.width <= 1100
             width: Math.max(900, Math.min(1100, parent.width - 200))
             height: Math.min(parent.height - 40, 700)
-            color: Colors.popupBackgroundColor
+            color: uiColors.popupBackgroundColor
             anchors.centerIn: parent
             Component.onCompleted: anchors.centerIn = undefined
             z: 1000
@@ -173,9 +173,9 @@ Item {
                     Rectangle {
                         id: searchRect
                         anchors.left: parent.left
-                        color: enabled ? Colors.inputBackgroundColor : Colors.inputInactiveBackground
+                        color: enabled ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
                         border.width: queryText.activeFocus ? 1 : 0
-                        border.color: Colors.artworkActiveColor
+                        border.color: uiColors.artworkActiveColor
                         width: dialogWindow.isTooNarrow ? 200 : 250
                         height: UIConfig.textInputHeight
                         clip: true
@@ -224,7 +224,7 @@ Item {
                     anchors.top: searchRow.bottom
                     anchors.topMargin: 10
                     anchors.bottom: parent.bottom
-                    color: Colors.defaultControlColor
+                    color: uiColors.defaultControlColor
 
                     Flickable {
                         clip: true
@@ -275,7 +275,7 @@ Item {
 
                                     Rectangle {
                                         anchors.fill: parent
-                                        color: Colors.defaultControlColor
+                                        color: uiColors.defaultControlColor
                                         opacity: isselected ? (mouseArea.containsMouse ? 0.6 : 0.7) : (mouseArea.containsMouse ? 0.4 : 0)
                                     }
 
@@ -317,7 +317,7 @@ Item {
 
                     Rectangle {
                         anchors.fill: parent
-                        color: Colors.selectedArtworkBackground
+                        color: uiColors.selectedArtworkBackground
                         opacity: 0.4
                         visible: keywordsSuggestor.isInProgress
                     }
@@ -329,7 +329,7 @@ Item {
                         StyledText {
                             anchors.centerIn: parent
                             text: keywordsSuggestor.lastErrorString
-                            color: Colors.selectedArtworkBackground
+                            color: uiColors.selectedArtworkBackground
                         }
 
                         MouseArea {
@@ -402,7 +402,7 @@ Item {
 
                         StyledText {
                             text: i18.n + qsTr("Suggested keywords:")
-                            color: Colors.artworkActiveColor
+                            color: uiColors.artworkActiveColor
                         }
 
                         Item {
@@ -416,14 +416,14 @@ Item {
 
                     Rectangle {
                         id: suggestedKeywordsWrapper
-                        border.color: Colors.artworkActiveColor
+                        border.color: uiColors.artworkActiveColor
                         border.width: suggestedFlv.isFocused ? 1 : 0
                         anchors.top: captionSuggested.bottom
                         anchors.topMargin: 5
                         anchors.left: parent.left
                         anchors.right: parent.right
                         anchors.bottom: parent.bottom
-                        color: Colors.inputBackgroundColor
+                        color: uiColors.inputBackgroundColor
 
                         function removeKeyword(index) {
                             var keyword = keywordsSuggestor.removeSuggestedKeywordAt(index)
@@ -522,7 +522,7 @@ Item {
                         anchors.left: parent.left
                         anchors.right: parent.right
                         anchors.bottom: parent.bottom
-                        color: Colors.inputInactiveBackground
+                        color: uiColors.inputInactiveBackground
 
                         function removeKeyword(index) {
                             var keyword = keywordsSuggestor.removeOtherKeywordAt(index)

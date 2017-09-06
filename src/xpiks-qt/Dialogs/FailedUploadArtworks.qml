@@ -89,7 +89,7 @@ Item {
             anchors.bottomMargin: -glowRadius/2
             glowRadius: 4
             spread: 0.0
-            color: Colors.defaultControlColor
+            color: uiColors.defaultControlColor
             cornerRadius: glowRadius
         }
 
@@ -98,7 +98,7 @@ Item {
             id: dialogWindow
             width: 680
             height: 450
-            color: Colors.popupBackgroundColor
+            color: uiColors.popupBackgroundColor
             anchors.centerIn: parent
             Component.onCompleted: anchors.centerIn = undefined
 
@@ -133,7 +133,7 @@ Item {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     Layout.fillHeight: true
-                    color: Colors.defaultControlColor
+                    color: uiColors.defaultControlColor
 
                     ListView {
                         id: warningsListView
@@ -153,7 +153,7 @@ Item {
 
                         delegate: Rectangle {
                             property int delegateIndex: index
-                            color: Colors.defaultDarkColor
+                            color: uiColors.defaultDarkColor
                             id: hostRectangleWrapper
                             anchors.margins: 10
                             anchors.left: parent.left
@@ -174,13 +174,13 @@ Item {
                                     height: 5
                                     width: height
                                     radius: height/2
-                                    color: Colors.labelInactiveForeground
+                                    color: uiColors.labelInactiveForeground
                                 }
 
                                 StyledText {
                                     id: hostAddress
                                     text: artworkUploader.getFtpName(ftpaddress)
-                                    color: Colors.artworkActiveColor
+                                    color: uiColors.artworkActiveColor
                                     //font.bold: true
                                     font.pixelSize: UIConfig.fontPixelSize + 4
                                 }

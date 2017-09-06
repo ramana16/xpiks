@@ -96,7 +96,7 @@ Item {
             anchors.bottomMargin: -glowRadius/2
             glowRadius: 4
             spread: 0.0
-            color: Colors.defaultControlColor
+            color: uiColors.defaultControlColor
             cornerRadius: glowRadius
         }
 
@@ -105,7 +105,7 @@ Item {
             id: dialogWindow
             width: 700
             height: 580
-            color: Colors.popupBackgroundColor
+            color: uiColors.popupBackgroundColor
             anchors.centerIn: parent
             Component.onCompleted: anchors.centerIn = undefined
 
@@ -137,7 +137,7 @@ Item {
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    color: Colors.defaultControlColor
+                    color: uiColors.defaultControlColor
 
                     StyledScrollView {
                         anchors.fill: parent
@@ -151,7 +151,7 @@ Item {
                             delegate: Rectangle {
                                 id: imageWrapper
                                 property int delegateIndex: index
-                                color: isselected ? Colors.selectedArtworkBackground : Colors.artworkBackground
+                                color: isselected ? uiColors.selectedArtworkBackground : uiColors.artworkBackground
                                 anchors.left: parent.left
                                 anchors.right: parent.right
                                 anchors.rightMargin: 10
@@ -246,7 +246,7 @@ Item {
                                     anchors.top: parent.top
                                     anchors.right: parent.right
                                     height: (childrenRect.height < 130) ? 150 : (childrenRect.height + 20)
-                                    color: isselected ? Colors.selectedArtworkBackground : Colors.artworkBackground
+                                    color: isselected ? uiColors.selectedArtworkBackground : uiColors.artworkBackground
 
                                     Item {
                                         clip: true
@@ -269,7 +269,7 @@ Item {
                                         Rectangle {
                                             id: titleRectangle
                                             height: childrenRect.height + 10
-                                            color: (isselected && enabled) ? Colors.inputBackgroundColor : Colors.inputInactiveBackground
+                                            color: (isselected && enabled) ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
                                             anchors.right: parent.right
                                             anchors.left: parent.left
                                             anchors.top: titleHit.bottom
@@ -308,7 +308,7 @@ Item {
 
                                         Rectangle {
                                             id: descriptionRectangle
-                                            color: (isselected && enabled) ? Colors.inputBackgroundColor : Colors.inputInactiveBackground
+                                            color: (isselected && enabled) ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
                                             height: childrenRect.height + 10
                                             anchors.top: descriptionHit.bottom
                                             anchors.topMargin: 3
@@ -348,7 +348,7 @@ Item {
 
                                         Rectangle {
                                             id: keywordsRectangle
-                                            color: (isselected && enabled) ? Colors.inputBackgroundColor : Colors.inputInactiveBackground
+                                            color: (isselected && enabled) ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
                                             height: childrenRect.height + 10
                                             anchors.right: parent.right
                                             anchors.left: parent.left
@@ -390,7 +390,7 @@ Item {
                         StyledText {
                             text: i18.n + qsTr("Nothing found")
                             anchors.centerIn: parent
-                            color: Colors.selectedArtworkBackground
+                            color: uiColors.selectedArtworkBackground
                         }
                     }
                 }

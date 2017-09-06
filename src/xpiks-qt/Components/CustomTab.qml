@@ -18,7 +18,7 @@ Rectangle {
     anchors.top: parent.top
     anchors.bottom: parent.bottom
     width: 75
-    color: isSelected ? Colors.defaultControlColor : Colors.defaultDarkColor
+    color: isSelected ? uiColors.defaultControlColor : uiColors.defaultDarkColor
     property int tabIndex: -1
     property bool isSelected: false
     property bool hovered: false

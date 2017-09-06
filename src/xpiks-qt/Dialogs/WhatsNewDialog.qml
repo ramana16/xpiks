@@ -68,7 +68,7 @@ Item {
             anchors.bottomMargin: -glowRadius/2
             glowRadius: 4
             spread: 0.0
-            color: Colors.defaultControlColor
+            color: uiColors.defaultControlColor
             cornerRadius: glowRadius
         }
 
@@ -77,7 +77,7 @@ Item {
             id: dialogWindow
             width: 700
             height: 500
-            color: Colors.popupBackgroundColor
+            color: uiColors.popupBackgroundColor
             anchors.centerIn: parent
             Component.onCompleted: anchors.centerIn = undefined
 
@@ -102,7 +102,7 @@ Item {
                 anchors.topMargin: 10
                 anchors.bottom: footer.top
                 anchors.bottomMargin: 20
-                color: Colors.defaultControlColor
+                color: uiColors.defaultControlColor
                 clip: true
 
                 property int currentSlideIndex: 0
@@ -212,7 +212,7 @@ Item {
 
                 StyledText {
                     text: i18.n + qsTr("Skip")
-                    color: skipMA.pressed ? Colors.linkClickedColor : Colors.labelInactiveForeground
+                    color: skipMA.pressed ? uiColors.linkClickedColor : uiColors.labelInactiveForeground
 
                     MouseArea {
                         id: skipMA
@@ -231,7 +231,7 @@ Item {
 
                 StyledText {
                     text: i18.n + qsTr("Previous")
-                    color: previousMA.pressed ? Colors.linkClickedColor : Colors.labelActiveForeground
+                    color: previousMA.pressed ? uiColors.linkClickedColor : uiColors.labelActiveForeground
 
                     MouseArea {
                         id: previousMA

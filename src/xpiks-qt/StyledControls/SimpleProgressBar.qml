@@ -26,7 +26,7 @@ Item {
     Rectangle {
         id: border
         anchors.fill: parent
-        color: Colors.defaultControlColor
+        color: uiColors.defaultControlColor
         border.width: 0
         border.color: parent.color
     }

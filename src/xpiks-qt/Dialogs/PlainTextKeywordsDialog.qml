@@ -112,7 +112,7 @@ Item {
             anchors.bottomMargin: -glowRadius/2
             glowRadius: 4
             spread: 0.0
-            color: Colors.defaultControlColor
+            color: uiColors.defaultControlColor
             cornerRadius: glowRadius
         }
 
@@ -121,7 +121,7 @@ Item {
             id: dialogWindow
             width: 600
             height: 400
-            color: Colors.popupBackgroundColor
+            color: uiColors.popupBackgroundColor
             anchors.centerIn: parent
             Component.onCompleted: anchors.centerIn = undefined
 
@@ -143,7 +143,7 @@ Item {
                 anchors.topMargin: 10
                 anchors.bottom: footer.top
                 anchors.bottomMargin: 20
-                color: Colors.popupDarkInputBackground
+                color: uiColors.popupDarkInputBackground
 
                 Flickable {
                     id: flick
@@ -172,7 +172,7 @@ Item {
                         focus: true
                         text: plainTextKeywordsComponent.keywordsText
                         font.pixelSize: UIConfig.fontPixelSize*settingsModel.keywordSizeScale
-                        selectionColor: Colors.inputBackgroundColor
+                        selectionColor: uiColors.inputBackgroundColor
                         wrapMode: TextEdit.Wrap
                         horizontalAlignment: TextEdit.AlignLeft
                         verticalAlignment: TextEdit.AlignTop

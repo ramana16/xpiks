@@ -259,13 +259,13 @@ Flickable {
                 id: nextTagTextInput
                 objectName: "nextTagTextInput"
                 property int maximumTextLength: 30
-                selectedTextColor: Colors.inputForegroundColor
-                selectionColor: Colors.defaultControlColor
+                selectedTextColor: uiColors.inputForegroundColor
+                selectionColor: uiColors.defaultControlColor
                 selectByMouse: true
                 anchors.left: parent.left
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
-                color: Colors.inputForegroundColor
+                color: uiColors.inputForegroundColor
                 font.family: Qt.platform.os === "windows" ? "Arial" : "Helvetica"
                 font.pixelSize: UIConfig.fontPixelSize*settingsModel.keywordSizeScale
                 verticalAlignment: TextInput.AlignVCenter

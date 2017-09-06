@@ -15,7 +15,7 @@ Item {
     id: item
     property bool isPlus: true
     property int thickness: 3
-    property color lineColor: Colors.artworkActiveColor
+    property color lineColor: uiColors.artworkActiveColor
     property real circleWidth: item.width*0.75
     property real plusOffset: 0.5
 

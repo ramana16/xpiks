@@ -21,14 +21,14 @@ import xpiks 1.0
 Rectangle {
     width: 24
     height: 20
-    border.color: isHighlighted ? Colors.labelActiveForeground : Colors.inactiveControlColor
+    border.color: isHighlighted ? uiColors.labelActiveForeground : uiColors.inactiveControlColor
     border.width: 2
     color: "transparent"
 
     Rectangle {
         width: 24
         height: 15
-        border.color: isHighlighted ? Colors.labelActiveForeground : Colors.inactiveControlColor
+        border.color: isHighlighted ? uiColors.labelActiveForeground : uiColors.inactiveControlColor
         border.width: 2
         color: "transparent"
         anchors.bottom: parent.bottom

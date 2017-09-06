@@ -17,7 +17,7 @@ Item {
     property bool isPlus: false
     property int thickness: 3
     property alias crossOpacity: wrapperRect.opacity
-    property color disabledColor: Colors.closeIconDisabledColor
+    property color disabledColor: uiColors.closeIconDisabledColor
     signal itemClicked();
 
     Item {
@@ -27,9 +27,9 @@ Item {
 
         property color pressColor: {
             if (closeIconMouseArea.containsMouse) {
-                return Colors.artworkModifiedColor;
+                return uiColors.artworkModifiedColor;
             } else {
-                return item.isActive ? Colors.closeIconActiveColor : Colors.closeIconInactiveColor;
+                return item.isActive ? uiColors.closeIconActiveColor : uiColors.closeIconInactiveColor;
             }
         }
 

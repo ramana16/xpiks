@@ -17,7 +17,7 @@ Button {
     style: ButtonStyle {
         background: Rectangle {
             radius: 1
-            color: control.enabled ? (control.hovered ? Colors.buttonHoverBackground : Colors.popupBackgroundColor) : Colors.defaultControlColor
+            color: control.enabled ? (control.hovered ? uiColors.buttonHoverBackground : uiColors.popupBackgroundColor) : uiColors.defaultControlColor
             implicitWidth: control.width
             implicitHeight: 24
         }
@@ -26,7 +26,7 @@ Button {
             font.bold: true
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
-            color: control.enabled ? (control.pressed ? Colors.buttonPressedForeground : Colors.buttonDefaultForeground) : Colors.buttonDisabledForeground
+            color: control.enabled ? (control.pressed ? uiColors.buttonPressedForeground : uiColors.buttonDefaultForeground) : uiColors.buttonDisabledForeground
             text: control.text
         }
     }

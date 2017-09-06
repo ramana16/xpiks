@@ -22,7 +22,7 @@ Item {
         opacity: mouseArea.containsMouse ? 1 : 0.8
 
         Rectangle {
-            color: mouseArea.pressed ? Colors.artworkModifiedColor : (isActive ? Colors.defaultControlColor : Colors.inputForegroundColor)
+            color: mouseArea.pressed ? uiColors.artworkModifiedColor : (isActive ? uiColors.defaultControlColor : uiColors.inputForegroundColor)
             width: parent.width - 4
             height: 3
             border.width: 1
@@ -34,7 +34,7 @@ Item {
         }
 
         Rectangle {
-            color: mouseArea.pressed ? Colors.artworkModifiedColor : (isActive ? Colors.defaultControlColor : Colors.inputForegroundColor)
+            color: mouseArea.pressed ? uiColors.artworkModifiedColor : (isActive ? uiColors.defaultControlColor : uiColors.inputForegroundColor)
             width: parent.width - 4
             height: 3
             radius: 2

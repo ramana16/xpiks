@@ -1078,7 +1078,7 @@ ApplicationWindow {
     }
 
     Rectangle {
-        color: Colors.defaultDarkColor
+        color: uiColors.defaultDarkColor
         anchors.fill: parent
 
         DropArea {
@@ -1214,7 +1214,7 @@ ApplicationWindow {
                     TriangleElement {
                         anchors.centerIn: parent
                         anchors.verticalCenterOffset: isFlipped ? height*0.3 : 0
-                        color: (enabled && (plusMA.containsMouse || plusTab.isHighlighted)) ? Colors.labelActiveForeground : Colors.labelInactiveForeground
+                        color: (enabled && (plusMA.containsMouse || plusTab.isHighlighted)) ? uiColors.labelActiveForeground : uiColors.labelInactiveForeground
                         isFlipped: !plusTab.isSelected
                         width: parent.width * 0.6
                         height: width * 0.5
@@ -1233,7 +1233,7 @@ ApplicationWindow {
             }
 
             Rectangle {
-                color: Colors.defaultControlColor
+                color: uiColors.defaultControlColor
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: tabsHolder.bottom
@@ -1329,7 +1329,7 @@ ApplicationWindow {
             anchors.left: parent.left
             anchors.top: parent.top
             anchors.bottom: parent.bottom
-            color: Colors.leftSliderColor
+            color: uiColors.leftSliderColor
             width: 20
 
             TriangleElement {
@@ -1341,9 +1341,9 @@ ApplicationWindow {
                 anchors.horizontalCenterOffset: isFlipped ? -1 : 0
                 color: {
                     if (leftCollapseMA.pressed) {
-                        return Colors.whiteColor
+                        return uiColors.whiteColor
                     } else {
-                        return leftCollapseMA.containsMouse ? Colors.labelInactiveForeground : Colors.inputBackgroundColor
+                        return leftCollapseMA.containsMouse ? uiColors.labelInactiveForeground : uiColors.inputBackgroundColor
                     }
                 }
             }
@@ -1408,7 +1408,7 @@ ApplicationWindow {
 
             StyledText {
                 text: i18.n + qsTr("Check warnings")
-                color: warningsMA.pressed ? Colors.linkClickedColor : (warningsModel.warningsCount > 0 ? Colors.artworkModifiedColor : Colors.labelInactiveForeground)
+                color: warningsMA.pressed ? uiColors.linkClickedColor : (warningsModel.warningsCount > 0 ? uiColors.artworkModifiedColor : uiColors.labelInactiveForeground)
 
                 MouseArea {
                     id: warningsMA
@@ -1444,7 +1444,7 @@ ApplicationWindow {
                 visible: applicationWindow.showUpdateLink
                 enabled: applicationWindow.showUpdateLink
                 text: i18.n + qsTr("Update available!")
-                color: updateMA.pressed ? Colors.linkClickedColor : Colors.greenColor
+                color: updateMA.pressed ? uiColors.linkClickedColor : uiColors.greenColor
 
                 MouseArea {
                     id: updateMA
@@ -1463,7 +1463,7 @@ ApplicationWindow {
             StyledText {
                 id: filteredCountText
                 text: i18.n + qsTr("No items available")
-                color: Colors.labelInactiveForeground
+                color: uiColors.labelInactiveForeground
                 verticalAlignment: Text.AlignVCenter
 
                 function updateText() {
@@ -1496,7 +1496,7 @@ ApplicationWindow {
 
             StyledText {
                 text: i18.n + getOriginalText()
-                color: Colors.labelInactiveForeground
+                color: uiColors.labelInactiveForeground
                 verticalAlignment: Text.AlignVCenter
 
                 function getOriginalText() {
@@ -1525,7 +1525,7 @@ ApplicationWindow {
             StyledText {
                 text: i18.n + getOriginalText()
                 verticalAlignment: Text.AlignVCenter
-                color: artItemsModel.modifiedArtworksCount > 0 ? Colors.artworkModifiedColor : Colors.labelInactiveForeground
+                color: artItemsModel.modifiedArtworksCount > 0 ? uiColors.artworkModifiedColor : uiColors.labelInactiveForeground
 
                 function getOriginalText() {
                     return artItemsModel.modifiedArtworksCount > 1 ? qsTr("%1 modified items").arg(artItemsModel.modifiedArtworksCount) : (artItemsModel.modifiedArtworksCount === 1 ? qsTr("1 modified item") : qsTr("No modified items"))
@@ -1553,7 +1553,7 @@ ApplicationWindow {
             background: Rectangle {
                 implicitHeight: 20
                 implicitWidth: 200
-                color: Colors.statusBarColor
+                color: uiColors.statusBarColor
             }
         }
     }

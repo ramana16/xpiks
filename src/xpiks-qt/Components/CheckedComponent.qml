@@ -17,14 +17,14 @@ Item {
 
     Rectangle {
         border.width: 2
-        border.color: Colors.inputForegroundColor
+        border.color: uiColors.inputForegroundColor
         radius: parent.width / 2
         anchors.fill: parent
-        color: enabled ? (isGreen ? Colors.greenColor : Colors.destructiveColor) : Colors.selectedArtworkBackground
+        color: enabled ? (isGreen ? uiColors.greenColor : uiColors.destructiveColor) : uiColors.selectedArtworkBackground
 
         Rectangle {
             visible: item.isGreen
-            color: Colors.inputBackgroundColor
+            color: uiColors.inputBackgroundColor
             width: parent.width * 0.7
             height: 2
             radius: 1
@@ -35,7 +35,7 @@ Item {
 
         Rectangle {
             visible: item.isGreen
-            color: Colors.inputBackgroundColor
+            color: uiColors.inputBackgroundColor
             width: parent.width / 2
             radius: 1
             height: 2

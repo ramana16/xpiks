@@ -90,7 +90,7 @@ Item {
             anchors.bottomMargin: -glowRadius/2
             glowRadius: 4
             spread: 0.0
-            color: Colors.defaultControlColor
+            color: uiColors.defaultControlColor
             cornerRadius: glowRadius
         }
 
@@ -99,7 +99,7 @@ Item {
             id: dialogWindow
             width: 260
             height: childrenRect.height + 40
-            color: Colors.popupBackgroundColor
+            color: uiColors.popupBackgroundColor
             anchors.centerIn: parent
             Component.onCompleted: anchors.centerIn = undefined
 
@@ -120,9 +120,9 @@ Item {
                     width: 220
                     height: UIConfig.textInputHeight
                     anchors.left: parent.left
-                    color: enabled ? Colors.inputBackgroundColor : Colors.inputInactiveBackground
+                    color: enabled ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
                     border.width: masterPassword.activeFocus ? 1 : 0
-                    border.color: wrongTry ? Colors.destructiveColor : Colors.artworkActiveColor
+                    border.color: wrongTry ? uiColors.destructiveColor : uiColors.artworkActiveColor
                     clip: true
 
                     StyledTextInput {

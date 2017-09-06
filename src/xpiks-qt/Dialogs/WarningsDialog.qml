@@ -88,7 +88,7 @@ Item {
             anchors.bottomMargin: -glowRadius/2
             glowRadius: 4
             spread: 0.0
-            color: Colors.defaultControlColor
+            color: uiColors.defaultControlColor
             cornerRadius: glowRadius
         }
 
@@ -97,7 +97,7 @@ Item {
             id: dialogWindow
             width: 700
             height: 580
-            color: Colors.popupBackgroundColor
+            color: uiColors.popupBackgroundColor
             anchors.centerIn: parent
             Component.onCompleted: anchors.centerIn = undefined
 
@@ -113,7 +113,7 @@ Item {
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.fillHeight: true
-                    color: Colors.defaultControlColor
+                    color: uiColors.defaultControlColor
 
                     StyledScrollView {
                         anchors.fill: parent
@@ -126,7 +126,7 @@ Item {
 
                             delegate: Rectangle {
                                 property int delegateIndex: index
-                                color: Colors.defaultDarkColor
+                                color: uiColors.defaultDarkColor
                                 id: imageWrapper
                                 anchors.left: parent.left
                                 anchors.right: parent.right
@@ -223,13 +223,13 @@ Item {
                                                     width: height
                                                     radius: height/2
                                                     anchors.verticalCenter: parent.verticalCenter
-                                                    color: Colors.inactiveControlColor
+                                                    color: uiColors.inactiveControlColor
                                                 }
 
                                                 StyledText {
                                                     Layout.fillWidth: true
                                                     text: i18.n + modelData
-                                                    color: Colors.artworkModifiedColor
+                                                    color: uiColors.artworkModifiedColor
                                                     anchors.verticalCenter: parent.verticalCenter
                                                 }
                                             }

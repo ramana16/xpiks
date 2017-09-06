@@ -13,7 +13,7 @@ import "../Constants"
 
 Text {
     property bool isActive: true
-    color: (isActive && enabled) ? Colors.labelActiveForeground : Colors.labelInactiveForeground
+    color: (isActive && enabled) ? uiColors.labelActiveForeground : uiColors.labelInactiveForeground
     renderType: Text.NativeRendering
     font.family: Qt.platform.os === "windows" ? "Arial" : "Helvetica"
     font.pixelSize: 14

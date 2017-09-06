@@ -20,17 +20,17 @@ Item {
     property bool isListLayout: true
     signal layoutChanged()
     property color currentColor: {
-        var resultColor = Colors.selectedArtworkBackground
+        var resultColor = uiColors.selectedArtworkBackground
         if (enabled) {
             if (layoutMA.pressed) {
-                resultColor = Colors.linkClickedColor
+                resultColor = uiColors.linkClickedColor
             } else if (layoutMA.containsMouse) {
-                resultColor = Colors.labelActiveForeground
+                resultColor = uiColors.labelActiveForeground
             } else {
-                resultColor = Colors.selectedArtworkBackground
+                resultColor = uiColors.selectedArtworkBackground
             }
         } else {
-            resultColor = Colors.selectedArtworkBackground
+            resultColor = uiColors.selectedArtworkBackground
         }
 
         return resultColor

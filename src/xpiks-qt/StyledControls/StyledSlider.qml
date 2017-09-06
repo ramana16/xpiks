@@ -18,7 +18,7 @@ Slider {
         groove: Rectangle {
             implicitWidth: 200
             implicitHeight: 4
-            color: Colors.defaultControlColor
+            color: uiColors.defaultControlColor
             radius: 4
 
             Rectangle {
@@ -27,7 +27,7 @@ Slider {
                 implicitHeight: 4
                 implicitWidth: 100
                 radius: height/2
-                color: Colors.artworkActiveColor
+                color: uiColors.artworkActiveColor
             }
         }
     }

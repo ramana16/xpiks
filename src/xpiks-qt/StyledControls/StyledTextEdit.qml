@@ -21,14 +21,14 @@ TextEdit {
     font.family: Qt.platform.os === "windows" ? "Arial" : "Helvetica"
     font.pixelSize: UIConfig.fontPixelSize * settingsModel.keywordSizeScale
     verticalAlignment: TextInput.AlignVCenter
-    selectedTextColor: Colors.inputForegroundColor
-    selectionColor: Colors.inputInactiveBackground
+    selectedTextColor: uiColors.inputForegroundColor
+    selectionColor: uiColors.inputInactiveBackground
     renderType: Text.NativeRendering
     selectByMouse: true
     cursorVisible: false
     wrapMode: TextEdit.NoWrap
     activeFocusOnPress: true
-    color: (enabled && isActive) ? Colors.inputForegroundColor : Colors.inputInactiveForeground
+    color: (enabled && isActive) ? uiColors.inputForegroundColor : uiColors.inputInactiveForeground
 
     function isSeparator(position) {
         var separators = " ,.:;\\|<>()-";

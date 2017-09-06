@@ -178,7 +178,7 @@ Item {
             anchors.bottomMargin: -glowRadius/2
             glowRadius: 4
             spread: 0.0
-            color: Colors.defaultControlColor
+            color: uiColors.defaultControlColor
             cornerRadius: glowRadius
         }
 
@@ -187,7 +187,7 @@ Item {
             id: dialogWindow
             width: 630
             height: Qt.platform.os == "windows" ? 470 : (Qt.platform.os == "linux" ? 475 : 460)
-            color: Colors.popupBackgroundColor
+            color: uiColors.popupBackgroundColor
             anchors.centerIn: parent
             Component.onCompleted: anchors.centerIn = undefined
 
@@ -244,7 +244,7 @@ Item {
                         Rectangle {
                             height: 5
                             Layout.fillWidth: true
-                            color: Colors.defaultControlColor
+                            color: uiColors.defaultControlColor
                         }
 
                         Rectangle {
@@ -254,7 +254,7 @@ Item {
                             Layout.preferredWidth: 250
                             Layout.maximumWidth: 300
 
-                            color: Colors.defaultControlColor
+                            color: uiColors.defaultControlColor
 
                             StyledScrollView {
                                 anchors.fill: parent
@@ -292,7 +292,7 @@ Item {
                                         property variant myData: model
                                         property int delegateIndex: index
                                         property bool isSelected: ListView.isCurrentItem
-                                        color: isSelected ? Colors.selectedArtworkBackground : Colors.defaultDarkColor
+                                        color: isSelected ? uiColors.selectedArtworkBackground : uiColors.defaultDarkColor
                                         width: parent.width - 10
                                         anchors.left: parent.left
                                         anchors.leftMargin: 5
@@ -348,7 +348,7 @@ Item {
                                                 id: percentText
                                                 text: percent + '%'
                                                 visible: artworkUploader.inProgress && isselected
-                                                color: Colors.artworkActiveColor
+                                                color: uiColors.artworkActiveColor
                                                 font.bold: true
                                             }
 
@@ -357,7 +357,7 @@ Item {
                                                 height: 14
                                                 anchors.verticalCenterOffset: 1
                                                 isActive: false
-                                                disabledColor: Colors.closeIconInactiveColor
+                                                disabledColor: uiColors.closeIconInactiveColor
 
                                                 onItemClicked: {
                                                     confirmRemoveItemDialog.itemIndex = sourceWrapper.delegateIndex
@@ -376,7 +376,7 @@ Item {
                         }
 
                         Rectangle {
-                            color: Colors.defaultControlColor
+                            color: uiColors.defaultControlColor
                             height: 40
                             anchors.left: parent.left
                             anchors.right: parent.right
@@ -470,9 +470,9 @@ Item {
                                     Rectangle {
                                         id: titleWrapper
                                         border.width: titleText.activeFocus ? 1 : 0
-                                        border.color: Colors.artworkActiveColor
+                                        border.color: uiColors.artworkActiveColor
                                         Layout.fillWidth: true
-                                        color: enabled ? Colors.inputBackgroundColor : Colors.inputInactiveBackground
+                                        color: enabled ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
                                         height: 30
 
                                         function onTitleFocusRequested() {
@@ -576,9 +576,9 @@ Item {
 
                                     Rectangle {
                                         border.width: ftpHost.activeFocus ? 1 : 0
-                                        border.color: Colors.artworkActiveColor
+                                        border.color: uiColors.artworkActiveColor
                                         Layout.fillWidth: true
-                                        color: enabled ? Colors.inputBackgroundColor : Colors.inputInactiveBackground
+                                        color: enabled ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
                                         height: 30
 
                                         StyledTextInput {
@@ -610,9 +610,9 @@ Item {
 
                                     Rectangle {
                                         border.width: ftpUsername.activeFocus ? 1 : 0
-                                        border.color: Colors.artworkActiveColor
+                                        border.color: uiColors.artworkActiveColor
                                         Layout.fillWidth: true
-                                        color: enabled ? Colors.inputBackgroundColor : Colors.inputInactiveBackground
+                                        color: enabled ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
                                         height: 30
 
                                         StyledTextInput {
@@ -643,10 +643,10 @@ Item {
 
                                     Rectangle {
                                         border.width: ftpPassword.activeFocus ? 1 : 0
-                                        border.color: Colors.artworkActiveColor
+                                        border.color: uiColors.artworkActiveColor
                                         Layout.fillWidth: true
                                         height: 30
-                                        color: enabled ? Colors.inputBackgroundColor : Colors.inputInactiveBackground
+                                        color: enabled ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
 
                                         StyledTextInput {
                                             id: ftpPassword
@@ -807,7 +807,7 @@ Item {
                         Rectangle {
                             id: overlayRectangle
                             anchors.fill: parent
-                            color: Colors.selectedArtworkBackground
+                            color: uiColors.selectedArtworkBackground
                             opacity: 0.6
                             visible: (uploadInfos.infosCount === 0) || artworkUploader.inProgress
                         }
@@ -819,7 +819,7 @@ Item {
                     anchors.horizontalCenter: parent.horizontalCenter
                     width: parent.width
                     height: 20
-                    color: artworkUploader.isError ? Colors.destructiveColor : Colors.artworkActiveColor
+                    color: artworkUploader.isError ? uiColors.destructiveColor : uiColors.artworkActiveColor
                     value: artworkUploader.percent
                 }
 
@@ -831,7 +831,7 @@ Item {
                         visible: !skipUploadItems && (!artworkUploader.inProgress) && (uploadWatcher.failedImagesCount === 0)
                         enabled: uploadArtworksComponent.uploadEnabled && !skipUploadItems
                         text: i18.n + getOriginalText()
-                        color: uploadWarmingsMA.pressed ? Colors.linkClickedColor : warningsModel.warningsCount > 0 ? Colors.artworkModifiedColor : Colors.labelActiveForeground
+                        color: uploadWarmingsMA.pressed ? uiColors.linkClickedColor : warningsModel.warningsCount > 0 ? uiColors.artworkModifiedColor : uiColors.labelActiveForeground
 
                         function getOriginalText() {
                             return warningsModel.warningsCount == 1 ? qsTr("1 warning") : qsTr("%1 warnings").arg(warningsModel.warningsCount)
@@ -860,7 +860,7 @@ Item {
                         visible: !skipUploadItems && (uploadWatcher.failedImagesCount > 0)
                         enabled: uploadArtworksComponent.uploadEnabled && !skipUploadItems && (uploadWatcher.failedImagesCount > 0)
                         text: i18.n + getOriginalText()
-                        color: showFailedArtworksMA.pressed ? Colors.linkClickedColor : Colors.artworkModifiedColor
+                        color: showFailedArtworksMA.pressed ? uiColors.linkClickedColor : uiColors.artworkModifiedColor
 
                         function getOriginalText() {
                             return uploadWatcher.failedImagesCount === 1 ?

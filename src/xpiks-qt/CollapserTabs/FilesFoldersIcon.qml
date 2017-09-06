@@ -22,5 +22,5 @@ FolderElement {
     width: 20
     height: 17
     thickness: 2
-    color: isHighlighted ? Colors.labelActiveForeground : Colors.inactiveControlColor
+    color: isHighlighted ? uiColors.labelActiveForeground : uiColors.inactiveControlColor
 }

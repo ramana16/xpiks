@@ -14,7 +14,7 @@ import "../StyledControls"
 
 Item {
     id: completeBox
-    property color highlightedItemColor: Colors.artworkActiveColor
+    property color highlightedItemColor: uiColors.artworkActiveColor
     property double maxCount: 5
     property bool isBelowEdit: true
     property alias model: dropDownItems.model
@@ -57,7 +57,7 @@ Item {
         height: dropDown.height
         glowRadius: 4
         spread: 0.0
-        color: Colors.defaultControlColor
+        color: uiColors.defaultControlColor
         cornerRadius: glowRadius
     }
 
@@ -66,7 +66,7 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
-        color: Colors.inputForegroundColor
+        color: uiColors.inputForegroundColor
         height: 0
         focus: false
         clip: true
@@ -88,7 +88,7 @@ Item {
 
             delegate: Rectangle {
                 id: currentDelegate
-                color: isSelected ? highlightedItemColor : Colors.inputForegroundColor
+                color: isSelected ? highlightedItemColor : uiColors.inputForegroundColor
                 property var itemText: display
                 property bool isLastItem: index === (dropDownItems.count - 1)
                 property bool isSelected: index === autoCompleteSource.selectedIndex
@@ -102,7 +102,7 @@ Item {
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.leftMargin: 16
-                    color: isSelected ? Colors.whiteColor : Colors.inputBackgroundColor
+                    color: isSelected ? uiColors.whiteColor : uiColors.inputBackgroundColor
                 }
 
                 StyledText {
@@ -119,7 +119,7 @@ Item {
                     visible: !currentDelegate.isLastItem
                     enabled: !currentDelegate.isLastItem
                     height: 1
-                    color: isSelected ? highlightedItemColor : Colors.listSeparatorColor
+                    color: isSelected ? highlightedItemColor : uiColors.listSeparatorColor
                     anchors.bottom: parent.bottom
                     anchors.left: parent.left
                     anchors.right: parent.right

@@ -22,7 +22,7 @@ import "../StyledControls"
 import "../Constants/UIConfig.js" as UIConfig
 
 Rectangle {
-    color: Colors.defaultDarkColor
+    color: uiColors.defaultDarkColor
     property bool wasLeftSideCollapsed
     property bool isRestricted: false
 
@@ -47,7 +47,7 @@ Rectangle {
 
     Rectangle {
         id: header
-        color: Colors.defaultDarkColor
+        color: uiColors.defaultDarkColor
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
@@ -94,7 +94,7 @@ Rectangle {
 
             delegate: Rectangle {
                 property int delegateIndex: index
-                color: Colors.defaultControlColor
+                color: uiColors.defaultControlColor
                 id: imageWrapper
                 anchors.left: parent.left
                 anchors.right: parent.right
@@ -172,7 +172,7 @@ Rectangle {
                     anchors.top: parent.top
                     anchors.right: parent.right
                     height: (childrenRect.height < 120) ? 180 : (childrenRect.height + 60)
-                    color: Colors.defaultControlColor
+                    color: uiColors.defaultControlColor
 
                     Column {
                         id: warningsTextList
@@ -199,13 +199,13 @@ Rectangle {
                                     width: height
                                     radius: height/2
                                     anchors.verticalCenter: parent.verticalCenter
-                                    color: Colors.inactiveControlColor
+                                    color: uiColors.inactiveControlColor
                                 }
 
                                 StyledText {
                                     Layout.fillWidth: true
                                     text: i18.n + modelData
-                                    color: Colors.artworkModifiedColor
+                                    color: uiColors.artworkModifiedColor
                                     anchors.verticalCenter: parent.verticalCenter
                                 }
                             }

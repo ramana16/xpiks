@@ -48,7 +48,7 @@ ColumnLayout {
         showColorSign: true
         hasLastItemAction: true
         lastActionText: i18.n + qsTr("Add dictionary...")
-        comboboxBackgroundColor: Colors.popupBackgroundColor
+        comboboxBackgroundColor: uiColors.popupBackgroundColor
         z: 100500
 
         onLastItemActionInvoked: {
@@ -70,7 +70,7 @@ ColumnLayout {
         anchors.left: parent.left
         anchors.right: parent.right
         height: 30
-        color: Colors.popupDarkInputBackground
+        color: uiColors.popupDarkInputBackground
 
         StyledTextEdit {
             id: trTextEdit
@@ -83,7 +83,7 @@ ColumnLayout {
             text: translationManager.query
             onTextChanged: translationManager.query = text
             isActive: false
-            selectionColor: Colors.inputBackgroundColor
+            selectionColor: uiColors.inputBackgroundColor
 
             Keys.onBacktabPressed: {
                 event.accepted = true
@@ -127,7 +127,7 @@ ColumnLayout {
         anchors.left: parent.left
         anchors.right: parent.right
         Layout.fillHeight: true
-        color: Colors.popupDarkInputBackground
+        color: uiColors.popupDarkInputBackground
 
         Flickable {
             id: trFlickOther
@@ -156,7 +156,7 @@ ColumnLayout {
                 focus: true
                 readOnly: true
                 text: translationManager.shortTranslation
-                selectionColor: Colors.inputBackgroundColor
+                selectionColor: uiColors.inputBackgroundColor
                 wrapMode: TextEdit.Wrap
                 horizontalAlignment: TextEdit.AlignLeft
                 verticalAlignment: TextEdit.AlignTop
@@ -186,7 +186,7 @@ ColumnLayout {
 
         Rectangle {
             anchors.fill: parent
-            color: Colors.selectedArtworkBackground
+            color: uiColors.selectedArtworkBackground
             opacity: 0.2
             visible: translationManager.isBusy
         }
@@ -205,7 +205,7 @@ ColumnLayout {
             anchors.right: parent.right
             text: i18.n + qsTr("Show more")
             enabled: translationManager.hasMore
-            color: enabled ? (showMoreMA.pressed ? Colors.linkClickedColor : Colors.artworkActiveColor) : Colors.labelInactiveForeground
+            color: enabled ? (showMoreMA.pressed ? uiColors.linkClickedColor : uiColors.artworkActiveColor) : uiColors.labelInactiveForeground
 
             MouseArea {
                 id: showMoreMA

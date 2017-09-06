@@ -128,7 +128,7 @@ ColumnLayout {
 
     Rectangle {
         height: 45
-        color: Colors.defaultDarkColor
+        color: uiColors.defaultDarkColor
         z: 2000
         anchors.left: parent.left
         anchors.leftMargin: mainGridComponent.myLeftMargin
@@ -191,7 +191,7 @@ ColumnLayout {
         anchors.leftMargin: mainGridComponent.myLeftMargin
         anchors.right: parent.right
         Layout.fillHeight: true
-        color: Colors.defaultControlColor
+        color: uiColors.defaultControlColor
 
         Item {
             id: workflowHost
@@ -245,7 +245,7 @@ ColumnLayout {
                     anchors.right: searchButton.left
                     anchors.rightMargin: 10
                     anchors.verticalCenter: parent.verticalCenter
-                    color: Colors.defaultDarkColor
+                    color: uiColors.defaultDarkColor
                     width: (artworkRepository.artworksSourcesCount > 0 && mainScrollView.areScrollbarsVisible) ? 288 : 298
                     height: UIConfig.textInputHeight
 
@@ -257,8 +257,8 @@ ColumnLayout {
                         anchors.left: parent.left
                         anchors.leftMargin: 5
                         enabled: artworkRepository.artworksSourcesCount > 0
-                        selectionColor: Colors.inputInactiveForeground
-                        selectedTextColor: Colors.whiteColor
+                        selectionColor: uiColors.inputInactiveForeground
+                        selectedTextColor: uiColors.whiteColor
 
                         onAccepted: {
                             filteredArtItemsModel.searchTerm = text
@@ -283,7 +283,7 @@ ColumnLayout {
                     StyledText {
                         text: i18.n + qsTr("Search...   x:empty  x:modified")
                         visible: !(filterClearTimer.running || filterText.activeFocus || (filterText.length > 0))
-                        color: Colors.inputHintForeground
+                        color: uiColors.inputHintForeground
                         anchors.left: parent.left
                         anchors.leftMargin: 7
                         anchors.verticalCenter: parent.verticalCenter
@@ -311,7 +311,7 @@ ColumnLayout {
 
             Rectangle {
                 id: undoRedoRect
-                color: Colors.defaultDarkColor
+                color: uiColors.defaultDarkColor
                 width: parent.width
                 height: 4
                 opacity: 0
@@ -392,7 +392,7 @@ ColumnLayout {
 
                 Rectangle {
                     anchors.left: parent.left
-                    color: Colors.artworkSavedColor
+                    color: uiColors.artworkSavedColor
                     width: applicationWindow.listLayout ? 6 : 3
                     height: parent.height
                 }
@@ -412,7 +412,7 @@ ColumnLayout {
 
                     StyledText {
                         text: i18.n + qsTr("Undo")
-                        color: undoMA.pressed ? Colors.linkClickedColor : Colors.artworkActiveColor
+                        color: undoMA.pressed ? uiColors.linkClickedColor : uiColors.artworkActiveColor
 
                         MouseArea {
                             id: undoMA
@@ -427,7 +427,7 @@ ColumnLayout {
 
                     StyledText {
                         text: i18.n + qsTr("Dismiss (%1)").arg(settingsModel.dismissDuration - (autoDismissTimer.iterations % (settingsModel.dismissDuration + 1)))
-                        color: dismissUndoMA.pressed ? Colors.linkClickedColor : Colors.labelInactiveForeground
+                        color: dismissUndoMA.pressed ? uiColors.linkClickedColor : uiColors.labelInactiveForeground
 
                         MouseArea {
                             id: dismissUndoMA
@@ -474,7 +474,7 @@ ColumnLayout {
                 anchors.topMargin: visible ? 2 : 4
                 anchors.top: undoRedoRect.bottom
                 height: visible ? 2 : 0
-                color: Colors.defaultDarkColor
+                color: uiColors.defaultDarkColor
                 visible: !undoRedoManager.canUndo && (artworksHost.count > 0)
             }
 
@@ -555,7 +555,7 @@ ColumnLayout {
                             id: rowWrapper
                             objectName: "artworkDelegate"
                             property bool isHighlighted: isselected || wrappersScope.GridView.isCurrentItem
-                            color: isHighlighted ? Colors.selectedArtworkBackground : Colors.artworkBackground
+                            color: isHighlighted ? uiColors.selectedArtworkBackground : uiColors.artworkBackground
                             property var artworkModel: filteredArtItemsModel.getArtworkMetadata(index)
                             property var keywordsModel: filteredArtItemsModel.getBasicModel(index)
                             property int delegateIndex: index
@@ -676,7 +676,7 @@ ColumnLayout {
 
                                 Rectangle {
                                     id: isModifiedRectangle
-                                    color: ismodified ? Colors.artworkModifiedColor : Colors.artworkSavedColor
+                                    color: ismodified ? uiColors.artworkModifiedColor : uiColors.artworkSavedColor
                                     width: applicationWindow.listLayout ? 6 : 3
                                     anchors.left: parent.left
                                     anchors.top: parent.top
@@ -895,8 +895,8 @@ ColumnLayout {
                                             anchors.rightMargin: columnLayout.isWideEnough ? 20 : 0
                                             anchors.top: descriptionText.bottom
                                             anchors.topMargin: 3
-                                            color: rowWrapper.isHighlighted ? Colors.inputBackgroundColor : Colors.inputInactiveBackground
-                                            border.color: Colors.artworkActiveColor
+                                            color: rowWrapper.isHighlighted ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
+                                            border.color: uiColors.artworkActiveColor
                                             border.width: descriptionTextInput.activeFocus ? 1 : 0
                                             clip: true
                                             focus: false
@@ -1007,8 +1007,8 @@ ColumnLayout {
                                             anchors.right: parent.right
                                             anchors.top: descriptionText.bottom
                                             anchors.topMargin: 3
-                                            color: rowWrapper.isHighlighted ? Colors.inputBackgroundColor : Colors.inputInactiveBackground
-                                            border.color: Colors.artworkActiveColor
+                                            color: rowWrapper.isHighlighted ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
+                                            border.color: uiColors.artworkActiveColor
                                             border.width: titleTextInput.activeFocus ? 1 : 0
                                             clip: true
                                             focus: false
@@ -1131,9 +1131,9 @@ ColumnLayout {
                                             anchors.left: parent.left
                                             anchors.right: parent.right
                                             height: 80*settingsModel.keywordSizeScale
-                                            border.color: Colors.artworkActiveColor
+                                            border.color: uiColors.artworkActiveColor
                                             border.width: flv.isFocused ? 1 : 0
-                                            color: rowWrapper.isHighlighted ? Colors.inputBackgroundColor : Colors.inputInactiveBackground
+                                            color: rowWrapper.isHighlighted ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
 
                                             function removeKeyword(index) {
                                                 artItemsModel.removeKeywordAt(rowWrapper.getIndex(), index)
@@ -1277,7 +1277,7 @@ ColumnLayout {
                                             StyledText {
                                                 id: plainTextText
                                                 text: i18.n + qsTr("<u>edit in plain text</u>")
-                                                color: plainTextMA.containsMouse ? Colors.linkClickedColor : Colors.labelActiveForeground
+                                                color: plainTextMA.containsMouse ? uiColors.linkClickedColor : uiColors.labelActiveForeground
                                                 visible: rowWrapper.isHighlighted
 
                                                 MouseArea {
@@ -1324,7 +1324,7 @@ ColumnLayout {
                                                 id: fixSpellingText
                                                 text: i18.n + qsTr("Fix spelling")
                                                 enabled: rowWrapper.keywordsModel ? rowWrapper.keywordsModel.hasSpellErrors : false
-                                                color: enabled ? (fixSpellingMA.pressed ? Colors.linkClickedColor : Colors.artworkActiveColor) : (rowWrapper.isHighlighted ? Colors.labelActiveForeground : Colors.labelInactiveForeground)
+                                                color: enabled ? (fixSpellingMA.pressed ? uiColors.linkClickedColor : uiColors.artworkActiveColor) : (rowWrapper.isHighlighted ? uiColors.labelActiveForeground : uiColors.labelInactiveForeground)
 
                                                 MouseArea {
                                                     id: fixSpellingMA
@@ -1348,7 +1348,7 @@ ColumnLayout {
 
                                             StyledText {
                                                 text: i18.n + qsTr("Suggest")
-                                                color: suggestKeywordsMA.pressed ? Colors.linkClickedColor : Colors.artworkActiveColor
+                                                color: suggestKeywordsMA.pressed ? uiColors.linkClickedColor : uiColors.artworkActiveColor
 
                                                 MouseArea {
                                                     id: suggestKeywordsMA
@@ -1378,7 +1378,7 @@ ColumnLayout {
 
                                             StyledText {
                                                 text: i18.n + qsTr("Copy")
-                                                color: enabled ? (copyKeywordsMA.pressed ? Colors.linkClickedColor : Colors.artworkActiveColor) : (rowWrapper.isHighlighted ? Colors.labelActiveForeground : Colors.labelInactiveForeground)
+                                                color: enabled ? (copyKeywordsMA.pressed ? uiColors.linkClickedColor : uiColors.artworkActiveColor) : (rowWrapper.isHighlighted ? uiColors.labelActiveForeground : uiColors.labelInactiveForeground)
                                                 enabled: keywordscount > 0
 
                                                 MouseArea {
@@ -1398,7 +1398,7 @@ ColumnLayout {
                                             StyledText {
                                                 text: i18.n + qsTr("Clear")
                                                 enabled: keywordscount > 0
-                                                color: enabled ? (clearKeywordsMA.pressed ? Colors.linkClickedColor : Colors.artworkActiveColor) : (rowWrapper.isHighlighted ? Colors.labelActiveForeground : Colors.labelInactiveForeground)
+                                                color: enabled ? (clearKeywordsMA.pressed ? uiColors.linkClickedColor : uiColors.artworkActiveColor) : (rowWrapper.isHighlighted ? uiColors.labelActiveForeground : uiColors.labelInactiveForeground)
 
                                                 MouseArea {
                                                     id: clearKeywordsMA
@@ -1479,7 +1479,7 @@ ColumnLayout {
 
                     StyledText {
                         text: i18.n + qsTr("Add files", "link")
-                        color: addFilesMA.pressed ? Colors.linkClickedColor : Colors.artworkActiveColor
+                        color: addFilesMA.pressed ? uiColors.linkClickedColor : uiColors.artworkActiveColor
 
                         MouseArea {
                             id: addFilesMA
@@ -1496,7 +1496,7 @@ ColumnLayout {
 
                     StyledText {
                         text: i18.n + qsTr("clear the filter")
-                        color: clearFilterMA.pressed ? Colors.linkClickedColor : Colors.artworkActiveColor
+                        color: clearFilterMA.pressed ? uiColors.linkClickedColor : uiColors.artworkActiveColor
 
                         MouseArea {
                             id: clearFilterMA

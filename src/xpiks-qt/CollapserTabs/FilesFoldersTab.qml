@@ -85,7 +85,7 @@ ColumnLayout {
                 delegate: Rectangle {
                     id: sourceWrapper
                     property int delegateIndex: index
-                    color: isselected ? Colors.itemsSourceSelected : Colors.itemsSourceBackground
+                    color: isselected ? uiColors.itemsSourceSelected : uiColors.itemsSourceBackground
                     width: parent.width
                     height: 31
                     Layout.minimumWidth: 237
@@ -111,7 +111,7 @@ ColumnLayout {
                             Layout.fillWidth: true
                             anchors.verticalCenter: parent.verticalCenter
                             height: 31
-                            color: Colors.itemsSourceForeground
+                            color: uiColors.itemsSourceForeground
                             text: path + " (" + usedimagescount + ")"
                             elide: Text.ElideMiddle
                             font.bold: isselected
@@ -160,8 +160,8 @@ ColumnLayout {
         anchors.left: parent.left
         anchors.right: parent.right
         text: i18.n + qsTr("Support Xpiks")
-        defaultForeground: Colors.goldColor
-        hoverForeground: Colors.buttonDefaultForeground
+        defaultForeground: uiColors.goldColor
+        hoverForeground: uiColors.buttonDefaultForeground
         visible: {
             if (switcher.isDonationCampaign1Active) {
                 if ((artworkRepository.artworksSourcesCount > 0) ||

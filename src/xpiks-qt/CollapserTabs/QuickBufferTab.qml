@@ -76,8 +76,8 @@ ColumnLayout {
         anchors.left: parent.left
         anchors.right: parent.right
         height: 25
-        color: Colors.inputInactiveBackground
-        border.color: Colors.artworkActiveColor
+        color: uiColors.inputInactiveBackground
+        border.color: uiColors.artworkActiveColor
         border.width: titleTextInput.activeFocus ? 1 : 0
         clip: true
 
@@ -185,8 +185,8 @@ ColumnLayout {
         anchors.left: parent.left
         anchors.right: parent.right
         height: 70
-        color: Colors.inputInactiveBackground
-        border.color: Colors.artworkActiveColor
+        color: uiColors.inputInactiveBackground
+        border.color: uiColors.artworkActiveColor
         border.width: descriptionTextInput.activeFocus ? 1 : 0
         clip: true
 
@@ -301,13 +301,13 @@ ColumnLayout {
 
     Rectangle {
         id: keywordsWrapper
-        border.color: Colors.artworkActiveColor
+        border.color: uiColors.artworkActiveColor
         border.width: flv.isFocused ? 1 : 0
         Layout.fillHeight: true
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.rightMargin: quickScrollBar.visible ? 10 : 0
-        color: Colors.inputInactiveBackground
+        color: uiColors.inputInactiveBackground
         property var keywordsModel: quickBuffer.getBasicModel()
 
         function removeKeyword(index) {
@@ -399,7 +399,7 @@ ColumnLayout {
         StyledText {
             text: i18.n + qsTr("Copy")
             enabled: quickBuffer.keywordsCount > 0
-            color: enabled ? (qCopyKeywordsMA.pressed ? Colors.linkClickedColor : Colors.artworkActiveColor) : Colors.labelInactiveForeground
+            color: enabled ? (qCopyKeywordsMA.pressed ? uiColors.linkClickedColor : uiColors.artworkActiveColor) : uiColors.labelInactiveForeground
 
             MouseArea {
                 id: qCopyKeywordsMA
@@ -418,7 +418,7 @@ ColumnLayout {
         StyledText {
             text: i18.n + qsTr("Clear")
             enabled: quickBuffer.keywordsCount > 0
-            color: enabled ? (qClearKeywordsMA.pressed ? Colors.linkClickedColor : Colors.artworkActiveColor) : Colors.labelInactiveForeground
+            color: enabled ? (qClearKeywordsMA.pressed ? uiColors.linkClickedColor : uiColors.artworkActiveColor) : uiColors.labelInactiveForeground
 
             MouseArea {
                 id: qClearKeywordsMA

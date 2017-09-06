@@ -29,23 +29,23 @@ Rectangle {
     signal clicked()
 
     color: {
-        var result = Colors.buttonDefaultBackground;
+        var result = uiColors.buttonDefaultBackground;
 
         if (control.enabled &&
                 (control.isDefault || control.hovered)) {
-            result = Colors.buttonHoverBackground;
+            result = uiColors.buttonHoverBackground;
         }
 
         return result
     }
 
     property color textColor: {
-        var result = Colors.defaultControlColor;
+        var result = uiColors.defaultControlColor;
 
         if (control.enabled) {
-            result = control.pressed ? Colors.buttonPressedForeground : Colors.buttonDefaultForeground;
+            result = control.pressed ? uiColors.buttonPressedForeground : uiColors.buttonDefaultForeground;
         } else {
-            result = Colors.buttonDisabledForeground;
+            result = uiColors.buttonDisabledForeground;
         }
 
         return result

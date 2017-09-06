@@ -73,7 +73,7 @@ Item {
                 id: backHandle
                 anchors.fill: parent
                 radius: 5
-                color: Colors.artworkActiveColor
+                color: uiColors.artworkActiveColor
                 opacity: clicker.pressed ? 1 : (clicker.containsMouse ? 0.9 : 0.8)
             }
         }

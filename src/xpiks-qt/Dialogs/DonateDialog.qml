@@ -70,7 +70,7 @@ Item {
             anchors.bottomMargin: -glowRadius/2
             glowRadius: 4
             spread: 0.0
-            color: Colors.defaultControlColor
+            color: uiColors.defaultControlColor
             cornerRadius: glowRadius
         }
 
@@ -79,7 +79,7 @@ Item {
             id: dialogWindow
             width: 400
             height: 400
-            color: Colors.popupBackgroundColor
+            color: uiColors.popupBackgroundColor
             anchors.centerIn: parent
             Component.onCompleted: anchors.centerIn = undefined
 
@@ -89,7 +89,7 @@ Item {
                 signal donateLinkClicked()
 
                 Image {
-                    source: Colors.t + helpersWrapper.getSvgForTheme("qrc:/Graphics/Icon_donate_", settingsModel.selectedThemeIndex)
+                    source: uiColors.t + helpersWrapper.getSvgForTheme("qrc:/Graphics/Icon_donate_", settingsModel.selectedThemeIndex)
                     cache: false
                     width: 123
                     height: 115
@@ -131,8 +131,8 @@ Item {
                     width: 150
                     anchors.horizontalCenter: parent.horizontalCenter
                     text: i18.n + qsTr("Support Xpiks")
-                    defaultForeground: Colors.goldColor
-                    hoverForeground: Colors.buttonDefaultForeground
+                    defaultForeground: uiColors.goldColor
+                    hoverForeground: uiColors.buttonDefaultForeground
                     visible: true
                     onClicked: {
                         Qt.openUrlExternally(switcher.donateCampaign1Link)

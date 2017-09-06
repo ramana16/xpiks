@@ -20,7 +20,7 @@ Item {
         anchors.fill: parent
 
         Rectangle {
-            color: Colors.whiteColor
+            color: uiColors.whiteColor
             width: parent.width/3
             height: item.thickness
             radius: height/2
@@ -30,7 +30,7 @@ Item {
         }
 
         Rectangle {
-            color: Colors.whiteColor
+            color: uiColors.whiteColor
             width: parent.width/3
             height: item.thickness
             radius: height/2

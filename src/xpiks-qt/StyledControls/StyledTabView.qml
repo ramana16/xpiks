@@ -19,7 +19,7 @@ import "../Constants"
 TabView {
     property double tabBarHeight: 1
     property double tabsHeight: 25
-    property color backgroundColor: Colors.popupBackgroundColor
+    property color backgroundColor: uiColors.popupBackgroundColor
 
     style: TabViewStyle {
         frameOverlap: -tabBarHeight
@@ -42,15 +42,15 @@ TabView {
                 height: tabBarHeight
                 anchors.left: parent.left
                 anchors.right: parent.right
-                color: Colors.artworkActiveColor
+                color: uiColors.artworkActiveColor
             }
         }
 
         tab: Rectangle {
-            color: styleData.selected ? backgroundColor : Colors.defaultControlColor
+            color: styleData.selected ? backgroundColor : uiColors.defaultControlColor
             implicitWidth: Math.max(text.width + 10, 80)
             implicitHeight: tabsHeight
-            border.color: Colors.artworkActiveColor
+            border.color: uiColors.artworkActiveColor
             border.width: styleData.selected ? tabBarHeight : 0
 
             StyledText {
@@ -58,7 +58,7 @@ TabView {
                 anchors.centerIn: parent
                 anchors.verticalCenterOffset: styleData.selected ? 1 : -1
                 text: styleData.title
-                color: styleData.hovered ? Colors.artworkActiveColor : (styleData.selected ? Colors.inputForegroundColor : Colors.labelActiveForeground)
+                color: styleData.hovered ? uiColors.artworkActiveColor : (styleData.selected ? uiColors.inputForegroundColor : uiColors.labelActiveForeground)
             }
 
             Rectangle {
@@ -67,7 +67,7 @@ TabView {
                 anchors.right: parent.right
                 anchors.leftMargin: styleData.selected ? 1 : 0
                 anchors.rightMargin: styleData.selected ? 1 : 0
-                color: styleData.selected ? backgroundColor : Colors.artworkActiveColor
+                color: styleData.selected ? backgroundColor : uiColors.artworkActiveColor
                 height: tabBarHeight
             }
         }

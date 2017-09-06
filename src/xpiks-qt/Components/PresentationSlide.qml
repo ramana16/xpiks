@@ -42,7 +42,7 @@ Item {
         anchors.bottom: parent.bottom
         anchors.left: parent.left
         anchors.right: parent.right
-        color: Colors.defaultDarkColor
+        color: uiColors.defaultDarkColor
         height: 50
 
         StyledText {

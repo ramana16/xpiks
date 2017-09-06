@@ -24,7 +24,7 @@ Rectangle {
 
     signal actionClicked();
 
-    color: isSelected ? Colors.whiteColor : (innerMA.containsMouse ? Colors.artworkActiveColor : Colors.inactiveControlColor)
+    color: isSelected ? uiColors.whiteColor : (innerMA.containsMouse ? uiColors.artworkActiveColor : uiColors.inactiveControlColor)
 
     width: suggestionText.width + 10
     height: childrenRect.height
@@ -35,7 +35,7 @@ Rectangle {
         anchors.left: parent.left
         anchors.leftMargin: 5
         text: itemWrapper.suggestionText
-        color: isSelected ? Colors.inactiveControlColor : (innerMA.containsMouse ? Colors.whiteColor : Colors.labelActiveForeground)
+        color: isSelected ? uiColors.inactiveControlColor : (innerMA.containsMouse ? uiColors.whiteColor : uiColors.labelActiveForeground)
         font.pixelSize: UIConfig.fontPixelSize * settingsModel.keywordSizeScale
     }
 

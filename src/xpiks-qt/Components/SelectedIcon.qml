@@ -15,7 +15,7 @@ Item {
     id: item
     signal itemClicked();
     property bool isVisible: true
-    property color linesColor: Colors.whiteColor
+    property color linesColor: uiColors.whiteColor
 
     Item {
         anchors.fill: parent

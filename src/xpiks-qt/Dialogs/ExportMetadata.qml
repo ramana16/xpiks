@@ -108,7 +108,7 @@ Item {
             anchors.bottomMargin: -glowRadius/2
             glowRadius: 4
             spread: 0.0
-            color: Colors.defaultControlColor
+            color: uiColors.defaultControlColor
             cornerRadius: glowRadius
         }
 
@@ -117,7 +117,7 @@ Item {
             id: dialogWindow
             width: 380
             height: childrenRect.height + 40
-            color: Colors.popupBackgroundColor
+            color: uiColors.popupBackgroundColor
             anchors.centerIn: parent
             Component.onCompleted: anchors.centerIn = undefined
 
@@ -158,7 +158,7 @@ Item {
                     StyledText {
                         anchors.right: parent.right
                         text: i18.n + qsTr("%1 modified image(s) selected").arg(filteredArtItemsModel.getModifiedSelectedCount(overwriteAll))
-                        color: Colors.inputForegroundColor
+                        color: uiColors.inputForegroundColor
                     }
                 }
 

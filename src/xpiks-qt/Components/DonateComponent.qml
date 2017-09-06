@@ -23,7 +23,7 @@ ColumnLayout {
     signal donateLinkClicked()
 
     Image {
-        source: Colors.t + helpersWrapper.getSvgForTheme("qrc:/Graphics/Icon_donate_", settingsModel.selectedThemeIndex)
+        source: uiColors.t + helpersWrapper.getSvgForTheme("qrc:/Graphics/Icon_donate_", settingsModel.selectedThemeIndex)
         cache: false
         width: 123
         height: 115
@@ -49,7 +49,7 @@ ColumnLayout {
     StyledText {
         text: i18.n + qsTr("Support Xpiks")
         anchors.horizontalCenter: parent.horizontalCenter
-        color: donateMA.pressed ? Colors.linkClickedColor : Colors.goldColor
+        color: donateMA.pressed ? uiColors.linkClickedColor : uiColors.goldColor
         font.bold: true
 
         MouseArea {

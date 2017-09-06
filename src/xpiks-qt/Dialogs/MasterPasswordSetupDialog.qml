@@ -124,7 +124,7 @@ Item {
             anchors.bottomMargin: -glowRadius/2
             glowRadius: 4
             spread: 0.0
-            color: Colors.defaultControlColor
+            color: uiColors.defaultControlColor
             cornerRadius: glowRadius
         }
 
@@ -133,7 +133,7 @@ Item {
             id: dialogWindow
             width: 360
             height: 220
-            color: Colors.popupBackgroundColor
+            color: uiColors.popupBackgroundColor
             anchors.centerIn: parent
             Component.onCompleted: anchors.centerIn = undefined
 
@@ -157,9 +157,9 @@ Item {
                     }
 
                     Rectangle {
-                        color: enabled ? Colors.inputBackgroundColor : Colors.inputInactiveBackground
+                        color: enabled ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
                         border.width: (currentPassword.activeFocus || emptyMP) ? 1 : 0
-                        border.color: (emptyMP || wrongMP) ? Colors.artworkModifiedColor : Colors.artworkActiveColor
+                        border.color: (emptyMP || wrongMP) ? uiColors.artworkModifiedColor : uiColors.artworkActiveColor
                         width: 135
                         height: UIConfig.textInputHeight
                         clip: true
@@ -202,9 +202,9 @@ Item {
                     }
 
                     Rectangle {
-                        color: enabled ? Colors.inputBackgroundColor : Colors.inputInactiveBackground
+                        color: enabled ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
                         border.width: newMasterPassword.activeFocus ? 1 : 0
-                        border.color: Colors.artworkActiveColor
+                        border.color: uiColors.artworkActiveColor
                         width: 135
                         height: UIConfig.textInputHeight
                         clip: true
@@ -245,8 +245,8 @@ Item {
 
                     Rectangle {
                         border.width: enabled ? ((repeatMasterPassword.activeFocus || newMasterPassword.length > 0) ? 1 : 0) : 0
-                        border.color: repeatMasterPassword.text == newMasterPassword.text ? Colors.artworkActiveColor : Colors.artworkModifiedColor
-                        color: enabled ? Colors.inputBackgroundColor : Colors.inputInactiveBackground
+                        border.color: repeatMasterPassword.text == newMasterPassword.text ? uiColors.artworkActiveColor : uiColors.artworkModifiedColor
+                        color: enabled ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
                         width: 135
                         height: UIConfig.textInputHeight
                         clip: true

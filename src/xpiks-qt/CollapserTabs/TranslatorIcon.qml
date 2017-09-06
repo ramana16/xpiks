@@ -22,7 +22,7 @@ Rectangle {
     id: translatorIconWrapper
     width: 24
     height: 20
-    border.color: isHighlighted ? Colors.labelActiveForeground : Colors.inactiveControlColor
+    border.color: isHighlighted ? uiColors.labelActiveForeground : uiColors.inactiveControlColor
     border.width: 2
     color: "transparent"
 

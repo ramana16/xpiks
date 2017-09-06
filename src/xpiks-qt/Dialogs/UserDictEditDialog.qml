@@ -102,7 +102,7 @@ Item {
             anchors.bottomMargin: -glowRadius/2
             glowRadius: 4
             spread: 0.0
-            color: Colors.defaultControlColor
+            color: uiColors.defaultControlColor
             cornerRadius: glowRadius
         }
 
@@ -111,7 +111,7 @@ Item {
             id: dialogWindow
             width: 500
             height: 300
-            color: Colors.popupBackgroundColor
+            color: uiColors.popupBackgroundColor
             anchors.centerIn: parent
             Component.onCompleted: anchors.centerIn = undefined
 
@@ -130,12 +130,12 @@ Item {
 
                 Rectangle {
                     id: keywordsWrapper
-                    border.color: Colors.artworkActiveColor
+                    border.color: uiColors.artworkActiveColor
                     border.width: flv.isFocused ? 1 : 0
                     anchors.left: parent.left
                     anchors.right: parent.right
                     Layout.fillHeight: true
-                    color: enabled ? Colors.inputBackgroundColor : Colors.inputInactiveBackground
+                    color: enabled ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
                     property var keywordsModel: userDictEditModel.getBasicModel()
 
                     function removeKeyword(index) {
@@ -166,7 +166,7 @@ Item {
                             hasSpellCheckError: false
                             isHighlighted: true
                             itemHeight: flv.keywordHeight
-                            closeIconDisabledColor: Colors.closeIconInactiveColor
+                            closeIconDisabledColor: uiColors.closeIconInactiveColor
                             onRemoveClicked: keywordsWrapper.removeKeyword(delegateIndex)
                         }
 

@@ -17,7 +17,7 @@ import QtGraphicalEffects 1.0
 
 Item {
     id: comboBox
-    property color highlightedItemColor: Colors.artworkActiveColor
+    property color highlightedItemColor: uiColors.artworkActiveColor
     property bool showColorSign: true
     property bool hasLastItemAction: false
     property string lastActionText: ''
@@ -26,7 +26,7 @@ Item {
     property double maxCount: 5
     property alias model: dropDownItems.model
     property alias selectedIndex: dropDownItems.currentIndex
-    property color comboboxBackgroundColor: Colors.defaultControlColor
+    property color comboboxBackgroundColor: uiColors.defaultControlColor
     signal comboIndexChanged();
     signal lastItemActionInvoked();
 
@@ -45,7 +45,7 @@ Item {
         height: dropDown.height
         glowRadius: 4
         spread: 0.0
-        color: Colors.defaultDarkColor
+        color: uiColors.defaultDarkColor
         cornerRadius: glowRadius
     }
 
@@ -92,12 +92,12 @@ Item {
             anchors.top: parent.top
             anchors.bottom: parent.bottom
             width: 20
-            color: enabled ? Colors.artworkBackground : Colors.panelSelectedColor
+            color: enabled ? uiColors.artworkBackground : uiColors.panelSelectedColor
 
             TriangleElement {
                 anchors.centerIn: parent
                 anchors.verticalCenterOffset: isFlipped ? height*0.3 : 0
-                color: (enabled && (headerMA.containsMouse || comboBox.state === "dropDown")) ? Colors.labelActiveForeground : Colors.labelInactiveForeground
+                color: (enabled && (headerMA.containsMouse || comboBox.state === "dropDown")) ? uiColors.labelActiveForeground : uiColors.labelInactiveForeground
                 isFlipped: comboBox.state === ""
                 width: parent.width * 0.6
                 height: width * 0.5
@@ -120,7 +120,7 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: header.bottom
-        color: Colors.popupBackgroundColor
+        color: uiColors.popupBackgroundColor
         visible: false
         height: 0
         focus: true
@@ -157,14 +157,14 @@ Item {
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.leftMargin: 16
-                    color: itemMA.containsMouse ? Colors.whiteColor : (isCurrentItem ? highlightedItemColor : Colors.labelActiveForeground)
+                    color: itemMA.containsMouse ? uiColors.whiteColor : (isCurrentItem ? highlightedItemColor : uiColors.labelActiveForeground)
                 }
 
                 Rectangle {
                     visible: !currentDelegate.isLastItem || hasLastItemAction
                     enabled: !currentDelegate.isLastItem || hasLastItemAction
                     height: 1
-                    color: itemMA.containsMouse ? highlightedItemColor : Colors.inputBackgroundColor
+                    color: itemMA.containsMouse ? highlightedItemColor : uiColors.inputBackgroundColor
                     anchors.bottom: parent.bottom
                     anchors.left: parent.left
                     anchors.right: parent.right
@@ -203,7 +203,7 @@ Item {
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.leftMargin: 16
-                    color: lastItemMA.containsMouse ? Colors.whiteColor : Colors.labelActiveForeground
+                    color: lastItemMA.containsMouse ? uiColors.whiteColor : uiColors.labelActiveForeground
                 }
 
                 MouseArea {

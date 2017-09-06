@@ -441,7 +441,7 @@ int main(int argc, char *argv[]) {
     rootContext->setContextProperty("warningsModel", &warningsModel);
     rootContext->setContextProperty("languagesModel", &languagesModel);
     rootContext->setContextProperty("i18", &languagesModel);
-    rootContext->setContextProperty("Colors", &colorsModel);
+    rootContext->setContextProperty("uiColors", &colorsModel);
     rootContext->setContextProperty("acSource", &autoCompleteModel);
     rootContext->setContextProperty("replaceModel", &replaceModel);
     rootContext->setContextProperty("presetsModel", &presetsModel);

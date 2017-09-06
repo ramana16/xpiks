@@ -48,7 +48,7 @@ ApplicationWindow {
         settingsModel.selectedThemeIndex = uxTab.themeIndex
         settingsModel.userStatistics = secTab.useStatistics
         settingsModel.saveAllValues()
-        Colors.applyTheme(settingsModel.selectedThemeIndex)
+        uiColors.applyTheme(settingsModel.selectedThemeIndex)
     }
 
     function onCancelMP(firstTime) {
@@ -208,7 +208,7 @@ ApplicationWindow {
     }
 
     Rectangle {
-        color: Colors.popupBackgroundColor
+        color: uiColors.popupBackgroundColor
         anchors.fill: parent
 
         Component.onCompleted: focus = true
@@ -444,7 +444,7 @@ ApplicationWindow {
 
                         CustomComboBox {
                             id: themeComboBox
-                            model: Colors.getThemeNames()
+                            model: uiColors.getThemeNames()
                             showColorSign: false
                             width: 130
                             height: 24
@@ -533,7 +533,7 @@ ApplicationWindow {
                             anchors.left: row.right
                             anchors.leftMargin: 10
                             anchors.verticalCenter: row.verticalCenter
-                            color: Colors.inputForegroundColor
+                            color: uiColors.inputForegroundColor
 
                             width: childrenRect.width
                             height: childrenRect.height
@@ -553,7 +553,7 @@ ApplicationWindow {
                                     anchors.bottom: parent.bottom
                                     verticalAlignment: Text.AlignVCenter
                                     text: i18.n + qsTr("keyword", "standalone")
-                                    color: Colors.defaultControlColor
+                                    color: uiColors.defaultControlColor
                                     font.pixelSize: UIConfig.fontPixelSize * uxTab.sizeSliderValue
                                 }
                             }
@@ -625,8 +625,8 @@ ApplicationWindow {
                         }
 
                         Rectangle {
-                            color: enabled ? Colors.inputBackgroundColor : Colors.inputInactiveBackground
-                            border.color: Colors.artworkActiveColor
+                            color: enabled ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
+                            border.color: uiColors.artworkActiveColor
                             border.width: dismissDuration.activeFocus ? 1 : 0
                             width: 115
                             height: UIConfig.textInputHeight
@@ -717,8 +717,8 @@ ApplicationWindow {
                         }
 
                         Rectangle {
-                            color: enabled ? Colors.inputBackgroundColor : Colors.inputInactiveBackground
-                            border.color: Colors.artworkActiveColor
+                            color: enabled ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
+                            border.color: uiColors.artworkActiveColor
                             border.width: exifToolText.activeFocus ? 1 : 0
                             Layout.row: 0
                             Layout.column: 1
@@ -775,8 +775,8 @@ ApplicationWindow {
                         }
 
                         Rectangle {
-                            color: enabled ? Colors.inputBackgroundColor : Colors.inputInactiveBackground
-                            border.color: Colors.artworkActiveColor
+                            color: enabled ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
+                            border.color: uiColors.artworkActiveColor
                             border.width: dictText.activeFocus ? 1 : 0
                             Layout.row: 2
                             Layout.column: 1
@@ -859,9 +859,9 @@ ApplicationWindow {
                         }
 
                         Rectangle {
-                            color: enabled ? Colors.inputBackgroundColor : Colors.inputInactiveBackground
+                            color: enabled ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
                             border.width: timeoutSeconds.activeFocus ? 1 : 0
-                            border.color: Colors.artworkActiveColor
+                            border.color: uiColors.artworkActiveColor
                             width: 115
                             height: UIConfig.textInputHeight
                             clip: true
@@ -913,9 +913,9 @@ ApplicationWindow {
                         }
 
                         Rectangle {
-                            color: enabled ? Colors.inputBackgroundColor : Colors.inputInactiveBackground
+                            color: enabled ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
                             border.width: maxParallelUploads.activeFocus ? 1 : 0
-                            border.color: Colors.artworkActiveColor
+                            border.color: uiColors.artworkActiveColor
                             width: 115
                             height: UIConfig.textInputHeight
                             clip: true
@@ -1106,7 +1106,7 @@ ApplicationWindow {
                         StyledText {
                             id: link
                             text: i18.n + qsTr("More...")
-                            color: Colors.artworkActiveColor
+                            color: uiColors.artworkActiveColor
                             anchors.top: parent.top
                             anchors.left: parent.left
 
@@ -1130,7 +1130,7 @@ ApplicationWindow {
                         Rectangle {
                             id: contentsRect
                             color: "transparent"
-                            border.color: Colors.defaultControlColor
+                            border.color: uiColors.defaultControlColor
                             border.width: 1
                             anchors.left: parent.left
                             anchors.top: link.bottom

@@ -14,8 +14,8 @@ Item {
     id: host
     width: 25
     height: 25
-    property color iconColor: editMA.pressed ? Colors.linkClickedColor : (editMA.containsMouse ? Colors.artworkActiveColor : Colors.inputBackgroundColor)
-    property color backgroundColor: Colors.defaultControlColor
+    property color iconColor: editMA.pressed ? uiColors.linkClickedColor : (editMA.containsMouse ? uiColors.artworkActiveColor : uiColors.inputBackgroundColor)
+    property color backgroundColor: uiColors.defaultControlColor
     property double lineWidth: width / 9
     signal actionInvoked()
 

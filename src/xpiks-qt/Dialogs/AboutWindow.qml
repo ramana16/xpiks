@@ -37,7 +37,7 @@ ApplicationWindow {
     }
 
     Rectangle {
-        color: Colors.popupBackgroundColor
+        color: uiColors.popupBackgroundColor
         anchors.fill: parent
 
         Component.onCompleted: focus = true
@@ -52,7 +52,7 @@ ApplicationWindow {
             anchors.centerIn: parent
 
             StyledText {
-                color: Colors.inputForegroundColor
+                color: uiColors.inputForegroundColor
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: i18.n + qsTr("Version: %1").arg(settingsModel.appVersion)
             }
@@ -61,7 +61,7 @@ ApplicationWindow {
                 focus: true
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: i18.n + qsTr("<u>Xpiks webpage</u>")
-                color: aboutMA.pressed ? Colors.linkClickedColor : Colors.artworkActiveColor
+                color: aboutMA.pressed ? uiColors.linkClickedColor : uiColors.artworkActiveColor
 
                 MouseArea {
                     id: aboutMA
@@ -84,7 +84,7 @@ ApplicationWindow {
                 anchors.margins: 10
 
                 StyledText {
-                    color: Colors.inputForegroundColor
+                    color: uiColors.inputForegroundColor
                     wrapMode: TextEdit.Wrap
                     anchors.fill: parent
                     horizontalAlignment: Text.AlignHCenter

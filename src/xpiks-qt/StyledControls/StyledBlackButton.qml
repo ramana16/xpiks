@@ -15,17 +15,17 @@ import "../Constants"
 
 Button {
     activeFocusOnTab: false
-    property color defaultForeground: Colors.buttonDefaultForeground
+    property color defaultForeground: uiColors.buttonDefaultForeground
     property color hoverForeground: defaultForeground
 
     style: ButtonStyle {
         background: Rectangle {
             color: {
-                var result = Colors.defaultDarkColor;
+                var result = uiColors.defaultDarkColor;
 
                 if (control.enabled &&
                         (control.isDefault || control.hovered)) {
-                    result = Colors.buttonHoverBackground;
+                    result = uiColors.buttonHoverBackground;
                 }
 
                 return result
@@ -39,12 +39,12 @@ Button {
             horizontalAlignment: Text.AlignHCenter
             verticalAlignment: Text.AlignVCenter
             color: {
-                var result = Colors.defaultControlColor;
+                var result = uiColors.defaultControlColor;
 
                 if (control.enabled) {
-                    result = control.pressed ? Colors.buttonPressedForeground : (control.hovered ? control.hoverForeground : control.defaultForeground);
+                    result = control.pressed ? uiColors.buttonPressedForeground : (control.hovered ? control.hoverForeground : control.defaultForeground);
                 } else {
-                    result = Colors.inactiveControlColor;
+                    result = uiColors.inactiveControlColor;
                 }
 
                 return result

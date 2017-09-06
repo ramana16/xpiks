@@ -71,7 +71,7 @@ Item {
             id: dialogWindow
             width: 600
             height: 700
-            color: Colors.popupBackgroundColor
+            color: uiColors.popupBackgroundColor
             anchors.centerIn: parent
             Component.onCompleted: anchors.centerIn = undefined
 
@@ -95,7 +95,7 @@ Item {
                 anchors.topMargin: 10
                 anchors.bottom: footer.top
                 anchors.bottomMargin: 20
-                color: Colors.popupDarkInputBackground
+                color: uiColors.popupDarkInputBackground
 
                 StyledScrollView {
                     id: scrollView
@@ -105,7 +105,7 @@ Item {
                     StyledTextEdit {
                         id: textEdit
                         text: whatsNewMinorComponent.whatsNewText
-                        selectionColor: Colors.inputBackgroundColor
+                        selectionColor: uiColors.inputBackgroundColor
                         readOnly: true
                     }
                 }
