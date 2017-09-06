@@ -10,7 +10,7 @@ qmake "CONFIG+=debug" hunspell.pro
 make
 pwd
 ls -la
-cp libhunspell.a ../../libs/
+cp libhunspell.a ../../libs/libhunspell.a
 cd ../
 
 ##########
