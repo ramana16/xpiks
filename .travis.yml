@@ -27,7 +27,7 @@ addons:
     - g++-5
 
 before_install:
-  - wget https://github.com/hunspell/hunspell/archive/v1.6.0.tar.gz -O /tmp/hunspell.tar.gz
+  - if [ -z "${UI_TESTS+xxx}" ]; then wget https://github.com/hunspell/hunspell/archive/v1.6.0.tar.gz -O /tmp/hunspell.tar.gz; fi
   - sudo add-apt-repository ppa:beineri/opt-qt551-trusty -y
   - sudo add-apt-repository ppa:kubuntu-ppa/backports -y
   - sudo add-apt-repository ppa:jonathonf/ffmpeg-3 -y
@@ -50,45 +50,12 @@ before_script:
   - if [ -n "$UI_TESTS" ]; then sleep 3; fi # give xvfb some time to start
 
 script:
-  - cd vendors/
-  - tar xzf /tmp/hunspell.tar.gz
-  - cd hunspell/
-  - qmake "CONFIG+=debug" hunspell.pro
-  - make
-  - cp libhunspell.a ../../libs/
-  - cd ../
-  - cd quazip/quazip/
-  - qmake "CONFIG+=debug" quazip.pro
-  - make
-  - cp libquazip.so.1.0.0 ../../../libs/
-  - cd ../../../libs
-  - ln -s libquazip.so.1.0.0 libquazip.so
-  - ln -s libquazip.so.1.0.0 libquazip.so.1
-  - ln -s libquazip.so.1.0.0 libquazip.so.1.0
-  - cd ../vendors/
-  - mv tiny-aes/aes.c tiny-aes/aes.cpp
-  - cd cpp-libface
-  - make lib-face
-  - cp libface.a ../../libs/
-  - cd ../
-  - cd ssdll/src/ssdll
-  - qmake "CONFIG+=debug" ssdll.pro
-  - make
-  - cp libssdll.so.1.0.0 ../../../../libs/
-  - cd ../../../../libs
-  - ln -s libssdll.so.1.0.0 libssdll.so
-  - ln -s libssdll.so.1.0.0 libssdll.so.1
-  - ln -s libssdll.so.1.0.0 libssdll.so.1.0
-  - cd ../src
-  - cd libxpks_stub
-  - qmake "CONFIG+=debug" libxpks_stub.pro
-  - make
-  - cp libxpks.a ../../libs/
-  - cd ../
+  - if [ -z "${UI_TESTS+xxx}" ]; then sh vendors/build_vendors.sh; fi
   - ls -la ../libs/
   - if [ -n "$XPIKS_BINARY" ]; then cd xpiks-qt/; fi
   - if [ -n "$CORE_TESTS" ]; then cd xpiks-tests/xpiks-tests-core; fi
   - if [ -n "$INTEGRATION_TESTS" ]; then cd xpiks-tests/xpiks-tests-integration; fi
+  - if [ -n "$UI_TESTS" ]; then sed -i "s/import Qt.Quick 2.6/import Qt.Quick 2.5/" xpiks-qt/Components/EditableTags.qml; fi
   - if [ -n "$UI_TESTS" ]; then cd xpiks-tests/xpiks-tests-ui; fi
   - if [ -n "$XPIKS_BINARY" ]; then qmake "CONFIG+= debug travis-ci" xpiks-qt.pro; fi
   - if [ -n "$CORE_TESTS" ]; then qmake "CONFIG+=debug travis-ci" xpiks-tests-core.pro; fi
