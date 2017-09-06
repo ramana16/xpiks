@@ -82,7 +82,7 @@ build_script:
   - if defined XPIKS_BINARY cd xpiks-qt
   - if defined CORE_TESTS cd xpiks-tests\xpiks-tests-core
   - if defined INTEGRATION_TESTS cd xpiks-tests\xpiks-tests-integration
-  - if defined UI_TESTS qmake xpiks-tests\xpiks-tests-ui
+  - if defined UI_TESTS cd xpiks-tests\xpiks-tests-ui
   - if defined XPIKS_BINARY qmake "CONFIG+=%configuration% appveyor" xpiks-qt.pro
   - if defined CORE_TESTS qmake "CONFIG+=%configuration% appveyor" xpiks-tests-core.pro
   - if defined INTEGRATION_TESTS qmake "CONFIG+=%configuration% appveyor" xpiks-tests-integration.pro
@@ -115,6 +115,7 @@ test_script:
   - cmd: 'echo %cd%'
   - if defined CORE_TESTS %configuration%\xpiks-tests-core.exe
   - if defined INTEGRATION_TESTS %configuration%\xpiks-tests-integration.exe
+  - if defined UI_TESTS %configuration%\xpiks-tests-ui.exe
 
 on_failure:
   - ps: Get-ChildItem .\*.dmp | % { Push-AppveyorArtifact $_.FullName -FileName $_.Name }
