@@ -8,11 +8,12 @@ platform:
 
 environment:
   QTDIR: C:\Qt\5.6\msvc2015_64
-  QT_FATAL_WARNINGS: true
   matrix:
     - XPIKS_BINARY: true
     - CORE_TESTS: true
+      QT_FATAL_WARNINGS: true
     - INTEGRATION_TESTS: true
+      QT_FATAL_WARNINGS: true
     - UI_TESTS: true
 
 branches:
