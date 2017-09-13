@@ -2,6 +2,7 @@ import QtQuick 2.0
 import QtTest 1.1
 import xpiks 1.0
 import "../../xpiks-qt/StackViews"
+import "UiTestsStubPlugin"
 
 Item {
     id: root

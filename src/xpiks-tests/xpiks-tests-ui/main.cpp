@@ -1,7 +1,14 @@
 #include <QtQuickTest/quicktest.h>
 #include <QtQml>
+#include <QDir>
+#include <QDebug>
+#include <QQmlEngine>
 #include "../../xpiks-qt/Helpers/clipboardhelper.h"
 #include "../../xpiks-qt/QMLExtensions/triangleelement.h"
+#include "../ui-tests-plugin/ui-tests-stubs/ui-tests-stubs_plugin.h"
+
+#define STRINGIZE_(x) #x
+#define STRINGIZE(x) STRINGIZE_(x)
 
 int main(int argc, char **argv) {
     qmlRegisterType<Helpers::ClipboardHelper>("xpiks", 1, 0, "ClipboardHelper");
