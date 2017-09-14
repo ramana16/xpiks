@@ -11,4 +11,4 @@ qmake "CONFIG+=%configuration% appveyor" ssdll.pro
 nmake.exe
 copy %configuration%\ssdll.* ..\..\..\..\libs
 
-cd ..\..\..\..\src
+rem cd ..\..\..\..\src

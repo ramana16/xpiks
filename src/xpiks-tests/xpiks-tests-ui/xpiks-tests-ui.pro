@@ -33,3 +33,13 @@ RESOURCES += \
 copyplugins.commands = $$QMAKE_COPY_DIR "$$PWD/UiTestsStubPlugin/" "$$OUT_PWD/"
 QMAKE_EXTRA_TARGETS += copyplugins
 POST_TARGETDEPS += copyplugins
+
+travis-ci {
+    QMAKE_EXTRA_TARGETS -= copyplugins
+    POST_TARGETDEPS -= copyplugins
+}
+
+appveyor {
+    QMAKE_EXTRA_TARGETS -= copyplugins
+    POST_TARGETDEPS -= copyplugins
+}
