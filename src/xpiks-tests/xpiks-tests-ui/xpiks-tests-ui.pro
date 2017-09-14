@@ -10,8 +10,10 @@ DEFINES += QT_DEBUG_PLUGINS
 SOURCES += main.cpp \
     ../../xpiks-qt/QMLExtensions/triangleelement.cpp
 
+STUB_PLUGIN_NAME = UiTestsStubPlugin
+
 # Additional import path used to resolve QML modules in Qt Creator's code model
-QML_IMPORT_PATH = "$$PWD/UiTestsStubPlugin"
+QML_IMPORT_PATH = "$$PWD/$$STUB_PLUGIN_NAME"
 
 # Default rules for deployment.
 include(deployment.pri)
@@ -29,30 +31,3 @@ HEADERS += \
 
 RESOURCES += \
     xpiks-tests-ui.qrc
-
-STUB_PLUGIN_NAME = UiTestsStubPlugin
-
-win32 {
-    CONFIG(debug, debug|release) {
-        BUILDDIR = $$OUT_PWD/debug
-    }
-    else {
-        BUILDDIR = $$OUT_PWD/release
-    }
-
-    mkstubdir.commands = $$QMAKE_MKDIR_CMD \"$$shell_path($$BUILDDIR/$$STUB_PLUGIN_NAME)\"
-    QMAKE_EXTRA_TARGETS += mkstubdir
-    POST_TARGETDEPS += mkstubdir
-
-    copyplugins.commands = $(COPY_DIR) \"$$shell_path($$PWD/$$STUB_PLUGIN_NAME)\" \"$$shell_path($$BUILDDIR/$$STUB_PLUGIN_NAME)\"
-} else {
-    copyplugins.commands = $$QMAKE_COPY_DIR "$$PWD/$$STUB_PLUGIN_NAME/" "$$OUT_PWD/"
-}
-
-QMAKE_EXTRA_TARGETS += copyplugins
-POST_TARGETDEPS += copyplugins
-
-travis-ci {
-    QMAKE_EXTRA_TARGETS -= copyplugins
-    POST_TARGETDEPS -= copyplugins
-}
