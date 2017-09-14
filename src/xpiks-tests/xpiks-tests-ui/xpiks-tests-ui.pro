@@ -36,7 +36,7 @@ win32 {
     CONFIG(debug, debug|release) {
         BUILDDIR = $$OUT_PWD/debug
     }
-    else: build_pass {
+    else {
         BUILDDIR = $$OUT_PWD/release
     }
 
@@ -53,11 +53,6 @@ QMAKE_EXTRA_TARGETS += copyplugins
 POST_TARGETDEPS += copyplugins
 
 travis-ci {
-    QMAKE_EXTRA_TARGETS -= copyplugins
-    POST_TARGETDEPS -= copyplugins
-}
-
-appveyor {
     QMAKE_EXTRA_TARGETS -= copyplugins
     POST_TARGETDEPS -= copyplugins
 }
