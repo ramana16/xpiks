@@ -12,6 +12,3 @@ nmake.exe
 copy %configuration%\ssdll.* ..\..\..\..\libs
 
 cd ..\..\..\..\src
-
-echo "Current directory is:"
-echo %cd%
