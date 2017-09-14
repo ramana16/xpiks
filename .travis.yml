@@ -48,7 +48,7 @@ before_script:
   - if [ -n "$UI_TESTS" ]; then export DISPLAY=:99.0; fi
   - if [ -n "$UI_TESTS" ]; then sh -e /etc/init.d/xvfb start; fi
   - if [ -n "$UI_TESTS" ]; then sleep 3; fi # give xvfb some time to start
-  - chmod +x vendors/build_vendors.sh
+  - chmod +x vendors/build_vendors_travis.sh
 
 script:
   - if [ -z "${UI_TESTS+xxx}" ]; then bash vendors/build_vendors_travis.sh; fi
