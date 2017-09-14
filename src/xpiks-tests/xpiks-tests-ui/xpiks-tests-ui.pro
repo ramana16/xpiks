@@ -30,7 +30,25 @@ HEADERS += \
 RESOURCES += \
     xpiks-tests-ui.qrc
 
-copyplugins.commands = $$QMAKE_COPY_DIR "$$PWD/UiTestsStubPlugin/" "$$OUT_PWD/"
+STUB_PLUGIN_NAME = UiTestsStubPlugin
+
+win32 {
+    CONFIG(debug, debug|release) {
+        BUILDDIR = $$OUT_PWD/debug
+    }
+    else: build_pass {
+        BUILDDIR = $$OUT_PWD/release
+    }
+
+    mkstubdir.commands = $$QMAKE_MKDIR_CMD \"$$shell_path($$BUILDDIR/$$STUB_PLUGIN_NAME)\"
+    QMAKE_EXTRA_TARGETS += mkstubdir
+    POST_TARGETDEPS += mkstubdir
+
+    copyplugins.commands = $(COPY_DIR) \"$$shell_path($$PWD/$$STUB_PLUGIN_NAME)\" \"$$shell_path($$BUILDDIR/$$STUB_PLUGIN_NAME)\"
+} else {
+    copyplugins.commands = $$QMAKE_COPY_DIR "$$PWD/$$STUB_PLUGIN_NAME/" "$$OUT_PWD/"
+}
+
 QMAKE_EXTRA_TARGETS += copyplugins
 POST_TARGETDEPS += copyplugins
 

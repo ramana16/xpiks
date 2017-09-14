@@ -14,6 +14,11 @@ HEADERS += \
 
 DISTFILES = qmldir
 
-copyqmldir.commands = $(COPY_FILE) "$$PWD/qmldir" "$$DESTDIR/"
+win32 {
+    copyqmldir.commands = $(COPY_FILE) \"$$shell_path($$PWD/qmldir)\" \"$$shell_path($$DESTDIR/)\"
+} else {
+    copyqmldir.commands = $(COPY_FILE) "$$PWD/qmldir" "$$DESTDIR/"
+}
+
 QMAKE_EXTRA_TARGETS += copyqmldir
 POST_TARGETDEPS += copyqmldir
