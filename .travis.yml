@@ -51,17 +51,25 @@ before_script:
   - chmod +x vendors/build_vendors.sh
 
 script:
-  - if [ -z "${UI_TESTS+xxx}" ]; then bash vendors/build_vendors.sh; fi
+  - if [ -z "${UI_TESTS+xxx}" ]; then bash vendors/build_vendors_travis.sh; fi
   - cd src/
   - ls -la ../libs/
+  - echo "-------"
   - if [ -n "$XPIKS_BINARY" ]; then cd xpiks-qt/; fi
-  - if [ -n "$CORE_TESTS" ]; then cd xpiks-tests/xpiks-tests-core; fi
-  - if [ -n "$INTEGRATION_TESTS" ]; then cd xpiks-tests/xpiks-tests-integration; fi
-  - if [ -n "$UI_TESTS" ]; then cd xpiks-tests/xpiks-tests-ui; fi
   - if [ -n "$XPIKS_BINARY" ]; then qmake "CONFIG+= debug travis-ci" xpiks-qt.pro; fi
+  - echo "-------"
+  - if [ -n "$CORE_TESTS" ]; then cd xpiks-tests/xpiks-tests-core; fi
   - if [ -n "$CORE_TESTS" ]; then qmake "CONFIG+=debug travis-ci" xpiks-tests-core.pro; fi
+  - echo "-------"
+  - if [ -n "$INTEGRATION_TESTS" ]; then cd xpiks-tests/xpiks-tests-integration; fi
   - if [ -n "$INTEGRATION_TESTS" ]; then qmake "CONFIG+=debug travis-ci" xpiks-tests-integration.pro; fi
+  - echo "-------"
+  - if [ -n "$UI_TESTS" ]; then cd xpiks-tests/ui-tests-stubs; fi
+  - if [ -n "$UI_TESTS" ]; then qmake "CONFIG+=debug travis-ci" ui-tests-stubs.pro; fi
+  - if [ -n "$UI_TESTS" ]; then make; fi
+  - if [ -n "$UI_TESTS" ]; then cd ../xpiks-tests-ui; fi
   - if [ -n "$UI_TESTS" ]; then qmake "CONFIG+=debug travis-ci" xpiks-tests-ui.pro; fi
+  - echo "-------"
   - make
   - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../../../libs/
   - if [ -n "$CORE_TESTS" ]; then ./xpiks-tests-core; fi

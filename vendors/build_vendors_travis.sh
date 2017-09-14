@@ -1,5 +1,8 @@
 #!/bin/bash
 
+### This script is only used in Travis CI ###
+## Do not use it to build vendors locally ###
+
 cd vendors/
 
 ##########
