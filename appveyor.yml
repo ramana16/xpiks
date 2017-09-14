@@ -79,7 +79,7 @@ build_script:
   - if defined INTEGRATION_TESTS qmake "CONFIG+=%configuration% appveyor" xpiks-tests-integration.pro
   - if defined UI_TESTS cd xpiks-tests\ui-tests-stubs
   - if defined UI_TESTS qmake "CONFIG+=%configuration% appveyor" ui-tests-stubs.pro
-  - nmake.exe
+  - if defined UI_TESTS nmake.exe
   - if defined UI_TESTS cd ..\xpiks-tests-ui
   - if defined UI_TESTS qmake "CONFIG+=%configuration% appveyor" xpiks-tests-ui.pro
   - nmake.exe
