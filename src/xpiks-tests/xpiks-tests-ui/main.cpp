@@ -13,7 +13,7 @@
 
 int main(int argc, char **argv) {
     // hack to overcome URI warning when loading Stubs plugin
-#ifdef Q_OS_WIN
+#if defined(Q_OS_WIN) || defined(Q_OS_MAC)
     QString importPath = qgetenv(QML2_IMPORT_PATH_VAR);
     if (!importPath.isEmpty()) { importPath += ";"; }
     importPath += QDir::toNativeSeparators(STRINGIZE(PLUGIN_STUB_IMPORT_DIR));
