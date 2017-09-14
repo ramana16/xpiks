@@ -16,7 +16,7 @@ env:
   - XPIKS_BINARY=binary
   - CORE_TESTS=tests QT_FATAL_WARNINGS=true
   - INTEGRATION_TESTS=tests QT_FATAL_WARNINGS=true
-  - UI_TESTS=tests
+  - UI_TESTS=tests QT_FATAL_WARNINGS=true
 
 addons:
   apt:
