@@ -622,7 +622,7 @@ ColumnLayout {
                                     }
                                 }
 
-                                onCompletionsAvailable: {                                    
+                                onCompletionsAvailable: {
                                     acSource.sync()
 
                                     if (typeof workflowHost.autoCompleteBox !== "undefined") {
@@ -658,7 +658,7 @@ ColumnLayout {
 
                                     var component = Qt.createComponent("../Components/CompletionBox.qml");
                                     if (component.status !== Component.Ready) {
-                                        console.debug("Component Error: " + component.errorString());
+                                        console.warn("Component Error: " + component.errorString());
                                     } else {
                                         var instance = component.createObject(directParent, options);
 

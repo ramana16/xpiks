@@ -57,7 +57,7 @@ function launchDialog(componentName, directParent, options, functor) {
 
     var component = Qt.createComponent(componentName);
     if (component.status !== Component.Ready) {
-        console.debug("Component Error: " + component.errorString());
+        console.warn("Component Error: " + component.errorString());
     } else {
         var instance = component.createObject(directParent, options);        
 
