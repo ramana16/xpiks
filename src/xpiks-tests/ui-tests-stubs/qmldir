@@ -1,2 +1,2 @@
-module UiTestsStubsModule
+module UiTestsStubPlugin
 plugin uitestsstubs
