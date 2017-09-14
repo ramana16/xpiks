@@ -623,6 +623,8 @@ ColumnLayout {
                                 }
 
                                 onCompletionsAvailable: {
+                                    if (!applicationWindow.actionsEnabled) { return }
+
                                     acSource.sync()
 
                                     if (typeof workflowHost.autoCompleteBox !== "undefined") {
