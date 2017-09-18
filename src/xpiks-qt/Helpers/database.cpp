@@ -514,7 +514,7 @@ namespace Helpers {
         return !anyError;
     }
 
-    void Database::Table::foreachRow(std::function<bool (QByteArray &, QByteArray &)> action) {
+    void Database::Table::foreachRow(const std::function<bool (QByteArray &, QByteArray &)> &action) {
         Q_ASSERT(m_AllStatement != nullptr);
         LOG_DEBUG << "#";
 
