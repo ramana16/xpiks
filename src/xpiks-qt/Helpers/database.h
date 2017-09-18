@@ -80,7 +80,7 @@ namespace Helpers {
             int tryAddMany(const QVector<QPair<QByteArray, QByteArray> > &keyValueList);
             bool tryDeleteRecord(const QByteArray &key);
             bool tryDeleteMany(const QVector<QByteArray> &keysList);
-            void foreachRow(std::function<bool (QByteArray &, QByteArray &)> action);
+            void foreachRow(const std::function<bool (QByteArray &, QByteArray &)> &action);
 
         private:
             QString m_TableName;
