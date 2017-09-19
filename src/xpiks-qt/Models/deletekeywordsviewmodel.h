@@ -79,6 +79,7 @@ namespace Models {
         Q_INVOKABLE void appendKeywordToDelete(const QString &keyword);
         Q_INVOKABLE void pasteKeywordsToDelete(const QStringList &keywords);
         Q_INVOKABLE void deleteKeywords();
+        Q_INVOKABLE bool addPreset(int presetIndex);
 
     private:
         void recombineKeywords();

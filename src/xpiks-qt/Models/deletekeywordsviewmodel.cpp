@@ -136,6 +136,23 @@ namespace Models {
         m_CommandManager->processCommand(deleteKeywordsCommand);
     }
 
+    bool DeleteKeywordsViewModel::addPreset(int presetIndex) {
+        bool success = false;
+        LOG_INFO << "preset" << presetIndex;
+        auto *presetsModel = m_CommandManager->getPresetsModel();
+        QStringList keywords;
+
+        if (presetsModel->tryGetPreset(presetIndex, keywords)) {
+            if (m_KeywordsToDeleteModel.appendKeywords(keywords) > 0) {
+                emit keywordsToDeleteCountChanged();
+
+                m_CommandManager->submitItemForSpellCheck(&m_KeywordsToDeleteModel, Common::SpellCheckFlags::Keywords);
+            }
+        }
+
+        return success;
+    }
+
     void DeleteKeywordsViewModel::recombineKeywords() {
         LOG_DEBUG << "#";
         QHash<QString, int> keywordsHash;

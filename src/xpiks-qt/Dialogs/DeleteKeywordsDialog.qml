@@ -86,6 +86,29 @@ CloseRequested")
         onYes: deleteKeywordsModel.clearKeywordsToDelete()
     }
 
+    Menu {
+        id: presetsMenu
+
+        Menu {
+            id: subMenu
+            title: i18.n + qsTr("Insert preset")
+
+            Instantiator {
+                model: presetsModel
+                onObjectAdded:{
+                    subMenu.insertItem( index, object )
+                }
+                onObjectRemoved: subMenu.removeItem( object )
+                delegate: MenuItem {
+                    text: name
+                    onTriggered: {
+                        deleteKeywordsModel.addPreset(presetsMenu.artworkIndex);
+                    }
+                }
+            }
+        }
+    }
+
     // This rectange is the a overlay to partially show the parent through it
     // and clicking outside of the 'dialog' popup will do 'nothing'
     Rectangle {
@@ -420,6 +443,10 @@ CloseRequested")
 
                                 onCompletionRequested: {
                                     // BUMP
+                                }
+
+                                onRightClickedInside: {
+                                    presetsMenu.popup()
                                 }
                             }
 
