@@ -15,13 +15,21 @@
 #include <QString>
 #include "../Common/iservicebase.h"
 
+namespace Common {
+    class BasicKeywordsModel;
+}
+
 namespace KeywordsPresets {
-    class IPresetsManager;
+    class PresetKeywordsModel;
+}
+
+namespace Models {
+    class SettingsModel;
 }
 
 namespace AutoComplete {
     class AutoCompleteWorker;
-    class AutoCompleteModel;
+    class KeywordsAutoCompleteModel;
 
     class AutoCompleteService:
             public QObject,
@@ -29,7 +37,10 @@ namespace AutoComplete {
     {
         Q_OBJECT
     public:
-        AutoCompleteService(AutoCompleteModel *autoCompleteModel, KeywordsPresets::IPresetsManager *presetsManager, QObject *parent = 0);
+        AutoCompleteService(KeywordsAutoCompleteModel *autoCompleteModel,
+                            KeywordsPresets::PresetKeywordsModel *presetsManager,
+                            Models::SettingsModel *settingsModel,
+                            QObject *parent = 0);
         virtual ~AutoCompleteService();
 
         virtual void startService(const std::shared_ptr<Common::ServiceStartParams> &params) override;
@@ -45,9 +56,7 @@ namespace AutoComplete {
 
     public:
         void restartWorker();
-
-        // copy-by-value on purpose
-        void findKeywordCompletions(const QString &prefix, QObject *notifyObject);
+        void generateCompletions(const QString &prefix, Common::BasicKeywordsModel *basicModel);
 
     private slots:
         void workerFinished();
@@ -59,13 +68,14 @@ namespace AutoComplete {
 
 #ifdef INTEGRATION_TESTS
     public:
-        AutoCompleteModel *getAutoCompleteModel() const { return m_AutoCompleteModel; }
+        KeywordsAutoCompleteModel *getAutoCompleteModel() const { return m_AutoCompleteModel; }
 #endif
 
     private:
         AutoCompleteWorker *m_AutoCompleteWorker;
-        AutoCompleteModel *m_AutoCompleteModel;
-        KeywordsPresets::IPresetsManager *m_PresetsManager;
+        KeywordsAutoCompleteModel *m_AutoCompleteModel;
+        KeywordsPresets::PresetKeywordsModel *m_PresetsManager;
+        Models::SettingsModel *m_SettingsModel;
         volatile bool m_RestartRequired;
     };
 }

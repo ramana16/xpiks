@@ -453,6 +453,17 @@ namespace Models {
         m_CommandManager->setupSpellCheckSuggestions(itemsForSuggestions, (SuggestionFlags)flags);
     }
 
+    void FilteredArtItemsProxyModel::generateCompletions(const QString &prefix, int index) {
+        if (0 <= index && index < rowCount()) {
+            int originalIndex = getOriginalIndex(index);
+
+            ArtItemsModel *artItemsModel = getArtItemsModel();
+            auto *basicModel = artItemsModel->getBasicModel(originalIndex);
+
+            m_CommandManager->generateCompletions(prefix, basicModel);
+        }
+    }
+
     void FilteredArtItemsProxyModel::itemSelectedChanged(bool value) {
         int plus = value ? +1 : -1;
 

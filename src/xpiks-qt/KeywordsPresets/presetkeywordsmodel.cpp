@@ -112,6 +112,19 @@ namespace KeywordsPresets {
         return result;
     }
 
+    void PresetKeywordsModel::foreachPreset(const std::function<bool (int, PresetModel *)> &action) {
+        QReadLocker locker(&m_PresetsLock);
+        Q_UNUSED(locker);
+
+        const size_t size = m_PresetsList.size();
+
+        for (size_t i = 0; i < size; i++) {
+            PresetModel *preset = m_PresetsList[i];
+            const bool shouldContinue = action((int)i, preset);
+            if (!shouldContinue) { break; }
+        }
+    }
+
     bool PresetKeywordsModel::tryGetNameFromIndexUnsafe(int index, QString &name) {
         Q_ASSERT((index >= 0) && (index < (int)m_PresetsList.size()));
         name = m_PresetsList[index]->m_PresetName;

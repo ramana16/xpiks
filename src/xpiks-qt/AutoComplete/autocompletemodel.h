@@ -11,33 +11,19 @@
 #ifndef AUTOCOMPLETEMODEL_H
 #define AUTOCOMPLETEMODEL_H
 
+#include <QObject>
 #include <QAbstractListModel>
-#include <QMutex>
-#include <QVector>
-#include <QString>
-#include <QSet>
-#include <vector>
-#include <memory>
 #include "../Common/baseentity.h"
 #include "completionitem.h"
 
 namespace AutoComplete {
-    class AutoCompleteModel : public QAbstractListModel, public Common::BaseEntity
+    class AutoCompleteModel : public QObject, public Common::BaseEntity
     {
         Q_OBJECT
         Q_PROPERTY(int selectedIndex READ getSelectedIndex WRITE setSelectedIndex NOTIFY selectedIndexChanged)
         Q_PROPERTY(bool isActive READ getIsActive WRITE setIsActive NOTIFY isActiveChanged)
     public:
-        AutoCompleteModel(QObject *parent=0);
-
-    public:
-        enum AutoCompleteModelRoles {
-            IsPresetRole = Qt::UserRole + 1,
-        };
-
-    public:
-        void setCompletions(const QStringList &completions);
-        void setPresetsMembership(const QSet<QString> &presetsMembership);
+        explicit AutoCompleteModel(QObject *parent = 0);
 
     public:
         int getSelectedIndex() const { return m_SelectedIndex; }
@@ -45,49 +31,35 @@ namespace AutoComplete {
 
     public:
         void setSelectedIndex(int value);
-
-        void setIsActive(bool value) {
-            if (value != m_IsActive) {
-                m_IsActive = value;
-                emit isActiveChanged(value);
-            }
-        }
+        void setIsActive(bool value);
 
     public:
-        Q_INVOKABLE void sync();
+        Q_INVOKABLE void initializeCompletions();
         Q_INVOKABLE bool moveSelectionUp();
         Q_INVOKABLE bool moveSelectionDown();
-        Q_INVOKABLE void cancelCompletion() { setIsActive(false); emit dismissPopupRequested(); }
-        Q_INVOKABLE void acceptSelected(bool tryExpandPreset=false);
-        Q_INVOKABLE int getCount() const { return (int)m_CompletionList.size(); }
-        Q_INVOKABLE bool hasSelectedCompletion() const { return (0 <= m_SelectedIndex) && (m_SelectedIndex < rowCount()); }
+        Q_INVOKABLE void cancelCompletion();
+        Q_INVOKABLE void acceptSelected(bool withMetaAction=false);
+        Q_INVOKABLE int getCount() { return getCompletionsCount(); }
+        Q_INVOKABLE bool hasSelectedCompletion() { return (0 <= m_SelectedIndex) && (m_SelectedIndex < getCompletionsCount()); }
+        Q_INVOKABLE QString getCompletion(int completionID) { return doGetCompletion(completionID); }
+        Q_INVOKABLE QObject *getCompletionsModel();
 
     signals:
         void selectedIndexChanged(int index);
         void dismissPopupRequested();
-        void completionAccepted(const QString &completion, bool expandPreset);
+        void completionAccepted(int completionID);
         void isActiveChanged(bool value);
         void completionsAvailable();
 
-    public slots:
-        void onUpdatesArrived();
-
-        // QAbstractItemModel interface
-    public:
-        virtual int rowCount(const QModelIndex &parent=QModelIndex()) const override { Q_UNUSED(parent); return (int)m_CompletionList.size(); }
-        virtual QVariant data(const QModelIndex &index, int role) const override;
-        virtual QHash<int, QByteArray> roleNames() const override;
-
-#ifdef INTEGRATION_TESTS
-        bool containsWord(const QString &word) const;
-        QStringList getLastGeneratedCompletions();
-#endif
+    protected:
+        virtual int getCompletionsCount() = 0;
+        virtual QString doGetCompletion(int completionID) = 0;
+        virtual QAbstractItemModel *doGetCompletionsModel() = 0;
+        virtual void doInitializeCompletions() = 0;
+        virtual void clearCompletions() = 0;
+        virtual int doAcceptCompletion(int index, bool withMetaAction) = 0;
 
     private:
-        QMutex m_Mutex;
-        std::vector<std::shared_ptr<CompletionItem> > m_CompletionList;
-        std::vector<std::shared_ptr<CompletionItem> > m_LastGeneratedCompletions;
-        QSet<QString> m_PresetsMembership;
         int m_SelectedIndex;
         bool m_IsActive;
     };

@@ -625,11 +625,13 @@ ColumnLayout {
                                 onCompletionsAvailable: {
                                     if (!applicationWindow.actionsEnabled) { return }
 
-                                    acSource.sync()
+                                    acSource.initializeCompletions()
 
                                     if (typeof workflowHost.autoCompleteBox !== "undefined") {
-                                        // update completion
-                                        return
+                                        if (workflowHost.autoCompleteBox.isBelowEdit) {
+                                            // update completion
+                                            return;
+                                        }
                                     }
 
                                     var directParent = mainScrollView;
@@ -642,10 +644,19 @@ ColumnLayout {
                                     var visibleItemsCount = Math.min(acSource.getCount(), 5);
                                     var popupHeight = visibleItemsCount * (25 + 1) + 10
 
+                                    if (typeof workflowHost.autoCompleteBox !== "undefined") {
+                                        if (!workflowHost.autoCompleteBox.isBelowEdit) {
+                                            workflowHost.autoCompleteBox.anchors.topMargin = tmp.y - popupHeight - flv.editControl.height - 2
+                                        }
+                                        // update completion
+                                        return
+                                    }
+
                                     var isBelow = (tmp.y + popupHeight) < directParent.height;
 
                                     var options = {
-                                        model: acSource,
+                                        model: acSource.getCompletionsModel(),
+                                        autoCompleteSource: acSource,
                                         isBelowEdit: isBelow,
                                         "anchors.left": directParent.left,
                                         "anchors.leftMargin": Math.min(tmp.x, directParent.width - 200),
@@ -665,7 +676,7 @@ ColumnLayout {
                                         var instance = component.createObject(directParent, options);
 
                                         instance.boxDestruction.connect(workflowHost.onAutoCompleteClose)
-                                        instance.itemSelected.connect(flv.editControl.acceptCompletion)
+                                        instance.itemSelected.connect(flv.acceptCompletion)
                                         workflowHost.autoCompleteBox = instance
 
                                         instance.openPopup()
@@ -1166,6 +1177,16 @@ ColumnLayout {
                                                 stealWheel: false
                                                 focus: true
 
+                                                function acceptCompletion(completionID) {
+                                                    var accepted = artItemsModel.acceptCompletionAsPreset(rowWrapper.getIndex(), completionID);
+                                                    if (!accepted) {
+                                                        var completion = acSource.getCompletion(completionID)
+                                                        flv.editControl.acceptCompletion(completion)
+                                                    } else {
+                                                        flv.editControl.acceptCompletion('')
+                                                    }
+                                                }
+
                                                 delegate: KeywordWrapper {
                                                     id: kw
                                                     isHighlighted: rowWrapper.isHighlighted
@@ -1240,8 +1261,8 @@ ColumnLayout {
                                                 onCopyRequest: clipboard.setText(keywordsstring)
 
                                                 onCompletionRequested: {
-                                                    helpersWrapper.autoCompleteKeyword(prefix,
-                                                                                       rowWrapper.keywordsModel)
+                                                    filteredArtItemsModel.generateCompletions(prefix,
+                                                                                              rowWrapper.delegateIndex)
                                                 }
 
                                                 onExpandLastAsPreset: {

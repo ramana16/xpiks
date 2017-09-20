@@ -176,6 +176,8 @@ namespace Models {
         Q_INVOKABLE void initSuggestion();
         Q_INVOKABLE void registerAsCurrentItem();
         Q_INVOKABLE void copyToQuickBuffer();
+        Q_INVOKABLE void generateCompletions(const QString &prefix);
+        Q_INVOKABLE bool acceptCompletionAsPreset(int completionID);
 
     private:
         void processCombinedEditCommand();

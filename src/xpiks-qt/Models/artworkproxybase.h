@@ -81,6 +81,8 @@ namespace Models {
         void doCopyToQuickBuffer();
         bool hasKeywords(const QStringList &keywordsList);
         void doRequestBackup();
+        void doGenerateCompletions(const QString &prefix);
+        bool doAcceptCompletionAsPreset(int completionID);
 
     private:
         void spellCheckEverything();

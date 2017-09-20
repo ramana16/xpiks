@@ -79,13 +79,11 @@ SOURCES += main.cpp \
     Helpers/remoteconfig.cpp \
     Helpers/localconfig.cpp \
     Helpers/jsonhelper.cpp \
-    AutoComplete/autocompletemodel.cpp \
     AutoComplete/autocompleteworker.cpp \
     AutoComplete/autocompleteservice.cpp \
     Suggestion/gettyqueryengine.cpp \
     Models/abstractconfigupdatermodel.cpp \
     AutoComplete/stocksftplistmodel.cpp \
-    AutoComplete/stringfilterproxymodel.cpp \
     Models/imageartwork.cpp \
     Common/flags.cpp \
     Models/proxysettings.cpp \
@@ -160,7 +158,12 @@ SOURCES += main.cpp \
     MetadataIO/metadataioservice.cpp \
     MetadataIO/artworkssnapshot.cpp \
     Connectivity/connectivityrequest.cpp \
-    MetadataIO/metadatareadinghub.cpp
+    MetadataIO/metadatareadinghub.cpp \
+    AutoComplete/libfacecompletionengine.cpp \
+    AutoComplete/autocompletemodel.cpp \
+    AutoComplete/keywordsautocompletemodel.cpp \
+    AutoComplete/stringsautocompletemodel.cpp \
+    AutoComplete/presetscompletionengine.cpp
 
 RESOURCES += qml.qrc
 
@@ -277,14 +280,12 @@ HEADERS += \
     Helpers/localconfig.h \
     Helpers/jsonhelper.h \
     Helpers/comparevaluesjson.h \
-    AutoComplete/autocompletemodel.h \
     AutoComplete/autocompleteworker.h \
     AutoComplete/completionquery.h \
     AutoComplete/autocompleteservice.h \
     Suggestion/gettyqueryengine.h \
     Models/abstractconfigupdatermodel.h \
     AutoComplete/stocksftplistmodel.h \
-    AutoComplete/stringfilterproxymodel.h \
     Models/imageartwork.h \
     Common/hold.h \
     Models/proxysettings.h \
@@ -380,7 +381,13 @@ HEADERS += \
     Suggestion/locallibraryquery.h \
     MetadataIO/artworkssnapshot.h \
     Connectivity/connectivityrequest.h \
-    MetadataIO/metadatareadinghub.h
+    MetadataIO/metadatareadinghub.h \
+    AutoComplete/completionenginebase.h \
+    AutoComplete/libfacecompletionengine.h \
+    AutoComplete/autocompletemodel.h \
+    AutoComplete/keywordsautocompletemodel.h \
+    AutoComplete/stringsautocompletemodel.h \
+    AutoComplete/presetscompletionengine.h
 
 DISTFILES += \
     Components/CloseIcon.qml \

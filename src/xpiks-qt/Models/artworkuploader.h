@@ -16,7 +16,7 @@
 #include <QFutureWatcher>
 #include "artworksprocessor.h"
 #include "../Connectivity/testconnection.h"
-#include "../AutoComplete/stringfilterproxymodel.h"
+#include "../AutoComplete/stringsautocompletemodel.h"
 #include "../AutoComplete/stocksftplistmodel.h"
 #include "../Connectivity/uploadwatcher.h"
 
@@ -49,7 +49,7 @@ namespace Models {
     public:
         // used to test UI of artwork upload
         // virtual bool getInProgress() const { return true; }
-        AutoComplete::StringFilterProxyModel *getStocksCompletionSource() { return &m_StocksCompletionSource; }
+        AutoComplete::StringsAutoCompleteModel *getStocksCompletionSource() { return &m_StocksCompletionSource; }
         virtual void setCommandManager(Commands::CommandManager *commandManager) override;
 
     signals:
@@ -98,7 +98,7 @@ namespace Models {
     private:
         Connectivity::UploadWatcher m_UploadWatcher;
         Connectivity::IFtpCoordinator *m_FtpCoordinator;
-        AutoComplete::StringFilterProxyModel m_StocksCompletionSource;
+        AutoComplete::StringsAutoCompleteModel m_StocksCompletionSource;
         AutoComplete::StocksFtpListModel m_StocksFtpList;
         QFutureWatcher<Connectivity::ContextValidationResult> *m_TestingCredentialWatcher;
         int m_Percent;

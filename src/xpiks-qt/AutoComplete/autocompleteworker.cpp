@@ -10,33 +10,30 @@
 
 #include "autocompleteworker.h"
 #include <QDir>
-#include <QCoreApplication>
 #include "../Common/defines.h"
-#include <src/libfaceapi.hpp>
-#include <include/types.hpp>
-#include <string>
 #include <QStringList>
 #include "../Helpers/asynccoordinator.h"
-#include "../KeywordsPresets/ipresetsmanager.h"
-
-#define FREQUENCY_TABLE_FILENAME "en_wordlist.tsv"
+#include "../KeywordsPresets/presetkeywordsmodel.h"
+#include "keywordsautocompletemodel.h"
+#include "../Common/basickeywordsmodel.h"
 
 namespace AutoComplete {
-    AutoCompleteWorker::AutoCompleteWorker(Helpers::AsyncCoordinator *initCoordinator, KeywordsPresets::IPresetsManager *presetsManager, QObject *parent) :
+    AutoCompleteWorker::AutoCompleteWorker(Helpers::AsyncCoordinator *initCoordinator,
+                                           KeywordsAutoCompleteModel *autoCompleteModel,
+                                           KeywordsPresets::PresetKeywordsModel *presetsManager,
+                                           QObject *parent) :
         QObject(parent),
+        m_PresetsCompletionEngine(presetsManager),
         m_InitCoordinator(initCoordinator),
-        m_PresetsManager(presetsManager),
-        m_Soufleur(NULL),
-        m_CompletionsCount(8)
+        m_AutoCompleteModel(autoCompleteModel),
+        m_PresetsManager(presetsManager)
     {
         Q_ASSERT(presetsManager != nullptr);
+        Q_ASSERT(autoCompleteModel != nullptr);
     }
 
     AutoCompleteWorker::~AutoCompleteWorker() {
-        if (m_Soufleur != NULL) {
-            delete m_Soufleur;
-        }
-
+        m_FaceCompletionEngine.finalize();
         LOG_INFO << "destroyed";
     }
 
@@ -46,49 +43,13 @@ namespace AutoComplete {
         Helpers::AsyncCoordinatorUnlocker unlocker(m_InitCoordinator);
         Q_UNUSED(unlocker);
 
-        bool importResult = false;
+        bool anyError = false;
 
-        QString resourcesPath;
-        QString wordlistPath;
-
-//#if !defined(Q_OS_LINUX)
-        resourcesPath = QCoreApplication::applicationDirPath();
-
-#if defined(Q_OS_MAC)
-#  if defined(INTEGRATION_TESTS)
-        resourcesPath += "/../../../xpiks-qt/deps/";
-#  else
-        resourcesPath += "/../Resources/";
-#  endif
-#elif  defined(APPVEYOR)
-        resourcesPath += "/../../../xpiks-qt/deps/";
-#elif defined(Q_OS_WIN)
-        resourcesPath += "/ac_sources/";
-#elif defined(TRAVIS_CI)
-        resourcesPath += "/../../xpiks-qt/deps/";
-#endif
-
-        QDir resourcesDir(resourcesPath);
-        wordlistPath = resourcesDir.absoluteFilePath(FREQUENCY_TABLE_FILENAME);
-
-        if (QFileInfo(wordlistPath).exists()) {
-            try {
-                m_Soufleur = new Souffleur();
-                importResult = m_Soufleur->import(wordlistPath.toStdString().c_str());
-                if (!importResult) {
-                    LOG_WARNING << "Failed to import" << wordlistPath;
-                } else {
-                    LOG_INFO << "LIBFACE initialized with" << wordlistPath;
-                }
-            }
-            catch (...) {
-                LOG_WARNING << "Exception while initializing LIBFACE with" << wordlistPath;
-            }
-        } else {
-            LOG_WARNING << "File not found:" << wordlistPath;
+        if (!m_FaceCompletionEngine.initialize()) {
+            anyError = true;
         }
 
-        return importResult;
+        return !anyError;
     }
 
     void AutoCompleteWorker::processOneItem(std::shared_ptr<CompletionQuery> &item) {
@@ -100,33 +61,44 @@ namespace AutoComplete {
     }
 
     void AutoCompleteWorker::generateCompletions(std::shared_ptr<CompletionQuery> &item) {
-        LOG_INTEGR_TESTS_OR_DEBUG << item->getPrefix();
         const QString &prefix = item->getPrefix();
+        LOG_INTEGR_TESTS_OR_DEBUG << prefix;
 
-        vp_t completions = m_Soufleur->prompt(prefix.toStdString(), m_CompletionsCount);
+        bool onlyFindPresets = false;
 
-        QStringList completionsList;
-        QSet<QString> completionsSet;
-
-        size_t size = completions.size(), i = 0;
-        completions.reserve(size);
-        completionsSet.reserve((int)size);
-
-        for (; i < size; ++i) {
-            const phrase_t &suggestion = completions[i];
-            const QString phrase = QString::fromStdString(suggestion.phrase).trimmed();
-
-            if (!completionsSet.contains(phrase)) {
-                completionsList.append(phrase);
-                completionsSet.insert(phrase);
+        if (item->getCompletePresets()) {
+            if (item->getCompleteKeywords()) {
+                if (prefix.startsWith(PRESETS_COMPLETE_PREFIX)) {
+                    onlyFindPresets = true;
+                }
+            } else {
+                onlyFindPresets = true;
             }
         }
 
-        if (!completionsList.empty()) {
-            item->setCompletions(completionsList);
+        std::vector<CompletionResult> completionsList;
 
-            item->setNeedsUpdate();
-            this->submitFirst(item);
+        if (onlyFindPresets) {
+            if (m_PresetsCompletionEngine.generateCompletions(*item.get(), completionsList)) {
+                auto &completionsModel = m_AutoCompleteModel->getInnerModel();
+                completionsModel.setPresetCompletions(completionsList);
+
+                auto *basicModel = item->getBasicModel();
+                basicModel->notifyCompletionsAvailable();
+            }
+        } else {
+            if (m_FaceCompletionEngine.generateCompletions(*item.get(), completionsList)) {
+                auto &completionsModel = m_AutoCompleteModel->getInnerModel();
+                completionsModel.setKeywordCompletions(completionsList);
+
+                auto *basicModel = item->getBasicModel();
+                basicModel->notifyCompletionsAvailable();
+
+                item->setCompletions(completionsList);
+                item->setNeedsUpdate();
+
+                this->submitFirst(item);
+            }
         }
     }
 
@@ -136,21 +108,22 @@ namespace AutoComplete {
 
         bool anyChanges = false;
         auto &completionsList = item->getCompletions();
-        int dummy;
 
         LOG_INTEGR_TESTS_OR_DEBUG << "Updating" << completionsList.size() << "items";
 
-        for (auto &completion: completionsList) {
-            const bool haveOnePreset = m_PresetsManager->tryFindSinglePresetByName(completion, false, dummy);
+        for (auto &result: completionsList) {
+            int presetIndex = -1;
+            const bool haveOnePreset = m_PresetsManager->tryFindSinglePresetByName(result.m_Completion, false, presetIndex);
             if (haveOnePreset) {
-                item->setIsPreset(completion);
+                result.m_PresetIndex = presetIndex;
                 anyChanges = true;
             }
         }
 
         if (anyChanges) {
             LOG_INTEGR_TESTS_OR_DEBUG << "Propagating update to the model";
-            item->propagateUpdates();
+            auto &completionsModel = m_AutoCompleteModel->getInnerModel();
+            completionsModel.setPresetsMembership(completionsList);
         }
     }
 }

@@ -9,40 +9,18 @@
  */
 
 #include "autocompletemodel.h"
+#include <QQmlEngine>
 #include "../Common/defines.h"
-#include "../Commands/commandmanager.h"
-#include "../KeywordsPresets/presetkeywordsmodel.h"
 
 namespace AutoComplete {
-    AutoCompleteModel::AutoCompleteModel(QObject *parent):
-        QAbstractListModel(parent),
+    AutoCompleteModel::AutoCompleteModel(QObject *parent) :
+        QObject(parent),
         m_SelectedIndex(-1),
         m_IsActive(false)
     {
     }
 
-    void AutoCompleteModel::setCompletions(const QStringList &completions) {
-        Q_ASSERT(!completions.empty());
-        LOG_INFO << completions.size() << "completions";
-        LOG_INTEGR_TESTS_OR_DEBUG << completions;
-
-        QMutexLocker locker(&m_Mutex);
-        Q_UNUSED(locker);
-
-        m_LastGeneratedCompletions.clear();
-        m_LastGeneratedCompletions.reserve(completions.size());
-
-        for (auto &str: completions) {
-            m_LastGeneratedCompletions.emplace_back(new CompletionItem(str));
-        }
-    }
-
-    void AutoCompleteModel::setPresetsMembership(const QSet<QString> &presetsMembership) {
-        LOG_DEBUG << "#";
-        m_PresetsMembership = presetsMembership;
-    }
-
-    void AutoCompleteModel::setSelectedIndex(int value)  {
+    void AutoCompleteModel::setSelectedIndex(int value) {
         if (value != m_SelectedIndex) {
             LOG_INTEGR_TESTS_OR_DEBUG << value;
             m_SelectedIndex = value;
@@ -50,22 +28,15 @@ namespace AutoComplete {
         }
     }
 
-    void AutoCompleteModel::sync() {
-        LOG_DEBUG << "Setting completions...";
-
-        {
-            QMutexLocker locker(&m_Mutex);
-            Q_UNUSED(locker);
-
-            beginResetModel();
-            {
-                m_CompletionList.swap(m_LastGeneratedCompletions);
-            }
-            endResetModel();
-
-            m_LastGeneratedCompletions.clear();
+    void AutoCompleteModel::setIsActive(bool value) {
+        if (value != m_IsActive) {
+            m_IsActive = value;
+            emit isActiveChanged(value);
         }
+    }
 
+    void AutoCompleteModel::initializeCompletions() {
+        doInitializeCompletions();
         setSelectedIndex(-1);
         setIsActive(true);
     }
@@ -80,7 +51,7 @@ namespace AutoComplete {
     }
 
     bool AutoCompleteModel::moveSelectionDown() {
-        const int size = (int)m_CompletionList.size();
+        const int size = getCompletionsCount();
         const bool canMove = m_SelectedIndex < size - 1;
         LOG_INTEGR_TESTS_OR_DEBUG << "can move:" << canMove;
         if (canMove) {
@@ -89,14 +60,20 @@ namespace AutoComplete {
         return canMove;
     }
 
-    void AutoCompleteModel::acceptSelected(bool tryExpandPreset) {
-        LOG_DEBUG << "Selected index:" << m_SelectedIndex << "expand preset" << tryExpandPreset;
-        const int size = (int)m_CompletionList.size();
+    void AutoCompleteModel::cancelCompletion() {
+        LOG_DEBUG << "#";
+        clearCompletions();
+        setIsActive(false);
+        emit dismissPopupRequested();
+    }
+
+    void AutoCompleteModel::acceptSelected(bool withMetaAction) {
+        LOG_DEBUG << "Selected index:" << m_SelectedIndex << ", meta action:" << withMetaAction;
+        const int size = getCompletionsCount();
 
         if (0 <= m_SelectedIndex && m_SelectedIndex < size) {
-            auto &item = m_CompletionList.at(m_SelectedIndex);
-            auto &completion = item->getCompletion();
-            emit completionAccepted(completion, tryExpandPreset);
+            const int id = doAcceptCompletion(m_SelectedIndex, withMetaAction);
+            emit completionAccepted(id);
         }
 
         emit dismissPopupRequested();
@@ -104,61 +81,9 @@ namespace AutoComplete {
         setIsActive(false);
     }
 
-    void AutoCompleteModel::onUpdatesArrived() {
-        LOG_DEBUG << "Updating completions...";
-        bool anyChange = false;
-
-        for (auto &item: m_CompletionList) {
-            if (m_PresetsMembership.contains(item->getCompletion())) {
-                LOG_INTEGR_TESTS_OR_DEBUG << "Item is a preset:" << item->getCompletion();
-                item->setIsPreset();
-                anyChange = true;
-            }
-        }
-
-        if (anyChange) {
-            QModelIndex first = this->index(0);
-            QModelIndex last = this->index(rowCount() - 1);
-
-            emit dataChanged(first, last, QVector<int>() << IsPresetRole);
-        }
+    QObject *AutoCompleteModel::getCompletionsModel() {
+        auto *listModel = doGetCompletionsModel();
+        QQmlEngine::setObjectOwnership(listModel, QQmlEngine::CppOwnership);
+        return listModel;
     }
-
-    QVariant AutoCompleteModel::data(const QModelIndex &index, int role) const {
-        int row = index.row();
-        if (row < 0 || row >= (int)m_CompletionList.size()) return QVariant();
-
-        auto &item = m_CompletionList[row];
-        if (role == Qt::DisplayRole) { return item->getCompletion(); }
-        else if (role == IsPresetRole) { return item->isPreset(); }
-        return QVariant();
-    }
-
-    QHash<int, QByteArray> AutoCompleteModel::roleNames() const {
-        QHash<int, QByteArray> roles = QAbstractListModel::roleNames();
-        roles[IsPresetRole] = "ispreset";
-        return roles;
-    }
-
-#ifdef INTEGRATION_TESTS
-    bool AutoCompleteModel::containsWord(const QString &word) const {
-        bool contains = false;
-        for (auto &item: m_CompletionList) {
-            if (item->getCompletion() == word) {
-                contains = true;
-                break;
-            }
-        }
-
-        return contains;
-    }
-
-    QStringList AutoCompleteModel::getLastGeneratedCompletions() {
-        QStringList completions;
-        for (auto &item: m_CompletionList) {
-            completions.append(item->getCompletion());
-        }
-        return completions;
-    }
-#endif
 }

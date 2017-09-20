@@ -38,6 +38,8 @@
 #include "videoartwork.h"
 #include "../QMLExtensions/artworkupdaterequest.h"
 #include "../Helpers/filehelpers.h"
+#include "../AutoComplete/keywordsautocompletemodel.h"
+#include "../AutoComplete/completionitem.h"
 
 namespace Models {
     ArtItemsModel::ArtItemsModel(QObject *parent):
@@ -645,6 +647,38 @@ namespace Models {
             std::shared_ptr<Commands::ICommandResult> result = m_CommandManager->processCommand(expandPresetCommand);
             Q_UNUSED(result);
         }
+    }
+
+    bool ArtItemsModel::acceptCompletionAsPreset(int metadataIndex, int completionID) {
+        LOG_INFO << "item" << metadataIndex << "completionID" << completionID;
+        bool accepted = false;
+
+        if (0 <= metadataIndex && metadataIndex < rowCount()) {
+            ArtworkMetadata *metadata = accessArtwork(metadataIndex);
+
+            AutoComplete::KeywordsAutoCompleteModel *acModel = m_CommandManager->getAutoCompleteModel();
+            std::shared_ptr<AutoComplete::CompletionItem> completionItem = acModel->getAcceptedCompletion(completionID);
+            if (!completionItem) {
+                LOG_WARNING << "Completion is not available anymore";
+                return false;
+            }
+
+            const int presetIndex = completionItem->getPresetIndex();
+
+            if (completionItem->isPreset() ||
+                    (completionItem->canBePreset() && completionItem->shouldExpandPreset())) {
+                std::shared_ptr<Commands::ExpandPresetCommand> expandPresetCommand(new Commands::ExpandPresetCommand(MetadataElement(metadata, metadataIndex), presetIndex));
+                std::shared_ptr<Commands::ICommandResult> result = m_CommandManager->processCommand(expandPresetCommand);
+                Q_UNUSED(result);
+                accepted = true;
+            }/* --------- this is handled in the edit field -----------
+                else if (completionItem->isKeyword()) {
+                this->appendKeyword(metadataIndex, completionItem->getCompletion());
+                accepted = true;
+            }*/
+        }
+
+        return accepted;
     }
 
     void ArtItemsModel::initSuggestion(int metadataIndex) {

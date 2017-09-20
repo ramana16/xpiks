@@ -394,18 +394,34 @@ ApplicationWindow {
                         }
 
                         StyledCheckbox {
-                            id: autoCompleteCheckbox
+                            id: autoCompleteKeywordsCheckbox
                             text: i18.n + qsTr("Autocomplete keywords")
                             onCheckedChanged: {
-                                settingsModel.useAutoComplete = checked
+                                settingsModel.useKeywordsAutoComplete = checked
                             }
                             function onResetRequested() {
-                                checked = settingsModel.useAutoComplete
+                                checked = settingsModel.useKeywordsAutoComplete
                             }
 
                             Component.onCompleted: {
-                                checked = settingsModel.useAutoComplete
-                                behaviorTab.resetRequested.connect(autoCompleteCheckbox.onResetRequested)
+                                checked = settingsModel.useKeywordsAutoComplete
+                                behaviorTab.resetRequested.connect(autoCompleteKeywordsCheckbox.onResetRequested)
+                            }
+                        }
+
+                        StyledCheckbox {
+                            id: autoCompletePresetsCheckbox
+                            text: i18.n + qsTr("Autocomplete presets")
+                            onCheckedChanged: {
+                                settingsModel.usePresetsAutoComplete = checked
+                            }
+                            function onResetRequested() {
+                                checked = settingsModel.usePresetsAutoComplete
+                            }
+
+                            Component.onCompleted: {
+                                checked = settingsModel.usePresetsAutoComplete
+                                behaviorTab.resetRequested.connect(autoCompletePresetsCheckbox.onResetRequested)
                             }
                         }
 

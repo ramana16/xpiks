@@ -172,8 +172,9 @@ Rectangle {
 
     Connections {
         target: combinedArtworks
+
         onCompletionsAvailable: {
-            acSource.sync()
+            acSource.initializeCompletions()
 
             if (typeof combinedEditComponent.autoCompleteBox !== "undefined") {
                 // update completion
@@ -193,7 +194,8 @@ Rectangle {
             var isBelow = (tmp.y + popupHeight) < directParent.height;
 
             var options = {
-                model: acSource,
+                model: acSource.getCompletionsModel(),
+                autoCompleteSource: acSource,
                 editableTags: flv,
                 isBelowEdit: isBelow,
                 "anchors.left": directParent.left,
@@ -215,7 +217,7 @@ Rectangle {
                 var instance = component.createObject(directParent, options);
 
                 instance.boxDestruction.connect(combinedEditComponent.onAutoCompleteClose)
-                instance.itemSelected.connect(flv.editControl.acceptCompletion)
+                instance.itemSelected.connect(flv.acceptCompletion)
                 combinedEditComponent.autoCompleteBox = instance
 
                 instance.openPopup()
@@ -724,6 +726,16 @@ Rectangle {
                             populateAnimationEnabled: false
                             scrollStep: keywordHeight
 
+                            function acceptCompletion(completionID) {
+                                var accepted = combinedArtworks.acceptCompletionAsPreset(completionID);
+                                if (!accepted) {
+                                    var completion = acSource.getCompletion(completionID)
+                                    flv.editControl.acceptCompletion(completion)
+                                } else {
+                                    flv.editControl.acceptCompletion('')
+                                }
+                            }
+
                             delegate: KeywordWrapper {
                                 id: kw
                                 isHighlighted: keywordsCheckBox.checked
@@ -787,8 +799,7 @@ Rectangle {
                             }
 
                             onCompletionRequested: {
-                                helpersWrapper.autoCompleteKeyword(prefix,
-                                                                   keywordsWrapper.keywordsModel)
+                                combinedArtworks.generateCompletions(prefix)
                             }
 
                             onExpandLastAsPreset: {

@@ -266,27 +266,41 @@ namespace Helpers {
         return str;
     }
 
-    int levensteinDistance(const QString &s1, const QString &s2) {
-        const unsigned int len1 = s1.size(), len2 = s2.size();
-        std::vector<unsigned int> col(len2 + 1), prevCol(len2 + 1);
+    unsigned int levensteinDistance(const QString &a, const QString &b) {
+        const unsigned int lengthA = a.size(), lengthB = b.size();
+        std::vector<unsigned int> costs(lengthB + 1), prevCosts(lengthB + 1);
+        const unsigned int prevCostsSize = (unsigned int)prevCosts.size();
 
-        for (unsigned int i = 0; i < prevCol.size(); i++) {
-            prevCol[i] = i;
+        for (unsigned int i = 0; i < prevCostsSize; i++) {
+            prevCosts[i] = i;
         }
 
-        for (unsigned int i = 0; i < len1; i++) {
-            col[0] = i + 1;
+        for (unsigned int i = 0; i < lengthA; i++) {
+            costs[0] = i + 1;
 
-            for (unsigned int j = 0; j < len2; j++) {
-                col[j + 1] = std::min(
-                    std::min(prevCol[1 + j] + 1, col[j] + 1),
-                    prevCol[j] + (s1[i] == s2[j] ? 0 : 1));
+            for (unsigned int j = 0; j < lengthB; j++) {
+                costs[j + 1] = std::min(
+                    std::min(prevCosts[1 + j] + 1, costs[j] + 1),
+                    prevCosts[j] + (a[i] == b[j] ? 0 : 1));
             }
 
-            col.swap(prevCol);
+            costs.swap(prevCosts);
         }
 
-        return prevCol[len2];
+        unsigned int result = prevCosts[lengthB];
+        return result;
+    }
+
+    int levensteinPercentage(const QString &s1, const QString &s2) {
+        int maxLength = std::max(s1.length(), s2.length());
+
+        unsigned int distance = levensteinDistance(s1.toLower(), s2.toLower());
+        int reverseDistance = maxLength - (int)distance;
+
+        if (reverseDistance == 0) { return 0; }
+
+        int percent = (reverseDistance * 100) / maxLength;
+        return percent;
     }
 
     bool is7BitAscii(const QByteArray &s) {

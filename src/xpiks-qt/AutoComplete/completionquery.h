@@ -11,62 +11,77 @@
 #ifndef COMPLETIONQUERY_H
 #define COMPLETIONQUERY_H
 
-#include <QObject>
-#include <QSet>
 #include <QString>
 #include <QStringList>
-#include "autocompletemodel.h"
-#include "completionitem.h"
-#include "../Common/defines.h"
+#include "../Common/flags.h"
+
+namespace Common {
+    class BasicKeywordsModel;
+}
 
 namespace AutoComplete {
-    class CompletionQuery : public QObject {
-        Q_OBJECT
-    public:
-        CompletionQuery(const QString &prefix, AutoCompleteModel *autoCompleteModel) :
-            m_Prefix(prefix),
-            m_AutoCompleteModel(autoCompleteModel),
-            m_NeedsUpdate(false)
+    struct CompletionResult {
+        CompletionResult(const QString &completion):
+            m_Completion(completion),
+            m_PresetIndex(-1)
         {
-            Q_ASSERT(autoCompleteModel != nullptr);
         }
 
-        const QString &getPrefix() const { return m_Prefix; }
-        const QStringList &getCompletions() const { return m_Completions; }
-
-        void setCompletions(const QStringList &completions) {
-            m_Completions = completions;
-            m_AutoCompleteModel->setCompletions(completions);
-            emit completionsAvailable();
+        CompletionResult(const QString &completion, int presetIndex):
+            m_Completion(completion),
+            m_PresetIndex(presetIndex)
+        {
         }
 
-        void propagateUpdates() {
-            m_AutoCompleteModel->setPresetsMembership(m_PresetsSet);
-            emit updatesAvailable();
+        QString m_Completion;
+        int m_PresetIndex;
+    };
+
+    class CompletionQuery {
+    public:
+        CompletionQuery(const QString &prefix, Common::BasicKeywordsModel *basicModel):
+            m_BasicKeywordsModel(basicModel),
+            m_Prefix(prefix),
+            m_CompletionFlags(0)
+        {
+            Q_ASSERT(basicModel != nullptr);
         }
-
-        void setNeedsUpdate() { m_NeedsUpdate = true; }
-        bool getNeedsUpdate() const { return m_NeedsUpdate; }
-
-        void setIsPreset(const QString &completion) {
-            m_PresetsSet.insert(completion);
-        }
-
-        bool getIsPreset(const QString &completion) {
-            bool isPreset = m_PresetsSet.contains(completion);
-            return isPreset;
-        }
-
-    signals:
-        void completionsAvailable();
-        void updatesAvailable();
 
     private:
+        enum CompletionQueryFlags {
+            RequiresUpdateFlag = 1 << 0,
+            CompleteKeywordsFlag = 1 << 1,
+            CompletePresetsFlag = 1 << 2
+        };
+
+        inline bool getRequiresUpdateFlag() const { return Common::HasFlag(m_CompletionFlags, RequiresUpdateFlag); }
+        inline bool getCompleteKeywordsFlag() const { return Common::HasFlag(m_CompletionFlags, CompleteKeywordsFlag); }
+        inline bool getCompletePresetsFlag() const { return Common::HasFlag(m_CompletionFlags, CompletePresetsFlag); }
+
+        void setRequiresUpdateFlag(bool value) { Common::ApplyFlag(m_CompletionFlags, value, RequiresUpdateFlag); }
+        void setCompleteKeywordsFlag(bool value) { Common::ApplyFlag(m_CompletionFlags, value, CompleteKeywordsFlag); }
+        void setCompletePresetsFlag(bool value) { Common::ApplyFlag(m_CompletionFlags, value, CompletePresetsFlag); }
+
+    public:
+        const QString &getPrefix() const { return m_Prefix; }
+        bool getNeedsUpdate() const { return getRequiresUpdateFlag(); }
+        bool getCompleteKeywords() const { return getCompleteKeywordsFlag(); }
+        bool getCompletePresets() const { return getCompletePresetsFlag(); }
+        std::vector<CompletionResult> &getCompletions() { return m_Completions; }
+
+    public:
+        void setNeedsUpdate() { setRequiresUpdateFlag(true); }
+        void setCompleteKeywords(bool value) { setCompleteKeywordsFlag(value); }
+        void setCompletePresets(bool value) { setCompletePresetsFlag(value); }
+        void setCompletions(std::vector<CompletionResult> &completions) { m_Completions.swap(completions); }
+        Common::BasicKeywordsModel *getBasicModel() { return m_BasicKeywordsModel; }
+
+    private:
+        Common::BasicKeywordsModel *m_BasicKeywordsModel;
         QString m_Prefix;
-        QStringList m_Completions;
-        QSet<QString> m_PresetsSet;
-        AutoCompleteModel *m_AutoCompleteModel;
-        volatile bool m_NeedsUpdate;
+        std::vector<CompletionResult> m_Completions;
+        // QString m_Context;
+        volatile Common::flag_t m_CompletionFlags;
     };
 }
 

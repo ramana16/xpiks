@@ -12,23 +12,54 @@
 #define COMPLETIONITEM_H
 
 #include <QString>
+#include "../Common/flags.h"
 
 namespace AutoComplete {
     class CompletionItem {
+    private:
+        enum CompletionsFlags {
+            FlagIsPreset = 1 << 0,
+            FlagIsKeyword = 1 << 1,
+            FlagShouldExpandPreset = 1 << 2
+        };
+
+        inline bool getIsPresetFlag() const { return Common::HasFlag(m_CompletionFlags, FlagIsPreset); }
+        inline bool getIsKeywordFlag() const { return Common::HasFlag(m_CompletionFlags, FlagIsKeyword); }
+        inline bool getShouldExpandPresetFlag() const { return Common::HasFlag(m_CompletionFlags, FlagShouldExpandPreset); }
+
+        inline void setIsPresetFlag(bool value) { Common::ApplyFlag(m_CompletionFlags, value, FlagIsPreset); }
+        inline void setIsKeywordFlag(bool value) { Common::ApplyFlag(m_CompletionFlags, value, FlagIsKeyword); }
+        inline void setShouldExpandPresetFlag(bool value) { Common::ApplyFlag(m_CompletionFlags, value, FlagShouldExpandPreset); }
+
     public:
-        CompletionItem(const QString &completion):
+        CompletionItem(const QString &completion, int id):
             m_Completion(completion),
-            m_IsPreset(false)
+            m_CompletionFlags(0),
+            m_ID(id),
+            m_PresetIndex(-1)
         {}
 
     public:
         const QString &getCompletion() const { return m_Completion; }
-        bool isPreset() const { return m_IsPreset; }
-        void setIsPreset() { m_IsPreset = true; }
+        int getID() const { return m_ID; }
+        int getPresetIndex() const { return m_PresetIndex; }
+        bool isPreset() const { return getIsPresetFlag() && !getIsKeywordFlag(); }
+        bool isKeyword() const { return getIsKeywordFlag(); }
+        bool canBePreset() const { return getIsPresetFlag(); }
+        bool shouldExpandPreset() const { return isPreset() || getShouldExpandPresetFlag(); }
+
+    public:
+        void setIsKeyword() { setIsKeywordFlag(true); }
+        void setCanBePreset() { setIsPresetFlag(true); }
+        void setIsPreset() { setIsPresetFlag(true); }
+        void setShouldExpandPreset() { setShouldExpandPresetFlag(true); }
+        void setPresetIndex(int index) { m_PresetIndex = index; }
 
     private:
         QString m_Completion;
-        volatile bool m_IsPreset;
+        Common::flag_t m_CompletionFlags;
+        int m_ID;
+        int m_PresetIndex;
     };
 }
 

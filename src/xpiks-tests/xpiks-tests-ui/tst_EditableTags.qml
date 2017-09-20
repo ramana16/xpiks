@@ -431,13 +431,12 @@ Item {
         }
 
         function test_AcceptCompletionSingle() {
-            var dontExpandPreset = false
             tagAddedSpy.clear()
             input.text = "abc"
             input.cursorPosition = input.length
             compare(tagAddedSpy.count, 0)
 
-            input.acceptCompletion("abcdee", dontExpandPreset)
+            input.acceptCompletion("abcdee")
 
             compare(input.text, "")
             compare(tagAddedSpy.count, 1)
@@ -446,17 +445,55 @@ Item {
         }
 
         function test_AcceptCompletionMoreThanOne() {
-            var dontExpandPreset = false
             tagAddedSpy.clear()
             input.text = "abc def"
             input.cursorPosition = input.length
             compare(tagAddedSpy.count, 0)
 
-            input.acceptCompletion("llll", dontExpandPreset)
+            input.acceptCompletion("llll")
 
             compare(input.text, "abc llll")
             compare(tagAddedSpy.count, 0)
             compare(input.cursorPosition, input.length)
+        }
+
+        function test_AcceptCompletionToEmpty() {
+            tagAddedSpy.clear()
+            input.text = "abc"
+            input.cursorPosition = input.length
+            compare(tagAddedSpy.count, 0)
+
+            input.acceptCompletion("")
+
+            compare(input.text, "")
+            compare(tagAddedSpy.count, 0)
+            compare(input.cursorPosition, 0)
+        }
+
+        function test_AcceptCompletionToEmptyWithMoreThanOne() {
+            tagAddedSpy.clear()
+            input.text = "abc def"
+            input.cursorPosition = input.length
+            compare(tagAddedSpy.count, 0)
+
+            input.acceptCompletion("")
+
+            compare(input.text, "abc ")
+            compare(tagAddedSpy.count, 0)
+            compare(input.cursorPosition, input.length)
+        }
+
+        function test_AcceptCompletionToEmptyWithMoreThanOneInTheMiddle() {
+            tagAddedSpy.clear()
+            input.text = "abc def"
+            input.cursorPosition = 3
+            compare(tagAddedSpy.count, 0)
+
+            input.acceptCompletion("")
+
+            compare(input.text, " def")
+            compare(tagAddedSpy.count, 0)
+            compare(input.cursorPosition, 0)
         }
 
         function test_RequestCompletionEmpty() {
@@ -525,25 +562,6 @@ Item {
 
             compare(tagAddedSpy.count, 1)
             compare(tagAddedSpy.signalArguments[0][0], "next_keyword")
-        }
-
-        function test_AcceptCompletionExpandPreset() {
-            var expandPreset = true
-            tagAddedSpy.clear()
-            expandLastPresetSpy.clear()
-            input.text = "abc"
-            input.cursorPosition = input.length
-            compare(tagAddedSpy.count, 0)
-            compare(expandLastPresetSpy.count, 0)
-
-            input.acceptCompletion("abcdee", expandPreset)
-
-            compare(input.text, "")
-            compare(tagAddedSpy.count, 1)
-            compare(tagAddedSpy.signalArguments[0][0], "abcdee")
-            compare(input.cursorPosition, 0)
-
-            compare(expandLastPresetSpy.count, 1)
         }
 
         function test_LosesFocusCancelsCompletion() {

@@ -11,7 +11,7 @@
 #include "../../xpiks-qt/Models/artworkmetadata.h"
 #include "../../xpiks-qt/Models/settingsmodel.h"
 #include "../../xpiks-qt/AutoComplete/autocompleteservice.h"
-#include "../../xpiks-qt/AutoComplete/autocompletemodel.h"
+#include "../../xpiks-qt/AutoComplete/keywordsautocompletemodel.h"
 
 QString AutoCompleteBasicTest::testName() {
     return QLatin1String("AutoCompleteBasicTest");
@@ -19,7 +19,7 @@ QString AutoCompleteBasicTest::testName() {
 
 void AutoCompleteBasicTest::setup() {
     Models::SettingsModel *settingsModel = m_CommandManager->getSettingsModel();
-    settingsModel->setUseAutoComplete(true);
+    settingsModel->setUseKeywordsAutoComplete(true);
 }
 
 int AutoCompleteBasicTest::doTest() {
@@ -45,40 +45,41 @@ int AutoCompleteBasicTest::doTest() {
     Common::BasicMetadataModel *basicModel = metadata->getBasicModel();
 
     AutoComplete::AutoCompleteService *acService = m_CommandManager->getAutoCompleteService();
-    AutoComplete::AutoCompleteModel *acModel = acService->getAutoCompleteModel();
+    AutoComplete::KeywordsAutoCompleteModel *acModel = acService->getAutoCompleteModel();
+    AutoComplete::KeywordsCompletionsModel &completionsModel = acModel->getInnerModel();
 
     SignalWaiter completionWaiter;
     QObject::connect(basicModel, SIGNAL(completionsAvailable()), &completionWaiter, SIGNAL(finished()));
 
     VERIFY(acModel->getCount() == 0, "AC model was not empty");
 
-    m_CommandManager->autoCompleteKeyword("tes", metadata->getBasicModel());
+    m_CommandManager->generateCompletions("tes", metadata->getBasicModel());
 
     if (!completionWaiter.wait(10)) {
         VERIFY(false, "Timeout while waiting for the completion");
     }
 
-    acModel->sync();
+    acModel->initializeCompletions();
 
     qInfo() << "Generated" << acModel->getCount() << "completions";
-    qInfo() << "Completions:" << acModel->getLastGeneratedCompletions();
+    qInfo() << "Completions:" << completionsModel.getLastGeneratedCompletions();
 
     VERIFY(acModel->getCount() > 0, "AC model didn't receive the completions");
-    VERIFY(acModel->containsWord("test"), "AC model has irrelevant results");
+    VERIFY(completionsModel.containsWord("test"), "AC model has irrelevant results");
 
-    m_CommandManager->autoCompleteKeyword("Tes", metadata->getBasicModel());
+    m_CommandManager->generateCompletions("Tes", metadata->getBasicModel());
 
     if (!completionWaiter.wait(10)) {
         VERIFY(false, "Timeout while waiting for the completion");
     }
 
-    acModel->sync();
+    acModel->initializeCompletions();
 
     qInfo() << "Generated" << acModel->getCount() << "completions";
-    qInfo() << "Completions:" << acModel->getLastGeneratedCompletions();
+    qInfo() << "Completions:" << completionsModel.getLastGeneratedCompletions();
 
     VERIFY(acModel->getCount() > 0, "AC model didn't receive the completions second time");
-    VERIFY(acModel->containsWord("test"), "AC model has irrelevant results");
+    VERIFY(completionsModel.containsWord("test"), "AC model has irrelevant results");
 
     VERIFY(acModel->moveSelectionDown(), "AC model can't move selection down");
     // in the beginning the selection index is -1

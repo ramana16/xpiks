@@ -11,13 +11,14 @@
 #ifndef PRESETKEYWORDSMODEL_H
 #define PRESETKEYWORDSMODEL_H
 
-#include "../Common/basickeywordsmodel.h"
-#include "../Common/baseentity.h"
-#include "../Common/abstractlistmodel.h"
 #include <QAbstractListModel>
 #include <QSortFilterProxyModel>
 #include <QTimer>
 #include <QReadWriteLock>
+#include <functional>
+#include "../Common/basickeywordsmodel.h"
+#include "../Common/baseentity.h"
+#include "../Common/abstractlistmodel.h"
 #include "ipresetsmanager.h"
 
 namespace KeywordsPresets {
@@ -75,6 +76,7 @@ namespace KeywordsPresets {
         virtual void triggerPresetsUpdated() override;
 
         bool tryFindPresetByFullName(const QString &name, bool caseSensitive, int &index);
+        void foreachPreset(const std::function<bool (int, PresetModel *)> &action);
 
         // safe and unsafe versions exist because of plugins which
         // can use presets manager in multithreaded way

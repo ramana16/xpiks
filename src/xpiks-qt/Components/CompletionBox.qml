@@ -18,7 +18,7 @@ Item {
     property double maxCount: 5
     property bool isBelowEdit: true
     property alias model: dropDownItems.model
-    property var autoCompleteSource: acSource
+    property var autoCompleteSource
     property real itemHeight: 25
 
     signal boxDestruction();
@@ -27,7 +27,7 @@ Item {
     width: 200
     height: childrenRect.height
 
-    signal itemSelected(string completion, bool expandPreset);
+    signal itemSelected(int completionID);
 
     function openPopup() {
         completeBox.state = "dropDown"
@@ -42,7 +42,7 @@ Item {
     Connections {
         target: autoCompleteSource
         onDismissPopupRequested: closePopup()
-        onCompletionAccepted: itemSelected(completion, expandPreset)
+        onCompletionAccepted: itemSelected(completionID)
         onSelectedIndexChanged: dropDownItems.positionViewAtIndex(autoCompleteSource.selectedIndex, ListView.Contain)
     }
 
@@ -103,9 +103,12 @@ Item {
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.leftMargin: 16
                     color: isSelected ? uiColors.whiteColor : uiColors.inputBackgroundColor
+                    anchors.right: presetMarkText.left
+                    elide: Text.ElideMiddle
                 }
 
                 StyledText {
+                    id: presetMarkText
                     text: "p"
                     visible: ispreset
                     font.pixelSize: 10

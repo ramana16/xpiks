@@ -16,7 +16,7 @@
 #include "../../xpiks-qt/Models/deletekeywordsviewmodel.h"
 #include "../../xpiks-qt/Connectivity/analyticsuserevent.h"
 #include "../../xpiks-qt/SpellCheck/spellcheckerservice.h"
-#include "../../xpiks-qt/AutoComplete/autocompletemodel.h"
+#include "../../xpiks-qt/AutoComplete/keywordsautocompletemodel.h"
 #include "../../xpiks-qt/Translation/translationmanager.h"
 #include "../../xpiks-qt/Translation/translationservice.h"
 #include "../../xpiks-qt/Models/recentdirectoriesmodel.h"
@@ -220,8 +220,8 @@ int main(int argc, char *argv[]) {
     Warnings::WarningsModel warningsModel;
     warningsModel.setSourceModel(&artItemsModel);
     Models::LanguagesModel languagesModel;
-    AutoComplete::AutoCompleteModel autoCompleteModel;
-    AutoComplete::AutoCompleteService autoCompleteService(&autoCompleteModel, &presetsModel);
+    AutoComplete::KeywordsAutoCompleteModel autoCompleteModel;
+    AutoComplete::AutoCompleteService autoCompleteService(&autoCompleteModel, &presetsModel, &settingsModel);
     QMLExtensions::ImageCachingService imageCachingService;
     Models::FindAndReplaceModel findAndReplaceModel(&colorsModel);
     Models::DeleteKeywordsViewModel deleteKeywordsModel;
@@ -272,6 +272,7 @@ int main(int argc, char *argv[]) {
     commandManager.InjectDependency(&languagesModel);
     commandManager.InjectDependency(&colorsModel);
     commandManager.InjectDependency(&autoCompleteService);
+    commandManager.InjectDependency(&autoCompleteModel);
     commandManager.InjectDependency(&imageCachingService);
     commandManager.InjectDependency(&findAndReplaceModel);
     commandManager.InjectDependency(&deleteKeywordsModel);

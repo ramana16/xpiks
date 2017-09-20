@@ -27,8 +27,8 @@
 #include <QQmlApplicationEngine>
 #include <QDesktopWidget>
 // -------------------------------------
+#include "AutoComplete/keywordsautocompletemodel.h"
 #include "SpellCheck/spellchecksuggestionmodel.h"
-#include "SpellCheck/userdicteditmodel.h"
 #include "QMLExtensions/cachingimageprovider.h"
 #include "Models/filteredartitemsproxymodel.h"
 #include "QMLExtensions/imagecachingservice.h"
@@ -36,26 +36,25 @@
 #include "AutoComplete/autocompleteservice.h"
 #include "Connectivity/analyticsuserevent.h"
 #include "SpellCheck/spellcheckerservice.h"
-#include "AutoComplete/autocompletemodel.h"
 #include "Models/deletekeywordsviewmodel.h"
 #include "Translation/translationmanager.h"
 #include "Translation/translationservice.h"
 #include "Models/recentdirectoriesmodel.h"
-#include "MetadataIO/metadataioservice.h"
 #include "QMLExtensions/triangleelement.h"
-#include "Suggestion/keywordssuggestor.h"
-#include "Models/combinedartworksmodel.h"
 #include "Connectivity/telemetryservice.h"
+#include "MetadataIO/metadataioservice.h"
+#include "Suggestion/keywordssuggestor.h"
+#include "SpellCheck/userdicteditmodel.h"
+#include "Models/combinedartworksmodel.h"
 #include "QMLExtensions/folderelement.h"
 #include "Helpers/globalimageprovider.h"
 #include "Models/uploadinforepository.h"
-#include <ftpcoordinator.h>
 #include "Connectivity/curlinithelper.h"
+#include "Connectivity/updateservice.h"
 #include "Helpers/helpersqmlwrapper.h"
 #include "Encryption/secretsmanager.h"
 #include "Models/artworksrepository.h"
 #include "QMLExtensions/colorsmodel.h"
-#include "Connectivity/updateservice.h"
 #include "Models/artworkproxymodel.h"
 #include "Warnings/warningsservice.h"
 #include "UndoRedo/undoredomanager.h"
@@ -69,10 +68,10 @@
 #include "Plugins/pluginmanager.h"
 #include "Helpers/loggingworker.h"
 #include "Models/languagesmodel.h"
+#include "Models/sessionmanager.h"
 #include "Models/artitemsmodel.h"
 #include "Models/settingsmodel.h"
 #include "Models/ziparchiver.h"
-#include "Models/sessionmanager.h"
 #include "Helpers/constants.h"
 #include "Helpers/runguard.h"
 #include "Models/logsmodel.h"
@@ -91,6 +90,7 @@
 #include "KeywordsPresets/presetkeywordsmodelconfig.h"
 #include "Models/switchermodel.h"
 #include "Connectivity/requestsservice.h"
+#include <ftpcoordinator.h>
 
 void myMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg) {
     Q_UNUSED(context);
@@ -305,8 +305,8 @@ int main(int argc, char *argv[]) {
     warningsModel.setSourceModel(&artItemsModel);
     warningsModel.setWarningsSettingsModel(warningsService.getWarningsSettingsModel());
     Models::LanguagesModel languagesModel;
-    AutoComplete::AutoCompleteModel autoCompleteModel;
-    AutoComplete::AutoCompleteService autoCompleteService(&autoCompleteModel, &presetsModel);
+    AutoComplete::KeywordsAutoCompleteModel autoCompleteModel;
+    AutoComplete::AutoCompleteService autoCompleteService(&autoCompleteModel, &presetsModel, &settingsModel);
     QMLExtensions::ImageCachingService imageCachingService;
     Models::FindAndReplaceModel replaceModel(&colorsModel);
     Models::DeleteKeywordsViewModel deleteKeywordsModel;
@@ -370,6 +370,7 @@ int main(int argc, char *argv[]) {
     commandManager.InjectDependency(&languagesModel);
     commandManager.InjectDependency(&colorsModel);
     commandManager.InjectDependency(&autoCompleteService);
+    commandManager.InjectDependency(&autoCompleteModel);
     commandManager.InjectDependency(&imageCachingService);
     commandManager.InjectDependency(&replaceModel);
     commandManager.InjectDependency(&deleteKeywordsModel);
@@ -391,7 +392,6 @@ int main(int argc, char *argv[]) {
     commandManager.InjectDependency(&databaseManager);
 
     userDictEditModel.setCommandManager(&commandManager);
-    autoCompleteModel.setCommandManager(&commandManager);
 
     commandManager.ensureDependenciesInjected();
 

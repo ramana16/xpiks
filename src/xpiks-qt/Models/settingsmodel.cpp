@@ -62,7 +62,8 @@
 #define DEFAULT_AUTO_FIND_VECTORS true
 #define DEFAULT_LOCALE "en_US"
 #define DEFAULT_SELECTED_THEME_INDEX 0
-#define DEFAULT_USE_AUTO_COMPLETE true
+#define DEFAULT_USE_KEYWORDS_AUTO_COMPLETE true
+#define DEFAULT_USE_PRESETS_AUTO_COMPLETE true
 #define DEFAULT_USE_EXIFTOOL true
 #define DEFAULT_USE_PROXY false
 #define DEFAULT_PROXY_HOST ""
@@ -142,7 +143,8 @@ namespace Models {
         m_AutoDownloadUpdates(DEFAULT_AUTO_DOWNLOAD_UPDATES),
         m_DictsPathChanged(false),
         m_AutoFindVectors(DEFAULT_AUTO_FIND_VECTORS),
-        m_UseAutoComplete(DEFAULT_USE_AUTO_COMPLETE),
+        m_UseKeywordsAutoComplete(DEFAULT_USE_KEYWORDS_AUTO_COMPLETE),
+        m_UsePresetsAutoComplete(DEFAULT_USE_PRESETS_AUTO_COMPLETE),
         m_UseExifTool(DEFAULT_USE_EXIFTOOL),
         m_UseProxy(DEFAULT_USE_PROXY),
         m_AutoCacheImages(DEFAULT_AUTO_CACHE_IMAGES),
@@ -444,7 +446,8 @@ namespace Models {
         setAutoFindVectors(boolValue(autoFindVectors, DEFAULT_AUTO_FIND_VECTORS));
         setSelectedLocale(stringValue(selectedLocale, DEFAULT_LOCALE));
         setSelectedThemeIndex(intValue(selectedThemeIndex, DEFAULT_SELECTED_THEME_INDEX));
-        setUseAutoComplete(boolValue(useAutoComplete, DEFAULT_USE_AUTO_COMPLETE));
+        setUseKeywordsAutoComplete(boolValue(useKeywordsAutoComplete, DEFAULT_USE_KEYWORDS_AUTO_COMPLETE));
+        setUsePresetsAutoComplete(boolValue(usePresetsAutoComplete, DEFAULT_USE_PRESETS_AUTO_COMPLETE));
         setUseExifTool(boolValue(useExifTool, DEFAULT_USE_EXIFTOOL));
         setUseProxy(boolValue(useProxy, DEFAULT_USE_PROXY));
         setVerboseUpload(boolValue(verboseUpload, DEFAULT_VERBOSE_UPLOAD));
@@ -502,7 +505,7 @@ namespace Models {
         moveSetting(oldSettings, USER_CONSENT, userConsent, QMetaType::Bool);
         moveSetting(oldSettings, SELECTED_LOCALE, selectedLocale, QMetaType::QString);
         moveSetting(oldSettings, SELECTED_THEME_INDEX, selectedThemeIndex, QMetaType::Int);
-        moveSetting(oldSettings, USE_AUTO_COMPLETE, useAutoComplete, QMetaType::Bool);
+        moveSetting(oldSettings, USE_AUTO_COMPLETE, useKeywordsAutoComplete, QMetaType::Bool);
         moveSetting(oldSettings, USE_EXIFTOOL, useExifTool, QMetaType::Bool);
         moveSetting(oldSettings, CACHE_IMAGES_AUTOMATICALLY, cacheImagesAutomatically, QMetaType::Bool);
         moveSetting(oldSettings, SCROLL_SPEED_SENSIVITY, scrollSpeedSensivity, QMetaType::Double);
@@ -545,7 +548,8 @@ namespace Models {
         setAutoFindVectors(DEFAULT_AUTO_FIND_VECTORS);
         setSelectedLocale(DEFAULT_LOCALE);
         setSelectedThemeIndex(DEFAULT_SELECTED_THEME_INDEX);
-        setUseAutoComplete(DEFAULT_USE_AUTO_COMPLETE);
+        setUseKeywordsAutoComplete(DEFAULT_USE_KEYWORDS_AUTO_COMPLETE);
+        setUsePresetsAutoComplete(DEFAULT_USE_PRESETS_AUTO_COMPLETE);
         setUseExifTool(DEFAULT_USE_EXIFTOOL);
         setUseProxy(DEFAULT_USE_PROXY);
         resetProxySetting();
@@ -597,7 +601,8 @@ namespace Models {
         setValue(autoDownloadUpdates, m_AutoDownloadUpdates);
         setValue(autoFindVectors, m_AutoFindVectors);
         setValue(selectedThemeIndex, m_SelectedThemeIndex);
-        setValue(useAutoComplete, m_UseAutoComplete);
+        setValue(useKeywordsAutoComplete, m_UseKeywordsAutoComplete);
+        setValue(usePresetsAutoComplete, m_UsePresetsAutoComplete);
         setValue(useExifTool, m_UseExifTool);
         setValue(useProxy, m_UseProxy);
         setValue(proxyHost, serializeProxyForSettings(m_ProxySettings));

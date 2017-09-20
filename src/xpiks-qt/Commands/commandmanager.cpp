@@ -62,6 +62,7 @@
 #include "../Helpers/database.h"
 #include "../Models/switchermodel.h"
 #include "../Connectivity/requestsservice.h"
+#include "../AutoComplete/keywordsautocompletemodel.h"
 
 Commands::CommandManager::CommandManager():
     QObject(),
@@ -90,6 +91,7 @@ Commands::CommandManager::CommandManager():
     m_LanguagesModel(NULL),
     m_ColorsModel(NULL),
     m_AutoCompleteService(NULL),
+    m_AutoCompleteModel(NULL),
     m_ImageCachingService(NULL),
     m_DeleteKeywordsViewModel(NULL),
     m_FindAndReplaceModel(NULL),
@@ -241,6 +243,11 @@ void Commands::CommandManager::InjectDependency(QMLExtensions::ColorsModel *colo
 
 void Commands::CommandManager::InjectDependency(AutoComplete::AutoCompleteService *autoCompleteService) {
     Q_ASSERT(autoCompleteService != NULL); m_AutoCompleteService = autoCompleteService;
+}
+
+void Commands::CommandManager::InjectDependency(AutoComplete::KeywordsAutoCompleteModel *autoCompleteModel) {
+    Q_ASSERT(autoCompleteModel != NULL); m_AutoCompleteModel = autoCompleteModel;
+    m_AutoCompleteModel->setCommandManager(this);
 }
 
 void Commands::CommandManager::InjectDependency(QMLExtensions::ImageCachingService *imageCachingService) {
@@ -532,6 +539,7 @@ void Commands::CommandManager::ensureDependenciesInjected() {
 
 #if !defined(CORE_TESTS)
     Q_ASSERT(m_DatabaseManager != NULL);
+    Q_ASSERT(m_AutoCompleteModel != NULL);
 #endif
 
 #if !defined(INTEGRATION_TESTS)
@@ -1143,13 +1151,13 @@ void Commands::CommandManager::restartSpellChecking() {
     }
 }
 
+void Commands::CommandManager::generateCompletions(const QString &prefix, Common::BasicKeywordsModel *source) const {
 #ifndef CORE_TESTS
-void Commands::CommandManager::autoCompleteKeyword(const QString &keyword, QObject *notifyObject) const {
-    if ((m_SettingsModel != NULL) && m_SettingsModel->getUseAutoComplete() && (m_AutoCompleteService != NULL)) {
-        m_AutoCompleteService->findKeywordCompletions(keyword, notifyObject);
+    if (m_AutoCompleteService != NULL) {
+        m_AutoCompleteService->generateCompletions(prefix, source);
     }
-}
 #endif
+}
 
 void Commands::CommandManager::removeUnavailableFiles() {
     LOG_DEBUG << "#";

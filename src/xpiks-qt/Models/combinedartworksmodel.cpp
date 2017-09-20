@@ -279,6 +279,16 @@ namespace Models {
         doCopyToQuickBuffer();
     }
 
+    void CombinedArtworksModel::generateCompletions(const QString &prefix) {
+        LOG_DEBUG << prefix;
+        doGenerateCompletions(prefix);
+    }
+
+    bool CombinedArtworksModel::acceptCompletionAsPreset(int completionID) {
+        LOG_DEBUG << completionID;
+        return doAcceptCompletionAsPreset(completionID);
+    }
+
     void CombinedArtworksModel::processCombinedEditCommand() {
         auto &artworksList = getArtworksList();
 

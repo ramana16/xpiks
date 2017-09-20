@@ -178,7 +178,8 @@ namespace Constants {
     const char userConsent[] = "userConsent10";
     const char selectedLocale[] = "selectedLocale";
     const char selectedThemeIndex[] = "selectedThemeIndex";
-    const char useAutoComplete[] = "useAutoComplete";
+    const char useKeywordsAutoComplete[] = "useKeywordsAutoComplete";
+    const char usePresetsAutoComplete[] = "usePresetsAutoComplete";
     const char useExifTool[] = "useExifTool";
     const char cacheImagesAutomatically[] = "cacheImagesAutomatically";
     const char scrollSpeedSensivity[] = "scrollSpeedSensivity";

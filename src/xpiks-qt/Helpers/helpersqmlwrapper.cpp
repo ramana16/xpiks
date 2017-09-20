@@ -20,7 +20,7 @@
 #include "../Commands/commandmanager.h"
 #include "../Models/logsmodel.h"
 #include "../Models/artworkuploader.h"
-#include "../AutoComplete/stringfilterproxymodel.h"
+#include "../AutoComplete/stringsautocompletemodel.h"
 #include "../Models/ziparchiver.h"
 #include "../SpellCheck/spellcheckerservice.h"
 #include "../Models/deletekeywordsviewmodel.h"
@@ -146,15 +146,6 @@ namespace Helpers {
         m_CommandManager->removeUnavailableFiles();
     }
 
-    void HelpersQmlWrapper::autoCompleteKeyword(const QString &keyword, QObject *notifyObject) {
-#ifndef CORE_TESTS
-        m_CommandManager->autoCompleteKeyword(keyword, notifyObject);
-#else
-        Q_UNUSED(keyword);
-        Q_UNUSED(notifyObject);
-#endif
-    }
-
     bool HelpersQmlWrapper::isVector(const QString &path) const {
         return path.endsWith("eps", Qt::CaseInsensitive) ||
                 path.endsWith("ai", Qt::CaseInsensitive);
@@ -188,7 +179,7 @@ namespace Helpers {
 
     QObject *HelpersQmlWrapper::getFtpACList() {
         auto *artworkUploader = m_CommandManager->getArtworkUploader();
-        AutoComplete::StringFilterProxyModel *model = artworkUploader->getStocksCompletionSource();
+        AutoComplete::StringsAutoCompleteModel *model = artworkUploader->getStocksCompletionSource();
         QQmlEngine::setObjectOwnership(model, QQmlEngine::CppOwnership);
         return model;
     }

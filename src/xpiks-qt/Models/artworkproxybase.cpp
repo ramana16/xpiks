@@ -13,6 +13,8 @@
 #include "../Suggestion/keywordssuggestor.h"
 #include "../QuickBuffer/quickbuffer.h"
 #include "../Helpers/stringhelper.h"
+#include "../AutoComplete/completionitem.h"
+#include "../AutoComplete/keywordsautocompletemodel.h"
 
 namespace Models {
     QString ArtworkProxyBase::getDescription() {
@@ -399,6 +401,34 @@ namespace Models {
     void ArtworkProxyBase::doRequestBackup() {
         auto *metadataOperator = getMetadataOperator();
         metadataOperator->requestBackup();
+    }
+
+    void ArtworkProxyBase::doGenerateCompletions(const QString &prefix) {
+        auto *basicArwork = getBasicMetadataModel();
+        m_CommandManager->generateCompletions(prefix, basicArwork);
+    }
+
+    bool ArtworkProxyBase::doAcceptCompletionAsPreset(int completionID) {
+        bool accepted = false;
+
+        AutoComplete::KeywordsAutoCompleteModel *acModel = m_CommandManager->getAutoCompleteModel();
+        std::shared_ptr<AutoComplete::CompletionItem> completionItem = acModel->getAcceptedCompletion(completionID);
+        if (!completionItem) {
+            LOG_WARNING << "Completion is not available anymore";
+            return false;
+        }
+
+        const int presetIndex = completionItem->getPresetIndex();
+
+        if (completionItem->isPreset() || (completionItem->canBePreset() && completionItem->shouldExpandPreset())) {
+            accepted = doAddPreset(presetIndex);
+        }/* --------- this is handled in the edit field -----------
+            else if (completionItem->isKeyword()) {
+            doAppendKeyword(completionItem->getCompletion());
+            accepted = true;
+        }*/
+
+        return accepted;
     }
 
     void ArtworkProxyBase::spellCheckEverything() {

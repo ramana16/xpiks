@@ -303,6 +303,16 @@ namespace Models {
         doCopyToQuickBuffer();
     }
 
+    void ArtworkProxyModel::generateCompletions(const QString &prefix) {
+        LOG_DEBUG << prefix;
+        doGenerateCompletions(prefix);
+    }
+
+    bool ArtworkProxyModel::acceptCompletionAsPreset(int completionID) {
+        LOG_DEBUG << completionID;
+        return doAcceptCompletionAsPreset(completionID);
+    }
+
     Common::ID_t ArtworkProxyModel::getSpecialItemID() {
         Common::ID_t result = 0;
 

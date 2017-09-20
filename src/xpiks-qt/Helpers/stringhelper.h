@@ -36,7 +36,8 @@ namespace Helpers {
     QString getLastNLines(const QString &text, int N);
     void splitText(const QString &text, QStringList &parts);
     void splitKeywords(const QString &text, const QVector<QChar> &separators, QStringList &parts);
-    int levensteinDistance(const QString &s1, const QString &s2);
+    unsigned int levensteinDistance(const QString &a, const QString &b);
+    int levensteinPercentage(const QString &s1, const QString &s2);
     bool is7BitAscii(const QByteArray &s);
     bool isPunctuation(const QChar &);
     std::string string_format(const std::string fmt, ...);

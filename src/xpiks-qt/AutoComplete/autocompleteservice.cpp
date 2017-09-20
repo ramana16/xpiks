@@ -15,17 +15,23 @@
 #include "../Common/flags.h"
 #include "../Common/basickeywordsmodel.h"
 #include "../Helpers/asynccoordinator.h"
+#include "../Models/settingsmodel.h"
 
 namespace AutoComplete {
-    AutoCompleteService::AutoCompleteService(AutoCompleteModel *autoCompleteModel, KeywordsPresets::IPresetsManager *presetsManager, QObject *parent):
+    AutoCompleteService::AutoCompleteService(KeywordsAutoCompleteModel *autoCompleteModel,
+                                             KeywordsPresets::PresetKeywordsModel *presetsManager,
+                                             Models::SettingsModel *settingsModel,
+                                             QObject *parent):
         QObject(parent),
         m_AutoCompleteWorker(NULL),
         m_AutoCompleteModel(autoCompleteModel),
         m_PresetsManager(presetsManager),
+        m_SettingsModel(settingsModel),
         m_RestartRequired(false)
     {
         Q_ASSERT(autoCompleteModel != nullptr);
         Q_ASSERT(presetsManager != nullptr);
+        Q_ASSERT(settingsModel != nullptr);
     }
 
     AutoCompleteService::~AutoCompleteService() {
@@ -44,7 +50,7 @@ namespace AutoComplete {
         Helpers::AsyncCoordinatorLocker locker(coordinator);
         Q_UNUSED(locker);
 
-        m_AutoCompleteWorker = new AutoCompleteWorker(coordinator, m_PresetsManager);
+        m_AutoCompleteWorker = new AutoCompleteWorker(coordinator, m_AutoCompleteModel, m_PresetsManager);
 
         QThread *thread = new QThread();
         m_AutoCompleteWorker->moveToThread(thread);
@@ -107,24 +113,29 @@ namespace AutoComplete {
         stopService();
     }
 
-    void AutoCompleteService::findKeywordCompletions(const QString &prefix, QObject *notifyObject) {
+    void AutoCompleteService::generateCompletions(const QString &prefix, Common::BasicKeywordsModel *basicModel) {
         if (m_AutoCompleteWorker == NULL) {
             LOG_WARNING << "Worker is NULL";
+            return;
+        }
+
+        const bool completeKeywords = m_SettingsModel->getUseKeywordsAutoComplete();
+        const bool completePresets = m_SettingsModel->getUsePresetsAutoComplete();
+
+        LOG_INTEGR_TESTS_OR_DEBUG << "Complete keywords:" << completeKeywords << "presets:" << completePresets;
+
+        if (!completeKeywords && !completePresets) {
+            LOG_INTEGR_TESTS_OR_DEBUG << "Completions are disabled";
             return;
         }
 
         LOG_INFO << "Received:" << prefix;
         QString requestPrefix = prefix.toLower();
         LOG_INFO << "Requesting for" << requestPrefix;
-        std::shared_ptr<CompletionQuery> query(new CompletionQuery(requestPrefix, m_AutoCompleteModel),
-                                               [](CompletionQuery *cq) { cq->deleteLater(); });
 
-        Common::BasicKeywordsModel *basicKeywordsModel = qobject_cast<Common::BasicKeywordsModel*>(notifyObject);
-        Q_ASSERT(basicKeywordsModel != NULL);
-
-        QObject::connect(query.get(), &CompletionQuery::completionsAvailable, basicKeywordsModel, &Common::BasicKeywordsModel::completionsAvailable);
-        QObject::connect(query.get(), &CompletionQuery::updatesAvailable, m_AutoCompleteModel, &AutoCompleteModel::onUpdatesArrived);
-
+        std::shared_ptr<CompletionQuery> query(new CompletionQuery(requestPrefix, basicModel));
+        query->setCompleteKeywords(completeKeywords);
+        query->setCompletePresets(completePresets);
         m_AutoCompleteWorker->submitItem(query);
     }
 

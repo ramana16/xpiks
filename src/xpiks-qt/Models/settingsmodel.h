@@ -61,7 +61,8 @@ namespace Models {
         Q_PROPERTY(bool autoFindVectors READ getAutoFindVectors WRITE setAutoFindVectors NOTIFY autoFindVectorsChanged)
         Q_PROPERTY(QString selectedLocale READ getSelectedLocale WRITE setSelectedLocale NOTIFY selectedLocaleChanged)
         Q_PROPERTY(int selectedThemeIndex READ getSelectedThemeIndex WRITE setSelectedThemeIndex NOTIFY selectedThemeIndexChanged)
-        Q_PROPERTY(bool useAutoComplete READ getUseAutoComplete WRITE setUseAutoComplete NOTIFY useAutoCompleteChanged)
+        Q_PROPERTY(bool useKeywordsAutoComplete READ getUseKeywordsAutoComplete WRITE setUseKeywordsAutoComplete NOTIFY useKeywordsAutoCompleteChanged)
+        Q_PROPERTY(bool usePresetsAutoComplete READ getUsePresetsAutoComplete WRITE setUsePresetsAutoComplete NOTIFY usePresetsAutoCompleteChanged)
         Q_PROPERTY(bool useExifTool READ getUseExifTool WRITE setUseExifTool NOTIFY useExifToolChanged)
         Q_PROPERTY(bool useProxy READ getUseProxy WRITE setUseProxy NOTIFY useProxyChanged)
         Q_PROPERTY(QString proxyAddress READ getProxyAddress NOTIFY proxyAddressChanged)
@@ -350,7 +351,8 @@ namespace Models {
         bool getAutoFindVectors() const { return m_AutoFindVectors; }
         QString getSelectedLocale() const { return m_SelectedLocale; }
         int getSelectedThemeIndex() const { return m_SelectedThemeIndex; }
-        bool getUseAutoComplete() const { return m_UseAutoComplete; }
+        bool getUseKeywordsAutoComplete() const { return m_UseKeywordsAutoComplete; }
+        bool getUsePresetsAutoComplete() const { return m_UsePresetsAutoComplete; }
         bool getUseExifTool() const { return m_UseExifTool; }
         bool getUseProxy() const { return m_UseProxy; }
         QString getProxyAddress() const { return m_ProxySettings.m_Address; }
@@ -392,7 +394,8 @@ namespace Models {
         void autoFindVectorsChanged(bool value);
         void selectedLocaleChanged(QString value);
         void selectedThemeIndexChanged(int value);
-        void useAutoCompleteChanged(bool value);
+        void useKeywordsAutoCompleteChanged(bool value);
+        void usePresetsAutoCompleteChanged(bool value);
         void useExifToolChanged(bool value);
         void useProxyChanged(bool value);
         void proxyAddressChanged(QString value);
@@ -567,18 +570,26 @@ namespace Models {
             }
         }
 
-        void setUseAutoComplete(bool value) {
-            if (value != m_UseAutoComplete) {
-                m_UseAutoComplete = value;
-                emit useAutoCompleteChanged(value);
+        void setUseKeywordsAutoComplete(bool value) {
+            if (value != m_UseKeywordsAutoComplete) {
+                m_UseKeywordsAutoComplete = value;
+                emit useKeywordsAutoCompleteChanged(value);
             }
         }
+
+        void setUsePresetsAutoComplete(bool value) {
+            if (value != m_UsePresetsAutoComplete) {
+                m_UsePresetsAutoComplete = value;
+                emit usePresetsAutoCompleteChanged(value);
+            }
+        }
+
         void setUseProxy(bool value) {
             if (value != m_UseProxy) {
                 m_UseProxy = value;
                 emit useProxyChanged(value);
             }
-         }
+        }
 
         void setUseExifTool(bool value) {
             if (value != m_UseExifTool) {
@@ -687,7 +698,8 @@ namespace Models {
         bool m_AutoDownloadUpdates;
         bool m_DictsPathChanged;
         bool m_AutoFindVectors;
-        bool m_UseAutoComplete;
+        bool m_UseKeywordsAutoComplete;
+        bool m_UsePresetsAutoComplete;
         bool m_UseExifTool;
         bool m_UseProxy;
         ProxySettings m_ProxySettings;

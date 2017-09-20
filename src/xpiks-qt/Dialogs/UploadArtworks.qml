@@ -434,9 +434,9 @@ Item {
                                     var isBelow = true
 
                                     var options = {
-                                        model: ftpListAC,
-                                        isBelowEdit: isBelow,
+                                        model: ftpListAC.getCompletionsModel(),
                                         autoCompleteSource: ftpListAC,
+                                        isBelowEdit: isBelow,
                                         "anchors.left": directParent.left,
                                         "anchors.leftMargin": tmp.x,
                                         "anchors.top": directParent.top,
@@ -513,8 +513,9 @@ Item {
                                                 }
                                             }
 
-                                            function acceptCompletion(completion, expandPreset) {
+                                            function acceptCompletion(completionID) {
                                                 if (uploadHostsListView.currentItem) {
+                                                    var completion = ftpListAC.getCompletion(completionID);
                                                     uploadHostsListView.currentItem.myData.edittitle = completion
                                                     uploadHostsListView.currentItem.myData.edithost = artworkUploader.getFtpAddress(completion)
                                                 }
