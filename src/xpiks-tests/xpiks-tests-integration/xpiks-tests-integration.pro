@@ -204,7 +204,8 @@ SOURCES += main.cpp \
     ../../xpiks-qt/AutoComplete/libfacecompletionengine.cpp \
     ../../xpiks-qt/AutoComplete/presetscompletionengine.cpp \
     ../../xpiks-qt/AutoComplete/keywordsautocompletemodel.cpp \
-    ../../xpiks-qt/AutoComplete/stringsautocompletemodel.cpp
+    ../../xpiks-qt/AutoComplete/stringsautocompletemodel.cpp \
+    autocompletepresetstest.cpp
 
 RESOURCES +=
 
@@ -444,7 +445,8 @@ HEADERS += \
     ../../xpiks-qt/AutoComplete/libfacecompletionengine.h \
     ../../xpiks-qt/AutoComplete/presetscompletionengine.h \
     ../../xpiks-qt/AutoComplete/keywordsautocompletemodel.h \
-    ../../xpiks-qt/AutoComplete/stringsautocompletemodel.h
+    ../../xpiks-qt/AutoComplete/stringsautocompletemodel.h \
+    autocompletepresetstest.h
 
 INCLUDEPATH += ../../../vendors/tiny-aes
 INCLUDEPATH += ../../../vendors/cpp-libface

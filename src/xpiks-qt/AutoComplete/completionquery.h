@@ -44,7 +44,9 @@ namespace AutoComplete {
             m_Prefix(prefix),
             m_CompletionFlags(0)
         {
+#ifndef INTEGRATION_TESTS
             Q_ASSERT(basicModel != nullptr);
+#endif
         }
 
     private:

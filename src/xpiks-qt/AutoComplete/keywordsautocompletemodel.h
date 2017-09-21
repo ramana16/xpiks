@@ -53,6 +53,7 @@ namespace AutoComplete {
     public:
         bool containsWord(const QString &word) const;
         QStringList getLastGeneratedCompletions();
+        size_t getLastGeneratedCompletionsCount() const { return m_LastGeneratedCompletions.size(); }
 #endif
     signals:
         void updateRequired();

@@ -102,6 +102,7 @@
 #include "locallibrarysearchtest.h"
 #include "metadatacachesavetest.h"
 #include "savevideobasictest.h"
+#include "autocompletepresetstest.h"
 
 #if defined(WITH_LOGS)
 #undef WITH_LOGS
@@ -344,6 +345,7 @@ int main(int argc, char *argv[]) {
     integrationTests.append(new UserDictEditTest(&commandManager));
     integrationTests.append(new WeirdNamesReadTest(&commandManager));
     integrationTests.append(new RestoreSessionTest(&commandManager));
+    integrationTests.append(new AutoCompletePresetsTest(&commandManager));
     // always the last one. insert new tests above
     integrationTests.append(new LocalLibrarySearchTest(&commandManager));
 

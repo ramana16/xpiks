@@ -77,28 +77,34 @@ namespace AutoComplete {
         }
 
         std::vector<CompletionResult> completionsList;
+        auto *basicModel = item->getBasicModel();
+        bool needToNotify = false;
 
         if (onlyFindPresets) {
             if (m_PresetsCompletionEngine.generateCompletions(*item.get(), completionsList)) {
                 auto &completionsModel = m_AutoCompleteModel->getInnerModel();
                 completionsModel.setPresetCompletions(completionsList);
-
-                auto *basicModel = item->getBasicModel();
-                basicModel->notifyCompletionsAvailable();
+                needToNotify = true;
             }
         } else {
             if (m_FaceCompletionEngine.generateCompletions(*item.get(), completionsList)) {
                 auto &completionsModel = m_AutoCompleteModel->getInnerModel();
                 completionsModel.setKeywordCompletions(completionsList);
-
-                auto *basicModel = item->getBasicModel();
-                basicModel->notifyCompletionsAvailable();
+                needToNotify = true;
 
                 item->setCompletions(completionsList);
                 item->setNeedsUpdate();
 
                 this->submitFirst(item);
             }
+        }
+
+#ifdef INTEGRATION_TESTS
+        if (basicModel != nullptr) {
+#else
+        Q_ASSERT(basicModel != nullptr); {
+#endif
+            basicModel->notifyCompletionsAvailable();
         }
     }
 
