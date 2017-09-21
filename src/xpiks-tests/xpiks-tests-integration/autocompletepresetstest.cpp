@@ -54,6 +54,8 @@ int AutoCompletePresetsTest::doTest() {
 
     VERIFY(acModel->getCount() == 0, "AC model was not empty");
 
+    // --------------------------------------------------------------
+
     m_CommandManager->generateCompletions("pr:stock", nullptr);
 
     sleepWaitUntil(5, [&]() {
@@ -68,6 +70,24 @@ int AutoCompletePresetsTest::doTest() {
     VERIFY(acModel->getCount() == 2, "Autocomplete did not find all presets");
     VERIFY(completionsModel.containsWord(FIRST_PRESET), "AC model did not find first preset");
     VERIFY(completionsModel.containsWord(SECOND_PRESET), "AC model did not find second preset");
+
+    acModel->clear();
+
+    // --------------------------------------------------------------
+
+    m_CommandManager->generateCompletions("pr:shttrst", nullptr);
+
+    sleepWaitUntil(5, [&]() {
+        return completionsModel.getLastGeneratedCompletionsCount() > 0;
+    });
+
+    acModel->initializeCompletions();
+
+    qInfo() << "Generated" << acModel->getCount() << "completions";
+    qInfo() << "Completions:" << completionsModel.getLastGeneratedCompletions();
+
+    VERIFY(acModel->getCount() == 1, "Autocomplete did not find all presets");
+    VERIFY(completionsModel.containsWord(FIRST_PRESET), "Presets fuzzy search does not work");
 
     return 0;
 }

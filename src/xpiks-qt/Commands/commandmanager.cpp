@@ -1190,6 +1190,7 @@ void Commands::CommandManager::cleanup() {
     m_SpellCheckerService->cancelCurrentBatch();
     m_WarningsService->cancelCurrentBatch();
     m_ArtworksUpdateHub->clear();
+    m_AutoCompleteModel->clear();
 
     m_CombinedArtworksModel->resetModel();
     m_ZipArchiver->resetModel();

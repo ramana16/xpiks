@@ -32,6 +32,7 @@ namespace AutoComplete {
     public:
         void setSelectedIndex(int value);
         void setIsActive(bool value);
+        void clear() { clearCompletions(); }
 
     public:
         Q_INVOKABLE void initializeCompletions();

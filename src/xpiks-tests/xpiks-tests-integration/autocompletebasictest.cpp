@@ -53,6 +53,8 @@ int AutoCompleteBasicTest::doTest() {
 
     VERIFY(acModel->getCount() == 0, "AC model was not empty");
 
+    // --------------------------------------------------------------
+
     m_CommandManager->generateCompletions("tes", metadata->getBasicModel());
 
     if (!completionWaiter.wait(10)) {
@@ -67,6 +69,10 @@ int AutoCompleteBasicTest::doTest() {
     VERIFY(acModel->getCount() > 0, "AC model didn't receive the completions");
     VERIFY(completionsModel.containsWord("test"), "AC model has irrelevant results");
 
+    acModel->clear();
+
+    // --------------------------------------------------------------
+
     m_CommandManager->generateCompletions("Tes", metadata->getBasicModel());
 
     if (!completionWaiter.wait(10)) {
@@ -80,6 +86,8 @@ int AutoCompleteBasicTest::doTest() {
 
     VERIFY(acModel->getCount() > 0, "AC model didn't receive the completions second time");
     VERIFY(completionsModel.containsWord("test"), "AC model has irrelevant results");
+
+    // --------------------------------------------------------------
 
     VERIFY(acModel->moveSelectionDown(), "AC model can't move selection down");
     // in the beginning the selection index is -1
