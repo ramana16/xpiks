@@ -65,8 +65,6 @@ Item {
         function getKeywordsModel() { return {}; }
         function registerAsCurrentItem() {}
         function getBasicModel() { return { hasSpellErrors: false, hasDuplicates: false }; }
-        function spellCheckTitle() {}
-        function spellCheckDescription() {}
 
         property string thumbpath: ""
         property bool isvideo: false

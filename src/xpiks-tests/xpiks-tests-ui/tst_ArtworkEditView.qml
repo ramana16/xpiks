@@ -68,8 +68,6 @@ Item {
         function getPropertiesMap() { return {} }
         function initTitleHighlighting() {}
         function initDescriptionHighlighting() {}
-        function spellCheckTitle() {}
-        function spellCheckDescription() {}
         function resetModel() {}
         function registerAsCurrentItem() {}
 
