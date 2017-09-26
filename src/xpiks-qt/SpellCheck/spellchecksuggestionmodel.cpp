@@ -212,30 +212,47 @@ namespace SpellCheck {
         if (Common::HasFlag(flags, SuggestionFlags::Keywords)) {
             for (auto &pair: m_ItemsPairs) {
                 auto *item = pair.first;
-                auto subrequests = item->createKeywordsSuggestionsList();
-                for (auto &req: subrequests) { req->setMetadataOperator(item); }
-                requests.insert(requests.end(), subrequests.begin(), subrequests.end());
-                LOG_DEBUG << subrequests.size() << "keywords requests";
+                auto misspelledKeywords = item->retrieveMisspelledKeywords();
+                requests.reserve(requests.size() + misspelledKeywords.size());
+                for (auto &keywordItem: misspelledKeywords) {
+                    if (!keywordItem.isPartOfAKeyword()) {
+                        requests.emplace_back(new SpellCheck::KeywordSpellSuggestions(keywordItem.m_Word, keywordItem.m_Index));
+                    } else {
+                        requests.emplace_back(new SpellCheck::KeywordSpellSuggestions(keywordItem.m_Word, keywordItem.m_Index, keywordItem.m_OriginKeyword));
+                    }
+
+                    requests.back()->setMetadataOperator(item);
+                }
+                LOG_DEBUG << misspelledKeywords.size() << "keywords requests";
             }
         }
 
         if (Common::HasFlag(flags, SuggestionFlags::Title)) {
             for (auto &pair: m_ItemsPairs) {
                 auto *item = pair.first;
-                auto subrequests = item->createTitleSuggestionsList();
-                for (auto &req: subrequests) { req->setMetadataOperator(item); }
-                requests.insert(requests.end(), subrequests.begin(), subrequests.end());
-                LOG_DEBUG << subrequests.size() << "title requests";
+                QStringList misspelledWords = item->retrieveMisspelledTitleWords();
+                requests.reserve(requests.size() + misspelledWords.size());
+
+                for (auto &word: misspelledWords) {
+                    requests.emplace_back(new SpellCheck::TitleSpellSuggestions(word));
+                    requests.back()->setMetadataOperator(item);
+                }
+
+                LOG_DEBUG << misspelledWords.size() << "title requests";
             }
         }
 
         if (Common::HasFlag(flags, SuggestionFlags::Description)) {
             for (auto &pair: m_ItemsPairs) {
                 auto *item = pair.first;
-                auto subrequests = item->createDescriptionSuggestionsList();
-                for (auto &req: subrequests) { req->setMetadataOperator(item); }
-                requests.insert(requests.end(), subrequests.begin(), subrequests.end());
-                LOG_DEBUG << subrequests.size() << "description requests";
+                QStringList misspelledWords = item->retrieveMisspelledDescriptionWords();
+                requests.reserve(requests.size() + misspelledWords.size());
+
+                for (auto &word: misspelledWords) {
+                    requests.emplace_back(new SpellCheck::DescriptionSpellSuggestions(word));
+                    requests.back()->setMetadataOperator(item);
+                }
+                LOG_DEBUG << misspelledWords.size() << "description requests";
             }
         }
 

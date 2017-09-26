@@ -96,6 +96,7 @@ namespace Models {
         Q_INVOKABLE void fillFromQuickBuffer(int index) const;
         Q_INVOKABLE void suggestCorrectionsForSelected() const;
         Q_INVOKABLE void generateCompletions(const QString &prefix, int index);
+        Q_INVOKABLE void reviewDuplicatesInSelected() const;
 
     public slots:
         void itemSelectedChanged(bool value);

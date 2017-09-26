@@ -831,6 +831,7 @@ Rectangle {
                                     isHighlighted: true
                                     keywordText: keyword
                                     hasSpellCheckError: !iscorrect
+                                    hasDuplicate: hasduplicate
                                     delegateIndex: index
                                     itemHeight: flv.keywordHeight
                                     onRemoveClicked: keywordsWrapper.removeKeyword(delegateIndex)
@@ -914,22 +915,15 @@ Rectangle {
                             anchors.right: parent.right
                             spacing: 5
 
-                            StyledText {
+                            StyledLink {
                                 text: i18.n + qsTr("Fix spelling")
                                 enabled: artworkEditComponent.keywordsModel ? artworkEditComponent.keywordsModel.hasSpellErrors : false
-                                color: enabled ? (fixSpellingMA.pressed ? uiColors.linkClickedColor : uiColors.artworkActiveColor) : uiColors.labelActiveForeground
-
-                                MouseArea {
-                                    id: fixSpellingMA
-                                    anchors.fill: parent
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: {
-                                        artworkProxy.suggestCorrections()
-                                        Common.launchDialog("Dialogs/SpellCheckSuggestionsDialog.qml",
-                                                            componentParent,
-                                                            {})
-                                        updateChangesText()
-                                    }
+                                onClicked: {
+                                    artworkProxy.suggestCorrections()
+                                    Common.launchDialog("Dialogs/SpellCheckSuggestionsDialog.qml",
+                                                        componentParent,
+                                                        {})
+                                    updateChangesText()
                                 }
                             }
 
@@ -938,28 +932,45 @@ Rectangle {
                                 verticalAlignment: Text.AlignVCenter
                             }
 
+                            StyledLink {
+                                id: removeDuplicatesText
+                                text: i18.n + qsTr("Remove Duplicates")
+                                enabled: artworkEditComponent.keywordsModel ? artworkEditComponent.keywordsModel.hasDuplicates : false
+                                onClicked: {
+                                    artworkProxy.setupDuplicatesModel()
+
+                                    var wasCollapsed = applicationWindow.leftSideCollapsed
+                                    mainStackView.push({
+                                                           item: "qrc:/StackViews/DuplicatesReView.qml",
+                                                           properties: {
+                                                               componentParent: applicationWindow,
+                                                               wasLeftSideCollapsed: wasCollapsed
+                                                           },
+                                                           destroyOnPop: true
+                                                       })
+                                }
+                            }
+
                             StyledText {
+                                text: "|"
+                                verticalAlignment: Text.AlignVCenter
+                            }
+
+                            StyledLink {
                                 text: i18.n + qsTr("Suggest")
-                                color: enabled ? (suggestKeywordsMA.pressed ? uiColors.linkClickedColor : uiColors.artworkActiveColor) : uiColors.labelActiveForeground
-
-                                MouseArea {
-                                    id: suggestKeywordsMA
-                                    anchors.fill: parent
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: {
-                                        var callbackObject = {
-                                            promoteKeywords: function(keywords) {
-                                                artworkProxy.pasteKeywords(keywords)
-                                                updateChangesText()
-                                            }
+                                onClicked: {
+                                    var callbackObject = {
+                                        promoteKeywords: function(keywords) {
+                                            artworkProxy.pasteKeywords(keywords)
+                                            updateChangesText()
                                         }
-
-                                        artworkProxy.initSuggestion()
-
-                                        Common.launchDialog("Dialogs/KeywordsSuggestion.qml",
-                                                            componentParent,
-                                                            {callbackObject: callbackObject});
                                     }
+
+                                    artworkProxy.initSuggestion()
+
+                                    Common.launchDialog("Dialogs/KeywordsSuggestion.qml",
+                                                        componentParent,
+                                                        {callbackObject: callbackObject});
                                 }
                             }
 
@@ -968,17 +979,10 @@ Rectangle {
                                 verticalAlignment: Text.AlignVCenter
                             }
 
-                            StyledText {
+                            StyledLink {
                                 text: i18.n + qsTr("Copy")
                                 enabled: artworkProxy.keywordsCount > 0
-                                color: enabled ? (copyKeywordsMA.pressed ? uiColors.linkClickedColor : uiColors.artworkActiveColor) : uiColors.labelActiveForeground
-
-                                MouseArea {
-                                    id: copyKeywordsMA
-                                    anchors.fill: parent
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: clipboard.setText(artworkProxy.getKeywordsString())
-                                }
+                                onClicked: clipboard.setText(artworkProxy.getKeywordsString())
                             }
 
                             StyledText {
@@ -986,17 +990,10 @@ Rectangle {
                                 verticalAlignment: Text.AlignVCenter
                             }
 
-                            StyledText {
+                            StyledLink {
                                 text: i18.n + qsTr("Clear")
                                 enabled: artworkProxy.keywordsCount > 0
-                                color: enabled ? (clearKeywordsMA.pressed ? uiColors.linkClickedColor : uiColors.artworkActiveColor) : uiColors.labelActiveForeground
-
-                                MouseArea {
-                                    id: clearKeywordsMA
-                                    anchors.fill: parent
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: clearKeywordsDialog.open()
-                                }
+                                onClicked: clearKeywordsDialog.open()
                             }
                         }
 
@@ -1004,36 +1001,27 @@ Rectangle {
                             height: 10
                         }
 
-                        StyledText {
+                        StyledLink {
                             id: plainTextText
                             text: i18.n + qsTr("<u>edit in plain text</u>")
-                            color: plainTextMA.containsMouse ? uiColors.linkClickedColor : uiColors.labelActiveForeground
-
-                            MouseArea {
-                                id: plainTextMA
-                                anchors.fill: parent
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: {
-                                    // strange bug with clicking on the keywords field
-                                    if (!containsMouse) { return; }
-
-                                    var callbackObject = {
-                                        onSuccess: function(text, spaceIsSeparator) {
-                                            artworkProxy.plainTextEdit(text, spaceIsSeparator)
-                                        },
-                                        onClose: function() {
-                                            flv.activateEdit()
-                                        }
+                            normalLinkColor: uiColors.labelActiveForeground
+                            onClicked: {
+                                var callbackObject = {
+                                    onSuccess: function(text, spaceIsSeparator) {
+                                        artworkProxy.plainTextEdit(text, spaceIsSeparator)
+                                    },
+                                    onClose: function() {
+                                        flv.activateEdit()
                                     }
-
-                                    Common.launchDialog("Dialogs/PlainTextKeywordsDialog.qml",
-                                                        applicationWindow,
-                                                        {
-                                                            callbackObject: callbackObject,
-                                                            keywordsText: artworkProxy.getKeywordsString(),
-                                                            keywordsModel: artworkProxy.getBasicModel()
-                                                        });
                                 }
+
+                                Common.launchDialog("Dialogs/PlainTextKeywordsDialog.qml",
+                                                    applicationWindow,
+                                                    {
+                                                        callbackObject: callbackObject,
+                                                        keywordsText: artworkProxy.getKeywordsString(),
+                                                        keywordsModel: artworkProxy.getBasicModel()
+                                                    });
                             }
                         }
                     }
@@ -1085,63 +1073,6 @@ Rectangle {
                             }
                         }
                     }
-
-                    /*ColumnLayout {
-                        id: column
-
-
-                        Item {
-                            height: 15
-                        }
-
-                        StyledText {
-                            id: dimensionsText
-                            text: {
-                                var size = artworkProxy.imageSize
-                                return "W %1 x H %2".arg(size.width).arg(size.height)
-                            }
-                        }
-
-                        StyledText {
-                            id: sizeText
-                            text: artworkProxy.fileSize
-                        }
-
-                        StyledText {
-                            id: dateText
-                            text: artworkProxy.dateTaken
-                        }
-
-                        Item {
-                            Layout.fillWidth: true
-                            height: 90
-
-                            StyledText {
-                                wrapMode: TextEdit.Wrap
-                                anchors.fill: parent
-                                text: artworkProxy.filePath
-                                height: 90
-                                elide: Text.ElideRight
-                            }
-                        }
-
-                        Item {
-                            Layout.fillWidth: true
-                            height: 90
-
-                            StyledText {
-                                wrapMode: TextEdit.Wrap
-                                anchors.fill: parent
-                                text: artworkProxy.attachedVectorPath
-                                height: 90
-                                elide: Text.ElideRight
-                            }
-                        }
-
-                        Item {
-                            Layout.fillHeight: true
-                        }
-                    }*/
                 }
             }
         }

@@ -46,21 +46,15 @@ ColumnLayout {
         height: 10
     }
 
-    StyledText {
+    StyledLink {
         text: i18.n + qsTr("Support Xpiks")
         anchors.horizontalCenter: parent.horizontalCenter
         color: donateMA.pressed ? uiColors.linkClickedColor : uiColors.goldColor
         font.bold: true
-
-        MouseArea {
-            id: donateMA
-            anchors.fill: parent
-            cursorShape: Qt.PointingHandCursor
-            onClicked: {
-                Qt.openUrlExternally(switcher.donateCampaign1Link)
-                switcher.setDonateCampaign1LinkClicked()
-                donateLinkClicked()
-            }
+        onClicked: {
+            Qt.openUrlExternally(switcher.donateCampaign1Link)
+            switcher.setDonateCampaign1LinkClicked()
+            donateLinkClicked()
         }
     }
 }

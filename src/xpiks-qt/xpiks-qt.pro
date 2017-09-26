@@ -163,7 +163,9 @@ SOURCES += main.cpp \
     AutoComplete/autocompletemodel.cpp \
     AutoComplete/keywordsautocompletemodel.cpp \
     AutoComplete/stringsautocompletemodel.cpp \
-    AutoComplete/presetscompletionengine.cpp
+    AutoComplete/presetscompletionengine.cpp \
+    SpellCheck/duplicatesreviewmodel.cpp \
+    SpellCheck/duplicateshighlighter.cpp
 
 RESOURCES += qml.qrc
 
@@ -384,10 +386,14 @@ HEADERS += \
     MetadataIO/metadatareadinghub.h \
     AutoComplete/completionenginebase.h \
     AutoComplete/libfacecompletionengine.h \
+    Common/wordanalysisresult.h \
     AutoComplete/autocompletemodel.h \
     AutoComplete/keywordsautocompletemodel.h \
     AutoComplete/stringsautocompletemodel.h \
-    AutoComplete/presetscompletionengine.h
+    AutoComplete/presetscompletionengine.h \
+    Common/keyword.h \
+    SpellCheck/duplicatesreviewmodel.h \
+    SpellCheck/duplicateshighlighter.h
 
 DISTFILES += \
     Components/CloseIcon.qml \
@@ -472,7 +478,9 @@ DISTFILES += \
     Graphics/Icon_donate_black.svg \
     Graphics/Icon_donate_slategray.svg \
     Dialogs/DonateDialog.qml \
-    Components/DonateComponent.qml
+    Components/DonateComponent.qml \
+    StackViews/DuplicatesReView.qml \
+    StyledControls/StyledLink.qml
 
 lupdate_only {
 SOURCES += *.qml \

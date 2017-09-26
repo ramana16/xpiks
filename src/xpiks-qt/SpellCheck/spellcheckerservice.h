@@ -83,6 +83,9 @@ namespace SpellCheck {
         void wordsNumberChangedHandler(int number);
 
     private:
+        Common::WordAnalysisFlags getWordAnalysisFlags() const;
+
+    private:
         SpellCheckWorker *m_SpellCheckWorker;
         Models::SettingsModel *m_SettingsModel;
         volatile bool m_RestartRequired;

@@ -137,8 +137,8 @@ namespace Models {
         Q_INVOKABLE void expandLastAsPreset(int metadataIndex);
         Q_INVOKABLE void addPreset(int metadataIndex, int presetIndex);
         Q_INVOKABLE bool acceptCompletionAsPreset(int metadataIndex, int completionID);
-
         Q_INVOKABLE void initSuggestion(int metadataIndex);
+        Q_INVOKABLE void setupDuplicatesModel(int metadataIndex);
 
         void fillFromQuickBuffer(int metadataIndex);
 
@@ -155,7 +155,8 @@ namespace Models {
         void itemModifiedChanged(bool) { updateModifiedCount(); }
         void spellCheckErrorsChanged();
         void onFilesUnavailableHandler();
-        void artworkBackupRequested();
+        void onArtworkBackupRequested();
+        void onArtworkEditingPaused();
         void onUndoStackEmpty();
         void userDictUpdateHandler(const QStringList &keywords, bool overwritten);
         void userDictClearedHandler();
@@ -223,7 +224,7 @@ namespace Models {
         virtual void removeInnerItemRange(int start, int end) override;
 
     private:
-        void destroyInnerItem(ArtworkMetadata *metadata);
+        void destroyInnerItem(ArtworkMetadata *artwork);
         void doRemoveItemsAtIndices(QVector<int> &indicesToRemove);
         void doRemoveItemsInRanges(const QVector<QPair<int, int> > &rangesToRemove);
         void getSelectedItemsIndices(QVector<int> &indices);

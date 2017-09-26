@@ -58,7 +58,7 @@ namespace Models {
 
     signals:
         void artworksSourcesCountChanged();
-        void fileChanged(const QString & path);
+        void fileChanged(const QString &path);
         void filesUnavailable();
 
 #ifdef CORE_TESTS
@@ -70,7 +70,7 @@ namespace Models {
 #endif
 
     private slots:
-        void checkFileUnavailable(const QString & path);
+        void checkFileUnavailable(const QString &path);
         void onAvailabilityTimer();
 
     public:
@@ -101,8 +101,8 @@ namespace Models {
 #endif
 
     public:
-        virtual int rowCount(const QModelIndex & parent = QModelIndex()) const override;
-        virtual QVariant data(const QModelIndex & index, int role = Qt::DisplayRole) const override;
+        virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+        virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
     public:
         Q_INVOKABLE void selectDirectory(int row);

@@ -64,7 +64,7 @@ Item {
         function initTitleHighlighting(){}
         function getKeywordsModel() { return {}; }
         function registerAsCurrentItem() {}
-        function getBasicModel() { return { hasSpellErrors: false }; }
+        function getBasicModel() { return { hasSpellErrors: false, hasDuplicates: false }; }
         function spellCheckTitle() {}
         function spellCheckDescription() {}
 

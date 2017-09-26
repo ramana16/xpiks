@@ -18,6 +18,8 @@
 #include "../Common/imetadataoperator.h"
 #include "../QuickBuffer/currenteditableproxyartwork.h"
 
+class QSyntaxHighlighter;
+
 namespace Models {
     class ArtworkProxyBase:
             public virtual Common::BaseEntity
@@ -62,8 +64,9 @@ namespace Models {
         bool doClearKeywords();
         QString doGetKeywordsString();
         void doSuggestCorrections();
-        void doInitDescriptionHighlighting(QQuickTextDocument *document);
-        void doInitTitleHighlighting(QQuickTextDocument *document);
+        void doSetupDuplicatesModel();
+        QSyntaxHighlighter *doCreateDescriptionHighligher(QQuickTextDocument *document);
+        QSyntaxHighlighter *doCreateTitleHighlighter(QQuickTextDocument *document);
         void doSpellCheckDescription();
         void doSpellCheckTitle();
         void doPlainTextEdit(const QString &rawKeywords, bool spaceIsSeparator);
@@ -80,7 +83,8 @@ namespace Models {
         void doHandleUserDictCleared();
         void doCopyToQuickBuffer();
         bool hasKeywords(const QStringList &keywordsList);
-        void doRequestBackup();
+        void doJustEdited();
+        void doCheckSemanticDuplicates();
         void doGenerateCompletions(const QString &prefix);
         bool doAcceptCompletionAsPreset(int completionID);
 

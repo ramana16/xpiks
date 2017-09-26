@@ -78,34 +78,6 @@ function launchDialog(componentName, directParent, options, functor) {
     }
 }
 
-function launchItemEditing(index, appWnd, callbackObject) {
-    artItemsModel.combineArtwork(index)
-
-    var currentImagePath = artItemsModel.getArtworkFilepath(index)
-
-    var size = artItemsModel.retrieveImageSize(index)
-    if (size.width < size.height) {
-        launchDialog("Dialogs/EditArtworkHorizontalDialog.qml", appWnd,
-                     {
-                         imagePath: currentImagePath,
-                         artworkIndex: index,
-                         componentParent: appWnd,
-                         callbackObject: callbackObject
-                     })
-    } else {
-        var width = size.width;
-        var height = size.height + 0.0;
-        launchDialog("Dialogs/EditArtworkVerticalDialog.qml", appWnd,
-                     {
-                         imagePath: currentImagePath,
-                         artworkIndex: index,
-                         componentParent: appWnd,
-                         callbackObject: callbackObject,
-                         coef: width / height
-                     })
-    }
-}
-
 function safeInsert(textEdit, textToInsert) {
     var originalLength = textToInsert.length;
     textToInsert = textToInsert.replace(/(\r\n|\n|\r)/gm, '');

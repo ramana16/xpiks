@@ -45,20 +45,20 @@ namespace Common {
 #endif
 
     public:
-        virtual void setSpellCheckResults(const QHash<QString, bool> &results, SpellCheckFlags flags);
-        virtual std::vector<std::shared_ptr<SpellCheck::SpellSuggestionsItem> > createDescriptionSuggestionsList() override;
-        virtual std::vector<std::shared_ptr<SpellCheck::SpellSuggestionsItem> > createTitleSuggestionsList() override;
+        virtual void setSpellCheckResults(const QHash<QString, Common::WordAnalysisResult> &results, SpellCheckFlags flags);
+        virtual QStringList retrieveMisspelledDescriptionWords() override;
+        virtual QStringList retrieveMisspelledTitleWords() override;
         virtual bool fixDescriptionSpelling(const QString &word, const QString &replacement) override;
         virtual bool fixTitleSpelling(const QString &word, const QString &replacement) override;
         virtual void setKeywordsSpellCheckResults(const std::vector<std::shared_ptr<SpellCheck::SpellCheckQueryItem> > &items) override;
         virtual bool processFailedKeywordReplacements(const std::vector<std::shared_ptr<SpellCheck::KeywordSpellSuggestions> > &candidatesForRemoval) override;
-        virtual std::vector<std::shared_ptr<SpellCheck::SpellSuggestionsItem> > createKeywordsSuggestionsList() override;
-        virtual Common::KeywordReplaceResult fixKeywordSpelling(int index, const QString &existing, const QString &replacement) override;
+        virtual std::vector<KeywordItem> retrieveMisspelledKeywords() override;
+        virtual Common::KeywordReplaceResult fixKeywordSpelling(size_t index, const QString &existing, const QString &replacement) override;
         virtual void afterReplaceCallback() override;
         virtual Common::BasicKeywordsModel *getBasicKeywordsModel() override;
         virtual QStringList getDescriptionWords();
         virtual QStringList getTitleWords();
-        virtual bool expandPreset(int keywordIndex, const QStringList &presetList) override;
+        virtual bool expandPreset(size_t keywordIndex, const QStringList &presetList) override;
         virtual bool appendPreset(const QStringList &presetList) override;
 
     private:
@@ -74,12 +74,13 @@ namespace Common {
         bool hasDescriptionWordSpellError(const QString &word);
         bool hasTitleWordSpellError(const QString &word);
         virtual bool hasSpellErrors() override;
+        virtual bool hasDuplicates() override;
 
     public:
         // IMetadataOperator
         // c++ is still not capable of picking abstract implementations from Base class
-        virtual bool editKeyword(int index, const QString &replacement) override { return BasicKeywordsModel::editKeyword(index, replacement); }
-        virtual bool removeKeywordAt(int index, QString &removedKeyword) override { return BasicKeywordsModel::removeKeywordAt(index, removedKeyword); }
+        virtual bool editKeyword(size_t index, const QString &replacement) override { return BasicKeywordsModel::editKeyword(index, replacement); }
+        virtual bool removeKeywordAt(size_t index, QString &removedKeyword) override { return BasicKeywordsModel::removeKeywordAt(index, removedKeyword); }
         virtual bool removeLastKeyword(QString &removedKeyword) override { return BasicKeywordsModel::removeLastKeyword(removedKeyword); }
         virtual bool appendKeyword(const QString &keyword) override { return BasicKeywordsModel::appendKeyword(keyword); }
         virtual int appendKeywords(const QStringList &keywordsList) override { return BasicKeywordsModel::appendKeywords(keywordsList); }
@@ -88,7 +89,7 @@ namespace Common {
         virtual void setKeywords(const QStringList &keywords) override { return BasicKeywordsModel::setKeywords(keywords); }
         virtual bool removeKeywords(const QSet<QString> &keywords, bool caseSensitive) override { return BasicKeywordsModel::removeKeywords(keywords, caseSensitive); }
         virtual bool hasKeywords(const QStringList &keywordsList) override { return BasicKeywordsModel::hasKeywords(keywordsList); }
-        virtual void requestBackup() override { /* bump */ }
+        virtual void justEdited() override { /* bump */ }
 
     public:
         virtual bool setDescription(const QString &value) override;
@@ -103,8 +104,8 @@ namespace Common {
         void notifyTitleSpellCheck();
 
     private:
-        void updateDescriptionSpellErrors(const QHash<QString, bool> &results);
-        void updateTitleSpellErrors(const QHash<QString, bool> &results);
+        void updateDescriptionSpellErrors(const QHash<QString, Common::WordAnalysisResult> &results, bool withStemInfo);
+        void updateTitleSpellErrors(const QHash<QString, Common::WordAnalysisResult> &results, bool withStemInfo);
 
     private:
         QReadWriteLock m_DescriptionLock;

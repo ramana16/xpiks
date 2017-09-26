@@ -71,6 +71,7 @@ namespace Models {
         void completionsAvailable();
         void itemBecomeUnavailable();
         void warningsCouldHaveChanged(int originalIndex);
+        void spellingRehighlightRequired();
 
     protected:
         virtual void signalDescriptionChanged() override { emit descriptionChanged(); }
@@ -94,6 +95,7 @@ namespace Models {
         Q_INVOKABLE void clearKeywords();
         Q_INVOKABLE QString getKeywordsString();
         Q_INVOKABLE void suggestCorrections();
+        Q_INVOKABLE void setupDuplicatesModel();
         Q_INVOKABLE void initDescriptionHighlighting(QQuickTextDocument *document);
         Q_INVOKABLE void initTitleHighlighting(QQuickTextDocument *document);
         Q_INVOKABLE void spellCheckDescription();
@@ -145,8 +147,8 @@ namespace Models {
 
     private:
         void updateCurrentArtwork();
-        void doResetModel();
         void disconnectCurrentArtwork();
+        void releaseCurrentArtwork();
 
     private:
         ArtworkPropertiesMap m_PropertiesMap;

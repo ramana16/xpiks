@@ -463,6 +463,13 @@ namespace Models {
             m_CommandManager->generateCompletions(prefix, basicModel);
         }
     }
+    
+    void FilteredArtItemsProxyModel::reviewDuplicatesInSelected() const {
+        auto itemsForSuggestions = getFilteredOriginalItems<ArtworkMetadata *>(
+                    [](ArtworkMetadata *artwork) { return artwork->hasDuplicates(); },
+                    [] (ArtworkMetadata *artwork, int, int) { return artwork; });
+        m_CommandManager->setupDuplicatesModel(itemsForSuggestions);
+    }
 
     void FilteredArtItemsProxyModel::itemSelectedChanged(bool value) {
         int plus = value ? +1 : -1;

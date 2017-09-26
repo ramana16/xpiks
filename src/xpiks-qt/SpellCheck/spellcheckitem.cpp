@@ -17,28 +17,25 @@
 #include "../Common/basicmetadatamodel.h"
 #include "../Helpers/stringhelper.h"
 
+#define IMPOSSIBLE_TITLE_INDEX 100000
+#define IMPOSSIBLE_DESCRIPTION_INDEX 200000
+
 namespace SpellCheck {
     SpellCheckItemBase::~SpellCheckItemBase() {}
 
-    void SpellCheckItemBase::accountResultAt(int index) {
-        if (0 <= index && (size_t)index < m_QueryItems.size()) {
-            auto &item = m_QueryItems.at(index);
-            m_SpellCheckResults[item->m_Word] = item->m_IsCorrect;
+    void SpellCheckItemBase::accountResults() {
+        for (auto &item: m_QueryItems) {
+            m_SpellCheckResults.insert(item->m_Word,
+                                       Common::WordAnalysisResult(item->m_Stem, item->m_IsCorrect, item->m_IsDuplicate));
         }
-    }
-
-    bool SpellCheckItemBase::getIsCorrect(const QString &word) const {
-        bool result = m_SpellCheckResults.value(word, true);
-
-        return result;
     }
 
     void SpellCheckItemBase::appendItem(const std::shared_ptr<SpellCheckQueryItem> &item) {
         m_QueryItems.push_back(item);
     }
 
-    SpellCheckItem::SpellCheckItem(Common::BasicKeywordsModel *spellCheckable, Common::SpellCheckFlags spellCheckFlags, int keywordIndex):
-        SpellCheckItemBase(),
+    SpellCheckItem::SpellCheckItem(Common::BasicKeywordsModel *spellCheckable, Common::SpellCheckFlags spellCheckFlags, Common::WordAnalysisFlags wordAnalysisFlag, int keywordIndex):
+        SpellCheckItemBase(wordAnalysisFlag),
         m_SpellCheckable(spellCheckable),
         m_SpellCheckFlags(spellCheckFlags),
         m_OnlyOneKeyword(true) {
@@ -62,8 +59,8 @@ namespace SpellCheck {
         }
     }
 
-    SpellCheckItem::SpellCheckItem(Common::BasicKeywordsModel *spellCheckable, Common::SpellCheckFlags spellCheckFlags):
-        SpellCheckItemBase(),
+    SpellCheckItem::SpellCheckItem(Common::BasicKeywordsModel *spellCheckable, Common::SpellCheckFlags spellCheckFlags, Common::WordAnalysisFlags wordAnalysisFlags):
+        SpellCheckItemBase(wordAnalysisFlags),
         m_SpellCheckable(spellCheckable),
         m_SpellCheckFlags(spellCheckFlags),
         m_OnlyOneKeyword(false) {
@@ -83,7 +80,7 @@ namespace SpellCheck {
             if (metadataModel != nullptr) {
                 QStringList descriptionWords = metadataModel->getDescriptionWords();
                 reserve(descriptionWords.length());
-                addWords(descriptionWords, 100000, alwaysTrue);
+                addWords(descriptionWords, IMPOSSIBLE_DESCRIPTION_INDEX, alwaysTrue);
             }
         }
 
@@ -92,13 +89,13 @@ namespace SpellCheck {
             if (metadataModel != nullptr) {
                 QStringList titleWords = metadataModel->getTitleWords();
                 reserve(titleWords.length());
-                addWords(titleWords, 100000, alwaysTrue);
+                addWords(titleWords, IMPOSSIBLE_TITLE_INDEX, alwaysTrue);
             }
         }
     }
 
-    SpellCheckItem::SpellCheckItem(Common::BasicKeywordsModel *spellCheckable, const QStringList &keywordsToCheck):
-        SpellCheckItemBase(),
+    SpellCheckItem::SpellCheckItem(Common::BasicKeywordsModel *spellCheckable, const QStringList &keywordsToCheck, Common::WordAnalysisFlags wordAnalysisFlags):
+        SpellCheckItemBase(wordAnalysisFlags),
         m_SpellCheckable(spellCheckable),
         m_SpellCheckFlags(Common::SpellCheckFlags::All),
         m_OnlyOneKeyword(false)
@@ -140,11 +137,11 @@ namespace SpellCheck {
         if (metadataModel != nullptr) {
             QStringList descriptionWords = metadataModel->getDescriptionWords();
             reserve(descriptionWords.length());
-            addWords(descriptionWords, 100000, sameKeywordFunc);
+            addWords(descriptionWords, IMPOSSIBLE_DESCRIPTION_INDEX, sameKeywordFunc);
 
             QStringList titleWords = metadataModel->getTitleWords();
             reserve(titleWords.length());
-            addWords(titleWords, 100000, sameKeywordFunc);
+            addWords(titleWords, IMPOSSIBLE_TITLE_INDEX, sameKeywordFunc);
         }
     }
 
@@ -219,7 +216,7 @@ namespace SpellCheck {
     ModifyUserDictItem::ModifyUserDictItem(const QStringList &keywords):
         m_ClearFlag(true)
     {
-        for (auto & keyword : keywords) {
+        for (auto &keyword : keywords) {
             Helpers::splitText(keyword, m_KeywordsToAdd);
         }
 

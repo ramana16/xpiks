@@ -52,54 +52,56 @@ namespace Common {
     }
 #endif
 
-    void BasicMetadataModel::setSpellCheckResults(const QHash<QString, bool> &results, Common::SpellCheckFlags flags) {
+    void BasicMetadataModel::setSpellCheckResults(const QHash<QString, Common::WordAnalysisResult> &results, Common::SpellCheckFlags flags) {
+        const bool withStems = flags == Common::SpellCheckFlags::All;
+
         if (Common::HasFlag(flags, Common::SpellCheckFlags::Description)) {
-            updateDescriptionSpellErrors(results);
+            updateDescriptionSpellErrors(results, withStems);
         }
 
         if (Common::HasFlag(flags, Common::SpellCheckFlags::Title)) {
-            updateTitleSpellErrors(results);
+            updateTitleSpellErrors(results, withStems);
         }
     }
 
-    std::vector<std::shared_ptr<SpellCheck::SpellSuggestionsItem> > BasicMetadataModel::createDescriptionSuggestionsList() {
+    QStringList BasicMetadataModel::retrieveMisspelledDescriptionWords() {
         LOG_DEBUG << "#";
         QStringList descriptionWords = getDescriptionWords();
-        int length = descriptionWords.length();
+        const int length = descriptionWords.length();
 
-        std::vector<std::shared_ptr<SpellCheck::SpellSuggestionsItem> > spellCheckSuggestions;
-        spellCheckSuggestions.reserve(length / 3);
+        QStringList misspelledWords;
+        misspelledWords.reserve(length / 3);
 
         for (int i = 0; i < length; ++i) {
             const QString &word = descriptionWords.at(i);
             if (m_SpellCheckInfo->hasDescriptionError(word)) {
                 LOG_DEBUG << word << "has wrong spelling";
 
-                spellCheckSuggestions.emplace_back(new SpellCheck::DescriptionSpellSuggestions(word));
+                misspelledWords.append(word);
             }
         }
 
-        return spellCheckSuggestions;
+        return misspelledWords;
     }
 
-    std::vector<std::shared_ptr<SpellCheck::SpellSuggestionsItem> > BasicMetadataModel::createTitleSuggestionsList() {
+    QStringList BasicMetadataModel::retrieveMisspelledTitleWords() {
         LOG_DEBUG << "#";
         QStringList titleWords = getTitleWords();
-        int length = titleWords.length();
+        const int length = titleWords.length();
 
-        std::vector<std::shared_ptr<SpellCheck::SpellSuggestionsItem> > spellCheckSuggestions;
-        spellCheckSuggestions.reserve(length / 3);
+        QStringList misspelledWords;
+        misspelledWords.reserve(length / 3);
 
         for (int i = 0; i < length; ++i) {
             const QString &word = titleWords.at(i);
             if (m_SpellCheckInfo->hasTitleError(word)) {
                 LOG_DEBUG << word << "has wrong spelling";
 
-                spellCheckSuggestions.emplace_back(new SpellCheck::TitleSpellSuggestions(word));
+                misspelledWords.append(word);
             }
         }
 
-        return spellCheckSuggestions;
+        return misspelledWords;
     }
 
     bool BasicMetadataModel::fixDescriptionSpelling(const QString &word, const QString &replacement) {
@@ -128,11 +130,11 @@ namespace Common {
         return BasicKeywordsModel::processFailedKeywordReplacements(candidatesForRemoval);
     }
 
-    std::vector<std::shared_ptr<SpellCheck::SpellSuggestionsItem> > BasicMetadataModel::createKeywordsSuggestionsList() {
-        return BasicKeywordsModel::createKeywordsSuggestionsList();
+    std::vector<KeywordItem> BasicMetadataModel::retrieveMisspelledKeywords() {
+        return BasicKeywordsModel::retrieveMisspelledKeywords();
     }
 
-    KeywordReplaceResult BasicMetadataModel::fixKeywordSpelling(int index, const QString &existing, const QString &replacement) {
+    KeywordReplaceResult BasicMetadataModel::fixKeywordSpelling(size_t index, const QString &existing, const QString &replacement) {
         return BasicKeywordsModel::fixKeywordSpelling(index, existing, replacement);
     }
 
@@ -164,7 +166,7 @@ namespace Common {
         return words;
     }
 
-    bool BasicMetadataModel::expandPreset(int keywordIndex, const QStringList &presetList) {
+    bool BasicMetadataModel::expandPreset(size_t keywordIndex, const QStringList &presetList) {
         return BasicKeywordsModel::expandPreset(keywordIndex, presetList);
     }
 
@@ -279,6 +281,13 @@ namespace Common {
         return result;
     }
 
+    bool BasicMetadataModel::hasDuplicates() {
+        bool result = m_SpellCheckInfo->anyDescriptionDuplicates() ||
+                m_SpellCheckInfo->anyTitleDuplicates() ||
+                BasicKeywordsModel::hasDuplicates();
+        return result;
+    }
+
     bool BasicMetadataModel::setDescription(const QString &value) {
         QWriteLocker writeLocker(&m_DescriptionLock);
 
@@ -347,27 +356,53 @@ namespace Common {
         emit spellCheckResultsReady();
     }
 
-    void BasicMetadataModel::updateDescriptionSpellErrors(const QHash<QString, bool> &results) {
+    void BasicMetadataModel::updateDescriptionSpellErrors(const QHash<QString, Common::WordAnalysisResult> &results, bool withStemInfo) {
         QSet<QString> descriptionErrors;
+        QSet<QString> descriptionDuplicates;
         QStringList descriptionWords = getDescriptionWords();
+        Common::WordAnalysisResult defaultWordAnalysisResult;
+
         foreach(const QString &word, descriptionWords) {
-            if (results.value(word, true) == false) {
+            Common::WordAnalysisResult wordResult = results.value(word, defaultWordAnalysisResult);
+
+            if (wordResult.m_IsCorrect == false) {
                 descriptionErrors.insert(word.toLower());
+            }
+
+            if (withStemInfo && wordResult.m_HasDuplicates) {
+                descriptionDuplicates.insert(word);
             }
         }
 
         m_SpellCheckInfo->setDescriptionErrors(descriptionErrors);
+
+        if (withStemInfo) {
+            m_SpellCheckInfo->setDescriptionDuplicates(descriptionDuplicates);
+        }
     }
 
-    void BasicMetadataModel::updateTitleSpellErrors(const QHash<QString, bool> &results) {
+    void BasicMetadataModel::updateTitleSpellErrors(const QHash<QString, Common::WordAnalysisResult> &results, bool withStemInfo) {
         QSet<QString> titleErrors;
+        QSet<QString> titleDuplicates;
         QStringList titleWords = getTitleWords();
-        foreach(const QString &word, titleWords) {
-            if (results.value(word, true) == false) {
+        Common::WordAnalysisResult defaultWordAnalysisResult;
+
+        foreach(const QString &word, titleWords) {            
+            Common::WordAnalysisResult wordResult = results.value(word, defaultWordAnalysisResult);
+
+            if (wordResult.m_IsCorrect == false) {
                 titleErrors.insert(word.toLower());
+            }
+
+            if (withStemInfo && wordResult.m_HasDuplicates) {
+                titleDuplicates.insert(word);
             }
         }
 
         m_SpellCheckInfo->setTitleErrors(titleErrors);
+
+        if (withStemInfo) {
+            m_SpellCheckInfo->setTitleDuplicates(titleDuplicates);
+        }
     }
 }

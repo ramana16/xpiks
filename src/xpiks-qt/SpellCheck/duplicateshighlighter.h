@@ -8,8 +8,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#ifndef SPELLCHECKERRORSHIGHLIGHTER_H
-#define SPELLCHECKERRORSHIGHLIGHTER_H
+#ifndef DUPLICATESHIGHLIGHTER_H
+#define DUPLICATESHIGHLIGHTER_H
 
 #include <QtGui>
 #include <QSet>
@@ -22,14 +22,14 @@ namespace QMLExtensions {
 namespace SpellCheck {
     class SpellCheckErrorsInfo;
 
-    class SpellCheckErrorsHighlighter : public QSyntaxHighlighter
+    class DuplicatesHighlighter : public QSyntaxHighlighter
     {
         Q_OBJECT
     public:
-        SpellCheckErrorsHighlighter(QTextDocument *document,
-                                    QMLExtensions::ColorsModel *colorsModel,
-                                    SpellCheckErrorsInfo *errorsInfo);
-        virtual ~SpellCheckErrorsHighlighter();
+        DuplicatesHighlighter(QTextDocument *document,
+                              QMLExtensions::ColorsModel *colorsModel,
+                              SpellCheckErrorsInfo *errorsInfo);
+        virtual ~DuplicatesHighlighter();
 
     protected:
         virtual void highlightBlock(const QString &text) override;
@@ -40,4 +40,4 @@ namespace SpellCheck {
     };
 }
 
-#endif // SPELLCHECKERRORSHIGHLIGHTER_H
+#endif // DUPLICATESHIGHLIGHTER_H

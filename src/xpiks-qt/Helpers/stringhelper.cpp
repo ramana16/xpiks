@@ -20,6 +20,7 @@
 #include <vector>
 #include <utility>
 #include <algorithm>
+#include <cmath>
 #include "../Common/defines.h"
 #include "../Helpers/indiceshelper.h"
 
@@ -32,6 +33,8 @@
 #elif defined(Q_OS_LINUX)
 #include <arpa/inet.h>
 #endif
+
+#define SYNONYMS_DISTANCE 3
 
 namespace Helpers {
     void foreachPart(const QString &text,
@@ -384,4 +387,14 @@ namespace Helpers {
         return prefix;
     }
 
+    bool areSemanticDuplicates(const QString &s1, const QString &s2) {
+        const int length1 = s1.length();
+        const int length2 = s2.length();
+
+        const int diff = abs(length1 - length2);
+        if (diff > SYNONYMS_DISTANCE) { return false; }
+
+        const auto distance = Helpers::levensteinDistance(s1, s2);
+        return distance <= SYNONYMS_DISTANCE;
+    }
 }

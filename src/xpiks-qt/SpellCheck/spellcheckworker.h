@@ -84,7 +84,8 @@ namespace SpellCheck {
     protected:
         virtual void onQueueIsEmpty() override {
             /* Notify on emptiness only for batches with separator */
-            /* emit queueIsEmpty(); */ }
+            /* emit queueIsEmpty(); */
+        }
         virtual void workerStopped() override { emit stopped(); }
 
     public slots:
@@ -108,7 +109,10 @@ namespace SpellCheck {
         QStringList suggestCorrections(const QString &word);
         bool checkWordSpelling(const std::shared_ptr<SpellCheckQueryItem> &queryItem);
         bool checkWordSpelling(const QString &word);
+        void stemWord(const std::shared_ptr<SpellCheckQueryItem> &queryItem);
+        QString getWordStem(const QString &word);
         bool isHunspellSpellingCorrect(const QString &word) const;
+        void findSemanticDuplicates(const std::vector<std::shared_ptr<SpellCheckQueryItem> > &queries);
         void findSuggestions(const QString &word);
         void initUserDictionary();
         void cleanUserDict();

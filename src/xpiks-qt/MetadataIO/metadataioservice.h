@@ -13,7 +13,6 @@
 
 #include <QObject>
 #include <QVector>
-#include <QTimer>
 #include "../Common/baseentity.h"
 #include "../Suggestion/locallibraryquery.h"
 #include "artworkssnapshot.h"
@@ -58,10 +57,12 @@ namespace MetadataIO {
     private slots:
         void onCacheSyncRequest();
         void workerFinished();
-        void onSaverTimer();
+
+    protected:
+        virtual void timerEvent(QTimerEvent *event) override;
 
     private:
-        QTimer m_SaverTimer;
+        int m_LastTimerId;
         volatile int m_RestartsCount;
         MetadataIOWorker *m_MetadataIOWorker;
     };

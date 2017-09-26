@@ -15,6 +15,7 @@
 #include <QSet>
 #include "../SpellCheck/spellsuggestionsitem.h"
 #include "../Common/flags.h"
+#include "keyword.h"
 
 namespace Common {
     class BasicKeywordsModel;
@@ -23,8 +24,8 @@ namespace Common {
     public:
         virtual ~IMetadataOperator() {}
 
-        virtual bool editKeyword(int index, const QString &replacement) = 0;
-        virtual bool removeKeywordAt(int index, QString &removedKeyword) = 0;
+        virtual bool editKeyword(size_t index, const QString &replacement) = 0;
+        virtual bool removeKeywordAt(size_t index, QString &removedKeyword) = 0;
         virtual bool removeLastKeyword(QString &removedKeyword) = 0;
         virtual bool appendKeyword(const QString &keyword) = 0;
         virtual int appendKeywords(const QStringList &keywordsList) = 0;
@@ -34,20 +35,21 @@ namespace Common {
         virtual void setKeywords(const QStringList &keywords) = 0;
         virtual bool setDescription(const QString &value) = 0;
         virtual bool setTitle(const QString &value) = 0;
-        virtual bool expandPreset(int keywordIndex, const QStringList &presetList) = 0;
+        virtual bool expandPreset(size_t keywordIndex, const QStringList &presetList) = 0;
         virtual bool appendPreset(const QStringList &presetList) = 0;
         virtual bool hasKeywords(const QStringList &keywordsList) = 0;
-        virtual void requestBackup() = 0;
+        virtual void justEdited() = 0;
+        //virtual const QHash<QString, QStringList> getDuplicatesModel() = 0;
 
         virtual Common::BasicKeywordsModel *getBasicKeywordsModel() = 0;
 
         // former ispellcheckable here
-        virtual Common::KeywordReplaceResult fixKeywordSpelling(int index, const QString &existing, const QString &replacement) = 0;
+        virtual Common::KeywordReplaceResult fixKeywordSpelling(size_t index, const QString &existing, const QString &replacement) = 0;
         virtual bool fixDescriptionSpelling(const QString &word, const QString &replacement) = 0;
         virtual bool fixTitleSpelling(const QString &word, const QString &replacement) = 0;
-        virtual std::vector<std::shared_ptr<SpellCheck::SpellSuggestionsItem> > createDescriptionSuggestionsList() = 0;
-        virtual std::vector<std::shared_ptr<SpellCheck::SpellSuggestionsItem> > createTitleSuggestionsList() = 0;
-        virtual std::vector<std::shared_ptr<SpellCheck::SpellSuggestionsItem> > createKeywordsSuggestionsList() = 0;
+        virtual std::vector<KeywordItem> retrieveMisspelledKeywords() = 0;
+        virtual QStringList retrieveMisspelledTitleWords() = 0;
+        virtual QStringList retrieveMisspelledDescriptionWords() = 0;
         virtual bool processFailedKeywordReplacements(const std::vector<std::shared_ptr<SpellCheck::KeywordSpellSuggestions> > &candidatesForRemoval) = 0;
         virtual void afterReplaceCallback() = 0;
     };

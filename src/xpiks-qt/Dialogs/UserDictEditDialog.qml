@@ -164,6 +164,7 @@ Item {
                             keywordText: keyword
                             delegateIndex: index
                             hasSpellCheckError: false
+                            hasDuplicate: hasduplicate
                             isHighlighted: true
                             itemHeight: flv.keywordHeight
                             closeIconDisabledColor: uiColors.closeIconInactiveColor

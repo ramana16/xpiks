@@ -401,6 +401,7 @@ Item {
                                 isHighlighted: true
                                 keywordText: keyword
                                 hasSpellCheckError: !iscorrect
+                                hasDuplicate: hasduplicate
                                 delegateIndex: index
                                 itemHeight: flv.keywordHeight
                                 onRemoveClicked: presetsModel.removeKeywordAt(presetNamesListView.currentIndex, index)
@@ -469,43 +470,33 @@ Item {
                 anchors.bottomMargin: 20
                 anchors.rightMargin: 20
 
-                StyledText {
+                StyledLink {
                     id: plainTextText
                     text: i18.n + qsTr("<u>edit in plain text</u>")
-                    color: plainTextMA.containsMouse ? uiColors.linkClickedColor : uiColors.labelActiveForeground
+                    normalLinkColor: uiColors.labelActiveForeground
                     enabled: presetNamesListView.currentItem ? true : false
                     visible: presetNamesListView.count > 0
+                    onClicked: {
+                        if (!presetNamesListView.currentItem) { return; }
 
-                    MouseArea {
-                        id: plainTextMA
-                        anchors.fill: parent
-                        hoverEnabled: true
-                        preventStealing: true
-                        cursorShape: containsMouse ? Qt.PointingHandCursor : Qt.ArrowCursor
-                        onClicked: {
-                            // strange bug with clicking on the keywords field
-                            if (!containsMouse) { return; }
-                            if (!presetNamesListView.currentItem) { return; }
-
-                            var callbackObject = {
-                                onSuccess: function(text, spaceIsSeparator) {
-                                    presetsModel.plainTextEdit(presetNamesListView.currentIndex, text, spaceIsSeparator)
-                                },
-                                onClose: function() {
-                                    flv.activateEdit()
-                                }
+                        var callbackObject = {
+                            onSuccess: function(text, spaceIsSeparator) {
+                                presetsModel.plainTextEdit(presetNamesListView.currentIndex, text, spaceIsSeparator)
+                            },
+                            onClose: function() {
+                                flv.activateEdit()
                             }
-
-                            var basicModel =  presetsModel.getKeywordsModel(presetNamesListView.currentIndex)
-
-                            Common.launchDialog("../Dialogs/PlainTextKeywordsDialog.qml",
-                                                applicationWindow,
-                                                {
-                                                    callbackObject: callbackObject,
-                                                    keywordsText: presetNamesListView.currentItem.myData.keywordsstring,
-                                                    keywordsModel: basicModel
-                                                });
                         }
+
+                        var basicModel =  presetsModel.getKeywordsModel(presetNamesListView.currentIndex)
+
+                        Common.launchDialog("../Dialogs/PlainTextKeywordsDialog.qml",
+                                            applicationWindow,
+                                            {
+                                                callbackObject: callbackObject,
+                                                keywordsText: presetNamesListView.currentItem.myData.keywordsstring,
+                                                keywordsModel: basicModel
+                                            });
                     }
                 }
 

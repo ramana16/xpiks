@@ -22,7 +22,8 @@
 #include "../MetadataIO/cachedartwork.h"
 #include "../MetadataIO/originalmetadata.h"
 
-#define MAX_BACKUP_TIMER_DELAYS 5
+// twice average English word length
+#define MAX_EDITING_PAUSE_RESTARTS 12
 
 #ifdef SIZE_MAX
   #define INVALID_INDEX SIZE_MAX
@@ -35,7 +36,8 @@ namespace Models {
         m_MetadataModel(m_Hold),
         m_FileSize(0),
         m_ArtworkFilepath(filepath),
-        m_BackupTimerDelay(0),
+        m_EditingRestartsCount(0),
+        m_EditingPauseTimerId(-1),
         m_ID(ID),
         m_DirectoryID(directoryID),
         m_MetadataFlags(0),
@@ -43,9 +45,7 @@ namespace Models {
         m_WarningsFlags(0)
     {
         m_MetadataModel.setSpellCheckInfo(&m_SpellCheckInfo);
-        m_BackupTimer.setSingleShot(true);
 
-        QObject::connect(&m_BackupTimer, &QTimer::timeout, this, &ArtworkMetadata::backupTimerTriggered);
         QObject::connect(&m_MetadataModel, &Common::BasicMetadataModel::spellCheckErrorsChanged, this, &ArtworkMetadata::spellCheckErrorsChanged);
     }
 
@@ -182,6 +182,10 @@ namespace Models {
         return isInDir;
     }
 
+    bool ArtworkMetadata::hasDuplicates() {
+        return m_MetadataModel.hasDuplicates();
+    }
+
     void ArtworkMetadata::clearModel() {
         if (!getIsInitializedFlag()) {
             LOG_WARNING << "#" << m_ID << "attempt to clear not initialized artwork";
@@ -203,7 +207,7 @@ namespace Models {
         return result;
     }
 
-    bool ArtworkMetadata::editKeyword(int index, const QString &replacement) {
+    bool ArtworkMetadata::editKeyword(size_t index, const QString &replacement) {
         if (!getIsInitializedFlag()) {
             LOG_WARNING << "#" << m_ID << "attempt to edit keyword int not initialized artwork";
             return false;
@@ -271,7 +275,7 @@ namespace Models {
         return result;
     }
 
-    bool ArtworkMetadata::removeKeywordAt(int index, QString &removed) {
+    bool ArtworkMetadata::removeKeywordAt(size_t index, QString &removed) {
         bool result = m_MetadataModel.removeKeywordAt(index, removed);
         if (result) { markModified(); }
         return result;
@@ -323,7 +327,7 @@ namespace Models {
         return result;
     }
 
-    Common::KeywordReplaceResult ArtworkMetadata::fixKeywordSpelling(int index, const QString &existing, const QString &replacement) {
+    Common::KeywordReplaceResult ArtworkMetadata::fixKeywordSpelling(size_t index, const QString &existing, const QString &replacement) {
         if (!getIsInitializedFlag()) {
             LOG_WARNING << "#" << m_ID << "attempt to fix keyword for not initialized artwork";
             return Common::KeywordReplaceResult::Unknown;
@@ -365,16 +369,16 @@ namespace Models {
         return result;
     }
 
-    std::vector<std::shared_ptr<SpellCheck::SpellSuggestionsItem> > ArtworkMetadata::createDescriptionSuggestionsList() {
-        return m_MetadataModel.createDescriptionSuggestionsList();
+    std::vector<Common::KeywordItem> ArtworkMetadata::retrieveMisspelledKeywords() {
+        return m_MetadataModel.retrieveMisspelledKeywords();
     }
 
-    std::vector<std::shared_ptr<SpellCheck::SpellSuggestionsItem> > ArtworkMetadata::createTitleSuggestionsList() {
-        return m_MetadataModel.createTitleSuggestionsList();
+    QStringList ArtworkMetadata::retrieveMisspelledTitleWords() {
+        return m_MetadataModel.retrieveMisspelledTitleWords();
     }
 
-    std::vector<std::shared_ptr<SpellCheck::SpellSuggestionsItem> > ArtworkMetadata::createKeywordsSuggestionsList() {
-        return m_MetadataModel.createKeywordsSuggestionsList();
+    QStringList ArtworkMetadata::retrieveMisspelledDescriptionWords() {
+        return m_MetadataModel.retrieveMisspelledDescriptionWords();
     }
 
     bool ArtworkMetadata::processFailedKeywordReplacements(const std::vector<std::shared_ptr<SpellCheck::KeywordSpellSuggestions> > &candidatesForRemoval) {
@@ -401,17 +405,23 @@ namespace Models {
         }
     }
 
-    void ArtworkMetadata::requestBackup() {
-        if (m_BackupTimerDelay < MAX_BACKUP_TIMER_DELAYS) {
-            m_BackupTimer.start(1000);
-            m_BackupTimerDelay++;
+    void ArtworkMetadata::justEdited() {
+        if (m_EditingRestartsCount < MAX_EDITING_PAUSE_RESTARTS) {
+            if (m_EditingPauseTimerId != -1) {
+                this->killTimer(m_EditingPauseTimerId);
+                LOG_INTEGR_TESTS_OR_DEBUG << "killed timer" << m_EditingPauseTimerId;
+            }
+
+            m_EditingPauseTimerId = this->startTimer(1000, Qt::VeryCoarseTimer);
+            LOG_INTEGR_TESTS_OR_DEBUG << "started timer" << m_EditingPauseTimerId;
+            m_EditingRestartsCount++;
         } else {
+            Q_ASSERT(m_EditingPauseTimerId != -1);
             LOG_INFO << "Maximum backup delays occured, forcing backup";
-            Q_ASSERT(m_BackupTimer.isActive());
         }
     }
 
-    bool ArtworkMetadata::expandPreset(int keywordIndex, const QStringList &presetList)  {
+    bool ArtworkMetadata::expandPreset(size_t keywordIndex, const QStringList &presetList)  {
         bool result = m_MetadataModel.expandPreset(keywordIndex, presetList);
         if (result) {
             markModified();
@@ -435,7 +445,28 @@ namespace Models {
     }
 
     void ArtworkMetadata::deepDisconnect() {
+        LOG_DEBUG << "#";
         m_MetadataModel.disconnect();
         this->disconnect();
+    }
+
+    void ArtworkMetadata::clearSpellingInfo() {
+        LOG_DEBUG << "#";
+        m_SpellCheckInfo.clear();
+    }
+
+    void ArtworkMetadata::timerEvent(QTimerEvent *event) {
+        LOG_DEBUG << "timer" << event->timerId();
+
+        if ((event != nullptr) && (event->timerId() == m_EditingPauseTimerId)) {
+            m_EditingRestartsCount = 0;
+            m_EditingPauseTimerId = -1;
+
+            emit backupRequired();
+            emit editingPaused();
+        }
+
+        // one time event
+        this->killTimer(event->timerId());
     }
 }

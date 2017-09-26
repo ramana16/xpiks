@@ -106,6 +106,7 @@ namespace Models {
         size_t getLastKnownIndex() const { return m_LastKnownIndex; }
         virtual qint64 getFileSize() const { return m_FileSize; }
         virtual Common::ID_t getItemID() const override { return m_ID; }
+        bool hasDuplicates();
 
     public:
         void setCurrentIndex(size_t index) { m_LastKnownIndex = index; }
@@ -123,7 +124,7 @@ namespace Models {
 
         virtual void clearModel();
         virtual bool clearKeywords() override;
-        virtual bool editKeyword(int index, const QString &replacement) override;
+        virtual bool editKeyword(size_t index, const QString &replacement) override;
         virtual bool replace(const QString &replaceWhat, const QString &replaceTo, Common::SearchFlags flags);
 
     public:
@@ -145,7 +146,7 @@ namespace Models {
 
     public:
         bool areKeywordsEmpty() { return m_MetadataModel.areKeywordsEmpty(); }
-        virtual bool removeKeywordAt(int index, QString &removed) override;
+        virtual bool removeKeywordAt(size_t index, QString &removed) override;
         virtual bool removeLastKeyword(QString &removed) override;
         virtual bool appendKeyword(const QString &keyword) override;
         virtual int appendKeywords(const QStringList &keywordsList) override;
@@ -153,12 +154,12 @@ namespace Models {
         virtual QString getKeywordsString() override { return m_MetadataModel.getKeywordsString(); }
 
     public:
-        virtual Common::KeywordReplaceResult fixKeywordSpelling(int index, const QString &existing, const QString &replacement) override;
+        virtual Common::KeywordReplaceResult fixKeywordSpelling(size_t index, const QString &existing, const QString &replacement) override;
         virtual bool fixDescriptionSpelling(const QString &word, const QString &replacement) override;
         virtual bool fixTitleSpelling(const QString &word, const QString &replacement) override;
-        virtual std::vector<std::shared_ptr<SpellCheck::SpellSuggestionsItem> > createDescriptionSuggestionsList() override;
-        virtual std::vector<std::shared_ptr<SpellCheck::SpellSuggestionsItem> > createTitleSuggestionsList() override;
-        virtual std::vector<std::shared_ptr<SpellCheck::SpellSuggestionsItem> > createKeywordsSuggestionsList() override;
+        virtual std::vector<Common::KeywordItem> retrieveMisspelledKeywords() override;
+        virtual QStringList retrieveMisspelledTitleWords() override;
+        virtual QStringList retrieveMisspelledDescriptionWords() override;
         virtual bool processFailedKeywordReplacements(const std::vector<std::shared_ptr<SpellCheck::KeywordSpellSuggestions> > &candidatesForRemoval) override;
         virtual void afterReplaceCallback() override;
         virtual Common::BasicKeywordsModel *getBasicKeywordsModel() override;
@@ -183,11 +184,17 @@ namespace Models {
         void setUnavailable() { setIsUnavailableFlag(true); }
         void resetModified() { setIsModifiedFlag(false); }
         void requestFocus(int directionSign) { emit focusRequested(directionSign); }
-        virtual void requestBackup() override;
-        virtual bool expandPreset(int keywordIndex, const QStringList &presetList) override;
+        virtual void justEdited() override;
+        virtual bool expandPreset(size_t keywordIndex, const QStringList &presetList) override;
         virtual bool appendPreset(const QStringList &presetList) override;
         virtual bool hasKeywords(const QStringList &keywordsList) override;
         void deepDisconnect();
+        void clearSpellingInfo();
+
+#ifdef INTEGRATION_TESTS
+    public:
+        bool hasDuplicates(size_t index) { return m_MetadataModel.hasDuplicateAt(index); }
+#endif
 
 #ifndef CORE_TESTS
     private:
@@ -202,15 +209,14 @@ namespace Models {
         void selectedChanged(bool newValue);
         void focusRequested(int directionSign);
         void backupRequired();
+        void editingPaused();
         void aboutToBeRemoved();
         void spellCheckErrorsChanged();
         void thumbnailUpdated();
 
-    private slots:
-        void backupTimerTriggered() { m_BackupTimerDelay = 0; emit backupRequired(); }
-
     protected:
         virtual void resetFlags() { m_MetadataFlags = 0; }
+        virtual void timerEvent(QTimerEvent *event) override;
 
     private:
         Common::Hold m_Hold;
@@ -220,8 +226,8 @@ namespace Models {
         QMutex m_InitMutex;
         qint64 m_FileSize;  // in bytes
         QString m_ArtworkFilepath;
-        QTimer m_BackupTimer;
-        int m_BackupTimerDelay;
+        int m_EditingRestartsCount;
+        int m_EditingPauseTimerId;
         Common::ID_t m_ID;
         qint64 m_DirectoryID;
         volatile Common::flag_t m_MetadataFlags;

@@ -19,6 +19,7 @@ Rectangle {
     id: itemWrapper
     property int delegateIndex
     property bool isHighlighted
+    property bool hasDuplicate : false
     property bool hasSpellCheckError: false
     property string keywordText
     property bool hasPlusSign: false
@@ -93,7 +94,7 @@ Rectangle {
         anchors.left: row.left
         anchors.right: row.right
         anchors.bottom: row.bottom
-        color: uiColors.destructiveColor
-        visible: itemWrapper.hasSpellCheckError
+        color: itemWrapper.hasSpellCheckError ? uiColors.destructiveColor : uiColors.artworkActiveColor
+        visible: itemWrapper.hasSpellCheckError || itemWrapper.hasDuplicate
     }
 }

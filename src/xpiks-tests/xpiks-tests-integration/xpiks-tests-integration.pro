@@ -23,6 +23,8 @@ DEFINES += TELEMETRY_ENABLED
 
 DEFINES += INTEGRATION_TESTS
 
+DEFINES += HUNSPELL_DICTS_PATH=\"$$PWD/../../xpiks-qt/deps/dict\"
+
 SOURCES += main.cpp \
     ../../xpiks-qt/Commands/addartworkscommand.cpp \
     ../../xpiks-qt/Commands/combinededitcommand.cpp \
@@ -205,7 +207,9 @@ SOURCES += main.cpp \
     ../../xpiks-qt/AutoComplete/presetscompletionengine.cpp \
     ../../xpiks-qt/AutoComplete/keywordsautocompletemodel.cpp \
     ../../xpiks-qt/AutoComplete/stringsautocompletemodel.cpp \
-    autocompletepresetstest.cpp
+    autocompletepresetstest.cpp \
+    duplicatesearchtest.cpp \
+    ../../xpiks-qt/SpellCheck/duplicatesreviewmodel.cpp
 
 RESOURCES +=
 
@@ -446,7 +450,10 @@ HEADERS += \
     ../../xpiks-qt/AutoComplete/presetscompletionengine.h \
     ../../xpiks-qt/AutoComplete/keywordsautocompletemodel.h \
     ../../xpiks-qt/AutoComplete/stringsautocompletemodel.h \
-    autocompletepresetstest.h
+    autocompletepresetstest.h \
+    ../../xpiks-qt/Common/keyword.h \
+    duplicatesearchtest.h \
+    ../../xpiks-qt/SpellCheck/duplicatesreviewmodel.h
 
 INCLUDEPATH += ../../../vendors/tiny-aes
 INCLUDEPATH += ../../../vendors/cpp-libface

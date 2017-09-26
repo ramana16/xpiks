@@ -187,6 +187,10 @@ namespace Models {
         doSuggestCorrections();
     }
 
+    void CombinedArtworksModel::setupDuplicatesModel() {
+        doSetupDuplicatesModel();
+    }
+
     void CombinedArtworksModel::initDescriptionHighlighting(QQuickTextDocument *document) {
         SpellCheck::SpellCheckItemInfo *info = m_CommonKeywordsModel.getSpellCheckInfo();
 

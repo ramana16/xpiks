@@ -183,7 +183,8 @@ SOURCES += main.cpp \
     ../../xpiks-qt/MetadataIO/artworkssnapshot.cpp \
     ../../xpiks-qt/Helpers/threadhelpers.cpp \
     ../../xpiks-qt/AutoComplete/autocompletemodel.cpp \
-    ../../xpiks-qt/AutoComplete/keywordsautocompletemodel.cpp
+    ../../xpiks-qt/AutoComplete/keywordsautocompletemodel.cpp \
+    ../../xpiks-qt/SpellCheck/duplicatesreviewmodel.cpp
 
 HEADERS += \
     encryption_tests.h \
@@ -311,5 +312,7 @@ HEADERS += \
     ../../xpiks-qt/Maintenance/logscleanupjobitem.h \
     ../../xpiks-qt/Helpers/threadhelpers.h \
     ../../xpiks-qt/AutoComplete/autocompletemodel.h \
-    ../../xpiks-qt/AutoComplete/keywordsautocompletemodel.h
+    ../../xpiks-qt/AutoComplete/keywordsautocompletemodel.h \
+    ../../xpiks-qt/Common/keyword.h \
+    ../../xpiks-qt/SpellCheck/duplicatesreviewmodel.h
 

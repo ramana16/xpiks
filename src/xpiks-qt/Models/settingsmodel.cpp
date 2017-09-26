@@ -52,6 +52,7 @@
 #define DEFAULT_SEARCH_BY_FILEPATH true
 #define DEFAULT_SCROLL_SPEED_SCALE 1.0
 #define DEFAULT_USE_SPELL_CHECK true
+#define DEFAULT_DETECT_DUPLICATES true
 #define DEFAULT_HAVE_USER_CONSENT false
 #define DEFAULT_COLLECT_USER_STATISTICS true
 #define DEFAULT_CHECK_FOR_UPDATES true
@@ -138,6 +139,7 @@ namespace Models {
         m_SearchUsingAnd(DEFAULT_SEARCH_USING_AND),
         m_SearchByFilepath(DEFAULT_SEARCH_BY_FILEPATH),
         m_UseSpellCheck(DEFAULT_USE_SPELL_CHECK),
+        m_DetectDuplicates(DEFAULT_DETECT_DUPLICATES),
         m_UserStatistics(DEFAULT_COLLECT_USER_STATISTICS),
         m_CheckForUpdates(DEFAULT_CHECK_FOR_UPDATES),
         m_AutoDownloadUpdates(DEFAULT_AUTO_DOWNLOAD_UPDATES),
@@ -440,6 +442,7 @@ namespace Models {
         setSearchByFilepath(boolValue(searchByFilepath, DEFAULT_SEARCH_BY_FILEPATH));
         setScrollSpeedScale(doubleValue(scrollSpeedSensivity, DEFAULT_SCROLL_SPEED_SCALE));
         setUseSpellCheck(boolValue(useSpellCheck, DEFAULT_USE_SPELL_CHECK));
+        setDetectDuplicates(boolValue(detectDuplicates, DEFAULT_DETECT_DUPLICATES));
         setUserStatistics(boolValue(userStatistics, DEFAULT_COLLECT_USER_STATISTICS));
         setCheckForUpdates(boolValue(checkForUpdates, DEFAULT_CHECK_FOR_UPDATES));
         setAutoDownloadUpdates(boolValue(autoDownloadUpdates, DEFAULT_AUTO_DOWNLOAD_UPDATES));
@@ -542,6 +545,7 @@ namespace Models {
         setSearchByFilepath(DEFAULT_SEARCH_BY_FILEPATH);
         setScrollSpeedScale(DEFAULT_SCROLL_SPEED_SCALE);
         setUseSpellCheck(DEFAULT_USE_SPELL_CHECK);
+        setDetectDuplicates(DEFAULT_DETECT_DUPLICATES);
         setUserStatistics(DEFAULT_COLLECT_USER_STATISTICS);
         setCheckForUpdates(DEFAULT_CHECK_FOR_UPDATES);
         setAutoDownloadUpdates(DEFAULT_AUTO_DOWNLOAD_UPDATES);
@@ -596,6 +600,7 @@ namespace Models {
         setValue(searchByFilepath, m_SearchByFilepath);
         setValue(scrollSpeedSensivity, m_ScrollSpeedScale);
         setValue(useSpellCheck, m_UseSpellCheck);
+        setValue(detectDuplicates, m_DetectDuplicates);
         setValue(userStatistics, m_UserStatistics);
         setValue(checkForUpdates, m_CheckForUpdates);
         setValue(autoDownloadUpdates, m_AutoDownloadUpdates);

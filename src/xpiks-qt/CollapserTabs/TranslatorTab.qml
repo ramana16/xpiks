@@ -201,21 +201,13 @@ ColumnLayout {
         anchors.right: parent.right
         height: childrenRect.height
 
-        StyledText {
+        StyledLink {
             anchors.right: parent.right
             text: i18.n + qsTr("Show more")
             enabled: translationManager.hasMore
-            color: enabled ? (showMoreMA.pressed ? uiColors.linkClickedColor : uiColors.artworkActiveColor) : uiColors.labelInactiveForeground
-
-            MouseArea {
-                id: showMoreMA
-                anchors.fill: parent
-                cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-
-                onClicked: {
-                    Common.launchDialog("Dialogs/TranslationPreviewDialog.qml",
-                                        applicationWindow, {})
-                }
+            onClicked: {
+                Common.launchDialog("Dialogs/TranslationPreviewDialog.qml",
+                                    applicationWindow, {})
             }
         }
     }

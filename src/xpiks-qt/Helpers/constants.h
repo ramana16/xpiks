@@ -173,6 +173,7 @@ namespace Constants {
     const char recentFiles[] = "recentFiles";
     const char maxParallelUploads[] = "maxParallelUploads";
     const char useSpellCheck[] = "useSpellCheck";
+    const char detectDuplicates[] = "detectDuplicates";
     const char userAgentId[] = "userAgentId";
     const char installedVersion[] = "installedVersion";
     const char userConsent[] = "userConsent10";

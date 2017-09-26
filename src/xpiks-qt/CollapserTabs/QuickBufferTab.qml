@@ -343,6 +343,7 @@ ColumnLayout {
                 isHighlighted: false
                 keywordText: keyword
                 hasSpellCheckError: !iscorrect
+                hasDuplicate: hasduplicate
                 delegateIndex: index
                 itemHeight: flv.keywordHeight
                 onRemoveClicked: keywordsWrapper.removeKeyword(delegateIndex)
@@ -396,17 +397,10 @@ ColumnLayout {
             Layout.fillWidth: true
         }
 
-        StyledText {
+        StyledLink {
             text: i18.n + qsTr("Copy")
             enabled: quickBuffer.keywordsCount > 0
-            color: enabled ? (qCopyKeywordsMA.pressed ? uiColors.linkClickedColor : uiColors.artworkActiveColor) : uiColors.labelInactiveForeground
-
-            MouseArea {
-                id: qCopyKeywordsMA
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                onClicked: quickClipboard.setText(quickBuffer.getKeywordsString())
-            }
+            onClicked: quickClipboard.setText(quickBuffer.getKeywordsString())
         }
 
         StyledText {
@@ -415,17 +409,10 @@ ColumnLayout {
             isActive: false
         }
 
-        StyledText {
+        StyledLink {
             text: i18.n + qsTr("Clear")
             enabled: quickBuffer.keywordsCount > 0
-            color: enabled ? (qClearKeywordsMA.pressed ? uiColors.linkClickedColor : uiColors.artworkActiveColor) : uiColors.labelInactiveForeground
-
-            MouseArea {
-                id: qClearKeywordsMA
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                onClicked: quickBuffer.clearKeywords()
-            }
+            onClicked: quickBuffer.clearKeywords()
         }
     }
 

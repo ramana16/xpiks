@@ -416,6 +416,7 @@ CloseRequested")
                                     id: kw
                                     keywordText: keyword
                                     hasSpellCheckError: !iscorrect
+                                    hasDuplicate: hasduplicate
                                     delegateIndex: index
                                     isHighlighted: true
                                     itemHeight: flv.keywordHeight
@@ -465,22 +466,15 @@ CloseRequested")
                             anchors.right: parent.right
                             height: childrenRect.height
 
-                            StyledText {
+                            StyledLink {
                                 anchors.top: parent.top
                                 anchors.rightMargin: 3
                                 anchors.right: parent.right
                                 text: i18.n + qsTr("Clear")
                                 enabled: deleteKeywordsModel.keywordsToDeleteCount > 0
-                                color: enabled ? (clearKeywordsMA.pressed ? uiColors.linkClickedColor : uiColors.artworkActiveColor) : uiColors.labelActiveForeground
-
-                                MouseArea {
-                                    id: clearKeywordsMA
-                                    anchors.fill: parent
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: {
-                                        if (deleteKeywordsModel.keywordsToDeleteCount > 0) {
-                                            clearKeywordsDialog.open()
-                                        }
+                                onClicked: {
+                                    if (deleteKeywordsModel.keywordsToDeleteCount > 0) {
+                                        clearKeywordsDialog.open()
                                     }
                                 }
                             }
@@ -546,6 +540,7 @@ CloseRequested")
                                 delegate: KeywordWrapper {
                                     keywordText: keyword
                                     hasSpellCheckError: !iscorrect
+                                    hasDuplicate: hasduplicate
                                     delegateIndex: index
                                     isHighlighted: false
                                     hasPlusSign: true

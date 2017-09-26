@@ -86,5 +86,7 @@
         <file>Graphics/Icon_donate_slategray.svg</file>
         <file>Dialogs/DonateDialog.qml</file>
         <file>Components/DonateComponent.qml</file>
+        <file>StackViews/DuplicatesReView.qml</file>
+        <file>StyledControls/StyledLink.qml</file>
     </qresource>
 </RCC>

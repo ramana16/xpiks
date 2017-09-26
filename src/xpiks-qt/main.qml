@@ -26,7 +26,7 @@ import "Constants/UIConfig.js" as UIConfig
 ApplicationWindow {
     id: applicationWindow
     visible: true
-    width: settingsModel.getAppWidth(930)
+    width: settingsModel.getAppWidth(1010)
     height: settingsModel.getAppHeight(725)
     minimumHeight: 725
     minimumWidth: 930
@@ -489,52 +489,98 @@ ApplicationWindow {
                 action: searchAndReplaceAction
             }
 
-            MenuItem {
-                text: i18.n + qsTr("&Delete keywords from selected")
-                enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
-                onTriggered: {
-                    console.info("Delete keywords from selected triggered")
-                    filteredArtItemsModel.deleteKeywordsFromSelected()
-                    openDeleteKeywordsDialog()
-                }
-            }
+            Menu {
+                title: i18.n + qsTr("&Selected artworks")
 
-            MenuItem {
-                text: i18.n + qsTr("&Fix spelling in selected")
-                enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
-                onTriggered: {
-                    console.info("Fix spelling in selected triggered")
-                    filteredArtItemsModel.suggestCorrectionsForSelected()
-                    Common.launchDialog("Dialogs/SpellCheckSuggestionsDialog.qml",
-                                        applicationWindow,
-                                        {})
+                MenuItem {
+                    text: i18.n + qsTr("&Fix spelling")
+                    enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
+                    onTriggered: {
+                        console.info("Fix spelling in selected triggered")
+                        filteredArtItemsModel.suggestCorrectionsForSelected()
+                        Common.launchDialog("Dialogs/SpellCheckSuggestionsDialog.qml",
+                                            applicationWindow,
+                                            {})
+                    }
                 }
-            }
 
-            MenuItem {
-                text: i18.n + qsTr("&Remove metadata from selected")
-                enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
-                onTriggered: {
-                    console.info("Remove metadata from selected triggered")
-                    removeMetadataDialog.open()
+                MenuItem {
+                    text: i18.n + qsTr("&Fix duplicates")
+                    enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
+                    onTriggered: {
+                        console.info("Fix duplicates in selected triggered")
+                        filteredArtItemsModel.reviewDuplicatesInSelected()
+
+                        var wasCollapsed = applicationWindow.leftSideCollapsed
+                        applicationWindow.collapseLeftPane()
+                        mainStackView.push({
+                                               item: "qrc:/StackViews/DuplicatesReView.qml",
+                                               properties: {
+                                                   componentParent: applicationWindow,
+                                                   wasLeftSideCollapsed: wasCollapsed
+                                               },
+                                               destroyOnPop: true
+                                           })
+                    }
                 }
-            }
 
-            MenuItem {
-                text: i18.n + qsTr("&Detach vectors from selected")
-                enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
-                onTriggered: {
-                    console.info("Detach vectors from selected triggered")
-                    filteredArtItemsModel.detachVectorFromSelected()
+                MenuItem {
+                    text: i18.n + qsTr("&Remove metadata")
+                    enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
+                    onTriggered: {
+                        console.info("Remove metadata from selected triggered")
+                        removeMetadataDialog.open()
+                    }
                 }
-            }
 
-            MenuItem {
-                text: i18.n + qsTr("&Manage upload hosts")
-                enabled: (applicationWindow.openedDialogsCount == 0)
-                onTriggered: {
-                    console.info("Manage upload hosts triggered")
-                    openUploadDialog(true)
+                MenuItem {
+                    text: i18.n + qsTr("&Delete keywords")
+                    enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
+                    onTriggered: {
+                        console.info("Delete keywords from selected triggered")
+                        filteredArtItemsModel.deleteKeywordsFromSelected()
+                        openDeleteKeywordsDialog()
+                    }
+                }
+
+                MenuItem {
+                    text: i18.n + qsTr("&Detach vectors")
+                    enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
+                    onTriggered: {
+                        console.info("Detach vectors from selected triggered")
+                        filteredArtItemsModel.detachVectorFromSelected()
+                    }
+                }
+
+                MenuItem {
+                    text: i18.n + qsTr("&Create archives")
+                    enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
+                    onTriggered: {
+                        console.info("Zip archives triggered")
+
+                        filteredArtItemsModel.setSelectedForZipping()
+                        Common.launchDialog("Dialogs/ZipArtworksDialog.qml",
+                                            applicationWindow,
+                                            {});
+                    }
+                }
+
+                MenuItem {
+                    text: i18.n + qsTr("&Reimport metadata")
+                    enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
+                    onTriggered: {
+                        console.info("Reimport metadata triggered")
+                        filteredArtItemsModel.reimportMetadataForSelected()
+                    }
+                }
+
+                MenuItem {
+                    text: i18.n + qsTr("&Overwrite metadata")
+                    enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
+                    onTriggered: {
+                        console.info("Overwrite metadata triggered")
+                        Common.launchDialog("Dialogs/ExportMetadata.qml", applicationWindow, {overwriteAll: true})
+                    }
                 }
             }
         }
@@ -610,33 +656,11 @@ ApplicationWindow {
             }
 
             MenuItem {
-                text: i18.n + qsTr("&Zip selected artworks")
-                enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
+                text: i18.n + qsTr("&Manage upload hosts")
+                enabled: (applicationWindow.openedDialogsCount == 0)
                 onTriggered: {
-                    console.info("Zip archives triggered")
-
-                    filteredArtItemsModel.setSelectedForZipping()
-                    Common.launchDialog("Dialogs/ZipArtworksDialog.qml",
-                                        applicationWindow,
-                                        {});
-                }
-            }
-
-            MenuItem {
-                text: i18.n + qsTr("&Import metadata from selected")
-                enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
-                onTriggered: {
-                    console.info("Reimport metadata triggered")
-                    filteredArtItemsModel.reimportMetadataForSelected()
-                }
-            }
-
-            MenuItem {
-                text: i18.n + qsTr("&Overwrite metadata in selected")
-                enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
-                onTriggered: {
-                    console.info("Overwrite metadata triggered")
-                    Common.launchDialog("Dialogs/ExportMetadata.qml", applicationWindow, {overwriteAll: true})
+                    console.info("Manage upload hosts triggered")
+                    openUploadDialog(true)
                 }
             }
 
@@ -1406,30 +1430,24 @@ ApplicationWindow {
                 width: 20
             }
 
-            StyledText {
+            StyledLink {
                 text: i18.n + qsTr("Check warnings")
                 color: warningsMA.pressed ? uiColors.linkClickedColor : (warningsModel.warningsCount > 0 ? uiColors.artworkModifiedColor : uiColors.labelInactiveForeground)
+                enabled: mainStackView.areActionsAllowed
+                onClicked: {
+                    warningsModel.update()
+                    //filteredArtItemsModel.checkForWarnings()
 
-                MouseArea {
-                    id: warningsMA
-                    anchors.fill: parent
-                    cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-                    enabled: mainStackView.areActionsAllowed
-                    onClicked: {
-                        warningsModel.update()
-                        //filteredArtItemsModel.checkForWarnings()
-
-                        var wasCollapsed = applicationWindow.leftSideCollapsed
-                        applicationWindow.collapseLeftPane()
-                        mainStackView.push({
-                                               item: "qrc:/StackViews/WarningsView.qml",
-                                               properties: {
-                                                   componentParent: applicationWindow,
-                                                   wasLeftSideCollapsed: wasCollapsed
-                                               },
-                                               destroyOnPop: true
-                                           })
-                    }
+                    var wasCollapsed = applicationWindow.leftSideCollapsed
+                    applicationWindow.collapseLeftPane()
+                    mainStackView.push({
+                                           item: "qrc:/StackViews/WarningsView.qml",
+                                           properties: {
+                                               componentParent: applicationWindow,
+                                               wasLeftSideCollapsed: wasCollapsed
+                                           },
+                                           destroyOnPop: true
+                                       })
                 }
             }
 
@@ -1440,19 +1458,13 @@ ApplicationWindow {
                 verticalAlignment: Text.AlignVCenter
             }
 
-            StyledText {
+            StyledLink {
                 visible: applicationWindow.showUpdateLink
                 enabled: applicationWindow.showUpdateLink
                 text: i18.n + qsTr("Update available!")
                 color: updateMA.pressed ? uiColors.linkClickedColor : uiColors.greenColor
-
-                MouseArea {
-                    id: updateMA
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: {
-                        Qt.openUrlExternally("https://ribtoks.github.io/xpiks/downloads/")
-                    }
+                onClicked: {
+                    Qt.openUrlExternally("https://ribtoks.github.io/xpiks/downloads/")
                 }
             }
 
@@ -1494,24 +1506,19 @@ ApplicationWindow {
                 verticalAlignment: Text.AlignVCenter
             }
 
-            StyledText {
+            StyledLink {
                 text: i18.n + getOriginalText()
                 color: uiColors.labelInactiveForeground
                 verticalAlignment: Text.AlignVCenter
+                enabled: mainStackView.areActionsAllowed
 
                 function getOriginalText() {
                     return filteredArtItemsModel.selectedArtworksCount > 1 ? qsTr("%1 selected items").arg(filteredArtItemsModel.selectedArtworksCount) : (filteredArtItemsModel.selectedArtworksCount === 1 ? qsTr("1 selected item") : qsTr("No selected items"))
                 }
 
-                MouseArea {
-                    id: selectSelectedMA
-                    anchors.fill: parent
-                    enabled: mainStackView.areActionsAllowed
-                    cursorShape: filteredArtItemsModel.selectedArtworksCount > 0 ? Qt.PointingHandCursor : Qt.ArrowCursor
-                    onClicked: {
-                        if (filteredArtItemsModel.selectedArtworksCount > 0) {
-                            filteredArtItemsModel.searchTerm = "x:selected"
-                        }
+                onClicked: {
+                    if (filteredArtItemsModel.selectedArtworksCount > 0) {
+                        filteredArtItemsModel.searchTerm = "x:selected"
                     }
                 }
             }
@@ -1522,7 +1529,7 @@ ApplicationWindow {
                 verticalAlignment: Text.AlignVCenter
             }
 
-            StyledText {
+            StyledLink {
                 text: i18.n + getOriginalText()
                 verticalAlignment: Text.AlignVCenter
                 color: artItemsModel.modifiedArtworksCount > 0 ? uiColors.artworkModifiedColor : uiColors.labelInactiveForeground
@@ -1531,15 +1538,9 @@ ApplicationWindow {
                     return artItemsModel.modifiedArtworksCount > 1 ? qsTr("%1 modified items").arg(artItemsModel.modifiedArtworksCount) : (artItemsModel.modifiedArtworksCount === 1 ? qsTr("1 modified item") : qsTr("No modified items"))
                 }
 
-                MouseArea {
-                    id: selectModifiedMA
-                    anchors.fill: parent
-                    enabled: mainStackView.areActionsAllowed
-                    cursorShape: artItemsModel.modifiedArtworksCount > 0 ? Qt.PointingHandCursor : Qt.ArrowCursor
-                    onClicked: {
-                        if (artItemsModel.modifiedArtworksCount > 0) {
-                            filteredArtItemsModel.searchTerm = "x:modified"
-                        }
+                onClicked: {
+                    if (artItemsModel.modifiedArtworksCount > 0) {
+                        filteredArtItemsModel.searchTerm = "x:modified"
                     }
                 }
             }

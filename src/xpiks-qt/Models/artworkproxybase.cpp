@@ -40,21 +40,21 @@ namespace Models {
     void ArtworkProxyBase::setDescription(const QString &description) {
         if (doSetDescription(description)) {
             signalDescriptionChanged();
-            doRequestBackup();
+            doJustEdited();
         }
     }
 
     void ArtworkProxyBase::setTitle(const QString &title) {
         if (doSetTitle(title)) {
             signalTitleChanged();
-            doRequestBackup();
+            doJustEdited();
         }
     }
 
     void ArtworkProxyBase::setKeywords(const QStringList &keywords) {
         doSetKeywords(keywords);
         signalKeywordsCountChanged();
-        doRequestBackup();
+        doJustEdited();
     }
 
     bool ArtworkProxyBase::doSetDescription(const QString &description) {
@@ -85,7 +85,7 @@ namespace Models {
         if (result) {
             auto *basicModel = getBasicMetadataModel();
             m_CommandManager->submitKeywordForSpellCheck(basicModel, index);
-            doRequestBackup();
+            doJustEdited();
         } else {
             LOG_INFO << "Failed to edit to" << replacement;
         }
@@ -100,7 +100,7 @@ namespace Models {
         if (result) {
             signalKeywordsCountChanged();
             LOG_INFO << "Removed keyword:" << keyword << "keywords count:" << getKeywordsCount();
-            doRequestBackup();
+            doJustEdited();
         }
 
         return result;
@@ -113,7 +113,7 @@ namespace Models {
         if (result) {
             signalKeywordsCountChanged();
             LOG_INFO << "Removed keyword:" << keyword << "keywords count:" << getKeywordsCount();
-            doRequestBackup();
+            doJustEdited();
         }
 
         return result;
@@ -127,7 +127,7 @@ namespace Models {
             signalKeywordsCountChanged();
             auto *basicModel = getBasicMetadataModel();
             m_CommandManager->submitKeywordForSpellCheck(basicModel, basicModel->rowCount() - 1);
-            doRequestBackup();
+            doJustEdited();
         } else {
             LOG_INFO << "Failed to append:" << keyword;
         }
@@ -146,7 +146,7 @@ namespace Models {
 
             auto *basicModel = getBasicMetadataModel();
             m_CommandManager->submitItemForSpellCheck(basicModel, Common::SpellCheckFlags::Keywords);
-            doRequestBackup();
+            doJustEdited();
         }
 
         return appendedCount;
@@ -161,7 +161,7 @@ namespace Models {
 
             // to update fix spelling link
             spellCheckKeywords();
-            doRequestBackup();
+            doJustEdited();
         }
 
         return result;
@@ -194,22 +194,28 @@ namespace Models {
         m_CommandManager->setupSpellCheckSuggestions(metadataOperator, -1, Common::SuggestionFlags::All);
     }
 
-    void ArtworkProxyBase::doInitDescriptionHighlighting(QQuickTextDocument *document) {
-        auto *keywordsModel = getBasicMetadataModel();
-        SpellCheck::SpellCheckItemInfo *info = keywordsModel->getSpellCheckInfo();
-
-        QMLExtensions::ColorsModel *colorsModel = m_CommandManager->getColorsModel();
-        info->createHighlighterForDescription(document->textDocument(), colorsModel, keywordsModel);
-        keywordsModel->notifyDescriptionSpellCheck();
+    void ArtworkProxyBase::doSetupDuplicatesModel() {
+        LOG_DEBUG << "#";
+        auto *basicModel = getBasicMetadataModel();
+        m_CommandManager->setupDuplicatesModel(basicModel);
     }
 
-    void ArtworkProxyBase::doInitTitleHighlighting(QQuickTextDocument *document) {
+    QSyntaxHighlighter *ArtworkProxyBase::doCreateDescriptionHighligher(QQuickTextDocument *document) {
         auto *keywordsModel = getBasicMetadataModel();
         SpellCheck::SpellCheckItemInfo *info = keywordsModel->getSpellCheckInfo();
 
         QMLExtensions::ColorsModel *colorsModel = m_CommandManager->getColorsModel();
-        info->createHighlighterForTitle(document->textDocument(), colorsModel, keywordsModel);
-        keywordsModel->notifyTitleSpellCheck();
+        auto *highlighter = info->createHighlighterForDescription(document->textDocument(), colorsModel, nullptr);
+        return highlighter;
+    }
+
+    QSyntaxHighlighter *ArtworkProxyBase::doCreateTitleHighlighter(QQuickTextDocument *document) {
+        auto *keywordsModel = getBasicMetadataModel();
+        SpellCheck::SpellCheckItemInfo *info = keywordsModel->getSpellCheckInfo();
+
+        QMLExtensions::ColorsModel *colorsModel = m_CommandManager->getColorsModel();
+        auto *highlighter = info->createHighlighterForTitle(document->textDocument(), colorsModel, nullptr);
+        return highlighter;
     }
 
     void ArtworkProxyBase::doSpellCheckDescription() {
@@ -247,7 +253,7 @@ namespace Models {
         spellCheckKeywords();
 
         signalKeywordsCountChanged();
-        doRequestBackup();
+        doJustEdited();
     }
 
     bool ArtworkProxyBase::getHasTitleWordSpellError(const QString &word) {
@@ -271,7 +277,7 @@ namespace Models {
             if (metadataOperator->expandPreset(keywordIndex, keywords)) {
                 signalKeywordsCountChanged();
                 spellCheckKeywords();
-                doRequestBackup();
+                doJustEdited();
                 success = true;
             }
         }
@@ -290,7 +296,7 @@ namespace Models {
             if (metadataOperator->appendPreset(keywords)) {
                 signalKeywordsCountChanged();
                 spellCheckKeywords();
-                doRequestBackup();
+                doJustEdited();
                 success = true;
             }
         }
@@ -398,9 +404,14 @@ namespace Models {
         return result;
     }
 
-    void ArtworkProxyBase::doRequestBackup() {
+    void ArtworkProxyBase::doJustEdited() {
         auto *metadataOperator = getMetadataOperator();
-        metadataOperator->requestBackup();
+        metadataOperator->justEdited();
+    }
+
+    void ArtworkProxyBase::doCheckSemanticDuplicates() {
+        auto *basicArwork = getBasicMetadataModel();
+        m_CommandManager->checkSemanticDuplicates(basicArwork);
     }
 
     void ArtworkProxyBase::doGenerateCompletions(const QString &prefix) {

@@ -31,6 +31,7 @@
 #include "../KeywordsPresets/presetkeywordsmodelconfig.h"
 #include "../Helpers/asynccoordinator.h"
 #include "../MetadataIO/artworkssnapshot.h"
+#include "../Common/flags.h"
 
 namespace Encryption {
     class SecretsManager;
@@ -81,6 +82,7 @@ namespace MetadataIO {
 namespace SpellCheck {
     class SpellCheckerService;
     class SpellCheckSuggestionModel;
+    class DuplicatesReviewModel;
 }
 
 namespace Connectivity {
@@ -182,6 +184,7 @@ namespace Commands {
         void InjectDependency(QMLExtensions::ArtworksUpdateHub *artworksUpdateHub);
         void InjectDependency(Connectivity::RequestsService *requestsService);
         void InjectDependency(Helpers::DatabaseManager *databaseManager);
+        void InjectDependency(SpellCheck::DuplicatesReviewModel *duplicatesModel);
 
     private:
         int generateNextCommandID() { int id = m_LastCommandID++; return id; }
@@ -208,7 +211,7 @@ namespace Commands {
         void deleteKeywordsFromArtworks(std::vector<Models::MetadataElement> &artworks) const;
         void setArtworksForUpload(MetadataIO::ArtworksSnapshot &artworks) const;
         void setArtworksForZipping(MetadataIO::ArtworksSnapshot &artworks) const;
-        virtual void connectArtworkSignals(Models::ArtworkMetadata *metadata) const;
+        virtual void connectArtworkSignals(Models::ArtworkMetadata *artwork) const;
         void disconnectArtworkSignals(Models::ArtworkMetadata *metadata) const;
         void readMetadata(const MetadataIO::ArtworksSnapshot &snapshot) const;
         void writeMetadata(const QVector<Models::ArtworkMetadata*> &artworks, bool useBackups) const;
@@ -227,9 +230,12 @@ namespace Commands {
         void submitForSpellCheck(const MetadataIO::WeakArtworksSnapshot &items) const;
         void submitForSpellCheck(const QVector<Common::BasicKeywordsModel *> &items) const;
         void submitItemForSpellCheck(Common::BasicKeywordsModel *item, Common::SpellCheckFlags flags = Common::SpellCheckFlags::All) const;
+        void checkSemanticDuplicates(Common::BasicKeywordsModel *item);
         void setupSpellCheckSuggestions(Common::IMetadataOperator *item, int index, Common::SuggestionFlags flags);
         void setupSpellCheckSuggestions(std::vector<std::pair<Common::IMetadataOperator *, int> > &itemPairs, Common::SuggestionFlags flags);
         void submitForSpellCheck(const QVector<Common::BasicKeywordsModel *> &items, const QStringList &wordsToCheck) const;
+        void setupDuplicatesModel(Common::BasicMetadataModel *item);
+        void setupDuplicatesModel(const std::vector<Models::ArtworkMetadata *> &items);
 
     public:
         void submitKeywordsForWarningsCheck(Models::ArtworkMetadata *item) const;
@@ -320,6 +326,8 @@ namespace Commands {
         virtual Warnings::WarningsService *getWarningsService() const { return m_WarningsService; }
         virtual Models::FindAndReplaceModel *getFindAndReplaceModel() const { return m_FindAndReplaceModel; }
 #endif
+    private:
+        Common::WordAnalysisFlags getWordAnalysisFlags() const;
 
     private:
         Helpers::AsyncCoordinator m_InitCoordinator;
@@ -369,6 +377,7 @@ namespace Commands {
         Models::SwitcherModel *m_SwitcherModel;
         Connectivity::RequestsService *m_RequestsService;
         Helpers::DatabaseManager *m_DatabaseManager;
+        SpellCheck::DuplicatesReviewModel *m_DuplicatesModel;
 
         QVector<Common::IServiceBase<Common::IBasicArtwork, Common::WarningsCheckFlags> *> m_WarningsCheckers;
         QVector<Helpers::IFileNotAvailableModel*> m_AvailabilityListeners;

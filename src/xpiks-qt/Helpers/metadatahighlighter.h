@@ -25,15 +25,17 @@ namespace Helpers {
         public QSyntaxHighlighter
     {
     public:
-        MetadataHighlighter(const QString &replaceFrom, Common::IFlagsProvider *flagsProvider,
-                            QMLExtensions::ColorsModel *colorsModel, QTextDocument *document=0);
+        MetadataHighlighter(const QString &textToHighlight,
+                            Common::IFlagsProvider *flagsProvider,
+                            QMLExtensions::ColorsModel *colorsModel,
+                            QTextDocument *document=0);
 
     protected:
         void highlightBlock(const QString &text);
 
     private:
         QMLExtensions::ColorsModel *m_ColorsModel;
-        QString m_ReplaceFrom;
+        QString m_TextToHighlight;
         Common::IFlagsProvider *m_FlagsProvider;
         QTextCharFormat m_Format;
     };

@@ -10,6 +10,7 @@
 
 #include "artworkproxymodel.h"
 #include <QImageReader>
+#include <QSyntaxHighlighter>
 #include "../Commands/commandmanager.h"
 #include "../Warnings/warningsservice.h"
 #include "imageartwork.h"
@@ -27,7 +28,8 @@ namespace Models {
     }
 
     ArtworkProxyModel::~ArtworkProxyModel() {
-        doResetModel();
+        disconnectCurrentArtwork();
+        releaseCurrentArtwork();
     }
 
     bool ArtworkProxyModel::getIsVideo() const {
@@ -43,7 +45,7 @@ namespace Models {
             signalDescriptionChanged();
 
             if (m_ArtworkMetadata->isInitialized()) {
-                m_ArtworkMetadata->requestBackup();
+                doJustEdited();
             }
         }
     }
@@ -55,7 +57,7 @@ namespace Models {
             signalTitleChanged();
 
             if (m_ArtworkMetadata->isInitialized()) {
-                m_ArtworkMetadata->requestBackup();
+                doJustEdited();
             }
         }
     }
@@ -64,7 +66,7 @@ namespace Models {
         ArtworkProxyBase::setKeywords(keywords);
 
         if (m_ArtworkMetadata->isInitialized()) {
-            m_ArtworkMetadata->requestBackup();
+            doJustEdited();
         }
     }
 
@@ -150,12 +152,28 @@ namespace Models {
         doSuggestCorrections();
     }
 
+    void ArtworkProxyModel::setupDuplicatesModel() {
+       doSetupDuplicatesModel();
+    }
+
     void ArtworkProxyModel::initDescriptionHighlighting(QQuickTextDocument *document) {
-        doInitDescriptionHighlighting(document);
+        auto *highlighter = doCreateDescriptionHighligher(document);
+
+        QObject::connect(this, &ArtworkProxyModel::spellingRehighlightRequired,
+                         highlighter, &QSyntaxHighlighter::rehighlight);
+
+        auto *basicModel = getBasicMetadataModel();
+        basicModel->notifyDescriptionSpellCheck();
     }
 
     void ArtworkProxyModel::initTitleHighlighting(QQuickTextDocument *document) {
-        doInitTitleHighlighting(document);
+        auto *highlighter = doCreateTitleHighlighter(document);
+
+        QObject::connect(this, &ArtworkProxyModel::spellingRehighlightRequired,
+                         highlighter, &QSyntaxHighlighter::rehighlight);
+
+        auto *basicModel = getBasicMetadataModel();
+        basicModel->notifyTitleSpellCheck();
     }
 
     void ArtworkProxyModel::spellCheckDescription() {
@@ -180,25 +198,26 @@ namespace Models {
 
     void ArtworkProxyModel::setSourceArtwork(QObject *artworkMetadata, int originalIndex) {
         LOG_INFO << originalIndex;
-        ArtworkMetadata *metadata = qobject_cast<ArtworkMetadata*>(artworkMetadata);
-        Q_ASSERT(metadata != nullptr);
+        ArtworkMetadata *artwork = qobject_cast<ArtworkMetadata*>(artworkMetadata);
+        Q_ASSERT(artwork != nullptr);
 
 #ifdef QT_DEBUG
         if (originalIndex != -1) {
             auto *itemsModel = m_CommandManager->getArtItemsModel();
-            Q_ASSERT(itemsModel->getArtwork(originalIndex) == metadata);
+            Q_ASSERT(itemsModel->getArtwork(originalIndex) == artwork);
         }
 #endif
 
-        updateCurrentArtwork();
         disconnectCurrentArtwork();
+        updateCurrentArtwork();
+        releaseCurrentArtwork();
 
-        metadata->acquire();
-        metadata->setIsLockedForEditing(true);
-        m_ArtworkMetadata = metadata;
+        artwork->acquire();
+        artwork->setIsLockedForEditing(true);
+        m_ArtworkMetadata = artwork;
         m_ArtworkOriginalIndex = originalIndex;
 
-        auto *keywordsModel = metadata->getBasicModel();
+        auto *keywordsModel = artwork->getBasicModel();
         QObject::connect(keywordsModel, &Common::BasicMetadataModel::spellCheckErrorsChanged,
                          this, &ArtworkProxyModel::spellCheckErrorsChangedHandler);
 
@@ -208,7 +227,10 @@ namespace Models {
         QObject::connect(keywordsModel, &Common::BasicMetadataModel::afterSpellingErrorsFixed,
                          this, &ArtworkProxyModel::afterSpellingErrorsFixedHandler);
 
-        QObject::connect(metadata, SIGNAL(thumbnailUpdated()),
+        QObject::connect(keywordsModel, &Common::BasicKeywordsModel::spellCheckResultsReady,
+                         this, &ArtworkProxyModel::spellingRehighlightRequired);
+
+        QObject::connect(artwork, SIGNAL(thumbnailUpdated()),
                          this, SIGNAL(thumbnailChanged()));
 
         emit descriptionChanged();
@@ -217,13 +239,14 @@ namespace Models {
         emit thumbnailChanged();
         emit imagePathChanged();
 
-        m_PropertiesMap.updateProperties(metadata);
+        m_PropertiesMap.updateProperties(artwork);
     }
 
     void ArtworkProxyModel::resetModel() {
         LOG_DEBUG << "#";
+        disconnectCurrentArtwork();
         updateCurrentArtwork();
-        doResetModel();
+        releaseCurrentArtwork();
     }
 
     QSize ArtworkProxyModel::retrieveImageSize() const {
@@ -326,7 +349,7 @@ namespace Models {
     }
 
     void ArtworkProxyModel::updateCurrentArtwork() {
-        LOG_DEBUG << "#";
+        LOG_DEBUG << "index:" << m_ArtworkOriginalIndex;
 
         if (m_ArtworkOriginalIndex != -1) {
             m_CommandManager->updateArtworksAtIndices(QVector<int>() << m_ArtworkOriginalIndex);
@@ -334,15 +357,10 @@ namespace Models {
 
         if (m_ArtworkMetadata != nullptr) {
             m_CommandManager->submitForWarningsCheck(m_ArtworkMetadata);
+            m_CommandManager->checkSemanticDuplicates(m_ArtworkMetadata->getBasicModel());
         }
 
         emit warningsCouldHaveChanged(m_ArtworkOriginalIndex);
-    }
-
-    void ArtworkProxyModel::doResetModel() {
-        LOG_DEBUG << "#";
-        disconnectCurrentArtwork();
-        m_ArtworkOriginalIndex = -1;
     }
 
     void ArtworkProxyModel::disconnectCurrentArtwork() {
@@ -351,11 +369,17 @@ namespace Models {
             auto *basicModel = m_ArtworkMetadata->getBasicModel();
             basicModel->disconnect(this);
             this->disconnect(basicModel);
-            m_ArtworkMetadata->setIsLockedForEditing(false);
+        }
+    }
+
+    void ArtworkProxyModel::releaseCurrentArtwork() {
+        LOG_DEBUG << "#";
+        if (m_ArtworkMetadata != nullptr) {m_ArtworkMetadata->setIsLockedForEditing(false);
             m_ArtworkMetadata->release();
             LOG_DEBUG << "Metadata released";
         }
 
         m_ArtworkMetadata = nullptr;
+        m_ArtworkOriginalIndex = -1;
     }
 }

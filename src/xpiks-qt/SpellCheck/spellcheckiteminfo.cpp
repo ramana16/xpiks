@@ -19,46 +19,72 @@
 namespace SpellCheck {
     bool SpellCheckErrorsInfo::hasWrongSpelling(const QString &word) {
         QReadLocker readLocker(&m_ErrorsLock);
-
         Q_UNUSED(readLocker);
 
         return m_WordsWithErrors.contains(word.toLower());
     }
 
+    bool SpellCheckErrorsInfo::hasDuplicates(const QString &word) {
+        QReadLocker readLocker(&m_DuplicatesLock);
+        Q_UNUSED(readLocker);
+
+        return m_WordsWithDuplicates.contains(word);
+    }
+
     void SpellCheckErrorsInfo::setErrorWords(const QSet<QString> &errors) {
         QWriteLocker writeLocker(&m_ErrorsLock);
-
         Q_UNUSED(writeLocker);
 
         /*m_WordsWithErrors.clear();*/ m_WordsWithErrors.unite(errors);
     }
 
+    void SpellCheckErrorsInfo::setDuplicates(const QSet<QString> &duplicates) {
+        QWriteLocker writeLocker(&m_DuplicatesLock);
+        Q_UNUSED(writeLocker);
+
+        m_WordsWithDuplicates.clear();
+        m_WordsWithDuplicates.unite(duplicates);
+    }
+
     bool SpellCheckErrorsInfo::removeWordFromSet(const QString &word) {
         QWriteLocker writeLocker(&m_ErrorsLock);
-
         Q_UNUSED(writeLocker);
+
         return m_WordsWithErrors.remove(word.toLower());
     }
 
     bool SpellCheckErrorsInfo::anyError() {
         QReadLocker readLocker(&m_ErrorsLock);
-
         Q_UNUSED(readLocker);
 
         return !m_WordsWithErrors.isEmpty();
     }
 
+    bool SpellCheckErrorsInfo::anyDuplicate() {
+        QReadLocker readLocker(&m_DuplicatesLock);
+        Q_UNUSED(readLocker);
+
+        return !m_WordsWithDuplicates.isEmpty();
+    }
+
     void SpellCheckErrorsInfo::clear() {
-        QWriteLocker writeLocker(&m_ErrorsLock);
+        {
+            QWriteLocker writeLocker(&m_ErrorsLock);
+            Q_UNUSED(writeLocker);
 
-        Q_UNUSED(writeLocker);
+            m_WordsWithErrors.clear();
+        }
 
-        m_WordsWithErrors.clear();
+        {
+            QWriteLocker writeLocker(&m_DuplicatesLock);
+            Q_UNUSED(writeLocker);
+
+            m_WordsWithDuplicates.clear();
+        }
     }
 
     QStringList SpellCheckErrorsInfo::toList() {
         QReadLocker readLocker(&m_ErrorsLock);
-
         Q_UNUSED(readLocker);
 
         return QStringList::fromSet(m_WordsWithErrors);
@@ -72,43 +98,66 @@ namespace SpellCheck {
         m_TitleErrors.setErrorWords(errors);
     }
 
+    void SpellCheckItemInfo::setDescriptionDuplicates(const QSet<QString> &duplicates) {
+        m_DescriptionErrors.setDuplicates(duplicates);
+    }
+
+    void SpellCheckItemInfo::setTitleDuplicates(const QSet<QString> &duplicates) {
+        m_TitleErrors.setDuplicates(duplicates);
+    }
+
     void SpellCheckItemInfo::removeWordsFromErrors(const QStringList &words) {
         LOG_DEBUG << "#";
+
         for (const QString &word: words) {
             m_TitleErrors.removeWordFromSet(word);
             m_DescriptionErrors.removeWordFromSet(word);
         }
     }
 
-    void SpellCheckItemInfo::createHighlighterForDescription(QTextDocument *document, QMLExtensions::ColorsModel *colorsModel,
-                                                             Common::BasicKeywordsModel *basicKeywordsModel) {
+    QSyntaxHighlighter *SpellCheckItemInfo::createHighlighterForDescription(QTextDocument *document,
+                                                                            QMLExtensions::ColorsModel *colorsModel,
+                                                                            Common::BasicKeywordsModel *basicKeywordsModel) {
         // is freed by the document
 #ifndef CORE_TESTS
         SpellCheckErrorsHighlighter *highlighter = new SpellCheckErrorsHighlighter(document, colorsModel, &m_DescriptionErrors);
-        QObject::connect(basicKeywordsModel, &Common::BasicKeywordsModel::spellCheckResultsReady,
-                         highlighter, &SpellCheckErrorsHighlighter::rehighlight);
+        if (basicKeywordsModel != nullptr) {
+            QObject::connect(basicKeywordsModel, &Common::BasicKeywordsModel::spellCheckResultsReady,
+                             highlighter, &SpellCheckErrorsHighlighter::rehighlight);
+        }
+
         QObject::connect(colorsModel, &QMLExtensions::ColorsModel::themeChanged,
                          highlighter, &SpellCheckErrorsHighlighter::rehighlight);
+
+        return highlighter;
 #else
         Q_UNUSED(document);
         Q_UNUSED(colorsModel);
         Q_UNUSED(basicKeywordsModel);
+        return nullptr;
 #endif
     }
 
-    void SpellCheckItemInfo::createHighlighterForTitle(QTextDocument *document, QMLExtensions::ColorsModel *colorsModel,
-                                                       Common::BasicKeywordsModel *basicKeywordsModel) {
+    QSyntaxHighlighter *SpellCheckItemInfo::createHighlighterForTitle(QTextDocument *document,
+                                                                      QMLExtensions::ColorsModel *colorsModel,
+                                                                      Common::BasicKeywordsModel *basicKeywordsModel) {
 #ifndef CORE_TESTS
         // is freed by the document
         SpellCheckErrorsHighlighter *highlighter = new SpellCheckErrorsHighlighter(document, colorsModel, &m_TitleErrors);
-        QObject::connect(basicKeywordsModel, &Common::BasicKeywordsModel::spellCheckResultsReady,
-                         highlighter, &SpellCheckErrorsHighlighter::rehighlight);
+        if (basicKeywordsModel != nullptr) {
+            QObject::connect(basicKeywordsModel, &Common::BasicKeywordsModel::spellCheckResultsReady,
+                             highlighter, &SpellCheckErrorsHighlighter::rehighlight);
+        }
+
         QObject::connect(colorsModel, &QMLExtensions::ColorsModel::themeChanged,
                          highlighter, &SpellCheckErrorsHighlighter::rehighlight);
+
+        return highlighter;
 #else
         Q_UNUSED(document);
         Q_UNUSED(colorsModel);
         Q_UNUSED(basicKeywordsModel);
+        return nullptr;
 #endif
     }
 }

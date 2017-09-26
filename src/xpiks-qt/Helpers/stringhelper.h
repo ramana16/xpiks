@@ -44,6 +44,7 @@ namespace Helpers {
     QString getUnitedHitsString(const QString &text, const std::vector<int> &hits, int radius);
 
     quint32 switcherHash(const QString &text);
+    bool areSemanticDuplicates(const QString &s1, const QString &s2);
 }
 
 #endif // STRINGHELPER

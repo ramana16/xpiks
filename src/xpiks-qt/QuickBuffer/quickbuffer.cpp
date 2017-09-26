@@ -89,11 +89,11 @@ namespace QuickBuffer {
     }
 
     void QuickBuffer::initDescriptionHighlighting(QQuickTextDocument *document) {
-        doInitDescriptionHighlighting(document);
+        doCreateDescriptionHighligher(document);
     }
 
     void QuickBuffer::initTitleHighlighting(QQuickTextDocument *document) {
-        doInitTitleHighlighting(document);
+        doCreateTitleHighlighter(document);
     }
 
     void QuickBuffer::spellCheckDescription() {

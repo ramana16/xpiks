@@ -27,6 +27,7 @@
 #include "../Models/recentdirectoriesmodel.h"
 #include "../Models/recentfilesmodel.h"
 #include "../Models/metadataelement.h"
+#include "../SpellCheck/duplicatesreviewmodel.h"
 #include "../SpellCheck/spellcheckerservice.h"
 #include "../Models/settingsmodel.h"
 #include "../SpellCheck/spellchecksuggestionmodel.h"
@@ -110,6 +111,7 @@ Commands::CommandManager::CommandManager():
     m_ArtworksUpdateHub(NULL),
     m_SwitcherModel(NULL),
     m_RequestsService(NULL),
+    m_DuplicatesModel(NULL),
     m_ServicesInitialized(false),
     m_AfterInitCalled(false),
     m_LastCommandID(0)
@@ -340,6 +342,10 @@ void Commands::CommandManager::InjectDependency(Helpers::DatabaseManager *databa
     Q_ASSERT(databaseManager != NULL); m_DatabaseManager = databaseManager;
 }
 
+void Commands::CommandManager::InjectDependency(SpellCheck::DuplicatesReviewModel *duplicatesModel) {
+    Q_ASSERT(duplicatesModel != NULL); m_DuplicatesModel = duplicatesModel;
+}
+
 std::shared_ptr<Commands::ICommandResult> Commands::CommandManager::processCommand(const std::shared_ptr<ICommandBase> &command)
 {
     int id = generateNextCommandID();
@@ -536,6 +542,7 @@ void Commands::CommandManager::ensureDependenciesInjected() {
     Q_ASSERT(m_VideoCachingService != NULL);
     Q_ASSERT(m_RequestsService != NULL);
     Q_ASSERT(m_ArtworksUpdateHub != NULL);
+    Q_ASSERT(m_DuplicatesModel != NULL);
 
 #if !defined(CORE_TESTS)
     Q_ASSERT(m_DatabaseManager != NULL);
@@ -609,7 +616,7 @@ void Commands::CommandManager::setArtworksForZipping(MetadataIO::ArtworksSnapsho
 }
 
 /*virtual*/
-void Commands::CommandManager::connectArtworkSignals(Models::ArtworkMetadata *metadata) const {
+void Commands::CommandManager::connectArtworkSignals(Models::ArtworkMetadata *artwork) const {
 #if defined(CORE_TESTS) || defined(INTEGRATION_TESTS)
     if (m_ArtItemsModel)
 #else
@@ -618,14 +625,17 @@ void Commands::CommandManager::connectArtworkSignals(Models::ArtworkMetadata *me
     {
         LOG_INTEGRATION_TESTS << "Connecting to ArtItemsModel...";
 
-        QObject::connect(metadata, &Models::ArtworkMetadata::modifiedChanged,
+        QObject::connect(artwork, &Models::ArtworkMetadata::modifiedChanged,
                          m_ArtItemsModel, &Models::ArtItemsModel::itemModifiedChanged);
 
-        QObject::connect(metadata, &Models::ArtworkMetadata::spellCheckErrorsChanged,
+        QObject::connect(artwork, &Models::ArtworkMetadata::spellCheckErrorsChanged,
                          m_ArtItemsModel, &Models::ArtItemsModel::spellCheckErrorsChanged);
 
-        QObject::connect(metadata, &Models::ArtworkMetadata::backupRequired,
-                         m_ArtItemsModel, &Models::ArtItemsModel::artworkBackupRequested);
+        QObject::connect(artwork, &Models::ArtworkMetadata::backupRequired,
+                         m_ArtItemsModel, &Models::ArtItemsModel::onArtworkBackupRequested);
+
+        QObject::connect(artwork, &Models::ArtworkMetadata::editingPaused,
+                         m_ArtItemsModel, &Models::ArtItemsModel::onArtworkEditingPaused);
     }
 
 #if defined(CORE_TESTS) || defined(INTEGRATION_TESTS)
@@ -636,7 +646,7 @@ void Commands::CommandManager::connectArtworkSignals(Models::ArtworkMetadata *me
     {
         LOG_INTEGRATION_TESTS << "Connecting to FilteredItemsModel...";
 
-        QObject::connect(metadata, &Models::ArtworkMetadata::selectedChanged,
+        QObject::connect(artwork, &Models::ArtworkMetadata::selectedChanged,
                          m_FilteredItemsModel, &Models::FilteredArtItemsProxyModel::itemSelectedChanged);
     }
 }
@@ -793,14 +803,15 @@ void Commands::CommandManager::generatePreviews(const MetadataIO::ArtworksSnapsh
 
 void Commands::CommandManager::submitKeywordForSpellCheck(Common::BasicKeywordsModel *item, int keywordIndex) const {
     Q_ASSERT(item != NULL);
-    if ((m_SettingsModel != NULL) && m_SettingsModel->getUseSpellCheck() && (m_SpellCheckerService != NULL)) {
+    const Common::WordAnalysisFlags wordAnalysisFlags = getWordAnalysisFlags();
+    if ((wordAnalysisFlags != Common::WordAnalysisFlags::None) && (m_SpellCheckerService != NULL)) {
         m_SpellCheckerService->submitKeyword(item, keywordIndex);
     }
 }
 
 void Commands::CommandManager::submitForSpellCheck(const MetadataIO::WeakArtworksSnapshot &items) const {
-    if ((m_SettingsModel != NULL) &&
-        m_SettingsModel->getUseSpellCheck() &&
+    const Common::WordAnalysisFlags wordAnalysisFlags = getWordAnalysisFlags();
+    if ((wordAnalysisFlags != Common::WordAnalysisFlags::None) &&
         (m_SpellCheckerService != NULL) &&
         !items.isEmpty()) {
         QVector<Common::BasicKeywordsModel *> itemsToSubmit;
@@ -817,15 +828,25 @@ void Commands::CommandManager::submitForSpellCheck(const MetadataIO::WeakArtwork
 }
 
 void Commands::CommandManager::submitForSpellCheck(const QVector<Common::BasicKeywordsModel *> &items) const {
-    if ((m_SettingsModel != NULL) && m_SettingsModel->getUseSpellCheck() && m_SpellCheckerService != NULL) {
+    const Common::WordAnalysisFlags wordAnalysisFlags = getWordAnalysisFlags();
+    if ((wordAnalysisFlags != Common::WordAnalysisFlags::None) && (m_SpellCheckerService != NULL)) {
         m_SpellCheckerService->submitItems(items);
     }
 }
 
 void Commands::CommandManager::submitItemForSpellCheck(Common::BasicKeywordsModel *item, Common::SpellCheckFlags flags) const {
     Q_ASSERT(item != NULL);
-    if ((m_SettingsModel != NULL) && m_SettingsModel->getUseSpellCheck() && (m_SpellCheckerService != NULL)) {
+    const Common::WordAnalysisFlags wordAnalysisFlags = getWordAnalysisFlags();
+    if ((wordAnalysisFlags != Common::WordAnalysisFlags::None) && (m_SpellCheckerService != NULL)) {
         m_SpellCheckerService->submitItem(item, flags);
+    }
+}
+
+void Commands::CommandManager::checkSemanticDuplicates(Common::BasicKeywordsModel *item) {
+    Q_ASSERT(item != NULL);
+    const Common::WordAnalysisFlags wordAnalysisFlags = getWordAnalysisFlags();
+    if (Common::HasFlag(wordAnalysisFlags, Common::WordAnalysisFlags::Stemming) && (m_SpellCheckerService != NULL)) {
+        m_SpellCheckerService->submitItem(item, Common::SpellCheckFlags::All);
     }
 }
 
@@ -846,7 +867,8 @@ void Commands::CommandManager::setupSpellCheckSuggestions(std::vector<std::pair<
 
 void Commands::CommandManager::submitForSpellCheck(const QVector<Common::BasicKeywordsModel *> &items,
                                                    const QStringList &wordsToCheck) const {
-    if ((m_SettingsModel != NULL) && m_SettingsModel->getUseSpellCheck() && m_SpellCheckerService != NULL) {
+    Common::WordAnalysisFlags wordAnalysisFlags = getWordAnalysisFlags();
+    if ((wordAnalysisFlags != Common::WordAnalysisFlags::None) && (m_SpellCheckerService != NULL)) {
         m_SpellCheckerService->submitItems(items, wordsToCheck);
     }
 }
@@ -856,6 +878,18 @@ void Commands::CommandManager::submitKeywordsForWarningsCheck(Models::ArtworkMet
     this->submitForWarningsCheck(item, Common::WarningsCheckFlags::Keywords);
 }
 
+void Commands::CommandManager::setupDuplicatesModel(Common::BasicMetadataModel *item) {
+    if (m_DuplicatesModel != nullptr) {
+        m_DuplicatesModel->setupModel(item);
+    }
+}
+
+void Commands::CommandManager::setupDuplicatesModel(const std::vector<Models::ArtworkMetadata*> &items) {
+    if (m_DuplicatesModel != nullptr) {
+        m_DuplicatesModel->setupModel(items);
+    }
+}
+
 void Commands::CommandManager::submitForWarningsCheck(Models::ArtworkMetadata *item, Common::WarningsCheckFlags flags) const {
     Q_ASSERT(item != NULL);
 
@@ -863,7 +897,7 @@ void Commands::CommandManager::submitForWarningsCheck(Models::ArtworkMetadata *i
         m_WarningsService->submitItem(item, flags);
     }
 
-    int count = m_WarningsCheckers.length();
+    const int count = m_WarningsCheckers.length();
 
     LOG_INTEGRATION_TESTS << count << "checkers available";
 
@@ -1241,4 +1275,18 @@ void Commands::CommandManager::clearCurrentItem() const {
     if (m_UIManager != nullptr) {
         m_UIManager->clearCurrentItem();
     }
+}
+
+Common::WordAnalysisFlags Commands::CommandManager::getWordAnalysisFlags() const {
+    Common::WordAnalysisFlags result = Common::WordAnalysisFlags::None;
+    if (m_SettingsModel != NULL) {
+        if (m_SettingsModel->getUseSpellCheck()) {
+            Common::SetFlag(result, Common::WordAnalysisFlags::Spelling);
+        }
+
+        if (m_SettingsModel->getDetectDuplicates()) {
+            Common::SetFlag(result, Common::WordAnalysisFlags::Stemming);
+        }
+    }
+    return result;
 }

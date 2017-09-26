@@ -741,6 +741,7 @@ Rectangle {
                                 isHighlighted: keywordsCheckBox.checked
                                 keywordText: keyword
                                 hasSpellCheckError: !iscorrect
+                                hasDuplicate: hasduplicate
                                 delegateIndex: index
                                 itemHeight: flv.keywordHeight
                                 closeIconDisabledColor: uiColors.closeIconInactiveColor
@@ -835,36 +836,27 @@ Rectangle {
                             anchors.rightMargin: 3
                             spacing: 5
 
-                            StyledText {
+                            StyledLink {
                                 id: plainTextText
                                 text: i18.n + qsTr("<u>edit in plain text</u>")
-                                color: plainTextMA.containsMouse ? uiColors.linkClickedColor : uiColors.labelActiveForeground
-
-                                MouseArea {
-                                    id: plainTextMA
-                                    anchors.fill: parent
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: {
-                                        // strange bug with clicking on the keywords field
-                                        if (!containsMouse) { return; }
-
-                                        var callbackObject = {
-                                            onSuccess: function(text, spaceIsSeparator) {
-                                                combinedArtworks.plainTextEdit(text, spaceIsSeparator)
-                                            },
-                                            onClose: function() {
-                                                flv.activateEdit()
-                                            }
+                                normalLinkColor: uiColors.labelActiveForeground
+                                onClicked: {
+                                    var callbackObject = {
+                                        onSuccess: function(text, spaceIsSeparator) {
+                                            combinedArtworks.plainTextEdit(text, spaceIsSeparator)
+                                        },
+                                        onClose: function() {
+                                            flv.activateEdit()
                                         }
-
-                                        Common.launchDialog("Dialogs/PlainTextKeywordsDialog.qml",
-                                                            applicationWindow,
-                                                            {
-                                                                callbackObject: callbackObject,
-                                                                keywordsText: combinedArtworks.getKeywordsString(),
-                                                                keywordsModel: combinedArtworks.getBasicModel()
-                                                            });
                                     }
+
+                                    Common.launchDialog("Dialogs/PlainTextKeywordsDialog.qml",
+                                                        applicationWindow,
+                                                        {
+                                                            callbackObject: callbackObject,
+                                                            keywordsText: combinedArtworks.getKeywordsString(),
+                                                            keywordsModel: combinedArtworks.getBasicModel()
+                                                        });
                                 }
                             }
 
@@ -872,21 +864,13 @@ Rectangle {
                                 Layout.fillWidth: true
                             }
 
-                            StyledText {
+                            StyledLink {
                                 text: i18.n + qsTr("Fix spelling")
                                 enabled: keywordsWrapper.keywordsModel ? keywordsWrapper.keywordsModel.hasSpellErrors : false
-                                color: enabled ? (fixSpellingMA.pressed ? uiColors.linkClickedColor : uiColors.artworkActiveColor) : uiColors.labelActiveForeground
-
-                                MouseArea {
-                                    id: fixSpellingMA
-                                    anchors.fill: parent
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: {
-                                        combinedArtworks.suggestCorrections()
-                                        Common.launchDialog("Dialogs/SpellCheckSuggestionsDialog.qml",
-                                                            componentParent,
-                                                            {})
-                                    }
+                                onClicked: {
+                                    Common.launchDialog("Dialogs/SpellCheckSuggestionsDialog.qml",
+                                                        componentParent,
+                                                        {})
                                 }
                             }
 
@@ -895,27 +879,44 @@ Rectangle {
                                 verticalAlignment: Text.AlignVCenter
                             }
 
+                            StyledLink {
+                                id: removeDuplicatesText
+                                text: i18.n + qsTr("Remove Duplicates")
+                                enabled: keywordsWrapper.keywordsModel ? keywordsWrapper.keywordsModel.hasDuplicates : false
+                                onClicked: {
+                                    combinedArtworks.setupDuplicatesModel()
+
+                                    var wasCollapsed = applicationWindow.leftSideCollapsed
+                                    mainStackView.push({
+                                                           item: "qrc:/StackViews/DuplicatesReView.qml",
+                                                           properties: {
+                                                               componentParent: applicationWindow,
+                                                               wasLeftSideCollapsed: wasCollapsed
+                                                           },
+                                                           destroyOnPop: true
+                                                       })
+                                }
+                            }
+
                             StyledText {
+                                text: "|"
+                                verticalAlignment: Text.AlignVCenter
+                            }
+
+                            StyledLink {
                                 text: i18.n + qsTr("Suggest")
-                                color: enabled ? (suggestKeywordsMA.pressed ? uiColors.linkClickedColor : uiColors.artworkActiveColor) : uiColors.labelActiveForeground
-
-                                MouseArea {
-                                    id: suggestKeywordsMA
-                                    anchors.fill: parent
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: {
-                                        var callbackObject = {
-                                            promoteKeywords: function(keywords) {
-                                                combinedArtworks.pasteKeywords(keywords)
-                                            }
+                                onClicked: {
+                                    var callbackObject = {
+                                        promoteKeywords: function(keywords) {
+                                            combinedArtworks.pasteKeywords(keywords)
                                         }
-
-                                        combinedArtworks.initSuggestion()
-
-                                        Common.launchDialog("Dialogs/KeywordsSuggestion.qml",
-                                                            componentParent,
-                                                            {callbackObject: callbackObject});
                                     }
+
+                                    combinedArtworks.initSuggestion()
+
+                                    Common.launchDialog("Dialogs/KeywordsSuggestion.qml",
+                                                        componentParent,
+                                                        {callbackObject: callbackObject});
                                 }
                             }
 
@@ -926,15 +927,8 @@ Rectangle {
 
                             StyledText {
                                 text: i18.n + qsTr("Copy")
-                                color: enabled ? (copyKeywordsMA.pressed ? uiColors.linkClickedColor : uiColors.artworkActiveColor) : uiColors.labelActiveForeground
                                 enabled: combinedArtworks.keywordsCount > 0
-
-                                MouseArea {
-                                    id: copyKeywordsMA
-                                    anchors.fill: parent
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: clipboard.setText(combinedArtworks.getKeywordsString())
-                                }
+                                onClicked: clipboard.setText(combinedArtworks.getKeywordsString())
                             }
 
                             StyledText {
@@ -942,19 +936,12 @@ Rectangle {
                                 verticalAlignment: Text.AlignVCenter
                             }
 
-                            StyledText {
+                            StyledLink {
                                 text: i18.n + qsTr("Clear")
                                 enabled: combinedArtworks.keywordsCount > 0
-                                color: enabled ? (clearKeywordsMA.pressed ? uiColors.linkClickedColor : uiColors.artworkActiveColor) : uiColors.labelActiveForeground
-
-                                MouseArea {
-                                    id: clearKeywordsMA
-                                    anchors.fill: parent
-                                    cursorShape: Qt.PointingHandCursor
-                                    onClicked: {
-                                        if (combinedArtworks.keywordsCount > 0) {
-                                            clearKeywordsDialog.open()
-                                        }
+                                onClicked: {
+                                    if (combinedArtworks.keywordsCount > 0) {
+                                        clearKeywordsDialog.open()
                                     }
                                 }
                             }

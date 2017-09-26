@@ -20,6 +20,8 @@
 #include <QThread>
 #include "spellcheckitem.h"
 #include "../Common/defines.h"
+#include "../Common/flags.h"
+#include "../Helpers/stringhelper.h"
 #include <hunspell/hunspell.hxx>
 
 #define EN_HUNSPELL_DIC "en_US.dic"
@@ -72,9 +74,14 @@ namespace SpellCheck {
         dicPath = resourcesDir.absoluteFilePath(EN_HUNSPELL_DIC);
 
 #else
-        if (m_SettingsModel) {
+#if defined(TRAVIS_CI)
+        resourcesPath = STRINGIZE(HUNSPELL_DICTS_PATH);
+        LOG_DEBUG << "Resources path:" << resourcesPath;
+#else
+        if (m_SettingsModel != nullptr) {
             resourcesPath = m_SettingsModel->getDictPath();
         }
+#endif
 
         if (resourcesPath.isEmpty()) {
             resourcesPath = "hunspell/";
@@ -137,19 +144,35 @@ namespace SpellCheck {
     }
 
     void SpellCheckWorker::processQueryItem(std::shared_ptr<SpellCheckItem> &item) {
-        bool neededSuggestions = item->needsSuggestions();
+        const bool neededSuggestions = item->needsSuggestions();
         auto &queryItems = item->getQueries();
+        const auto wordAnalysisFlags = item->getWordAnalysisFlags();
+        const bool shouldCheckSpelling = Common::HasFlag(wordAnalysisFlags, Common::WordAnalysisFlags::Spelling);
+        const bool shouldStemWord = Common::HasFlag(wordAnalysisFlags, Common::WordAnalysisFlags::Stemming);
         bool anyWrong = false;
 
         if (!neededSuggestions) {
-            size_t size = queryItems.size();
+            const size_t size = queryItems.size();
             for (size_t i = 0; i < size; ++i) {
                 auto &queryItem = queryItems.at(i);
-                bool isOk = checkWordSpelling(queryItem);
-                item->accountResultAt((int)i);
+                bool isOk = true;
+
+                if (shouldCheckSpelling) {
+                    isOk = checkWordSpelling(queryItem);
+                }
+
+                if (shouldStemWord) {
+                    stemWord(queryItem);
+                }
+
                 anyWrong = anyWrong || !isOk;
             }
 
+            if (shouldStemWord && !item->getIsOnlyOneKeyword()) {
+                findSemanticDuplicates(queryItems);
+            }
+
+            item->accountResults();
             item->submitSpellCheckResult();
         } else {
             for (auto &queryItem: queryItems) {
@@ -259,6 +282,49 @@ namespace SpellCheck {
         return isOk;
     }
 
+    QString SpellCheckWorker::getWordStem(const QString &word) {
+        QString result;
+
+        if (word.isEmpty()) { return result; }
+
+        std::string encodedWord = m_Codec->fromUnicode(word).toStdString();
+        std::vector<std::string> stems;
+
+        try {
+            stems = m_Hunspell->stem(encodedWord);
+        } catch(...) {
+            return result;
+        }
+
+#ifdef INTEGRATION_TESTS
+        QStringList stemsList;
+        for (auto &stm: stems) { stemsList.append(QString::fromStdString(stm)); }
+        LOG_DEBUG << "Stemming:" << word << "->" << stemsList;
+#endif
+
+        const size_t size = stems.size();
+        if (size > 0) {
+            size_t minIndex = 0, minSize = stems[0].length();
+
+            for (size_t i = 1; i < size; i++) {
+                const size_t currSize = stems[i].length();
+                if (currSize < minSize) {
+                    minSize = currSize;
+                    minIndex = i;
+                }
+            }
+
+            result = QString::fromStdString(stems[minIndex]);
+        }
+
+        return result;
+    }
+
+    void SpellCheckWorker::stemWord(const std::shared_ptr<SpellCheckQueryItem> &queryItem) {
+        const QString &word = queryItem->m_Word;
+        queryItem->m_Stem = getWordStem(word);
+    }
+
     bool SpellCheckWorker::isHunspellSpellingCorrect(const QString &word) const {
         bool isOk = false;
 
@@ -269,6 +335,59 @@ namespace SpellCheck {
             isOk = false;
         }
         return isOk;
+    }
+
+    void SpellCheckWorker::findSemanticDuplicates(const std::vector<std::shared_ptr<SpellCheckQueryItem> > &queries) {
+        LOG_INTEGR_TESTS_OR_DEBUG << "#";
+        const size_t size = queries.size();
+
+        QHash<QString, QVector<size_t> > stemToIndexMap;
+
+        for (size_t i = 0; i < size; ++i) {
+            auto &queryItem = queries.at(i);
+            if (queryItem->m_Stem.isEmpty()) {
+                LOG_WARNING << "Stem is empty for" << queryItem->m_Word;
+                continue;
+            }
+
+            stemToIndexMap[queryItem->m_Stem].append(i);
+        }
+
+        LOG_INTEGR_TESTS_OR_DEBUG << "Stems hash has" << stemToIndexMap.size() << "item(s)";
+        LOG_INTEGRATION_TESTS << stemToIndexMap;
+
+        auto itEnd = stemToIndexMap.constEnd();
+        auto it = stemToIndexMap.constBegin();
+
+        while (it != itEnd) {
+            const QVector<size_t> &sameStemIndices = it.value();
+            if (sameStemIndices.size() > 1) {
+                const int size = sameStemIndices.size();
+
+                for (int i = 0; i < size; i++) {
+                    for (int j = 0; j < size; j++) {
+                        if (i == j) { continue; }
+
+                        size_t index1 = sameStemIndices[i];
+                        size_t index2 = sameStemIndices[j];
+
+                        auto &query1 = queries[index1];
+                        auto &query2 = queries[index2];
+                        Q_ASSERT(query1->m_Stem == query2->m_Stem);
+
+                        if (query1->m_IsDuplicate && query2->m_IsDuplicate) { continue; }
+
+                        if (Helpers::areSemanticDuplicates(query1->m_Word, query2->m_Word)) {
+                            LOG_INTEGR_TESTS_OR_DEBUG << "detected as duplicates:" << "[" << query1->m_Index << "]:" << query1->m_Word << "[" << query2->m_Index << "]:" << query2->m_Word;
+                            query1->m_IsDuplicate = true;
+                            query2->m_IsDuplicate = true;
+                        }
+                    }
+                }
+            }
+
+            ++it;
+        }
     }
 
     void SpellCheckWorker::findSuggestions(const QString &word) {

@@ -57,20 +57,12 @@ ApplicationWindow {
                 text: i18.n + qsTr("Version: %1").arg(settingsModel.appVersion)
             }
 
-            StyledText {
+            StyledLink {
                 focus: true
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: i18.n + qsTr("<u>Xpiks webpage</u>")
-                color: aboutMA.pressed ? uiColors.linkClickedColor : uiColors.artworkActiveColor
-
-                MouseArea {
-                    id: aboutMA
-                    anchors.fill: parent
-                    cursorShape: Qt.PointingHandCursor
-                    hoverEnabled: true
-                    onClicked: {
-                        Qt.openUrlExternally("https://ribtoks.github.io/xpiks/")
-                    }
+                onClicked: {
+                    Qt.openUrlExternally("https://ribtoks.github.io/xpiks/")
                 }
             }
 

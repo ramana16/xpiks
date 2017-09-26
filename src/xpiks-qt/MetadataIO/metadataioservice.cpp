@@ -10,6 +10,7 @@
 
 #include "metadataioservice.h"
 #include <QThread>
+#include <QTimerEvent>
 #include "metadataioworker.h"
 #include "metadataiotask.h"
 #include "../Commands/commandmanager.h"
@@ -21,12 +22,10 @@
 namespace MetadataIO {
     MetadataIOService::MetadataIOService(QObject *parent):
         QObject(parent),
+        m_LastTimerId(-1),
         m_RestartsCount(0),
         m_MetadataIOWorker(nullptr)
     {
-        m_SaverTimer.setSingleShot(true);
-        QObject::connect(&m_SaverTimer, &QTimer::timeout, this, &MetadataIOService::onSaverTimer);
-
         QObject::connect(this, &MetadataIOService::cacheSyncRequest, this, &MetadataIOService::onCacheSyncRequest);
     }
 
@@ -142,11 +141,12 @@ namespace MetadataIO {
         LOG_DEBUG << "#";
 
         if (m_RestartsCount < SAVER_TIMER_MAX_RESTARTS) {
-            m_SaverTimer.start(SAVER_TIMER_TIMEOUT);
+            if (m_LastTimerId != -1) { this->killTimer(m_LastTimerId); }
+
+            m_LastTimerId = this->startTimer(SAVER_TIMER_TIMEOUT, Qt::VeryCoarseTimer);
             m_RestartsCount++;
         } else {
             LOG_INFO << "Maximum backup delays occured, forcing backup";
-            Q_ASSERT(m_SaverTimer.isActive());
         }
     }
 
@@ -154,11 +154,16 @@ namespace MetadataIO {
         LOG_INFO << "#";
     }
 
-    void MetadataIOService::onSaverTimer() {
+    void MetadataIOService::timerEvent(QTimerEvent *event) {
         LOG_DEBUG << "#";
-        m_RestartsCount = 0;
+        if ((event != nullptr) && (event->timerId() == m_LastTimerId)) {
+            m_RestartsCount = 0;
+            m_LastTimerId = -1;
 
-        std::shared_ptr<MetadataIOTaskBase> syncItem(new MetadataCacheSyncTask());
-        m_MetadataIOWorker->submitItem(syncItem);
+            std::shared_ptr<MetadataIOTaskBase> syncItem(new MetadataCacheSyncTask());
+            m_MetadataIOWorker->submitItem(syncItem);
+        }
+
+        this->killTimer(event->timerId());
     }
 }

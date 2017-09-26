@@ -210,18 +210,12 @@ Item {
                 height: 24
                 spacing: 20
 
-                StyledText {
+                StyledLink {
                     text: i18.n + qsTr("Skip")
                     color: skipMA.pressed ? uiColors.linkClickedColor : uiColors.labelInactiveForeground
-
-                    MouseArea {
-                        id: skipMA
-                        anchors.fill: parent
-                        cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-                        onClicked: {
-                            settingsModel.saveCurrentVersion()
-                            closePopup()
-                        }
+                    onClicked: {
+                        settingsModel.saveCurrentVersion()
+                        closePopup()
                     }
                 }
 
@@ -229,18 +223,12 @@ Item {
                     Layout.fillWidth: true
                 }
 
-                StyledText {
+                StyledLink {
                     text: i18.n + qsTr("Previous")
                     color: previousMA.pressed ? uiColors.linkClickedColor : uiColors.labelActiveForeground
-
-                    MouseArea {
-                        id: previousMA
-                        anchors.fill: parent
-                        cursorShape: enabled ? Qt.PointingHandCursor : Qt.ArrowCursor
-                        onClicked: {
-                            slidesHost.swipeBackward()
-                            actionButton.text = qsTr("Next")
-                        }
+                    onClicked: {
+                        slidesHost.swipeBackward()
+                        actionButton.text = qsTr("Next")
                     }
                 }
 

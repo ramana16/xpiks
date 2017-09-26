@@ -12,6 +12,7 @@
 #include <QStringList>
 #include <QDirIterator>
 #include <QImageReader>
+#include <QSyntaxHighlighter>
 #include <QList>
 #include <QHash>
 #include <QSet>
@@ -214,7 +215,7 @@ namespace Models {
                 QModelIndex index = this->index(metadataIndex);
                 emit dataChanged(index, index, QVector<int>() << IsModifiedRole << KeywordsCountRole);
                 m_CommandManager->submitKeywordsForWarningsCheck(metadata);
-                metadata->requestBackup();
+                metadata->justEdited();
             }
         }
     }
@@ -229,7 +230,7 @@ namespace Models {
                 QModelIndex index = this->index(metadataIndex);
                 emit dataChanged(index, index, QVector<int>() << IsModifiedRole << KeywordsCountRole);
                 m_CommandManager->submitKeywordsForWarningsCheck(metadata);
-                metadata->requestBackup();
+                metadata->justEdited();
             }
         }
     }
@@ -246,7 +247,7 @@ namespace Models {
 
                 m_CommandManager->submitKeywordForSpellCheck(keywordsModel, keywordsModel->getKeywordsCount() - 1);
                 m_CommandManager->submitKeywordsForWarningsCheck(metadata);
-                metadata->requestBackup();
+                metadata->justEdited();
             }
         }
     }
@@ -550,7 +551,7 @@ namespace Models {
                 auto *keywordsModel = metadata->getBasicModel();
                 m_CommandManager->submitKeywordForSpellCheck(keywordsModel, keywordIndex);
                 m_CommandManager->submitKeywordsForWarningsCheck(metadata);
-                metadata->requestBackup();
+                metadata->justEdited();
             }
         }
     }
@@ -692,6 +693,17 @@ namespace Models {
 #endif
     }
 
+    void ArtItemsModel::setupDuplicatesModel(int metadataIndex) {
+        LOG_INFO << metadataIndex;
+        if (0 <= metadataIndex && metadataIndex < rowCount()) {
+            ArtworkMetadata *artwork = accessArtwork(metadataIndex);
+            Q_ASSERT(artwork != nullptr);
+            std::vector<ArtworkMetadata*> artworks;
+            artworks.push_back(artwork);
+            m_CommandManager->setupDuplicatesModel(artworks);
+        }
+    }
+
     void ArtItemsModel::fillFromQuickBuffer(int metadataIndex) {
         LOG_INFO << "item" << metadataIndex;
 
@@ -817,7 +829,7 @@ namespace Models {
             if (role == EditArtworkDescriptionRole ||
                 role == EditArtworkTitleRole) {
                 if (metadata->isInitialized()) {
-                    metadata->requestBackup();
+                    metadata->justEdited();
                 }
             }
         }
@@ -920,12 +932,21 @@ namespace Models {
         }
     }
 
-    void ArtItemsModel::artworkBackupRequested() {
+    void ArtItemsModel::onArtworkBackupRequested() {
         LOG_DEBUG << "#";
         ArtworkMetadata *metadata = qobject_cast<ArtworkMetadata *>(sender());
         Q_ASSERT(metadata != nullptr);
         if (metadata != NULL) {
             m_CommandManager->saveArtworkBackup(metadata);
+        }
+    }
+
+    void ArtItemsModel::onArtworkEditingPaused() {
+        LOG_DEBUG << "#";
+        ArtworkMetadata *artwork = qobject_cast<ArtworkMetadata *>(sender());
+        Q_ASSERT(artwork != nullptr);
+        if (artwork != NULL) {
+            m_CommandManager->submitItemForSpellCheck(artwork->getBasicModel());
         }
     }
 
@@ -1381,25 +1402,26 @@ namespace Models {
         }
     }
 
-    void ArtItemsModel::destroyInnerItem(ArtworkMetadata *metadata) {
-        if (metadata->release()) {
-            LOG_INTEGRATION_TESTS << "Destroying metadata" << metadata->getItemID() << "for real";
-            m_CommandManager->disconnectArtworkSignals(metadata);
-            metadata->deepDisconnect();
+    void ArtItemsModel::destroyInnerItem(ArtworkMetadata *artwork) {
+        if (artwork->release()) {
+            LOG_INTEGRATION_TESTS << "Destroying metadata" << artwork->getItemID() << "for real";
+            m_CommandManager->disconnectArtworkSignals(artwork);
+            artwork->deepDisconnect();
+            artwork->clearSpellingInfo();
 #ifdef QT_DEBUG
-            m_DestroyedList.push_back(metadata);
+            m_DestroyedList.push_back(artwork);
 #else
             metadata->deleteLater();
 #endif
         } else {
-            LOG_DEBUG << "Metadata #" << metadata->getItemID() << "is locked. Postponing destruction...";
+            LOG_DEBUG << "Metadata #" << artwork->getItemID() << "is locked. Postponing destruction...";
 
-            metadata->disconnect();
-            auto *metadataModel = metadata->getBasicModel();
+            artwork->disconnect();
+            auto *metadataModel = artwork->getBasicModel();
             metadataModel->disconnect();
             metadataModel->clearModel();
 
-            m_FinalizationList.push_back(metadata);
+            m_FinalizationList.push_back(artwork);
         }
     }
 
