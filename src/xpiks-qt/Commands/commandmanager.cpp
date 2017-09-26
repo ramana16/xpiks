@@ -464,6 +464,11 @@ void Commands::CommandManager::connectEntitiesSignalsSlots() const {
                          m_WarningsModel, &Warnings::WarningsModel::onWarningsCouldHaveChanged);
     }
 
+    if (m_DuplicatesModel != NULL && m_ArtworkProxyModel != NULL) {
+        QObject::connect(m_ArtworkProxyModel, &Models::ArtworkProxyModel::duplicatesCouldHaveChanged,
+                         m_DuplicatesModel, &SpellCheck::DuplicatesReviewModel::onDuplicatesCouldHaveChanged);
+    }
+
     if (m_SpellCheckerService != NULL && m_QuickBuffer != NULL) {
         QObject::connect(m_SpellCheckerService, &SpellCheck::SpellCheckerService::userDictUpdate,
                          m_QuickBuffer, &QuickBuffer::QuickBuffer::userDictUpdateHandler);

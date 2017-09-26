@@ -210,7 +210,7 @@ namespace Models {
         void artworksChanged(bool needToMoveCurrentItem);
         void artworksAdded(int imagesCount, int vectorsCount);
         void selectedArtworksRemoved(int count);
-        void fileWithIndexUnavailable(int index);
+        void fileWithIndexUnavailable(size_t index);
         void unavailableArtworksFound();
         void unavailableVectorsFound();
         void userDictUpdate(const QString &word);

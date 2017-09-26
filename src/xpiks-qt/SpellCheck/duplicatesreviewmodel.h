@@ -60,7 +60,8 @@ namespace SpellCheck {
             OriginalIndexRole,
             IsVideoRole,
             HasVectorAttachedRole,
-            BaseFilenameRole
+            BaseFilenameRole,
+            TriggerRole
         };
 
     public:
@@ -76,6 +77,7 @@ namespace SpellCheck {
         Q_INVOKABLE QString getDescriptionDuplicates(int index);
         Q_INVOKABLE QString getKeywordsDuplicates(int index);
         Q_INVOKABLE void clearModel();
+        Q_INVOKABLE void processPendingUpdates();
 
         // QAbstractItemModel interface
     public:
@@ -83,8 +85,15 @@ namespace SpellCheck {
         virtual QVariant data(const QModelIndex &index, int role) const override;
         virtual QHash<int, QByteArray> roleNames() const override;
 
+    signals:
+        void rehighlightRequired();
+
+    public slots:
+        void onDuplicatesCouldHaveChanged(size_t originalIndex);
+
     private:
         std::vector<MetadataDuplicatesItem> m_DuplicatesList;
+        QVector<size_t> m_PendingUpdates;
         QMLExtensions::ColorsModel *m_ColorsModel;
     };
 }

@@ -154,7 +154,7 @@ namespace Models {
         for (size_t i = 0; i < size; ++i) {
             if (accessArtwork(i)->isUnavailable()) {
                 indicesToRemove.append((int)i);
-                emit fileWithIndexUnavailable((int)i);
+                emit fileWithIndexUnavailable(i);
             }
         }
 

@@ -28,7 +28,7 @@ Rectangle {
 
     Stack.onStatusChanged: {
         if (Stack.status == Stack.Active) {
-            // warningsModel.processPendingUpdates()
+            duplicatesModel.processPendingUpdates()
         }
     }
 
@@ -213,7 +213,7 @@ Rectangle {
                                 anchors.leftMargin: 5
                                 anchors.rightMargin: 5
                                 wrapMode: TextEdit.Wrap
-                                text: i18.n + duplicatesModel.getTitleDuplicates(imageWrapper.delegateIndex)
+                                text: dtrigger + duplicatesModel.getTitleDuplicates(imageWrapper.delegateIndex)
                                 readOnly: true
                                 selectByKeyboard: false
                                 selectByMouse: false
@@ -251,7 +251,7 @@ Rectangle {
                                 anchors.left: parent.left
                                 anchors.leftMargin: 5
                                 anchors.rightMargin: 5
-                                text: i18.n + duplicatesModel.getDescriptionDuplicates(imageWrapper.delegateIndex).trim()
+                                text: dtrigger + duplicatesModel.getDescriptionDuplicates(imageWrapper.delegateIndex).trim()
                                 readOnly: true
                                 selectByKeyboard: false
                                 selectByMouse: false
@@ -289,7 +289,7 @@ Rectangle {
                                 anchors.leftMargin: 5
                                 anchors.rightMargin: 5
                                 wrapMode: TextEdit.Wrap
-                                text: i18.n + duplicatesModel.getKeywordsDuplicates(imageWrapper.delegateIndex)
+                                text: dtrigger + duplicatesModel.getKeywordsDuplicates(imageWrapper.delegateIndex)
                                 readOnly: true
                                 selectByKeyboard: false
                                 selectByMouse: false

@@ -34,9 +34,13 @@ namespace SpellCheck {
     protected:
         virtual void highlightBlock(const QString &text) override;
 
+    public slots:
+        void keywordsDuplicatesChanged();
+
     private:
         SpellCheckErrorsInfo *m_SpellCheckErrors;
         QMLExtensions::ColorsModel *m_ColorsModel;
+        bool m_HighlighAll;
     };
 }
 

@@ -22,8 +22,7 @@ namespace Models {
     ArtworkProxyModel::ArtworkProxyModel(QObject *parent) :
         QObject(parent),
         ArtworkProxyBase(),
-        m_ArtworkMetadata(nullptr),
-        m_ArtworkOriginalIndex(-1)
+        m_ArtworkMetadata(nullptr)
     {
     }
 
@@ -109,12 +108,14 @@ namespace Models {
         emit titleChanged();
     }
 
-    void ArtworkProxyModel::itemUnavailableHandler(int index) {
+    void ArtworkProxyModel::itemUnavailableHandler(size_t index) {
         LOG_DEBUG << "#";
 
-        if ((index == m_ArtworkOriginalIndex) && (m_ArtworkOriginalIndex != -1)) {
-            LOG_INFO << "Item is not available anymore" << index;
-            emit itemBecomeUnavailable();
+        if (m_ArtworkMetadata != nullptr) {
+            if (index == m_ArtworkMetadata->getLastKnownIndex()) {
+                LOG_INFO << "Item is not available anymore" << index;
+                emit itemBecomeUnavailable();
+            }
         }
     }
 
@@ -196,16 +197,14 @@ namespace Models {
         return getHasDescriptionWordSpellError(word);
     }
 
-    void ArtworkProxyModel::setSourceArtwork(QObject *artworkMetadata, int originalIndex) {
-        LOG_INFO << originalIndex;
+    void ArtworkProxyModel::setSourceArtwork(QObject *artworkMetadata) {
         ArtworkMetadata *artwork = qobject_cast<ArtworkMetadata*>(artworkMetadata);
         Q_ASSERT(artwork != nullptr);
+        LOG_INFO << artwork->getLastKnownIndex();
 
 #ifdef QT_DEBUG
-        if (originalIndex != -1) {
-            auto *itemsModel = m_CommandManager->getArtItemsModel();
-            Q_ASSERT(itemsModel->getArtwork(originalIndex) == artwork);
-        }
+        auto *itemsModel = m_CommandManager->getArtItemsModel();
+        Q_ASSERT(itemsModel->getArtwork(artwork->getLastKnownIndex()) == artwork);
 #endif
 
         disconnectCurrentArtwork();
@@ -215,7 +214,6 @@ namespace Models {
         artwork->acquire();
         artwork->setIsLockedForEditing(true);
         m_ArtworkMetadata = artwork;
-        m_ArtworkOriginalIndex = originalIndex;
 
         auto *keywordsModel = artwork->getBasicModel();
         QObject::connect(keywordsModel, &Common::BasicMetadataModel::spellCheckErrorsChanged,
@@ -349,18 +347,19 @@ namespace Models {
     }
 
     void ArtworkProxyModel::updateCurrentArtwork() {
-        LOG_DEBUG << "index:" << m_ArtworkOriginalIndex;
+        LOG_DEBUG << "#";
+        if (m_ArtworkMetadata == nullptr) { return; }
 
-        if (m_ArtworkOriginalIndex != -1) {
-            m_CommandManager->updateArtworksAtIndices(QVector<int>() << m_ArtworkOriginalIndex);
-        }
+        size_t lastKnownIndex = m_ArtworkMetadata->getLastKnownIndex();
+        LOG_DEBUG << "index:" << lastKnownIndex;
 
-        if (m_ArtworkMetadata != nullptr) {
-            m_CommandManager->submitForWarningsCheck(m_ArtworkMetadata);
-            m_CommandManager->checkSemanticDuplicates(m_ArtworkMetadata->getBasicModel());
-        }
+        m_CommandManager->updateArtworksAtIndices(QVector<int>() << (int)lastKnownIndex);
 
-        emit warningsCouldHaveChanged(m_ArtworkOriginalIndex);
+        m_CommandManager->submitForWarningsCheck(m_ArtworkMetadata);
+        m_CommandManager->checkSemanticDuplicates(m_ArtworkMetadata->getBasicModel());
+
+        emit warningsCouldHaveChanged(lastKnownIndex);
+        emit duplicatesCouldHaveChanged(lastKnownIndex);
     }
 
     void ArtworkProxyModel::disconnectCurrentArtwork() {
@@ -380,6 +379,5 @@ namespace Models {
         }
 
         m_ArtworkMetadata = nullptr;
-        m_ArtworkOriginalIndex = -1;
     }
 }

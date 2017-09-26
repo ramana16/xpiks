@@ -70,6 +70,9 @@ namespace SpellCheck {
                         m_ColorsModel,
                         spellCheckInfo->getTitleErrors());
 
+            //QObject::connect(this, &DuplicatesReviewModel::rehighlightRequired,
+            //                 highlighter, &DuplicatesHighlighter::rehighlight);
+
             Q_UNUSED(highlighter);
         }
 #endif
@@ -90,6 +93,9 @@ namespace SpellCheck {
                         m_ColorsModel,
                         spellCheckInfo->getDescriptionErrors());
 
+            //QObject::connect(this, &DuplicatesReviewModel::rehighlightRequired,
+            //                 highlighter, &DuplicatesHighlighter::rehighlight);
+
             Q_UNUSED(highlighter);
         }
 #endif
@@ -109,12 +115,16 @@ namespace SpellCheck {
                         m_ColorsModel,
                         nullptr); // highlight all words
 
+            QObject::connect(basicModel, &Common::BasicMetadataModel::hasDuplicatesChanged,
+                             highlighter, &DuplicatesHighlighter::keywordsDuplicatesChanged);
+
             Q_UNUSED(highlighter);
         }
 #endif
     }
 
     QString DuplicatesReviewModel::getTitleDuplicates(int index) {
+        LOG_FOR_DEBUG << index;
         if ((index < 0) || (index >= (int)m_DuplicatesList.size())) { return QString(); }
 
         auto &item = m_DuplicatesList.at(index);
@@ -148,6 +158,7 @@ namespace SpellCheck {
     }
 
     QString DuplicatesReviewModel::getDescriptionDuplicates(int index) {
+        LOG_FOR_DEBUG << index;
         if ((index < 0) || (index >= (int)m_DuplicatesList.size())) { return QString(); }
 
         auto &item = m_DuplicatesList.at(index);
@@ -181,6 +192,7 @@ namespace SpellCheck {
     }
 
     QString DuplicatesReviewModel::getKeywordsDuplicates(int index) {
+        LOG_FOR_DEBUG << index;
         if ((index < 0) || (index >= (int)m_DuplicatesList.size())) { return QString(); }
 
         auto &item = m_DuplicatesList.at(index);
@@ -212,6 +224,48 @@ namespace SpellCheck {
 
     void DuplicatesReviewModel::clearModel() {
         clearDuplicates();
+        m_PendingUpdates.clear();
+    }
+
+    void DuplicatesReviewModel::processPendingUpdates() {
+        LOG_DEBUG << "#";
+        if (m_DuplicatesList.empty()) {
+            m_PendingUpdates.clear();
+            return;
+        }
+
+        QSet<size_t> indicesSet = m_PendingUpdates.toList().toSet();
+
+        QVector<int> indicesToUpdate;
+        const size_t size = m_DuplicatesList.size();
+        indicesToUpdate.reserve(size);
+
+        for (size_t i = 0; i < size; i++) {
+            auto &item = m_DuplicatesList[i];
+            if (item.m_ArtworkMetadata == nullptr) { continue; }
+
+            const size_t index = item.m_ArtworkMetadata->getLastKnownIndex();
+            if (indicesSet.contains(index)) {
+                indicesToUpdate.append((int)i);
+            }
+        }
+
+        LOG_INTEGR_TESTS_OR_DEBUG << indicesToUpdate;
+
+        QVector<QPair<int, int> > ranges;
+        qSort(indicesToUpdate);
+        Helpers::indicesToRanges(indicesToUpdate, ranges);
+
+        QVector<int> roles;
+        roles << TriggerRole;
+
+        for (auto &r: ranges) {
+            QModelIndex indexFrom = this->index(r.first, 0);
+            QModelIndex indexTo = this->index(r.second, 0);
+            emit dataChanged(indexFrom, indexTo, roles);
+        }
+
+        m_PendingUpdates.clear();
     }
 
     int DuplicatesReviewModel::rowCount(const QModelIndex &parent) const {
@@ -245,6 +299,9 @@ namespace SpellCheck {
             bool isVideo = dynamic_cast<Models::VideoArtwork*>(item.m_ArtworkMetadata) != nullptr;
             return isVideo;
         }
+        case TriggerRole: {
+            return QString();
+        }
         default:
             return QVariant();
         }
@@ -258,6 +315,12 @@ namespace SpellCheck {
         roleNames[IsVideoRole] = "isvideo";
         roleNames[HasVectorAttachedRole] = "hasvectorattached";
         roleNames[BaseFilenameRole] = "basefilename";
+        roleNames[TriggerRole] = "dtrigger";
         return roleNames;
+    }
+
+    void DuplicatesReviewModel::onDuplicatesCouldHaveChanged(size_t originalIndex) {
+        LOG_DEBUG << originalIndex;
+        m_PendingUpdates.push_back(originalIndex);
     }
 }

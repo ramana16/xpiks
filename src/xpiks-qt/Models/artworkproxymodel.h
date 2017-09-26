@@ -70,7 +70,8 @@ namespace Models {
         void keywordsCountChanged();
         void completionsAvailable();
         void itemBecomeUnavailable();
-        void warningsCouldHaveChanged(int originalIndex);
+        void warningsCouldHaveChanged(size_t originalIndex);
+        void duplicatesCouldHaveChanged(size_t originalIndex);
         void spellingRehighlightRequired();
 
     protected:
@@ -83,7 +84,7 @@ namespace Models {
         void userDictClearedHandler();
         void afterSpellingErrorsFixedHandler();
         void spellCheckErrorsChangedHandler();
-        void itemUnavailableHandler(int index);
+        void itemUnavailableHandler(size_t index);
 
     public:
         Q_INVOKABLE void updateKeywords() { signalKeywordsCountChanged(); }
@@ -104,7 +105,7 @@ namespace Models {
         Q_INVOKABLE bool hasTitleWordSpellError(const QString &word);
         Q_INVOKABLE bool hasDescriptionWordSpellError(const QString &word);
         // --
-        Q_INVOKABLE void setSourceArtwork(QObject *artworkMetadata, int originalIndex=-1);
+        Q_INVOKABLE void setSourceArtwork(QObject *artworkMetadata);
         // --
         Q_INVOKABLE void resetModel();
         Q_INVOKABLE QObject *getBasicModel() {
@@ -153,7 +154,6 @@ namespace Models {
     private:
         ArtworkPropertiesMap m_PropertiesMap;
         Models::ArtworkMetadata *m_ArtworkMetadata;
-        int m_ArtworkOriginalIndex;
     };
 }
 

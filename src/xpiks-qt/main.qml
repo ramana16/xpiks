@@ -193,7 +193,7 @@ ApplicationWindow {
 
     function startOneItemEditing(metadata, index, originalIndex) {
         var keywordsModel = filteredArtItemsModel.getBasicModel(index)
-        artworkProxy.setSourceArtwork(metadata, originalIndex)
+        artworkProxy.setSourceArtwork(metadata)
         var wasCollapsed = applicationWindow.leftSideCollapsed
         applicationWindow.collapseLeftPane()
         mainStackView.push({

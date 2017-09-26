@@ -48,7 +48,7 @@ namespace Warnings {
         void warningsCountChanged();
 
     public slots:
-        void onWarningsCouldHaveChanged(int originalIndex);
+        void onWarningsCouldHaveChanged(size_t originalIndex);
         void onWarningsUpdateRequired();
 
     private slots:

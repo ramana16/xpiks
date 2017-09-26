@@ -16,6 +16,7 @@
 #include "../QMLExtensions/colorsmodel.h"
 #include "../Helpers/stringhelper.h"
 #include "../Common/defines.h"
+#include "../Common/basickeywordsmodel.h"
 
 namespace SpellCheck {
     DuplicatesHighlighter::DuplicatesHighlighter(QTextDocument *document,
@@ -23,7 +24,8 @@ namespace SpellCheck {
                                                  SpellCheckErrorsInfo *errorsInfo) :
         QSyntaxHighlighter(document),
         m_SpellCheckErrors(errorsInfo),
-        m_ColorsModel(colorsModel)
+        m_ColorsModel(colorsModel),
+        m_HighlighAll(true)
     {
         Q_ASSERT(colorsModel != nullptr);
     }
@@ -45,11 +47,21 @@ namespace SpellCheck {
                              [this](const QString &word) {
             return m_SpellCheckErrors != nullptr ?
                         this->m_SpellCheckErrors->hasDuplicates(word) :
-                        true;
+                        m_HighlighAll;
         },
         [this, &duplicatesFormat](int start, int length, const QString &) {
             this->setFormat(start, length, duplicatesFormat);
         });
+    }
+
+    void DuplicatesHighlighter::keywordsDuplicatesChanged() {
+        Common::BasicKeywordsModel *basicModel = qobject_cast<Common::BasicKeywordsModel *>(sender());
+        Q_ASSERT(basicModel != nullptr);
+        if (basicModel != nullptr) {
+            m_HighlighAll = basicModel->hasDuplicates();
+        }
+
+        rehighlight();
     }
 }
 

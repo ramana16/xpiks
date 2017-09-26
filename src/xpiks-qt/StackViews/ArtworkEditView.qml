@@ -54,7 +54,7 @@ Rectangle {
         var metadata = filteredArtItemsModel.getArtworkMetadata(itemIndex)
         var keywordsModel = filteredArtItemsModel.getBasicModel(itemIndex)
 
-        artworkProxy.setSourceArtwork(metadata, originalIndex)
+        artworkProxy.setSourceArtwork(metadata)
         artworkProxy.registerAsCurrentItem()
 
         artworkEditComponent.artworkIndex = itemIndex
