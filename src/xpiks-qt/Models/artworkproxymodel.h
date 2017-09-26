@@ -46,12 +46,14 @@ namespace Models {
         Q_PROPERTY(QString fileSize READ retrieveFileSize NOTIFY imagePathChanged)
         Q_PROPERTY(QString dateTaken READ getDateTaken NOTIFY imagePathChanged)
         Q_PROPERTY(bool isVideo READ getIsVideo NOTIFY imagePathChanged)
+        Q_PROPERTY(bool isValid READ getIsValid NOTIFY isValidChanged)
 
     public:
         explicit ArtworkProxyModel(QObject *parent = 0);
         virtual ~ArtworkProxyModel();
 
     public:
+        bool getIsValid() const { return m_ArtworkMetadata != nullptr; }
         bool getIsVideo() const;
         QString getThumbPath() const { return m_ArtworkMetadata->getThumbnailPath(); }
         const QString &getFilePath() const { return m_ArtworkMetadata->getFilepath(); }
@@ -73,6 +75,7 @@ namespace Models {
         void warningsCouldHaveChanged(size_t originalIndex);
         void duplicatesCouldHaveChanged(size_t originalIndex);
         void spellingRehighlightRequired();
+        void isValidChanged();
 
     protected:
         virtual void signalDescriptionChanged() override { emit descriptionChanged(); }
@@ -99,8 +102,6 @@ namespace Models {
         Q_INVOKABLE void setupDuplicatesModel();
         Q_INVOKABLE void initDescriptionHighlighting(QQuickTextDocument *document);
         Q_INVOKABLE void initTitleHighlighting(QQuickTextDocument *document);
-        Q_INVOKABLE void spellCheckDescription();
-        Q_INVOKABLE void spellCheckTitle();
         Q_INVOKABLE void plainTextEdit(const QString &rawKeywords, bool spaceIsSeparator=false);
         Q_INVOKABLE bool hasTitleWordSpellError(const QString &word);
         Q_INVOKABLE bool hasDescriptionWordSpellError(const QString &word);

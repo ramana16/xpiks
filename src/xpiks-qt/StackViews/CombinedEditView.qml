@@ -420,8 +420,6 @@ Rectangle {
                                     }
                                 }
 
-                                onActiveFocusChanged: combinedArtworks.spellCheckTitle()
-
                                 Component.onCompleted: {
                                     combinedArtworks.initTitleHighlighting(titleTextInput.textDocument)
                                 }
@@ -582,8 +580,6 @@ Rectangle {
                                 Component.onCompleted: {
                                     combinedArtworks.initDescriptionHighlighting(descriptionTextInput.textDocument)
                                 }
-
-                                onActiveFocusChanged: combinedArtworks.spellCheckDescription()
 
                                 onCursorRectangleChanged: descriptionFlick.ensureVisible(cursorRectangle)
 

@@ -965,7 +965,6 @@ ColumnLayout {
                                                     }
 
                                                     onActiveFocusChanged: {
-                                                        filteredArtItemsModel.spellCheckDescription(rowWrapper.delegateIndex)
                                                         if (activeFocus) {
                                                             wrappersScope.updateCurrentIndex()
                                                         }
@@ -1077,7 +1076,6 @@ ColumnLayout {
                                                     }
 
                                                     onActiveFocusChanged: {
-                                                        filteredArtItemsModel.spellCheckTitle(rowWrapper.delegateIndex)
                                                         if (activeFocus) {
                                                             wrappersScope.updateCurrentIndex()
                                                         }

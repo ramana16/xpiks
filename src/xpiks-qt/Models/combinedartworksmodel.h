@@ -89,24 +89,9 @@ namespace Models {
         virtual void acceptSuggestedKeywords(const QStringList &keywords);
 
     public:
-        virtual void setDescription(const QString &value) override {
-            if (doSetDescription(value)) {
-                signalDescriptionChanged();
-                setDescriptionModified(true);
-            }
-        }
-
-        virtual void setTitle(const QString &value) override {
-            if (doSetTitle(value)) {
-                signalTitleChanged();
-                setTitleModified(true);
-            }
-        }
-
-        virtual void setKeywords(const QStringList &keywords) override {
-            ArtworkProxyBase::setKeywords(keywords);
-            setKeywordsModified(true);
-        }
+        virtual void setDescription(const QString &value) override;
+        virtual void setTitle(const QString &value) override;
+        virtual void setKeywords(const QStringList &keywords) override;
 
         bool getChangeDescription() const { return Common::HasFlag(m_EditFlags, Common::CombinedEditFlags::EditDescription); }
         void setChangeDescription(bool value);
@@ -130,6 +115,7 @@ namespace Models {
         void appendKeywordsChanged();
         void artworkUnavailable(int index);
         void completionsAvailable();
+        void editingPaused();
 
     protected:
         virtual void signalDescriptionChanged() override { emit descriptionChanged(); }
@@ -164,8 +150,6 @@ namespace Models {
         Q_INVOKABLE void setupDuplicatesModel();
         Q_INVOKABLE void initDescriptionHighlighting(QQuickTextDocument *document);
         Q_INVOKABLE void initTitleHighlighting(QQuickTextDocument *document);
-        Q_INVOKABLE void spellCheckDescription();
-        Q_INVOKABLE void spellCheckTitle();
         Q_INVOKABLE void assignFromSelected();
         Q_INVOKABLE void plainTextEdit(const QString &rawKeywords, bool spaceIsSeparator=false);
 
@@ -187,6 +171,7 @@ namespace Models {
         void assignFromManyArtworks();
         void recombineArtworks(std::function<bool (const MetadataElement &)> pred);
         bool findNonEmptyData(std::function<bool (const MetadataElement &)> pred, int &index, ArtworkMetadata *&artworkMetadata);
+        void justEdited();
 
     public slots:
         void spellCheckErrorsChangedHandler();
@@ -195,6 +180,7 @@ namespace Models {
     public slots:
         void userDictUpdateHandler(const QStringList &keywords, bool overwritten);
         void userDictClearedHandler();
+        void onEditingPaused();
 
 #ifdef INTEGRATION_TESTS
     public:
@@ -207,10 +193,9 @@ namespace Models {
 
     protected:
         virtual qint64 getSpecialItemID() override;
-
-    protected:
         virtual bool doRemoveSelectedArtworks() override;
         virtual void doResetModel() override;
+        virtual void timerEvent(QTimerEvent *event) override;
 
     public:
         virtual bool removeUnavailableItems() override;
@@ -221,6 +206,8 @@ namespace Models {
         SpellCheck::SpellCheckItemInfo m_SpellCheckInfo;
         Common::CombinedEditFlags m_EditFlags;
         Common::flag_t m_ModifiedFlags;
+        int m_EditingRestartsCount;
+        int m_EditingPauseTimerId;
     };
 }
 

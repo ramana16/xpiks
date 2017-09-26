@@ -20,13 +20,18 @@
 #include "../Common/defines.h"
 #include "../QMLExtensions/colorsmodel.h"
 
+#define MAX_EDITING_PAUSE_RESTARTS 12
+
 namespace Models {
     CombinedArtworksModel::CombinedArtworksModel(QObject *parent):
         ArtworksViewModel(parent),
         ArtworkProxyBase(),
         m_CommonKeywordsModel(m_HoldPlaceholder, this),
         m_EditFlags(Common::CombinedEditFlags::None),
-        m_ModifiedFlags(0) {
+        m_ModifiedFlags(0),
+        m_EditingRestartsCount(0),
+        m_EditingPauseTimerId(-1)
+    {
         m_CommonKeywordsModel.setSpellCheckInfo(&m_SpellCheckInfo);
 
         QObject::connect(&m_CommonKeywordsModel, &Common::BasicMetadataModel::spellCheckErrorsChanged,
@@ -37,6 +42,9 @@ namespace Models {
 
         QObject::connect(&m_CommonKeywordsModel, &Common::BasicMetadataModel::afterSpellingErrorsFixed,
                          this, &CombinedArtworksModel::spellCheckErrorsFixedHandler);
+
+        QObject::connect(this, &CombinedArtworksModel::editingPaused,
+                         this, &CombinedArtworksModel::onEditingPaused);
     }
 
     void CombinedArtworksModel::setArtworks(std::vector<MetadataElement> &artworks) {
@@ -78,6 +86,28 @@ namespace Models {
         foreach(const QString &keyword, keywords) {
             this->appendKeyword(keyword);
         }
+    }
+
+    void CombinedArtworksModel::setDescription(const QString &value) {
+        if (doSetDescription(value)) {
+            signalDescriptionChanged();
+            setDescriptionModified(true);
+            justEdited();
+        }
+    }
+
+    void CombinedArtworksModel::setTitle(const QString &value) {
+        if (doSetTitle(value)) {
+            signalTitleChanged();
+            setTitleModified(true);
+            justEdited();
+        }
+    }
+
+    void CombinedArtworksModel::setKeywords(const QStringList &keywords) {
+        ArtworkProxyBase::setKeywords(keywords);
+        setKeywordsModified(true);
+        justEdited();
     }
 
     void CombinedArtworksModel::setChangeDescription(bool value) {
@@ -126,6 +156,7 @@ namespace Models {
     void CombinedArtworksModel::editKeyword(int index, const QString &replacement) {
         if (doEditKeyword(index, replacement)) {
             setKeywordsModified(true);
+            justEdited();
         }
     }
 
@@ -133,6 +164,7 @@ namespace Models {
         QString keyword;
         if (doRemoveKeywordAt(keywordIndex, keyword)) {
             setKeywordsModified(true);
+            justEdited();
         }
         return keyword;
     }
@@ -141,18 +173,21 @@ namespace Models {
         QString keyword;
         if (doRemoveLastKeyword(keyword)) {
             setKeywordsModified(true);
+            justEdited();
         }
     }
 
     void CombinedArtworksModel::appendKeyword(const QString &keyword) {
         if (doAppendKeyword(keyword)) {
             setKeywordsModified(true);
+            justEdited();
         }
     }
 
     void CombinedArtworksModel::pasteKeywords(const QStringList &keywords) {
         if (doAppendKeywords(keywords) > 0) {
             setKeywordsModified(true);
+            justEdited();
         }
     }
 
@@ -180,6 +215,7 @@ namespace Models {
     void CombinedArtworksModel::clearKeywords() {
         if (doClearKeywords()) {
             setKeywordsModified(true);
+            justEdited();
         }
     }
 
@@ -221,14 +257,6 @@ namespace Models {
         m_CommonKeywordsModel.notifyTitleSpellCheck();
     }
 
-    void CombinedArtworksModel::spellCheckDescription() {
-        doSpellCheckDescription();
-    }
-
-    void CombinedArtworksModel::spellCheckTitle() {
-        doSpellCheckTitle();
-    }
-
     void CombinedArtworksModel::assignFromSelected() {
         LOG_DEBUG << "#";
         recombineArtworks([](const MetadataElement &item) { return item.isSelected(); });
@@ -243,6 +271,7 @@ namespace Models {
     void CombinedArtworksModel::plainTextEdit(const QString &rawKeywords, bool spaceIsSeparator) {
         doPlainTextEdit(rawKeywords, spaceIsSeparator);
         setKeywordsModified(true);
+        justEdited();
     }
 
     bool CombinedArtworksModel::hasTitleWordSpellError(const QString &word) {
@@ -256,16 +285,19 @@ namespace Models {
     void CombinedArtworksModel::expandPreset(int keywordIndex, int presetIndex) {
         if (doExpandPreset(keywordIndex, presetIndex)) {
             setKeywordsModified(true);
+            justEdited();
         }
     }
 
     void CombinedArtworksModel::expandLastKeywordAsPreset() {
         doExpandLastKeywordAsPreset();
+        justEdited();
     }
 
     void CombinedArtworksModel::addPreset(int presetIndex) {
         if (doAddPreset(presetIndex)) {
             setKeywordsModified(true);
+            justEdited();
         }
     }
 
@@ -449,6 +481,22 @@ namespace Models {
         return found || foundOther;
     }
 
+    void CombinedArtworksModel::justEdited() {
+        if (m_EditingRestartsCount < MAX_EDITING_PAUSE_RESTARTS) {
+            if (m_EditingPauseTimerId != -1) {
+                this->killTimer(m_EditingPauseTimerId);
+                LOG_INTEGR_TESTS_OR_DEBUG << "killed timer" << m_EditingPauseTimerId;
+            }
+
+            m_EditingPauseTimerId = this->startTimer(1000, Qt::VeryCoarseTimer);
+            LOG_INTEGR_TESTS_OR_DEBUG << "started timer" << m_EditingPauseTimerId;
+            m_EditingRestartsCount++;
+        } else {
+            Q_ASSERT(m_EditingPauseTimerId != -1);
+            LOG_INFO << "Maximum backup delays occured, forcing backup";
+        }
+    }
+
     void CombinedArtworksModel::spellCheckErrorsChangedHandler() {
         emit descriptionChanged();
         emit titleChanged();
@@ -495,6 +543,20 @@ namespace Models {
         m_CommandManager->clearCurrentItem();
     }
 
+    void CombinedArtworksModel::timerEvent(QTimerEvent *event) {
+        LOG_DEBUG << "timer" << event->timerId();
+
+        if ((event != nullptr) && (event->timerId() == m_EditingPauseTimerId)) {
+            m_EditingRestartsCount = 0;
+            m_EditingPauseTimerId = -1;
+
+            emit editingPaused();
+        }
+
+        // one time event
+        this->killTimer(event->timerId());
+    }
+
     bool CombinedArtworksModel::removeUnavailableItems() {
         LOG_DEBUG << "#";
         bool anyRemoved = ArtworksViewModel::removeUnavailableItems();
@@ -520,5 +582,9 @@ namespace Models {
     void CombinedArtworksModel::userDictClearedHandler() {
         LOG_DEBUG << "#";
         doHandleUserDictCleared();
+    }
+
+    void CombinedArtworksModel::onEditingPaused() {
+        m_CommandManager->submitItemForSpellCheck(&m_CommonKeywordsModel);
     }
 }

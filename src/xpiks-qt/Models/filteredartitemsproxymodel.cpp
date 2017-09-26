@@ -283,48 +283,6 @@ namespace Models {
         }
     }
 
-    void FilteredArtItemsProxyModel::spellCheckDescription(int index) {
-        LOG_DEBUG << "index:" << index;
-        if (0 <= index && index < rowCount()) {
-            int originalIndex = getOriginalIndex(index);
-            ArtItemsModel *artItemsModel = getArtItemsModel();
-            ArtworkMetadata *metadata = artItemsModel->getArtwork(originalIndex);
-            if (metadata != NULL) {
-                auto *keywordsModel = metadata->getBasicModel();
-
-                if (!metadata->getDescription().trimmed().isEmpty()) {
-                    m_CommandManager->submitItemForSpellCheck(keywordsModel, Common::SpellCheckFlags::Description);
-                } else {
-                    LOG_INFO << "description is empty";
-                    keywordsModel->notifySpellCheckResults(Common::SpellCheckFlags::Description);
-                }
-
-                m_CommandManager->submitForWarningsCheck(metadata, Common::WarningsCheckFlags::Description);
-            }
-        }
-    }
-
-    void FilteredArtItemsProxyModel::spellCheckTitle(int index) {
-        LOG_DEBUG << "index:" << index;
-        if (0 <= index && index < rowCount()) {
-            int originalIndex = getOriginalIndex(index);
-            ArtItemsModel *artItemsModel = getArtItemsModel();
-            ArtworkMetadata *metadata = artItemsModel->getArtwork(originalIndex);
-            if (metadata != NULL) {
-                auto *keywordsModel = metadata->getBasicModel();
-
-                if (!metadata->getTitle().trimmed().isEmpty()) {
-                    m_CommandManager->submitItemForSpellCheck(keywordsModel, Common::SpellCheckFlags::Title);
-                } else {
-                    LOG_INFO << "title is empty";
-                    keywordsModel->notifySpellCheckResults(Common::SpellCheckFlags::Title);
-                }
-
-                m_CommandManager->submitForWarningsCheck(metadata, Common::WarningsCheckFlags::Title);
-            }
-        }
-    }
-
     void FilteredArtItemsProxyModel::toggleSorted() {
         LOG_INFO << "current sorted is" << m_SortingEnabled;
         forceUnselectAllItems();

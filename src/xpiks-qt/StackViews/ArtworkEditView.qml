@@ -502,6 +502,7 @@ Rectangle {
                     id: editTab
                     color: uiColors.selectedArtworkBackground
                     anchors.fill: parent
+                    enabled: artworkProxy.isValid
 
                     ColumnLayout {
                         id: fields
@@ -607,8 +608,6 @@ Rectangle {
                                     }
 
                                     onCursorRectangleChanged: titleFlick.ensureVisible(cursorRectangle)
-
-                                    onActiveFocusChanged: artworkProxy.spellCheckTitle()
 
                                     Keys.onPressed: {
                                         if(event.matches(StandardKey.Paste)) {
@@ -732,8 +731,6 @@ Rectangle {
                                     }
 
                                     onCursorRectangleChanged: descriptionFlick.ensureVisible(cursorRectangle)
-
-                                    onActiveFocusChanged: artworkProxy.spellCheckDescription()
 
                                     Keys.onPressed: {
                                         if(event.matches(StandardKey.Paste)) {
@@ -1029,6 +1026,7 @@ Rectangle {
 
                 Rectangle {
                     id: infoTab
+                    enabled: artworkProxy.isValid
                     visible: false
                     color: uiColors.selectedArtworkBackground
                     anchors.fill: parent

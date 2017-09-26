@@ -38,6 +38,7 @@ namespace Models {
     }
 
     void ArtworkProxyModel::setDescription(const QString &description)  {
+        Q_ASSERT(getIsValid());
         LOG_INFO << description;
 
         if (doSetDescription(description)) {
@@ -50,6 +51,7 @@ namespace Models {
     }
 
     void ArtworkProxyModel::setTitle(const QString &title) {
+        Q_ASSERT(getIsValid());
         LOG_INFO << title;
 
         if (doSetTitle(title)) {
@@ -62,6 +64,7 @@ namespace Models {
     }
 
     void ArtworkProxyModel::setKeywords(const QStringList &keywords) {
+        Q_ASSERT(getIsValid());
         ArtworkProxyBase::setKeywords(keywords);
 
         if (m_ArtworkMetadata->isInitialized()) {
@@ -177,14 +180,6 @@ namespace Models {
         basicModel->notifyTitleSpellCheck();
     }
 
-    void ArtworkProxyModel::spellCheckDescription() {
-        doSpellCheckDescription();
-    }
-
-    void ArtworkProxyModel::spellCheckTitle() {
-        doSpellCheckTitle();
-    }
-
     void ArtworkProxyModel::plainTextEdit(const QString &rawKeywords, bool spaceIsSeparator) {
         doPlainTextEdit(rawKeywords, spaceIsSeparator);
     }
@@ -238,6 +233,8 @@ namespace Models {
         emit imagePathChanged();
 
         m_PropertiesMap.updateProperties(artwork);
+
+        emit isValidChanged();
     }
 
     void ArtworkProxyModel::resetModel() {
@@ -248,6 +245,7 @@ namespace Models {
     }
 
     QSize ArtworkProxyModel::retrieveImageSize() const {
+        Q_ASSERT(getIsValid());
         ImageArtwork *image = dynamic_cast<ImageArtwork *>(m_ArtworkMetadata);
 
         if (image == NULL) {
@@ -268,6 +266,7 @@ namespace Models {
     }
 
     QString ArtworkProxyModel::retrieveFileSize() const {
+        Q_ASSERT(getIsValid());
         qint64 size = 0;
 
         if (m_ArtworkMetadata->isInitialized()) {
@@ -281,6 +280,7 @@ namespace Models {
     }
 
     QString ArtworkProxyModel::getDateTaken() const {
+        Q_ASSERT(getIsValid());
         ImageArtwork *image = dynamic_cast<ImageArtwork *>(m_ArtworkMetadata);
         if (image != NULL) {
             return image->getDateTaken();
@@ -290,6 +290,7 @@ namespace Models {
     }
 
     QString ArtworkProxyModel::getAttachedVectorPath() const {
+        Q_ASSERT(getIsValid());
         ImageArtwork *image = dynamic_cast<ImageArtwork *>(m_ArtworkMetadata);
         if (image != NULL) {
             return image->getAttachedVectorPath();
@@ -380,5 +381,6 @@ namespace Models {
         }
 
         m_ArtworkMetadata = nullptr;
+        emit isValidChanged();
     }
 }
