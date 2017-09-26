@@ -15,6 +15,7 @@
 #include "../../xpiks-qt/SpellCheck/spellsuggestionsitem.h"
 #include "../../xpiks-qt/Models/combinedartworksmodel.h"
 #include "../../xpiks-qt/Common/basickeywordsmodel.h"
+#include "testshelpers.h"
 
 QString SpellCheckCombinedModelTest::testName() {
     return QLatin1String("SpellCheckCombinedModelTest");
@@ -60,12 +61,9 @@ int SpellCheckCombinedModelTest::doTest() {
     combinedModel->setDescription(combinedModel->getDescription() + ' ' + wrongWord);
     combinedModel->appendKeyword("correct part " + wrongWord);
 
-    if (!waiter.wait(5)) {
-        VERIFY(false, "Timeout for waiting for spellcheck results");
-    }
-
-    // wait for finding suggestions
-    QThread::sleep(1);
+    sleepWaitUntil(5, [&basicModel]() {
+        return basicModel->hasDescriptionSpellError();
+    });
 
     VERIFY(basicModel->hasDescriptionSpellError(), "Description spell error not detected");
     VERIFY(!basicModel->hasTitleSpellError(), "Title spell error not detected");

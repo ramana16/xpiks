@@ -585,6 +585,7 @@ namespace Models {
     }
 
     void CombinedArtworksModel::onEditingPaused() {
+        LOG_INTEGR_TESTS_OR_DEBUG << "#";
         m_CommandManager->submitItemForSpellCheck(&m_CommonKeywordsModel);
     }
 }
