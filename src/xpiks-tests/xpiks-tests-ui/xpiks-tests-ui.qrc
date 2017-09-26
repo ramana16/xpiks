@@ -1,6 +1,7 @@
 <RCC>
     <qresource prefix="/">
         <file alias="Graphics/vector-icon.svg">../../xpiks-qt/Graphics/vector-icon.svg</file>
+        <file alias="Graphics/video-icon.svg">../../xpiks-qt/Graphics/video-icon.svg</file>
         <file alias="Graphics/video-icon-s.png">../../xpiks-qt/Graphics/video-icon-s.png</file>
     </qresource>
 </RCC>

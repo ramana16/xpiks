@@ -25,7 +25,8 @@ DISTFILES += \
     tst_EditableTags.qml \
     FakeColors.qml \
     ../../xpiks-qt/StackViews/CombinedEditView.qml \
-    tst_CombinedEditView.qml
+    tst_CombinedEditView.qml \
+    tst_ArtworkEditView.qml
 
 HEADERS += \
     ../../xpiks-qt/Helpers/clipboardhelper.h \
