@@ -867,6 +867,8 @@ namespace Common {
     }
 
     void BasicKeywordsModel::notifySpellCheckResults(Common::SpellCheckFlags flags) {
+        LOG_INTEGR_TESTS_OR_DEBUG << (int)flags;
+
         if (Common::HasFlag(flags, Common::SpellCheckFlags::Description) ||
             Common::HasFlag(flags, Common::SpellCheckFlags::Title)) {
             emit spellCheckResultsReady();

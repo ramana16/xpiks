@@ -64,17 +64,15 @@ namespace SpellCheck {
         Q_ASSERT(basicModel != nullptr);
         SpellCheck::SpellCheckItemInfo *spellCheckInfo = basicModel->getSpellCheckInfo();
 
-        if (spellCheckInfo->anyTitleDuplicates()) {
-            SpellCheck::DuplicatesHighlighter *highlighter = new SpellCheck::DuplicatesHighlighter(
-                        document->textDocument(),
-                        m_ColorsModel,
-                        spellCheckInfo->getTitleErrors());
+        SpellCheck::DuplicatesHighlighter *highlighter = new SpellCheck::DuplicatesHighlighter(
+                    document->textDocument(),
+                    m_ColorsModel,
+                    spellCheckInfo->getTitleErrors());
 
-            //QObject::connect(this, &DuplicatesReviewModel::rehighlightRequired,
-            //                 highlighter, &DuplicatesHighlighter::rehighlight);
+        //QObject::connect(this, &DuplicatesReviewModel::rehighlightRequired,
+        //                 highlighter, &DuplicatesHighlighter::rehighlight);
 
-            Q_UNUSED(highlighter);
-        }
+        Q_UNUSED(highlighter);
 #endif
     }
 
@@ -87,17 +85,15 @@ namespace SpellCheck {
         Q_ASSERT(basicModel != nullptr);
         SpellCheck::SpellCheckItemInfo *spellCheckInfo = basicModel->getSpellCheckInfo();
 
-        if (spellCheckInfo->anyDescriptionDuplicates()) {
-            SpellCheck::DuplicatesHighlighter *highlighter = new SpellCheck::DuplicatesHighlighter(
-                        document->textDocument(),
-                        m_ColorsModel,
-                        spellCheckInfo->getDescriptionErrors());
+        SpellCheck::DuplicatesHighlighter *highlighter = new SpellCheck::DuplicatesHighlighter(
+                    document->textDocument(),
+                    m_ColorsModel,
+                    spellCheckInfo->getDescriptionErrors());
 
-            //QObject::connect(this, &DuplicatesReviewModel::rehighlightRequired,
-            //                 highlighter, &DuplicatesHighlighter::rehighlight);
+        //QObject::connect(this, &DuplicatesReviewModel::rehighlightRequired,
+        //                 highlighter, &DuplicatesHighlighter::rehighlight);
 
-            Q_UNUSED(highlighter);
-        }
+        Q_UNUSED(highlighter);
 #endif
     }
 
@@ -109,17 +105,15 @@ namespace SpellCheck {
         auto *basicModel = item.m_BasicModel;
         Q_ASSERT(basicModel != nullptr);
 
-        if (basicModel->hasKeywordsDuplicates()) {
-            SpellCheck::DuplicatesHighlighter *highlighter = new SpellCheck::DuplicatesHighlighter(
-                        document->textDocument(),
-                        m_ColorsModel,
-                        nullptr); // highlight all words
+        SpellCheck::DuplicatesHighlighter *highlighter = new SpellCheck::DuplicatesHighlighter(
+                    document->textDocument(),
+                    m_ColorsModel,
+                    nullptr); // highlight all words
 
-            QObject::connect(basicModel, &Common::BasicMetadataModel::hasDuplicatesChanged,
-                             highlighter, &DuplicatesHighlighter::keywordsDuplicatesChanged);
+        QObject::connect(basicModel, &Common::BasicMetadataModel::hasDuplicatesChanged,
+                         highlighter, &DuplicatesHighlighter::keywordsDuplicatesChanged);
 
-            Q_UNUSED(highlighter);
-        }
+        Q_UNUSED(highlighter);
 #endif
     }
 

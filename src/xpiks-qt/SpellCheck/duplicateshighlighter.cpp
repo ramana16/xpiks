@@ -58,7 +58,7 @@ namespace SpellCheck {
         Common::BasicKeywordsModel *basicModel = qobject_cast<Common::BasicKeywordsModel *>(sender());
         Q_ASSERT(basicModel != nullptr);
         if (basicModel != nullptr) {
-            m_HighlighAll = basicModel->hasDuplicates();
+            m_HighlighAll = basicModel->hasKeywordsDuplicates();
         }
 
         rehighlight();
