@@ -64,6 +64,7 @@ Item {
         property string title
         property string description
         property int keywordsCount: 0
+        property bool isValid: true
 
         function getPropertiesMap() { return {} }
         function initTitleHighlighting() {}
