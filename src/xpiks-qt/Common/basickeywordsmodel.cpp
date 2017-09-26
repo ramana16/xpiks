@@ -128,7 +128,7 @@ namespace Common {
 
         m_KeywordsLock.lockForWrite();
         {
-            if ((0 <= index) && (index < m_KeywordsList.size())) {
+            if (index < m_KeywordsList.size()) {
                 beginRemoveRows(QModelIndex(), (int)index, (int)index);
                 {
                     takeKeywordAtUnsafe(index, removedKeyword, wasCorrect);
@@ -198,7 +198,7 @@ namespace Common {
 
         m_KeywordsLock.lockForWrite();
         {
-            if ((0 <= index) && (index < m_KeywordsList.size())) {
+            if (index < m_KeywordsList.size()) {
                 result = editKeywordUnsafe(index, replacement);
             } else {
                 LOG_WARNING << "Failed to edit keyword with index" << index;
@@ -238,7 +238,7 @@ namespace Common {
         QWriteLocker writeLocker(&m_KeywordsLock);
         Q_UNUSED(writeLocker);
 
-        if ((0 <= keywordIndex) && (keywordIndex < m_KeywordsList.size())) {
+        if (keywordIndex < m_KeywordsList.size()) {
             expandPresetUnsafe(keywordIndex, presetList);
             result = true;
         }
@@ -593,12 +593,12 @@ namespace Common {
         return result;
     }
 
-    QString BasicKeywordsModel::retrieveKeyword(int wordIndex) {
+    QString BasicKeywordsModel::retrieveKeyword(size_t wordIndex) {
         QReadLocker readLocker(&m_KeywordsLock);
         Q_UNUSED(readLocker);
 
         QString keyword;
-        if (0 <= wordIndex && wordIndex < m_KeywordsList.size()) {
+        if (wordIndex < m_KeywordsList.size()) {
             keyword = m_KeywordsList.at(wordIndex).m_Value;
         }
 
@@ -675,7 +675,7 @@ namespace Common {
         m_KeywordsLock.lockForWrite();
         {
             const size_t size = m_KeywordsList.size();
-            if (0 <= index && index < size) {
+            if (index < size) {
                 if (replaceKeywordUnsafe(index, existing, replacement)) {
                     m_KeywordsList[index].m_IsCorrect = true;
                     result = Common::KeywordReplaceResult::Succeeded;
@@ -921,7 +921,7 @@ namespace Common {
         for (size_t i = 0; i < itemsSize; ++i) {
             auto &item = items.at(i);
             size_t index = item->m_Index;
-            if (0 <= index && index < keywordsSize) {
+            if (index < keywordsSize) {
                 m_KeywordsList[index].resetSpelling();
             }
 
@@ -943,7 +943,7 @@ namespace Common {
             // looks like this is a stupid assert to trace impossible race conditions
             Q_ASSERT(keywordsSize == m_KeywordsList.size());
 
-            if (0 <= index && index < keywordsSize) {
+            if (index < keywordsSize) {
                 auto &keyword = m_KeywordsList[index];
                 if (keyword.m_Value.contains(item->m_Word)) {
                     // if keyword contains several words, there would be

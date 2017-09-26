@@ -373,7 +373,8 @@ namespace Models {
 
     void ArtworkProxyModel::releaseCurrentArtwork() {
         LOG_DEBUG << "#";
-        if (m_ArtworkMetadata != nullptr) {m_ArtworkMetadata->setIsLockedForEditing(false);
+        if (m_ArtworkMetadata != nullptr) {
+            m_ArtworkMetadata->setIsLockedForEditing(false);
             m_ArtworkMetadata->release();
             LOG_DEBUG << "Metadata released";
         }

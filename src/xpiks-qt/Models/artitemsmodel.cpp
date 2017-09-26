@@ -1065,7 +1065,7 @@ namespace Models {
     ArtworkMetadata *ArtItemsModel::getArtwork(size_t index) const {
         ArtworkMetadata *result = NULL;
 
-        if (0 <= index && index < m_ArtworkList.size()) {
+        if (index < m_ArtworkList.size()) {
             result = accessArtwork(index);
         }
 
