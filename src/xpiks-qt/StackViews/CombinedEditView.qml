@@ -925,7 +925,7 @@ Rectangle {
                                 verticalAlignment: Text.AlignVCenter
                             }
 
-                            StyledText {
+                            StyledLink {
                                 text: i18.n + qsTr("Copy")
                                 enabled: combinedArtworks.keywordsCount > 0
                                 onClicked: clipboard.setText(combinedArtworks.getKeywordsString())
