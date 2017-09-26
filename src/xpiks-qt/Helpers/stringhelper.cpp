@@ -388,6 +388,8 @@ namespace Helpers {
     }
 
     bool areSemanticDuplicates(const QString &s1, const QString &s2) {
+        if (QString::compare(s1, s2, Qt::CaseInsensitive) == 0) { return true; }
+
         const int length1 = s1.length();
         const int length2 = s2.length();
 
