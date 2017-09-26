@@ -73,6 +73,9 @@ namespace SpellCheck {
         //                 highlighter, &DuplicatesHighlighter::rehighlight);
 
         Q_UNUSED(highlighter);
+#else
+        Q_UNUSED(index);
+        Q_UNUSED(document);
 #endif
     }
 
@@ -94,6 +97,9 @@ namespace SpellCheck {
         //                 highlighter, &DuplicatesHighlighter::rehighlight);
 
         Q_UNUSED(highlighter);
+#else
+        Q_UNUSED(index);
+        Q_UNUSED(document);
 #endif
     }
 
@@ -114,6 +120,9 @@ namespace SpellCheck {
                          highlighter, &DuplicatesHighlighter::keywordsDuplicatesChanged);
 
         Q_UNUSED(highlighter);
+#else
+        Q_UNUSED(index);
+        Q_UNUSED(document);
 #endif
     }
 

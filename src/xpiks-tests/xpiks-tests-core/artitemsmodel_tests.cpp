@@ -287,7 +287,7 @@ void ArtItemsModelTests::proxyModelExitEmitsModifiedTest() {
 
     Models::ArtworkProxyModel proxyModel;
     commandManagerMock.InjectDependency(&proxyModel);
-    proxyModel.setSourceArtwork((QObject*)artItemsModelMock.getMockArtwork(0), 0);
+    proxyModel.setSourceArtwork((QObject*)artItemsModelMock.getMockArtwork(0));
     proxyModel.setDescription("other description");
 
     artItemsModelMock.setUpdatesBlocked(false);

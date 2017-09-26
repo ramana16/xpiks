@@ -60,9 +60,6 @@ int SpellCheckCombinedModelTest::doTest() {
     combinedModel->setDescription(combinedModel->getDescription() + ' ' + wrongWord);
     combinedModel->appendKeyword("correct part " + wrongWord);
 
-    combinedModel->spellCheckDescription();
-    combinedModel->spellCheckTitle();
-
     if (!waiter.wait(5)) {
         VERIFY(false, "Timeout for waiting for spellcheck results");
     }
