@@ -70,8 +70,11 @@ int DuplicateSearchTest::doTest() {
     VERIFY(metadata->hasDuplicates(0), "Duplicates not detected singular");
     VERIFY(metadata->hasDuplicates(1), "Duplicate not detected for mouse after append");
     VERIFY(metadata->hasDuplicates(2), "Duplicate not detected for mice after append");
-    VERIFY(metadata->hasDuplicates(3), "Duplicates not detected for plural");
-    VERIFY(!metadata->hasDuplicates(4), "Duplicates detected for 2 chars word");
+    // cat
+    VERIFY(metadata->hasDuplicates(4), "Duplicates not detected for plural");
+    // on
+    VERIFY(!metadata->hasDuplicates(3), "Duplicates detected for 2 chars word");
+    VERIFY(!metadata->hasDuplicates(5), "Duplicates detected for 2 chars word");
 
     return 0;
 }
