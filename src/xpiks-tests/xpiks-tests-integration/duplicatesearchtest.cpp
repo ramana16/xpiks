@@ -42,7 +42,7 @@ int DuplicateSearchTest::doTest() {
 
     Models::ArtworkMetadata *metadata = artItemsModel->getArtwork(0);
     metadata->clearModel();
-    artItemsModel->pasteKeywords(0, QStringList() << "cat" << "Mouse" << "mice");
+    artItemsModel->pasteKeywords(0, QStringList() << "cat" << "Mouse" << "mice" << "on");
 
     Models::FilteredArtItemsProxyModel *filteredModel = m_CommandManager->getFilteredArtItemsModel();
     SpellCheck::SpellCheckerService *spellCheckService = m_CommandManager->getSpellCheckerService();
@@ -61,6 +61,7 @@ int DuplicateSearchTest::doTest() {
     VERIFY(metadata->hasDuplicates(2), "Duplicate not detected for mice");
 
     artItemsModel->appendKeyword(0, "cats");
+    artItemsModel->appendKeyword(0, "on");
 
     sleepWaitUntil(5, [&metadata]() {
         return metadata->hasDuplicates(0);
@@ -70,6 +71,7 @@ int DuplicateSearchTest::doTest() {
     VERIFY(metadata->hasDuplicates(1), "Duplicate not detected for mouse after append");
     VERIFY(metadata->hasDuplicates(2), "Duplicate not detected for mice after append");
     VERIFY(metadata->hasDuplicates(3), "Duplicates not detected for plural");
+    VERIFY(!metadata->hasDuplicates(4), "Duplicates detected for 2 chars word");
 
     return 0;
 }
