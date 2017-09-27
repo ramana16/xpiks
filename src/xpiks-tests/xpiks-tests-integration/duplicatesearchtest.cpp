@@ -60,8 +60,8 @@ int DuplicateSearchTest::doTest() {
     VERIFY(metadata->hasDuplicates(1), "Duplicate not detected for mouse");
     VERIFY(metadata->hasDuplicates(2), "Duplicate not detected for mice");
 
+    metadata->setDescription("on");
     artItemsModel->appendKeyword(0, "cats");
-    artItemsModel->appendKeyword(0, "on");
 
     sleepWaitUntil(5, [&metadata]() {
         return metadata->hasDuplicates(0);
@@ -74,7 +74,6 @@ int DuplicateSearchTest::doTest() {
     VERIFY(metadata->hasDuplicates(4), "Duplicates not detected for plural");
     // on
     VERIFY(!metadata->hasDuplicates(3), "Duplicates detected for 2 chars word");
-    VERIFY(!metadata->hasDuplicates(5), "Duplicates detected for 2 chars word");
 
     return 0;
 }
