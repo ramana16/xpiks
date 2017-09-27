@@ -27,6 +27,8 @@
 #define EN_HUNSPELL_DIC "en_US.dic"
 #define EN_HUNSPELL_AFF "en_US.aff"
 
+#define MINIMUM_LENGTH_FOR_STEMMING 3
+
 namespace SpellCheck {
     SpellCheckWorker::SpellCheckWorker(Helpers::AsyncCoordinator *initCoordinator, Models::SettingsModel *settingsModel, QObject *parent):
         QObject(parent),
@@ -321,8 +323,10 @@ namespace SpellCheck {
     }
 
     void SpellCheckWorker::stemWord(const std::shared_ptr<SpellCheckQueryItem> &queryItem) {
-        const QString &word = queryItem->m_Word;
-        queryItem->m_Stem = getWordStem(word);
+        QString word = queryItem->m_Word;
+        if (word.length() >= MINIMUM_LENGTH_FOR_STEMMING) {
+            queryItem->m_Stem = getWordStem(word.toLower());
+        }
     }
 
     bool SpellCheckWorker::isHunspellSpellingCorrect(const QString &word) const {

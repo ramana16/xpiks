@@ -46,7 +46,7 @@ namespace SpellCheck {
         Helpers::foreachWord(text,
                              [this](const QString &word) {
             return m_SpellCheckErrors != nullptr ?
-                        this->m_SpellCheckErrors->hasDuplicates(word) :
+                        this->m_SpellCheckErrors->hasDuplicates(word.toLower()) :
                         m_HighlighAll;
         },
         [this, &duplicatesFormat](int start, int length, const QString &) {

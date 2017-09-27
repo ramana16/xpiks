@@ -42,7 +42,7 @@ int DuplicateSearchTest::doTest() {
 
     Models::ArtworkMetadata *metadata = artItemsModel->getArtwork(0);
     metadata->clearModel();
-    artItemsModel->pasteKeywords(0, QStringList() << "cat" << "mouse" << "mice");
+    artItemsModel->pasteKeywords(0, QStringList() << "cat" << "Mouse" << "mice");
 
     Models::FilteredArtItemsProxyModel *filteredModel = m_CommandManager->getFilteredArtItemsModel();
     SpellCheck::SpellCheckerService *spellCheckService = m_CommandManager->getSpellCheckerService();
