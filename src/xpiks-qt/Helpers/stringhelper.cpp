@@ -396,7 +396,7 @@ namespace Helpers {
         const int diff = abs(length1 - length2);
         if (diff > SYNONYMS_DISTANCE) { return false; }
 
-        const auto distance = Helpers::levensteinDistance(s1, s2);
+        const auto distance = Helpers::levensteinDistance(s1.toLower(), s2.toLower());
         return distance <= SYNONYMS_DISTANCE;
     }
 }
