@@ -317,6 +317,10 @@ namespace SpellCheck {
             }
 
             result = QString::fromStdString(stems[minIndex]);
+        } else {
+            // this may help to find at least exact duplicates
+            // for words unknown to Hunspell
+            result = word.toLower();
         }
 
         return result;
