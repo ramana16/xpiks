@@ -20,8 +20,8 @@ namespace Plugins {
         Q_ASSERT(realUIProvider != nullptr);
     }
 
-    void UIProviderSafe::openWindow(const QUrl &rcPath, const QHash<QString, QObject *> &contextModels) const {
-        m_RealUIProvider->openWindow(rcPath, contextModels);
+    void UIProviderSafe::openDialog(const QUrl &rcPath, const QHash<QString, QObject *> &contextModels) const {
+        m_RealUIProvider->openDialog(rcPath, contextModels);
     }
 
     int UIProviderSafe::addTab(const QString &tabIconUrl, const QString &tabComponentUrl, QObject *tabModel) const {

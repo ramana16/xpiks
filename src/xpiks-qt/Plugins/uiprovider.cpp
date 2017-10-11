@@ -31,7 +31,7 @@ namespace Plugins {
     UIProvider::~UIProvider() {
     }
 
-    void UIProvider::openWindow(const QUrl &rcPath, const QHash<QString, QObject *> &contextModels) const {
+    void UIProvider::openDialog(const QUrl &rcPath, const QHash<QString, QObject *> &contextModels) const {
         QQmlComponent component(m_QmlEngine);
 
         QObject::connect(&component, &QQmlComponent::statusChanged,
@@ -58,19 +58,21 @@ namespace Plugins {
         QObject *object = component.create(context);
 
         if (object != NULL) {
-            QObject::connect(object, &QObject::destroyed,
-                             this, &UIProvider::windowDestroyed);
+            QObject::connect(object, &QObject::destroyed, this, &UIProvider::componentDestroyed);
 
-            QQuickWindow *window = qobject_cast<QQuickWindow*>(object);
-            if (window != NULL) {
-                QObject::connect(window, SIGNAL(closing(QQuickCloseEvent*)),
-                                 this, SLOT(windowClosing(QQuickCloseEvent*)));
-            }
-
-            //QQmlEngine::setObjectOwnership(object, QQmlEngine::CppOwnership);
-
-            object->setParent(m_Root);
+            //object->setParent(m_Root);
             context->setParent(object);
+
+            QQmlEngine::setObjectOwnership(object, QQmlEngine::JavaScriptOwnership);
+            QQmlProperty::write(object, "parent", QVariant::fromValue<QObject*>(m_Root));
+
+            QVariant returnedValue;
+            bool result = QMetaObject::invokeMethod(object, "onAfterCreated", Q_RETURN_ARG(QVariant, returnedValue));
+            if (!result) {
+                LOG_WARNING << "Failed to call onAfterCreated() for" << rcPath;
+            }
+        } else {
+            LOG_WARNING << "Failed to create object";
         }
     }
 
@@ -84,9 +86,9 @@ namespace Plugins {
         }
     }
 
-    void UIProvider::windowDestroyed(QObject *object) {
+    void UIProvider::componentDestroyed(QObject *object) {
         Q_UNUSED(object);
-        LOG_DEBUG << "Plugin window destroyed";
+        LOG_DEBUG << "Component destroyed";
         m_QmlEngine->collectGarbage();
     }
 
@@ -94,11 +96,5 @@ namespace Plugins {
         Q_UNUSED(object);
         LOG_DEBUG << "#";
         m_QmlEngine->collectGarbage();
-    }
-
-    void UIProvider::windowClosing(QQuickCloseEvent *closeEvent) {
-        Q_UNUSED(closeEvent);
-        LOG_DEBUG << "#";
-        sender()->deleteLater();
     }
 }

@@ -39,13 +39,12 @@ namespace Plugins {
 
         // IUIProvider interface
     public:
-        void openWindow(const QUrl &rcPath, const QHash<QString, QObject*> &contextModels = QHash<QString, QObject*>()) const;
+        void openDialog(const QUrl &rcPath, const QHash<QString, QObject*> &contextModels = QHash<QString, QObject*>()) const;
 
     private slots:
         void viewStatusChanged(QQmlComponent::Status status);
-        void windowDestroyed(QObject *object);
+        void componentDestroyed(QObject *object);
         void contextDestroyed(QObject *object);
-        void windowClosing(QQuickCloseEvent* closeEvent);
 
     private:
         QQmlEngine *m_QmlEngine;
