@@ -3,7 +3,7 @@
 	url = https://github.com/kokke/tiny-AES128-C.git
 [submodule "src/cpp-libface"]
 	path = vendors/cpp-libface
-	url = https://github.com/Ribtoks/cpp-libface.git
+	url = https://github.com/ribtoks/cpp-libface.git
 [submodule "src/ssdll"]
 	path = vendors/ssdll
-	url = https://github.com/Ribtoks/ssdll.git
+	url = https://github.com/ribtoks/ssdll.git
