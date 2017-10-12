@@ -77,9 +77,6 @@ namespace Models {
 
         m_TabsModel.addPluginTab(id, tabIconComponent, tabComponent);
 
-        Q_ASSERT(!m_TabsIDsToIndex.contains(id));
-        m_TabsIDsToIndex.insert(id, index);
-
         if (tabModel != nullptr) {
             Q_ASSERT(!m_TabIDsToModel.contains(id));
             m_TabIDsToModel.insert(id, tabModel);
@@ -110,23 +107,22 @@ namespace Models {
                 break;
             }
 
-            if (!m_TabsIDsToIndex.contains(tabID)) {
-                break;
-            }
-
-            int index = m_TabsIDsToIndex.value(tabID);
-            if ((index < 0) || (index >= m_TabsModel.rowCount())) {
+            int index = m_TabsModel.findPluginTabIndexByID(tabID);
+            if (index == -1) {
                 break;
             }
 
             tabsSet.remove(tabID);
             m_TabsModel.removePluginTab(index);
             m_TabIDsToModel.remove(tabID);
-            m_TabsIDsToIndex.remove(tabID);
 
             LOG_INFO << "Plugin's tab" << tabID << "removed";
             success = true;
         } while(false);
+
+        if (!success) {
+            LOG_WARNING << "Failed to remove plugin tab" << tabID;
+        }
 
         return success;
     }

@@ -72,7 +72,6 @@ namespace Models {
         QMLExtensions::InactiveTabsModel m_InactiveTabs;
         std::shared_ptr<QuickBuffer::ICurrentEditable> m_CurrentEditable;
         QHash<int, QSet<int> > m_PluginIDToTabIDs;
-        QHash<int, int> m_TabsIDsToIndex;
         QHash<int, QObject*> m_TabIDsToModel;
         volatile int m_TabID;
     };

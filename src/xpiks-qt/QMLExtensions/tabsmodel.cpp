@@ -94,6 +94,22 @@ namespace QMLExtensions {
         return success;
     }
 
+    int TabsModel::findPluginTabIndexByID(int tabID) {
+        int index = -1;
+        const int size = m_TabsList.size();
+        for (int i = 0; i < size; i++) {
+            auto &tab = m_TabsList[i];
+            if (tab.m_IsSystemTab) { continue; }
+
+            if (tab.m_ExternalTabID == tabID) {
+                index = i;
+                break;
+            }
+        }
+
+        return index;
+    }
+
     bool TabsModel::isTabActive(int index) {
         bool found = m_ActiveTabs.contains(index);
         return found;

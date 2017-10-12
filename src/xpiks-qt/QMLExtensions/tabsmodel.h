@@ -73,6 +73,7 @@ namespace QMLExtensions {
         void addSystemTab(const QString &iconPath, const QString &componentPath);
         void addPluginTab(int tabID, const QString &iconPath, const QString &componentPath);
         bool removePluginTab(int index);
+        int findPluginTabIndexByID(int tabID);
         bool isTabActive(int index);
         void activateTab(int index);
         void escalateTab(int index);

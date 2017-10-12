@@ -1144,6 +1144,14 @@ void Commands::CommandManager::beforeDestructionCallback() const {
         return;
     }
 
+#ifndef CORE_TESTS
+    #ifdef WITH_PLUGINS
+
+    m_PluginManager->unloadPlugins();
+
+    #endif
+#endif
+
     m_ArtworksRepository->stopListeningToUnavailableFiles();
 
     m_ArtItemsModel->disconnect();
@@ -1161,9 +1169,6 @@ void Commands::CommandManager::beforeDestructionCallback() const {
     m_AutoCompleteService->stopService();
     m_TranslationService->stopService();
 
-#ifdef WITH_PLUGINS
-    m_PluginManager->unloadPlugins();
-#endif
 
     m_SettingsModel->syncronizeSettings();
 
