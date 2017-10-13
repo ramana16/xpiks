@@ -52,6 +52,7 @@ namespace QMLExtensions {
                 result = image.scaled(requestedSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
             } else {
                 LOG_WARNING << "Size is invalid:" << requestedSize.width() << "x" << requestedSize.height();
+                m_ImageCachingService->cacheImage(id);
                 result = image;
             }
 
