@@ -223,7 +223,7 @@ int main(int argc, char *argv[]) {
 
 #ifdef WITH_LOGS
     QString appDataPath = XPIKS_USERDATA_PATH;
-    const QString &logFileDir = QDir::cleanPath(appDataPath + QDir::separator() + "logs");
+    const QString &logFileDir = QDir::cleanPath(appDataPath + QDir::separator() + Constants::LOGS_DIR);
     if (!logFileDir.isEmpty()) {
         QDir dir(logFileDir);
         if (!dir.exists()) {
@@ -239,7 +239,6 @@ int main(int argc, char *argv[]) {
         Helpers::Logger &logger = Helpers::Logger::getInstance();
         logger.setLogFilePath(logFilePath);
     }
-
 #endif
 
     QMLExtensions::ColorsModel colorsModel;

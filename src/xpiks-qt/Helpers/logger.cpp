@@ -105,7 +105,9 @@ namespace Helpers {
                 endl(ts);
             }
         }
-#else
+#endif
+
+#ifdef WITH_STDOUT_LOGS
         int size = logItems->size();
         for (int i = 0; i < size; ++i) {
             const QString &line = logItems->at(i);
@@ -114,6 +116,7 @@ namespace Helpers {
 
         std::cout.flush();
 #endif
+
         logItems->clear();
     }
 }

@@ -520,6 +520,8 @@ BRANCH_NAME=$$system(git rev-parse --abbrev-ref HEAD)
 CONFIG(debug, debug|release)  {
     message("Building debug")
     DEFINES += WITH_PLUGINS
+    DEFINES += WITH_LOGS
+    DEFINES += WITH_STDOUT_LOGS
     #QMAKE_CXXFLAGS += -fsanitize=thread
 } else {
     DEFINES += WITH_LOGS

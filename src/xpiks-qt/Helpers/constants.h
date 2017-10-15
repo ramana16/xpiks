@@ -85,6 +85,7 @@ namespace Constants {
     const char IMAGECACHE_DB_NAME[] = "imgcache.db";
     const char VIDEOCACHE_DB_NAME[] = "videocache.db";
     const char METADATA_CACHE_DB_NAME[] = "metadatacache.db";
+    const char LOGS_DIR[] = "logs";
 #else
     // common for DEBUG and INTEGRATION_TESTS
     const char ONE_UPLOAD_SECONDS_TIMEMOUT[] = "DEBUG_ONE_UPLOAD_SECONDS_TIMEMOUT";
@@ -127,6 +128,7 @@ namespace Constants {
     const char IMAGECACHE_DB_NAME[] = "tests_imgcache.db";
     const char VIDEOCACHE_DB_NAME[] = "tests_videocache.db";
     const char METADATA_CACHE_DB_NAME[] = "tests_metadatacache.db";
+    const char LOGS_DIR[] = "tests_logs";
 #else
     const char UPLOAD_HOSTS[] = "DEBUG_UPLOAD_HOSTS_HASH";
     const char USE_MASTER_PASSWORD[] = "DEBUG_USE_MASTER_PASSWORD";
@@ -141,6 +143,7 @@ namespace Constants {
     const char IMAGECACHE_DB_NAME[] = "debug_imgcache.db";
     const char VIDEOCACHE_DB_NAME[] = "debug_videocache.db";
     const char METADATA_CACHE_DB_NAME[] = "debug_metadatacache.db";
+    const char LOGS_DIR[] = "debug_logs";
 #endif
 #endif // QT_NO_DEBUG
 
