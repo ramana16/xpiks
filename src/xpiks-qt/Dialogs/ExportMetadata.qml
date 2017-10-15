@@ -157,7 +157,7 @@ Item {
 
                     StyledText {
                         anchors.right: parent.right
-                        text: i18.n + qsTr("%1 modified image(s) selected").arg(filteredArtItemsModel.getModifiedSelectedCount(overwriteAll))
+                        text: i18.n + qsTr("%1 modified artwork(s) selected").arg(filteredArtItemsModel.getModifiedSelectedCount(overwriteAll))
                         color: uiColors.inputForegroundColor
                     }
                 }
@@ -172,8 +172,8 @@ Item {
 
                 StyledCheckbox {
                     id: useBackupsCheckbox
-                    text: i18.n + qsTr("Backup each image")
-                    checked: false
+                    text: i18.n + qsTr("Backup each file")
+                    checked: true
                     enabled: settingsModel.useExifTool && !metadataExportComponent.isInProgress
                     visible: settingsModel.useExifTool
                 }
