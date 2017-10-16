@@ -138,7 +138,7 @@ namespace Models {
     int ArtworkProxyBase::doAppendKeywords(const QStringList &keywords) {
         LOG_INFO << keywords.length() << "keyword(s)" << "|" << keywords;
         auto *metadataOperator = getMetadataOperator();
-        int appendedCount = metadataOperator->appendKeywords(keywords);
+        const size_t appendedCount = metadataOperator->appendKeywords(keywords);
         LOG_INFO << "Appended" << appendedCount << "keywords";
 
         if (appendedCount > 0) {

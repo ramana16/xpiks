@@ -214,7 +214,9 @@ SOURCES += main.cpp \
     ../../xpiks-qt/MetadataIO/csvexportplansmodel.cpp \
     ../../xpiks-qt/MetadataIO/csvexportproperties.cpp \
     ../../xpiks-qt/MetadataIO/csvexportworker.cpp \
-    csvexporttest.cpp
+    csvexporttest.cpp \
+    exiv2iohelpers.cpp \
+    unicodeiotest.cpp
 
 RESOURCES +=
 
@@ -463,7 +465,9 @@ HEADERS += \
     ../../xpiks-qt/MetadataIO/csvexportproperties.h \
     ../../xpiks-qt/MetadataIO/csvexportworker.h \
     csvexporttest.h \
-    ../../../vendors/csv/csv.h
+    ../../../vendors/csv/csv.h \
+    exiv2iohelpers.h \
+    unicodeiotest.h
 
 INCLUDEPATH += ../../../vendors/tiny-aes
 INCLUDEPATH += ../../../vendors/cpp-libface
@@ -498,6 +502,13 @@ win* {
 macx {
     INCLUDEPATH += "../../../vendors/quazip"
     INCLUDEPATH += "../../../vendors/libcurl/include"
+    INCLUDEPATH += "../../../vendors/exiv2-0.25/include"
+
+    LIBS += -liconv
+    LIBS += -lexpat
+
+    LIBS += -lxmpsdk
+    LIBS += -lexiv2
 }
 
 win32 {
@@ -506,9 +517,13 @@ win32 {
     INCLUDEPATH += "../../../vendors/zlib-1.2.11"
     INCLUDEPATH += "../../../vendors/quazip"
     INCLUDEPATH += "../../../vendors/libcurl/include"
+    INCLUDEPATH += "../../../vendors/exiv2-0.25/include"
 
     LIBS -= -lcurl
     LIBS += -lmman
+
+    LIBS += -llibexpat
+    LIBS += -llibexiv2
 
     CONFIG(debug, debug|release) {
         EXE_DIR = debug
@@ -533,6 +548,8 @@ win32 {
 }
 
 linux-g++-64 {
+    LIBS += -lexiv2
+
     message("for Linux")
     target.path=/usr/bin/
     QML_IMPORT_PATH += /usr/lib/x86_64-linux-gnu/qt5/imports/
@@ -552,10 +569,13 @@ linux-g++-64 {
 travis-ci {
     message("for Travis CI")
     INCLUDEPATH += "../../../vendors/quazip"
+
     LIBS += -L"$$PWD/../../../libs"
     LIBS -= -lz
     LIBS += /usr/lib/x86_64-linux-gnu/libz.so
     LIBS += -ldl
+    LIBS += -lexiv2
+
     DEFINES += TRAVIS_CI
     DEFINES -= WITH_LOGS
 

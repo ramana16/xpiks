@@ -38,6 +38,7 @@ install:
   - sudo apt-get install qt56base qt56quickcontrols qt56svg qt56declarative qt56graphicaleffects libcurl4-openssl-dev hunspell-en-us zlib1g-dev libimage-exiftool-perl
   - sudo apt-get install libavcodec-dev libavdevice-dev libavformat-dev libavfilter-dev libavutil-dev libswscale-dev libdb-dev
   - sudo apt-get install -y gdb
+  - sudo apt-get install -y libexiv2-dev expat
   - sudo unlink /usr/bin/g++ && sudo ln -s /usr/bin/g++-5 /usr/bin/g++
   - if [ "$CXX" = "g++" ]; then export CXX="g++-5" CC="gcc-5"; fi
 

@@ -63,6 +63,8 @@
 #include "../../xpiks-qt/SpellCheck/duplicatesreviewmodel.h"
 #include "../../xpiks-qt/MetadataIO/csvexportmodel.h"
 
+#include "exiv2iohelpers.h"
+
 #ifdef Q_OS_WIN
 #include "windowscrashhandler.h"
 #endif
@@ -105,6 +107,7 @@
 #include "duplicatesearchtest.h"
 #include "autocompletepresetstest.h"
 #include "csvexporttest.h"
+#include "unicodeiotest.h"
 
 #if defined(WITH_PLUGINS)
 #undef WITH_PLUGINS
@@ -178,6 +181,9 @@ int main(int argc, char *argv[]) {
     // will call curl_global_init and cleanup
     Connectivity::CurlInitHelper curlInitHelper;
     Q_UNUSED(curlInitHelper);
+
+    Exiv2InitHelper exiv2InitHelper;
+    Q_UNUSED(exiv2InitHelper);
 
     QCoreApplication app(argc, argv);
 
@@ -368,6 +374,7 @@ int main(int argc, char *argv[]) {
     integrationTests.append(new DuplicateSearchTest(&commandManager));
     integrationTests.append(new AutoCompletePresetsTest(&commandManager));
     integrationTests.append(new CsvExportTest(&commandManager));
+    integrationTests.append(new UnicodeIoTest(&commandManager));
     // always the last one. insert new tests above
     integrationTests.append(new LocalLibrarySearchTest(&commandManager));
 
