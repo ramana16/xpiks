@@ -65,6 +65,10 @@ Item {
         standardButtons: StandardButton.Yes | StandardButton.No
         onYes: {
             csvExportModel.removePlanAt(itemIndex)
+
+            if (exportPlanModelsListView.count == 0) {
+                addExportPlanButton.forceActiveFocus()
+            }
         }
     }
 
@@ -73,7 +77,7 @@ Item {
         property int columnIndex: 0
 
         MenuItem {
-            text: qsTr("Remove")
+            text: i18.n + qsTr("Remove")
             onTriggered: {
                 columnsModel.removeColumn(dotsClickMenu.columnIndex)
                 csvExportModel.requestSave()
@@ -81,7 +85,7 @@ Item {
         }
 
         MenuItem {
-            text: qsTr("Add column above")
+            text: i18.n + qsTr("Add column above")
             onTriggered: {
                 columnsModel.addColumnAbove(dotsClickMenu.columnIndex)
                 csvExportModel.requestSave()
@@ -89,7 +93,7 @@ Item {
         }
 
         MenuItem {
-            text: qsTr("Move up")
+            text: i18.n + qsTr("Move up")
             onTriggered: {
                 columnsModel.moveColumnUp(dotsClickMenu.columnIndex)
                 csvExportModel.requestSave()
@@ -97,7 +101,7 @@ Item {
         }
 
         MenuItem {
-            text: qsTr("Move down")
+            text: i18.n + qsTr("Move down")
             onTriggered: {
                 columnsModel.moveColumnDown(dotsClickMenu.columnIndex)
                 csvExportModel.requestSave()
@@ -118,6 +122,7 @@ Item {
             console.log("CsvExportDialog # You chose: " + exportDirDialog.folder)
             var path = exportDirDialog.folder.toString().replace(/^(file:\/{2})/,"");
             csvExportModel.outputDirectory = decodeURIComponent(path);
+            csvExportModel.startExport()
         }
 
         onRejected: {
@@ -332,9 +337,10 @@ Item {
                     anchors.left: parent.left
                     anchors.right: parent.right
                     anchors.bottom: parent.bottom
-                    height: 70
+                    height: 50
 
                     StyledBlackButton {
+                        id: addExportPlanButton
                         text: i18.n + qsTr("Add new", "csv export plan")
                         width: 210
                         height: 30
@@ -349,12 +355,32 @@ Item {
             }
 
             Item {
-                id: rightPanel
+                id: rightHeader
                 anchors.left: leftPanel.right
                 anchors.right: parent.right
                 anchors.top: parent.top
+                height: 40
+
+                StyledText {
+                    anchors.right: parent.right
+                    anchors.rightMargin: 20
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: i18.n + getOriginalText()
+                    isActive: false
+
+                    function getOriginalText() {
+                        return (csvExportModel.artworksCount == 1) ? qsTr("1 artwork selected") : qsTr("%1 artworks selected").arg(csvExportModel.artworksCount)
+                    }
+                }
+            }
+
+            Item {
+                id: rightPanel
+                anchors.left: leftPanel.right
+                anchors.right: parent.right
+                anchors.top: rightHeader.top
                 anchors.bottom: footer.top
-                enabled: !csvExportModel.isExporting
+                enabled: !csvExportModel.isExporting && (exportPlanModelsListView.count > 0)
 
                 MouseArea {
                     id: rightPanelMA
@@ -374,10 +400,10 @@ Item {
                     }
 
                     StyledText {
-                        text: qsTr("Title:")
-                        isActive: true
+                        text: i18.n + qsTr("Title:")
+                        isActive: false
                         anchors.left: parent.left
-                        anchors.leftMargin: 10
+                        anchors.leftMargin: 33
                     }
 
                     Item {
@@ -392,7 +418,7 @@ Item {
                         color: enabled ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
                         height: 24
                         anchors.left: parent.left
-                        anchors.leftMargin: 10
+                        anchors.leftMargin: 33
 
                         StyledTextInput {
                             id: titleText
@@ -447,15 +473,17 @@ Item {
                         height: childrenRect.height
 
                         StyledText {
-                            text: qsTr("Column name:")
+                            text: i18.n + qsTr("Column name:")
                             anchors.left: parent.left
                             anchors.leftMargin: 40
+                            isActive: false
                         }
 
                         StyledText {
-                            text: qsTr("Property:")
+                            text: i18.n + qsTr("Property:")
                             anchors.left: parent.left
                             anchors.leftMargin: 210
+                            isActive: false
                         }
                     }
 
@@ -524,7 +552,7 @@ Item {
                                     id: columnNameWrapper
                                     border.width: columnNameText.activeFocus ? 1 : 0
                                     border.color: uiColors.artworkActiveColor
-                                    width: 150
+                                    width: 170
                                     color: enabled ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
                                     height: 24
                                     anchors.verticalCenter: parent.verticalCenter
@@ -573,7 +601,7 @@ Item {
                                 CustomComboBox {
                                     id: propertiesCombobox
                                     model: propertiesModel
-                                    width: 150
+                                    width: 170
                                     height: 24
                                     itemHeight: 28
                                     showColorSign: false
@@ -612,6 +640,28 @@ Item {
                                     Layout.fillWidth: true
                                 }
                             }
+
+                            footer: Item {
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                height: 50
+
+                                StyledButton {
+                                    text: i18.n + qsTr("Add column")
+                                    width: 170
+                                    height: 30
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: 33
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    opacity: hovered ? 1 : 0.3
+
+                                    onClicked: {
+                                        columnsModel.addColumn()
+                                        csvExportModel.requestSave()
+                                        columnsListView.positionViewAtEnd()
+                                    }
+                                }
+                            }
                         }
 
                         CustomScrollbar {
@@ -623,27 +673,13 @@ Item {
                             //canShow: leftPanelMA.containsMouse
                         }
                     }
-
-                    Item {
-                        height: 10
-                    }
-
-                    StyledButton {
-                        text: qsTr("Add column")
-                        width: 100
-                        onClicked: {
-                            columnsModel.addColumn()
-                            csvExportModel.requestSave()
-                            columnsListView.positionViewAtIndex(columnsListView.count - 1, ListView.Contain)
-                        }
-                    }
                 }
 
                 Rectangle {
                     anchors.fill: parent
                     color: uiColors.defaultControlColor
                     opacity: 0.5
-                    visible: csvExportModel.isExporting
+                    visible: csvExportModel.isExporting || (exportPlanModelsListView.count == 0)
                 }
 
                 LoaderIcon {
@@ -654,12 +690,13 @@ Item {
                 }
             }
 
-            Item {
+            Rectangle {
                 id: footer
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
-                height: 30
+                height: 50
+                color: uiColors.defaultDarkColor
 
                 RowLayout {
                     id: footerRow
@@ -668,37 +705,6 @@ Item {
                     anchors.rightMargin: 20
                     height: parent.height
                     spacing: 20
-
-                    StyledText {
-                        text: i18.n + qsTr("Output:")
-                        isActive: false
-                    }
-
-                    Rectangle {
-                        color: enabled ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
-                        border.color: uiColors.artworkActiveColor
-                        border.width: outputDirText.activeFocus ? 1 : 0
-                        width: 165
-                        height: UIConfig.textInputHeight
-                        clip: true
-
-                        StyledTextInput {
-                            id: outputDirText
-                            text: csvExportModel.outputDirectory
-                            anchors.left: parent.left
-                            anchors.right: parent.right
-                            anchors.leftMargin: 5
-                            anchors.rightMargin: 5
-                            anchors.verticalCenter: parent.verticalCenter
-                            onTextChanged: csvExportModel.outputDirectory = text
-                        }
-                    }
-
-                    StyledButton {
-                        text: i18.n + qsTr("Select...")
-                        width: 100
-                        onClicked: exportDirDialog.open()
-                    }
 
                     Item {
                         Layout.fillWidth: true
@@ -714,7 +720,7 @@ Item {
                             if (csvExportModel.getSelectedPlansCount() === 0) {
                                 selectPlansMessageBox.open()
                             } else {
-                                csvExportModel.startExport()
+                                exportDirDialog.open()
                             }
                         }
                     }

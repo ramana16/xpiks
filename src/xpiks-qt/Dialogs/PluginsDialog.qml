@@ -225,7 +225,7 @@ Item {
                             }
 
                             StyledText {
-                                text: qsTr("(restart required)")
+                                text: i18.n + qsTr("(restart required)")
                                 anchors.verticalCenter: parent.verticalCenter
                                 anchors.left: pluginNameText.right
                                 anchors.leftMargin: 10
