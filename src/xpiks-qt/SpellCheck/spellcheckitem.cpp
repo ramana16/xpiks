@@ -198,7 +198,7 @@ namespace SpellCheck {
             }
         }
 
-        int index = m_OnlyOneKeyword ? items.front()->m_Index : -1;
+        int index = m_OnlyOneKeyword ? (int)items.front()->m_Index : -1;
         emit resultsReady(m_SpellCheckFlags, index);
     }
 

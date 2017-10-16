@@ -566,6 +566,19 @@ ApplicationWindow {
                 }
 
                 MenuItem {
+                    text: i18.n + qsTr("&Export to CSV")
+                    enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
+                    onTriggered: {
+                        console.info("CSV export triggered")
+
+                        filteredArtItemsModel.setSelectedForCsvExport()
+                        Common.launchDialog("Dialogs/CsvExportDialog.qml",
+                                            applicationWindow,
+                                            {});
+                    }
+                }
+
+                MenuItem {
                     text: i18.n + qsTr("&Reimport metadata")
                     enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
                     onTriggered: {
@@ -786,6 +799,13 @@ ApplicationWindow {
                     Common.launchDialog("Dialogs/DonateDialog.qml", applicationWindow, {})
                 }
             }
+
+            MenuItem {
+                text: "CSV export"
+                onTriggered: {
+                    Common.launchDialog("Dialogs/CsvExportDialog.qml", applicationWindow, {})
+                }
+            }
         }
     }
 
@@ -887,7 +907,8 @@ ApplicationWindow {
         selectExisting: true
         selectMultiple: true
         folder: shortcuts.pictures
-        nameFilters: [ "Image files (*.jpg *.tiff *.tif *.eps *.ai)",
+        nameFilters: [ "All Xpiks files (*.jpg *.tiff *.tif *.eps *.ai *.mov, *.mp4, *.avi, *.mpeg, *.qt, *.vob, *.wmv, *.asf, *.asx, *.flv)",
+            "Image files (*.jpg *.tiff *.tif *.eps *.ai)",
             "Video files (*.mov, *.mp4, *.avi, *.mpeg, *.qt, *.vob, *.wmv, *.asf, *.asx, *.flv)",
             "All files (*)" ]
 
@@ -1432,7 +1453,7 @@ ApplicationWindow {
 
             StyledLink {
                 text: i18.n + qsTr("Check warnings")
-                color: warningsMA.pressed ? uiColors.linkClickedColor : (warningsModel.warningsCount > 0 ? uiColors.artworkModifiedColor : uiColors.labelInactiveForeground)
+                color: isPressed ? uiColors.linkClickedColor : (warningsModel.warningsCount > 0 ? uiColors.artworkModifiedColor : uiColors.labelInactiveForeground)
                 enabled: mainStackView.areActionsAllowed
                 onClicked: {
                     warningsModel.update()
@@ -1462,7 +1483,7 @@ ApplicationWindow {
                 visible: applicationWindow.showUpdateLink
                 enabled: applicationWindow.showUpdateLink
                 text: i18.n + qsTr("Update available!")
-                color: updateMA.pressed ? uiColors.linkClickedColor : uiColors.greenColor
+                color: isPressed ? uiColors.linkClickedColor : uiColors.greenColor
                 onClicked: {
                     Qt.openUrlExternally("https://ribtoks.github.io/xpiks/downloads/")
                 }

@@ -17,6 +17,7 @@ StyledText {
     property bool isActive: true
     property color normalLinkColor: uiColors.artworkActiveColor
     color: enabled ? (linkMA.pressed ? uiColors.linkClickedColor : normalLinkColor) : (isActive ? uiColors.labelActiveForeground : uiColors.labelInactiveForeground)
+    property bool isPressed: linkMA.pressed
 
     signal clicked()
 

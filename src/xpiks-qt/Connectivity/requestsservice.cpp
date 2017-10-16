@@ -18,7 +18,8 @@
 
 namespace Connectivity {
     RequestsService::RequestsService(QObject *parent):
-        QObject(parent)
+        QObject(parent),
+        m_IsStopped(false)
     {
         m_RequestsWorker = new RequestsWorker();
     }
@@ -48,9 +49,15 @@ namespace Connectivity {
     void RequestsService::stopService() {
         LOG_DEBUG << "#";
         m_RequestsWorker->stopWorking();
+        m_IsStopped = true;
     }
 
     void RequestsService::receiveConfig(const QString &url, Helpers::RemoteConfig *config) {
+        if (m_IsStopped) {
+            LOG_DEBUG << "Skipping" << url << ". Service is stopped";
+            return;
+        }
+
         LOG_INFO << url;
         Models::ProxySettings *proxySettings = getProxySettings();
 

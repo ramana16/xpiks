@@ -64,6 +64,10 @@ Item {
         standardButtons: StandardButton.Yes | StandardButton.No
         onYes: {
             presetsModel.removeItem(itemIndex);
+
+            if (presetNamesListView.count == 0) {
+                addPresetButton.forceActiveFocus()
+            }
         }
     }
 
@@ -128,6 +132,15 @@ Item {
                     anchors.topMargin: 20
                     anchors.bottomMargin: 20
                     spacing: 0
+
+                    StyledText {
+                        text: i18.n + qsTr("Presets:")
+                        isActive: false
+                    }
+
+                    Item {
+                        height: 4
+                    }
 
                     Rectangle {
                         height: 5
@@ -248,12 +261,13 @@ Item {
                         anchors.right: parent.right
 
                         StyledAddHostButton {
+                            id: addPresetButton
                             anchors.left: parent.left
                             anchors.right: parent.right
                             anchors.leftMargin: 10
                             anchors.rightMargin: 10
                             anchors.verticalCenter: parent.verticalCenter
-                            text: i18.n + qsTr("Add new Preset")
+                            text: i18.n + qsTr("Add new", "preset")
                             onClicked: {
                                 presetsModel.addItem()
                                 presetNamesListView.currentIndex = presetNamesListView.count - 1

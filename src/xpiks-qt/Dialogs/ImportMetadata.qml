@@ -177,7 +177,7 @@ Item {
 
                     StyledText {
                         anchors.right: parent.right
-                        text: i18.n + qsTr("from %1 image(s)").arg(metadataIOCoordinator.processingItemsCount)
+                        text: i18.n + qsTr("from %1 file(s)").arg(metadataIOCoordinator.processingItemsCount)
                     }
                 }
 

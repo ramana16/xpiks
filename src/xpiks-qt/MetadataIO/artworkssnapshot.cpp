@@ -11,7 +11,7 @@
 #include "artworkssnapshot.h"
 
 namespace MetadataIO {
-    ArtworkSessionSnapshot::ArtworkSessionSnapshot(Models::ArtworkMetadata *metadata){
+    ArtworkSessionSnapshot::ArtworkSessionSnapshot(Models::ArtworkMetadata *metadata) {
         Q_ASSERT(metadata != nullptr);
         m_ArtworkPath = metadata->getFilepath();
 

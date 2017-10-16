@@ -49,6 +49,7 @@ namespace Connectivity {
 
     private:
         RequestsWorker *m_RequestsWorker;
+        bool m_IsStopped;
     };
 }
 

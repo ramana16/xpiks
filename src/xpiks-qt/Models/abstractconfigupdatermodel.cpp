@@ -17,15 +17,20 @@ namespace Models {
     AbstractConfigUpdaterModel::AbstractConfigUpdaterModel(bool forceOverwrite, QObject *parent):
         QObject(parent),
         m_RemoteConfig(this),
-        m_ForceOverwrite(forceOverwrite)
+        m_ForceOverwrite(forceOverwrite),
+        m_OnlyLocal(false)
     {
         QObject::connect(&m_RemoteConfig, &Helpers::RemoteConfig::configArrived, this, &AbstractConfigUpdaterModel::remoteConfigArrived);
     }
 
     void AbstractConfigUpdaterModel::initializeConfigs(const QString &configUrl, const QString &filePath) {
         LOG_DEBUG << "#";
+
         initLocalConfig(filePath);
-        initRemoteConfig(configUrl);
+
+        if (!m_OnlyLocal) {
+            initRemoteConfig(configUrl);
+        }
     }
 
     void AbstractConfigUpdaterModel::remoteConfigArrived() {
@@ -39,6 +44,8 @@ namespace Models {
         QJsonDocument &localDocument = m_LocalConfig.getConfig();
         Helpers::mergeJson(remoteDocument, localDocument, overwriteLocal, *this);
         m_LocalConfig.saveToFile();
+
+        processMergedConfig(localDocument);
     }
 
     void AbstractConfigUpdaterModel::initRemoteConfig(const QString &configUrl) {

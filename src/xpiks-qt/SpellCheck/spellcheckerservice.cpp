@@ -19,7 +19,8 @@ namespace SpellCheck {
     SpellCheckerService::SpellCheckerService(Models::SettingsModel *settingsModel):
         m_SpellCheckWorker(NULL),
         m_SettingsModel(settingsModel),
-        m_RestartRequired(false)
+        m_RestartRequired(false),
+        m_IsStopped(false)
     {}
 
     SpellCheckerService::~SpellCheckerService() {
@@ -71,6 +72,8 @@ namespace SpellCheck {
         LOG_DEBUG << "starting thread...";
         thread->start();
 
+        m_IsStopped = false;
+
         emit serviceAvailable(m_RestartRequired);
     }
 
@@ -81,6 +84,8 @@ namespace SpellCheck {
         } else {
             LOG_WARNING << "SpellCheckWorker is NULL";
         }
+
+        m_IsStopped = true;
     }
 
     bool SpellCheckerService::isBusy() const {
@@ -94,9 +99,8 @@ namespace SpellCheck {
     }
 
     void SpellCheckerService::submitItem(Common::BasicKeywordsModel *itemToCheck, Common::SpellCheckFlags flags) {
-        if (m_SpellCheckWorker == NULL) {
-            return;
-        }
+        if (m_SpellCheckWorker == NULL) { return; }
+        if (m_IsStopped) { return; }
 
         Q_ASSERT(itemToCheck != nullptr);
         LOG_INFO << "flags:" << (int)flags;
@@ -112,9 +116,8 @@ namespace SpellCheck {
     }
 
     void SpellCheckerService::submitItems(const QVector<Common::BasicKeywordsModel *> &itemsToCheck) {
-        if (m_SpellCheckWorker == NULL) {
-            return;
-        }
+        if (m_SpellCheckWorker == NULL) { return; }
+        if (m_IsStopped) { return; }
 
         std::vector<std::shared_ptr<ISpellCheckItem> > items;
         int length = itemsToCheck.length();
@@ -147,6 +150,7 @@ namespace SpellCheck {
     void SpellCheckerService::submitItems(const QVector<Common::BasicKeywordsModel *> &itemsToCheck,
                                           const QStringList &wordsToCheck) {
         if (m_SpellCheckWorker == NULL) { return; }
+        if (m_IsStopped) { return; }
 
         std::vector<std::shared_ptr<ISpellCheckItem> > items;
         int length = itemsToCheck.length();
@@ -177,9 +181,8 @@ namespace SpellCheck {
     void SpellCheckerService::submitKeyword(Common::BasicKeywordsModel *itemToCheck, int keywordIndex) {
         Q_ASSERT(itemToCheck != nullptr);
         LOG_INFO << "index:" << keywordIndex;
-        if (m_SpellCheckWorker == NULL) {
-            return;
-        }
+        if (m_SpellCheckWorker == NULL) { return; }
+        if (m_IsStopped) { return; }
 
         const Common::WordAnalysisFlags flags = getWordAnalysisFlags();
 

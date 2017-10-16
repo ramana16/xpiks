@@ -132,14 +132,14 @@ namespace SpellCheck {
         return roles;
     }
 
-    KeywordSpellSuggestions::KeywordSpellSuggestions(const QString &keyword, int originalIndex, const QString &origin) :
+    KeywordSpellSuggestions::KeywordSpellSuggestions(const QString &keyword, size_t originalIndex, const QString &origin) :
         SpellSuggestionsItem(keyword, origin),
         m_OriginalIndex(originalIndex),
         m_ReplaceResult(Common::KeywordReplaceResult::Unknown)
     {
     }
 
-    KeywordSpellSuggestions::KeywordSpellSuggestions(const QString &keyword, int originalIndex):
+    KeywordSpellSuggestions::KeywordSpellSuggestions(const QString &keyword, size_t originalIndex):
         SpellSuggestionsItem(keyword),
         m_OriginalIndex(originalIndex),
         m_ReplaceResult(Common::KeywordReplaceResult::Unknown)

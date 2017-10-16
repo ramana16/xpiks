@@ -65,6 +65,7 @@ namespace MetadataIO {
         int m_LastTimerId;
         volatile int m_RestartsCount;
         MetadataIOWorker *m_MetadataIOWorker;
+        bool m_IsStopped;
     };
 }
 

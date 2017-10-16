@@ -19,7 +19,9 @@
 namespace Warnings {
     WarningsService::WarningsService(QObject *parent):
         QObject(parent),
-        m_WarningsWorker(NULL) {}
+        m_WarningsWorker(NULL),
+        m_IsStopped(false)
+    {}
 
     void WarningsService::initWarningsSettings() {
         QTimer::singleShot(1000, this, SLOT(updateWarningsSettings()));
@@ -58,6 +60,8 @@ namespace Warnings {
         LOG_INFO << "Starting worker";
 
         thread->start();
+
+        m_IsStopped = false;
     }
 
     void WarningsService::stopService() {
@@ -67,6 +71,8 @@ namespace Warnings {
         } else {
             LOG_WARNING << "Warnings Worker was NULL";
         }
+
+        m_IsStopped = true;
     }
 
     bool WarningsService::isBusy() const {
@@ -76,9 +82,8 @@ namespace Warnings {
     }
 
     void WarningsService::submitItem(Models::ArtworkMetadata *item) {
-        if (m_WarningsWorker == NULL) {
-            return;
-        }
+        if (m_WarningsWorker == NULL) { return; }
+        if (m_IsStopped) { return; }
 
         LOG_INFO << "Submitting one item";
 
@@ -87,9 +92,8 @@ namespace Warnings {
     }
 
     void WarningsService::submitItem(Models::ArtworkMetadata *item, Common::WarningsCheckFlags flags) {
-        if (m_WarningsWorker == NULL) {
-            return;
-        }
+        if (m_WarningsWorker == NULL) { return; }
+        if (m_IsStopped) { return; }
 
         LOG_INFO << "Submitting one item with flags" << Common::warningsFlagToString(flags);
 
@@ -98,9 +102,8 @@ namespace Warnings {
     }
 
     void WarningsService::submitItems(const MetadataIO::WeakArtworksSnapshot &items) {
-        if (m_WarningsWorker == NULL) {
-            return;
-        }
+        if (m_WarningsWorker == NULL) { return; }
+        if (m_IsStopped) { return; }
 
         int length = items.length();
 

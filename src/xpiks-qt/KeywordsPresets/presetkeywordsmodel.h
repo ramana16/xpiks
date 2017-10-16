@@ -20,6 +20,7 @@
 #include "../Common/baseentity.h"
 #include "../Common/abstractlistmodel.h"
 #include "ipresetsmanager.h"
+#include "presetkeywordsmodelconfig.h"
 
 namespace KeywordsPresets {
     struct PresetModel {
@@ -62,8 +63,17 @@ namespace KeywordsPresets {
         PresetKeywordsModel(QObject *parent=0);
         virtual ~PresetKeywordsModel();
 
+#ifdef INTEGRATION_TESTS
+    public:
+        PresetKeywordsModelConfig *getKeywordsModelConfig() { return &m_PresetsConfig; }
+        void reload() { loadModelFromConfig(); }
+#endif
+
     public:
         int getPresetsCount() const { return (int)m_PresetsList.size(); }
+
+    public:
+        void initializePresets();
         bool tryGetNameFromIndex(int index, QString &name);
         virtual bool tryGetPreset(int presetIndex, QStringList &keywords) override;
         void setName(int presetIndex, const QString &name);
@@ -134,7 +144,6 @@ namespace KeywordsPresets {
         /*Q_INVOKABLE*/ void loadModelFromConfig();
 
     public slots:
-        void onPresetsUpdated();
         void onBackupRequested();
 
     private slots:
@@ -145,6 +154,7 @@ namespace KeywordsPresets {
         void removeAllPresets();
 
     private:
+        PresetKeywordsModelConfig m_PresetsConfig;
         QReadWriteLock m_PresetsLock;
         std::vector<PresetModel *> m_PresetsList;
         std::vector<PresetModel *> m_Finalizers;

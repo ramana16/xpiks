@@ -149,7 +149,7 @@ namespace Models {
         virtual bool removeKeywordAt(size_t index, QString &removed) override;
         virtual bool removeLastKeyword(QString &removed) override;
         virtual bool appendKeyword(const QString &keyword) override;
-        virtual int appendKeywords(const QStringList &keywordsList) override;
+        virtual size_t appendKeywords(const QStringList &keywordsList) override;
         virtual bool removeKeywords(const QSet<QString> &keywordsSet, bool caseSensitive=true) override;
         virtual QString getKeywordsString() override { return m_MetadataModel.getKeywordsString(); }
 

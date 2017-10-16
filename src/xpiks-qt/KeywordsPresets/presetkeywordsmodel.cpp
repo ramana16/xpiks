@@ -31,6 +31,13 @@ namespace KeywordsPresets {
         }
     }
 
+    void PresetKeywordsModel::initializePresets() {
+        LOG_DEBUG << "#";
+        m_PresetsConfig.initializeConfigs();
+        loadModelFromConfig();
+        requestBackup();
+    }
+
     bool PresetKeywordsModel::tryGetNameFromIndex(int index, QString &name) {
         if (index < 0 || index >= getPresetsCount()) {
             return false;
@@ -406,27 +413,20 @@ namespace KeywordsPresets {
 
     void PresetKeywordsModel::saveToConfig() {
         LOG_DEBUG << "#";
-#ifndef CORE_TESTS
-        auto *presetConfig = m_CommandManager->getPresetsModelConfig();
         {
             QWriteLocker locker(&m_PresetsLock);
             Q_UNUSED(locker);
-            presetConfig->loadFromModel(m_PresetsList);
+            m_PresetsConfig.loadFromModel(m_PresetsList);
         }
-        presetConfig->sync();
-#endif
+        m_PresetsConfig.sync();
     }
 
     void PresetKeywordsModel::loadModelFromConfig() {
         beginResetModel();
-        doLoadFromConfig();
+        {
+            doLoadFromConfig();
+        }
         endResetModel();
-    }
-
-    void PresetKeywordsModel::onPresetsUpdated() {
-         LOG_INFO << "loading Model";
-         loadModelFromConfig();
-         requestBackup();
     }
 
     void PresetKeywordsModel::onBackupRequested() {
@@ -440,14 +440,14 @@ namespace KeywordsPresets {
     }
 
     void PresetKeywordsModel::doLoadFromConfig() {
-#ifndef CORE_TESTS
-        auto *presetConfig = m_CommandManager->getPresetsModelConfig();
-        auto &presetData = presetConfig->m_PresetData;
+        auto &presetData = m_PresetsConfig.m_PresetData;
 
         // removeAllPresets();
 
         QWriteLocker locker(&m_PresetsLock);
         Q_UNUSED(locker);
+
+        Q_ASSERT(m_PresetsList.empty());
 
         for (auto &item: presetData) {
             auto &keywords = item.m_Keywords;
@@ -463,7 +463,6 @@ namespace KeywordsPresets {
                 LOG_WARNING << "Preset" << name << "already exists. Skipping...";
             }
         }
-#endif
     }
 
     void PresetKeywordsModel::removeAllPresets() {

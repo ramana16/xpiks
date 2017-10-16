@@ -49,7 +49,7 @@ ColumnLayout {
     StyledLink {
         text: i18.n + qsTr("Support Xpiks")
         anchors.horizontalCenter: parent.horizontalCenter
-        color: donateMA.pressed ? uiColors.linkClickedColor : uiColors.goldColor
+        color: isPressed ? uiColors.linkClickedColor : uiColors.goldColor
         font.bold: true
         onClicked: {
             Qt.openUrlExternally(switcher.donateCampaign1Link)

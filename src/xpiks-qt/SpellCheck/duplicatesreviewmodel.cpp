@@ -241,7 +241,7 @@ namespace SpellCheck {
 
         QVector<int> indicesToUpdate;
         const size_t size = m_DuplicatesList.size();
-        indicesToUpdate.reserve(size);
+        indicesToUpdate.reserve((int)size);
 
         for (size_t i = 0; i < size; i++) {
             auto &item = m_DuplicatesList[i];

@@ -9,6 +9,7 @@
  */
 
 #include <QDir>
+#include <QJsonArray>
 #include "../Models/artitemsmodel.h"
 #include "../Models/imageartwork.h"
 #include "../Models/artworksrepository.h"

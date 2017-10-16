@@ -115,9 +115,13 @@ namespace Connectivity {
         }
 
         Models::AbstractConfigUpdaterModel::processRemoteConfig(remoteDocument, overwrite);
+    }
 
-        if (remoteDocument.isObject()) {
-            parseSwitches(remoteDocument.object());
+    void SwitcherConfig::processMergedConfig(const QJsonDocument &document) {
+        LOG_DEBUG << "#";
+
+        if (document.isObject()) {
+            parseSwitches(document.object());
         } else {
             LOG_WARNING << "Remote document is not an object";
         }

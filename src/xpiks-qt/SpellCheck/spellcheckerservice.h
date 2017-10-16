@@ -88,8 +88,9 @@ namespace SpellCheck {
     private:
         SpellCheckWorker *m_SpellCheckWorker;
         Models::SettingsModel *m_SettingsModel;
-        volatile bool m_RestartRequired;
         QString m_DictionariesPath;
+        volatile bool m_RestartRequired;
+        volatile bool m_IsStopped;
     };
 }
 

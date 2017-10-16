@@ -52,13 +52,13 @@ namespace Connectivity {
             return m_BaseUrl + "warnings_settings.json";
         }
 
-        QString getPresetsSourceAddr() const {
-            return m_BaseUrl + "presets.json";
-        }
-
         QString getSwitcherAddr() {
             QString filename = QString("switches_%1.json").arg(XPIKS_API_VERSION_STRING);
             return m_BaseUrl + filename;
+        }
+
+        QString getCsvExportPlansAddr() {
+            return m_BaseUrl + "csv_export_plans.json";
         }
 
     private:

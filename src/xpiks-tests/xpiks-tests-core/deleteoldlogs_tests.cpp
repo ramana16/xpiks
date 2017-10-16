@@ -1,4 +1,4 @@
-#include "deleteoldlogstest.h"
+#include "deleteoldlogs_tests.h"
 
 qint64 getFilesSize(const QVector<Maintenance::FileInfoHolder> &files) {
     qint64 sum = 0;

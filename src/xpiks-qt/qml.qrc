@@ -88,5 +88,7 @@
         <file>Components/DonateComponent.qml</file>
         <file>StackViews/DuplicatesReView.qml</file>
         <file>StyledControls/StyledLink.qml</file>
+        <file>Dialogs/CsvExportDialog.qml</file>
+        <file>Components/DotsButton.qml</file>
     </qresource>
 </RCC>

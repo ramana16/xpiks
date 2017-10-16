@@ -7,6 +7,8 @@ TARGET = xpiks-tests-ui
 DEFINES += QML_IMPORT_TRACE
 DEFINES += QT_DEBUG_PLUGINS
 
+#DEFINES += QT_FATAL_WARNINGS
+
 SOURCES += main.cpp \
     ../../xpiks-qt/QMLExtensions/triangleelement.cpp
 
@@ -26,7 +28,9 @@ DISTFILES += \
     FakeColors.qml \
     ../../xpiks-qt/StackViews/CombinedEditView.qml \
     tst_CombinedEditView.qml \
-    tst_ArtworkEditView.qml
+    tst_ArtworkEditView.qml \
+    tst_CsvExportDialog.qml \
+    ../../xpiks-qt/Dialogs/CsvExportDialog.qml
 
 HEADERS += \
     ../../xpiks-qt/Helpers/clipboardhelper.h \

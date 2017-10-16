@@ -17,6 +17,7 @@ import "../Constants"
 
 ScrollView {
     activeFocusOnTab: false
+    property color handleColor: uiColors.panelSelectedColor
 
     style: ScrollViewStyle {
         //transientScrollBars: true
@@ -29,7 +30,7 @@ ScrollView {
             Rectangle {
                 anchors.fill: parent
                 radius: 5
-                color: uiColors.artworkActiveColor
+                color: control.handleColor
                 opacity: styleData.pressed ? 1 : (styleData.hovered ? 0.9 : 0.8)
             }
         }

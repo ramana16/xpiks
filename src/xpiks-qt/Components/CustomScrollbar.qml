@@ -14,7 +14,9 @@ import "../Constants"
 Item {
     id: scrollbar;
     width: (handleSize + 2);
-    visible: (flickable.visibleArea.heightRatio < 1.0);
+    visible: canShow && (flickable.visibleArea.heightRatio < 1.0);
+    property color handleColor: uiColors.panelSelectedColor
+    property bool canShow: true
 
     anchors {
         top: flickable.top;
@@ -73,7 +75,7 @@ Item {
                 id: backHandle
                 anchors.fill: parent
                 radius: 5
-                color: uiColors.artworkActiveColor
+                color: scrollbar.handleColor
                 opacity: clicker.pressed ? 1 : (clicker.containsMouse ? 0.9 : 0.8)
             }
         }

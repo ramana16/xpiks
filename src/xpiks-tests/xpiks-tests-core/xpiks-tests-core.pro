@@ -149,7 +149,6 @@ SOURCES += main.cpp \
     artitemsmodel_tests.cpp \
     ../../xpiks-qt/Common/flags.cpp \
     fixspelling_tests.cpp \
-    deleteoldlogstest.cpp \
     ../../xpiks-qt/Models/findandreplacemodel.cpp \
     replacepreview_tests.cpp \
     replace_tests.cpp \
@@ -184,7 +183,10 @@ SOURCES += main.cpp \
     ../../xpiks-qt/Helpers/threadhelpers.cpp \
     ../../xpiks-qt/AutoComplete/autocompletemodel.cpp \
     ../../xpiks-qt/AutoComplete/keywordsautocompletemodel.cpp \
-    ../../xpiks-qt/SpellCheck/duplicatesreviewmodel.cpp
+    ../../xpiks-qt/SpellCheck/duplicatesreviewmodel.cpp \
+    deleteoldlogs_tests.cpp \
+    jsonmerge_tests.cpp \
+    ../../xpiks-qt/KeywordsPresets/presetkeywordsmodelconfig.cpp
 
 HEADERS += \
     encryption_tests.h \
@@ -268,7 +270,6 @@ HEADERS += \
     ../../xpiks-qt/Helpers/jsonhelper.h \
     ../../xpiks-qt/AutoComplete/stringsautocompletemodel.h \
     ../../xpiks-qt/Models/imageartwork.h \
-    deleteoldlogstest.h \
     ../../xpiks-qt/Common/hold.h \
     recentitems_tests.h \
     removefilesfs_tests.h \
@@ -314,5 +315,8 @@ HEADERS += \
     ../../xpiks-qt/AutoComplete/autocompletemodel.h \
     ../../xpiks-qt/AutoComplete/keywordsautocompletemodel.h \
     ../../xpiks-qt/Common/keyword.h \
-    ../../xpiks-qt/SpellCheck/duplicatesreviewmodel.h
+    ../../xpiks-qt/SpellCheck/duplicatesreviewmodel.h \
+    deleteoldlogs_tests.h \
+    jsonmerge_tests.h \
+    ../../xpiks-qt/KeywordsPresets/presetkeywordsmodelconfig.h
 

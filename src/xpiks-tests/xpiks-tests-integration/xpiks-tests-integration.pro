@@ -20,7 +20,8 @@ DEFINES += QT_NO_CAST_TO_ASCII \
 
 DEFINES += HUNSPELL_STATIC
 DEFINES += TELEMETRY_ENABLED
-
+DEFINES += WITH_STDOUT_LOGS
+DEFINES += WITH_LOGS
 DEFINES += INTEGRATION_TESTS
 
 DEFINES += HUNSPELL_DICTS_PATH=\"$$PWD/../../xpiks-qt/deps/dict\"
@@ -132,7 +133,6 @@ SOURCES += main.cpp \
     ../../xpiks-qt/QMLExtensions/cachingimageprovider.cpp \
     clearmetadatatest.cpp \
     savewithemptytitletest.cpp \
-    jsonmerge_tests.cpp \
     ../../xpiks-qt/Commands/findandreplacecommand.cpp \
     ../../xpiks-qt/Models/artworksviewmodel.cpp \
     ../../xpiks-qt/Models/deletekeywordsviewmodel.cpp \
@@ -209,7 +209,12 @@ SOURCES += main.cpp \
     ../../xpiks-qt/AutoComplete/stringsautocompletemodel.cpp \
     autocompletepresetstest.cpp \
     duplicatesearchtest.cpp \
-    ../../xpiks-qt/SpellCheck/duplicatesreviewmodel.cpp
+    ../../xpiks-qt/SpellCheck/duplicatesreviewmodel.cpp \
+    ../../xpiks-qt/MetadataIO/csvexportmodel.cpp \
+    ../../xpiks-qt/MetadataIO/csvexportplansmodel.cpp \
+    ../../xpiks-qt/MetadataIO/csvexportproperties.cpp \
+    ../../xpiks-qt/MetadataIO/csvexportworker.cpp \
+    csvexporttest.cpp
 
 RESOURCES +=
 
@@ -361,7 +366,6 @@ HEADERS += \
     savewithemptytitletest.h \
     spellingproduceswarningstest.h \
     ../../xpiks-qt/Helpers/comparevaluesjson.h \
-    jsonmerge_tests.h \
     ../../xpiks-qt/Commands/findandreplacecommand.h \
     ../../xpiks-qt/Models/artworksviewmodel.h \
     ../../xpiks-qt/Models/deletekeywordsviewmodel.h \
@@ -453,7 +457,13 @@ HEADERS += \
     autocompletepresetstest.h \
     ../../xpiks-qt/Common/keyword.h \
     duplicatesearchtest.h \
-    ../../xpiks-qt/SpellCheck/duplicatesreviewmodel.h
+    ../../xpiks-qt/SpellCheck/duplicatesreviewmodel.h \
+    ../../xpiks-qt/MetadataIO/csvexportmodel.h \
+    ../../xpiks-qt/MetadataIO/csvexportplansmodel.h \
+    ../../xpiks-qt/MetadataIO/csvexportproperties.h \
+    ../../xpiks-qt/MetadataIO/csvexportworker.h \
+    csvexporttest.h \
+    ../../../vendors/csv/csv.h
 
 INCLUDEPATH += ../../../vendors/tiny-aes
 INCLUDEPATH += ../../../vendors/cpp-libface
@@ -547,6 +557,7 @@ travis-ci {
     LIBS += /usr/lib/x86_64-linux-gnu/libz.so
     LIBS += -ldl
     DEFINES += TRAVIS_CI
+    DEFINES -= WITH_LOGS
 
     LIBS -= -lthmbnlr
     SOURCES += ../../../vendors/libthmbnlr/thumbnailcreator_stub.cpp
@@ -555,6 +566,7 @@ travis-ci {
 appveyor {
     message("for Appveyor")
     DEFINES += APPVEYOR
+    DEFINES -= WITH_LOGS
     LIBS += -L"$$PWD/../../../libs"
 }
 

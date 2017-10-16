@@ -87,10 +87,10 @@
 #include "QMLExtensions/artworksupdatehub.h"
 #include "QMLExtensions/videocachingservice.h"
 #include "KeywordsPresets/presetkeywordsmodel.h"
-#include "KeywordsPresets/presetkeywordsmodelconfig.h"
 #include "Models/switchermodel.h"
 #include "Connectivity/requestsservice.h"
 #include "SpellCheck/duplicatesreviewmodel.h"
+#include "MetadataIO/csvexportmodel.h"
 #include <ftpcoordinator.h>
 
 void myMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg) {
@@ -283,7 +283,6 @@ int main(int argc, char *argv[]) {
     Models::CombinedArtworksModel combinedArtworksModel;
     Models::UploadInfoRepository uploadInfoRepository;
     KeywordsPresets::PresetKeywordsModel presetsModel;
-    KeywordsPresets::PresetKeywordsModelConfig presetsModelConfig;
     KeywordsPresets::FilteredPresetKeywordsModel filteredPresetsModel;
     filteredPresetsModel.setSourceModel(&presetsModel);
     Warnings::WarningsService warningsService;
@@ -325,6 +324,7 @@ int main(int argc, char *argv[]) {
     Connectivity::RequestsService requestsService;
     Helpers::DatabaseManager databaseManager;
     SpellCheck::DuplicatesReviewModel duplicatesModel(&colorsModel);
+    MetadataIO::CsvExportModel csvExportModel;
 
     Connectivity::UpdateService updateService(&settingsModel);
 
@@ -377,7 +377,6 @@ int main(int argc, char *argv[]) {
     commandManager.InjectDependency(&deleteKeywordsModel);
     commandManager.InjectDependency(&helpersQmlWrapper);
     commandManager.InjectDependency(&presetsModel);
-    commandManager.InjectDependency(&presetsModelConfig);
     commandManager.InjectDependency(&translationManager);
     commandManager.InjectDependency(&translationService);
     commandManager.InjectDependency(&uiManager);
@@ -392,6 +391,7 @@ int main(int argc, char *argv[]) {
     commandManager.InjectDependency(&requestsService);
     commandManager.InjectDependency(&databaseManager);
     commandManager.InjectDependency(&duplicatesModel);
+    commandManager.InjectDependency(&csvExportModel);
 
     userDictEditModel.setCommandManager(&commandManager);
 
@@ -455,6 +455,7 @@ int main(int argc, char *argv[]) {
     rootContext->setContextProperty("userDictEditModel", &userDictEditModel);
     rootContext->setContextProperty("switcher", &switcherModel);
     rootContext->setContextProperty("duplicatesModel", &duplicatesModel);
+    rootContext->setContextProperty("csvExportModel", &csvExportModel);
 
     rootContext->setContextProperty("tabsModel", uiManager.getTabsModel());
     rootContext->setContextProperty("activeTabs", uiManager.getActiveTabs());

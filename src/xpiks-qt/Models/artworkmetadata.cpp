@@ -129,7 +129,7 @@ namespace Models {
                 anythingChanged = this->setDescription(cachedArtwork.m_Description) || anythingChanged;
             }
 
-            const int addedCount = this->appendKeywords(cachedArtwork.m_Keywords);
+            const size_t addedCount = this->appendKeywords(cachedArtwork.m_Keywords);
             if (addedCount > 0) {
                 anythingChanged = true;
             }
@@ -303,13 +303,13 @@ namespace Models {
         return result;
     }
 
-    int ArtworkMetadata::appendKeywords(const QStringList &keywordsList) {
+    size_t ArtworkMetadata::appendKeywords(const QStringList &keywordsList) {
         if (!getIsInitializedFlag()) {
             LOG_WARNING << "#" << m_ID << "attempt to append keywords to not initialized artwork";
             return false;
         }
 
-        int result = m_MetadataModel.appendKeywords(keywordsList);
+        size_t result = m_MetadataModel.appendKeywords(keywordsList);
         LOG_INFO << "Appended" << result << "keywords out of" << keywordsList.length();
         if (result > 0) { markModified(); }
         return result;
@@ -456,9 +456,11 @@ namespace Models {
     }
 
     void ArtworkMetadata::timerEvent(QTimerEvent *event) {
+        if (event == nullptr) { return; }
+
         LOG_DEBUG << "timer" << event->timerId();
 
-        if ((event != nullptr) && (event->timerId() == m_EditingPauseTimerId)) {
+        if (event->timerId() == m_EditingPauseTimerId) {
             m_EditingRestartsCount = 0;
             m_EditingPauseTimerId = -1;
 

@@ -24,7 +24,8 @@ namespace MetadataIO {
         QObject(parent),
         m_LastTimerId(-1),
         m_RestartsCount(0),
-        m_MetadataIOWorker(nullptr)
+        m_MetadataIOWorker(nullptr),
+        m_IsStopped(false)
     {
         QObject::connect(this, &MetadataIOService::cacheSyncRequest, this, &MetadataIOService::onCacheSyncRequest);
     }
@@ -49,12 +50,15 @@ namespace MetadataIO {
                          this, &MetadataIOService::workerFinished);
 
         thread->start();
+
+        m_IsStopped = false;
     }
 
     void MetadataIOService::stopService() {
         LOG_DEBUG << "#";
         Q_ASSERT(m_MetadataIOWorker != nullptr);
         m_MetadataIOWorker->stopWorking();
+        m_IsStopped = true;
     }
 
     void MetadataIOService::cancelBatch(quint32 batchID) const {
@@ -65,6 +69,7 @@ namespace MetadataIO {
 
     void MetadataIOService::readArtwork(Models::ArtworkMetadata *metadata) const {
         Q_ASSERT(metadata != nullptr);
+        if (m_IsStopped) { return; }
 
         std::shared_ptr<MetadataIOTaskBase> jobItem(new MetadataReadWriteTask(metadata, MetadataReadWriteTask::Read));
         m_MetadataIOWorker->submitItem(jobItem);
@@ -72,6 +77,7 @@ namespace MetadataIO {
 
     void MetadataIOService::writeArtwork(Models::ArtworkMetadata *metadata) {
         Q_ASSERT(metadata != nullptr);
+        if (m_IsStopped) { return; }
 
         std::shared_ptr<MetadataIOTaskBase> jobItem(new MetadataReadWriteTask(metadata, MetadataReadWriteTask::Write));
         m_MetadataIOWorker->submitItem(jobItem);
@@ -81,6 +87,7 @@ namespace MetadataIO {
 
     quint32 MetadataIOService::readArtworks(const ArtworksSnapshot &snapshot) const {
         LOG_INFO << snapshot.size() << "artwork(s)";
+        if (m_IsStopped) { return 0; }
         std::vector<std::shared_ptr<MetadataIOTaskBase> > jobs;
         jobs.reserve(snapshot.size());
 
@@ -99,6 +106,7 @@ namespace MetadataIO {
 
     void MetadataIOService::writeArtworks(const QVector<Models::ArtworkMetadata *> &artworks) const {
         LOG_INFO << artworks.size() << "artwork(s)";
+        if (m_IsStopped) { return; }
         std::vector<std::shared_ptr<MetadataIOTaskBase> > jobs;
         jobs.reserve(artworks.length());
 
@@ -115,6 +123,7 @@ namespace MetadataIO {
 
     void MetadataIOService::addArtworks(const QVector<Models::ArtworkMetadata *> &artworks) const {
         LOG_INFO << artworks.size() << "artwork(s)";
+        if (m_IsStopped) { return; }
         std::vector<std::shared_ptr<MetadataIOTaskBase> > jobs;
         jobs.reserve(artworks.length());
 
@@ -133,6 +142,7 @@ namespace MetadataIO {
     void MetadataIOService::searchArtworks(Suggestion::LocalLibraryQuery *query) {
         LOG_DEBUG << "#";
         Q_ASSERT(query != nullptr);
+        if (m_IsStopped) { return; }
         std::shared_ptr<MetadataSearchTask> jobItem(new MetadataSearchTask(query));
         m_MetadataIOWorker->submitFirst(jobItem);
     }

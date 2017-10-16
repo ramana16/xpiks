@@ -58,10 +58,10 @@
 #include "../../xpiks-qt/Common/defines.h"
 #include "../../xpiks-qt/Helpers/database.h"
 #include "../../xpiks-qt/KeywordsPresets/presetkeywordsmodel.h"
-#include "../../xpiks-qt/KeywordsPresets/presetkeywordsmodelconfig.h"
 #include "../../xpiks-qt/Maintenance/maintenanceservice.h"
 #include "../../xpiks-qt/Connectivity/requestsservice.h"
 #include "../../xpiks-qt/SpellCheck/duplicatesreviewmodel.h"
+#include "../../xpiks-qt/MetadataIO/csvexportmodel.h"
 
 #ifdef Q_OS_WIN
 #include "windowscrashhandler.h"
@@ -85,7 +85,6 @@
 #include "readlegacysavedtest.h"
 #include "clearmetadatatest.h"
 #include "savewithemptytitletest.h"
-#include "jsonmerge_tests.h"
 #include "combinededitfixspellingtest.h"
 #include "findandreplacemodeltest.h"
 #include "addtouserdictionarytest.h"
@@ -105,10 +104,7 @@
 #include "savevideobasictest.h"
 #include "duplicatesearchtest.h"
 #include "autocompletepresetstest.h"
-
-#if defined(WITH_LOGS)
-#undef WITH_LOGS
-#endif
+#include "csvexporttest.h"
 
 #if defined(WITH_PLUGINS)
 #undef WITH_PLUGINS
@@ -195,6 +191,26 @@ int main(int argc, char *argv[]) {
     settingsModel.initializeConfigs();
     settingsModel.retrieveAllValues();
 
+#ifdef WITH_LOGS
+    QString appDataPath = XPIKS_USERDATA_PATH;
+    const QString &logFileDir = QDir::cleanPath(appDataPath + QDir::separator() + Constants::LOGS_DIR);
+    if (!logFileDir.isEmpty()) {
+        QDir dir(logFileDir);
+        if (!dir.exists()) {
+            bool created = QDir().mkpath(logFileDir);
+            Q_UNUSED(created);
+        }
+
+        QString time = QDateTime::currentDateTimeUtc().toString("ddMMyyyy-hhmmss-zzz");
+        QString logFilename = QString("xpiks-qt-%1.log").arg(time);
+
+        QString logFilePath = dir.filePath(logFilename);
+
+        Helpers::Logger &logger = Helpers::Logger::getInstance();
+        logger.setLogFilePath(logFilePath);
+    }
+#endif
+
     Models::LogsModel logsModel;
     logsModel.startLogging();
 
@@ -205,7 +221,6 @@ int main(int argc, char *argv[]) {
     Models::CombinedArtworksModel combinedArtworksModel;
     Models::UploadInfoRepository uploadInfoRepository;
     KeywordsPresets::PresetKeywordsModel presetsModel;
-    KeywordsPresets::PresetKeywordsModelConfig presetsModelConfig;
     Warnings::WarningsService warningsService;
     Encryption::SecretsManager secretsManager;
     UndoRedo::UndoRedoManager undoRedoManager;
@@ -249,6 +264,8 @@ int main(int argc, char *argv[]) {
     Plugins::PluginManager pluginManager;    
     Helpers::DatabaseManager databaseManager;
     SpellCheck::DuplicatesReviewModel duplicatesModel(&colorsModel);
+    MetadataIO::CsvExportModel csvExportModel;
+    csvExportModel.disableRemoteConfigs();
 
     Commands::CommandManager commandManager;
     commandManager.InjectDependency(&artworkRepository);
@@ -281,7 +298,6 @@ int main(int argc, char *argv[]) {
     commandManager.InjectDependency(&findAndReplaceModel);
     commandManager.InjectDependency(&deleteKeywordsModel);
     commandManager.InjectDependency(&presetsModel);
-    commandManager.InjectDependency(&presetsModelConfig);
     commandManager.InjectDependency(&translationManager);
     commandManager.InjectDependency(&translationService);
     commandManager.InjectDependency(&artworkProxy);
@@ -294,6 +310,7 @@ int main(int argc, char *argv[]) {
     commandManager.InjectDependency(&artworksUpdateHub);
     commandManager.InjectDependency(&databaseManager);
     commandManager.InjectDependency(&duplicatesModel);
+    commandManager.InjectDependency(&csvExportModel);
 
     commandManager.ensureDependenciesInjected();
 
@@ -335,7 +352,6 @@ int main(int argc, char *argv[]) {
     integrationTests.append(new ReadLegacySavedTest(&commandManager));
     integrationTests.append(new ClearMetadataTest(&commandManager));
     integrationTests.append(new SaveWithEmptyTitleTest(&commandManager));
-    integrationTests.append(new JsonMergeTests(&commandManager));
     integrationTests.append(new CombinedEditFixSpellingTest(&commandManager));
     integrationTests.append(new FindAndReplaceModelTest(&commandManager));
     integrationTests.append(new AddToUserDictionaryTest(&commandManager));
@@ -351,6 +367,7 @@ int main(int argc, char *argv[]) {
     integrationTests.append(new RestoreSessionTest(&commandManager));
     integrationTests.append(new DuplicateSearchTest(&commandManager));
     integrationTests.append(new AutoCompletePresetsTest(&commandManager));
+    integrationTests.append(new CsvExportTest(&commandManager));
     // always the last one. insert new tests above
     integrationTests.append(new LocalLibrarySearchTest(&commandManager));
 

@@ -28,7 +28,7 @@ namespace Common {
         virtual bool removeKeywordAt(size_t index, QString &removedKeyword) = 0;
         virtual bool removeLastKeyword(QString &removedKeyword) = 0;
         virtual bool appendKeyword(const QString &keyword) = 0;
-        virtual int appendKeywords(const QStringList &keywordsList) = 0;
+        virtual size_t appendKeywords(const QStringList &keywordsList) = 0;
         virtual bool removeKeywords(const QSet<QString> &keywords, bool caseSensitive) = 0;
         virtual bool clearKeywords() = 0;
         virtual QString getKeywordsString() = 0;

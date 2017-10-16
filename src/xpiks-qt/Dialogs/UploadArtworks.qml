@@ -423,9 +423,10 @@ Item {
                                 }
 
                                 function showStockCompletion(textField) {
+                                    ftpListAC.selectedIndex = -1
+
                                     if (typeof generalTab.autoCompleteBox !== "undefined") {
                                         // update completion
-                                        ftpListAC.selectedIndex = -1
                                         return
                                     }
 

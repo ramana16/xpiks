@@ -186,7 +186,7 @@ namespace Common {
         setKeywordsUnsafe(keywordsList);
     }
 
-    int BasicKeywordsModel::appendKeywords(const QStringList &keywordsList) {
+    size_t BasicKeywordsModel::appendKeywords(const QStringList &keywordsList) {
         QWriteLocker writeLocker(&m_KeywordsLock);
 
         Q_UNUSED(writeLocker);
@@ -530,7 +530,7 @@ namespace Common {
         size_t size = m_KeywordsList.size();
 
         QVector<int> indicesToRemove;
-        indicesToRemove.reserve(size/2);
+        indicesToRemove.reserve((int)size/2);
 
         for (size_t i = 0; i < size; ++i) {
             QString keyword = m_KeywordsList.at(i).m_Value;
@@ -565,7 +565,7 @@ namespace Common {
         LOG_INFO << "replaced keyword" << removedKeyword;
         Q_UNUSED(wasCorrect);
 
-        int addedCount = appendKeywordsUnsafe(keywordsList);
+        size_t addedCount = appendKeywordsUnsafe(keywordsList);
         LOG_INFO << addedCount << "new added";
     }
 
@@ -717,8 +717,8 @@ namespace Common {
         for (size_t i = 0; i < size; ++i) {
             auto &item = candidatesForRemoval.at(i);
 
-            int index = item->getOriginalIndex();
-            if (index < 0 || index >= (int)m_KeywordsList.size()) {
+            size_t index = item->getOriginalIndex();
+            if (index >= m_KeywordsList.size()) {
                 LOG_DEBUG << "index is out of range";
                 continue;
             }
@@ -727,7 +727,7 @@ namespace Common {
             QString sanitized = Helpers::doSanitizeKeyword(item->getReplacement());
 
             if (isReplacedADuplicateUnsafe(index, existingPrev, sanitized)) {
-                indicesToRemove.append(index);
+                indicesToRemove.append((int)index);
             }
         }
 
@@ -909,7 +909,7 @@ namespace Common {
 
     void BasicKeywordsModel::onSpellCheckRequestReady(Common::SpellCheckFlags flags, size_t index) {
         if (Common::HasFlag(flags, Common::SpellCheckFlags::Keywords)) {
-            emitSpellCheckChanged(index);
+            emitSpellCheckChanged((int)index);
         }
 
         notifySpellCheckResults(flags);

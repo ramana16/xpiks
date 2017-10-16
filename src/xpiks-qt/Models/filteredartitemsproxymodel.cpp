@@ -212,6 +212,12 @@ namespace Models {
         m_CommandManager->deleteKeywordsFromArtworks(selectedItems);
     }
 
+    void FilteredArtItemsProxyModel::setSelectedForCsvExport() {
+        LOG_DEBUG << "#";
+        auto selectedArtworks = getSelectedArtworksSnapshot();
+        m_CommandManager->setArtworksForCsvExport(selectedArtworks);
+    }
+
     void FilteredArtItemsProxyModel::reimportMetadataForSelected() {
         LOG_DEBUG << "#";
         QVector<ArtworkMetadata *> selectedArtworks = getSelectedOriginalItems();

@@ -14,8 +14,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
-#include "../Connectivity/apimanager.h"
-#include "../Helpers/asynccoordinator.h"
+#include "presetkeywordsmodel.h"
 
 namespace KeywordsPresets {
 #define OVERWRITE_KEY QLatin1String("overwrite")
@@ -27,16 +26,11 @@ namespace KeywordsPresets {
 #endif
 #define OVERWRITE_PRESETS_CONFIG false
 
-    PresetKeywordsModelConfig::PresetKeywordsModelConfig(QObject *parent):
-        Models::AbstractConfigUpdaterModel(OVERWRITE_PRESETS_CONFIG, parent)
+    PresetKeywordsModelConfig::PresetKeywordsModelConfig()
     {}
 
-    void PresetKeywordsModelConfig::initializeConfigs(Helpers::AsyncCoordinator *initCoordinator) {
+    void PresetKeywordsModelConfig::initializeConfigs() {
         LOG_DEBUG << "#";
-
-        Helpers::AsyncCoordinatorLocker locker(initCoordinator);
-        Helpers::AsyncCoordinatorUnlocker unlocker(initCoordinator);
-        Q_UNUSED(locker); Q_UNUSED(unlocker);
 
         QString localConfigPath;
 
@@ -48,10 +42,8 @@ namespace KeywordsPresets {
             localConfigPath = LOCAL_PRESETKEYWORDS_LIST_FILE;
         }
 
-        auto &apiManager = Connectivity::ApiManager::getInstance();
-        QString remoteAddress = apiManager.getPresetsSourceAddr();
-        AbstractConfigUpdaterModel::initializeConfigs(remoteAddress, localConfigPath);
-        emit presetsUpdated();
+        m_Config.initConfig(localConfigPath);
+        processLocalConfig(m_Config.getConfig());
     }
 
     void PresetKeywordsModelConfig::loadFromModel(const std::vector<PresetModel *> &presets) {
@@ -72,9 +64,7 @@ namespace KeywordsPresets {
     }
 
     void PresetKeywordsModelConfig::sync() {
-#if !defined(INTEGRATION_TESTS) && !defined(CORE_TESTS)
         writeToConfig();
-#endif
     }
 
     bool PresetKeywordsModelConfig::processLocalConfig(const QJsonDocument &document) {
@@ -107,34 +97,6 @@ namespace KeywordsPresets {
         } while (false);
 
         return anyError;
-    }
-
-    void PresetKeywordsModelConfig::processRemoteConfig(const QJsonDocument &remoteDocument, bool overwriteLocal) {
-        bool overwrite = false;
-
-        if (!overwriteLocal && remoteDocument.isObject()) {
-            QJsonObject rootObject = remoteDocument.object();
-            if (rootObject.contains(OVERWRITE_KEY)) {
-                QJsonValue overwriteValue = rootObject[OVERWRITE_KEY];
-                if (overwriteValue.isBool()) {
-                    overwrite = overwriteValue.toBool();
-                    LOG_DEBUG << "Overwrite flag present in the config:" << overwrite;
-                } else {
-                    LOG_WARNING << "Overwrite flag is not boolean";
-                }
-            }
-        } else {
-            overwrite = overwriteLocal;
-        }
-
-        Models::AbstractConfigUpdaterModel::processRemoteConfig(remoteDocument, overwrite);
-    }
-
-    int PresetKeywordsModelConfig::operator ()(const QJsonObject &val1, const QJsonObject &val2) {
-        // values are always considered equal. This may lead to loss of local changes.
-        Q_UNUSED(val1);
-        Q_UNUSED(val2);
-        return 0;
     }
 
     void PresetKeywordsModelConfig::parsePresetArray(const QJsonArray &array) {
@@ -198,13 +160,10 @@ namespace KeywordsPresets {
         QJsonDocument doc;
         doc.setObject(rootObject);
 
-        Helpers::LocalConfig &localConfig = getLocalConfig();
-        localConfig.setConfig(doc);
-        localConfig.saveToFile();
-    }
+        Helpers::LocalConfigDropper dropper(&m_Config);
+        Q_UNUSED(dropper);
 
-    void PresetKeywordsModelConfig::initialize(const QVector<PresetData> &presetData){
-        m_PresetData = presetData;
-        emit presetsUpdated();
+        m_Config.setConfig(doc);
+        m_Config.saveToFile();
     }
 }

@@ -77,6 +77,7 @@ namespace Suggestion {
 namespace MetadataIO {
     class MetadataIOService;
     class MetadataIOCoordinator;
+    class CsvExportModel;
 }
 
 namespace SpellCheck {
@@ -185,6 +186,7 @@ namespace Commands {
         void InjectDependency(Connectivity::RequestsService *requestsService);
         void InjectDependency(Helpers::DatabaseManager *databaseManager);
         void InjectDependency(SpellCheck::DuplicatesReviewModel *duplicatesModel);
+        void InjectDependency(MetadataIO::CsvExportModel *csvExportModel);
 
     private:
         int generateNextCommandID() { int id = m_LastCommandID++; return id; }
@@ -211,6 +213,7 @@ namespace Commands {
         void deleteKeywordsFromArtworks(std::vector<Models::MetadataElement> &artworks) const;
         void setArtworksForUpload(MetadataIO::ArtworksSnapshot &artworks) const;
         void setArtworksForZipping(MetadataIO::ArtworksSnapshot &artworks) const;
+        void setArtworksForCsvExport(MetadataIO::ArtworksSnapshot::Container &rawSnapshot) const;
         virtual void connectArtworkSignals(Models::ArtworkMetadata *artwork) const;
         void disconnectArtworkSignals(Models::ArtworkMetadata *metadata) const;
         void readMetadata(const MetadataIO::ArtworksSnapshot &snapshot) const;
@@ -301,7 +304,6 @@ namespace Commands {
         virtual Models::DeleteKeywordsViewModel *getDeleteKeywordsModel() const { return m_DeleteKeywordsViewModel; }
         virtual SpellCheck::SpellCheckSuggestionModel *getSpellSuggestionsModel() const { return m_SpellCheckSuggestionModel; }
         virtual KeywordsPresets::PresetKeywordsModel *getPresetsModel() const { return m_PresetsModel; }
-        virtual KeywordsPresets::PresetKeywordsModelConfig *getPresetsModelConfig() const { return m_PresetsModelConfig; }
         virtual Translation::TranslationService *getTranslationService() const { return m_TranslationService; }
         virtual Models::UIManager *getUIManager() const { return m_UIManager; }
         virtual QuickBuffer::QuickBuffer *getQuickBuffer() const { return m_QuickBuffer; }
@@ -325,6 +327,7 @@ namespace Commands {
         virtual AutoComplete::AutoCompleteService *getAutoCompleteService() const { return m_AutoCompleteService; }
         virtual Warnings::WarningsService *getWarningsService() const { return m_WarningsService; }
         virtual Models::FindAndReplaceModel *getFindAndReplaceModel() const { return m_FindAndReplaceModel; }
+        virtual MetadataIO::CsvExportModel *getCsvExportModel() const { return m_CsvExportModel; }
 #endif
     private:
         Common::WordAnalysisFlags getWordAnalysisFlags() const;
@@ -363,7 +366,6 @@ namespace Commands {
         Models::FindAndReplaceModel *m_FindAndReplaceModel;
         Helpers::HelpersQmlWrapper *m_HelpersQmlWrapper;
         KeywordsPresets::PresetKeywordsModel *m_PresetsModel;
-        KeywordsPresets::PresetKeywordsModelConfig *m_PresetsModelConfig;
         Translation::TranslationService *m_TranslationService;
         Translation::TranslationManager *m_TranslationManager;
         Models::UIManager *m_UIManager;
@@ -378,6 +380,7 @@ namespace Commands {
         Connectivity::RequestsService *m_RequestsService;
         Helpers::DatabaseManager *m_DatabaseManager;
         SpellCheck::DuplicatesReviewModel *m_DuplicatesModel;
+        MetadataIO::CsvExportModel *m_CsvExportModel;
 
         QVector<Common::IServiceBase<Common::IBasicArtwork, Common::WarningsCheckFlags> *> m_WarningsCheckers;
         QVector<Helpers::IFileNotAvailableModel*> m_AvailabilityListeners;

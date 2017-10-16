@@ -41,6 +41,7 @@ namespace Connectivity {
     protected:
         virtual bool processLocalConfig(const QJsonDocument &document) override;
         virtual void processRemoteConfig(const QJsonDocument &remoteDocument, bool overwriteLocal) override;
+        virtual void processMergedConfig(const QJsonDocument &document) override;
 
         // CompareValuesJson interface
     public:

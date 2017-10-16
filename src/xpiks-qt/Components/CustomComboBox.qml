@@ -27,6 +27,13 @@ Item {
     property alias model: dropDownItems.model
     property alias selectedIndex: dropDownItems.currentIndex
     property color comboboxBackgroundColor: uiColors.defaultControlColor
+    property bool isOpened: comboBox.state != ""
+
+    property bool isBelow: true
+    property variant relativeParent: undefined
+    property bool withRelativePosition: false
+    property real dropDownHeight: dropDownItems.itemsCount > maxCount ? (maxCount * (comboBox.itemHeight + 1) + 10) : ((comboBox.itemHeight + 1) * dropDownItems.itemsCount + 10)
+
     signal comboIndexChanged();
     signal lastItemActionInvoked();
 
@@ -37,10 +44,10 @@ Item {
     RectangularGlow {
         anchors.left: header.left
         anchors.right: header.right
-        anchors.top: header.top
-        anchors.bottom: dropDown.bottom
-        anchors.topMargin: glowRadius/2
-        anchors.bottomMargin: -glowRadius
+        anchors.top: isBelow ? header.top : dropDown.top
+        anchors.bottom: isBelow ? dropDown.bottom : header.bottom
+        anchors.topMargin: isBelow ? glowRadius/2 : -glowRadius
+        anchors.bottomMargin: isBelow ? -glowRadius : glowRadius/2
         visible: dropDown.visible
         height: dropDown.height
         glowRadius: 4
@@ -109,6 +116,17 @@ Item {
             hoverEnabled: true
             anchors.fill: parent;
             onClicked: {
+                if (withRelativePosition) {
+                    if (typeof relativeParent !== "undefined") {
+                        var tmp = comboBox.mapToItem(comboBox.relativeParent,
+                                                     0,
+                                                     header.height)
+
+                        var popupHeight = dropDownHeight
+                        comboBox.isBelow = (tmp.y + popupHeight) < comboBox.relativeParent.height;
+                    }
+                }
+
                 comboBox.state = comboBox.state === "dropDown" ? "" : "dropDown"
                 dropDown.forceActiveFocus()
             }
@@ -119,7 +137,8 @@ Item {
         id: dropDown
         anchors.left: parent.left
         anchors.right: parent.right
-        anchors.top: header.bottom
+        anchors.top: isBelow ? header.bottom : undefined
+        anchors.bottom: isBelow ? undefined : header.top
         color: uiColors.popupBackgroundColor
         visible: false
         height: 0
@@ -230,8 +249,9 @@ Item {
         name: "dropDown";
         PropertyChanges {
             target: dropDown;
-            height: dropDownItems.itemsCount > maxCount ? (maxCount * (comboBox.itemHeight + 1) + 10) : ((comboBox.itemHeight + 1) * dropDownItems.itemsCount + 10)
+            height: dropDownHeight
             visible: true
+            //z: 100500
         }
     }
 

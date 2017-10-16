@@ -15,7 +15,7 @@ namespace Helpers {
     bool mergeJsonObjects (const QJsonObject &objectMergeFrom, QJsonObject &objectMergeTo, CompareValuesJson &comparer);
 
     bool mergeArraysOfObjects(const QJsonArray &arrayFrom, QJsonArray &arrayTo, CompareValuesJson &comparer);
-    bool containsObject(const QJsonArray &array, int minIndex, const QJsonObject &object, CompareValuesJson &comparer);
+    int findObjectIndex(const QJsonArray &array, int minIndex, const QJsonObject &object, CompareValuesJson &comparer);
     bool mergeArraysOfStrings(const QJsonArray &arrayFrom, QJsonArray &arrayTo);
 
     bool mergeJsonArrays (const QJsonArray &arrayFrom, QJsonArray &arrayTo, CompareValuesJson &comparer) {
@@ -38,7 +38,7 @@ namespace Helpers {
         }
 
         bool mergeResult = false;
-        int type = arrayTo.first().type();
+        const int type = arrayTo.first().type();
 
         if (type == QJsonValue::Object) {
             mergeResult = mergeArraysOfObjects(arrayFrom, arrayTo, comparer);
@@ -63,6 +63,10 @@ namespace Helpers {
             QJsonObject objectFrom = arrayFrom[i].toObject();
 
             if (comparer(objectTo, objectFrom) == 0) {
+                if (mergeJsonObjects(objectFrom, objectTo, comparer)) {
+                    arrayTo[i] = objectTo;
+                }
+
                 i++;
             } else {
                 break;
@@ -73,23 +77,28 @@ namespace Helpers {
 
         int maxIndexOfEqual = i;
 
-        QJsonArray mergedArray = arrayTo;
-
-        int sizeFrom = arrayFrom.size();
+        const int sizeFrom = arrayFrom.size();
         QJsonArray elementsToAdd;
 
         for (; i < sizeFrom; i++) {
             Q_ASSERT(arrayFrom[i].isObject());
-            QJsonObject objectToAdd = arrayFrom[i].toObject();
+            QJsonObject objectFrom = arrayFrom[i].toObject();
 
-            bool alreadyExists = containsObject(arrayTo, maxIndexOfEqual, objectToAdd, comparer);
-            if (!alreadyExists) {
-                elementsToAdd.append(objectToAdd);
+            const int existingIndex = findObjectIndex(arrayTo, maxIndexOfEqual, objectFrom, comparer);
+            if (existingIndex == -1) {
+                elementsToAdd.append(objectFrom);
+            } else {
+                QJsonObject objectTo = arrayTo[i].toObject();
+
+                if (mergeJsonObjects(objectFrom, objectTo, comparer)) {
+                    arrayTo[i] = objectTo;
+                }
             }
         }
 
         LOG_DEBUG << elementsToAdd.size() << "new elements to be added";
 
+        QJsonArray mergedArray = arrayTo;
         int sizeMergedAdd = elementsToAdd.size();
         for (int t = 0; t < sizeMergedAdd; t++) {
             mergedArray.append(elementsToAdd[t]);
@@ -100,11 +109,11 @@ namespace Helpers {
         return true;
     }
 
-    bool containsObject(const QJsonArray &array, int minIndex, const QJsonObject &object, CompareValuesJson &comparer) {
-        bool found = false;
+    int findObjectIndex(const QJsonArray &array, int minIndex, const QJsonObject &object, CompareValuesJson &comparer) {
+        int index = -1;
         Q_ASSERT(minIndex < array.size());
 
-        int size = array.size();
+        const int size = array.size();
 
         for (int i = minIndex; i < size; ++i) {
             Q_ASSERT(array[i].type() == QJsonValue::Object);
@@ -112,12 +121,12 @@ namespace Helpers {
             QJsonObject objectInArray = array[i].toObject();
 
             if (comparer(object, objectInArray) == 0) {
-                found = true;
+                index = i;
                 break;
             }
         }
 
-        return found;
+        return index;
     }
 
     bool mergeArraysOfStrings(const QJsonArray &arrayFrom, QJsonArray &arrayTo) {
@@ -127,13 +136,13 @@ namespace Helpers {
         commonValues.reserve(arrayTo.size() + arrayFrom.size());
 
         int i = 0;
-        int sizeTo = arrayTo.size();
+        const int sizeTo = arrayTo.size();
         for (i = 0; i < sizeTo; ++i) {
             Q_ASSERT(arrayTo[i].type() == QJsonValue::String);
             commonValues.insert(arrayTo[i].toString());
         }
 
-        int sizeFrom = arrayFrom.size();
+        const int sizeFrom = arrayFrom.size();
         for (i = 0; i < sizeFrom; ++i) {
             Q_ASSERT(arrayFrom[i].type() == QJsonValue::String);
             commonValues.insert(arrayFrom[i].toString());
@@ -150,8 +159,8 @@ namespace Helpers {
         return true;
     }
 
-    bool mergeJsonObjects (const QJsonObject &objectMergeFrom, QJsonObject &objectMergeTo, CompareValuesJson &comparer) {
-        LOG_DEBUG << "#";
+    bool mergeJsonObjects(const QJsonObject &objectMergeFrom, QJsonObject &objectMergeTo, CompareValuesJson &comparer) {
+        LOG_INTEGR_TESTS_OR_DEBUG << "#";
 
         QStringList keysMergeFrom = objectMergeFrom.keys();
         int keysSize = keysMergeFrom.size();
@@ -191,13 +200,15 @@ namespace Helpers {
                         break;
                     }
                 } else {
+                    // overwrite if found plain type
                     valueTo = valueFrom;
                 }
 
                 objectMergeTo[keyFrom] = valueTo;
 
             } else {
-                objectMergeTo[keyFrom] = objectMergeFrom[keyFrom]; // insert if doesn't contain
+                // insert if not found
+                objectMergeTo[keyFrom] = objectMergeFrom[keyFrom];
             }
         }
 

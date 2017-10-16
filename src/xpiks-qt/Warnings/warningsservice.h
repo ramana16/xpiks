@@ -61,6 +61,7 @@ namespace Warnings {
     private:
         WarningsCheckingWorker *m_WarningsWorker;
         WarningsSettingsModel m_WarningsSettingsModel;
+        bool m_IsStopped;
     };
 }
 

@@ -98,15 +98,15 @@ namespace SpellCheck {
     {
         Q_OBJECT
     public:
-        KeywordSpellSuggestions(const QString &keyword, int originalIndex, const QString &origin);
-        KeywordSpellSuggestions(const QString &keyword, int originalIndex);
+        KeywordSpellSuggestions(const QString &keyword, size_t originalIndex, const QString &origin);
+        KeywordSpellSuggestions(const QString &keyword, size_t originalIndex);
         virtual ~KeywordSpellSuggestions();
 
     public:
 #if defined(CORE_TESTS) || defined(INTEGRATION_TESTS)
         virtual QString toDebugString() const override { return QString("KeywordReplace: %1 -> (%2)").arg(getWord()).arg(getSuggestions().join(", ")); }
 #endif
-        int getOriginalIndex() const { return m_OriginalIndex; }
+        size_t getOriginalIndex() const { return m_OriginalIndex; }
         bool isPotentialDuplicate() const { return m_ReplaceResult == Common::KeywordReplaceResult::FailedDuplicate; }
         virtual void replaceToSuggested() override;
 
@@ -115,7 +115,7 @@ namespace SpellCheck {
         virtual void replaceToSuggested(const QString &word, const QString &replacement) override;
 
     private:
-        int m_OriginalIndex;
+        size_t m_OriginalIndex;
         Common::KeywordReplaceResult m_ReplaceResult;
     };
 

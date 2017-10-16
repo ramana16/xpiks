@@ -72,7 +72,6 @@ namespace Models {
     int UIManager::addPluginTab(int pluginID, const QString tabIconComponent, const QString &tabComponent, QObject *tabModel) {
         LOG_INFO << "plugin" << pluginID << "icon" << tabIconComponent << "contents" << tabComponent;
 
-        int index = m_TabsModel.rowCount();
         int id = generateNextTabID();
 
         m_TabsModel.addPluginTab(id, tabIconComponent, tabComponent);

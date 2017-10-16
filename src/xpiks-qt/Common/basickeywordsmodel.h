@@ -90,7 +90,7 @@ namespace Common {
         virtual bool removeKeywordAt(size_t index, QString &removedKeyword);
         virtual bool removeLastKeyword(QString &removedKeyword);
         virtual void setKeywords(const QStringList &keywordsList);
-        virtual int appendKeywords(const QStringList &keywordsList);
+        virtual size_t appendKeywords(const QStringList &keywordsList);
         virtual bool editKeyword(size_t index, const QString &replacement);
         virtual bool clearKeywords();
         virtual bool expandPreset(size_t keywordIndex, const QStringList &presetList);

@@ -165,7 +165,11 @@ SOURCES += main.cpp \
     AutoComplete/stringsautocompletemodel.cpp \
     AutoComplete/presetscompletionengine.cpp \
     SpellCheck/duplicatesreviewmodel.cpp \
-    SpellCheck/duplicateshighlighter.cpp
+    SpellCheck/duplicateshighlighter.cpp \
+    MetadataIO/csvexportworker.cpp \
+    MetadataIO/csvexportplansmodel.cpp \
+    MetadataIO/csvexportproperties.cpp \
+    MetadataIO/csvexportmodel.cpp
 
 RESOURCES += qml.qrc
 
@@ -393,7 +397,11 @@ HEADERS += \
     AutoComplete/presetscompletionengine.h \
     Common/keyword.h \
     SpellCheck/duplicatesreviewmodel.h \
-    SpellCheck/duplicateshighlighter.h
+    SpellCheck/duplicateshighlighter.h \
+    MetadataIO/csvexportworker.h \
+    MetadataIO/csvexportproperties.h \
+    MetadataIO/csvexportplansmodel.h \
+    MetadataIO/csvexportmodel.h
 
 DISTFILES += \
     Components/CloseIcon.qml \
@@ -480,7 +488,9 @@ DISTFILES += \
     Dialogs/DonateDialog.qml \
     Components/DonateComponent.qml \
     StackViews/DuplicatesReView.qml \
-    StyledControls/StyledLink.qml
+    StyledControls/StyledLink.qml \
+    Dialogs/CsvExportDialog.qml \
+    Components/DotsButton.qml
 
 lupdate_only {
 SOURCES += *.qml \

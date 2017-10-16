@@ -64,6 +64,7 @@
 #include "../Models/switchermodel.h"
 #include "../Connectivity/requestsservice.h"
 #include "../AutoComplete/keywordsautocompletemodel.h"
+#include "../MetadataIO/csvexportmodel.h"
 
 Commands::CommandManager::CommandManager():
     QObject(),
@@ -98,7 +99,6 @@ Commands::CommandManager::CommandManager():
     m_FindAndReplaceModel(NULL),
     m_HelpersQmlWrapper(NULL),
     m_PresetsModel(NULL),
-    m_PresetsModelConfig(NULL),
     m_TranslationService(NULL),
     m_TranslationManager(NULL),
     m_UIManager(NULL),
@@ -112,6 +112,7 @@ Commands::CommandManager::CommandManager():
     m_SwitcherModel(NULL),
     m_RequestsService(NULL),
     m_DuplicatesModel(NULL),
+    m_CsvExportModel(NULL),
     m_ServicesInitialized(false),
     m_AfterInitCalled(false),
     m_LastCommandID(0)
@@ -277,11 +278,6 @@ void Commands::CommandManager::InjectDependency(KeywordsPresets::PresetKeywordsM
     m_PresetsModel->setCommandManager(this);
 }
 
-void Commands::CommandManager::InjectDependency(KeywordsPresets::PresetKeywordsModelConfig *presetsModelConfig) {
-    Q_ASSERT(presetsModelConfig != NULL); m_PresetsModelConfig = presetsModelConfig;
-    m_PresetsModelConfig->setCommandManager(this);
-}
-
 void Commands::CommandManager::InjectDependency(Translation::TranslationService *translationService) {
     Q_ASSERT(translationService != NULL); m_TranslationService = translationService;
 }
@@ -344,6 +340,11 @@ void Commands::CommandManager::InjectDependency(Helpers::DatabaseManager *databa
 
 void Commands::CommandManager::InjectDependency(SpellCheck::DuplicatesReviewModel *duplicatesModel) {
     Q_ASSERT(duplicatesModel != NULL); m_DuplicatesModel = duplicatesModel;
+}
+
+void Commands::CommandManager::InjectDependency(MetadataIO::CsvExportModel *csvExportModel) {
+    Q_ASSERT(csvExportModel != NULL); m_CsvExportModel = csvExportModel;
+    m_CsvExportModel->setCommandManager(this);
 }
 
 std::shared_ptr<Commands::ICommandResult> Commands::CommandManager::processCommand(const std::shared_ptr<ICommandBase> &command)
@@ -420,11 +421,6 @@ void Commands::CommandManager::connectEntitiesSignalsSlots() const {
 
         QObject::connect(m_UpdateService, &Connectivity::UpdateService::updateDownloaded,
                          m_HelpersQmlWrapper, &Helpers::HelpersQmlWrapper::updateIsDownloaded);
-    }
-
-    if (m_PresetsModel != NULL && m_PresetsModelConfig != NULL) {
-        QObject::connect(m_PresetsModelConfig, &KeywordsPresets::PresetKeywordsModelConfig::presetsUpdated,
-                         m_PresetsModel, &KeywordsPresets::PresetKeywordsModel::onPresetsUpdated);
     }
 
     if (m_WarningsModel != NULL && m_WarningsService != NULL) {
@@ -536,7 +532,6 @@ void Commands::CommandManager::ensureDependenciesInjected() {
     Q_ASSERT(m_FindAndReplaceModel != NULL);
     Q_ASSERT(m_DeleteKeywordsViewModel != NULL);
     Q_ASSERT(m_PresetsModel != NULL);
-    Q_ASSERT(m_PresetsModelConfig != NULL);
     Q_ASSERT(m_TranslationService != NULL);
     Q_ASSERT(m_TranslationManager != NULL);
     Q_ASSERT(m_ArtworkProxyModel != NULL);
@@ -552,6 +547,7 @@ void Commands::CommandManager::ensureDependenciesInjected() {
 #if !defined(CORE_TESTS)
     Q_ASSERT(m_DatabaseManager != NULL);
     Q_ASSERT(m_AutoCompleteModel != NULL);
+    Q_ASSERT(m_CsvExportModel != NULL);
 #endif
 
 #if !defined(INTEGRATION_TESTS)
@@ -618,6 +614,17 @@ void Commands::CommandManager::setArtworksForZipping(MetadataIO::ArtworksSnapsho
     if (m_ZipArchiver) {
         m_ZipArchiver->setArtworks(artworks);
     }
+}
+
+void Commands::CommandManager::setArtworksForCsvExport(MetadataIO::ArtworksSnapshot::Container &rawSnapshot) const {
+#ifndef CORE_TESTS
+    LOG_INFO << rawSnapshot.size() << "artworks";
+    if (m_CsvExportModel) {
+        m_CsvExportModel->setupModel(rawSnapshot);
+    }
+#else
+    Q_UNUSED(rawSnapshot);
+#endif
 }
 
 /*virtual*/
@@ -1026,7 +1033,8 @@ void Commands::CommandManager::afterConstructionCallback() {
     m_ArtworkUploader->initializeStocksList(&m_InitCoordinator);
     m_WarningsService->initWarningsSettings();
     m_TranslationManager->initializeDictionaries();
-    m_PresetsModelConfig->initializeConfigs(&m_InitCoordinator);
+    m_PresetsModel->initializePresets();
+    m_CsvExportModel->initializeExportPlans(&m_InitCoordinator);
 #endif
 
     executeMaintenanceJobs();
@@ -1236,6 +1244,8 @@ void Commands::CommandManager::cleanup() {
     m_ArtworksUpdateHub->clear();
     m_AutoCompleteModel->clear();
 
+    m_CsvExportModel->clearModel();
+    m_CsvExportModel->clearPlans();
     m_CombinedArtworksModel->resetModel();
     m_ZipArchiver->resetModel();
     m_ArtworkUploader->resetModel();

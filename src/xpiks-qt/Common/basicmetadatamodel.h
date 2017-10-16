@@ -83,7 +83,7 @@ namespace Common {
         virtual bool removeKeywordAt(size_t index, QString &removedKeyword) override { return BasicKeywordsModel::removeKeywordAt(index, removedKeyword); }
         virtual bool removeLastKeyword(QString &removedKeyword) override { return BasicKeywordsModel::removeLastKeyword(removedKeyword); }
         virtual bool appendKeyword(const QString &keyword) override { return BasicKeywordsModel::appendKeyword(keyword); }
-        virtual int appendKeywords(const QStringList &keywordsList) override { return BasicKeywordsModel::appendKeywords(keywordsList); }
+        virtual size_t appendKeywords(const QStringList &keywordsList) override { return BasicKeywordsModel::appendKeywords(keywordsList); }
         virtual bool clearKeywords() override { return BasicKeywordsModel::clearKeywords(); }
         virtual QString getKeywordsString() override { return BasicKeywordsModel::getKeywordsString(); }
         virtual void setKeywords(const QStringList &keywords) override { return BasicKeywordsModel::setKeywords(keywords); }
