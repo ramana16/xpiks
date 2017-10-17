@@ -18,9 +18,6 @@ namespace Models {
 }
 
 namespace Helpers {
-    void extractFilePathes(const QVector<Models::ArtworkMetadata *> &artworkList,
-                           QStringList &filePathes,
-                           QStringList &zipsPathes);
     QStringList convertToVectorFilenames(const QStringList &items);
     QStringList convertToVectorFilenames(const QString &path);
     QString getImagePath(const QString &path);

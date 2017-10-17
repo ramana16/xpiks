@@ -136,7 +136,6 @@ SOURCES += main.cpp \
     keywordvalidation_tests.cpp \
     artworkrepository_tests.cpp \
     filteredmodel_tests.cpp \
-    conectivityhelpers_tests.cpp \
     undoredo_tests.cpp \
     ../../xpiks-qt/Helpers/filterhelpers.cpp \
     artworkfilter_tests.cpp \
@@ -259,7 +258,6 @@ HEADERS += \
     ../../xpiks-qt/Common/version.h \
     ../../xpiks-qt/Commands/icommandbase.h \
     ../../xpiks-qt/Commands/icommandmanager.h \
-    conectivityhelpers_tests.h \
     undoredo_tests.h \
     ../../xpiks-qt/Helpers/filterhelpers.h \
     artworkfilter_tests.h \

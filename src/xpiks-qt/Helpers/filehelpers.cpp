@@ -17,33 +17,6 @@
 #include "../Models/artworkmetadata.h"
 #include "../Models/imageartwork.h"
 
-void Helpers::extractFilePathes(const QVector<Models::ArtworkMetadata *> &artworkList,
-                       QStringList &filePathes,
-                       QStringList &zipsPathes) {
-
-    int size = artworkList.length();
-    filePathes.reserve(size);
-    zipsPathes.reserve(size);
-    LOG_DEBUG << "Generating filepathes for" << size << "item(s)";
-
-    for (int i = 0; i < size; ++i) {
-        Models::ArtworkMetadata *metadata = artworkList.at(i);
-        QString filepath = metadata->getFilepath();
-        filePathes.append(filepath);
-
-        Models::ImageArtwork *image = dynamic_cast<Models::ImageArtwork*>(metadata);
-
-        if (image != NULL && image->hasVectorAttached()) {
-            filePathes.append(image->getAttachedVectorPath());
-
-            QString zipPath = Helpers::getArchivePath(filepath);
-            zipsPathes.append(zipPath);
-        } else {
-            zipsPathes.append(filepath);
-        }
-    }
-}
-
 QStringList Helpers::convertToVectorFilenames(const QStringList &item) {
     QStringList converted;
     converted.reserve(item.length()*2);
