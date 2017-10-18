@@ -589,6 +589,26 @@ win32 {
 
     LIBS += -lmman
 
+    TR_DIR = translations
+
+    exists($$OUT_PWD/$$EXE_DIR/$$TR_DIR) {
+        message("Translations exist")
+    } else {
+        createtranslations.commands += $(MKDIR) \"$$shell_path($$OUT_PWD/$$EXE_DIR/$$TR_DIR)\"
+        QMAKE_EXTRA_TARGETS += createtranslations
+        POST_TARGETDEPS += createtranslations
+    }
+
+    AC_SOURCES_DIR = ac_sources
+
+    exists($$OUT_PWD/$$EXE_DIR/$$AC_SOURCES_DIR) {
+        message("ac_sources exist")
+    } else {
+        create_ac_sources.commands += $(MKDIR) \"$$shell_path($$OUT_PWD/$$EXE_DIR/$$AC_SOURCES_DIR)\"
+        QMAKE_EXTRA_TARGETS += create_ac_sources
+        POST_TARGETDEPS += create_ac_sources
+    }
+
     copywhatsnew.commands = $(COPY_FILE) \"$$shell_path($$PWD/deps/whatsnew.txt)\" \"$$shell_path($$OUT_PWD/$$EXE_DIR/)\"
     copyterms.commands = $(COPY_FILE) \"$$shell_path($$PWD/deps/terms_and_conditions.txt)\" \"$$shell_path($$OUT_PWD/$$EXE_DIR/)\"
     copydicts.commands = $(COPY_DIR) \"$$shell_path($$PWD/deps/dict)\" \"$$shell_path($$OUT_PWD/$$EXE_DIR/dict)\"
@@ -596,16 +616,10 @@ win32 {
     appveyor {
         DEFINES += WITH_LOGS
         LIBS += -L"$$PWD/../../libs"
-
-        copytranslations.commands = echo "Skip translations"
-        create_ac_sources.commands = $(MKDIR) \"$$shell_path($$OUT_PWD/$$EXE_DIR/ac_sources)\"
-        QMAKE_EXTRA_TARGETS += create_ac_sources
-        POST_TARGETDEPS += create_ac_sources
-    } else {
-        copytranslations.commands = $(COPY_FILE) \"$$shell_path($$PWD/deps/translations/xpiks_*.qm)\" \"$$shell_path($$OUT_PWD/$$EXE_DIR/translations/)\"
     }
 
-    copyfreqtables.commands = $(COPY_FILE) \"$$shell_path($$PWD/deps/en_wordlist.tsv)\" \"$$shell_path($$OUT_PWD/$$EXE_DIR/ac_sources)\"
+    copytranslations.commands = $(COPY_FILE) \"$$shell_path($$PWD/deps/$$TR_DIR/xpiks_*.qm)\" \"$$shell_path($$OUT_PWD/$$EXE_DIR/$$TR_DIR/)\"
+    copyfreqtables.commands = $(COPY_FILE) \"$$shell_path($$PWD/deps/en_wordlist.tsv)\" \"$$shell_path($$OUT_PWD/$$EXE_DIR/$$AC_SOURCES_DIR/)\"
 
     QMAKE_EXTRA_TARGETS += copywhatsnew copyterms copydicts copytranslations copyfreqtables
     POST_TARGETDEPS += copywhatsnew copyterms copydicts copytranslations copyfreqtables
