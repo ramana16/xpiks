@@ -616,9 +616,11 @@ win32 {
     appveyor {
         DEFINES += WITH_LOGS
         LIBS += -L"$$PWD/../../libs"
+        copytranslations.commands = echo "Skip translations"
+    } else {
+        copytranslations.commands = $(COPY_FILE) \"$$shell_path($$PWD/deps/$$TR_DIR/xpiks_*.qm)\" \"$$shell_path($$OUT_PWD/$$EXE_DIR/$$TR_DIR/)\"
     }
 
-    copytranslations.commands = $(COPY_FILE) \"$$shell_path($$PWD/deps/$$TR_DIR/xpiks_*.qm)\" \"$$shell_path($$OUT_PWD/$$EXE_DIR/$$TR_DIR/)\"
     copyfreqtables.commands = $(COPY_FILE) \"$$shell_path($$PWD/deps/en_wordlist.tsv)\" \"$$shell_path($$OUT_PWD/$$EXE_DIR/$$AC_SOURCES_DIR/)\"
 
     QMAKE_EXTRA_TARGETS += copywhatsnew copyterms copydicts copytranslations copyfreqtables
