@@ -126,6 +126,11 @@ namespace Warnings {
             QString formattedSeconds = QString::number(settingsModel->getMaxVideoDurationSeconds(), 'f', 1);
             descriptions.append(QObject::tr("Video is longer than %1 seconds").arg(formattedSeconds));
         }
+
+        if (Common::HasFlag(warningsFlags, Common::WarningFlags::VideoIsTooShort)) {
+            QString formattedSeconds = QString::number(settingsModel->getMinVideoDurationSeconds(), 'f', 1);
+            descriptions.append(QObject::tr("Video is shorter than %1 seconds").arg(formattedSeconds));
+        }
     }
 
     WarningsModel::WarningsModel(QObject *parent):

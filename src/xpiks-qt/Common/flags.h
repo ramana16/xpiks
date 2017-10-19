@@ -124,6 +124,7 @@ namespace Common {
         FilenameSymbols = 1 << 17,
         VideoFileIsTooBig = 1 << 18,
         VideoIsTooLong = 1 << 19,
+        VideoIsTooShort = 1 << 20,
 
         DescriptionGroup = DescriptionIsEmpty |
             DescriptionNotEnoughWords |

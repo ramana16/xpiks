@@ -29,6 +29,7 @@ namespace Warnings {
         double getMinMegapixels() const { return m_MinMegapixels; }
         double getMaxImageFilesizeMB() const { return m_MaxImageFilesizeMB; }
         double getMaxVideoFilesizeMB() const { return m_MaxVideoFilesizeMB; }
+        double getMinVideoDurationSeconds() const { return m_MinVideoDurationSeconds; }
         double getMaxVideoDurationSeconds() const { return m_MaxVideoDurationSeconds; }
         int getMinKeywordsCount() const { return m_MinKeywordsCount; }
         int getMaxKeywordsCount() const { return m_MaxKeywordsCount; }
@@ -53,6 +54,7 @@ namespace Warnings {
         double m_MinMegapixels;
         double m_MaxImageFilesizeMB;
         double m_MaxVideoFilesizeMB;
+        double m_MinVideoDurationSeconds;
         double m_MaxVideoDurationSeconds;
         int m_MinKeywordsCount;
         int m_MaxKeywordsCount;

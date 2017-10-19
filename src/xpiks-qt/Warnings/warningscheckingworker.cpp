@@ -125,8 +125,14 @@ namespace Warnings {
         if (video != nullptr) {
             const double duration = video->getDuration();
             const double maxDuration = m_WarningsSettingsModel->getMaxVideoDurationSeconds();
+            const double minDuration = m_WarningsSettingsModel->getMinVideoDurationSeconds();
+
             if (duration > maxDuration) {
                 Common::SetFlag(warningsInfo, Common::WarningFlags::VideoIsTooLong);
+            }
+
+            if (duration < minDuration) {
+                Common::SetFlag(warningsInfo, Common::WarningFlags::VideoIsTooShort);
             }
         }
 

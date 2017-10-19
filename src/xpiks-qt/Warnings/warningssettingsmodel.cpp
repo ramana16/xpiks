@@ -26,6 +26,7 @@
 #define MIN_WORDS_COUNT QLatin1String("min_words_count")
 #define MAX_DESCRIPTION_LENGTH QLatin1String("max_description_length")
 #define MAX_VIDEO_DURATION QLatin1String("max_video_duration_s")
+#define MIN_VIDEO_DURATION QLatin1String("min_video_duration_s")
 
 #define DEFAULT_MIN_MEGAPIXELS 4.0
 #define DEFAULT_MAX_IMAGE_FILESIZE_MB 25.0
@@ -34,6 +35,7 @@
 #define DEFAULT_MAX_KEYWORDS_COUNT 50
 #define DEFAULT_MIN_WORDS_COUNT 3
 #define DEFAULT_MAX_DESCRIPTION_LENGTH 200
+#define DEFAULT_MIN_VIDEO_DURATION_SECONDS 5
 #define DEFAULT_MAX_VIDEO_DURATION_SECONDS 60
 
 namespace Warnings {
@@ -43,6 +45,7 @@ namespace Warnings {
         m_MinMegapixels(DEFAULT_MIN_MEGAPIXELS),
         m_MaxImageFilesizeMB(DEFAULT_MAX_IMAGE_FILESIZE_MB),
         m_MaxVideoFilesizeMB(DEFAULT_MAX_VIDEO_FILESIZE_MB),
+        m_MinVideoDurationSeconds(DEFAULT_MIN_VIDEO_DURATION_SECONDS),
         m_MaxVideoDurationSeconds(DEFAULT_MAX_VIDEO_DURATION_SECONDS),
         m_MinKeywordsCount(DEFAULT_MIN_KEYWORDS_COUNT),
         m_MaxKeywordsCount(DEFAULT_MAX_KEYWORDS_COUNT),
@@ -165,6 +168,16 @@ namespace Warnings {
                 }
 
                 m_MaxVideoFilesizeMB = maxVideoFilesizeMB.toDouble(DEFAULT_MAX_VIDEO_FILESIZE_MB);
+            }
+
+            {
+                QJsonValue minVideoDuration = settingsObject[MIN_VIDEO_DURATION];
+                if (!minVideoDuration.isDouble()) {
+                    LOG_WARNING << "MAX_VIDEO_DURATION value is not number";
+                    anyError = true;
+                }
+
+                m_MinVideoDurationSeconds = minVideoDuration.toDouble(DEFAULT_MIN_VIDEO_DURATION_SECONDS);
             }
 
             {
