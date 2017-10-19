@@ -17,12 +17,15 @@
 #define MAX_SAVE_PAUSE_RESTARTS 5
 
 namespace MetadataIO {
-    CsvExportColumnsModel::CsvExportColumnsModel()
+    CsvExportColumnsModel::CsvExportColumnsModel():
+        m_CurrentIndex(-1)
     {
     }
 
-    void CsvExportColumnsModel::setupModel(const std::shared_ptr<CsvExportPlan> &plan) {
+    void CsvExportColumnsModel::setupModel(int row, const std::shared_ptr<CsvExportPlan> &plan) {
         LOG_DEBUG << "#";
+
+        m_CurrentIndex = row;
 
         beginResetModel();
         {
@@ -39,6 +42,8 @@ namespace MetadataIO {
             m_ExportPlan.reset();
         }
         endResetModel();
+
+        m_CurrentIndex = -1;
     }
 
     void CsvExportColumnsModel::addColumn() {
@@ -391,6 +396,10 @@ namespace MetadataIO {
 
         beginRemoveRows(QModelIndex(), row, row);
         {
+            if (m_CurrentColumnsModel.getCurrentIndex() == row) {
+                m_CurrentColumnsModel.clearModel();
+            }
+
             m_ExportPlans.erase(m_ExportPlans.begin() + row);
         }
         endRemoveRows();
@@ -408,13 +417,13 @@ namespace MetadataIO {
         }
         endInsertRows();
 
-        m_ColumnsModel.setupModel(m_ExportPlans.back());
+        m_CurrentColumnsModel.setupModel(size - 1, m_ExportPlans.back());
 
         justEdited();
     }
 
     QObject *CsvExportModel::getColumnsModel() {
-        QObject *object = &m_ColumnsModel;
+        QObject *object = &m_CurrentColumnsModel;
         QQmlEngine::setObjectOwnership(object, QQmlEngine::CppOwnership);
         return object;
     }
@@ -424,7 +433,7 @@ namespace MetadataIO {
 
         if (row < 0 || row >= (int)m_ExportPlans.size()) { return; }
 
-        m_ColumnsModel.setupModel(m_ExportPlans[row]);
+        m_CurrentColumnsModel.setupModel(row, m_ExportPlans[row]);
     }
 
     void CsvExportModel::justEdited() {

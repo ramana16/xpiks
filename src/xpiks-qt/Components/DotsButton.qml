@@ -16,7 +16,7 @@ Item {
     property real dimension: 28
     width: dimension
     height: dimension
-    property color dotsColor: dotsMA.pressed ? uiColors.whiteColor : (dotsMA.containsMouse ? uiColors.labelActiveForeground : uiColors.labelInactiveForeground)
+    property color dotsColor: dotsMA.pressed ? uiColors.whiteColor : (dotsMA.containsMouse ? uiColors.artworkActiveColor : uiColors.labelInactiveForeground)
     property color highlighColor: uiColors.inputBackgroundColor
     property real dotDimension: 4
 

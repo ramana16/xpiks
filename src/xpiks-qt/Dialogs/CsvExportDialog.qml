@@ -212,7 +212,7 @@ Item {
                     anchors.right: parent.right
                     anchors.top: parent.top
                     anchors.bottom: leftFooter.top
-                    anchors.topMargin: 10
+                    anchors.topMargin: 30
                     anchors.bottomMargin: 10
                     clip: true
                     boundsBehavior: Flickable.StopAtBounds
@@ -347,8 +347,14 @@ Item {
                         anchors.centerIn: parent
                         onClicked: {
                             csvExportModel.addNewPlan()
-                            exportPlanModelsListView.positionViewAtIndex(exportPlanModelsListView.count - 1, ListView.Contain)
-                            exportPlanModelsListView.currentIndex = exportPlanModelsListView.count - 1
+
+                            if (exportPlanModelsListView.count > 0) {
+                                exportPlanModelsListView.positionViewAtIndex(exportPlanModelsListView.count - 1, ListView.Contain)
+                                exportPlanModelsListView.currentIndex = exportPlanModelsListView.count - 1
+
+                                titleText.forceActiveFocus()
+                                titleText.cursorPosition = titleText.text.length
+                            }
                         }
                     }
                 }
@@ -380,7 +386,8 @@ Item {
                 anchors.right: parent.right
                 anchors.top: rightHeader.top
                 anchors.bottom: footer.top
-                enabled: !csvExportModel.isExporting && (exportPlanModelsListView.count > 0)
+                property bool isSystemPlan: exportPlanModelsListView.currentItem ? exportPlanModelsListView.currentItem.myData.issystem : false
+                enabled: !csvExportModel.isExporting && (exportPlanModelsListView.count > 0) && !isSystemPlan
 
                 MouseArea {
                     id: rightPanelMA
@@ -392,7 +399,10 @@ Item {
 
                 ColumnLayout {
                     anchors.fill: parent
-                    anchors.margins: 20
+                    anchors.leftMargin: 5
+                    anchors.topMargin: 20
+                    anchors.bottomMargin: 20
+                    anchors.rightMargin: 10
                     spacing: 0
 
                     Item {
@@ -414,7 +424,7 @@ Item {
                         id: titleWrapper
                         border.width: titleText.activeFocus ? 1 : 0
                         border.color: uiColors.artworkActiveColor
-                        width: 200
+                        width: 370
                         color: enabled ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
                         height: 24
                         anchors.left: parent.left
@@ -442,6 +452,14 @@ Item {
                                         presetNamesListView.currentItem.myData.editname = qsTr("Untitled")
                                         csvExportModel.requestSave()
                                     }
+                                }
+                            }
+
+                            Keys.onTabPressed: {
+                                if (columnsListView.count > 0) {
+                                    columnsListView.forceActiveFocus()
+                                    columnsListView.currentIndex = 0
+                                    columnsListView.currentItem.focusEditing()
                                 }
                             }
 
@@ -475,14 +493,14 @@ Item {
                         StyledText {
                             text: i18.n + qsTr("Column name:")
                             anchors.left: parent.left
-                            anchors.leftMargin: 40
+                            anchors.leftMargin: 35
                             isActive: false
                         }
 
                         StyledText {
                             text: i18.n + qsTr("Property:")
                             anchors.left: parent.left
-                            anchors.leftMargin: 210
+                            anchors.leftMargin: 235
                             isActive: false
                         }
                     }
@@ -505,6 +523,7 @@ Item {
                             anchors.fill: parent
                             boundsBehavior: Flickable.StopAtBounds
                             spacing: 10
+                            focus: true
 
                             add: Transition {
                                 NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 230 }
@@ -526,119 +545,137 @@ Item {
                                 NumberAnimation { properties: "x,y"; duration: 230 }
                             }
 
-                            delegate: RowLayout {
+                            delegate: FocusScope {
                                 id: columnWrapper
-                                property variant myData: model
+                                objectName: "columnDelegate"
                                 property int delegateIndex: index
+                                property variant myData: model
                                 anchors.left: parent.left
                                 anchors.right: parent.right
                                 height: 30
-                                spacing: 0
+                                focus: true
                                 z: propertiesCombobox.isOpened ? 100500 : 0
 
-                                DotsButton {
-                                    id: columnMenu
-                                    onDotsClicked: {
-                                        dotsClickMenu.columnIndex = columnWrapper.delegateIndex
-                                        dotsClickMenu.popup()
+                                function focusEditing() {
+                                    columnNameText.forceActiveFocus()
+                                }
+
+                                onFocusChanged: {
+                                    if (activeFocus) {
+                                        columnsListView.positionViewAtIndex(columnWrapper.delegateIndex, ListView.Contain)
                                     }
                                 }
 
-                                Item {
-                                    width: 5
-                                }
+                                RowLayout {
+                                    anchors.fill: parent
+                                    spacing: 0
 
-                                Rectangle {
-                                    id: columnNameWrapper
-                                    border.width: columnNameText.activeFocus ? 1 : 0
-                                    border.color: uiColors.artworkActiveColor
-                                    width: 170
-                                    color: enabled ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
-                                    height: 24
-                                    anchors.verticalCenter: parent.verticalCenter
+                                    DotsButton {
+                                        id: columnMenu
+                                        onDotsClicked: {
+                                            dotsClickMenu.columnIndex = columnWrapper.delegateIndex
+                                            dotsClickMenu.popup()
+                                        }
+                                    }
 
-                                    StyledTextInput {
-                                        id: columnNameText
-                                        height: parent.height
-                                        anchors.left: parent.left
-                                        anchors.right: parent.right
-                                        anchors.rightMargin: 5
-                                        text: column
-                                        anchors.leftMargin: 5
-                                        onTextChanged: {
-                                            model.editcolumn = text
-                                            csvExportModel.requestSave()
+                                    Item {
+                                        width: 5
+                                    }
+
+                                    Rectangle {
+                                        id: columnNameWrapper
+                                        border.width: columnNameText.activeFocus ? 1 : 0
+                                        border.color: uiColors.artworkActiveColor
+                                        width: 180
+                                        color: enabled ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
+                                        height: 24
+                                        anchors.verticalCenter: parent.verticalCenter
+
+                                        StyledTextInput {
+                                            id: columnNameText
+                                            height: parent.height
+                                            anchors.left: parent.left
+                                            anchors.right: parent.right
+                                            anchors.rightMargin: 5
+                                            text: column
+                                            anchors.leftMargin: 5
+                                            activeFocusOnTab: true
+                                            onTextChanged: {
+                                                model.editcolumn = text
+                                                csvExportModel.requestSave()
+                                            }
+
+                                            onEditingFinished: {
+                                                if (text.length == 0) {
+                                                    model.editcolumn = qsTr("Untitled")
+                                                }
+                                            }
+
+                                            validator: RegExpValidator {
+                                                // copy paste in keys.onpressed Paste
+                                                regExp: /[a-zA-Z0-9 _-]*$/
+                                            }
+
+                                            Keys.onPressed: {
+                                                if (event.matches(StandardKey.Paste)) {
+                                                    var clipboardText = clipboard.getText();
+                                                    clipboardText = clipboardText.replace(/(\r\n|\n|\r)/gm, '');
+                                                    // same regexp as in validator
+                                                    var sanitizedText = clipboardText.replace(/[^a-zA-Z0-9 _-]/g, '');
+                                                    columnNameText.paste(sanitizedText)
+                                                    event.accepted = true
+                                                }
+                                            }
+                                        }
+                                    }
+
+                                    Item {
+                                        width: 20
+                                    }
+
+                                    CustomComboBox {
+                                        id: propertiesCombobox
+                                        model: propertiesModel
+                                        width: 170
+                                        height: 24
+                                        itemHeight: 28
+                                        showColorSign: false
+                                        maxCount: columnsScrollbar.visible ? 4 : 5
+                                        //z: 100500 - columnWrapper.delegateIndex
+                                        isBelow: true
+                                        withRelativePosition: true
+                                        relativeParent: columnsHost
+
+                                        onComboIndexChanged: {
+                                            myData.editproperty = selectedIndex
                                         }
 
-                                        onEditingFinished: {
-                                            if (text.length == 0) {
-                                                model.editcolumn = qsTr("Untitled")
+                                        onIsOpenedChanged: {
+                                            // turn on/off scrolling of main listview
+                                            if (isOpened) {
+                                                columnsListView.interactive = false
+                                            } else {
+                                                columnsListView.interactive = true
                                             }
                                         }
 
-                                        validator: RegExpValidator {
-                                            // copy paste in keys.onpressed Paste
-                                            regExp: /[a-zA-Z0-9 _-]*$/
+                                        Component.onCompleted: {
+                                            selectedIndex = myData ? myData.property : 0
                                         }
 
-                                        Keys.onPressed: {
-                                            if (event.matches(StandardKey.Paste)) {
-                                                var clipboardText = clipboard.getText();
-                                                clipboardText = clipboardText.replace(/(\r\n|\n|\r)/gm, '');
-                                                // same regexp as in validator
-                                                var sanitizedText = clipboardText.replace(/[^a-zA-Z0-9 _-]/g, '');
-                                                columnNameText.paste(sanitizedText)
-                                                event.accepted = true
+                                        Connections {
+                                            target: csvExportComponent
+                                            onDismissComboboxes: {
+                                                propertiesCombobox.closePopup()
                                             }
                                         }
                                     }
-                                }
 
-                                Item {
-                                    width: 20
-                                }
-
-                                CustomComboBox {
-                                    id: propertiesCombobox
-                                    model: propertiesModel
-                                    width: 170
-                                    height: 24
-                                    itemHeight: 28
-                                    showColorSign: false
-                                    maxCount: columnsScrollbar.visible ? 4 : 5
-                                    //z: 100500 - columnWrapper.delegateIndex
-                                    isBelow: true
-                                    withRelativePosition: true
-                                    relativeParent: columnsHost
-
-                                    onComboIndexChanged: {
-                                        myData.editproperty = selectedIndex
-                                    }
-
-                                    onIsOpenedChanged: {
-                                        // turn on/off scrolling of main listview
-                                        if (isOpened) {
-                                            columnsListView.interactive = false
-                                        } else {
-                                            columnsListView.interactive = true
-                                        }
-                                    }
-
-                                    Component.onCompleted: {
-                                        selectedIndex = myData.property
-                                    }
-
-                                    Connections {
-                                        target: csvExportComponent
-                                        onDismissComboboxes: {
-                                            propertiesCombobox.closePopup()
-                                        }
+                                    Item {
+                                        Layout.fillWidth: true
                                     }
                                 }
 
-                                Item {
-                                    Layout.fillWidth: true
-                                }
                             }
 
                             footer: Item {
@@ -646,19 +683,58 @@ Item {
                                 anchors.right: parent.right
                                 height: 50
 
-                                StyledButton {
+                                GlyphButton {
+                                    id: addColumnButton
                                     text: i18.n + qsTr("Add column")
-                                    width: 170
+                                    width: 180
                                     height: 30
                                     anchors.left: parent.left
                                     anchors.leftMargin: 33
                                     anchors.verticalCenter: parent.verticalCenter
                                     opacity: hovered ? 1 : 0.3
 
+                                    glyphVisible: true
+                                    leftShift: -10
+                                    glyphMargin: 20
+                                    glyph: Item {
+                                        id: plusItem
+                                        width: 16
+                                        height: 16
+                                        property real size: 4
+
+                                        Rectangle {
+                                            id: verticalBar
+                                            width: plusItem.size
+                                            height: parent.height
+                                            color: addColumnButton.textColor
+                                            anchors.horizontalCenter: parent.horizontalCenter
+                                            opacity: 1
+                                        }
+
+                                        Rectangle {
+                                            anchors.left: parent.left
+                                            anchors.right: verticalBar.left
+                                            height: plusItem.size
+                                            color: addColumnButton.textColor
+                                            anchors.verticalCenter: parent.verticalCenter
+                                        }
+
+                                        Rectangle {
+                                            anchors.right: parent.right
+                                            anchors.left: verticalBar.right
+                                            height: plusItem.size
+                                            color: addColumnButton.textColor
+                                            anchors.verticalCenter: parent.verticalCenter
+                                        }
+                                    }
+
                                     onClicked: {
                                         columnsModel.addColumn()
                                         csvExportModel.requestSave()
+                                        columnsListView.forceActiveFocus()
                                         columnsListView.positionViewAtEnd()
+                                        columnsListView.currentIndex = columnsListView.count - 1
+                                        columnsListView.currentItem.focusEditing()
                                     }
                                 }
                             }
@@ -668,7 +744,7 @@ Item {
                             id: columnsScrollbar
                             anchors.topMargin: 0
                             anchors.bottomMargin: 0
-                            anchors.rightMargin: -10
+                            anchors.rightMargin: 5
                             flickable: columnsListView
                             //canShow: leftPanelMA.containsMouse
                         }
@@ -679,7 +755,7 @@ Item {
                     anchors.fill: parent
                     color: uiColors.defaultControlColor
                     opacity: 0.5
-                    visible: csvExportModel.isExporting || (exportPlanModelsListView.count == 0)
+                    visible: csvExportModel.isExporting || (exportPlanModelsListView.count == 0) || rightPanel.isSystemPlan
                 }
 
                 LoaderIcon {

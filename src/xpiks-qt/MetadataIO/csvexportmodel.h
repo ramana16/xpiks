@@ -29,7 +29,10 @@ namespace MetadataIO {
         CsvExportColumnsModel();
 
     public:
-        void setupModel(const std::shared_ptr<CsvExportPlan> &plan);
+        int getCurrentIndex() const { return m_CurrentIndex; }
+
+    public:
+        void setupModel(int row, const std::shared_ptr<CsvExportPlan> &plan);
         void clearModel();
 
     private:
@@ -61,6 +64,7 @@ namespace MetadataIO {
 
     private:
         std::shared_ptr<CsvExportPlan> m_ExportPlan;
+        int m_CurrentIndex;
     };
 
     class CsvExportModel: public QAbstractListModel, public Common::BaseEntity
@@ -146,7 +150,7 @@ namespace MetadataIO {
         void onBackupRequired();
 
     private:
-        CsvExportColumnsModel m_ColumnsModel;
+        CsvExportColumnsModel m_CurrentColumnsModel;
         CsvExportPlansModel m_ExportPlansModel;
         std::vector<std::shared_ptr<CsvExportPlan> > m_ExportPlans;
         ArtworksSnapshot m_ArtworksToExport;
