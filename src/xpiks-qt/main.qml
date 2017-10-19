@@ -26,8 +26,8 @@ import "Constants/UIConfig.js" as UIConfig
 ApplicationWindow {
     id: applicationWindow
     visible: true
-    width: settingsModel.getAppWidth(1010)
-    height: settingsModel.getAppHeight(725)
+    width: uiManager.getAppWidth(1010)
+    height: uiManager.getAppHeight(725)
     minimumHeight: 725
     minimumWidth: 930
     title: i18.n + (debug ? "Xpiks (Devel)" : qsTr("Xpiks"))
@@ -36,14 +36,14 @@ ApplicationWindow {
     property bool needToCenter: true
     property bool listLayout: true
     property var spellCheckService: helpersWrapper.getSpellCheckerService()
-    property bool leftSideCollapsed: false    
+    property bool leftSideCollapsed: false
     property bool actionsEnabled: mainStackView.areActionsAllowed && (openedDialogsCount == 0)
 
     onVisibleChanged: {
         if (needToCenter) {
             needToCenter = false
-            applicationWindow.x = settingsModel.getAppPosX((Screen.width - applicationWindow.width) / 2)
-            applicationWindow.y = settingsModel.getAppPosY((Screen.height - applicationWindow.height) / 2)
+            applicationWindow.x = uiManager.getAppPosX((Screen.width - applicationWindow.width) / 2)
+            applicationWindow.y = uiManager.getAppPosY((Screen.height - applicationWindow.height) / 2)
         }
     }
 
@@ -72,10 +72,10 @@ ApplicationWindow {
 
     function saveAppGeometry() {
         console.debug("Saving application geometry")
-        settingsModel.setAppWidth(applicationWindow.width)
-        settingsModel.setAppHeight(applicationWindow.height)
-        settingsModel.setAppPosX(applicationWindow.x)
-        settingsModel.setAppPosY(applicationWindow.y)
+        uiManager.setAppWidth(applicationWindow.width)
+        uiManager.setAppHeight(applicationWindow.height)
+        uiManager.setAppPosX(applicationWindow.x)
+        uiManager.setAppPosY(applicationWindow.y)
     }
 
     onClosing: closeHandler(close)

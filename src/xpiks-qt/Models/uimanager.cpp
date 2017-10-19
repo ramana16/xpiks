@@ -15,11 +15,22 @@
 #include "artworkmetadata.h"
 #include "../Models/settingsmodel.h"
 
+#define MAX_SAVE_PAUSE_RESTARTS 5
+
+#define DEFAULT_ARTWORK_EDIT_RIGHT_PANE_WIDTH 300
+
+#define DEFAULT_APP_WIDTH 900
+#define DEFAULT_APP_HEIGHT 725
+#define DEFAULT_APP_POSITION -1
+
 namespace Models {
     UIManager::UIManager(SettingsModel *settingsModel, QObject *parent) :
         QObject(parent),
+        Common::StatefulEntity("uimanager"),
         m_SettingsModel(settingsModel),
-        m_TabID(42)
+        m_TabID(42),
+        m_SaveTimerId(-1),
+        m_SaveRestartsCount(0)
     {
         Q_ASSERT(settingsModel != nullptr);
         QObject::connect(m_SettingsModel, &Models::SettingsModel::keywordSizeScaleChanged, this, &UIManager::keywordHeightChanged);
@@ -61,6 +72,59 @@ namespace Models {
         }
 
         return model;
+    }
+
+    int UIManager::getArtworkEditRightPaneWidth() {
+        return getStateInt(Constants::artworkEditRightPaneWidth, DEFAULT_ARTWORK_EDIT_RIGHT_PANE_WIDTH);
+    }
+
+    void UIManager::setArtworkEditRightPaneWidth(int value) {
+        setStateValue(Constants::artworkEditRightPaneWidth, value);
+        justEdited();
+    }
+
+    int UIManager::getAppWidth(int defaultWidth)  {
+        return getStateInt(Constants::appWindowWidth, defaultWidth);
+    }
+
+    void UIManager::setAppWidth(int width) {
+        LOG_DEBUG << width;
+        setStateValue(Constants::appWindowWidth, width);
+        justEdited();
+    }
+
+    int UIManager::getAppHeight(int defaultHeight) {
+        return getStateInt(Constants::appWindowHeight, defaultHeight);
+    }
+
+    void UIManager::setAppHeight(int height) {
+        LOG_DEBUG << height;
+        setStateValue(Constants::appWindowHeight, height);
+        justEdited();
+    }
+
+    int UIManager::getAppPosX(int defaultPosX) {
+        int posX = getStateInt(Constants::appWindowX, defaultPosX);
+        if (posX == -1) { posX = defaultPosX; }
+        return posX;
+    }
+
+    void UIManager::setAppPosX(int x) {
+        LOG_DEBUG << x;
+        setStateValue(Constants::appWindowX, x);
+        justEdited();
+    }
+
+    int UIManager::getAppPosY(int defaultPosY) {
+        int posY = getStateInt(Constants::appWindowY, defaultPosY);
+        if (posY == -1) { posY = defaultPosY; }
+        return posY;
+    }
+
+    void UIManager::setAppPosY(int y) {
+        LOG_DEBUG << y;
+        setStateValue(Constants::appWindowY, y);
+        justEdited();
     }
 
     void UIManager::addSystemTab(const QString tabIconComponent, const QString &tabComponent) {
@@ -134,5 +198,54 @@ namespace Models {
         m_TabsModel.touchTab(2);
 
         m_TabsModel.touchTab(0);
+    }
+
+    void UIManager::initializeState() {
+         initState();
+    }
+
+    void UIManager::resetWindowSettings() {
+        // resetting position in settings is pretty useless because
+        // we will overwrite them on Xpiks exit. But anyway for the future...
+        setStateValue(Constants::appWindowHeight, DEFAULT_APP_HEIGHT);
+        setStateValue(Constants::appWindowWidth, DEFAULT_APP_WIDTH);
+        setStateValue(Constants::appWindowX, DEFAULT_APP_POSITION);
+        setStateValue(Constants::appWindowY, DEFAULT_APP_POSITION);
+
+        setStateValue(Constants::artworkEditRightPaneWidth, DEFAULT_ARTWORK_EDIT_RIGHT_PANE_WIDTH);
+
+        justEdited();
+    }
+
+    void UIManager::justEdited() {
+        if (m_SaveRestartsCount < MAX_SAVE_PAUSE_RESTARTS) {
+            if (m_SaveTimerId != -1) {
+                this->killTimer(m_SaveTimerId);
+                LOG_INTEGR_TESTS_OR_DEBUG << "killed timer" << m_SaveTimerId;
+            }
+
+            m_SaveTimerId = this->startTimer(400, Qt::VeryCoarseTimer);
+            LOG_INTEGR_TESTS_OR_DEBUG << "started timer" << m_SaveTimerId;
+            m_SaveRestartsCount++;
+        } else {
+            Q_ASSERT(m_SaveTimerId != -1);
+            LOG_INFO << "Maximum backup delays occured, forcing backup";
+        }
+    }
+
+    void UIManager::timerEvent(QTimerEvent *event) {
+        if (event == nullptr) { return; }
+
+        LOG_DEBUG << "timer" << event->timerId();
+
+        if (event->timerId() == m_SaveTimerId) {
+            m_SaveRestartsCount = 0;
+            m_SaveTimerId = -1;
+
+            syncState();
+        }
+
+        // one time event
+        this->killTimer(event->timerId());
     }
 }

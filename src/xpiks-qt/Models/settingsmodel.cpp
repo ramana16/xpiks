@@ -57,9 +57,6 @@
 #define DEFAULT_COLLECT_USER_STATISTICS true
 #define DEFAULT_CHECK_FOR_UPDATES true
 #define DEFAULT_AUTO_DOWNLOAD_UPDATES true
-#define DEFAULT_APP_WIDTH 900
-#define DEFAULT_APP_HEIGHT 725
-#define DEFAULT_APP_POSITION -1
 #define DEFAULT_AUTO_FIND_VECTORS true
 #define DEFAULT_LOCALE "en_US"
 #define DEFAULT_SELECTED_THEME_INDEX 0
@@ -68,8 +65,6 @@
 #define DEFAULT_USE_EXIFTOOL true
 #define DEFAULT_USE_PROXY false
 #define DEFAULT_PROXY_HOST ""
-#define DEFAULT_ARTWORK_EDIT_RIGHT_PANE_WIDTH 300
-#define DEFAULT_SELECTED_DICT_INDEX -1
 #define DEFAULT_USE_PROGRESSIVE_SUGGESTION_PREVIEWS false
 #define DEFAULT_PROGRESSIVE_SUGGESTION_INCREMENT 10
 
@@ -84,7 +79,7 @@
     #define DEFAULT_VERBOSE_UPLOAD false
 #endif
 
-namespace Models {    
+namespace Models {
     int ensureInBounds(int value, int boundA, int boundB) {
         Q_ASSERT(boundA <= boundB);
 
@@ -125,12 +120,10 @@ namespace Models {
         m_SelectedLocale(DEFAULT_LOCALE),
         m_KeywordSizeScale(DEFAULT_KEYWORD_SIZE_SCALE),
         m_ScrollSpeedScale(DEFAULT_SCROLL_SPEED_SCALE),
-        m_ArtworkEditRightPaneWidth(DEFAULT_ARTWORK_EDIT_RIGHT_PANE_WIDTH),
         m_UploadTimeout(DEFAULT_UPLOAD_TIMEOUT),
         m_DismissDuration(DEFAULT_DISMISS_DURATION),
         m_MaxParallelUploads(DEFAULT_MAX_PARALLEL_UPLOADS),
         m_SelectedThemeIndex(DEFAULT_SELECTED_THEME_INDEX),
-        m_SelectedDictIndex(DEFAULT_SELECTED_DICT_INDEX),
         m_MustUseMasterPassword(DEFAULT_USE_MASTERPASSWORD),
         m_MustUseConfirmations(DEFAULT_USE_CONFIRMATIONS),
         m_SaveSession(DEFAULT_SAVE_SESSION),
@@ -394,18 +387,6 @@ namespace Models {
         }
     }
 
-    void SettingsModel::saveArtworkEditUISettings() {
-        setValue(Constants::artworkEditRightPaneWidth, m_ArtworkEditRightPaneWidth);
-        sync();
-    }
-
-    void SettingsModel::saveSelectedDictionaryIndex() {
-        QMutexLocker locker(&m_SettingsMutex);
-        Q_UNUSED(locker);
-        setValue(Constants::translatorSelectedDictIndex, m_SelectedDictIndex);
-        sync();
-    }
-
     void SettingsModel::updateSaveSession(bool value) {
         LOG_DEBUG << value;
 
@@ -462,9 +443,6 @@ namespace Models {
         deserializeProxyFromSettings(stringValue(proxyHost, DEFAULT_PROXY_HOST));
 
         setAutoCacheImages(boolValue(cacheImagesAutomatically, DEFAULT_AUTO_CACHE_IMAGES));
-
-        setArtworkEditRightPaneWidth(intValue(artworkEditRightPaneWidth, DEFAULT_ARTWORK_EDIT_RIGHT_PANE_WIDTH));
-        setSelectedDictIndex(intValue(translatorSelectedDictIndex, DEFAULT_SELECTED_DICT_INDEX));
     }
 
     void SettingsModel::doMoveSettingsFromQSettingsToJson() {
@@ -516,7 +494,7 @@ namespace Models {
         moveSetting(oldSettings, PATH_TO_UPDATE, pathToUpdate, QMetaType::QString);
         moveSetting(oldSettings, AVAILABLE_UPDATE_VERSION, availableUpdateVersion, QMetaType::Int);
         moveSetting(oldSettings, ARTWORK_EDIT_RIGHT_PANE_WIDTH, artworkEditRightPaneWidth, QMetaType::Int);
-        moveSetting(oldSettings, TRANSLATOR_SELECTED_DICT_INDEX, translatorSelectedDictIndex, QMetaType::Int);
+        //moveSetting(oldSettings, TRANSLATOR_SELECTED_DICT_INDEX, translatorSelectedDictIndex, QMetaType::Int);
 
         // apply imported settings
         doRetrieveAllValues();
@@ -558,8 +536,6 @@ namespace Models {
         setUseProxy(DEFAULT_USE_PROXY);
         resetProxySetting();
         setAutoCacheImages(DEFAULT_AUTO_CACHE_IMAGES);
-        setArtworkEditRightPaneWidth(DEFAULT_ARTWORK_EDIT_RIGHT_PANE_WIDTH);
-        setSelectedDictIndex(DEFAULT_SELECTED_DICT_INDEX);
         setVerboseUpload(DEFAULT_VERBOSE_UPLOAD);
 
         setUseProgressiveSuggestionPreviews(DEFAULT_USE_PROGRESSIVE_SUGGESTION_PREVIEWS);
@@ -570,13 +546,6 @@ namespace Models {
         setValue(Constants::userConsent, DEFAULT_HAVE_USER_CONSENT);
         setValue(Constants::installedVersion, 0);
 #endif
-
-        // resetting position in settings is pretty useless because
-        // we will overwrite them on Xpiks exit. But anyway for the future...
-        setValue(Constants::appWindowHeight, DEFAULT_APP_HEIGHT);
-        setValue(Constants::appWindowWidth, DEFAULT_APP_WIDTH);
-        setValue(Constants::appWindowX, DEFAULT_APP_POSITION);
-        setValue(Constants::appWindowY, DEFAULT_APP_POSITION);
 
         sync();
     }
@@ -612,7 +581,6 @@ namespace Models {
         setValue(useProxy, m_UseProxy);
         setValue(proxyHost, serializeProxyForSettings(m_ProxySettings));
         setValue(cacheImagesAutomatically, m_AutoCacheImages);
-        setValue(artworkEditRightPaneWidth, m_ArtworkEditRightPaneWidth);
         setValue(verboseUpload, m_VerboseUpload);
 
         setExperimentalValue(useProgressiveSuggestionPreviews, m_UseProgressiveSuggestionPreviews);

@@ -476,6 +476,7 @@ int main(int argc, char *argv[]) {
     uiManager.addSystemTab("qrc:/CollapserTabs/QuickBufferIcon.qml", "qrc:/CollapserTabs/QuickBufferTab.qml");
     uiManager.addSystemTab("qrc:/CollapserTabs/TranslatorIcon.qml", "qrc:/CollapserTabs/TranslatorTab.qml");
     uiManager.initializeSystemTabs();
+    uiManager.initializeState();
 
     LOG_DEBUG << "About to load main view...";
     engine.load(QUrl(QStringLiteral("qrc:/main.qml")));

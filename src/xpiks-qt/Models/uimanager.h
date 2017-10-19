@@ -20,13 +20,15 @@
 #include "../QuickBuffer/icurrenteditable.h"
 #include "../Models/metadataelement.h"
 #include "../QMLExtensions/tabsmodel.h"
+#include "../Common/statefulentity.h"
+#include "../Helpers/constants.h"
 
 namespace Models {
     class ArtworkMetadata;
     class ArtworkProxyBase;
     class SettingsModel;
 
-    class UIManager: public QObject
+    class UIManager: public QObject, public Common::StatefulEntity
     {
         Q_OBJECT
         Q_PROPERTY(bool hasCurrentEditable READ getHasCurrentEditable NOTIFY currentEditableChanged)
@@ -54,16 +56,34 @@ namespace Models {
         Q_INVOKABLE QObject *retrieveTabsModel(int tabID);
 
     public:
+        Q_INVOKABLE int getArtworkEditRightPaneWidth();
+        Q_INVOKABLE void setArtworkEditRightPaneWidth(int value);
+        Q_INVOKABLE int getAppWidth(int defaultWidth);
+        Q_INVOKABLE void setAppWidth(int width);
+        Q_INVOKABLE int getAppHeight(int defaultHeight);
+        Q_INVOKABLE void setAppHeight(int height);
+        Q_INVOKABLE int getAppPosX(int defaultPosX);
+        Q_INVOKABLE void setAppPosX(int x);
+        Q_INVOKABLE int getAppPosY(int defaultPosY);
+        Q_INVOKABLE void setAppPosY(int y);
+
+    public:
         void addSystemTab(const QString tabIconComponent, const QString &tabComponent);
         int addPluginTab(int pluginID, const QString tabIconComponent, const QString &tabComponent, QObject *tabModel);
         bool removePluginTab(int pluginID, int tabID);
         void initializeSystemTabs();
+        void initializeState();
+        void resetWindowSettings();
 
     signals:
         void tabsListChanged();
         void tabsIconsChanged();
         void currentEditableChanged();
         void keywordHeightChanged(double value);
+
+    protected:
+        void justEdited();
+        virtual void timerEvent(QTimerEvent *event) override;
 
     private:
         Models::SettingsModel *m_SettingsModel;
@@ -74,6 +94,9 @@ namespace Models {
         QHash<int, QSet<int> > m_PluginIDToTabIDs;
         QHash<int, QObject*> m_TabIDsToModel;
         volatile int m_TabID;
+
+        int m_SaveTimerId;
+        int m_SaveRestartsCount;
     };
 }
 

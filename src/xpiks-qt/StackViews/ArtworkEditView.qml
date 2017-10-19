@@ -77,7 +77,6 @@ Rectangle {
     function closePopup() {
         closeAutoComplete()
         artworkProxy.resetModel()
-        settingsModel.saveArtworkEditUISettings()
         uiManager.clearCurrentItem()
         mainStackView.pop({immediate: true})
         restoreLeftPane()
@@ -230,7 +229,7 @@ Rectangle {
     Connections {
         target: artworkProxy
 
-        onCompletionsAvailable: {            
+        onCompletionsAvailable: {
             acSource.initializeCompletions()
 
             if (typeof artworkEditComponent.autoCompleteBox !== "undefined") {
@@ -304,7 +303,7 @@ Rectangle {
         }
 
         onResizingChanged: {
-            settingsModel.artworkEditRightPaneWidth = rightPane.width
+            uiManager.setArtworkEditRightPaneWidth(rightPane.width)
         }
 
         Item {
@@ -441,7 +440,7 @@ Rectangle {
             anchors.bottom: parent.bottom
 
             Component.onCompleted: {
-                rightPane.width = settingsModel.artworkEditRightPaneWidth
+                rightPane.width = uiManager.getArtworkEditRightPaneWidth()
             }
 
             Row {

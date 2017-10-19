@@ -57,7 +57,7 @@ namespace Common {
     }
 
     void StatefulEntity::syncState() {
-        LOG_DEBUG << "#";
+        LOG_DEBUG << m_StateName;
 
         Helpers::LocalConfigDropper dropper(&m_StateConfig);
         Q_UNUSED(dropper);

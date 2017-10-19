@@ -71,7 +71,6 @@ namespace Models {
         Q_PROPERTY(QString proxyPassword READ getProxyPassword NOTIFY proxyPasswordChanged)
         Q_PROPERTY(QString proxyPort READ getProxyPort NOTIFY proxyPortChanged)
         Q_PROPERTY(bool autoCacheImages READ getAutoCacheImages WRITE setAutoCacheImages NOTIFY autoCacheImagesChanged)
-        Q_PROPERTY(int artworkEditRightPaneWidth READ getArtworkEditRightPaneWidth WRITE setArtworkEditRightPaneWidth NOTIFY artworkEditRightPaneWidthChanged)
         Q_PROPERTY(bool verboseUpload READ getVerboseUpload WRITE setVerboseUpload NOTIFY verboseUploadChanged)
         Q_PROPERTY(bool useProgressiveSuggestionPreviews READ getUseProgressiveSuggestionPreviews WRITE setUseProgressiveSuggestionPreviews NOTIFY useProgressiveSuggestionPreviewsChanged)
         Q_PROPERTY(int progressiveSuggestionIncrement READ getProgressiveSuggestionIncrement WRITE setProgressiveSuggestionIncrement NOTIFY progressiveSuggestionIncrementChanged)
@@ -113,8 +112,6 @@ namespace Models {
         Q_INVOKABLE void retrieveAllValues();
         Q_INVOKABLE void raiseMasterPasswordSignal() { emit mustUseMasterPasswordChanged(m_MustUseMasterPassword); }
         Q_INVOKABLE void saveProxySetting(const QString &address, const QString &user, const QString &password, const QString &port);
-        Q_INVOKABLE void saveArtworkEditUISettings();
-        Q_INVOKABLE void saveSelectedDictionaryIndex();
         Q_INVOKABLE void updateSaveSession(bool value);
 
     private:
@@ -228,49 +225,6 @@ namespace Models {
             setValue(Constants::userConsent, true);
         }
 
-        Q_INVOKABLE int getAppWidth(int defaultWidth) {
-            return intValue(Constants::appWindowWidth, defaultWidth);
-        }
-
-        Q_INVOKABLE void setAppWidth(int width) {
-            LOG_DEBUG << "#";
-
-            setValue(Constants::appWindowWidth, width);
-        }
-
-        Q_INVOKABLE int getAppHeight(int defaultHeight) {
-            return intValue(Constants::appWindowHeight, defaultHeight);
-        }
-
-        Q_INVOKABLE void setAppHeight(int height) {
-            LOG_DEBUG << "#";
-
-            setValue(Constants::appWindowHeight, height);
-        }
-
-        Q_INVOKABLE int getAppPosX(int defaultPosX) {
-            int posX = intValue(Constants::appWindowX, defaultPosX);
-            if (posX == -1) { posX = defaultPosX; }
-            return posX;
-        }
-
-        Q_INVOKABLE void setAppPosX(int x) {
-            LOG_DEBUG << "#";
-
-            setValue(Constants::appWindowX, x);
-        }
-
-        Q_INVOKABLE int getAppPosY(int defaultPosY) {
-            int posY = intValue(Constants::appWindowY, defaultPosY);
-            if (posY == -1) { posY = defaultPosY; }
-            return posY;
-        }
-
-        Q_INVOKABLE void setAppPosY(int y) {
-            LOG_DEBUG << "#";
-            setValue(Constants::appWindowY, y);
-        }
-
         Q_INVOKABLE void setUseMasterPassword(bool value) {
             LOG_DEBUG << "#";
             setValue(Constants::useMasterPassword, value);
@@ -363,8 +317,6 @@ namespace Models {
         QString getProxyPort() const { return m_ProxySettings.m_Port; }
         ProxySettings *getProxySettings() { return &m_ProxySettings; }
         bool getAutoCacheImages() const { return m_AutoCacheImages; }
-        int getArtworkEditRightPaneWidth() const { return m_ArtworkEditRightPaneWidth; }
-        int getSelectedDictIndex() const { return m_SelectedDictIndex; }
         bool getVerboseUpload() const { return m_VerboseUpload; }
         bool getUseProgressiveSuggestionPreviews() const { return m_UseProgressiveSuggestionPreviews; }
         int getProgressiveSuggestionIncrement() const { return m_ProgressiveSuggestionIncrement; }
@@ -407,8 +359,8 @@ namespace Models {
         void proxyPortChanged(QString value);
         void autoCacheImagesChanged(bool value);
         void artworkEditRightPaneWidthChanged(int value);
-        void selectedDictIndexChanged(int value);        
-        void verboseUploadChanged(bool verboseUpload);        
+        void selectedDictIndexChanged(int value);
+        void verboseUploadChanged(bool verboseUpload);
         void useProgressiveSuggestionPreviewsChanged(bool progressiveSuggestionPreviews);
         void progressiveSuggestionIncrementChanged(int progressiveSuggestionIncrement);
 
@@ -616,20 +568,6 @@ namespace Models {
             }
         }
 
-        void setArtworkEditRightPaneWidth(int value) {
-            if (value != m_ArtworkEditRightPaneWidth) {
-                m_ArtworkEditRightPaneWidth = value;
-                emit artworkEditRightPaneWidthChanged(value);
-            }
-        }
-
-        void setSelectedDictIndex(int value) {
-            if (value != m_SelectedDictIndex) {
-                m_SelectedDictIndex = value;
-                emit selectedDictIndexChanged(value);
-            }
-        }
-
         void setVerboseUpload(bool verboseUpload)
         {
             if (m_VerboseUpload == verboseUpload)
@@ -690,7 +628,6 @@ namespace Models {
         QString m_SelectedLocale;
         double m_KeywordSizeScale;
         double m_ScrollSpeedScale;
-        int m_ArtworkEditRightPaneWidth;
         int m_UploadTimeout; // in seconds
         int m_DismissDuration;
         int m_MaxParallelUploads;

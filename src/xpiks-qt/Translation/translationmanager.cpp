@@ -23,6 +23,8 @@
 #include "../Maintenance/maintenanceservice.h"
 #include "../Helpers/asynccoordinator.h"
 
+#define DEFAULT_SELECTED_DICT_INDEX -1
+
 #define SHORT_TRANSLATION_SYMBOLS 500
 #define BOOKNAME QLatin1String("bookname")
 
@@ -65,6 +67,7 @@ namespace Translation {
     TranslationManager::TranslationManager(QObject *parent) :
         QObject(parent),
         Common::BaseEntity(),
+        Common::StatefulEntity("translator"),
         m_AllowedSuffixes({"idx", "idx.dz", "idx.oft", "dict.dz", "dict", "ifo"}),
         m_SelectedDictionaryIndex(-1),
         m_IsBusy(false),
@@ -121,9 +124,8 @@ namespace Translation {
                 setIsBusy(true);
             }
 
-            auto *settingsModel = m_CommandManager->getSettingsModel();
-            settingsModel->setSelectedDictIndex(value);
-            settingsModel->saveSelectedDictionaryIndex();
+            setStateValue(Constants::translatorSelectedDictIndex, value);
+            syncState();
         }
     }
 
@@ -333,8 +335,9 @@ namespace Translation {
     void TranslationManager::initializationFinished() {
         LOG_DEBUG << "#";
 
-        auto *settingsModel = m_CommandManager->getSettingsModel();
-        int selectedDictIndex = settingsModel->getSelectedDictIndex();
+        initState();
+
+        const int selectedDictIndex = getStateInt(Constants::translatorSelectedDictIndex, DEFAULT_SELECTED_DICT_INDEX);
         if ((0 <= selectedDictIndex) && (selectedDictIndex < m_DictionariesList.length())) {
             setSelectedDictionaryIndex(selectedDictIndex);
         } else {

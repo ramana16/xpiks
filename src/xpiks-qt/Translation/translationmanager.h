@@ -16,6 +16,7 @@
 #include <QTimer>
 #include <QVector>
 #include "../Common/baseentity.h"
+#include "../Common/statefulentity.h"
 
 namespace Helpers {
     class AsyncCoordinator;
@@ -29,7 +30,8 @@ namespace Translation {
 
     class TranslationManager :
             public QObject,
-            public Common::BaseEntity
+            public Common::BaseEntity,
+            public Common::StatefulEntity
     {
         Q_OBJECT
         Q_PROPERTY(bool isBusy READ getIsBusy WRITE setIsBusy NOTIFY isBusyChanged)
