@@ -25,6 +25,8 @@ namespace Helpers {
     bool couldBeVideo(const QString &artworkPath);
     bool isVideoExtension(const QString &extension);
     bool isVectorExtension(const QString &extension);
+    bool isImageExtension(const QString &extension);
+    bool isSupportedExtension(const QString &extension);
     QString describeFileSize(qint64 filesizeBytes);
     bool ensureDirectoryExists(const QString &path);
 }

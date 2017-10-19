@@ -69,7 +69,7 @@ namespace Helpers {
         int index = artworkPath.lastIndexOf(QLatin1Char('.'));
         if (index == -1) { return false; }
 
-        QString ext = artworkPath.mid(index, -1);
+        QString ext = artworkPath.mid(index + 1, -1);
         bool isVideo = isVideoExtension(ext);
         return isVideo;
     }
@@ -80,7 +80,7 @@ namespace Helpers {
         bool anyFound = false;
 
         for (auto &ext: videoExtensions) {
-            if (extension.compare(ext, Qt::CaseInsensitive)) {
+            if (extension.compare(ext, Qt::CaseInsensitive) == 0) {
                 anyFound = true;
                 break;
             }
@@ -95,7 +95,22 @@ namespace Helpers {
         bool anyFound = false;
 
         for (auto &ext: vectorExtensions) {
-            if (extension.compare(ext, Qt::CaseInsensitive)) {
+            if (extension.compare(ext, Qt::CaseInsensitive) == 0) {
+                anyFound = true;
+                break;
+            }
+        }
+
+        return anyFound;
+    }
+
+    bool isImageExtension(const QString &extension) {
+        static QVector<QString> imageExtensions({"jpg", "jpeg", "tif", "tiff"});
+
+        bool anyFound = false;
+
+        for (auto &ext: imageExtensions) {
+            if (extension.compare(ext, Qt::CaseInsensitive) == 0) {
                 anyFound = true;
                 break;
             }
@@ -130,5 +145,11 @@ namespace Helpers {
         }
 
         return !anyError;
+    }
+
+    bool isSupportedExtension(const QString &extension) {
+        return isImageExtension(extension) ||
+                isVectorExtension(extension) ||
+                isVideoExtension(extension);
     }
 }

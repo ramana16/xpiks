@@ -93,7 +93,7 @@ namespace Models {
         for (size_t i = 0; i < size; ++i) {
             ArtworkMetadata *metadata = artworksToDestroy.at(i);
             destroyInnerItem(metadata);
-        }        
+        }
     }
 
 #ifdef INTEGRATION_TESTS
@@ -1270,15 +1270,12 @@ namespace Models {
         filenames.reserve(rawFilenames.length());
         vectors.reserve(rawFilenames.length());
 
-        QSet<QString> knownSuffixes;
-        knownSuffixes << "jpg" << "jpeg" << "tiff" << "tif";
-        knownSuffixes << "avi" << "mpeg" << "mpg" << "mpe" << "vob" << "qt" << "mov" << "asf" << "asx" << "wm" << "wmv" << "mp4" << "webm" << "flv";
-
         foreach(const QString &filepath, rawFilenames) {
             QFileInfo fi(filepath);
-            QString suffix = fi.suffix().toLower();
+            const QString suffix = fi.suffix().toLower();
 
-            if (knownSuffixes.contains(suffix)) {
+            if (Helpers::isImageExtension(suffix) ||
+                    Helpers::isVideoExtension(suffix)) {
                 filenames.append(filepath);
             } else if (suffix == QLatin1String("png")) {
                 LOG_WARNING << "PNG is unsupported file format";
