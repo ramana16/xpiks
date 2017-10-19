@@ -23,6 +23,8 @@ namespace Helpers {
     QString getImagePath(const QString &path);
     QString getArchivePath(const QString &artworkPath);
     bool couldBeVideo(const QString &artworkPath);
+    bool isVideoExtension(const QString &extension);
+    bool isVectorExtension(const QString &extension);
     QString describeFileSize(qint64 filesizeBytes);
     bool ensureDirectoryExists(const QString &path);
 }
