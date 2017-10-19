@@ -591,7 +591,7 @@ win32 {
 
     TR_DIR = translations
 
-    exists($$OUT_PWD/$$EXE_DIR/$$TR_DIR) {
+    exists($$OUT_PWD/$$EXE_DIR/$$TR_DIR/) {
         message("Translations exist")
     } else {
         createtranslations.commands += $(MKDIR) \"$$shell_path($$OUT_PWD/$$EXE_DIR/$$TR_DIR)\"
@@ -601,7 +601,7 @@ win32 {
 
     AC_SOURCES_DIR = ac_sources
 
-    exists($$OUT_PWD/$$EXE_DIR/$$AC_SOURCES_DIR) {
+    exists($$OUT_PWD/$$EXE_DIR/$$AC_SOURCES_DIR/) {
         message("ac_sources exist")
     } else {
         create_ac_sources.commands += $(MKDIR) \"$$shell_path($$OUT_PWD/$$EXE_DIR/$$AC_SOURCES_DIR)\"
