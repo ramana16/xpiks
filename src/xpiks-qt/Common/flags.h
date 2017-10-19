@@ -118,10 +118,12 @@ namespace Common {
         SpellErrorsInKeywords = 1 << 11,
         SpellErrorsInDescription = 1 << 12,
         SpellErrorsInTitle = 1 << 13,
-        FileIsTooBig = 1 << 14,
+        ImageFileIsTooBig = 1 << 14,
         KeywordsInDescription = 1 << 15,
         KeywordsInTitle = 1 << 16,
         FilenameSymbols = 1 << 17,
+        VideoFileIsTooBig = 1 << 18,
+        VideoIsTooLong = 1 << 19,
 
         DescriptionGroup = DescriptionIsEmpty |
             DescriptionNotEnoughWords |

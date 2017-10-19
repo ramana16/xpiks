@@ -16,6 +16,7 @@
 #include "../Common/flags.h"
 #include "../Models/artworkmetadata.h"
 #include "../Models/imageartwork.h"
+#include "../Models/videoartwork.h"
 #include "warningssettingsmodel.h"
 #include "warningsitem.h"
 
@@ -104,12 +105,29 @@ namespace Warnings {
             }
         }
 
+        Models::VideoArtwork *video = dynamic_cast<Models::VideoArtwork *>(item);
+
         qint64 filesize = item->getFileSize();
         double filesizeMB = (double)filesize;
         filesizeMB /= (1024.0*1024.0);
-        double maxFileSizeMB = m_WarningsSettingsModel->getMaxFilesizeMB();
-        if (filesizeMB >= maxFileSizeMB) {
-            Common::SetFlag(warningsInfo, Common::WarningFlags::FileIsTooBig);
+        if (image != NULL) {
+            double maxImageFileSizeMB = m_WarningsSettingsModel->getMaxImageFilesizeMB();
+            if (filesizeMB >= maxImageFileSizeMB) {
+                Common::SetFlag(warningsInfo, Common::WarningFlags::ImageFileIsTooBig);
+            }
+        } else if (video != NULL) {
+            double maxVideoFileSizeMB = m_WarningsSettingsModel->getMaxVideoFilesizeMB();
+            if (filesizeMB >= maxVideoFileSizeMB) {
+                Common::SetFlag(warningsInfo, Common::WarningFlags::VideoFileIsTooBig);
+            }
+        }
+
+        if (video != nullptr) {
+            const double duration = video->getDuration();
+            const double maxDuration = m_WarningsSettingsModel->getMaxVideoDurationSeconds();
+            if (duration > maxDuration) {
+                Common::SetFlag(warningsInfo, Common::WarningFlags::VideoIsTooLong);
+            }
         }
 
         QFileInfo fi(item->getFilepath());

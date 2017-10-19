@@ -19,25 +19,31 @@
 #define SETTINGS_KEY QLatin1String("settings")
 #define ALLOWED_CHARACTERS QLatin1String("additional_allowed_chars")
 #define MIN_MEGAPIXELS QLatin1String("min_megapixels")
-#define MAX_FILESIZE_MB QLatin1String("max_filesize_mb")
+#define MAX_IMAGE_FILESIZE_MB QLatin1String("max_image_filesize_mb")
+#define MAX_VIDEO_FILESIZE_MB QLatin1String("max_video_filesize_mb")
 #define MIN_KEYWORDS_COUNT QLatin1String("min_keywords_count")
 #define MAX_KEYWORDS_COUNT QLatin1String("max_keywords_count")
 #define MIN_WORDS_COUNT QLatin1String("min_words_count")
 #define MAX_DESCRIPTION_LENGTH QLatin1String("max_description_length")
+#define MAX_VIDEO_DURATION QLatin1String("max_video_duration_s")
 
 #define DEFAULT_MIN_MEGAPIXELS 4.0
-#define DEFAULT_MAX_FILESIZE_MB 25.0
+#define DEFAULT_MAX_IMAGE_FILESIZE_MB 25.0
+#define DEFAULT_MAX_VIDEO_FILESIZE_MB 4096.0
 #define DEFAULT_MIN_KEYWORDS_COUNT 7
 #define DEFAULT_MAX_KEYWORDS_COUNT 50
 #define DEFAULT_MIN_WORDS_COUNT 3
 #define DEFAULT_MAX_DESCRIPTION_LENGTH 200
+#define DEFAULT_MAX_VIDEO_DURATION_SECONDS 60
 
 namespace Warnings {
     WarningsSettingsModel::WarningsSettingsModel():
         Models::AbstractConfigUpdaterModel(OVERWRITE_WARNINGS_CONFIG),
         m_AllowedFilenameCharacters("._-@#"),
         m_MinMegapixels(DEFAULT_MIN_MEGAPIXELS),
-        m_MaxFilesizeMB(DEFAULT_MAX_FILESIZE_MB),
+        m_MaxImageFilesizeMB(DEFAULT_MAX_IMAGE_FILESIZE_MB),
+        m_MaxVideoFilesizeMB(DEFAULT_MAX_VIDEO_FILESIZE_MB),
+        m_MaxVideoDurationSeconds(DEFAULT_MAX_VIDEO_DURATION_SECONDS),
         m_MinKeywordsCount(DEFAULT_MIN_KEYWORDS_COUNT),
         m_MaxKeywordsCount(DEFAULT_MAX_KEYWORDS_COUNT),
         m_MinWordsCount(DEFAULT_MIN_WORDS_COUNT),
@@ -84,9 +90,18 @@ namespace Warnings {
     }
 
     bool WarningsSettingsModel::processLocalConfig(const QJsonDocument &document) {
-#ifdef QT_DEBUG
-        LOG_DEBUG << document;
-#endif
+        LOG_INTEGR_TESTS_OR_DEBUG << document;
+        bool result = parseConfig(document);
+        return result;
+    }
+
+    void WarningsSettingsModel::processMergedConfig(const QJsonDocument &document) {
+        LOG_DEBUG << "#";
+        parseConfig(document);
+    }
+
+    bool WarningsSettingsModel::parseConfig(const QJsonDocument &document) {
+        LOG_DEBUG << "#";
         bool anyError = false;
 
         do {
@@ -112,68 +127,95 @@ namespace Warnings {
 
             QJsonObject settingsObject = settingsValue.toObject();
 
-            QJsonValue allowedCharacters = settingsObject[ALLOWED_CHARACTERS];
-            if (!allowedCharacters.isString()) {
-                LOG_WARNING << "ALLOWED_CHARACTERS value is not string";
-                anyError = true;
-                break;
+            {
+                QJsonValue allowedCharacters = settingsObject[ALLOWED_CHARACTERS];
+                if (!allowedCharacters.isString()) {
+                    LOG_WARNING << "ALLOWED_CHARACTERS value is not string";
+                    anyError = true;
+                }
+
+                m_AllowedFilenameCharacters = allowedCharacters.toString();
             }
 
-            m_AllowedFilenameCharacters = allowedCharacters.toString();
+            {
+                QJsonValue minMPixels = settingsObject[MIN_MEGAPIXELS];
+                if (!minMPixels.isDouble()) {
+                    LOG_WARNING << "MIN_MEGAPIXELS value is not number";
+                    anyError = true;
+                }
 
-            QJsonValue minMPixels = settingsObject[MIN_MEGAPIXELS];
-            if (!minMPixels.isDouble()) {
-                LOG_WARNING << "MIN_MEGAPIXELS value is not number";
-                anyError = true;
-                break;
+                m_MinMegapixels = minMPixels.toDouble(DEFAULT_MIN_MEGAPIXELS);
             }
 
-            m_MinMegapixels = minMPixels.toDouble(DEFAULT_MIN_MEGAPIXELS);
+            {
+                QJsonValue maxImageFilesizeMB = settingsObject[MAX_IMAGE_FILESIZE_MB];
+                if (!maxImageFilesizeMB.isDouble()) {
+                    LOG_WARNING << "MAX_IMAGE_FILESIZE_MB value is not number";
+                    anyError = true;
+                }
 
-            QJsonValue maxFilesizeMB = settingsObject[MAX_FILESIZE_MB];
-            if (!maxFilesizeMB.isDouble()) {
-                LOG_WARNING << "MAX_FILESIZE_MB value is not number";
-                anyError = true;
-                break;
+                m_MaxImageFilesizeMB = maxImageFilesizeMB.toDouble(DEFAULT_MAX_IMAGE_FILESIZE_MB);
             }
 
-            m_MaxFilesizeMB = maxFilesizeMB.toDouble(DEFAULT_MAX_FILESIZE_MB);
+            {
+                QJsonValue maxVideoFilesizeMB = settingsObject[MAX_VIDEO_FILESIZE_MB];
+                if (!maxVideoFilesizeMB.isDouble()) {
+                    LOG_WARNING << "MAX_VIDEO_FILESIZE_MB value is not number";
+                    anyError = true;
+                }
 
-            QJsonValue minKeywordsCount = settingsObject[MIN_KEYWORDS_COUNT];
-            if (!minKeywordsCount.isDouble()) {
-                LOG_WARNING << "MIN_KEYWORDS_COUNT value is not number";
-                anyError = true;
-                break;
+                m_MaxVideoFilesizeMB = maxVideoFilesizeMB.toDouble(DEFAULT_MAX_VIDEO_FILESIZE_MB);
             }
 
-            m_MinKeywordsCount = minKeywordsCount.toInt(DEFAULT_MIN_KEYWORDS_COUNT);
+            {
+                QJsonValue maxVideoDuration = settingsObject[MAX_VIDEO_DURATION];
+                if (!maxVideoDuration.isDouble()) {
+                    LOG_WARNING << "MAX_VIDEO_DURATION value is not number";
+                    anyError = true;
+                }
 
-            QJsonValue maxKeywordsCount = settingsObject[MAX_KEYWORDS_COUNT];
-            if (!maxKeywordsCount.isDouble()) {
-                LOG_WARNING << "MAX_KEYWORDS_COUNT value is not number";
-                anyError = true;
-                break;
+                m_MaxVideoDurationSeconds = maxVideoDuration.toDouble(DEFAULT_MAX_VIDEO_DURATION_SECONDS);
             }
 
-            m_MaxKeywordsCount = maxKeywordsCount.toInt(DEFAULT_MAX_KEYWORDS_COUNT);
+            {
+                QJsonValue minKeywordsCount = settingsObject[MIN_KEYWORDS_COUNT];
+                if (!minKeywordsCount.isDouble()) {
+                    LOG_WARNING << "MIN_KEYWORDS_COUNT value is not number";
+                    anyError = true;
+                }
 
-            QJsonValue minWordsCount = settingsObject[MIN_WORDS_COUNT];
-            if (!minWordsCount.isDouble()) {
-                LOG_WARNING << "MIN_WORDS_COUNT value is not number";
-                anyError = true;
-                break;
+                m_MinKeywordsCount = minKeywordsCount.toInt(DEFAULT_MIN_KEYWORDS_COUNT);
             }
 
-            m_MinWordsCount = minWordsCount.toInt(DEFAULT_MIN_WORDS_COUNT);
+            {
+                QJsonValue maxKeywordsCount = settingsObject[MAX_KEYWORDS_COUNT];
+                if (!maxKeywordsCount.isDouble()) {
+                    LOG_WARNING << "MAX_KEYWORDS_COUNT value is not number";
+                    anyError = true;
+                }
 
-            QJsonValue maxDescriptionCount = settingsObject[MAX_DESCRIPTION_LENGTH];
-            if (!maxDescriptionCount.isDouble()) {
-                LOG_WARNING << "MAX_DESCRIPTION_LENGTH value is not number";
-                anyError = true;
-                break;
+                m_MaxKeywordsCount = maxKeywordsCount.toInt(DEFAULT_MAX_KEYWORDS_COUNT);
             }
 
-            m_MaxDescriptionLength = maxDescriptionCount.toInt(DEFAULT_MAX_DESCRIPTION_LENGTH);
+            {
+                QJsonValue minWordsCount = settingsObject[MIN_WORDS_COUNT];
+                if (!minWordsCount.isDouble()) {
+                    LOG_WARNING << "MIN_WORDS_COUNT value is not number";
+                    anyError = true;
+                }
+
+                m_MinWordsCount = minWordsCount.toInt(DEFAULT_MIN_WORDS_COUNT);
+            }
+
+            {
+                QJsonValue maxDescriptionCount = settingsObject[MAX_DESCRIPTION_LENGTH];
+                if (!maxDescriptionCount.isDouble()) {
+                    LOG_WARNING << "MAX_DESCRIPTION_LENGTH value is not number";
+                    anyError = true;
+                }
+
+                m_MaxDescriptionLength = maxDescriptionCount.toInt(DEFAULT_MAX_DESCRIPTION_LENGTH);
+            }
         } while (false);
 
         return anyError;

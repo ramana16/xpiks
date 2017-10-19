@@ -17,6 +17,7 @@
 #include "../Connectivity/apimanager.h"
 
 #define PLAN_NAME_KEY QLatin1String("name")
+#define PLAN_IS_SYSTEM_KEY QLatin1String("issystem")
 #define PLAN_PROPERTIES_KEY QLatin1String("properties")
 #define PLANS_KEY QLatin1String("plans")
 #define PROPERTY_TYPE_KEY QLatin1String("propertyType")
@@ -36,7 +37,7 @@
 #define OVERWRITE_KEY "overwrite"
 #define OVERWRITE_CSV_PLANS false
 
-namespace MetadataIO {    
+namespace MetadataIO {
     void propertiesToJsonArray(QJsonArray &propertiesArray, const std::vector<CsvExportProperty> &propertiesToExport) {
         for (auto &property: propertiesToExport) {
             QJsonObject propertyObject;
@@ -132,6 +133,11 @@ namespace MetadataIO {
 
             exportPlan->m_Name = nameValue.toString();
 
+            QJsonValue isSystemValue = planPropertiesObject.value(PLAN_IS_SYSTEM_KEY);
+            if (isSystemValue.isBool()) {
+                exportPlan->m_IsSystemPlan = isSystemValue.toBool(false);
+            }
+
             QJsonValue propertiesValue = planPropertiesObject.value(PLAN_PROPERTIES_KEY);
             if (!propertiesValue.isArray()) {
                 LOG_WARNING << "Element at" << i << "does not have a valid properties list";
@@ -153,6 +159,8 @@ namespace MetadataIO {
 
             QJsonObject planObject;
             planObject.insert(PLAN_NAME_KEY, plan->m_Name);
+
+            planObject.insert(PLAN_IS_SYSTEM_KEY, plan->m_IsSystemPlan);
 
             QJsonArray propertiesArray;
             propertiesToJsonArray(propertiesArray, plan->m_PropertiesToExport);

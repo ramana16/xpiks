@@ -96,8 +96,16 @@ namespace Warnings {
             descriptions.append(QObject::tr("Title has spelling error(s)"));
         }
 
-        if (Common::HasFlag(warningsFlags, Common::WarningFlags::FileIsTooBig)) {
-            double filesizeMB = settingsModel->getMaxFilesizeMB();
+        if (Common::HasFlag(warningsFlags, Common::WarningFlags::ImageFileIsTooBig) ||
+                Common::HasFlag(warningsFlags, Common::WarningFlags::VideoFileIsTooBig)) {
+            double filesizeMB = 0.0;
+
+            if (Common::HasFlag(warningsFlags, Common::WarningFlags::ImageFileIsTooBig)) {
+                filesizeMB = settingsModel->getMaxImageFilesizeMB();
+            } else if (Common::HasFlag(warningsFlags, Common::WarningFlags::VideoFileIsTooBig)) {
+                filesizeMB = settingsModel->getMaxVideoFilesizeMB();
+            }
+
             QString formattedSize = QString::number(filesizeMB, 'f', 1);
             descriptions.append(QObject::tr("File size is larger than %1 MB").arg(formattedSize));
         }
@@ -112,6 +120,11 @@ namespace Warnings {
 
         if (Common::HasFlag(warningsFlags, Common::WarningFlags::FilenameSymbols)) {
             descriptions.append(QObject::tr("Filename contains special characters or spaces"));
+        }
+
+        if (Common::HasFlag(warningsFlags, Common::WarningFlags::VideoIsTooLong)) {
+            QString formattedSeconds = QString::number(settingsModel->getMaxVideoDurationSeconds(), 'f', 1);
+            descriptions.append(QObject::tr("Video is longer than %1 seconds").arg(formattedSeconds));
         }
     }
 

@@ -27,7 +27,9 @@ namespace Warnings {
 
         const QString &getAllowedFilenameCharacters() const { return m_AllowedFilenameCharacters; }
         double getMinMegapixels() const { return m_MinMegapixels; }
-        double getMaxFilesizeMB() const { return m_MaxFilesizeMB; }
+        double getMaxImageFilesizeMB() const { return m_MaxImageFilesizeMB; }
+        double getMaxVideoFilesizeMB() const { return m_MaxVideoFilesizeMB; }
+        double getMaxVideoDurationSeconds() const { return m_MaxVideoDurationSeconds; }
         int getMinKeywordsCount() const { return m_MinKeywordsCount; }
         int getMaxKeywordsCount() const { return m_MaxKeywordsCount; }
         int getMinWordsCount() const { return m_MinWordsCount; }
@@ -37,6 +39,10 @@ namespace Warnings {
     protected:
         virtual void processRemoteConfig(const QJsonDocument &remoteDocument, bool overwriteLocal) override;
         virtual bool processLocalConfig(const QJsonDocument &document) override;
+        virtual void processMergedConfig(const QJsonDocument &document) override;
+
+    private:
+        bool parseConfig(const QJsonDocument &document);
 
         // CompareValuesJson interface
     public:
@@ -45,7 +51,9 @@ namespace Warnings {
     private:
         QString m_AllowedFilenameCharacters;
         double m_MinMegapixels;
-        double m_MaxFilesizeMB;
+        double m_MaxImageFilesizeMB;
+        double m_MaxVideoFilesizeMB;
+        double m_MaxVideoDurationSeconds;
         int m_MinKeywordsCount;
         int m_MaxKeywordsCount;
         int m_MinWordsCount;
