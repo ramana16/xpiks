@@ -42,9 +42,9 @@ Item {
         property int artworksCount: 0
         property string outputDirectory: ""
 
-        ListElement { name: "Jane"; isselected: false }
-        ListElement { name: "Harry"; isselected: false }
-        ListElement { name: "Wendy"; isselected: false }
+        ListElement { name: "Jane"; isselected: false; issystem: false }
+        ListElement { name: "Harry"; isselected: false; issystem: false }
+        ListElement { name: "Wendy"; isselected: false; issystem: false }
 
         function startExport() {}
         function setCurrentItem() {}
