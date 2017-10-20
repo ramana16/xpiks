@@ -22,11 +22,15 @@
 #include "../Common/basickeywordsmodel.h"
 #include "suggestionartwork.h"
 #include "../Common/hold.h"
+#include "../Common/statefulentity.h"
 
 namespace Suggestion {
     class SuggestionQueryEngineBase;
 
-    class KeywordsSuggestor : public QAbstractListModel, public Common::BaseEntity
+    class KeywordsSuggestor:
+            public QAbstractListModel,
+            public Common::BaseEntity,
+            public Common::StatefulEntity
     {
         Q_OBJECT
         Q_PROPERTY(int suggestedKeywordsCount READ getSuggestedKeywordsCount NOTIFY suggestedKeywordsCountChanged)
@@ -36,6 +40,7 @@ namespace Suggestion {
         Q_PROPERTY(int selectedSourceIndex READ getSelectedSourceIndex WRITE setSelectedSourceIndex NOTIFY selectedSourceIndexChanged)
         Q_PROPERTY(QString lastErrorString READ getLastErrorString WRITE setLastErrorString NOTIFY lastErrorStringChanged)
         Q_PROPERTY(bool isLocalSearch READ getIsLocalSearch NOTIFY isLocalSearchChanged)
+        Q_PROPERTY(int searchTypeIndex READ getSearchTypeIndex WRITE setSearchTypeIndex NOTIFY searchTypeIndexChanged)
 
     public:
         KeywordsSuggestor(QObject *parent=NULL);
@@ -49,6 +54,9 @@ namespace Suggestion {
 
         int getSelectedSourceIndex() const { return m_SelectedSourceIndex; }
         void setSelectedSourceIndex(int value);
+
+        int getSearchTypeIndex() const;
+        void setSearchTypeIndex(int value);
 
         void setLastErrorString(const QString &value) {
             if (value != m_LastErrorString) {
@@ -74,6 +82,7 @@ namespace Suggestion {
         void selectedArtworksCountChanged();
         void lastErrorStringChanged();
         void isLocalSearchChanged();
+        void searchTypeIndexChanged();
 
     private slots:
         void resultsAvailableHandler();

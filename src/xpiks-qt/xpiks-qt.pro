@@ -401,7 +401,8 @@ HEADERS += \
     MetadataIO/csvexportworker.h \
     MetadataIO/csvexportproperties.h \
     MetadataIO/csvexportplansmodel.h \
-    MetadataIO/csvexportmodel.h
+    MetadataIO/csvexportmodel.h \
+    Common/delayedactionentity.h
 
 DISTFILES += \
     Components/CloseIcon.qml \

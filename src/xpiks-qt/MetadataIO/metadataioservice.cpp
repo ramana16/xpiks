@@ -22,8 +22,7 @@
 namespace MetadataIO {
     MetadataIOService::MetadataIOService(QObject *parent):
         QObject(parent),
-        m_LastTimerId(-1),
-        m_RestartsCount(0),
+        Common::DelayedActionEntity(SAVER_TIMER_TIMEOUT, SAVER_TIMER_MAX_RESTARTS),
         m_MetadataIOWorker(nullptr),
         m_IsStopped(false)
     {
@@ -149,31 +148,15 @@ namespace MetadataIO {
 
     void MetadataIOService::onCacheSyncRequest() {
         LOG_DEBUG << "#";
-
-        if (m_RestartsCount < SAVER_TIMER_MAX_RESTARTS) {
-            if (m_LastTimerId != -1) { this->killTimer(m_LastTimerId); }
-
-            m_LastTimerId = this->startTimer(SAVER_TIMER_TIMEOUT, Qt::VeryCoarseTimer);
-            m_RestartsCount++;
-        } else {
-            LOG_INFO << "Maximum backup delays occured, forcing backup";
-        }
+        justChanged();
     }
 
     void MetadataIOService::workerFinished() {
         LOG_INFO << "#";
     }
 
-    void MetadataIOService::timerEvent(QTimerEvent *event) {
-        LOG_DEBUG << "#";
-        if ((event != nullptr) && (event->timerId() == m_LastTimerId)) {
-            m_RestartsCount = 0;
-            m_LastTimerId = -1;
-
-            std::shared_ptr<MetadataIOTaskBase> syncItem(new MetadataCacheSyncTask());
-            m_MetadataIOWorker->submitItem(syncItem);
-        }
-
-        this->killTimer(event->timerId());
+    void MetadataIOService::doOnTimer() {
+        std::shared_ptr<MetadataIOTaskBase> syncItem(new MetadataCacheSyncTask());
+        m_MetadataIOWorker->submitItem(syncItem);
     }
 }

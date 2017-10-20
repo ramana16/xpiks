@@ -79,8 +79,12 @@ namespace Models {
     }
 
     void UIManager::setArtworkEditRightPaneWidth(int value) {
-        setStateValue(Constants::artworkEditRightPaneWidth, value);
-        justEdited();
+        const int current = getArtworkEditRightPaneWidth();
+        if (current != value) {
+            setStateValue(Constants::artworkEditRightPaneWidth, value);
+            justEdited();
+            emit artworkEditRightPaneWidthChanged();
+        }
     }
 
     int UIManager::getAppWidth(int defaultWidth)  {

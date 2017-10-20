@@ -358,8 +358,6 @@ namespace Models {
         void proxyPasswordChanged(QString value);
         void proxyPortChanged(QString value);
         void autoCacheImagesChanged(bool value);
-        void artworkEditRightPaneWidthChanged(int value);
-        void selectedDictIndexChanged(int value);
         void verboseUploadChanged(bool verboseUpload);
         void useProgressiveSuggestionPreviewsChanged(bool progressiveSuggestionPreviews);
         void progressiveSuggestionIncrementChanged(int progressiveSuggestionIncrement);

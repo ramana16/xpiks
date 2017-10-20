@@ -303,7 +303,7 @@ Rectangle {
         }
 
         onResizingChanged: {
-            uiManager.setArtworkEditRightPaneWidth(rightPane.width)
+            uiManager.artworkEditRightPaneWidth = rightPane.width
         }
 
         Item {
@@ -440,7 +440,7 @@ Rectangle {
             anchors.bottom: parent.bottom
 
             Component.onCompleted: {
-                rightPane.width = uiManager.getArtworkEditRightPaneWidth()
+                rightPane.width = uiManager.artworkEditRightPaneWidth
             }
 
             Row {

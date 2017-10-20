@@ -23,13 +23,16 @@
 #include "gettyqueryengine.h"
 #include "../Models/switchermodel.h"
 #include "../Models/settingsmodel.h"
+#include "../Helpers/constants.h"
 
 #define LINEAR_TIMER_INTERVAL 1000
+#define DEFAULT_SEARCH_TYPE_INDEX 0
 
 namespace Suggestion {
     KeywordsSuggestor::KeywordsSuggestor(QObject *parent):
         QAbstractListModel(parent),
         Common::BaseEntity(),
+        Common::StatefulEntity("ksuggest"),
         m_SuggestedKeywords(m_HoldPlaceholder, this),
         m_AllOtherKeywords(m_HoldPlaceholder, this),
         m_SelectedArtworksCount(0),
@@ -76,6 +79,8 @@ namespace Suggestion {
             QObject::connect(engine, &SuggestionQueryEngineBase::errorReceived,
                              this, &KeywordsSuggestor::errorsReceivedHandler);
         }
+
+        initState();
     }
 
     void KeywordsSuggestor::setSuggestedArtworks(std::vector<std::shared_ptr<SuggestionArtwork> > &suggestedArtworks) {
@@ -154,6 +159,19 @@ namespace Suggestion {
                 emit selectedSourceIndexChanged();
                 emit isLocalSearchChanged();
             }
+        }
+    }
+
+    int KeywordsSuggestor::getSearchTypeIndex() const {
+        return getStateInt(Constants::suggestorSearchTypeIndex, DEFAULT_SEARCH_TYPE_INDEX);
+    }
+
+    void KeywordsSuggestor::setSearchTypeIndex(int value) {
+        int current = getSearchTypeIndex();
+        if (current != value) {
+            setStateValue(Constants::suggestorSearchTypeIndex, value);
+            emit suggestedKeywordsCountChanged();
+            syncState();
         }
     }
 

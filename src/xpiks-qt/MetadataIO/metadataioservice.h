@@ -16,6 +16,7 @@
 #include "../Common/baseentity.h"
 #include "../Suggestion/locallibraryquery.h"
 #include "artworkssnapshot.h"
+#include "../Common/delayedactionentity.h"
 
 namespace Models {
     class ArtworkMetadata;
@@ -23,7 +24,10 @@ namespace Models {
 namespace MetadataIO {
     class MetadataIOWorker;
 
-    class MetadataIOService: public QObject, public Common::BaseEntity
+    class MetadataIOService:
+            public QObject,
+            public Common::BaseEntity,
+            public Common::DelayedActionEntity
     {
         Q_OBJECT
     public:
@@ -58,12 +62,13 @@ namespace MetadataIO {
         void onCacheSyncRequest();
         void workerFinished();
 
+   // DelayedActionEntity implementation
     protected:
-        virtual void timerEvent(QTimerEvent *event) override;
+        virtual void doKillTimer(int timerId) override { this->killTimer(timerId); }
+        virtual int doStartTimer(int interval, Qt::TimerType timerType) override { return this->startTimer(interval, timerType); }
+        virtual void doOnTimer() override;
 
     private:
-        int m_LastTimerId;
-        volatile int m_RestartsCount;
         MetadataIOWorker *m_MetadataIOWorker;
         bool m_IsStopped;
     };

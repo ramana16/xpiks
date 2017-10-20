@@ -27,11 +27,13 @@
 #include "../Common/hold.h"
 #include "../Models/metadataelement.h"
 #include "artworkproxybase.h"
+#include "../Common/delayedactionentity.h"
 
 namespace Models {
     class CombinedArtworksModel:
             public ArtworksViewModel,
-            public ArtworkProxyBase
+            public ArtworkProxyBase,
+            public Common::DelayedActionEntity
     {
         Q_OBJECT
         Q_PROPERTY(QString description READ getDescription WRITE setDescription NOTIFY descriptionChanged)
@@ -171,7 +173,6 @@ namespace Models {
         void assignFromManyArtworks();
         void recombineArtworks(std::function<bool (const MetadataElement &)> pred);
         bool findNonEmptyData(std::function<bool (const MetadataElement &)> pred, int &index, ArtworkMetadata *&artworkMetadata);
-        void justEdited();
 
     public slots:
         void spellCheckErrorsChangedHandler();
@@ -195,7 +196,12 @@ namespace Models {
         virtual qint64 getSpecialItemID() override;
         virtual bool doRemoveSelectedArtworks() override;
         virtual void doResetModel() override;
-        virtual void timerEvent(QTimerEvent *event) override;
+
+        // DelayedActionEntity implementation
+    protected:
+        virtual void doKillTimer(int timerId) override { this->killTimer(timerId); }
+        virtual int doStartTimer(int interval, Qt::TimerType timerType) override { return this->startTimer(interval, timerType); }
+        virtual void doOnTimer() override;
 
     public:
         virtual bool removeUnavailableItems() override;
@@ -206,8 +212,6 @@ namespace Models {
         SpellCheck::SpellCheckItemInfo m_SpellCheckInfo;
         Common::CombinedEditFlags m_EditFlags;
         Common::flag_t m_ModifiedFlags;
-        int m_EditingRestartsCount;
-        int m_EditingPauseTimerId;
     };
 }
 

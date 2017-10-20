@@ -28,6 +28,7 @@
 #include "../Common/hold.h"
 #include "../SpellCheck/spellcheckiteminfo.h"
 #include "../UndoRedo/artworkmetadatabackup.h"
+#include "../Common/delayedactionentity.h"
 
 namespace MetadataIO {
     struct CachedArtwork;
@@ -41,6 +42,7 @@ namespace Models {
 
     class ArtworkMetadata:
             public QObject,
+            public Common::DelayedActionEntity,
             public Common::IBasicArtwork,
             public Common::IMetadataOperator
     {
@@ -184,7 +186,7 @@ namespace Models {
         void setUnavailable() { setIsUnavailableFlag(true); }
         void resetModified() { setIsModifiedFlag(false); }
         void requestFocus(int directionSign) { emit focusRequested(directionSign); }
-        virtual void justEdited() override;
+        virtual void justEdited() override { justChanged(); }
         virtual bool expandPreset(size_t keywordIndex, const QStringList &presetList) override;
         virtual bool appendPreset(const QStringList &presetList) override;
         virtual bool hasKeywords(const QStringList &keywordsList) override;
@@ -216,7 +218,12 @@ namespace Models {
 
     protected:
         virtual void resetFlags() { m_MetadataFlags = 0; }
-        virtual void timerEvent(QTimerEvent *event) override;
+
+        // DelayedActionEntity implementation
+    protected:
+        virtual void doKillTimer(int timerId) override { this->killTimer(timerId); }
+        virtual int doStartTimer(int interval, Qt::TimerType timerType) override { return this->startTimer(interval, timerType); }
+        virtual void doOnTimer() override;
 
     private:
         Common::Hold m_Hold;
@@ -226,8 +233,6 @@ namespace Models {
         QMutex m_InitMutex;
         qint64 m_FileSize;  // in bytes
         QString m_ArtworkFilepath;
-        int m_EditingRestartsCount;
-        int m_EditingPauseTimerId;
         Common::ID_t m_ID;
         qint64 m_DirectoryID;
         volatile Common::flag_t m_MetadataFlags;

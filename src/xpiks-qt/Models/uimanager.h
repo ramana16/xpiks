@@ -33,6 +33,7 @@ namespace Models {
         Q_OBJECT
         Q_PROPERTY(bool hasCurrentEditable READ getHasCurrentEditable NOTIFY currentEditableChanged)
         Q_PROPERTY(double keywordHeight READ getKeywordHeight NOTIFY keywordHeightChanged)
+        Q_PROPERTY(int artworkEditRightPaneWidth READ getArtworkEditRightPaneWidth WRITE setArtworkEditRightPaneWidth NOTIFY artworkEditRightPaneWidthChanged)
     public:
         explicit UIManager(Models::SettingsModel *settingsModel, QObject *parent = 0);
 
@@ -56,8 +57,8 @@ namespace Models {
         Q_INVOKABLE QObject *retrieveTabsModel(int tabID);
 
     public:
-        Q_INVOKABLE int getArtworkEditRightPaneWidth();
-        Q_INVOKABLE void setArtworkEditRightPaneWidth(int value);
+        int getArtworkEditRightPaneWidth();
+        void setArtworkEditRightPaneWidth(int value);
         Q_INVOKABLE int getAppWidth(int defaultWidth);
         Q_INVOKABLE void setAppWidth(int width);
         Q_INVOKABLE int getAppHeight(int defaultHeight);
@@ -80,6 +81,7 @@ namespace Models {
         void tabsIconsChanged();
         void currentEditableChanged();
         void keywordHeightChanged(double value);
+        void artworkEditRightPaneWidthChanged();
 
     protected:
         void justEdited();

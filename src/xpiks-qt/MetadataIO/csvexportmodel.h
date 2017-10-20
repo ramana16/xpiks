@@ -18,6 +18,7 @@
 #include "artworkssnapshot.h"
 #include "csvexportplansmodel.h"
 #include "../Common/baseentity.h"
+#include "../Common/delayedactionentity.h"
 
 class QTimerEvent;
 
@@ -67,7 +68,10 @@ namespace MetadataIO {
         int m_CurrentIndex;
     };
 
-    class CsvExportModel: public QAbstractListModel, public Common::BaseEntity
+    class CsvExportModel:
+            public QAbstractListModel,
+            public Common::BaseEntity,
+            public Common::DelayedActionEntity
     {
         Q_OBJECT
         Q_PROPERTY(bool isExporting READ getIsExporting WRITE setIsExporting NOTIFY isExportingChanged)
@@ -122,14 +126,12 @@ namespace MetadataIO {
         Q_INVOKABLE void addNewPlan();
         Q_INVOKABLE QObject *getColumnsModel();
         Q_INVOKABLE void setCurrentItem(int row);
-        Q_INVOKABLE void requestSave() { justEdited(); }
+        Q_INVOKABLE void requestSave() { justChanged(); }
         Q_INVOKABLE int getSelectedPlansCount() { return retrieveSelectedPlansCount(); }
 
     private:
-        void justEdited();
         void saveExportPlans();
         int retrieveSelectedPlansCount();
-        virtual void timerEvent(QTimerEvent *event) override;
 
 #ifdef INTEGRATION_TESTS
     public:
@@ -148,6 +150,12 @@ namespace MetadataIO {
         void onWorkerFinished();
         void onPlansUpdated();
         void onBackupRequired();
+
+        // DelayedActionEntity implementation
+    protected:
+        virtual void doKillTimer(int timerId) override { this->killTimer(timerId); }
+        virtual int doStartTimer(int interval, Qt::TimerType timerType) override { return this->startTimer(interval, timerType); }
+        virtual void doOnTimer() override { emit backupRequired(); }
 
     private:
         CsvExportColumnsModel m_CurrentColumnsModel;

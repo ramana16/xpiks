@@ -467,7 +467,8 @@ HEADERS += \
     csvexporttest.h \
     ../../../vendors/csv/csv.h \
     exiv2iohelpers.h \
-    unicodeiotest.h
+    unicodeiotest.h \
+    ../../xpiks-qt/Common/delayedactionentity.h
 
 INCLUDEPATH += ../../../vendors/tiny-aes
 INCLUDEPATH += ../../../vendors/cpp-libface

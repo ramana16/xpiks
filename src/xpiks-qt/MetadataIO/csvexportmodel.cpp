@@ -225,6 +225,8 @@ namespace MetadataIO {
     /*------------------------------------------------------*/
 
     CsvExportModel::CsvExportModel():
+        Common::BaseEntity(),
+        Common::DelayedActionEntity(3000, MAX_SAVE_PAUSE_RESTARTS),
         m_SaveTimerId(-1),
         m_SaveRestartsCount(0),
         m_IsExporting(false)
@@ -404,7 +406,7 @@ namespace MetadataIO {
         }
         endRemoveRows();
 
-        justEdited();
+        justChanged();
     }
 
     void CsvExportModel::addNewPlan() {
@@ -419,7 +421,7 @@ namespace MetadataIO {
 
         m_CurrentColumnsModel.setupModel(size - 1, m_ExportPlans.back());
 
-        justEdited();
+        justChanged();
     }
 
     QObject *CsvExportModel::getColumnsModel() {
@@ -434,22 +436,6 @@ namespace MetadataIO {
         if (row < 0 || row >= (int)m_ExportPlans.size()) { return; }
 
         m_CurrentColumnsModel.setupModel(row, m_ExportPlans[row]);
-    }
-
-    void CsvExportModel::justEdited() {
-        if (m_SaveRestartsCount < MAX_SAVE_PAUSE_RESTARTS) {
-            if (m_SaveTimerId != -1) {
-                this->killTimer(m_SaveTimerId);
-                LOG_INTEGR_TESTS_OR_DEBUG << "killed timer" << m_SaveTimerId;
-            }
-
-            m_SaveTimerId = this->startTimer(3000, Qt::VeryCoarseTimer);
-            LOG_INTEGR_TESTS_OR_DEBUG << "started timer" << m_SaveTimerId;
-            m_SaveRestartsCount++;
-        } else {
-            Q_ASSERT(m_SaveTimerId != -1);
-            LOG_INFO << "Maximum backup delays occured, forcing backup";
-        }
     }
 
     void CsvExportModel::saveExportPlans() {
@@ -467,22 +453,6 @@ namespace MetadataIO {
         }
 
         return count;
-    }
-
-    void CsvExportModel::timerEvent(QTimerEvent *event) {
-        if (event == nullptr) { return; }
-
-        LOG_DEBUG << "timer" << event->timerId();
-
-        if (event->timerId() == m_SaveTimerId) {
-            m_SaveRestartsCount = 0;
-            m_SaveTimerId = -1;
-
-            emit backupRequired();
-        }
-
-        // one time event
-        this->killTimer(event->timerId());
     }
 
     void CsvExportModel::onWorkerFinished() {

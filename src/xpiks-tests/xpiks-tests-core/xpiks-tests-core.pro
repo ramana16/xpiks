@@ -318,5 +318,6 @@ HEADERS += \
     deleteoldlogs_tests.h \
     jsonmerge_tests.h \
     ../../xpiks-qt/KeywordsPresets/presetkeywordsmodelconfig.h \
-    ../../xpiks-qt/Common/statefulentity.h
+    ../../xpiks-qt/Common/statefulentity.h \
+    ../../xpiks-qt/Common/delayedactionentity.h
 

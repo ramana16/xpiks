@@ -194,7 +194,6 @@ Item {
                     CustomComboBox {
                         id: searchTypeCombobox
                         anchors.left: searchRect.right
-                        enabled: !keywordsSuggestor.isLocalSearch
                         model: [i18.n + qsTr("All Images"),
                             i18.n + qsTr("Photos"),
                             i18.n + qsTr("Vectors"),

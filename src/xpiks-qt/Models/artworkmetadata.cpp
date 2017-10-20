@@ -33,11 +33,10 @@
 
 namespace Models {
     ArtworkMetadata::ArtworkMetadata(const QString &filepath, qint64 ID, qint64 directoryID):
+        Common::DelayedActionEntity(1000, MAX_EDITING_PAUSE_RESTARTS),
         m_MetadataModel(m_Hold),
         m_FileSize(0),
         m_ArtworkFilepath(filepath),
-        m_EditingRestartsCount(0),
-        m_EditingPauseTimerId(-1),
         m_ID(ID),
         m_DirectoryID(directoryID),
         m_MetadataFlags(0),
@@ -405,22 +404,6 @@ namespace Models {
         }
     }
 
-    void ArtworkMetadata::justEdited() {
-        if (m_EditingRestartsCount < MAX_EDITING_PAUSE_RESTARTS) {
-            if (m_EditingPauseTimerId != -1) {
-                this->killTimer(m_EditingPauseTimerId);
-                LOG_INTEGR_TESTS_OR_DEBUG << "killed timer" << m_EditingPauseTimerId;
-            }
-
-            m_EditingPauseTimerId = this->startTimer(1000, Qt::VeryCoarseTimer);
-            LOG_INTEGR_TESTS_OR_DEBUG << "started timer" << m_EditingPauseTimerId;
-            m_EditingRestartsCount++;
-        } else {
-            Q_ASSERT(m_EditingPauseTimerId != -1);
-            LOG_INFO << "Maximum backup delays occured, forcing backup";
-        }
-    }
-
     bool ArtworkMetadata::expandPreset(size_t keywordIndex, const QStringList &presetList)  {
         bool result = m_MetadataModel.expandPreset(keywordIndex, presetList);
         if (result) {
@@ -455,20 +438,8 @@ namespace Models {
         m_SpellCheckInfo.clear();
     }
 
-    void ArtworkMetadata::timerEvent(QTimerEvent *event) {
-        if (event == nullptr) { return; }
-
-        LOG_DEBUG << "timer" << event->timerId();
-
-        if (event->timerId() == m_EditingPauseTimerId) {
-            m_EditingRestartsCount = 0;
-            m_EditingPauseTimerId = -1;
-
-            emit backupRequired();
-            emit editingPaused();
-        }
-
-        // one time event
-        this->killTimer(event->timerId());
+    void ArtworkMetadata::doOnTimer() {
+        emit backupRequired();
+        emit editingPaused();
     }
 }
