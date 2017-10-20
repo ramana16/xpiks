@@ -156,6 +156,7 @@ namespace MetadataIO {
         virtual void doKillTimer(int timerId) override { this->killTimer(timerId); }
         virtual int doStartTimer(int interval, Qt::TimerType timerType) override { return this->startTimer(interval, timerType); }
         virtual void doOnTimer() override { emit backupRequired(); }
+        virtual void timerEvent(QTimerEvent *event) override { onQtTimer(event); }
 
     private:
         CsvExportColumnsModel m_CurrentColumnsModel;
