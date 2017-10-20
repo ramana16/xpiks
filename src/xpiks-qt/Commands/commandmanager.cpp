@@ -26,7 +26,7 @@
 #include "../Models/filteredartitemsproxymodel.h"
 #include "../Models/recentdirectoriesmodel.h"
 #include "../Models/recentfilesmodel.h"
-#include "../Models/metadataelement.h"
+#include "../Models/artworkelement.h"
 #include "../SpellCheck/duplicatesreviewmodel.h"
 #include "../SpellCheck/spellcheckerservice.h"
 #include "../Models/settingsmodel.h"
@@ -579,15 +579,15 @@ void Commands::CommandManager::recodePasswords(const QString &oldMasterPassword,
 void Commands::CommandManager::combineArtwork(Models::ArtworkMetadata *metadata, int index) const {
     LOG_INFO << "one item with index" << index;
     if (m_CombinedArtworksModel) {
-        std::vector<Models::MetadataElement> items;
-        items.emplace_back(metadata, index);
+        MetadataIO::WeakArtworksSnapshot items;
+        items.push_back(metadata);
 
         m_CombinedArtworksModel->resetModel();
         m_CombinedArtworksModel->setArtworks(items);
     }
 }
 
-void Commands::CommandManager::combineArtworks(std::vector<Models::MetadataElement> &artworks) const {
+void Commands::CommandManager::combineArtworks(MetadataIO::WeakArtworksSnapshot &artworks) const {
     LOG_INFO << artworks.size() << "artworks";
     if (m_CombinedArtworksModel) {
         m_CombinedArtworksModel->resetModel();
@@ -595,7 +595,7 @@ void Commands::CommandManager::combineArtworks(std::vector<Models::MetadataEleme
     }
 }
 
-void Commands::CommandManager::deleteKeywordsFromArtworks(std::vector<Models::MetadataElement> &artworks) const {
+void Commands::CommandManager::deleteKeywordsFromArtworks(MetadataIO::WeakArtworksSnapshot &artworks) const {
     LOG_INFO << artworks.size() << "artworks";
     if (m_DeleteKeywordsViewModel != NULL) {
         m_DeleteKeywordsViewModel->setArtworks(artworks);
@@ -710,7 +710,7 @@ void Commands::CommandManager::readMetadata(const MetadataIO::ArtworksSnapshot &
 #endif
 }
 
-void Commands::CommandManager::writeMetadata(const QVector<Models::ArtworkMetadata *> &artworks, bool useBackups) const {
+void Commands::CommandManager::writeMetadata(const MetadataIO::WeakArtworksSnapshot &artworks, bool useBackups) const {
 #ifndef CORE_TESTS
     if (m_MetadataIOCoordinator != nullptr) {
         m_MetadataIOService->writeArtworks(artworks);
@@ -726,7 +726,7 @@ void Commands::CommandManager::writeMetadata(const QVector<Models::ArtworkMetada
 #endif
 }
 
-void Commands::CommandManager::addToLibrary(const QVector<Models::ArtworkMetadata *> &artworks) const {
+void Commands::CommandManager::addToLibrary(const MetadataIO::WeakArtworksSnapshot &artworks) const {
 #ifndef CORE_TESTS
     if (m_MetadataIOService != nullptr) {
         m_MetadataIOService->addArtworks(artworks);
@@ -754,7 +754,7 @@ void Commands::CommandManager::updateArtworks(const MetadataIO::WeakArtworksSnap
     }
 }
 
-void Commands::CommandManager::updateArtworks(const std::vector<std::shared_ptr<Models::ArtworkMetadataLocker> > &artworks) {
+void Commands::CommandManager::updateArtworks(const MetadataIO::ArtworksSnapshot::Container &artworks) {
     if (m_ArtItemsModel != nullptr) {
         QVector<int> indices;
         indices.reserve((int)artworks.size());
@@ -824,22 +824,21 @@ void Commands::CommandManager::submitKeywordForSpellCheck(Common::BasicKeywordsM
 void Commands::CommandManager::submitForSpellCheck(const MetadataIO::WeakArtworksSnapshot &items) const {
     const Common::WordAnalysisFlags wordAnalysisFlags = getWordAnalysisFlags();
     if ((wordAnalysisFlags != Common::WordAnalysisFlags::None) &&
-        (m_SpellCheckerService != NULL) &&
-        !items.isEmpty()) {
-        QVector<Common::BasicKeywordsModel *> itemsToSubmit;
-        int count = items.length();
+            (m_SpellCheckerService != NULL) &&
+            !items.empty()) {
+        std::vector<Common::BasicKeywordsModel *> itemsToSubmit;
+        size_t count = items.size();
         itemsToSubmit.reserve(count);
 
-        for (int i = 0; i < count; ++i) {
-            Models::ArtworkMetadata *metadata = items.at(i);
-            itemsToSubmit << metadata->getBasicModel();
+        for (auto *artwork: items) {
+            itemsToSubmit.push_back(artwork->getBasicModel());
         }
 
         this->submitForSpellCheck(itemsToSubmit);
     }
 }
 
-void Commands::CommandManager::submitForSpellCheck(const QVector<Common::BasicKeywordsModel *> &items) const {
+void Commands::CommandManager::submitForSpellCheck(const std::vector<Common::BasicKeywordsModel *> &items) const {
     const Common::WordAnalysisFlags wordAnalysisFlags = getWordAnalysisFlags();
     if ((wordAnalysisFlags != Common::WordAnalysisFlags::None) && (m_SpellCheckerService != NULL)) {
         m_SpellCheckerService->submitItems(items);
@@ -877,7 +876,7 @@ void Commands::CommandManager::setupSpellCheckSuggestions(std::vector<std::pair<
     }
 }
 
-void Commands::CommandManager::submitForSpellCheck(const QVector<Common::BasicKeywordsModel *> &items,
+void Commands::CommandManager::submitForSpellCheck(const std::vector<Common::BasicKeywordsModel *> &items,
                                                    const QStringList &wordsToCheck) const {
     Common::WordAnalysisFlags wordAnalysisFlags = getWordAnalysisFlags();
     if ((wordAnalysisFlags != Common::WordAnalysisFlags::None) && (m_SpellCheckerService != NULL)) {
@@ -927,19 +926,19 @@ void Commands::CommandManager::submitForWarningsCheck(const MetadataIO::WeakArtw
     }
 
     if (!m_WarningsCheckers.isEmpty()) {
-        QVector<Common::IBasicArtwork *> itemsToSubmit;
-        int count = items.length();
-        itemsToSubmit.reserve(count);
+        std::vector<Common::IBasicArtwork *> itemsToSubmit;
+        size_t size = items.size();
+        itemsToSubmit.reserve(size);
 
-        for (int i = 0; i < count; ++i) {
-            itemsToSubmit << items.at(i);
+        for (auto &item: items) {
+            itemsToSubmit.push_back(item);
         }
 
         this->submitForWarningsCheck(itemsToSubmit);
     }
 }
 
-void Commands::CommandManager::submitForWarningsCheck(const QVector<Common::IBasicArtwork *> &items) const {
+void Commands::CommandManager::submitForWarningsCheck(const std::vector<Common::IBasicArtwork *> &items) const {
     int count = m_WarningsCheckers.length();
 
     for (int i = 0; i < count; ++i) {
@@ -1273,11 +1272,11 @@ void Commands::CommandManager::servicesInitialized(int status) {
     }
 }
 
-void Commands::CommandManager::registerCurrentItem(const Models::MetadataElement &metadataElement) {
+void Commands::CommandManager::registerCurrentItem(Models::ArtworkMetadata *artwork) {
     if (m_UIManager != nullptr) {
         std::shared_ptr<QuickBuffer::ICurrentEditable> currentItem(new QuickBuffer::CurrentEditableArtwork(
-                                                                       metadataElement.getOrigin(),
-                                                                       metadataElement.getOriginalIndex(),
+                                                                       artwork,
+                                                                       artwork->getLastKnownIndex(),
                                                                        this));
         m_UIManager->registerCurrentItem(currentItem);
     }

@@ -14,10 +14,11 @@
 #include <vector>
 #include <functional>
 #include "../Common/abstractlistmodel.h"
-#include "metadataelement.h"
+#include "artworkelement.h"
 #include "../Common/baseentity.h"
 #include "artworkmetadata.h"
 #include "../Helpers/ifilenotavailablemodel.h"
+#include "../MetadataIO/artworkssnapshot.h"
 
 namespace Models {
     class ArtworksViewModel:
@@ -39,13 +40,13 @@ namespace Models {
 
     public:
         ArtworksViewModel(QObject *parent=NULL);
-        virtual ~ArtworksViewModel() {}
+        virtual ~ArtworksViewModel() { }
 
     public:
-        virtual void setArtworks(std::vector<MetadataElement> &artworks);
+        virtual void setArtworks(MetadataIO::WeakArtworksSnapshot &weakSnapshot);
 
     public:
-        int getArtworksCount() const { return (int)m_ArtworksList.size(); }
+        int getArtworksCount() const { return (int)m_ArtworksSnapshot.size(); }
         int getSelectedArtworksCount() const;
 
     public:
@@ -54,22 +55,27 @@ namespace Models {
         Q_INVOKABLE void resetModel() { doResetModel(); }
         Q_INVOKABLE void unselectAllItems();
 
-    protected:
-        bool isEmpty() const { return m_ArtworksList.empty(); }
-        ArtworkMetadata *getArtworkMetadata(size_t i) const;
-        virtual bool doRemoveSelectedArtworks();
-        virtual void doResetModel();
-        void processArtworks(std::function<bool (const MetadataElement &)> pred,
-                             std::function<void (int, ArtworkMetadata *)> action) const;
-        void processArtworksEx(std::function<bool (const MetadataElement &)> pred,
-                             std::function<bool (int, ArtworkMetadata *)> action) const;
-
 #ifdef CORE_TESTS
     public:
 #else
     protected:
 #endif
-        std::vector<MetadataElement> &getArtworksList() { return m_ArtworksList; }
+        ArtworkElement *accessItem(size_t index) const;
+        bool getIsSelected(size_t i) const;
+        void setIsSelected(size_t i, bool value);
+
+    protected:
+        bool isEmpty() const { return m_ArtworksSnapshot.empty(); }
+        ArtworkMetadata *getArtworkMetadata(size_t i) const;
+        virtual bool doRemoveSelectedArtworks();
+        virtual void doResetModel();
+        void processArtworks(std::function<bool (const ArtworkElement *element)> pred,
+                             std::function<void (size_t, ArtworkMetadata *)> action) const;
+        void processArtworksEx(std::function<bool (const ArtworkElement *element)> pred,
+                               std::function<bool (size_t, ArtworkMetadata *)> action) const;
+
+    protected:
+        const MetadataIO::ArtworksSnapshot::Container &getRawSnapshot() const { return m_ArtworksSnapshot.getRawData(); }
 
     signals:
         void artworksCountChanged();
@@ -91,7 +97,7 @@ namespace Models {
         virtual void removeInnerItem(int row) override;
 
     private:
-        std::vector<MetadataElement> m_ArtworksList;
+        MetadataIO::ArtworksSnapshot m_ArtworksSnapshot;
     };
 }
 

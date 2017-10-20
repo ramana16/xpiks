@@ -8,7 +8,7 @@
 #include "../../xpiks-qt/Models/filteredartitemsproxymodel.h"
 #include "../../xpiks-qt/Models/artworksrepository.h"
 #include "../../xpiks-qt/Models/artworkuploader.h"
-#include "../../xpiks-qt/Models/metadataelement.h"
+#include "../../xpiks-qt/Models/artworkelement.h"
 #include "../../xpiks-qt/Models/combinedartworksmodel.h"
 #include "../../xpiks-qt/Models/ziparchiver.h"
 #include "../../xpiks-qt/Models/settingsmodel.h"
@@ -59,17 +59,15 @@ void RemoveFilesFsTests::removeArtworksNumberItems() {
 
     combinedModel.resetModel();
 
-    std::vector<Models::MetadataElement> itemInfos;
     MetadataIO::WeakArtworksSnapshot artworksList;
 
     for (int i = 0; i < itemsToAdd; i++) {
          auto *metadata = artItemsModelMock.getMockArtwork(i);
-         itemInfos.emplace_back(metadata, i);
-         artworksList.append(metadata);
+         artworksList.push_back(metadata);
     }
 
     combinedModel.resetModel();
-    combinedModel.setArtworks(itemInfos);
+    combinedModel.setArtworks(artworksList);
 
     MetadataIO::ArtworksSnapshot snapshot(artworksList);
     zipArchive.setArtworks(snapshot);
@@ -92,17 +90,15 @@ void RemoveFilesFsTests::removeArtworksAllItems() {
     DECLARE_MODELS_AND_GENERATE_(itemsToAdd);
 
     combinedModel.resetModel();
-    std::vector<Models::MetadataElement> itemInfos;
     MetadataIO::WeakArtworksSnapshot artworksList;
 
     for (int i = 0; i < itemsToAdd; i++) {
          auto *metadata = artItemsModelMock.getMockArtwork(i);
-         itemInfos.emplace_back(metadata, i);
-         artworksList.append(metadata);
+         artworksList.push_back(metadata);
     }
 
     combinedModel.resetModel();
-    combinedModel.setArtworks(itemInfos);
+    combinedModel.setArtworks(artworksList);
 
     MetadataIO::ArtworksSnapshot snapshot(artworksList);
     zipArchive.setArtworks(snapshot);

@@ -82,7 +82,7 @@
 #include "Common/defines.h"
 #include "Models/proxysettings.h"
 #include "Models/findandreplacemodel.h"
-#include "Models/previewmetadataelement.h"
+#include "Models/previewartworkelement.h"
 #include "Maintenance/maintenanceservice.h"
 #include "QMLExtensions/artworksupdatehub.h"
 #include "QMLExtensions/videocachingservice.h"

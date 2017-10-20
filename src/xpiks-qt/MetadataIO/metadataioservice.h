@@ -44,8 +44,8 @@ namespace MetadataIO {
         void readArtwork(Models::ArtworkMetadata *metadata) const;
         void writeArtwork(Models::ArtworkMetadata *metadata);
         quint32 readArtworks(const ArtworksSnapshot &snapshot) const;
-        void writeArtworks(const QVector<Models::ArtworkMetadata *> &artworks) const;
-        void addArtworks(const QVector<Models::ArtworkMetadata *> &artworks) const;
+        void writeArtworks(const WeakArtworksSnapshot &artworks) const;
+        void addArtworks(const WeakArtworksSnapshot &artworks) const;
 
     public:
         void searchArtworks(Suggestion::LocalLibraryQuery *query);

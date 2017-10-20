@@ -80,7 +80,7 @@ namespace Translation {
         this->submitItem(item);
     }
 
-    void TranslationService::submitItems(const QVector<QString *> &items) {
+    void TranslationService::submitItems(const std::vector<QString *> &items) {
         Q_UNUSED(items);
 #if QT_NO_DEBUG
         LOG_WARNING << "Cannot use this API for translation";

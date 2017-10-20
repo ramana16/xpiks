@@ -16,7 +16,6 @@
 #include <vector>
 #include <QVector>
 #include "commandbase.h"
-#include "../Models/metadataelement.h"
 #include "../Common/flags.h"
 #include "../MetadataIO/artworkssnapshot.h"
 
@@ -30,11 +29,11 @@ namespace Commands {
     {
     public:
         CombinedEditCommand(Common::CombinedEditFlags editFlags,
-                            std::vector<Models::MetadataElement> &infos,
+                            MetadataIO::ArtworksSnapshot::Container &rawSnapshot,
                             const QString &description, const QString &title,
                             const QStringList &keywords) :
             CommandBase(CommandType::CombinedEdit),
-            m_MetadataElements(std::move(infos)),
+            m_RawSnapshot(std::move(rawSnapshot)),
             m_ArtworkDescription(description),
             m_ArtworkTitle(title),
             m_Keywords(keywords),
@@ -42,9 +41,9 @@ namespace Commands {
         { }
 
         CombinedEditCommand(Common::CombinedEditFlags editFlags,
-                            std::vector<Models::MetadataElement> &infos) :
+                            MetadataIO::ArtworksSnapshot::Container &rawSnapshot) :
             CommandBase(CommandType::CombinedEdit),
-            m_MetadataElements(std::move(infos)),
+            m_RawSnapshot(std::move(rawSnapshot)),
             m_EditFlags(editFlags)
         { }
 
@@ -59,7 +58,7 @@ namespace Commands {
         void setTitle(Models::ArtworkMetadata *metadata) const;
 
     private:
-        std::vector<Models::MetadataElement> m_MetadataElements;
+        MetadataIO::ArtworksSnapshot::Container m_RawSnapshot;
         QString m_ArtworkDescription;
         QString m_ArtworkTitle;
         QStringList m_Keywords;
@@ -68,11 +67,11 @@ namespace Commands {
 
     class CombinedEditCommandResult : public CommandResult {
     public:
-        CombinedEditCommandResult(const MetadataIO::WeakArtworksSnapshot &affectedItems,
-                                  const MetadataIO::WeakArtworksSnapshot &itemsToSave,
+        CombinedEditCommandResult(MetadataIO::WeakArtworksSnapshot &affectedItems,
+                                  MetadataIO::WeakArtworksSnapshot &itemsToSave,
                                   const QVector<int> &indicesToUpdate) :
-            m_AffectedItems(affectedItems),
-            m_ItemsToSave(itemsToSave),
+            m_AffectedItems(std::move(affectedItems)),
+            m_ItemsToSave(std::move(itemsToSave)),
             m_IndicesToUpdate(indicesToUpdate)
         {
         }

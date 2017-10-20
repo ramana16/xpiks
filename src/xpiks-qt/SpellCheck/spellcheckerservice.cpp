@@ -115,14 +115,14 @@ namespace SpellCheck {
         m_SpellCheckWorker->submitItem(item);
     }
 
-    void SpellCheckerService::submitItems(const QVector<Common::BasicKeywordsModel *> &itemsToCheck) {
+    void SpellCheckerService::submitItems(const std::vector<Common::BasicKeywordsModel *> &itemsToCheck) {
         if (m_SpellCheckWorker == NULL) { return; }
         if (m_IsStopped) { return; }
 
         std::vector<std::shared_ptr<ISpellCheckItem> > items;
-        int length = itemsToCheck.length();
+        const size_t size = itemsToCheck.size();
 
-        items.reserve(length);
+        items.reserve(size);
         auto deleter = [](SpellCheckItem *spi) {
             LOG_INTEGRATION_TESTS << "Delete later for multiple spellcheck item";
             spi->disconnect();
@@ -131,7 +131,7 @@ namespace SpellCheck {
 
         const Common::WordAnalysisFlags flags = getWordAnalysisFlags();
 
-        for (int i = 0; i < length; ++i) {
+        for (size_t i = 0; i < size; ++i) {
             auto *itemToCheck = itemsToCheck.at(i);
             Q_ASSERT(itemToCheck != nullptr);
             std::shared_ptr<SpellCheckItem> item(new SpellCheckItem(itemToCheck, Common::SpellCheckFlags::All, flags),
@@ -140,22 +140,22 @@ namespace SpellCheck {
             items.emplace_back(std::dynamic_pointer_cast<ISpellCheckItem>(item));
         }
 
-        LOG_INFO << length << "item(s)";
+        LOG_INFO << size << "item(s)";
 
         m_SpellCheckWorker->submitItems(items);
         m_SpellCheckWorker->submitItem(std::shared_ptr<ISpellCheckItem>(new SpellCheckSeparatorItem()));
     }
 
     // used for spellchecking after adding a word to user dictionary
-    void SpellCheckerService::submitItems(const QVector<Common::BasicKeywordsModel *> &itemsToCheck,
+    void SpellCheckerService::submitItems(const std::vector<Common::BasicKeywordsModel *> &itemsToCheck,
                                           const QStringList &wordsToCheck) {
         if (m_SpellCheckWorker == NULL) { return; }
         if (m_IsStopped) { return; }
 
         std::vector<std::shared_ptr<ISpellCheckItem> > items;
-        int length = itemsToCheck.length();
+        const size_t size = itemsToCheck.size();
 
-        items.reserve(length);
+        items.reserve(size);
         auto deleter = [](SpellCheckItem *spi) {
             LOG_INTEGRATION_TESTS << "Delete later for UserDict spelling item";
             spi->disconnect();
@@ -164,7 +164,7 @@ namespace SpellCheck {
 
         const Common::WordAnalysisFlags flags = getWordAnalysisFlags();
 
-        for (int i = 0; i < length; ++i) {
+        for (size_t i = 0; i < size; ++i) {
             auto *itemToCheck = itemsToCheck.at(i);
             std::shared_ptr<SpellCheckItem> item(new SpellCheckItem(itemToCheck, wordsToCheck, flags),
                                                  deleter);
@@ -172,7 +172,7 @@ namespace SpellCheck {
             items.emplace_back(std::dynamic_pointer_cast<ISpellCheckItem>(item));
         }
 
-        LOG_INFO << length << "item(s)";
+        LOG_INFO << size << "item(s)";
 
         m_SpellCheckWorker->submitItems(items);
         m_SpellCheckWorker->submitItem(std::shared_ptr<ISpellCheckItem>(new SpellCheckSeparatorItem()));

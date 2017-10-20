@@ -75,7 +75,7 @@ namespace MetadataIO {
     }
 
     void ArtworksSnapshot::append(const WeakArtworksSnapshot &artworks) {
-        m_RawArtworks.append(artworks);
+        m_RawArtworks.insert(m_RawArtworks.end(), artworks.begin(), artworks.end());
 
         LOG_DEBUG << "Appending snapshot of" << artworks.size() << "artwork(s)";
         m_ArtworksSnapshot.reserve(m_ArtworksSnapshot.size() + artworks.size());
@@ -90,7 +90,7 @@ namespace MetadataIO {
         m_RawArtworks.reserve(m_RawArtworks.size() + (int)artworks.size());
         for (auto &item: artworks) {
             m_ArtworksSnapshot.emplace_back(new Models::ArtworkMetadataLocker(item));
-            m_RawArtworks << item;
+            m_RawArtworks.push_back(item);
         }
     }
 
@@ -100,7 +100,7 @@ namespace MetadataIO {
 
         m_RawArtworks.reserve((int)rawSnapshot.size());
         for (auto &item: rawSnapshot) {
-            m_RawArtworks << item->getArtworkMetadata();
+            m_RawArtworks.push_back(item->getArtworkMetadata());
         }
 
         m_ArtworksSnapshot = std::move(rawSnapshot);
@@ -110,8 +110,15 @@ namespace MetadataIO {
         clear();
         LOG_DEBUG << "Copying snapshot of" << other.m_ArtworksSnapshot.size() << "item(s)";
 
-        m_RawArtworks.append(other.m_RawArtworks);
+        m_RawArtworks.insert(m_RawArtworks.end(), other.m_RawArtworks.begin(), other.m_RawArtworks.end());
         m_ArtworksSnapshot = other.m_ArtworksSnapshot;
+    }
+
+    void ArtworksSnapshot::remove(size_t index) {
+        Q_ASSERT(m_ArtworksSnapshot.size() == m_RawArtworks.size());
+
+        m_RawArtworks.erase(m_RawArtworks.begin() + index);
+        m_ArtworksSnapshot.erase(m_ArtworksSnapshot.begin() + index);
     }
 
     void ArtworksSnapshot::clear() {

@@ -103,14 +103,14 @@ namespace MetadataIO {
         return batchID;
     }
 
-    void MetadataIOService::writeArtworks(const QVector<Models::ArtworkMetadata *> &artworks) const {
+    void MetadataIOService::writeArtworks(const WeakArtworksSnapshot &artworks) const {
         LOG_INFO << artworks.size() << "artwork(s)";
         if (m_IsStopped) { return; }
         std::vector<std::shared_ptr<MetadataIOTaskBase> > jobs;
-        jobs.reserve(artworks.length());
+        jobs.reserve(artworks.size());
 
-        int size = artworks.size();
-        for (int i = 0; i < size; ++i) {
+        size_t size = artworks.size();
+        for (size_t i = 0; i < size; ++i) {
             Models::ArtworkMetadata *artwork = artworks.at(i);
             jobs.emplace_back(new MetadataReadWriteTask(artwork, MetadataReadWriteTask::Write));
         }
@@ -120,14 +120,14 @@ namespace MetadataIO {
         m_MetadataIOWorker->submitItems(jobs);
     }
 
-    void MetadataIOService::addArtworks(const QVector<Models::ArtworkMetadata *> &artworks) const {
+    void MetadataIOService::addArtworks(const WeakArtworksSnapshot &artworks) const {
         LOG_INFO << artworks.size() << "artwork(s)";
         if (m_IsStopped) { return; }
         std::vector<std::shared_ptr<MetadataIOTaskBase> > jobs;
-        jobs.reserve(artworks.length());
+        jobs.reserve(artworks.size());
 
-        int size = artworks.size();
-        for (int i = 0; i < size; ++i) {
+        size_t size = artworks.size();
+        for (size_t i = 0; i < size; ++i) {
             Models::ArtworkMetadata *artwork = artworks.at(i);
             jobs.emplace_back(new MetadataReadWriteTask(artwork, MetadataReadWriteTask::Add));
         }

@@ -300,8 +300,6 @@ HEADERS += \
     QMLExtensions/imagecachingservice.h \
     QMLExtensions/cachingimageprovider.h \
     Commands/findandreplacecommand.h \
-    Models/metadataelement.h \
-    Models/previewmetadataelement.h \
     Helpers/metadatahighlighter.h \
     Models/findandreplacemodel.h \
     Commands/deletekeywordscommand.h \
@@ -402,7 +400,9 @@ HEADERS += \
     MetadataIO/csvexportproperties.h \
     MetadataIO/csvexportplansmodel.h \
     MetadataIO/csvexportmodel.h \
-    Common/delayedactionentity.h
+    Common/delayedactionentity.h \
+    Models/artworkelement.h \
+    Models/previewartworkelement.h
 
 DISTFILES += \
     Components/CloseIcon.qml \

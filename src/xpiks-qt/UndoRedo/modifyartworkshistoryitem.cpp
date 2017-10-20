@@ -29,11 +29,11 @@ void UndoRedo::ModifyArtworksHistoryItem::undo(const Commands::ICommandManager *
 
     for (int i = 0; i < count; ++i) {
         int index = m_Indices[i];
-        Models::ArtworkMetadata *metadata = artItemsModel->getArtwork(index);
-        if (metadata != NULL) {
+        Models::ArtworkMetadata *artwork = artItemsModel->getArtwork(index);
+        if (artwork != NULL) {
             const ArtworkMetadataBackup &backup = m_ArtworksBackups.at(i);
-            backup.restore(metadata);
-            itemsToSave.append(metadata);
+            backup.restore(artwork);
+            itemsToSave.push_back(artwork);
         }
     }
 

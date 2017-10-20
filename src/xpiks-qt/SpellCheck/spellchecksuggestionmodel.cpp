@@ -147,13 +147,13 @@ namespace SpellCheck {
         }
 
         if (anyChanged) {
-             QVector<Common::BasicKeywordsModel *> itemsToSubmit;
-             itemsToSubmit.reserve((int)m_ItemsPairs.size());
+             std::vector<Common::BasicKeywordsModel *> itemsToSubmit;
+             itemsToSubmit.reserve(m_ItemsPairs.size());
 
              for (auto &pair: m_ItemsPairs) {
                  auto *item = pair.first;
                  item->afterReplaceCallback();
-                 itemsToSubmit.append(item->getBasicKeywordsModel());
+                 itemsToSubmit.push_back(item->getBasicKeywordsModel());
              }
 
              m_CommandManager->submitForSpellCheck(itemsToSubmit);

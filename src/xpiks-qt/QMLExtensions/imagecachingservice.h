@@ -16,8 +16,8 @@
 #include <QVector>
 #include <vector>
 #include <memory>
-#include "../Common/iservicebase.h"
 #include "../Common/baseentity.h"
+#include "../Common/iservicebase.h"
 
 namespace Models {
     class ArtworkMetadata;

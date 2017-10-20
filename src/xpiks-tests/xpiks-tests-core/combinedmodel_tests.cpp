@@ -6,22 +6,22 @@
 #include "../../xpiks-qt/Models/combinedartworksmodel.h"
 #include "Mocks/artitemsmodelmock.h"
 #include "Mocks/commandmanagermock.h"
-#include "../../xpiks-qt/Models/metadataelement.h"
+#include "../../xpiks-qt/Models/artworkelement.h"
 #include "../../xpiks-qt/Common/basickeywordsmodel.h"
 #include "../../xpiks-qt/Models/settingsmodel.h"
 
-Models::MetadataElement createArtworkMetadata(const QString &desc, const QString &title, const QStringList &keywords, int index=0) {
-    Mocks::ArtworkMetadataMock *metadata = new Mocks::ArtworkMetadataMock("/random/file/path.jpg");
-    metadata->initAsEmpty();
-    metadata->appendKeywords(keywords);
-    metadata->setTitle(title);
-    metadata->setDescription(desc);
-    return Models::MetadataElement(metadata, index);
+Models::ArtworkMetadata *createArtworkMetadata(const QString &desc, const QString &title, const QStringList &keywords, int index=0) {
+    Mocks::ArtworkMetadataMock *artwork = new Mocks::ArtworkMetadataMock("/random/file/path.jpg");
+    artwork->initAsEmpty();
+    artwork->appendKeywords(keywords);
+    artwork->setTitle(title);
+    artwork->setDescription(desc);
+    return artwork;
 }
 
-void freeArtworks(std::vector<Models::MetadataElement> &items) {
+void freeArtworks(MetadataIO::WeakArtworksSnapshot &items) {
     for (auto &item: items) {
-        item.freeMetadata();
+        item->deleteLater();
     }
 }
 
@@ -36,7 +36,7 @@ void CombinedModelTests::trivialCombineNoItemsTest() {
     Models::CombinedArtworksModel combinedModel;
     combinedModel.setCommandManager(&m_CommandManagerMock);
 
-    std::vector<Models::MetadataElement> items;
+    MetadataIO::WeakArtworksSnapshot items;
 
     combinedModel.resetModel();
     combinedModel.setArtworks(items);
@@ -60,7 +60,7 @@ void CombinedModelTests::trivialCombineOneItemTest() {
     QStringList keywords;
     keywords << "keyword1" << "keyword2" << "keyword3";
 
-    std::vector<Models::MetadataElement> items;
+    MetadataIO::WeakArtworksSnapshot items;
     items.push_back(createArtworkMetadata(desc, title, keywords));
 
     combinedModel.setArtworks(items);
@@ -83,7 +83,7 @@ void CombinedModelTests::combineSeveralSameItemsTest() {
     QStringList keywords;
     keywords << "keyword1" << "keyword2" << "keyword3";
 
-    std::vector<Models::MetadataElement> items;
+    MetadataIO::WeakArtworksSnapshot items;
     const int itemsToGenerate = 5;
     int numberOfItems = itemsToGenerate;
     while (numberOfItems--) {
@@ -108,7 +108,7 @@ void CombinedModelTests::combineSeveralWithEmptyFirstTest() {
     QStringList keywords;
     keywords << "keyword1" << "keyword2" << "keyword3";
 
-    std::vector<Models::MetadataElement> items;
+    MetadataIO::WeakArtworksSnapshot items;
     items.push_back(createArtworkMetadata("Description2", "title2", QStringList(), 1));
     items.push_back(createArtworkMetadata("Description1", "title1", keywords, 0));
     int size = (int)items.size();
@@ -130,7 +130,7 @@ void CombinedModelTests::combineSeveralWithEmptyManyTest() {
 
     const QString commonKeyword = "Keyword1";
 
-    std::vector<Models::MetadataElement> items;
+    MetadataIO::WeakArtworksSnapshot items;
     items.push_back(createArtworkMetadata("Description2", "title2", QStringList(), 1));
     items.push_back(createArtworkMetadata("Description1", "title1", QStringList() << commonKeyword << "keyword2", 0));
     items.push_back(createArtworkMetadata("Description3", "title3", QStringList() << commonKeyword, 2));
@@ -155,7 +155,7 @@ void CombinedModelTests::combineSeveralWithEmptyTest() {
 
     const QString commonKeyword = "Keyword1";
 
-    std::vector<Models::MetadataElement> items;
+    MetadataIO::WeakArtworksSnapshot items;
     items.push_back(createArtworkMetadata("Description1", "title1", QStringList() << commonKeyword << "keyword2", 0));
     items.push_back(createArtworkMetadata("Description2", "title2", QStringList(), 1));
     items.push_back(createArtworkMetadata("Description3", "title3", QStringList() << commonKeyword, 2));
@@ -181,7 +181,7 @@ void CombinedModelTests::combineSeveralEmptyTest() {
     const QString title = "title";
     const QString description = "description";
 
-    std::vector<Models::MetadataElement> items;
+    MetadataIO::WeakArtworksSnapshot items;
     items.push_back(createArtworkMetadata(description, title, QStringList(), 0));
     items.push_back(createArtworkMetadata("", "", QStringList(), 1));
     items.push_back(createArtworkMetadata("", "", QStringList(), 2));
@@ -203,7 +203,7 @@ void CombinedModelTests::combineAllDifferentItemsTest() {
     Models::CombinedArtworksModel combinedModel;
     combinedModel.setCommandManager(&m_CommandManagerMock);
 
-    std::vector<Models::MetadataElement> items;
+    MetadataIO::WeakArtworksSnapshot items;
     items.push_back(createArtworkMetadata("Description1", "title1", QStringList() << "Keyword1", 0));
     items.push_back(createArtworkMetadata("Description2", "title2", QStringList() << "Keyword2", 1));
     items.push_back(createArtworkMetadata("Description3", "title3", QStringList() << "Keyword3", 2));
@@ -225,7 +225,7 @@ void CombinedModelTests::combineAllManyDifferentItemsTest() {
     Models::CombinedArtworksModel combinedModel;
     combinedModel.setCommandManager(&m_CommandManagerMock);
 
-    std::vector<Models::MetadataElement> items;
+    MetadataIO::WeakArtworksSnapshot items;
     items.push_back(createArtworkMetadata("Description1", "title1", QStringList() << "Keyword1" << "keyword2", 0));
     items.push_back(createArtworkMetadata("Description2", "title2", QStringList() << "Keyword3" << "keyword4" << "keyword5", 1));
 
@@ -246,7 +246,7 @@ void CombinedModelTests::combineAllManyLastDifferentItemsTest() {
     Models::CombinedArtworksModel combinedModel;
     combinedModel.setCommandManager(&m_CommandManagerMock);
 
-    std::vector<Models::MetadataElement> items;
+    MetadataIO::WeakArtworksSnapshot items;
     items.push_back(createArtworkMetadata("Description1", "title1", QStringList() << "Keyword1" << "keyword2", 0));
     items.push_back(createArtworkMetadata("Description2", "title2", QStringList() << "Keyword1" << "keyword2", 1));
     items.push_back(createArtworkMetadata("Description3", "title3", QStringList() << "Keyword3" << "keyword4", 1));
@@ -270,7 +270,7 @@ void CombinedModelTests::combineCommonInKeywordsTest() {
 
     QString commonKeyword = "a common keyword";
 
-    std::vector<Models::MetadataElement> items;
+    MetadataIO::WeakArtworksSnapshot items;
     items.push_back(createArtworkMetadata("Description1", "title1", QStringList() << "Keyword1" << commonKeyword, 0));
     items.push_back(createArtworkMetadata("Description2", "title2", QStringList() << "Keyword2" << commonKeyword, 1));
     items.push_back(createArtworkMetadata("Description3", "title3", QStringList() << "Keyword3" << commonKeyword, 2));
@@ -294,7 +294,7 @@ void CombinedModelTests::combineCommonInManyKeywordsTest() {
 
     QString commonKeyword = "a common keyword";
 
-    std::vector<Models::MetadataElement> items;
+    MetadataIO::WeakArtworksSnapshot items;
     items.push_back(createArtworkMetadata("Description1", "title1", QStringList() << "Keyword1" << "keyword12" << commonKeyword, 0));
     items.push_back(createArtworkMetadata("Description2", "title2", QStringList() << "Keyword2" << "keyword22" << "keyword23" << commonKeyword, 1));
     items.push_back(createArtworkMetadata("Description3", "title3", QStringList() << "Keyword3" << commonKeyword, 2));
@@ -318,7 +318,7 @@ void CombinedModelTests::combineCommonInTitleTest() {
 
     QString commonTitle = "a common title";
 
-    std::vector<Models::MetadataElement> items;
+    MetadataIO::WeakArtworksSnapshot items;
     items.push_back(createArtworkMetadata("Description1", commonTitle, QStringList() << "Keyword1", 0));
     items.push_back(createArtworkMetadata("Description2", commonTitle, QStringList() << "Keyword2", 1));
     items.push_back(createArtworkMetadata("Description3", commonTitle, QStringList() << "Keyword3", 2));
@@ -341,7 +341,7 @@ void CombinedModelTests::combineCommonInDescriptionTest() {
 
     QString commonDescription = "a common Description1";
 
-    std::vector<Models::MetadataElement> items;
+    MetadataIO::WeakArtworksSnapshot items;
     items.push_back(createArtworkMetadata(commonDescription, "title1", QStringList() << "Keyword1", 0));
     items.push_back(createArtworkMetadata(commonDescription, "title2", QStringList() << "Keyword2", 1));
     items.push_back(createArtworkMetadata(commonDescription, "title3", QStringList() << "Keyword3", 2));
@@ -369,14 +369,12 @@ void CombinedModelTests::editSeveralWithSameKeywordsTest() {
 
     std::vector<Models::ArtworkMetadata*> artworks;
 
-    std::vector<Models::MetadataElement> items;
+    MetadataIO::WeakArtworksSnapshot items;
     items.push_back(createArtworkMetadata(commonDescription, commonTitle, commonKeywords, 0));
     items.push_back(createArtworkMetadata(commonDescription, commonTitle, commonKeywords, 1));
     items.push_back(createArtworkMetadata(commonDescription, commonTitle, commonKeywords, 2));
 
-    for (auto &item: items) {
-        artworks.push_back(item.getOrigin());
-    }
+    artworks = items;
 
     combinedModel.setArtworks(items);
     combinedModel.pasteKeywords(QStringList() << "outdoors" << "tilt" << "pet");
@@ -401,7 +399,7 @@ void CombinedModelTests::recombineAfterRemoveDifferentTest() {
     QString commonDescription = "a common Description1";
     QString commonKeyword = "keyword";
 
-    std::vector<Models::MetadataElement> items;
+    MetadataIO::WeakArtworksSnapshot items;
     items.push_back(createArtworkMetadata(commonDescription, "title1", QStringList() << "Keyword1" << commonKeyword, 0));
     items.push_back(createArtworkMetadata(commonDescription, "title2", QStringList() << "Keyword2" << commonKeyword, 1));
     items.push_back(createArtworkMetadata("Different description", "title3", QStringList() << "Keyword3", 2));
@@ -410,7 +408,7 @@ void CombinedModelTests::recombineAfterRemoveDifferentTest() {
 
     combinedModel.setArtworks(items);
 
-    combinedModel.getArtworksList().back().setSelected(true);
+    combinedModel.setIsSelected(size - 1, true);
     combinedModel.removeSelectedArtworks();
 
     QCOMPARE(combinedModel.getArtworksCount(), size - 1);
@@ -427,17 +425,17 @@ void CombinedModelTests::recombineAfterRemoveAllButOneTest() {
     Models::CombinedArtworksModel combinedModel;
     combinedModel.setCommandManager(&m_CommandManagerMock);
 
-    std::vector<Models::MetadataElement> items;
+    MetadataIO::WeakArtworksSnapshot items;
     items.push_back(createArtworkMetadata("Description1", "title1", QStringList() << "Keyword1" << "adfafdaf", 0));
     items.push_back(createArtworkMetadata("Description2", "title2", QStringList() << "Keyword2" << "21345425421", 1));
     items.push_back(createArtworkMetadata("Description3", "title3", QStringList() << "Keyword3" << "(*&^*&^*&&^%", 2));
 
     combinedModel.setArtworks(items);
 
-    combinedModel.getArtworksList()[1].setSelected(true);
-    combinedModel.getArtworksList()[2].setSelected(true);
+    combinedModel.setIsSelected(1, true);
+    combinedModel.setIsSelected(2, true);
     combinedModel.removeSelectedArtworks();
-    Models::ArtworkMetadata *first = combinedModel.getArtworksList().front().getOrigin();
+    Models::ArtworkMetadata *first = combinedModel.accessItem(0)->getArtworkMetadata();
 
     QCOMPARE(combinedModel.getArtworksCount(), 1);
     QCOMPARE(combinedModel.getTitle(), first->getTitle());
@@ -453,7 +451,7 @@ void CombinedModelTests::recombineAfterChangesTest() {
     Models::CombinedArtworksModel combinedModel;
     combinedModel.setCommandManager(&m_CommandManagerMock);
 
-    std::vector<Models::MetadataElement> items;
+    MetadataIO::WeakArtworksSnapshot items;
     items.push_back(createArtworkMetadata("Description1", "title1", QStringList() << "Keyword1" << "adfafdaf", 0));
     items.push_back(createArtworkMetadata("Description2", "title2", QStringList() << "Keyword2" << "21345425421", 1));
     items.push_back(createArtworkMetadata("Description3", "title3", QStringList() << "Keyword3" << "(*&^*&^*&&^%", 2));
@@ -464,10 +462,10 @@ void CombinedModelTests::recombineAfterChangesTest() {
     combinedModel.setDescription(combinedModel.getDescription() + " new stuff here");
     combinedModel.setTitle(combinedModel.getTitle() + " new stuff here");
 
-    combinedModel.getArtworksList()[1].setSelected(true);
-    combinedModel.getArtworksList()[2].setSelected(true);
+    combinedModel.setIsSelected(1, true);
+    combinedModel.setIsSelected(2, true);
     combinedModel.removeSelectedArtworks();
-    Models::ArtworkMetadata *first = combinedModel.getArtworksList().front().getOrigin();
+    Models::ArtworkMetadata *first = combinedModel.accessItem(0)->getArtworkMetadata();
 
     QCOMPARE(combinedModel.getArtworksCount(), 1);
     QVERIFY(combinedModel.getTitle() != first->getTitle());
@@ -485,7 +483,7 @@ void CombinedModelTests::isNotModifiedAfterTitleDescEditTest() {
 
     QString commonDescription = "a common Description1";
 
-    std::vector<Models::MetadataElement> items;
+    MetadataIO::WeakArtworksSnapshot items;
     items.push_back(createArtworkMetadata(commonDescription, "title1", QStringList() << "Keyword1", 0));
     items.push_back(createArtworkMetadata(commonDescription, "title2", QStringList() << "Keyword2", 1));
     items.push_back(createArtworkMetadata(commonDescription, "title3", QStringList() << "Keyword3", 2));
@@ -509,7 +507,7 @@ void CombinedModelTests::isModifiedAfterKeywordsAppendTest() {
 
     QString commonDescription = "a common Description1";
 
-    std::vector<Models::MetadataElement> items;
+    MetadataIO::WeakArtworksSnapshot items;
     items.push_back(createArtworkMetadata(commonDescription, "title1", QStringList() << "Keyword1", 0));
     items.push_back(createArtworkMetadata(commonDescription, "title2", QStringList() << "Keyword2", 1));
     items.push_back(createArtworkMetadata(commonDescription, "title3", QStringList() << "Keyword3", 2));
@@ -531,7 +529,7 @@ void CombinedModelTests::isModifiedAfterKeywordRemovalTest() {
 
     QString commonKeyword = "a common keyword";
 
-    std::vector<Models::MetadataElement> items;
+    MetadataIO::WeakArtworksSnapshot items;
     items.push_back(createArtworkMetadata("Description1", "title1", QStringList() << "Keyword1" << commonKeyword, 0));
     items.push_back(createArtworkMetadata("Description2", "title2", QStringList() << "Keyword2" << commonKeyword, 1));
     items.push_back(createArtworkMetadata("Description3", "title3", QStringList() << "Keyword3" << commonKeyword, 2));
@@ -553,7 +551,7 @@ void CombinedModelTests::isModifiedAfterKeywordEditTest() {
 
     QString commonKeyword = "a common keyword";
 
-    std::vector<Models::MetadataElement> items;
+    MetadataIO::WeakArtworksSnapshot items;
     items.push_back(createArtworkMetadata("Description1", "title1", QStringList() << "Keyword1" << commonKeyword, 0));
     items.push_back(createArtworkMetadata("Description2", "title2", QStringList() << "Keyword2" << commonKeyword, 1));
     items.push_back(createArtworkMetadata("Description3", "title3", QStringList() << "Keyword3" << commonKeyword, 2));
@@ -575,7 +573,7 @@ void CombinedModelTests::isModifiedAfterKeywordsClearTest() {
 
     QString commonKeyword = "a common keyword";
 
-    std::vector<Models::MetadataElement> items;
+    MetadataIO::WeakArtworksSnapshot items;
     items.push_back(createArtworkMetadata("Description1", "title1", QStringList() << "Keyword1" << commonKeyword, 0));
     items.push_back(createArtworkMetadata("Description2", "title2", QStringList() << "Keyword2" << commonKeyword, 1));
     items.push_back(createArtworkMetadata("Description3", "title3", QStringList() << "Keyword3" << commonKeyword, 2));
@@ -595,7 +593,7 @@ void CombinedModelTests::isNotModifiedAfterEmptyKeywordsClearTest() {
     Models::CombinedArtworksModel combinedModel;
     combinedModel.setCommandManager(&m_CommandManagerMock);
 
-    std::vector<Models::MetadataElement> items;
+    MetadataIO::WeakArtworksSnapshot items;
     items.push_back(createArtworkMetadata("Description1", "title1", QStringList() << "Keyword1", 0));
     items.push_back(createArtworkMetadata("Description2", "title2", QStringList() << "Keyword2", 1));
     items.push_back(createArtworkMetadata("Description3", "title3", QStringList() << "Keyword3", 2));
@@ -615,7 +613,7 @@ void CombinedModelTests::isModifiedStatusNotResetWithOtherTest() {
     Models::CombinedArtworksModel combinedModel;
     combinedModel.setCommandManager(&m_CommandManagerMock);
 
-    std::vector<Models::MetadataElement> items;
+    MetadataIO::WeakArtworksSnapshot items;
     items.push_back(createArtworkMetadata("Description1", "title1", QStringList() << "Keyword1", 0));
     items.push_back(createArtworkMetadata("Description2", "title2", QStringList() << "Keyword2", 1));
     items.push_back(createArtworkMetadata("Description3", "title3", QStringList() << "Keyword3", 2));
@@ -640,7 +638,7 @@ void CombinedModelTests::initArtworksEmitsRowsInsertTest() {
 
     QString commonKeyword = "a common keyword";
 
-    std::vector<Models::MetadataElement> items;
+    MetadataIO::WeakArtworksSnapshot items;
     items.push_back(createArtworkMetadata("Description1", "title1", QStringList() << "Keyword1" << commonKeyword, 0));
     items.push_back(createArtworkMetadata("Description2", "title2", QStringList() << "Keyword2" << commonKeyword, 1));
     items.push_back(createArtworkMetadata("Description3", "title3", QStringList() << "Keyword3" << commonKeyword, 2));
@@ -661,7 +659,7 @@ void CombinedModelTests::initEmptyArtworksDoesNotEmitTest() {
 
     QSignalSpy addSpy(&combinedModel, SIGNAL(rowsInserted(QModelIndex,int,int)));
 
-    std::vector<Models::MetadataElement> items;
+    MetadataIO::WeakArtworksSnapshot items;
     combinedModel.setArtworks(items);
 
     QCOMPARE(combinedModel.areKeywordsModified(), false);
@@ -675,7 +673,7 @@ void CombinedModelTests::initOneArtworkEnablesAllFields() {
     Models::CombinedArtworksModel combinedModel;
     combinedModel.setCommandManager(&m_CommandManagerMock);
 
-    std::vector<Models::MetadataElement> items;
+    MetadataIO::WeakArtworksSnapshot items;
     items.push_back(createArtworkMetadata("Description1", "title1", QStringList() << "Keyword1", 0));
 
     combinedModel.setArtworks(items);
@@ -692,7 +690,7 @@ void CombinedModelTests::initManyArtworksDoesNotEnableAllFields() {
     Models::CombinedArtworksModel combinedModel;
     combinedModel.setCommandManager(&m_CommandManagerMock);
 
-    std::vector<Models::MetadataElement> items;
+    MetadataIO::WeakArtworksSnapshot items;
     items.push_back(createArtworkMetadata("Description1", "title1", QStringList() << "Keyword1", 0));
     items.push_back(createArtworkMetadata("Description2", "title2", QStringList() << "Keyword2", 1));
     items.push_back(createArtworkMetadata("Description3", "title3", QStringList() << "Keyword3", 2));
@@ -711,7 +709,7 @@ void CombinedModelTests::resetModelClearsEverythingTest() {
     Models::CombinedArtworksModel combinedModel;
     combinedModel.setCommandManager(&m_CommandManagerMock);
 
-    std::vector<Models::MetadataElement> items;
+    MetadataIO::WeakArtworksSnapshot items;
     items.push_back(createArtworkMetadata("Description1", "title1", QStringList() << "Keyword1", 0));
     items.push_back(createArtworkMetadata("Description2", "title2", QStringList() << "Keyword2", 1));
     items.push_back(createArtworkMetadata("Description3", "title3", QStringList() << "Keyword3", 2));
@@ -805,7 +803,7 @@ void CombinedModelTests::notSavedAfterAllDisabledTest() {
 
     QString commonDescription = "a common Description1";
 
-    std::vector<Models::MetadataElement> items;
+    MetadataIO::WeakArtworksSnapshot items;
     items.push_back(createArtworkMetadata(commonDescription, "title1", QStringList() << "Keyword1" << "keyword2", 0));
     items.push_back(createArtworkMetadata(commonDescription, "title2", QStringList() << "Keyword2", 0));
 
@@ -836,7 +834,7 @@ void CombinedModelTests::notSavedAfterNothingModifiedTest() {
 
     QString commonDescription = "a common Description1";
 
-    std::vector<Models::MetadataElement> items;
+    MetadataIO::WeakArtworksSnapshot items;
     items.push_back(createArtworkMetadata(commonDescription, "title1", QStringList() << "Keyword1", 0));
 
     combinedModel.resetModel();
@@ -856,7 +854,7 @@ void CombinedModelTests::notSavedAfterModifiedDisabledTest() {
 
     QString commonDescription = "a common Description1";
 
-    std::vector<Models::MetadataElement> items;
+    MetadataIO::WeakArtworksSnapshot items;
     items.push_back(createArtworkMetadata(commonDescription, "title1", QStringList() << "Keyword1", 0));
 
     combinedModel.resetModel();
@@ -882,7 +880,7 @@ void CombinedModelTests::savedAfterModifiedDescriptionTest() {
 
     QString commonDescription = "a common Description1";
 
-    std::vector<Models::MetadataElement> items;
+    MetadataIO::WeakArtworksSnapshot items;
     items.push_back(createArtworkMetadata(commonDescription, "title1", QStringList() << "Keyword1", 0));
 
     combinedModel.resetModel();
@@ -902,7 +900,7 @@ void CombinedModelTests::savedAfterModifiedTitleTest() {
 
     QString commonDescription = "a common Description1";
 
-    std::vector<Models::MetadataElement> items;
+    MetadataIO::WeakArtworksSnapshot items;
     items.push_back(createArtworkMetadata(commonDescription, "title1", QStringList() << "Keyword1", 0));
 
     combinedModel.resetModel();
@@ -922,7 +920,7 @@ void CombinedModelTests::savedAfterKeywordsModifiedTest() {
 
     QString commonDescription = "a common Description1";
 
-    std::vector<Models::MetadataElement> items;
+    MetadataIO::WeakArtworksSnapshot items;
     items.push_back(createArtworkMetadata(commonDescription, "title1", QStringList() << "Keyword1", 0));
 
     combinedModel.resetModel();
@@ -942,7 +940,7 @@ void CombinedModelTests::savedIfMoreThanOneButNotModifiedTest() {
 
     QString commonDescription = "a common Description1";
 
-    std::vector<Models::MetadataElement> items;
+    MetadataIO::WeakArtworksSnapshot items;
     items.push_back(createArtworkMetadata(commonDescription, "title1", QStringList() << "Keyword1", 0));
     items.push_back(createArtworkMetadata(commonDescription, "title2", QStringList() << "Keyword2", 1));
     items.push_back(createArtworkMetadata(commonDescription, "title3", QStringList() << "Keyword3", 2));
@@ -963,7 +961,7 @@ void CombinedModelTests::caseIsPreservedForOneItemTest() {
 
     QStringList keywords = QStringList() << "Keyword1" << "keyworD2";
 
-    std::vector<Models::MetadataElement> items;
+    MetadataIO::WeakArtworksSnapshot items;
     items.push_back(createArtworkMetadata("Description1", "title1", keywords, 0));
 
     combinedModel.resetModel();
@@ -976,7 +974,7 @@ void CombinedModelTests::caseIsPreservedForSeveralItemsTest() {
     Models::CombinedArtworksModel combinedModel;
     combinedModel.setCommandManager(&m_CommandManagerMock);
 
-    std::vector<Models::MetadataElement> items;
+    MetadataIO::WeakArtworksSnapshot items;
     items.push_back(createArtworkMetadata("Description1", "title1", QStringList() << "Keyword1" << "keyworD2", 0));
     items.push_back(createArtworkMetadata("Description2", "title2", QStringList() << "keyworD1" << "Keyword2", 1));
 
@@ -990,7 +988,7 @@ void CombinedModelTests::clearKeywordsFiresKeywordsCountTest() {
     Models::CombinedArtworksModel combinedModel;
     combinedModel.setCommandManager(&m_CommandManagerMock);
 
-    std::vector<Models::MetadataElement> items;
+    MetadataIO::WeakArtworksSnapshot items;
     items.push_back(createArtworkMetadata("Description1", "title1", QStringList(), 0));
 
     combinedModel.resetModel();

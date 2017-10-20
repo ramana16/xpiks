@@ -374,10 +374,12 @@ namespace Models {
 
         SpellCheck::SpellCheckItemInfo *info = metadataModel->getSpellCheckInfo();
 
-        if(!overwritten) {
+        if (!overwritten) {
             info->removeWordsFromErrors(keywords);
             // special case after words added to dict
-            m_CommandManager->submitForSpellCheck(QVector<Common::BasicKeywordsModel *>() << metadataModel, keywords);
+            std::vector<Common::BasicKeywordsModel *> items;
+            items.push_back(metadataModel);
+            m_CommandManager->submitForSpellCheck(items, keywords);
         }
         else {
             info->clear();

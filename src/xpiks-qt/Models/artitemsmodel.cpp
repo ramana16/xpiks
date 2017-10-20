@@ -16,8 +16,10 @@
 #include <QList>
 #include <QHash>
 #include <QSet>
+#include <vector>
+#include <memory>
 #include "artitemsmodel.h"
-#include "metadataelement.h"
+#include "artworkelement.h"
 #include "../Helpers/indiceshelper.h"
 #include "../Commands/addartworkscommand.h"
 #include "../Commands/removeartworkscommand.h"
@@ -257,7 +259,7 @@ namespace Models {
         if (metadataIndex >= 0
             && metadataIndex < getArtworksCount()
             && !keywords.empty()) {
-            std::vector<MetadataElement> metadataElements;
+            MetadataIO::ArtworksSnapshot::Container rawArtworkSnapshot;
             QVector<int> selectedIndices;
 
             // TODO: to be changed in future to the dialog
@@ -265,8 +267,7 @@ namespace Models {
             // if (!metadata->getIsSelected()) {
             selectedIndices.append(metadataIndex);
             // }
-
-            metadataElements.reserve(selectedIndices.length());
+            rawArtworkSnapshot.reserve(selectedIndices.size());
 
             bool onlyOneKeyword = keywords.length() == 1;
 
@@ -277,11 +278,10 @@ namespace Models {
 
             foreach(int index, selectedIndices) {
                 ArtworkMetadata *metadata = accessArtwork(index);
-
-                metadataElements.emplace_back(metadata, index);
+                rawArtworkSnapshot.emplace_back(new ArtworkMetadataLocker(metadata));
             }
 
-            std::shared_ptr<Commands::PasteKeywordsCommand> pasteCommand(new Commands::PasteKeywordsCommand(metadataElements, keywords));
+            std::shared_ptr<Commands::PasteKeywordsCommand> pasteCommand(new Commands::PasteKeywordsCommand(rawArtworkSnapshot, keywords));
             m_CommandManager->processCommand(pasteCommand);
         }
     }
@@ -291,12 +291,12 @@ namespace Models {
         if (metadataIndex >= 0
             && metadataIndex < getArtworksCount()
             && !keywords.empty()) {
-            std::vector<MetadataElement> metadataElements;
+            MetadataIO::ArtworksSnapshot::Container rawSnapshot;
 
             ArtworkMetadata *metadata = accessArtwork(metadataIndex);
-            metadataElements.emplace_back(metadata, metadataIndex);
+            rawSnapshot.emplace_back(new ArtworkMetadataLocker(metadata));
 
-            std::shared_ptr<Commands::PasteKeywordsCommand> pasteCommand(new Commands::PasteKeywordsCommand(metadataElements, keywords));
+            std::shared_ptr<Commands::PasteKeywordsCommand> pasteCommand(new Commands::PasteKeywordsCommand(rawSnapshot, keywords));
             m_CommandManager->processCommand(pasteCommand);
         }
     }
@@ -385,7 +385,7 @@ namespace Models {
     }
 
     void ArtItemsModel::saveSelectedArtworks(const QVector<int> &selectedIndices, bool overwriteAll, bool useBackups) {
-        QVector<ArtworkMetadata *> modifiedSelectedArtworks;
+        MetadataIO::WeakArtworksSnapshot modifiedSelectedArtworks;
         int count = selectedIndices.count();
         modifiedSelectedArtworks.reserve(count/2);
 
@@ -394,7 +394,7 @@ namespace Models {
             ArtworkMetadata *metadata = getArtwork(index);
             if (metadata != NULL && metadata->isSelected()) {
                 if (metadata->isModified() || overwriteAll) {
-                    modifiedSelectedArtworks.append(metadata);
+                    modifiedSelectedArtworks.push_back(metadata);
                 }
             }
         }
@@ -567,8 +567,8 @@ namespace Models {
             QStringList keywords;
             Helpers::splitKeywords(rawKeywords.trimmed(), separators, keywords);
 
-            std::vector<MetadataElement> items;
-            items.emplace_back(metadata, metadataIndex);
+            MetadataIO::ArtworksSnapshot::Container items;
+            items.emplace_back(new ArtworkMetadataLocker(metadata));
 
             Common::CombinedEditFlags flags = Common::CombinedEditFlags::None;
             Common::SetFlag(flags, Common::CombinedEditFlags::EditKeywords);
@@ -609,12 +609,12 @@ namespace Models {
         }
     }
 
-    void ArtItemsModel::expandPreset(int metadataIndex, int keywordIndex, int presetIndex) {
-        LOG_INFO << "item" << metadataIndex << "keyword" << keywordIndex << "preset" << presetIndex;
+    void ArtItemsModel::expandPreset(int artworkIndex, int keywordIndex, int presetIndex) {
+        LOG_INFO << "item" << artworkIndex << "keyword" << keywordIndex << "preset" << presetIndex;
 
-        if (0 <= metadataIndex && metadataIndex < getArtworksCount()) {
-            ArtworkMetadata *metadata = accessArtwork(metadataIndex);
-            std::shared_ptr<Commands::ExpandPresetCommand> expandPresetCommand(new Commands::ExpandPresetCommand(MetadataElement(metadata, metadataIndex), presetIndex, keywordIndex));
+        if (0 <= artworkIndex && artworkIndex < getArtworksCount()) {
+            ArtworkMetadata *artwork = accessArtwork(artworkIndex);
+            std::shared_ptr<Commands::ExpandPresetCommand> expandPresetCommand(new Commands::ExpandPresetCommand(artwork, presetIndex, keywordIndex));
             std::shared_ptr<Commands::ICommandResult> result = m_CommandManager->processCommand(expandPresetCommand);
             Q_UNUSED(result);
         }
@@ -624,15 +624,15 @@ namespace Models {
         LOG_INFO << "item" << metadataIndex;
 
         if (0 <= metadataIndex && metadataIndex < getArtworksCount()) {
-            ArtworkMetadata *metadata = accessArtwork(metadataIndex);
-            auto *basicModel = metadata->getBasicModel();
+            ArtworkMetadata *artwork = accessArtwork(metadataIndex);
+            auto *basicModel = artwork->getBasicModel();
             int keywordIndex = basicModel->getKeywordsCount() - 1;
             QString lastKeyword = basicModel->retrieveKeyword(keywordIndex);
 
             auto *presetsModel = m_CommandManager->getPresetsModel();
             int presetIndex = -1;
             if (presetsModel->tryFindSinglePresetByName(lastKeyword, false, presetIndex)) {
-                std::shared_ptr<Commands::ExpandPresetCommand> expandPresetCommand(new Commands::ExpandPresetCommand(MetadataElement(metadata, metadataIndex), presetIndex, keywordIndex));
+                std::shared_ptr<Commands::ExpandPresetCommand> expandPresetCommand(new Commands::ExpandPresetCommand(artwork, presetIndex, keywordIndex));
                 std::shared_ptr<Commands::ICommandResult> result = m_CommandManager->processCommand(expandPresetCommand);
                 Q_UNUSED(result);
             }
@@ -643,8 +643,8 @@ namespace Models {
         LOG_INFO << "item" << metadataIndex << "preset" << presetIndex;
 
         if (0 <= metadataIndex && metadataIndex < rowCount()) {
-            ArtworkMetadata *metadata = accessArtwork(metadataIndex);
-            std::shared_ptr<Commands::ExpandPresetCommand> expandPresetCommand(new Commands::ExpandPresetCommand(MetadataElement(metadata, metadataIndex), presetIndex));
+            ArtworkMetadata *artwork = accessArtwork(metadataIndex);
+            std::shared_ptr<Commands::ExpandPresetCommand> expandPresetCommand(new Commands::ExpandPresetCommand(artwork, presetIndex));
             std::shared_ptr<Commands::ICommandResult> result = m_CommandManager->processCommand(expandPresetCommand);
             Q_UNUSED(result);
         }
@@ -655,7 +655,7 @@ namespace Models {
         bool accepted = false;
 
         if (0 <= metadataIndex && metadataIndex < rowCount()) {
-            ArtworkMetadata *metadata = accessArtwork(metadataIndex);
+            ArtworkMetadata *artwork = accessArtwork(metadataIndex);
 
             AutoComplete::KeywordsAutoCompleteModel *acModel = m_CommandManager->getAutoCompleteModel();
             std::shared_ptr<AutoComplete::CompletionItem> completionItem = acModel->getAcceptedCompletion(completionID);
@@ -668,7 +668,7 @@ namespace Models {
 
             if (completionItem->isPreset() ||
                     (completionItem->canBePreset() && completionItem->shouldExpandPreset())) {
-                std::shared_ptr<Commands::ExpandPresetCommand> expandPresetCommand(new Commands::ExpandPresetCommand(MetadataElement(metadata, metadataIndex), presetIndex));
+                std::shared_ptr<Commands::ExpandPresetCommand> expandPresetCommand(new Commands::ExpandPresetCommand(artwork, presetIndex));
                 std::shared_ptr<Commands::ICommandResult> result = m_CommandManager->processCommand(expandPresetCommand);
                 Q_UNUSED(result);
                 accepted = true;
@@ -708,11 +708,11 @@ namespace Models {
         LOG_INFO << "item" << metadataIndex;
 
         if (0 <= metadataIndex && metadataIndex < rowCount()) {
-            ArtworkMetadata *metadata = accessArtwork(metadataIndex);
+            ArtworkMetadata *artwork = accessArtwork(metadataIndex);
             auto *quickBuffer = m_CommandManager->getQuickBuffer();
 
-            std::vector<MetadataElement> items;
-            items.emplace_back(metadata, metadataIndex);
+            MetadataIO::ArtworksSnapshot::Container items;
+            items.emplace_back(new ArtworkMetadataLocker(artwork));
 
             Common::CombinedEditFlags flags = Common::CombinedEditFlags::None;
 
@@ -971,8 +971,8 @@ namespace Models {
 
         Q_ASSERT(!keywords.isEmpty());
 
-        QVector<Common::BasicKeywordsModel *> itemsToCheck;
-        itemsToCheck.reserve((int)size);
+        std::vector<Common::BasicKeywordsModel *> itemsToCheck;
+        itemsToCheck.reserve(size);
 
         for (size_t i = 0; i < size; i++) {
             ArtworkMetadata *metadata = accessArtwork(i);
@@ -984,26 +984,25 @@ namespace Models {
                 info->clear();
             }
 
-            itemsToCheck.append(metadataModel);
+            itemsToCheck.push_back(metadataModel);
         }
 
-        if(!overwritten) {
+        if (!overwritten) {
             m_CommandManager->submitForSpellCheck(itemsToCheck, keywords);
-        }
-        else {
+        } else {
             m_CommandManager->submitForSpellCheck(itemsToCheck);
         }
     }
 
     void ArtItemsModel::userDictClearedHandler() {
         size_t size = m_ArtworkList.size();
-        QVector<Common::BasicKeywordsModel *> itemsToCheck;
-        itemsToCheck.reserve((int)size);
+        std::vector<Common::BasicKeywordsModel *> itemsToCheck;
+        itemsToCheck.reserve(size);
 
         for (size_t i = 0; i < size; i++) {
             ArtworkMetadata *metadata = accessArtwork(i);
             auto *keywordsModel = metadata->getBasicModel();
-            itemsToCheck.append(keywordsModel);
+            itemsToCheck.push_back(keywordsModel);
         }
 
         m_CommandManager->submitForSpellCheck(itemsToCheck);

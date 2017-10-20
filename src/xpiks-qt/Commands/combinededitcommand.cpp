@@ -15,7 +15,6 @@
 #include "../Commands/commandmanager.h"
 #include "../UndoRedo/artworkmetadatabackup.h"
 #include "../UndoRedo/modifyartworkshistoryitem.h"
-#include "../Models/metadataelement.h"
 #include "../Models/artworkmetadata.h"
 #include "../Common/flags.h"
 #include "../Models/settingsmodel.h"
@@ -54,39 +53,39 @@ Commands::CombinedEditCommand::~CombinedEditCommand() {
 }
 
 std::shared_ptr<Commands::ICommandResult> Commands::CombinedEditCommand::execute(const ICommandManager *commandManagerInterface) const {
-    LOG_INFO << "flags =" << combinedFlagsToString(m_EditFlags) << ", artworks count =" << m_MetadataElements.size();
+    LOG_INFO << "flags =" << combinedFlagsToString(m_EditFlags) << ", artworks count =" << m_RawSnapshot.size();
     QVector<int> indicesToUpdate;
     std::vector<UndoRedo::ArtworkMetadataBackup> artworksBackups;
     MetadataIO::WeakArtworksSnapshot itemsToSave, affectedItems;
 
     CommandManager *commandManager = (CommandManager*)commandManagerInterface;
 
-    size_t size = m_MetadataElements.size();
+    size_t size = m_RawSnapshot.size();
     indicesToUpdate.reserve((int)size);
     artworksBackups.reserve(size);
-    itemsToSave.reserve((int)size);
+    itemsToSave.reserve(size);
     affectedItems.reserve((int)size);
 
     const bool needToClear = Common::HasFlag(m_EditFlags, Common::CombinedEditFlags::Clear);
 
     for (size_t i = 0; i < size; ++i) {
-        const Models::MetadataElement &info = m_MetadataElements.at(i);
-        Models::ArtworkMetadata *metadata = info.getOrigin();
+        auto &locker = m_RawSnapshot.at(i);
+        Models::ArtworkMetadata *artwork = locker->getArtworkMetadata();
 
-        artworksBackups.emplace_back(metadata);
-        indicesToUpdate.append(info.getOriginalIndex());
+        artworksBackups.emplace_back(artwork);
+        indicesToUpdate.append(artwork->getLastKnownIndex());
 
-        setKeywords(metadata);
-        setDescription(metadata);
-        setTitle(metadata);
+        setKeywords(artwork);
+        setDescription(artwork);
+        setTitle(artwork);
 
         // do not save if Сlear flag present
         // to be able to restore from .xpks
         if (!needToClear) {
-            itemsToSave.append(metadata);
+            itemsToSave.push_back(artwork);
         }
 
-        affectedItems.append(metadata);
+        affectedItems.push_back(artwork);
     }
 
     std::unique_ptr<UndoRedo::IHistoryItem> modifyArtworksItem(
@@ -142,11 +141,11 @@ void Commands::CombinedEditCommandResult::afterExecCallback(const Commands::ICom
         commandManager->updateArtworksAtIndices(m_IndicesToUpdate);
     }
 
-    if (!m_ItemsToSave.isEmpty()) {
+    if (!m_ItemsToSave.empty()) {
         commandManager->saveArtworksBackups(m_ItemsToSave);
     }
 
-    if (!m_AffectedItems.isEmpty()) {
+    if (!m_AffectedItems.empty()) {
         commandManager->submitForSpellCheck(m_AffectedItems);
         commandManager->submitForWarningsCheck(m_AffectedItems);
     }

@@ -18,7 +18,7 @@
 #include "../MetadataIO/artworkssnapshot.h"
 
 namespace Models {
-    class PreviewMetadataElement;
+    class PreviewArtworkElement;
     class ArtworkMetadata;
 }
 
@@ -27,10 +27,10 @@ namespace Commands {
         public CommandBase
     {
     public:
-        FindAndReplaceCommand(std::vector<Models::PreviewMetadataElement> &metadataElements,
+        FindAndReplaceCommand(const MetadataIO::ArtworksSnapshot::Container &rawSnapshot,
         const QString &replaceWhat, const QString &replaceTo, Common::SearchFlags flags):
             CommandBase(CommandType::FindAndReplace),
-            m_MetadataElements(std::move(metadataElements)),
+            m_RawSnapshot(std::move(rawSnapshot)),
             m_ReplaceWhat(replaceWhat),
             m_ReplaceTo(replaceTo),
             m_Flags(flags)
@@ -42,7 +42,7 @@ namespace Commands {
         std::shared_ptr<Commands::ICommandResult> execute(const ICommandManager *commandManagerInterface) const;
 
     private:
-        std::vector<Models::PreviewMetadataElement> m_MetadataElements;
+        MetadataIO::ArtworksSnapshot::Container m_RawSnapshot;
         QString m_ReplaceWhat;
         QString m_ReplaceTo;
         Common::SearchFlags m_Flags;
@@ -53,11 +53,11 @@ namespace Commands {
     {
     public:
         FindAndReplaceCommandResult(
-        const QVector<Models::ArtworkMetadata *> &itemsToSave,
-        const QVector<int> &indicesToUpdate):
-            m_ItemsToSave(itemsToSave),
+                MetadataIO::WeakArtworksSnapshot &itemsToSave,
+                const QVector<int> &indicesToUpdate):
+            m_ItemsToSave(std::move(itemsToSave)),
             m_IndicesToUpdate(indicesToUpdate)
-        {}
+        { }
 
     public:
         virtual void afterExecCallback(const ICommandManager *commandManagerInterface) const override;

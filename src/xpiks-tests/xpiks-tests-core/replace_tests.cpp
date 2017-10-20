@@ -6,7 +6,7 @@
 #include "../../xpiks-qt/Commands/findandreplacecommand.h"
 #include "../../xpiks-qt/Models/filteredartitemsproxymodel.h"
 #include "../../xpiks-qt/Models/artworksrepository.h"
-#include "../../xpiks-qt/Models/previewmetadataelement.h"
+#include "../../xpiks-qt/Models/previewartworkelement.h"
 #include "../../xpiks-qt/Common/flags.h"
 
 #define DECLARE_MODELS_AND_GENERATE(count) \

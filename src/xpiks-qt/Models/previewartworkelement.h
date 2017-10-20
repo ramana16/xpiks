@@ -11,38 +11,23 @@
 #ifndef PREVIEWMETADATAELEMENT_H
 #define PREVIEWMETADATAELEMENT_H
 
-#include "metadataelement.h"
+#include "artworkelement.h"
 
 namespace Models {
-    class PreviewMetadataElement:
-        public MetadataElement
+    class PreviewArtworkElement: public ArtworkElement
     {
     public:
-        PreviewMetadataElement(ArtworkMetadata *metadata, int index):
-            MetadataElement(metadata, index),
-            m_Flags(0)
+        PreviewArtworkElement(ArtworkMetadata *metadata):
+            ArtworkElement(metadata)
         {
-            setSelected(true);
+            setIsSelected(true);
         }
-
-        PreviewMetadataElement(PreviewMetadataElement &&other):
-            MetadataElement(std::move(other)),
-            m_Flags(other.m_Flags)
-        {}
-
-        PreviewMetadataElement &operator=(PreviewMetadataElement &&other) {
-            m_Flags = other.m_Flags;
-
-            return static_cast<PreviewMetadataElement &>(MetadataElement::operator=(std::move(other)));
-        }
-
-        virtual ~PreviewMetadataElement() {}
 
     private:
         enum PreviewFlags {
-            FlagHasTitleMatch = 1 << 0,
-            FlagHasDescriptionMatch = 1 << 1,
-            FlagHasKeywordsMatch = 1 << 2
+            FlagHasTitleMatch = 1 << 1,
+            FlagHasDescriptionMatch = 1 << 2,
+            FlagHasKeywordsMatch = 1 << 3
         };
 
         inline bool getHasTitleMatchFlag() const { return Common::HasFlag(m_Flags, FlagHasTitleMatch); }
@@ -62,9 +47,6 @@ namespace Models {
         void setHasTitleMatch(bool value) { setHasTitleMatchFlag(value); }
         void setHasDescriptionMatch(bool value) { setHasDescriptionMatchFlag(value); }
         void setHasKeywordsMatch(bool value) { setHasKeywordsMatchFlag(value); }
-
-    private:
-        Common::flag_t m_Flags;
     };
 }
 

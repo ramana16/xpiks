@@ -15,7 +15,7 @@
 #include <vector>
 #include <QStringList>
 #include "commandbase.h"
-#include "../Models/metadataelement.h"
+#include "../Models/artworkelement.h"
 #include "../MetadataIO/artworkssnapshot.h"
 
 namespace Models {
@@ -26,10 +26,10 @@ namespace Commands {
     class PasteKeywordsCommand : public CommandBase
     {
     public:
-        PasteKeywordsCommand(std::vector<Models::MetadataElement> &metadataElements,
+        PasteKeywordsCommand(MetadataIO::ArtworksSnapshot::Container &rawSnapshot,
                              const QStringList &keywords) :
             CommandBase(CommandType::PasteKeywords),
-            m_MetadataElements(std::move(metadataElements)),
+            m_RawSnapshot(std::move(rawSnapshot)),
             m_KeywordsList(keywords)
         {}
 
@@ -39,7 +39,7 @@ namespace Commands {
         virtual std::shared_ptr<ICommandResult> execute(const ICommandManager *commandManagerInterface) const override;
 
     private:
-        std::vector<Models::MetadataElement> m_MetadataElements;
+        MetadataIO::ArtworksSnapshot::Container m_RawSnapshot;
         QStringList m_KeywordsList;
     };
 
@@ -58,7 +58,6 @@ namespace Commands {
 #else
     public:
 #endif
-        MetadataIO::WeakArtworksSnapshot m_AffectedItems;
         QVector<int> m_IndicesToUpdate;
     };
 }

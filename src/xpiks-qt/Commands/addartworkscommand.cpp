@@ -26,10 +26,10 @@
 int findAndAttachVectors(const MetadataIO::WeakArtworksSnapshot &artworksList, QVector<int> &modifiedIndices) {
     LOG_DEBUG << "#";
     int attachedCount = 0;
-    int size = artworksList.length();
+    size_t size = artworksList.size();
     modifiedIndices.reserve(size);
 
-    for (int i = 0; i < size; ++i) {
+    for (size_t i = 0; i < size; ++i) {
         Models::ArtworkMetadata *artwork = artworksList.at(i);
         Models::ImageArtwork *image = dynamic_cast<Models::ImageArtwork *>(artwork);
 
@@ -60,8 +60,8 @@ int findAndAttachVectors(const MetadataIO::WeakArtworksSnapshot &artworksList, Q
 void accountVectors(Models::ArtworksRepository *artworksRepository, const MetadataIO::WeakArtworksSnapshot &artworks) {
     LOG_DEBUG << "#";
 
-    int size = artworks.size();
-    for (int i = 0; i < size; ++i) {
+    size_t size = artworks.size();
+    for (size_t i = 0; i < size; ++i) {
         Models::ArtworkMetadata *metadata = artworks.at(i);
         Models::ImageArtwork *imageArtwork = dynamic_cast<Models::ImageArtwork *>(metadata);
         if ((imageArtwork != nullptr) && imageArtwork->hasVectorAttached()) {

@@ -26,7 +26,7 @@
 #include "icommandmanager.h"
 #include "../Common/iservicebase.h"
 #include "../Helpers/ifilenotavailablemodel.h"
-#include "../Models/metadataelement.h"
+#include "../Models/artworkelement.h"
 #include "../KeywordsPresets/presetkeywordsmodel.h"
 #include "../KeywordsPresets/presetkeywordsmodelconfig.h"
 #include "../Helpers/asynccoordinator.h"
@@ -209,19 +209,19 @@ namespace Commands {
                                 const std::vector<std::shared_ptr<Models::UploadInfo> > &uploadInfos) const;
 
         void combineArtwork(Models::ArtworkMetadata *metadata, int index) const;
-        void combineArtworks(std::vector<Models::MetadataElement> &artworks) const;
-        void deleteKeywordsFromArtworks(std::vector<Models::MetadataElement> &artworks) const;
+        void combineArtworks(MetadataIO::WeakArtworksSnapshot &artworks) const;
+        void deleteKeywordsFromArtworks(MetadataIO::WeakArtworksSnapshot &artworks) const;
         void setArtworksForUpload(MetadataIO::ArtworksSnapshot &artworks) const;
         void setArtworksForZipping(MetadataIO::ArtworksSnapshot &artworks) const;
         void setArtworksForCsvExport(MetadataIO::ArtworksSnapshot::Container &rawSnapshot) const;
         virtual void connectArtworkSignals(Models::ArtworkMetadata *artwork) const;
         void disconnectArtworkSignals(Models::ArtworkMetadata *metadata) const;
         void readMetadata(const MetadataIO::ArtworksSnapshot &snapshot) const;
-        void writeMetadata(const QVector<Models::ArtworkMetadata*> &artworks, bool useBackups) const;
-        void addToLibrary(const QVector<Models::ArtworkMetadata *> &artworks) const;
+        void writeMetadata(const MetadataIO::WeakArtworksSnapshot &artworks, bool useBackups) const;
+        void addToLibrary(const MetadataIO::WeakArtworksSnapshot &artworks) const;
         void updateArtworksAtIndices(const QVector<int> &indices) const;
         void updateArtworks(const MetadataIO::WeakArtworksSnapshot &artworks) const;
-        void updateArtworks(const std::vector<std::shared_ptr<Models::ArtworkMetadataLocker> > &artworks);
+        void updateArtworks(const MetadataIO::ArtworksSnapshot::Container &artworks);
         void addToRecentDirectories(const QString &path) const;
         void addToRecentFiles(const QString &path) const;
         void addToRecentFiles(const QStringList &filenames) const;
@@ -231,12 +231,12 @@ namespace Commands {
         void generatePreviews(const MetadataIO::ArtworksSnapshot &snapshot) const;
         void submitKeywordForSpellCheck(Common::BasicKeywordsModel *item, int keywordIndex) const;
         void submitForSpellCheck(const MetadataIO::WeakArtworksSnapshot &items) const;
-        void submitForSpellCheck(const QVector<Common::BasicKeywordsModel *> &items) const;
+        void submitForSpellCheck(const std::vector<Common::BasicKeywordsModel *> &items) const;
         void submitItemForSpellCheck(Common::BasicKeywordsModel *item, Common::SpellCheckFlags flags = Common::SpellCheckFlags::All) const;
         void checkSemanticDuplicates(Common::BasicKeywordsModel *item);
         void setupSpellCheckSuggestions(Common::IMetadataOperator *item, int index, Common::SuggestionFlags flags);
         void setupSpellCheckSuggestions(std::vector<std::pair<Common::IMetadataOperator *, int> > &itemPairs, Common::SuggestionFlags flags);
-        void submitForSpellCheck(const QVector<Common::BasicKeywordsModel *> &items, const QStringList &wordsToCheck) const;
+        void submitForSpellCheck(const std::vector<Common::BasicKeywordsModel *> &items, const QStringList &wordsToCheck) const;
         void setupDuplicatesModel(Common::BasicMetadataModel *item);
         void setupDuplicatesModel(const std::vector<Models::ArtworkMetadata *> &items);
 
@@ -246,7 +246,7 @@ namespace Commands {
         void submitForWarningsCheck(const MetadataIO::WeakArtworksSnapshot &items) const;
 
     private:
-        void submitForWarningsCheck(const QVector<Common::IBasicArtwork *> &items) const;
+        void submitForWarningsCheck(const std::vector<Common::IBasicArtwork *> &items) const;
 
     public:
         void saveArtworkBackup(Models::ArtworkMetadata *metadata) const;
@@ -280,7 +280,7 @@ namespace Commands {
         void servicesInitialized(int status);
 
     public:
-        void registerCurrentItem(const Models::MetadataElement &metadataElement);
+        void registerCurrentItem(Models::ArtworkMetadata *artwork);
         void registerCurrentItem(Models::ArtworkProxyBase *artworkProxy) const;
         void clearCurrentItem() const;
 

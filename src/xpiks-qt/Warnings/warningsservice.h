@@ -27,7 +27,7 @@ namespace Warnings {
         public Common::BaseEntity,
         public Common::IServiceBase<Models::ArtworkMetadata, Common::WarningsCheckFlags>
     {
-    Q_OBJECT
+        Q_OBJECT
 
     public:
         explicit WarningsService(QObject *parent=0);

@@ -27,7 +27,7 @@
 #include "../Common/flags.h"
 #include "../SpellCheck/spellcheckiteminfo.h"
 #include "../Common/hold.h"
-#include "../Models/metadataelement.h"
+#include "../Models/artworkelement.h"
 #include "artworkproxybase.h"
 #include "keyvaluelist.h"
 

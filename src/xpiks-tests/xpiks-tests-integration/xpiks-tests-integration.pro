@@ -281,7 +281,7 @@ HEADERS += \
     ../../xpiks-qt/MetadataIO/metadataiocoordinator.h \
     ../../xpiks-qt/MetadataIO/artworkssnapshot.h \
     ../../xpiks-qt/Common/abstractlistmodel.h \
-    ../../xpiks-qt/Models/metadataelement.h \
+    ../../xpiks-qt/Models/artworkelement.h \
     ../../xpiks-qt/Models/artitemsmodel.h \
     ../../xpiks-qt/Models/artworkmetadata.h \
     ../../xpiks-qt/Models/artworksprocessor.h \

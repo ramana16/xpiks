@@ -21,8 +21,8 @@
 
 namespace Models {
     class ArtworkMetadata;
-    class MetadataElement;
-    class PreviewMetadataElement;
+    class ArtworkElement;
+    class PreviewArtworkElement;
     class ArtItemsModel;
 
     class FilteredArtItemsProxyModel:
@@ -42,9 +42,7 @@ namespace Models {
         int getSelectedArtworksCount() const { return m_SelectedArtworksCount; }
         void spellCheckAllItems();
 
-        std::vector<MetadataElement> getSearchableOriginalItems(const QString &searchTerm, Common::SearchFlags flags) const;
-
-        std::vector<PreviewMetadataElement> getSearchablePreviewOriginalItems(const QString &searchTerm, Common::SearchFlags flags) const;
+        MetadataIO::ArtworksSnapshot::Container getSearchablePreviewOriginalItems(const QString &searchTerm, Common::SearchFlags flags) const;
 
 #ifdef CORE_TESTS
         int retrieveNumberOfSelectedItems();
@@ -111,22 +109,19 @@ namespace Models {
         void forceUnselected();
 
     private:
-        void removeMetadataInItems(std::vector<MetadataElement> &itemsToClear, Common::CombinedEditFlags flags) const;
-        void removeKeywordsInItem(ArtworkMetadata *metadata, int originalIndex);
+        void removeMetadataInItems(MetadataIO::ArtworksSnapshot::Container &itemsToClear, Common::CombinedEditFlags flags) const;
+        void removeKeywordsInItem(ArtworkMetadata *artwork);
         void setFilteredItemsSelected(bool selected);
         void invertFilteredItemsSelected();
 
-        QVector<ArtworkMetadata *> getSelectedOriginalItems() const;
+        MetadataIO::WeakArtworksSnapshot getSelectedOriginalItems() const;
         MetadataIO::ArtworksSnapshot::Container getSelectedArtworksSnapshot() const;
-        std::vector<MetadataElement> getSelectedOriginalItemsWithIndices() const;
-
-        std::vector<MetadataElement> getAllItemsWithIndices() const;
 
         template<typename T>
         std::vector<T> getFilteredOriginalItems(std::function<bool (ArtworkMetadata *)> pred,
                                                 std::function<T(ArtworkMetadata *, int, int)> mapper) const;
 
-        QVector<ArtworkMetadata *> getAllOriginalItems() const;
+        MetadataIO::WeakArtworksSnapshot getAllOriginalItems() const;
 
         QVector<int> getSelectedOriginalIndices() const;
         QVector<int> getSelectedIndices() const;

@@ -105,19 +105,19 @@ namespace Warnings {
         if (m_WarningsWorker == NULL) { return; }
         if (m_IsStopped) { return; }
 
-        int length = items.length();
+        const size_t size = items.size();
 
         std::vector<std::shared_ptr<IWarningsItem> > itemsToSubmit;
-        itemsToSubmit.reserve(length);
+        itemsToSubmit.reserve(size);
 
-        for (int i = 0; i < length; ++i) {
+        for (size_t i = 0; i < size; ++i) {
             Models::ArtworkMetadata *item = items.at(i);
             itemsToSubmit.emplace_back(new WarningsItem(item));
         }
 
         itemsToSubmit.emplace_back(new EmptyWarningsItem());
 
-        LOG_INFO << "Submitting" << length << "item(s)";
+        LOG_INFO << "Submitting" << size << "item(s)";
         m_WarningsWorker->submitItems(itemsToSubmit);
     }
 

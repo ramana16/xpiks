@@ -13,6 +13,7 @@
 
 #include <QVector>
 #include <memory>
+#include <vector>
 #include "../Common/flags.h"
 
 namespace Common {
@@ -36,7 +37,7 @@ namespace Common {
 
         virtual void submitItem(T *item) = 0;
         virtual void submitItem(T *item, FlagsType flags) = 0;
-        virtual void submitItems(const QVector<T*> &items) = 0;
+        virtual void submitItems(const std::vector<T*> &items) = 0;
     };
 }
 

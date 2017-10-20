@@ -14,9 +14,10 @@
 #include "../Common/baseentity.h"
 #include <QObject>
 #include <QQuickTextDocument>
-#include "../Models/previewmetadataelement.h"
+#include "../Models/previewartworkelement.h"
 #include "../Common/flags.h"
 #include "../Common/iflagsprovider.h"
+#include "../MetadataIO/artworkssnapshot.h"
 
 namespace Models {
     class FindAndReplaceModel:
@@ -43,7 +44,7 @@ namespace Models {
         virtual Common::flag_t getFlags() const override { return (Common::flag_t)m_Flags; }
         const QString &getReplaceFrom() const{ return m_ReplaceFrom; }
         const QString &getReplaceTo() const { return m_ReplaceTo; }
-        int getArtworksCount() const { return (int)m_ArtworksList.size(); }
+        int getArtworksCount() const { return (int)m_ArtworksSnapshot.size(); }
 
         void setReplaceFrom(const QString &value) {
             if (value != m_ReplaceFrom) {
@@ -144,7 +145,7 @@ namespace Models {
 
 #ifdef INTEGRATION_TESTS
         void setItemSelected(int index, bool selected) {
-            m_ArtworksList[index].setSelected(selected);
+            accessPreviewElement(index)->setIsSelected(selected);
         }
 #endif
 
@@ -174,9 +175,10 @@ namespace Models {
         void setAllSelected(bool isSelected);
         void initDefaultFlags();
         void normalizeSearchCriteria();
+        PreviewArtworkElement *accessPreviewElement(size_t index) const;
 
     private:
-        std::vector<Models::PreviewMetadataElement> m_ArtworksList;
+        MetadataIO::ArtworksSnapshot m_ArtworksSnapshot;
         QString m_ReplaceFrom;
         QString m_ReplaceTo;
         QMLExtensions::ColorsModel *m_ColorsModel;

@@ -18,7 +18,7 @@
 #include <QString>
 #include <QStringList>
 #include "../QuickBuffer/icurrenteditable.h"
-#include "../Models/metadataelement.h"
+#include "../Models/artworkelement.h"
 #include "../QMLExtensions/tabsmodel.h"
 #include "../Common/statefulentity.h"
 #include "../Helpers/constants.h"

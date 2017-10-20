@@ -12,7 +12,7 @@
 #include "pastekeywordscommand.h"
 #include "../UndoRedo/modifyartworkshistoryitem.h"
 #include "../UndoRedo/artworkmetadatabackup.h"
-#include "../Models/metadataelement.h"
+#include "../Models/artworkelement.h"
 #include "../Commands/commandmanager.h"
 #include "../Common/defines.h"
 #include "../Models/artitemsmodel.h"
@@ -22,27 +22,27 @@ Commands::PasteKeywordsCommand::~PasteKeywordsCommand() {
 }
 
 std::shared_ptr<Commands::ICommandResult> Commands::PasteKeywordsCommand::execute(const ICommandManager *commandManagerInterface) const {
-    LOG_INFO << "Pasting" << m_KeywordsList.length() << "keywords to" << m_MetadataElements.size() << "item(s)";
+    LOG_INFO << "Pasting" << m_KeywordsList.length() << "keywords to" << m_RawSnapshot.size() << "item(s)";
 
     CommandManager *commandManager = (CommandManager*)commandManagerInterface;
 
     QVector<int> indicesToUpdate;
     std::vector<UndoRedo::ArtworkMetadataBackup> artworksBackups;
     MetadataIO::WeakArtworksSnapshot affectedArtworks;
-    size_t size = m_MetadataElements.size();
+    const size_t size = m_RawSnapshot.size();
     indicesToUpdate.reserve((int)size);
     artworksBackups.reserve(size);
     affectedArtworks.reserve((int)size);
 
     for (size_t i = 0; i < size; ++i) {
-        const Models::MetadataElement &element = m_MetadataElements.at(i);
-        Models::ArtworkMetadata *metadata = element.getOrigin();
+        auto &item = m_RawSnapshot.at(i);
+        Models::ArtworkMetadata *artwork = item->getArtworkMetadata();
 
-        indicesToUpdate.append(element.getOriginalIndex());
-        artworksBackups.emplace_back(metadata);
+        indicesToUpdate.append(artwork->getLastKnownIndex());
+        artworksBackups.emplace_back(artwork);
 
-        metadata->appendKeywords(m_KeywordsList);
-        affectedArtworks.append(metadata);
+        artwork->appendKeywords(m_KeywordsList);
+        affectedArtworks.push_back(artwork);
     }
 
     if (size > 0) {

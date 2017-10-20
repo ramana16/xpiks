@@ -262,6 +262,9 @@ namespace Models {
         ArtworkMetadata *getArtworkMetadata() const { return m_ArtworkMetadata; }
 
     private:
+        ArtworkMetadataLocker(const ArtworkMetadataLocker&);
+
+    private:
         ArtworkMetadata *m_ArtworkMetadata;
     };
 }

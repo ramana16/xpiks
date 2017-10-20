@@ -11,7 +11,7 @@
 #include "deletekeywordsviewmodel.h"
 #include <QTime>
 #include "../Helpers/indiceshelper.h"
-#include "metadataelement.h"
+#include "artworkelement.h"
 #include "../Commands/commandmanager.h"
 #include "../Commands/deletekeywordscommand.h"
 #include "../Common/defines.h"
@@ -25,7 +25,7 @@ namespace Models {
     {
     }
 
-    void DeleteKeywordsViewModel::setArtworks(std::vector<MetadataElement> &artworks) {
+    void DeleteKeywordsViewModel::setArtworks(MetadataIO::WeakArtworksSnapshot &artworks) {
         LOG_DEBUG << "#";
         ArtworksViewModel::setArtworks(artworks);
         recombineKeywords();
@@ -120,7 +120,7 @@ namespace Models {
 
         if (m_KeywordsToDeleteModel.getKeywordsCount() == 0) { return; }
 
-        auto &artworksList = getArtworksList();
+        MetadataIO::ArtworksSnapshot::Container rawSnapshot(getRawSnapshot());
         auto keywordsList = m_KeywordsToDeleteModel.getKeywords();
 
         if (!m_CaseSensitive) {
@@ -132,7 +132,7 @@ namespace Models {
         auto keywordsSet = keywordsList.toSet();
 
         std::shared_ptr<Commands::DeleteKeywordsCommand> deleteKeywordsCommand(
-                    new Commands::DeleteKeywordsCommand(artworksList, keywordsSet, m_CaseSensitive));
+                    new Commands::DeleteKeywordsCommand(rawSnapshot, keywordsSet, m_CaseSensitive));
         m_CommandManager->processCommand(deleteKeywordsCommand);
     }
 
@@ -196,7 +196,7 @@ namespace Models {
 
     void DeleteKeywordsViewModel::fillKeywordsHash(QHash<QString, int> &keywordsHash) {
         LOG_DEBUG << "#";
-        processArtworks([](const MetadataElement&) { return true; },
+        processArtworks([](const ArtworkElement*) { return true; },
         [&keywordsHash](int, ArtworkMetadata *metadata) {
             const auto &keywords = metadata->getKeywords();
 

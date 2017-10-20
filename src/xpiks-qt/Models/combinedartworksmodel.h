@@ -25,7 +25,7 @@
 #include "../Common/flags.h"
 #include "../SpellCheck/spellcheckiteminfo.h"
 #include "../Common/hold.h"
-#include "../Models/metadataelement.h"
+#include "../Models/artworkelement.h"
 #include "artworkproxybase.h"
 #include "../Common/delayedactionentity.h"
 
@@ -50,7 +50,7 @@ namespace Models {
         virtual ~CombinedArtworksModel() {}
 
     public:
-        virtual void setArtworks(std::vector<MetadataElement> &artworks) override;
+        virtual void setArtworks(MetadataIO::WeakArtworksSnapshot &artworks) override;
 
     private:
         enum CombinedEditModifiedFlags {
@@ -171,8 +171,8 @@ namespace Models {
         void enableAllFields();
         void assignFromOneArtwork();
         void assignFromManyArtworks();
-        void recombineArtworks(std::function<bool (const MetadataElement &)> pred);
-        bool findNonEmptyData(std::function<bool (const MetadataElement &)> pred, int &index, ArtworkMetadata *&artworkMetadata);
+        void recombineArtworks(std::function<bool (const ArtworkElement *)> pred);
+        bool findNonEmptyData(std::function<bool (const ArtworkElement *)> pred, int &index, ArtworkMetadata *&artworkMetadata);
 
     public slots:
         void spellCheckErrorsChangedHandler();

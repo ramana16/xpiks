@@ -13,7 +13,7 @@
 #include "commandmanager.h"
 #include "../Models/filteredartitemsproxymodel.h"
 #include "../Models/artworkmetadata.h"
-#include "../Models/previewmetadataelement.h"
+#include "../Models/previewartworkelement.h"
 #include "../UndoRedo/artworkmetadatabackup.h"
 #include "../UndoRedo/modifyartworkshistoryitem.h"
 #include "../Common/defines.h"
@@ -23,7 +23,7 @@ namespace Commands {
     FindAndReplaceCommand::~FindAndReplaceCommand() { LOG_DEBUG << "#"; }
 
     std::shared_ptr<Commands::ICommandResult> FindAndReplaceCommand::execute(const ICommandManager *commandManagerInterface) const {
-        LOG_INFO << "Replacing [" << m_ReplaceWhat << "] to [" << m_ReplaceTo << "] in" << m_MetadataElements.size() << "item(s)";
+        LOG_INFO << "Replacing [" << m_ReplaceWhat << "] to [" << m_ReplaceTo << "] in" << m_RawSnapshot.size() << "item(s)";
         CommandManager *commandManager = (CommandManager *)commandManagerInterface;
 
         std::vector<UndoRedo::ArtworkMetadataBackup> artworksBackups;
@@ -31,28 +31,26 @@ namespace Commands {
         QVector<int> indicesToUpdate;
         MetadataIO::WeakArtworksSnapshot itemsToSave;
 
-        size_t size = m_MetadataElements.size();
-        itemsToSave.reserve((int)size);
+        size_t size = m_RawSnapshot.size();
+        itemsToSave.reserve(size);
         indicesToUpdate.reserve((int)size);
 
-        for (size_t i = 0; i < size; i++) {
-            const Models::PreviewMetadataElement &element = m_MetadataElements.at(i);
-            if (!element.isSelected()) {
-                continue;
-            }
+        for (auto &locker: m_RawSnapshot) {
+            std::shared_ptr<Models::ArtworkElement> element = std::dynamic_pointer_cast<Models::ArtworkElement>(locker);
+            Q_ASSERT(element);
+            if (!element->getIsSelected()) { continue; }
 
-            Models::ArtworkMetadata *metadata = element.getOrigin();
-            int index = element.getOriginalIndex();
+            Models::ArtworkMetadata *artwork = locker->getArtworkMetadata();
 
-            artworksBackups.emplace_back(metadata);
+            artworksBackups.emplace_back(artwork);
 
-            bool succeeded = metadata->replace(m_ReplaceWhat, m_ReplaceTo, m_Flags);
+            bool succeeded = artwork->replace(m_ReplaceWhat, m_ReplaceTo, m_Flags);
             if (succeeded) {
                 LOG_FOR_TESTS << "Succeeded";
-                itemsToSave.append(metadata);
-                indicesToUpdate.append(index);
+                itemsToSave.push_back(artwork);
+                indicesToUpdate.append(artwork->getLastKnownIndex());
             } else {
-                LOG_INFO << "Failed to replace [" << m_ReplaceWhat << "] to [" << m_ReplaceTo << "] in" << metadata->getFilepath();
+                LOG_INFO << "Failed to replace [" << m_ReplaceWhat << "] to [" << m_ReplaceTo << "] in" << artwork->getFilepath();
             }
         }
 
@@ -76,7 +74,7 @@ namespace Commands {
             commandManager->updateArtworksAtIndices(m_IndicesToUpdate);
         }
 
-        if (!m_ItemsToSave.isEmpty()) {
+        if (!m_ItemsToSave.empty()) {
             commandManager->saveArtworksBackups(m_ItemsToSave);
             commandManager->submitForSpellCheck(m_ItemsToSave);
             commandManager->submitForWarningsCheck(m_ItemsToSave);

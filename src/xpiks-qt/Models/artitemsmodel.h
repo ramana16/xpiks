@@ -38,7 +38,7 @@ namespace QMLExtensions {
 
 namespace Models {
     class ArtworkMetadata;
-    class MetadataElement;
+    class ArtworkElement;
 
     class ArtItemsModel:
         public Common::AbstractListModel,
@@ -133,7 +133,7 @@ namespace Models {
 
         /*Q_INVOKABLE*/ void detachVectorsFromSelected(const QVector<int> &selectedIndices);
 
-        Q_INVOKABLE void expandPreset(int metadataIndex, int keywordIndex, int presetIndex);
+        Q_INVOKABLE void expandPreset(int artworkIndex, int keywordIndex, int presetIndex);
         Q_INVOKABLE void expandLastAsPreset(int metadataIndex);
         Q_INVOKABLE void addPreset(int metadataIndex, int presetIndex);
         Q_INVOKABLE bool acceptCompletionAsPreset(int metadataIndex, int completionID);

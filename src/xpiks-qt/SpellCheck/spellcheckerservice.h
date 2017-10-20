@@ -30,8 +30,8 @@ namespace SpellCheck {
         public QObject,
         public Common::IServiceBase<Common::BasicKeywordsModel, Common::SpellCheckFlags>
     {
-    Q_OBJECT
-    Q_PROPERTY(int userDictWordsNumber READ getUserDictWordsNumber NOTIFY userDictWordsNumberChanged)
+        Q_OBJECT
+        Q_PROPERTY(int userDictWordsNumber READ getUserDictWordsNumber NOTIFY userDictWordsNumberChanged)
 
     public:
         SpellCheckerService(Models::SettingsModel *settingsModel = 0);
@@ -47,8 +47,8 @@ namespace SpellCheck {
 
         virtual void submitItem(Common::BasicKeywordsModel *itemToCheck) override;
         virtual void submitItem(Common::BasicKeywordsModel *itemToCheck, Common::SpellCheckFlags flags) override;
-        virtual void submitItems(const QVector<Common::BasicKeywordsModel *> &itemsToCheck) override;
-        void submitItems(const QVector<Common::BasicKeywordsModel *> &itemsToCheck, const QStringList &wordsToCheck);
+        virtual void submitItems(const std::vector<Common::BasicKeywordsModel *> &itemsToCheck) override;
+        void submitItems(const std::vector<Common::BasicKeywordsModel *> &itemsToCheck, const QStringList &wordsToCheck);
         void submitKeyword(Common::BasicKeywordsModel *itemToCheck, int keywordIndex);
         virtual QStringList suggestCorrections(const QString &word) const;
         void restartWorker();

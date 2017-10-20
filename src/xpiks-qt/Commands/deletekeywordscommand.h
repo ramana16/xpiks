@@ -16,7 +16,7 @@
 #include <QSet>
 #include <QString>
 #include <vector>
-#include "../Models/metadataelement.h"
+#include "../Models/artworkelement.h"
 #include "../MetadataIO/artworkssnapshot.h"
 
 namespace Models {
@@ -27,7 +27,7 @@ namespace Commands {
     class DeleteKeywordsCommand : public CommandBase
     {
     public:
-        DeleteKeywordsCommand(std::vector<Models::MetadataElement> &infos,
+        DeleteKeywordsCommand(MetadataIO::ArtworksSnapshot::Container &rawSnapshot,
                               const QSet<QString> &keywordsSet,
                               bool caseSensitive);
         virtual ~DeleteKeywordsCommand() {}
@@ -36,16 +36,16 @@ namespace Commands {
         virtual std::shared_ptr<ICommandResult> execute(const ICommandManager *commandManagerInterface) const override;
 
     private:
-        std::vector<Models::MetadataElement> m_MetadataElements;
+        MetadataIO::ArtworksSnapshot::Container m_RawSnapshot;
         QSet<QString> m_KeywordsSet;
         bool m_CaseSensitive;
     };
 
     class DeleteKeywordsCommandResult : public CommandResult {
     public:
-        DeleteKeywordsCommandResult(const MetadataIO::WeakArtworksSnapshot &affectedItems,
+        DeleteKeywordsCommandResult(MetadataIO::WeakArtworksSnapshot &affectedItems,
                                     const QVector<int> &indicesToUpdate):
-            m_AffectedItems(affectedItems),
+            m_AffectedItems(std::move(affectedItems)),
             m_IndicesToUpdate(indicesToUpdate)
         {
         }

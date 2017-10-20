@@ -99,7 +99,7 @@ namespace AutoComplete {
         this->submitItem(item);
     }
 
-    void AutoCompleteService::submitItems(const QVector<QString *> &items) {
+    void AutoCompleteService::submitItems(const std::vector<QString *> &items) {
         Q_UNUSED(items);
 #if QT_NO_DEBUG
         LOG_WARNING << "Cannot use this API for autocomplete";

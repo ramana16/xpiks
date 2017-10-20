@@ -15,7 +15,7 @@
 #include "../Commands/commandbase.h"
 #include "../Suggestion/keywordssuggestor.h"
 #include "artworkmetadata.h"
-#include "metadataelement.h"
+#include "artworkelement.h"
 #include "../SpellCheck/spellcheckiteminfo.h"
 #include "../Common/defines.h"
 #include "../QMLExtensions/colorsmodel.h"
@@ -46,7 +46,7 @@ namespace Models {
                          this, &CombinedArtworksModel::onEditingPaused);
     }
 
-    void CombinedArtworksModel::setArtworks(std::vector<MetadataElement> &artworks) {
+    void CombinedArtworksModel::setArtworks(MetadataIO::WeakArtworksSnapshot &artworks) {
         ArtworksViewModel::setArtworks(artworks);
 
         recombineArtworks();
@@ -258,7 +258,7 @@ namespace Models {
 
     void CombinedArtworksModel::assignFromSelected() {
         LOG_DEBUG << "#";
-        recombineArtworks([](const MetadataElement &item) { return item.isSelected(); });
+        recombineArtworks([](const ArtworkElement *item) { return item->getIsSelected(); });
 
         LOG_DEBUG << "After recombine description:" << getDescription();
         LOG_DEBUG << "After recombine title:" << getTitle();
@@ -325,13 +325,11 @@ namespace Models {
     }
 
     void CombinedArtworksModel::processCombinedEditCommand() {
-        auto &artworksList = getArtworksList();
-
-        std::vector<Models::MetadataElement> artworksToProcess(artworksList);
+        MetadataIO::ArtworksSnapshot::Container rawSnapshot(getRawSnapshot());
 
         std::shared_ptr<Commands::CombinedEditCommand> combinedEditCommand(new Commands::CombinedEditCommand(
                 m_EditFlags,
-                artworksToProcess,
+                rawSnapshot,
                 m_CommonKeywordsModel.getDescription(),
                 m_CommonKeywordsModel.getTitle(),
                 m_CommonKeywordsModel.getKeywords()));
@@ -364,10 +362,10 @@ namespace Models {
     }
 
     void CombinedArtworksModel::assignFromManyArtworks() {
-        recombineArtworks([](const MetadataElement &) { return true; });
+        recombineArtworks([](const ArtworkElement *) { return true; });
     }
 
-    void CombinedArtworksModel::recombineArtworks(std::function<bool (const MetadataElement &)> pred) {
+    void CombinedArtworksModel::recombineArtworks(std::function<bool (const ArtworkElement *)> pred) {
         LOG_DEBUG << "#";
 
         bool descriptionsDiffer = false;
@@ -438,7 +436,7 @@ namespace Models {
         }
     }
 
-    bool CombinedArtworksModel::findNonEmptyData(std::function<bool (const MetadataElement &)> pred, int &index,  ArtworkMetadata *&artworkMetadata) {
+    bool CombinedArtworksModel::findNonEmptyData(std::function<bool (const ArtworkElement *)> pred, int &index,  ArtworkMetadata *&artworkMetadata) {
         bool found = false, foundOther = false;
         int nonEmptyKeywordsIndex = -1, nonEmptyOtherIndex = -1;
         ArtworkMetadata *nonEmptyKeywordsMetadata = nullptr;

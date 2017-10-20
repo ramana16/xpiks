@@ -14,7 +14,7 @@
 #include "../Commands/commandmanager.h"
 #include "../KeywordsPresets/presetkeywordsmodel.h"
 #include "../Commands/expandpresetcommand.h"
-#include "../Models/metadataelement.h"
+#include "../Models/artworkelement.h"
 #include "../Commands/deletekeywordscommand.h"
 
 namespace QuickBuffer {
@@ -67,7 +67,7 @@ namespace QuickBuffer {
         bool success = false;
         LOG_INFO << "preset" << presetIndex;
 
-        std::shared_ptr<Commands::ExpandPresetCommand> expandPresetCommand(new Commands::ExpandPresetCommand(Models::MetadataElement(m_ArtworkMetadata, m_OriginalIndex), presetIndex));
+        std::shared_ptr<Commands::ExpandPresetCommand> expandPresetCommand(new Commands::ExpandPresetCommand(m_ArtworkMetadata, presetIndex));
         std::shared_ptr<Commands::ICommandResult> result = m_CommandManager->processCommand(expandPresetCommand);
         success = result->getStatus() == 0;
 
@@ -78,7 +78,7 @@ namespace QuickBuffer {
         bool success = false;
         LOG_INFO << "keyword" << keywordIndex << "preset" << presetIndex;
 
-        std::shared_ptr<Commands::ExpandPresetCommand> expandPresetCommand(new Commands::ExpandPresetCommand(Models::MetadataElement(m_ArtworkMetadata, m_OriginalIndex), presetIndex, keywordIndex));
+        std::shared_ptr<Commands::ExpandPresetCommand> expandPresetCommand(new Commands::ExpandPresetCommand(m_ArtworkMetadata, presetIndex, keywordIndex));
         std::shared_ptr<Commands::ICommandResult> result = m_CommandManager->processCommand(expandPresetCommand);
         success = result->getStatus() == 0;
 
@@ -92,8 +92,8 @@ namespace QuickBuffer {
         QStringList keywords;
 
         if (presetsModel->tryGetPreset(presetIndex, keywords)) {
-            std::vector<Models::MetadataElement> artworksList;
-            artworksList.emplace_back(m_ArtworkMetadata, m_OriginalIndex);
+            MetadataIO::ArtworksSnapshot::Container artworksList;
+            artworksList.emplace_back(new Models::ArtworkMetadataLocker(m_ArtworkMetadata));
 
             for (auto &keyword: keywords) {
                 keyword = keyword.toLower();

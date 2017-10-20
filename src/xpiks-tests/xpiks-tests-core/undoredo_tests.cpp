@@ -9,8 +9,8 @@
 #include "../../xpiks-qt/Models/settingsmodel.h"
 #include "../../xpiks-qt/UndoRedo/undoredomanager.h"
 #include "../../xpiks-qt/Common/flags.h"
-#include "../../xpiks-qt/Models/metadataelement.h"
-#include "../../xpiks-qt/Models/previewmetadataelement.h"
+#include "../../xpiks-qt/Models/artworkelement.h"
+#include "../../xpiks-qt/Models/previewartworkelement.h"
 #include "../../xpiks-qt/Commands/pastekeywordscommand.h"
 #include "../../xpiks-qt/Commands/findandreplacecommand.h"
 #include "../../xpiks-qt/Models/filteredartitemsproxymodel.h"
@@ -158,11 +158,11 @@ void UndoRedoTests::undoModifyCommandTest() {
     QString originalTitle = "title";
     QString originalDescription = "some description here";
     QStringList originalKeywords = QString("test1,test2,test3").split(',');
-    std::vector<Models::MetadataElement> infos;
+    MetadataIO::ArtworksSnapshot::Container infos;
 
     for (int i = 0; i < itemsToAdd; ++i) {
         artItemsMock.getMockArtwork(i)->set(originalTitle, originalDescription, originalKeywords);
-        infos.emplace_back(artItemsMock.getArtwork(i), i);
+        infos.emplace_back(new Models::ArtworkMetadataLocker(artItemsMock.getArtwork(i)));
     }
 
     artItemsMock.getArtwork(0)->setModified();
@@ -203,11 +203,11 @@ void UndoRedoTests::undoUndoModifyCommandTest() {
     QString originalTitle = "title";
     QString originalDescription = "some description here";
     QStringList originalKeywords = QString("test1,test2,test3").split(',');
-    std::vector<Models::MetadataElement> infos;
+    MetadataIO::ArtworksSnapshot::Container infos;
 
     for (int i = 0; i < itemsToAdd; ++i) {
         artItemsMock.getMockArtwork(i)->set(originalTitle, originalDescription, originalKeywords);
-        infos.emplace_back(artItemsMock.getArtwork(i), i);
+        infos.emplace_back(new Models::ArtworkMetadataLocker(artItemsMock.getArtwork(i)));
     }
 
     artItemsMock.getArtwork(0)->setModified();
@@ -239,11 +239,11 @@ void UndoRedoTests::undoPasteCommandTest() {
     QString originalTitle = "title";
     QString originalDescription = "some description here";
     QStringList originalKeywords = QString("test1,test2,test3").split(',');
-    std::vector<Models::MetadataElement> infos;
+    MetadataIO::ArtworksSnapshot::Container infos;
 
     for (int i = 0; i < itemsToAdd; ++i) {
         artItemsMock.getMockArtwork(i)->set(originalTitle, originalDescription, originalKeywords);
-        infos.emplace_back(artItemsMock.getArtwork(i), i);
+        infos.emplace_back(new Models::ArtworkMetadataLocker(artItemsMock.getArtwork(i)));
     }
 
     QStringList keywordsToPaste = QStringList() << "keyword1" << "keyword2" << "keyword3";
@@ -284,11 +284,11 @@ void UndoRedoTests::undoClearAllTest() {
     QString originalTitle = "title";
     QString originalDescription = "some description here";
     QStringList originalKeywords = QString("test1,test2,test3").split(',');
-    std::vector<Models::MetadataElement> infos;
+    MetadataIO::ArtworksSnapshot::Container infos;
 
     for (int i = 0; i < itemsToAdd; ++i) {
         artItemsMock.getMockArtwork(i)->set(originalTitle, originalDescription, originalKeywords);
-        infos.emplace_back(artItemsMock.getArtwork(i), i);
+        infos.emplace_back(new Models::ArtworkMetadataLocker(artItemsMock.getArtwork(i)));
     }
 
     auto flags = Common::CombinedEditFlags::Clear | Common::CombinedEditFlags::EditEverything;
@@ -327,11 +327,11 @@ void UndoRedoTests::undoClearKeywordsTest() {
     QString originalTitle = "title";
     QString originalDescription = "some description here";
     QStringList originalKeywords = QString("test1,test2,test3").split(',');
-    std::vector<Models::MetadataElement> infos;
+    MetadataIO::ArtworksSnapshot::Container infos;
 
     for (int i = 0; i < itemsToAdd; ++i) {
         artItemsMock.getMockArtwork(i)->set(originalTitle, originalDescription, originalKeywords);
-        infos.emplace_back(artItemsMock.getArtwork(i), i);
+        infos.emplace_back(new Models::ArtworkMetadataLocker(artItemsMock.getArtwork(i)));
     }
 
     auto flags = Common::CombinedEditFlags::Clear | Common::CombinedEditFlags::EditKeywords;
@@ -381,7 +381,7 @@ void UndoRedoTests::undoReplaceCommandTest() {
     QString replaceFrom = "Replace";
     auto flags = Common::SearchFlags::CaseSensitive |Common::SearchFlags::Description |
                 Common::SearchFlags::Title | Common::SearchFlags::Keywords;
-    std::vector<Models::PreviewMetadataElement> artWorksInfo = filteredItemsModel.getSearchablePreviewOriginalItems(replaceFrom, flags);
+    auto artWorksInfo = filteredItemsModel.getSearchablePreviewOriginalItems(replaceFrom, flags);
     std::shared_ptr<Commands::FindAndReplaceCommand> replaceCommand(new Commands::FindAndReplaceCommand(artWorksInfo, replaceFrom, replaceTo, flags) );
     auto result = commandManagerMock.processCommand(replaceCommand);
 

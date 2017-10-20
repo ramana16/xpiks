@@ -56,7 +56,7 @@ namespace MetadataIO {
 
     // designed to be used only temporarily
     // artworks are not locked and therefore can be deleted
-    typedef QVector<Models::ArtworkMetadata*> WeakArtworksSnapshot;
+    typedef std::vector<Models::ArtworkMetadata*> WeakArtworksSnapshot;
 
     class ArtworksSnapshot {
     public:
@@ -82,16 +82,17 @@ namespace MetadataIO {
         void reserve(size_t size) { m_ArtworksSnapshot.reserve(size); m_RawArtworks.reserve((int)size); }
         void append(Models::ArtworkMetadata *artwork) {
             m_ArtworksSnapshot.emplace_back(new Models::ArtworkMetadataLocker(artwork));
-            m_RawArtworks << artwork;
+            m_RawArtworks.push_back(artwork);
         }
         void append(const WeakArtworksSnapshot &artworks);
         void append(const std::deque<Models::ArtworkMetadata *> &artworks);
         void set(Container &rawSnapshot);
         void copy(const ArtworksSnapshot &other);
+        void remove(size_t index);
         Models::ArtworkMetadata *get(size_t i) const { Q_ASSERT(i < m_ArtworksSnapshot.size()); return m_ArtworksSnapshot.at(i)->getArtworkMetadata(); }
         const std::shared_ptr<Models::ArtworkMetadataLocker> &at(size_t i) const { Q_ASSERT(i < m_ArtworksSnapshot.size()); return m_ArtworksSnapshot.at(i); }
         void clear();
-        bool empty() const { Q_ASSERT((int)m_ArtworksSnapshot.size() == m_RawArtworks.size()); return m_ArtworksSnapshot.empty(); }
+        bool empty() const { Q_ASSERT(m_ArtworksSnapshot.size() == m_RawArtworks.size()); return m_ArtworksSnapshot.empty(); }
 
     private:
         Container m_ArtworksSnapshot;

@@ -14,17 +14,17 @@
 #include "../Common/defines.h"
 
 namespace Commands {
-    DeleteKeywordsCommand::DeleteKeywordsCommand(std::vector<Models::MetadataElement> &infos,
+    DeleteKeywordsCommand::DeleteKeywordsCommand(MetadataIO::ArtworksSnapshot::Container &rawSnapshot,
                                                  const QSet<QString> &keywordsSet, bool caseSensitive):
         CommandBase(CommandType::DeleteKeywords),
-        m_MetadataElements(std::move(infos)),
+        m_RawSnapshot(std::move(rawSnapshot)),
         m_KeywordsSet(keywordsSet),
         m_CaseSensitive(caseSensitive)
     {
     }
 
     std::shared_ptr<ICommandResult> DeleteKeywordsCommand::execute(const ICommandManager *commandManagerInterface) const {
-        LOG_INFO << m_KeywordsSet.size() << "keyword(s) to remove from" << m_MetadataElements.size() << "item(s)";
+        LOG_INFO << m_KeywordsSet.size() << "keyword(s) to remove from" << m_RawSnapshot.size() << "item(s)";
         LOG_INFO << "Case sensitive:" << m_CaseSensitive;
         QVector<int> indicesToUpdate;
         std::vector<UndoRedo::ArtworkMetadataBackup> artworksBackups;
@@ -32,20 +32,20 @@ namespace Commands {
 
         CommandManager *commandManager = (CommandManager*)commandManagerInterface;
 
-        size_t size = m_MetadataElements.size();
+        size_t size = m_RawSnapshot.size();
         indicesToUpdate.reserve((int)size);
         artworksBackups.reserve(size);
-        affectedItems.reserve((int)size);
+        affectedItems.reserve(size);
 
         for (size_t i = 0; i < size; ++i) {
-            const Models::MetadataElement &info = m_MetadataElements.at(i);
-            Models::ArtworkMetadata *metadata = info.getOrigin();
+            auto &locker = m_RawSnapshot.at(i);
+            Models::ArtworkMetadata *artwork = locker->getArtworkMetadata();
 
-            artworksBackups.emplace_back(metadata);
+            artworksBackups.emplace_back(artwork);
 
-            if (metadata->removeKeywords(m_KeywordsSet, m_CaseSensitive)) {
-                indicesToUpdate.append(info.getOriginalIndex());
-                affectedItems.append(metadata);
+            if (artwork->removeKeywords(m_KeywordsSet, m_CaseSensitive)) {
+                indicesToUpdate.append(artwork->getLastKnownIndex());
+                affectedItems.push_back(artwork);
             } else {
                 artworksBackups.pop_back();
             }
@@ -71,7 +71,7 @@ namespace Commands {
             commandManager->updateArtworksAtIndices(m_IndicesToUpdate);
         }
 
-        if (!m_AffectedItems.isEmpty()) {
+        if (!m_AffectedItems.empty()) {
             commandManager->saveArtworksBackups(m_AffectedItems);
             commandManager->submitForSpellCheck(m_AffectedItems);
             commandManager->submitForWarningsCheck(m_AffectedItems);

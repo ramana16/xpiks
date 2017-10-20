@@ -15,7 +15,7 @@
 #include <vector>
 #include <QStringList>
 #include "commandbase.h"
-#include "../Models/metadataelement.h"
+#include "../Models/artworkelement.h"
 
 namespace Models {
     class ArtworkMetadata;
@@ -25,10 +25,10 @@ namespace Commands {
     class ExpandPresetCommand : public CommandBase
     {
     public:
-        ExpandPresetCommand(Models::MetadataElement &&metadataElement,
+        ExpandPresetCommand(Models::ArtworkMetadata *artwork,
                             int presetIndex, int keywordIndex = -1):
             CommandBase(CommandType::ExpandPreset),
-            m_MetadataElement(std::move(metadataElement)),
+            m_ArtworkLocker(artwork),
             m_PresetIndex(presetIndex),
             m_KeywordIndex(keywordIndex)
         { }
@@ -39,7 +39,7 @@ namespace Commands {
         virtual std::shared_ptr<ICommandResult> execute(const ICommandManager *commandManagerInterface) const override;
 
     private:
-        Models::MetadataElement m_MetadataElement;
+        Models::ArtworkMetadataLocker m_ArtworkLocker;
         int m_PresetIndex;
         int m_KeywordIndex;
     };

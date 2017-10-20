@@ -16,7 +16,7 @@
 #include "../Commands/commandmanager.h"
 #include "../Helpers/filterhelpers.h"
 #include "../Models/filteredartitemsproxymodel.h"
-#include "../Models/previewmetadataelement.h"
+#include "../Models/previewartworkelement.h"
 #include "../Helpers/metadatahighlighter.h"
 #include "../Commands/findandreplacecommand.h"
 #include "../Common/defines.h"
@@ -78,12 +78,15 @@ namespace Models {
         normalizeSearchCriteria();
 
         Models::FilteredArtItemsProxyModel *filteredItemsModel = m_CommandManager->getFilteredArtItemsModel();
-        m_ArtworksList = std::move(filteredItemsModel->getSearchablePreviewOriginalItems(m_ReplaceFrom, m_Flags));
+        auto rawSnapshot = filteredItemsModel->getSearchablePreviewOriginalItems(m_ReplaceFrom, m_Flags);
+        m_ArtworksSnapshot.set(rawSnapshot);
 
-        LOG_INFO << "Found" << m_ArtworksList.size() << "item(s)";
+        LOG_INFO << "Found" << m_ArtworksSnapshot.size() << "item(s)";
 
-        for (auto &preview: m_ArtworksList) {
-            Models::ArtworkMetadata *metadata = preview.getOrigin();
+        for (auto &locker: rawSnapshot) {
+            std::shared_ptr<PreviewArtworkElement> preview = std::dynamic_pointer_cast<PreviewArtworkElement>(locker);
+            Q_ASSERT(preview);
+            Models::ArtworkMetadata *artwork = locker->getArtworkMetadata();
             bool hasMatch = false;
             Common::SearchFlags flags = Common::SearchFlags::None;
 
@@ -92,8 +95,8 @@ namespace Models {
                 Common::UnsetFlag(flags, Common::SearchFlags::Description);
                 Common::UnsetFlag(flags, Common::SearchFlags::Keywords);
 
-                hasMatch = Helpers::hasSearchMatch(m_ReplaceFrom, metadata, flags);
-                preview.setHasTitleMatch(hasMatch);
+                hasMatch = Helpers::hasSearchMatch(m_ReplaceFrom, artwork, flags);
+                preview->setHasTitleMatch(hasMatch);
             }
 
             if (getSearchInDescription()) {
@@ -101,8 +104,8 @@ namespace Models {
                 Common::UnsetFlag(flags, Common::SearchFlags::Title);
                 Common::UnsetFlag(flags, Common::SearchFlags::Keywords);
 
-                hasMatch = Helpers::hasSearchMatch(m_ReplaceFrom, metadata, flags);
-                preview.setHasDescriptionMatch(hasMatch);
+                hasMatch = Helpers::hasSearchMatch(m_ReplaceFrom, artwork, flags);
+                preview->setHasDescriptionMatch(hasMatch);
             }
 
             if (getSearchInKeywords()) {
@@ -110,38 +113,38 @@ namespace Models {
                 Common::UnsetFlag(flags, Common::SearchFlags::Description);
                 Common::UnsetFlag(flags, Common::SearchFlags::Title);
 
-                hasMatch = Helpers::hasSearchMatch(m_ReplaceFrom, metadata, flags);
-                preview.setHasKeywordsMatch(hasMatch);
+                hasMatch = Helpers::hasSearchMatch(m_ReplaceFrom, artwork, flags);
+                preview->setHasKeywordsMatch(hasMatch);
             }
         }
     }
 
     int FindAndReplaceModel::rowCount(const QModelIndex &parent) const {
         Q_UNUSED(parent);
-        return (int)m_ArtworksList.size();
+        return (int)m_ArtworksSnapshot.size();
     }
 
     QVariant FindAndReplaceModel::data(const QModelIndex &index, int role) const {
         int indexRow = index.row();
-        if (indexRow < 0 || indexRow >= (int)m_ArtworksList.size()) {
+        if (indexRow < 0 || indexRow >= (int)m_ArtworksSnapshot.size()) {
             return QVariant();
         }
 
-        const Models::PreviewMetadataElement &item = m_ArtworksList.at(indexRow);
+        const Models::PreviewArtworkElement *item = accessPreviewElement(indexRow);
 
         switch (role) {
         case PathRole:
-            return item.getOrigin()->getThumbnailPath();
+            return item->getArtworkMetadata()->getThumbnailPath();
         case IsSelectedRole:
-            return item.isSelected();
+            return item->getIsSelected();
         case HasTitleMatchRole:
-            return item.hasTitleMatch();
+            return item->hasTitleMatch();
         case HasDescriptionMatchRole:
-            return item.hasDescriptionMatch();
+            return item->hasDescriptionMatch();
         case HasKeywordsMatchRole:
-            return item.hasKeywordsMatch();
+            return item->hasKeywordsMatch();
         case IsVideoRole: {
-            Models::VideoArtwork *videoArtwork = dynamic_cast<Models::VideoArtwork*>(item.getOrigin());
+            Models::VideoArtwork *videoArtwork = dynamic_cast<Models::VideoArtwork*>(item->getArtworkMetadata());
             return videoArtwork != nullptr;
         }
         default:
@@ -151,7 +154,7 @@ namespace Models {
 
     Qt::ItemFlags FindAndReplaceModel::flags(const QModelIndex &index) const {
         int row = index.row();
-        if (row < 0 || row >= (int)m_ArtworksList.size()) {
+        if (row < 0 || row >= (int)m_ArtworksSnapshot.size()) {
             return Qt::ItemIsEnabled;
         }
 
@@ -160,7 +163,7 @@ namespace Models {
 
     bool FindAndReplaceModel::setData(const QModelIndex &index, const QVariant &value, int role) {
         int indexRow = index.row();
-        if (indexRow < 0 || indexRow >= (int)m_ArtworksList.size()) {
+        if (indexRow < 0 || indexRow >= (int)m_ArtworksSnapshot.size()) {
             return false;
         }
 
@@ -168,7 +171,7 @@ namespace Models {
 
         switch (role) {
             case EditIsSelectedRole:
-                m_ArtworksList.at(indexRow).setSelected(value.toBool());
+                accessPreviewElement(indexRow)->setIsSelected(value.toBool());
                 roleToUpdate = IsSelectedRole;
                 break;
             default:
@@ -205,17 +208,17 @@ namespace Models {
     QString FindAndReplaceModel::getSearchTitle(int index) {
         QString text;
 
-        if (index < 0 || index >= (int)m_ArtworksList.size()) {
+        if (index < 0 || index >= (int)m_ArtworksSnapshot.size()) {
             return text;
         }
 
-        Models::PreviewMetadataElement const &item = m_ArtworksList.at(index);
-        Models::ArtworkMetadata *metadata = item.getOrigin();
+        Models::PreviewArtworkElement *item = accessPreviewElement(index);
+        Models::ArtworkMetadata *artwork = item->getArtworkMetadata();
 
-        if (item.hasTitleMatch()) {
-            text = filterText(metadata->getTitle());
+        if (item->hasTitleMatch()) {
+            text = filterText(artwork->getTitle());
         } else {
-            auto title = metadata->getTitle();
+            auto title = artwork->getTitle();
             if (title.size() > PREVIEWOFFSET*2) {
                 text = title.left(PREVIEWOFFSET*2) + " ...";
             } else {
@@ -229,17 +232,17 @@ namespace Models {
     QString FindAndReplaceModel::getSearchDescription(int index) {
         QString text;
 
-        if (index < 0 || index >= (int)m_ArtworksList.size()) {
+        if (index < 0 || index >= (int)m_ArtworksSnapshot.size()) {
             return text;
         }
 
-        Models::PreviewMetadataElement const &item = m_ArtworksList.at(index);
-        Models::ArtworkMetadata *metadata = item.getOrigin();
+        Models::PreviewArtworkElement *item = accessPreviewElement(index);
+        Models::ArtworkMetadata *artwork = item->getArtworkMetadata();
 
-        if (item.hasDescriptionMatch()) {
-            text = filterText(metadata->getDescription());
+        if (item->hasDescriptionMatch()) {
+            text = filterText(artwork->getDescription());
         } else {
-            auto description = metadata->getDescription();
+            auto description = artwork->getDescription();
             if (description.size() > PREVIEWOFFSET*2) {
                 text = description.left(PREVIEWOFFSET*2) + " ...";
             } else {
@@ -253,15 +256,15 @@ namespace Models {
     QString FindAndReplaceModel::getSearchKeywords(int index) {
         QString text;
 
-        if (index < 0 || index >= (int)m_ArtworksList.size()) {
+        if (index < 0 || index >= (int)m_ArtworksSnapshot.size()) {
             return text;
         }
 
-        Models::PreviewMetadataElement const &item = m_ArtworksList.at(index);
-        Models::ArtworkMetadata *metadata = item.getOrigin();
-        QStringList list = metadata->getKeywords();
+        Models::PreviewArtworkElement *item = accessPreviewElement(index);
+        Models::ArtworkMetadata *artwork = item->getArtworkMetadata();
+        QStringList list = artwork->getKeywords();
 
-        if (item.hasKeywordsMatch()) {
+        if (item->hasKeywordsMatch()) {
             Qt::CaseSensitivity caseSensitivity = getCaseSensitive() ? Qt::CaseSensitive : Qt::CaseInsensitive;
             const bool wholeWords = getSearchWholeWords();
 
@@ -292,7 +295,8 @@ namespace Models {
     void FindAndReplaceModel::replace() {
         LOG_INFO << "Flags:" << searchFlagsToString(m_Flags);
 
-        std::shared_ptr<Commands::FindAndReplaceCommand> replaceCommand(new Commands::FindAndReplaceCommand(m_ArtworksList, m_ReplaceFrom,
+        std::shared_ptr<Commands::FindAndReplaceCommand> replaceCommand(new Commands::FindAndReplaceCommand(m_ArtworksSnapshot.getRawData(),
+                                                                                                            m_ReplaceFrom,
                                                                                                             m_ReplaceTo,
                                                                                                             m_Flags));
 
@@ -321,7 +325,9 @@ namespace Models {
     void FindAndReplaceModel::clearArtworks() {
         LOG_DEBUG << "#";
         beginResetModel();
-        m_ArtworksList.clear();
+        {
+            m_ArtworksSnapshot.clear();
+        }
         endResetModel();
     }
 
@@ -356,9 +362,10 @@ namespace Models {
 
     void FindAndReplaceModel::setAllSelected(bool isSelected) {
         LOG_INFO << "isSelected:" << isSelected;
+        const size_t size = m_ArtworksSnapshot.size();
 
-        for (auto &item: m_ArtworksList) {
-            item.setSelected(isSelected);
+        for (size_t i = 0; i < size; i++) {
+            accessPreviewElement(i)->setIsSelected(isSelected);
         }
 
         auto first = this->index(0);
@@ -383,5 +390,13 @@ namespace Models {
             LOG_DEBUG << "Setting whole words search to false";
             setSearchWholeWords(false);
         }
+    }
+
+    PreviewArtworkElement *FindAndReplaceModel::accessPreviewElement(size_t index) const {
+        Q_ASSERT(index < m_ArtworksSnapshot.size());
+        auto &locker = m_ArtworksSnapshot.at(index);
+        auto element = std::dynamic_pointer_cast<PreviewArtworkElement>(locker);
+        Q_ASSERT(element);
+        return element.get();
     }
 }

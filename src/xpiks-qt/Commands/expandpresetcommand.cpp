@@ -31,18 +31,18 @@ namespace Commands {
         MetadataIO::WeakArtworksSnapshot affectedArtworks;
 
         if (presetsModel->tryGetPreset(m_PresetIndex, keywords)) {
-            Models::ArtworkMetadata *metadata = m_MetadataElement.getOrigin();
+            Models::ArtworkMetadata *artwork = m_ArtworkLocker.getArtworkMetadata();
 
-            indexToUpdate = m_MetadataElement.getOriginalIndex();
-            artworksBackups.emplace_back(metadata);
+            indexToUpdate = artwork->getLastKnownIndex();
+            artworksBackups.emplace_back(artwork);
 
             if (m_KeywordIndex != -1) {
-                if (metadata->expandPreset(m_KeywordIndex, keywords)) {
-                    affectedArtworks.append(metadata);
+                if (artwork->expandPreset(m_KeywordIndex, keywords)) {
+                    affectedArtworks.push_back(artwork);
                 }
             } else {
-                if (metadata->appendKeywords(keywords)) {
-                    affectedArtworks.append(metadata);
+                if (artwork->appendKeywords(keywords)) {
+                    affectedArtworks.push_back(artwork);
                 }
             }
         }
