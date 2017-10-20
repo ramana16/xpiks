@@ -185,7 +185,8 @@ SOURCES += main.cpp \
     ../../xpiks-qt/SpellCheck/duplicatesreviewmodel.cpp \
     deleteoldlogs_tests.cpp \
     jsonmerge_tests.cpp \
-    ../../xpiks-qt/KeywordsPresets/presetkeywordsmodelconfig.cpp
+    ../../xpiks-qt/KeywordsPresets/presetkeywordsmodelconfig.cpp \
+    ../../xpiks-qt/Common/statefulentity.cpp
 
 HEADERS += \
     encryption_tests.h \
@@ -316,5 +317,6 @@ HEADERS += \
     ../../xpiks-qt/SpellCheck/duplicatesreviewmodel.h \
     deleteoldlogs_tests.h \
     jsonmerge_tests.h \
-    ../../xpiks-qt/KeywordsPresets/presetkeywordsmodelconfig.h
+    ../../xpiks-qt/KeywordsPresets/presetkeywordsmodelconfig.h \
+    ../../xpiks-qt/Common/statefulentity.h
 

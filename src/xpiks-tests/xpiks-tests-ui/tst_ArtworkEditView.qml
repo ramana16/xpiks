@@ -48,6 +48,8 @@ Item {
     QtObject {
         id: uiManager
         property real keywordHeight: 10
+
+        function getArtworkEditRightPaneWidth() { return 300 }
     }
 
     QtObject {

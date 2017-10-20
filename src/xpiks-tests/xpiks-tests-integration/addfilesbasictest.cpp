@@ -25,7 +25,6 @@ int AddFilesBasicTest::doTest() {
     QList<QUrl> files;
     files << getFilePathForTest("images-for-tests/vector/026.jpg");
 
-
     MetadataIO::MetadataIOCoordinator *ioCoordinator = m_CommandManager->getMetadataIOCoordinator();
     SignalWaiter waiter;
     QObject::connect(ioCoordinator, SIGNAL(metadataReadingFinished()), &waiter, SIGNAL(finished()));
@@ -46,6 +45,7 @@ int AddFilesBasicTest::doTest() {
     QStringList expectedKeywords = QString("abstract,art,black,blue,creative,dark,decor,decoration,decorative,design,dot,drops,elegance,element,geometric,interior,light,modern,old,ornate,paper,pattern,purple,retro,seamless,style,textile,texture,vector,wall,wallpaper").split(',');
 
     Models::ImageArtwork *image = dynamic_cast<Models::ImageArtwork*>(metadata);
+    VERIFY(image != nullptr, "Cannot convert artwork to image");
 
     VERIFY(expectedKeywords == keywords, "Keywords are not the same!");
     VERIFY(image->getImageSize().width() == 4167, "Image width was read incorrectly");
