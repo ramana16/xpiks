@@ -15,12 +15,14 @@
 #include "../Common/defines.h"
 
 namespace Connectivity {
-#if defined(QT_DEBUG)
-    #define LOCAL_SWITCHER_CONFIG "debug_switches.json"
-#elif defined(INTEGRATION_TESTS)
-#define LOCAL_SWITCHER_CONFIG "tests_switches.json"
+#ifdef QT_DEBUG
+    #ifdef INTEGRATION_TESTS
+        #define LOCAL_SWITCHER_CONFIG "tests_switches.json"
+    #else
+        #define LOCAL_SWITCHER_CONFIG "debug_switches.json"
+    #endif
 #else
-    #define LOCAL_SWITCHER_CONFIG "switches.json"
+#define LOCAL_SWITCHER_CONFIG "switches.json"
 #endif
 
 #define VALUE_KEY QLatin1String("v")

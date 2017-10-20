@@ -129,6 +129,7 @@ namespace KeywordsPresets {
         Q_INVOKABLE void addItem();
 #if defined(CORE_TESTS) || defined(INTEGARTION_TESTS)
         void addItem(const QString &presetName, const QStringList &keywords);
+        void cleanup();
 #endif
 
         Q_INVOKABLE void editKeyword(int index, int keywordIndex, const QString &replacement);

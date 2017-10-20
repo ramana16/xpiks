@@ -64,7 +64,11 @@ namespace SpellCheck {
         LOG_DEBUG << "App path:" << resourcesPath;
 
 #  if defined(Q_OS_MAC)
+#ifndef INTEGRATION_TESTS
         resourcesPath += "/../Resources/";
+#else
+        resourcesPath = STRINGIZE(HUNSPELL_DICTS_PATH);
+#endif
 #  elif defined(APPVEYOR)
         resourcesPath += "/../../../xpiks-qt/deps/dict/";
 #  elif defined(Q_OS_WIN)

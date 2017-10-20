@@ -62,7 +62,7 @@ namespace MetadataIO {
         void onCacheSyncRequest();
         void workerFinished();
 
-   // DelayedActionEntity implementation
+        // DelayedActionEntity implementation
     protected:
         virtual void doKillTimer(int timerId) override { this->killTimer(timerId); }
         virtual int doStartTimer(int interval, Qt::TimerType timerType) override { return this->startTimer(interval, timerType); }

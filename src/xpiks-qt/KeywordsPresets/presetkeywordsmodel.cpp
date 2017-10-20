@@ -297,7 +297,7 @@ namespace KeywordsPresets {
         beginInsertRows(QModelIndex(), lastIndex, lastIndex);
         m_PresetsList.push_back(new PresetModel());
         endInsertRows();
-    }    
+    }
 
 #if defined(CORE_TESTS) || defined(INTEGARTION_TESTS)
     void PresetKeywordsModel::addItem(const QString &presetName, const QStringList &keywords) {
@@ -307,6 +307,14 @@ namespace KeywordsPresets {
         beginInsertRows(QModelIndex(), lastIndex, lastIndex);
         m_PresetsList.push_back(new PresetModel(presetName, keywords));
         endInsertRows();
+    }
+
+    void PresetKeywordsModel::cleanup() {
+         beginResetModel();
+         {
+             removeAllPresets();
+         }
+         endResetModel();
     }
 #endif
 
@@ -389,7 +397,7 @@ namespace KeywordsPresets {
     void PresetKeywordsModel::appendKeyword(int index, const QString &keyword) {
         LOG_INFO << "index" << index << "keyword" << keyword;
 
-        if (0 <= index && index < getPresetsCount()) {            
+        if (0 <= index && index < getPresetsCount()) {
             auto *preset = m_PresetsList.at(index);
             auto &keywordsModel = preset->m_KeywordsModel;
             keywordsModel.appendKeyword(keyword);

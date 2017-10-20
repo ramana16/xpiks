@@ -19,11 +19,17 @@
 namespace KeywordsPresets {
 #define OVERWRITE_KEY QLatin1String("overwrite")
 #define PRESETKEYS_KEY QLatin1String("presetkeywords")
+
 #ifdef QT_DEBUG
-#define LOCAL_PRESETKEYWORDS_LIST_FILE "debug_keywords_presets.json"
+    #ifdef INTEGRATION_TESTS
+        #define LOCAL_PRESETKEYWORDS_LIST_FILE "tests_keywords_presets.json"
+    #else
+        #define LOCAL_PRESETKEYWORDS_LIST_FILE "debug_keywords_presets.json"
+    #endif
 #else
 #define LOCAL_PRESETKEYWORDS_LIST_FILE "keywords_presets.json"
 #endif
+
 #define OVERWRITE_PRESETS_CONFIG false
 
     PresetKeywordsModelConfig::PresetKeywordsModelConfig()
