@@ -116,6 +116,7 @@ namespace MetadataIO {
 
     void ArtworksSnapshot::remove(size_t index) {
         Q_ASSERT(m_ArtworksSnapshot.size() == m_RawArtworks.size());
+        if (index >= m_ArtworksSnapshot.size()) { return; }
 
         m_RawArtworks.erase(m_RawArtworks.begin() + index);
         m_ArtworksSnapshot.erase(m_ArtworksSnapshot.begin() + index);
