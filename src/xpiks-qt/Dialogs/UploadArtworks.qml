@@ -886,6 +886,7 @@ Item {
                 anchors.right: parent.right
                 anchors.bottom: footer.top
                 height: 5
+                isRounded: false
                 color: artworkUploader.isError ? uiColors.destructiveColor : uiColors.artworkActiveColor
                 value: artworkUploader.percent
             }

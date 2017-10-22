@@ -18,6 +18,7 @@ Item {
     property int maximum: 100
     property int value: 0
     property color color: "#77B753"
+    property bool isRounded: true
 
     width: 250
     height: 23
@@ -35,7 +36,7 @@ Item {
         id: highlight
         property int widthDest: ( ( (progressbar.width + 20) * ( value - minimum ) ) / ( maximum - minimum ) - 4 )
         width: highlight.widthDest
-        radius: height / 2
+        radius: progressbar.isRounded ? height / 2 : 0
 
         Behavior on width {
             SmoothedAnimation {
