@@ -14,34 +14,52 @@ import "../Constants"
 Item {
     id: item
     property bool isGreen
+    property color backgroundColor: uiColors.selectedArtworkBackground
+    property bool isAnimating: false
+
+    function startAnimation() {
+        animateColor.start()
+    }
+
+    function stopAnimation() {
+        animateColor.stop()
+        host.border.color = uiColors.defaultControlColor
+    }
 
     Rectangle {
-        border.width: 2
-        border.color: uiColors.inputForegroundColor
+        id: host
+        border.width: 4
+        border.color: uiColors.defaultControlColor
         radius: parent.width / 2
         anchors.fill: parent
-        color: enabled ? (isGreen ? uiColors.greenColor : uiColors.destructiveColor) : uiColors.selectedArtworkBackground
+        color: enabled ? (isGreen ? uiColors.greenColor : uiColors.destructiveColor) : item.backgroundColor
 
-        Rectangle {
-            visible: item.isGreen
-            color: uiColors.inputBackgroundColor
-            width: parent.width * 0.7
-            height: 2
-            radius: 1
-            transformOrigin: Item.Center
-            rotation: 120
-            transform: Translate { x: parent.width * 0.3; y: parent.height * 0.45 }
-        }
+        SequentialAnimation {
+            id: animateColor
+            running: false
+            loops: Animation.Infinite
 
-        Rectangle {
-            visible: item.isGreen
-            color: uiColors.inputBackgroundColor
-            width: parent.width / 2
-            radius: 1
-            height: 2
-            transformOrigin: Item.Center
-            rotation: 65
-            transform: Translate { x: parent.width * 0.15; y: parent.height * 0.55 }
+            PauseAnimation { duration: 500 }
+
+            PropertyAnimation {
+                target: host
+                properties: "border.color"
+                from: uiColors.defaultControlColor
+                to: uiColors.panelSelectedColor
+                duration: 1000
+                easing.type: Easing.InOutQuint
+            }
+
+            PauseAnimation { duration: 100 }
+
+            PropertyAnimation {
+                target: host
+                properties: "border.color"
+                from: uiColors.panelSelectedColor
+                to: uiColors.defaultControlColor
+                duration: 1000
+                easing.type: Easing.InOutQuint
+            }
         }
     }
 }

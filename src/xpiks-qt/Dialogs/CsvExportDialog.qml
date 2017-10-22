@@ -245,6 +245,7 @@ Item {
                         id: sourceWrapper
                         property variant myData: model
                         property int delegateIndex: index
+                        property bool isCurrent: ListView.isCurrentItem
                         color: ListView.isCurrentItem ? uiColors.popupBackgroundColor : (exportPlanMA.containsMouse ? uiColors.panelColor :  leftPanel.color)
                         anchors.left: parent.left
                         anchors.right: parent.right
@@ -280,7 +281,7 @@ Item {
 
                             StyledCheckbox {
                                 id: itemCheckedCheckbox
-                                isContrast: !ListView.isCurrentItem
+                                isContrast: !sourceWrapper.isCurrent
                                 onClicked: editisselected = checked
                                 Component.onCompleted: itemCheckedCheckbox.checked = isselected
                             }
@@ -292,7 +293,7 @@ Item {
                                 height: 31
                                 text: name
                                 elide: Text.ElideMiddle
-                                font.bold: isselected
+                                font.bold: sourceWrapper.isCurrent
                             }
 
                             CloseIcon {
