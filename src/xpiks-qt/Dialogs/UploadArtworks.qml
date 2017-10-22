@@ -132,6 +132,18 @@ Item {
     }
 
     MessageDialog {
+        id: abortConfirmationDialog
+        title: i18.n + qsTr("Confirmation")
+        text: i18.n + qsTr("There is upload in progress. Do you want to abort it?")
+        standardButtons: StandardButton.Yes | StandardButton.No
+        onYes: {
+            console.log("UI:UploadArtworks # About to cancel upload...")
+            uploadButton.enabled = false
+            artworkUploader.cancelOperation()
+        }
+    }
+
+    MessageDialog {
         id: selectHostsMessageBox
         title: i18.n + qsTr("Warning")
         text: i18.n + qsTr("Please, select some hosts first")
@@ -945,9 +957,7 @@ Item {
                                     }
                                 }
                             } else {
-                                console.log("UI:UploadArtworks # About to cancel upload...")
-                                enabled = false
-                                artworkUploader.cancelOperation()
+                                abortConfirmationDialog.open()
                             }
                         }
 
