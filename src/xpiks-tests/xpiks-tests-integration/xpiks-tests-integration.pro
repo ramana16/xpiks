@@ -218,7 +218,9 @@ SOURCES += main.cpp \
     exiv2iohelpers.cpp \
     unicodeiotest.cpp \
     ../../xpiks-qt/Helpers/threadhelpers.cpp \
-    faileduploadstest.cpp
+    faileduploadstest.cpp \
+    undoadddirectorytest.cpp \
+    ../../xpiks-qt/UndoRedo/removedirectoryitem.cpp
 
 RESOURCES +=
 
@@ -472,7 +474,9 @@ HEADERS += \
     unicodeiotest.h \
     ../../xpiks-qt/Common/delayedactionentity.h \
     ../../xpiks-qt/Helpers/threadhelpers.h \
-    faileduploadstest.h
+    faileduploadstest.h \
+    undoadddirectorytest.h \
+    ../../xpiks-qt/UndoRedo/removedirectoryitem.h
 
 INCLUDEPATH += ../../../vendors/tiny-aes
 INCLUDEPATH += ../../../vendors/cpp-libface

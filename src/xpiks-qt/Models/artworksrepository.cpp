@@ -36,16 +36,22 @@ namespace Models {
         emit dataChanged(index(0), index(rowCount() - 1), QVector<int>() << UsedImagesCountRole << IsSelectedRole);
     }
 
-    void ArtworksRepository::cleanupEmptyDirectories() {
+    void ArtworksRepository::cleanupEmptyDirectories(QVector<RepoDir> &directoriesToRemove, QVector<int> &indicesToRemove, bool &needsDeselectionOnUndo) {
         LOG_DEBUG << "#";
+        needsDeselectionOnUndo = true;
         size_t count = m_DirectoriesList.size();
-        QVector<int> indicesToRemove;
         indicesToRemove.reserve((int)count);
+        directoriesToRemove.reserve((int)count);
 
         for (size_t i = 0; i < count; ++i) {
             auto &directory = m_DirectoriesList[i];
             if (directory.m_FilesCount == 0) {
-                indicesToRemove.append((int)i);
+                indicesToRemove.push_back((int)i);
+                directoriesToRemove.push_back(directory);
+            }
+            else
+            {
+                needsDeselectionOnUndo &= !directory.m_IsSelected;
             }
         }
 
@@ -72,6 +78,25 @@ namespace Models {
         if (!directories.isEmpty()) {
             m_FilesWatcher.removePaths(directories);
         }
+    }
+
+    void ArtworksRepository::insertEmptyDirectory(const QString &absolutePath, int index, bool isSelected)
+    {
+        int size = m_DirectoriesList.size();
+        if (size ==0)
+        {
+            index = 0;
+        }
+        else if (index > size)
+        {
+            index = size;
+        }
+        beginInsertRows(QModelIndex(), index, index);
+        qint64 id = generateNextID();
+        m_DirectoriesList.insert(m_DirectoriesList.begin() + index, {absolutePath, id, 0, isSelected, true});
+        m_DirectoryIdToIndex[id] = index;
+        m_CommandManager->addToRecentDirectories(absolutePath);
+        endInsertRows();
     }
 
     bool ArtworksRepository::beginAccountingFiles(const QStringList &items) {
@@ -144,7 +169,7 @@ namespace Models {
         return isSelected;
     }
 
-    bool ArtworksRepository::accountFile(const QString &filepath, qint64 &directoryID) {
+    bool ArtworksRepository::accountFile(const QString &filepath, qint64 &directoryID, bool isFullDirectory) {
         bool wasModified = false;
         QString absolutePath;
 
@@ -158,7 +183,7 @@ namespace Models {
             if (!alreadyExists) {
                 qint64 id = generateNextID();
                 LOG_INFO << "Adding new directory" << absolutePath << "with index" << m_DirectoriesList.size() << "and id" << id;
-                m_DirectoriesList.emplace_back(absolutePath, id, 0, true);
+                m_DirectoriesList.emplace_back(absolutePath, id, 0, true, isFullDirectory);
                 index = m_DirectoriesList.size() - 1;
                 m_DirectoryIdToIndex[id] = index;
                 directoryID = id;
@@ -177,7 +202,9 @@ namespace Models {
 
             // watchFilePath(filepath);
             m_FilesSet.insert(filepath);
-            m_DirectoriesList[index].m_FilesCount = occurances + 1;
+            auto &item = m_DirectoriesList[index];
+            item.m_FilesCount = occurances + 1;
+            item.m_IsAddedAsDirectory = item.m_IsAddedAsDirectory || isFullDirectory;
             wasModified = true;
         }
 
@@ -328,6 +355,19 @@ namespace Models {
             Q_ASSERT(filteredArtItemsModel != NULL);
             filteredArtItemsModel->updateFilter();
 #endif
+        }
+    }
+
+    void ArtworksRepository::selectDirectory(const QString &path)
+    {
+        for (const auto &directory : m_DirectoriesList)
+        {
+            if (directory.m_AbsolutePath == path)
+            {
+                int index = directory.m_Id;
+                selectDirectory(index);
+                return;
+            }
         }
     }
 

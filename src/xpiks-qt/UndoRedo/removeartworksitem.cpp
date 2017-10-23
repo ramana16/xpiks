@@ -57,7 +57,7 @@ void UndoRedo::RemoveArtworksHistoryItem::undo(const Commands::ICommandManager *
         for (int j = 0; j < count; ++j) {
             const QString &filepath = m_RemovedArtworksPathes[j + usedCount];
             qint64 directoryID = 0;
-            if (artworksRepository->accountFile(filepath, directoryID)) {
+            if (artworksRepository->accountFile(filepath, directoryID, m_AsDirectoryRemoved)) {
                 Models::ArtworkMetadata *metadata = artItemsModel->createMetadata(filepath, directoryID);
                 commandManager->connectArtworkSignals(metadata);
 

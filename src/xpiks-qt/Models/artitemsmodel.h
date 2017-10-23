@@ -200,8 +200,7 @@ namespace Models {
     private:
         void updateItemAtIndex(int metadataIndex);
         int addDirectories(const QStringList &directories);
-        void doAddDirectory(const QString &directory, QStringList &filesList);
-        int addFiles(const QStringList &filepath);
+        int addFiles(const QStringList &filepath, bool isFullDirectory = false);
 
     private:
         void doCombineArtwork(int index);
@@ -227,8 +226,8 @@ namespace Models {
 
     private:
         void destroyInnerItem(ArtworkMetadata *artwork);
-        void doRemoveItemsAtIndices(QVector<int> &indicesToRemove);
-        void doRemoveItemsInRanges(const QVector<QPair<int, int> > &rangesToRemove);
+        void doRemoveItemsAtIndices(QVector<int> &indicesToRemove, bool isFullDirectory = false);
+        void doRemoveItemsInRanges(const QVector<QPair<int, int> > &rangesToRemove, bool isFullDirectory = false);
         void getSelectedItemsIndices(QVector<int> &indices);
 
     public:

@@ -101,7 +101,7 @@ std::shared_ptr<Commands::ICommandResult> Commands::AddArtworksCommand::execute(
             const QString &filename = m_FilePathes[i];
             qint64 directoryID = 0;
 
-            if (artworksRepository->accountFile(filename, directoryID)) {
+            if (artworksRepository->accountFile(filename, directoryID, m_IsFullDirectory)) {
                 Models::ArtworkMetadata *metadata = artItemsModel->createMetadata(filename, directoryID);
                 commandManager->connectArtworkSignals(metadata);
 

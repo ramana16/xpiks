@@ -170,7 +170,8 @@ SOURCES += main.cpp \
     MetadataIO/csvexportplansmodel.cpp \
     MetadataIO/csvexportproperties.cpp \
     MetadataIO/csvexportmodel.cpp \
-    Helpers/threadhelpers.cpp
+    Helpers/threadhelpers.cpp \
+    UndoRedo/removedirectoryitem.cpp
 
 RESOURCES += qml.qrc
 
@@ -404,7 +405,8 @@ HEADERS += \
     Common/delayedactionentity.h \
     Models/artworkelement.h \
     Models/previewartworkelement.h \
-    Helpers/threadhelpers.h
+    Helpers/threadhelpers.h \
+    UndoRedo/removedirectoryitem.h
 
 DISTFILES += \
     Components/CloseIcon.qml \

@@ -24,11 +24,13 @@ namespace UndoRedo {
     public:
         RemoveArtworksHistoryItem(int commandID, const QVector<int> &removedArtworksIndices,
                                   const QStringList &removedArtworksFilepathes,
-                                  const QStringList &removedAttachedVectors):
+                                  const QStringList &removedAttachedVectors,
+                                  bool asDirectoryRemoved = false):
             HistoryItem(HistoryActionType::RemovedArtworks, commandID),
             m_RemovedArtworksIndices(removedArtworksIndices),
             m_RemovedArtworksPathes(removedArtworksFilepathes),
-            m_RemovedAttachedVectors(removedAttachedVectors)
+            m_RemovedAttachedVectors(removedAttachedVectors),
+            m_AsDirectoryRemoved(asDirectoryRemoved)
         {}
 
         virtual ~RemoveArtworksHistoryItem() { }
@@ -43,11 +45,25 @@ namespace UndoRedo {
                                QObject::tr("1 item removed");
         }
 
+    protected:
+            void setRemovedArtworksIndices(const QVector<int> & removedArtworksIndices)
+            {
+                m_RemovedArtworksIndices = removedArtworksIndices;
+            }
+            void setRemovedArtworksPathes(const QStringList & removedArtworksPathes)
+            {
+                m_RemovedArtworksPathes = removedArtworksPathes;
+            }
+            void setRemovedAttachedVectors(const QStringList & removedAttachedVectors)
+            {
+                m_RemovedAttachedVectors = removedAttachedVectors;
+            }
 
     private:
         QVector<int> m_RemovedArtworksIndices;
         QStringList m_RemovedArtworksPathes;
         QStringList m_RemovedAttachedVectors;
+        bool m_AsDirectoryRemoved;
     };
 }
 

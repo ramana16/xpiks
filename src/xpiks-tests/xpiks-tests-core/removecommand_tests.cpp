@@ -19,7 +19,7 @@ void RemoveCommandTests::removeArtworksFromEmptyRepository() {
 
     QVector<QPair<int, int> > indicesToRemove;
     indicesToRemove.append(qMakePair(0, 2));
-    std::shared_ptr<Commands::RemoveArtworksCommand> removeArtworkCommand(new Commands::RemoveArtworksCommand(indicesToRemove));
+    std::shared_ptr<Commands::RemoveArtworksCommand> removeArtworkCommand(new Commands::RemoveArtworksCommand(indicesToRemove, false));
 
     QSignalSpy rowsRemovedItemsStart(&artItemsMock, SIGNAL(rowsAboutToBeRemoved(QModelIndex,int,int)));
     QSignalSpy rowsRemovedItemsEnd(&artItemsMock, SIGNAL(rowsRemoved(QModelIndex,int,int)));
@@ -64,7 +64,7 @@ void RemoveCommandTests::removeAllArtworksFromRepository() {
 
     QVector<QPair<int, int> > indicesToRemove;
     indicesToRemove.append(qMakePair(0, itemsToAdd - 1));
-    std::shared_ptr<Commands::RemoveArtworksCommand> removeArtworkCommand(new Commands::RemoveArtworksCommand(indicesToRemove));
+    std::shared_ptr<Commands::RemoveArtworksCommand> removeArtworkCommand(new Commands::RemoveArtworksCommand(indicesToRemove, false));
 
     QSignalSpy rowsRemovedItemsStart(&artItemsMock, SIGNAL(rowsAboutToBeRemoved(QModelIndex,int,int)));
     QSignalSpy rowsRemovedItemsEnd(&artItemsMock, SIGNAL(rowsRemoved(QModelIndex,int,int)));

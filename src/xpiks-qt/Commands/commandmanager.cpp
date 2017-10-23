@@ -1106,8 +1106,8 @@ int Commands::CommandManager::restoreReadSession() {
         LOG_INFO << "Session was empty";
         return 0;
     }
-
-    std::shared_ptr<Commands::AddArtworksCommand> addArtworksCommand(new Commands::AddArtworksCommand(filenames, vectors, autoFindVectors));
+    bool isFullDirectory = false;
+    std::shared_ptr<Commands::AddArtworksCommand> addArtworksCommand(new Commands::AddArtworksCommand(filenames, vectors, autoFindVectors, isFullDirectory));
     std::shared_ptr<Commands::ICommandResult> result = processCommand(addArtworksCommand);
     std::shared_ptr<Commands::AddArtworksCommandResult> addArtworksResult = std::dynamic_pointer_cast<Commands::AddArtworksCommandResult>(result);
 

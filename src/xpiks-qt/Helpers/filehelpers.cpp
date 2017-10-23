@@ -14,6 +14,7 @@
 #include <QDir>
 #include <QVector>
 #include "../Common/defines.h"
+#include "../Helpers/constants.h"
 #include "../Models/artworkmetadata.h"
 #include "../Models/imageartwork.h"
 
@@ -151,5 +152,52 @@ namespace Helpers {
         return isImageExtension(extension) ||
                 isVectorExtension(extension) ||
                 isVideoExtension(extension);
+    }
+}
+
+void Helpers::extractFiles(const QString &directory, QStringList &filesList)
+{
+    QDir dir(directory);
+
+    dir.setFilter(QDir::NoDotAndDotDot | QDir::Files);
+
+    QFileInfoList items = dir.entryInfoList();
+    int size = items.size();
+    filesList.reserve(filesList.size() + size);
+
+    for (int i = 0; i < size; ++i) {
+        QString filepath = items.at(i).absoluteFilePath();
+        filesList.append(filepath);
+    }
+
+    LOG_INFO << filesList.length() << "file(s) found";
+}
+
+void Helpers::extractImagesAndVectors(const QStringList &rawFilenames, QStringList &images, QStringList &vectors)
+{
+    LOG_INFO << rawFilenames.length() << "file(s)";
+    images.reserve(rawFilenames.length());
+    vectors.reserve(rawFilenames.length());
+
+    QSet<QString> knownSuffixes;
+    knownSuffixes << "jpg" << "jpeg" << "tiff" << "tif";
+    knownSuffixes << "avi" << "mpeg" << "mpg" << "mpe" << "vob" << "qt" << "mov" << "asf" << "asx" << "wm" << "wmv" << "mp4" << "webm" << "flv";
+
+    foreach(const QString &filepath, rawFilenames) {
+        QFileInfo fi(filepath);
+        QString suffix = fi.suffix().toLower();
+
+        if (knownSuffixes.contains(suffix)) {
+            images.append(filepath);
+        } else if (suffix == QLatin1String("png")) {
+            LOG_WARNING << "PNG is unsupported file format";
+        } else {
+            if (suffix == QLatin1String("eps") ||
+                suffix == QLatin1String("ai")) {
+                vectors.append(filepath);
+            } else if (suffix != QLatin1String(Constants::METADATA_BACKUP_SUFFIX)) {
+                LOG_WARNING << "Unsupported extension of file" << filepath;
+            }
+        }
     }
 }

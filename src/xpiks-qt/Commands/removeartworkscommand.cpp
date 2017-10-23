@@ -18,6 +18,7 @@
 #include "../Models/artworkmetadata.h"
 #include "../Helpers/indiceshelper.h"
 #include "../UndoRedo/removeartworksitem.h"
+#include "../UndoRedo/removedirectoryitem.h"
 #include "../Common/defines.h"
 #include "../Models/imageartwork.h"
 
@@ -34,6 +35,7 @@ namespace Commands {
         removedItemsIndices.reserve(count);
 
         QStringList removedItemsFilepathes;
+        QStringList removedItemsDirectorypathes;
         QStringList removedAttachedVectors;
         removedItemsFilepathes.reserve(count);
         removedAttachedVectors.reserve(count);
@@ -77,7 +79,10 @@ namespace Commands {
             commandManager->clearCurrentItem();
 
             Models::ArtworksRepository *artworkRepository = commandManager->getArtworksRepository();
-            artworkRepository->cleanupEmptyDirectories();
+            QVector<Models::ArtworksRepository::RepoDir> removedDirectories;
+            QVector<int> indicesToRemove;
+            bool needsDeselectionOnUndo;
+            artworkRepository->cleanupEmptyDirectories(removedDirectories, indicesToRemove, needsDeselectionOnUndo);
             artworkRepository->updateCountsForExistingDirectories();
             artworkRepository->unwatchFilePaths(removedItemsFilepathes);
 
@@ -87,13 +92,32 @@ namespace Commands {
 
             artItemsModel->updateModifiedCount();
 
-            if (!removedItemsFilepathes.empty()) {
-                std::unique_ptr<UndoRedo::IHistoryItem> removeArtworksItem(
-                        new UndoRedo::RemoveArtworksHistoryItem(getCommandID(),
-                                                                removedItemsIndices,
-                                                                removedItemsFilepathes,
-                                                                removedAttachedVectors));
-                commandManager->recordHistoryItem(removeArtworksItem);
+            if (! m_RemoveAsDirectory)
+            {
+                if (!removedItemsFilepathes.empty()) {
+                    std::unique_ptr<UndoRedo::IHistoryItem> removeArtworksItem(
+                            new UndoRedo::RemoveArtworksHistoryItem(getCommandID(),
+                                                                    removedItemsIndices,
+                                                                    removedItemsFilepathes,
+                                                                    removedAttachedVectors));
+                    commandManager->recordHistoryItem(removeArtworksItem);
+                }
+            }
+            else
+            {
+                Q_ASSERT(removedDirectories.size() == 1);
+                Q_ASSERT(indicesToRemove.size() == 1);
+                Q_ASSERT(removedItemsIndices.size());
+
+                const auto &directory = removedDirectories.front();
+                const auto &path = directory.m_AbsolutePath;
+                const auto &directorySelectedFlag = directory.m_IsSelected;
+                const auto &directoryIndex = indicesToRemove.front();
+                const auto &fileStartIndex = removedItemsIndices.front();
+
+                std::unique_ptr<UndoRedo::IHistoryItem> removeDirectoryItem(
+                        new UndoRedo::RemoveDirectoryItem(getCommandID(),path, fileStartIndex, directoryIndex, directorySelectedFlag, needsDeselectionOnUndo));
+                commandManager->recordHistoryItem(removeDirectoryItem);
             }
 
             commandManager->saveSessionInBackground();

@@ -40,10 +40,25 @@ namespace Models {
         };
 
     public:
+        struct RepoDir {
+            RepoDir (QString absolutePath, qint64 id, int count, bool selected,  bool isAddedAsDirectory):
+                m_AbsolutePath(absolutePath), m_Id(id), m_FilesCount(count), m_IsSelected(selected), m_IsAddedAsDirectory(isAddedAsDirectory)
+            { }
+            RepoDir() = default;
+
+            QString m_AbsolutePath = QString("");
+            qint64 m_Id = 0;
+            int m_FilesCount = 0;
+            bool m_IsSelected = true;
+            bool m_IsAddedAsDirectory = false;
+        };
+
+    public:
         void updateCountsForExistingDirectories();
-        void cleanupEmptyDirectories();
+        void cleanupEmptyDirectories(QVector<RepoDir> &directoriesToRemove,  QVector<int> &indicesToRemove, bool &needsDeselectionOnUndo);
         void resetLastUnavailableFilesCount() { m_LastUnavailableFilesCount=0; }
         void stopListeningToUnavailableFiles();
+        void insertEmptyDirectory(const QString &absolutePath, int index, bool isSelected);
 
     public:
         bool beginAccountingFiles(const QStringList &items);
@@ -74,7 +89,7 @@ namespace Models {
         void onAvailabilityTimer();
 
     public:
-        bool accountFile(const QString &filepath, qint64 &directoryID);
+        bool accountFile(const QString &filepath, qint64 &directoryID, bool isFullDirectory = false);
         void accountVector(const QString &vectorPath);
         bool removeFile(const QString &filepath, qint64 directoryID);
         void removeVector(const QString &vectorPath);
@@ -90,6 +105,7 @@ namespace Models {
 
     public:
         const QString &getDirectory(int index) const { return m_DirectoriesList[index].m_AbsolutePath; }
+        const bool getFullFlag(int index) const { return m_DirectoriesList[index].m_IsAddedAsDirectory; }
 #ifdef CORE_TESTS
         int getFilesCountForDirectory(const QString &directory) const { size_t index; tryFindDirectory(directory, index); return m_DirectoriesList[index].m_FilesCount; }
         int getFilesCountForDirectory(int index) const { return m_DirectoriesList[index].m_FilesCount; }
@@ -106,6 +122,7 @@ namespace Models {
 
     public:
         Q_INVOKABLE void selectDirectory(int row);
+        void selectDirectory(const QString &path);
 
     protected:
         virtual QHash<int, QByteArray> roleNames() const override;
@@ -114,38 +131,29 @@ namespace Models {
         virtual void removeInnerItem(int index) override {
             auto &directoryToRemove = m_DirectoriesList.at(index);
             qint64 idToRemove = directoryToRemove.m_Id;
-            const bool oldIsSelected = directoryToRemove.m_IsSelected;
-            const bool newIsSelected = false; // unselect folder to be deleted
-            changeSelectedState(index, newIsSelected, oldIsSelected);
+            if (!allAreSelected())
+            {
+                const bool oldIsSelected = directoryToRemove.m_IsSelected;
+                const bool newIsSelected = false; // unselect folder to be deleted
+                changeSelectedState(index, newIsSelected, oldIsSelected);
+            }
             m_DirectoriesList.erase(m_DirectoriesList.begin() + index);
             m_DirectoryIdToIndex.remove(idToRemove);
             emit artworksSourcesCountChanged();
         }
 
         virtual bool checkFileExists(const QString &filename, QString &directory) const;
+    public:
+        bool unselectAllDirectories() { return setAllSelected(false); }
+        bool selectAllDirectories() { return setAllSelected(true); }
 
     private:
         bool setDirectorySelected(size_t index, bool value);
         bool changeSelectedState(int row, bool newValue, bool oldValue);
-        bool unselectAllDirectories() { return setAllSelected(false); }
-        bool selectAllDirectories() { return setAllSelected(true); }
         bool setAllSelected(bool value);
         size_t retrieveSelectedDirsCount() const;
         bool allAreSelected() const;
         bool tryFindDirectory(const QString &directoryPath, size_t &index) const;
-
-    private:
-        struct RepoDir {
-            RepoDir (QString absolutePath, qint64 id, int count, bool selected):
-                m_AbsolutePath(absolutePath), m_Id(id), m_FilesCount(count), m_IsSelected(selected)
-            { }
-            RepoDir() = default;
-
-            QString m_AbsolutePath = QString("");
-            qint64 m_Id = 0;
-            int m_FilesCount = 0;
-            bool m_IsSelected = true;
-        };
 
     private:
         std::vector<RepoDir> m_DirectoriesList;

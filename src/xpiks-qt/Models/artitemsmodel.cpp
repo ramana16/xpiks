@@ -70,7 +70,6 @@ namespace Models {
         const int id = m_LastID++;
 
         LOG_INTEGRATION_TESTS << "Creating artwork with ID:" << id << "path:" << filepath;
-
         if (Helpers::couldBeVideo(filepath)) {
             return new VideoArtwork(filepath, id, directoryID);
         } else {
@@ -186,6 +185,7 @@ namespace Models {
     void ArtItemsModel::removeArtworksDirectory(int index) {
         LOG_INFO << "Remove artworks directory at" << index;
         const QString &directory = m_CommandManager->getArtworksRepository()->getDirectory(index);
+        const bool isFullDirectory =  m_CommandManager->getArtworksRepository()->getFullFlag(index);
         LOG_CORE_TESTS << "Removing directory:" << directory;
 
         QDir dir(directory);
@@ -202,7 +202,7 @@ namespace Models {
             }
         }
 
-        doRemoveItemsAtIndices(indicesToRemove);
+        doRemoveItemsAtIndices(indicesToRemove, isFullDirectory);
 
         emit modifiedArtworksCountChanged();
     }
@@ -344,7 +344,7 @@ namespace Models {
         }
 
         foreach(const QUrl &dirUrl, directories) {
-            doAddDirectory(dirUrl.toLocalFile(), filesToImport);
+            Helpers::extractFiles(dirUrl.toLocalFile(), filesToImport);
         }
 
         int importedCount = addFiles(filesToImport);
@@ -1255,34 +1255,18 @@ namespace Models {
         QStringList files;
 
         foreach(const QString &directory, directories) {
-            doAddDirectory(directory, files);
+            Helpers::extractFiles(directory, files);
         }
 
         if (files.count() > 0) {
-            filesCount = addFiles(files);
+            const bool isFullDirectory = true;
+            filesCount = addFiles(files, isFullDirectory);
         }
 
         return filesCount;
     }
 
-    void ArtItemsModel::doAddDirectory(const QString &directory, QStringList &filesList) {
-        QDir dir(directory);
-
-        dir.setFilter(QDir::NoDotAndDotDot | QDir::Files);
-
-        QFileInfoList items = dir.entryInfoList();
-        int size = items.size();
-        filesList.reserve(filesList.size() + size);
-
-        for (int i = 0; i < size; ++i) {
-            QString filepath = items.at(i).absoluteFilePath();
-            filesList.append(filepath);
-        }
-
-        LOG_INFO << filesList.length() << "file(s) found";
-    }
-
-    int ArtItemsModel::addFiles(const QStringList &rawFilenames) {
+    int ArtItemsModel::addFiles(const QStringList &rawFilenames, bool isFullDirectory) {
         LOG_INFO << rawFilenames.length() << "file(s)";
         QStringList filenames, vectors;
         filenames.reserve(rawFilenames.length());
@@ -1310,7 +1294,7 @@ namespace Models {
         Models::SettingsModel *settingsModel = m_CommandManager->getSettingsModel();
         bool autoFindVectors = settingsModel->getAutoFindVectors();
 
-        std::shared_ptr<Commands::AddArtworksCommand> addArtworksCommand(new Commands::AddArtworksCommand(filenames, vectors, autoFindVectors));
+        std::shared_ptr<Commands::AddArtworksCommand> addArtworksCommand(new Commands::AddArtworksCommand(filenames, vectors, autoFindVectors, isFullDirectory));
         std::shared_ptr<Commands::ICommandResult> result = m_CommandManager->processCommand(addArtworksCommand);
         std::shared_ptr<Commands::AddArtworksCommandResult> addArtworksResult = std::dynamic_pointer_cast<Commands::AddArtworksCommandResult>(result);
 
@@ -1440,15 +1424,15 @@ namespace Models {
         }
     }
 
-    void ArtItemsModel::doRemoveItemsAtIndices(QVector<int> &indicesToRemove) {
+    void ArtItemsModel::doRemoveItemsAtIndices(QVector<int> &indicesToRemove, bool isFullDirectory) {
         qSort(indicesToRemove);
         QVector<QPair<int, int> > rangesToRemove;
         Helpers::indicesToRanges(indicesToRemove, rangesToRemove);
-        doRemoveItemsInRanges(rangesToRemove);
+        doRemoveItemsInRanges(rangesToRemove, isFullDirectory);
     }
 
-    void ArtItemsModel::doRemoveItemsInRanges(const QVector<QPair<int, int> > &rangesToRemove) {
-        std::shared_ptr<Commands::RemoveArtworksCommand> removeArtworksCommand(new Commands::RemoveArtworksCommand(rangesToRemove));
+    void ArtItemsModel::doRemoveItemsInRanges(const QVector<QPair<int, int> > &rangesToRemove, bool isFullDirectory) {
+        std::shared_ptr<Commands::RemoveArtworksCommand> removeArtworksCommand(new Commands::RemoveArtworksCommand(rangesToRemove, isFullDirectory));
 
         m_CommandManager->processCommand(removeArtworksCommand);
     }

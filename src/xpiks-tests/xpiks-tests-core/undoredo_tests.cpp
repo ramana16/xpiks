@@ -31,7 +31,7 @@ void UndoRedoTests::undoAddCommandTest() {
     QStringList filenames;
     filenames << "/path/to/test/image1.jpg";
 
-    std::shared_ptr<Commands::AddArtworksCommand> addArtworksCommand(new Commands::AddArtworksCommand(filenames, QStringList(), false));
+    std::shared_ptr<Commands::AddArtworksCommand> addArtworksCommand(new Commands::AddArtworksCommand(filenames, QStringList(), false, false));
     auto result = commandManagerMock.processCommand(addArtworksCommand);
     auto addArtworksResult = std::dynamic_pointer_cast<Commands::AddArtworksCommandResult>(result);
     int newFilesCount = addArtworksResult->m_NewFilesAdded;
@@ -51,7 +51,7 @@ void UndoRedoTests::undoUndoAddCommandTest() {
     QStringList filenames;
     filenames << "/path/to/test/image1.jpg";
 
-    std::shared_ptr<Commands::AddArtworksCommand> addArtworksCommand(new Commands::AddArtworksCommand(filenames, QStringList(), false));
+    std::shared_ptr<Commands::AddArtworksCommand> addArtworksCommand(new Commands::AddArtworksCommand(filenames, QStringList(), false, false));
     auto result = commandManagerMock.processCommand(addArtworksCommand);
     auto addArtworksResult = std::dynamic_pointer_cast<Commands::AddArtworksCommandResult>(result);
     int newFilesCount = addArtworksResult->m_NewFilesAdded;
@@ -78,7 +78,7 @@ void UndoRedoTests::undoUndoAddWithVectorsTest() {
     filenames << "/path/to/test/image1.jpg" << "/path/to/test/image2.jpg" << "/path/to/test/image3.jpg";
     vectors << "/path/to/test/image3.jpg" << "/path/to/test/image1.eps";
 
-    std::shared_ptr<Commands::AddArtworksCommand> addArtworksCommand(new Commands::AddArtworksCommand(filenames, vectors, false));
+    std::shared_ptr<Commands::AddArtworksCommand> addArtworksCommand(new Commands::AddArtworksCommand(filenames, vectors, false, false));
     auto result = commandManagerMock.processCommand(addArtworksCommand);
     auto addArtworksResult = std::dynamic_pointer_cast<Commands::AddArtworksCommandResult>(result);
     int newFilesCount = addArtworksResult->m_NewFilesAdded;
@@ -114,7 +114,7 @@ void UndoRedoTests::undoRemoveItemsTest() {
 
     QVector<QPair<int, int> > indicesToRemove;
     indicesToRemove.append(qMakePair(1, 3));
-    std::shared_ptr<Commands::RemoveArtworksCommand> removeArtworkCommand(new Commands::RemoveArtworksCommand(indicesToRemove));
+    std::shared_ptr<Commands::RemoveArtworksCommand> removeArtworkCommand(new Commands::RemoveArtworksCommand(indicesToRemove, false));
     auto result = commandManagerMock.processCommand(removeArtworkCommand);
     auto removeArtworksResult = std::dynamic_pointer_cast<Commands::RemoveArtworksCommandResult>(result);
     int artworksRemovedCount = removeArtworksResult->m_RemovedArtworksCount;
@@ -134,7 +134,7 @@ void UndoRedoTests::undoUndoRemoveItemsTest() {
 
     QVector<QPair<int, int> > indicesToRemove;
     indicesToRemove.append(qMakePair(1, 3));
-    std::shared_ptr<Commands::RemoveArtworksCommand> removeArtworkCommand(new Commands::RemoveArtworksCommand(indicesToRemove));
+    std::shared_ptr<Commands::RemoveArtworksCommand> removeArtworkCommand(new Commands::RemoveArtworksCommand(indicesToRemove, false));
     auto result = commandManagerMock.processCommand(removeArtworkCommand);
     auto removeArtworksResult = std::dynamic_pointer_cast<Commands::RemoveArtworksCommandResult>(result);
     int artworksRemovedCount = removeArtworksResult->m_RemovedArtworksCount;
