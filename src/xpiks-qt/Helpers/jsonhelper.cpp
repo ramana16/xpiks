@@ -88,10 +88,10 @@ namespace Helpers {
             if (existingIndex == -1) {
                 elementsToAdd.append(objectFrom);
             } else {
-                QJsonObject objectTo = arrayTo[i].toObject();
+                QJsonObject objectTo = arrayTo[existingIndex].toObject();
 
                 if (mergeJsonObjects(objectFrom, objectTo, comparer)) {
-                    arrayTo[i] = objectTo;
+                    arrayTo[existingIndex] = objectTo;
                 }
             }
         }

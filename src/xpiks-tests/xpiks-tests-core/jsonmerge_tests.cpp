@@ -228,3 +228,106 @@ void JsonMergeTests::mergeOverwriteTest() {
 
     QCOMPARE(localDoc, mergedDoc);
 }
+
+void JsonMergeTests::mergeExistingElementsTest() {
+    const char *localJson = R"JSON(
+                            {
+                                "plans": [
+                                    {
+                                        "name": "test plan 1",
+                                        "properties": [
+                                            {
+                                                "propertyName": "Empty",
+                                                "propertyType": 0
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "issystem": true,
+                                        "name": "Shutterstock Video *",
+                                        "properties": [
+                                            {
+                                                "columnName": "Filename",
+                                                "propertyName": "Filename",
+                                                "propertyType": 1
+                                            },
+                                            {
+                                                "columnName": "Description",
+                                                "propertyName": "Description",
+                                                "propertyType": 3
+                                            }
+                                        ]
+                                    }
+                                ]
+                            }
+)JSON";
+
+    const char *remoteJson = R"JSON(
+                             {
+                                 "plans": [
+                                     {
+                                         "issystem": true,
+                                         "name": "Shutterstock Video *",
+                                         "properties": [
+                                             {
+                                                 "columnName": "Filename",
+                                                 "propertyName": "Filename",
+                                                 "propertyType": 1
+                                             },
+                                             {
+                                                 "columnName": "Description",
+                                                 "propertyName": "Description",
+                                                 "propertyType": 3
+                                             }
+                                         ]
+                                     }
+                                 ]
+                             }
+)JSON";
+
+    const char *mergedJson = R"JSON(
+                             {
+                                 "plans": [
+                                     {
+                                         "name": "test plan 1",
+                                         "properties": [
+                                             {
+                                                 "propertyName": "Empty",
+                                                 "propertyType": 0
+                                             }
+                                         ]
+                                     },
+                                     {
+                                         "issystem": true,
+                                         "name": "Shutterstock Video *",
+                                         "properties": [
+                                             {
+                                                 "columnName": "Filename",
+                                                 "propertyName": "Filename",
+                                                 "propertyType": 1
+                                             },
+                                             {
+                                                 "columnName": "Description",
+                                                 "propertyName": "Description",
+                                                 "propertyType": 3
+                                             }
+                                         ]
+                                     }
+                                 ]
+                             }
+)JSON";
+
+    QByteArray localJsonData(localJson);
+    QByteArray remoteJsonData(remoteJson);
+    QByteArray mergedJsonData(mergedJson);
+
+    QJsonParseError error;
+    QJsonDocument localDoc = QJsonDocument::fromJson(localJsonData, &error); QCOMPARE(error.error, QJsonParseError::NoError);
+    QJsonDocument remoteDoc = QJsonDocument::fromJson(remoteJsonData, &error); QCOMPARE(error.error, QJsonParseError::NoError);
+    QJsonDocument mergedDoc = QJsonDocument::fromJson(mergedJsonData, &error); QCOMPARE(error.error, QJsonParseError::NoError);
+
+    NameJsonComparer comparer;
+    Helpers::mergeJson(remoteDoc, localDoc, false, comparer);
+
+    QCOMPARE(localDoc, mergedDoc);
+}

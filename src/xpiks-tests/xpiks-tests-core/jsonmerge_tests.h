@@ -10,6 +10,7 @@ private slots:
     void mergeArraysOfObjectsTest();
     void mergeArraysOfStringsTest();
     void mergeOverwriteTest();
+    void mergeExistingElementsTest();
 };
 
 #endif // JSONMERGE_TESTS_H

@@ -271,12 +271,13 @@ namespace MetadataIO {
 
     int CsvExportPlansModel::operator ()(const QJsonObject &val1, const QJsonObject &val2) {
         if (val1.contains(PLAN_NAME_KEY) && val2.contains(PLAN_NAME_KEY)) {
-            int result = QString::compare(val1.value(PLAN_NAME_KEY).toString(), val2.value(PLAN_NAME_KEY).toString());
+            const QString planName1 = val1.value(PLAN_NAME_KEY).toString();
+            const QString planName2 = val2.value(PLAN_NAME_KEY).toString();
+            int result = QString::compare(planName1, planName2);
             return result;
         }
 
-        // values are always considered equal. This may lead to loss of local changes.
-        return 0;
+        return 1;
     }
 
     void CsvExportPlansModel::deserializeExportPlans(const QJsonObject &object) {
