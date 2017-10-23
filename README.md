@@ -9,7 +9,7 @@ Official website: http://ribtoks.github.io/xpiks/
 
 Translations: https://crowdin.com/project/xpiks/
 
-Linux build status: [![Build Status](https://travis-ci.org/Ribtoks/xpiks.svg?branch=master)](https://travis-ci.org/Ribtoks/xpiks)
+Linux build status: [![Build Status](https://travis-ci.org/ribtoks/xpiks.svg?branch=master)](https://travis-ci.org/ribtoks/xpiks)
 
 Windows build status: [![Build status](https://ci.appveyor.com/api/projects/status/m4warfr2xl8ago5s/branch/master?svg=true)](https://ci.appveyor.com/project/Ribtoks/xpiks/branch/master)
 
