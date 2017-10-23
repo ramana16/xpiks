@@ -59,7 +59,7 @@ Item {
     }
 
     function mainAction() {
-        artworkUploader.resetModel()
+        artworkUploader.resetProgress()
         artworkUploader.uploadArtworks()
     }
 
@@ -313,7 +313,7 @@ Item {
                                 height: 14
                                 anchors.verticalCenterOffset: 1
                                 isActive: false
-                                disabledColor: uiColors.closeIconInactiveColor
+                                //disabledColor: uiColors.closeIconInactiveColor
 
                                 onItemClicked: {
                                     confirmRemoveItemDialog.itemIndex = sourceWrapper.delegateIndex

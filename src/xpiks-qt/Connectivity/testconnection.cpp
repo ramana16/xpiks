@@ -26,7 +26,7 @@ namespace Connectivity {
         return (size_t)(size * nmemb);
     }
 
-    ContextValidationResult isContextValid(libxpks::net::UploadContext *context) {
+    ContextValidationResult isContextValid(std::shared_ptr<libxpks::net::UploadContext> &context) {
         bool result = false;
         CURL *curlHandle = NULL;
         QString host = sanitizeHost(context->m_Host);
@@ -60,7 +60,6 @@ namespace Connectivity {
         //curl_global_cleanup();
 
         LOG_INFO << "Credentials checking finished" << host;
-        delete context;
 
         ContextValidationResult cvr;
         cvr.m_Host = host;

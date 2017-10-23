@@ -13,13 +13,21 @@
 #include "../Common/defines.h"
 
 namespace Models {
+    int ArtworksProcessor::getPercent() const {
+        const int artworksCount = getItemsCount();
+        return artworksCount == 0 ? 0 : (m_ProcessedArtworksCount * 100 / artworksCount);
+    }
+
     void ArtworksProcessor::resetModel() {
+        resetArtworks();
+        resetProgress();
+    }
+
+    void ArtworksProcessor::resetProgress() {
         LOG_DEBUG << "#";
         setInProgress(false);
         setIsError(false);
         innerResetModel();
-        resetArtworks();
-        m_ArtworksCount = 0;
         m_ProcessedArtworksCount = 0;
         updateProgress();
     }
@@ -56,7 +64,6 @@ namespace Models {
     void ArtworksProcessor::beginProcessing() {
         m_ExistingMaxThreadsNumber = QThreadPool::globalInstance()->maxThreadCount();
         LOG_DEBUG << "Saving pools max threads" << m_ExistingMaxThreadsNumber;
-        m_ArtworksCount = (int)m_ArtworksSnapshot.size();
         m_ProcessedArtworksCount = 0;
         updateProgress();
         setInProgress(true);
@@ -65,7 +72,6 @@ namespace Models {
 
     void ArtworksProcessor::endProcessing() {
         m_ProcessedArtworksCount = 0;
-        m_ArtworksCount = 0;
         LOG_DEBUG << "Restoring pool max threads to" << m_ExistingMaxThreadsNumber;
         QThreadPool::globalInstance()->setMaxThreadCount(m_ExistingMaxThreadsNumber);
         setInProgress(false);
@@ -74,7 +80,7 @@ namespace Models {
 
     void ArtworksProcessor::endAfterFirstError() {
         setIsError(true);
-        m_ProcessedArtworksCount = m_ArtworksCount;
+        m_ProcessedArtworksCount = getItemsCount();
         updateProgress();
         endProcessing();
     }

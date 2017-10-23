@@ -33,7 +33,7 @@ namespace Connectivity {
         bool m_Result;
     };
 
-    ContextValidationResult isContextValid(libxpks::net::UploadContext *context);
+    ContextValidationResult isContextValid(std::shared_ptr<libxpks::net::UploadContext> &context);
 }
 
 #endif // TESTCONNECTION_H

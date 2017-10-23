@@ -39,7 +39,6 @@ namespace Models {
             QObject(parent),
             Common::BaseEntity(),
             m_ProcessedArtworksCount(0),
-            m_ArtworksCount(0),
             m_ExistingMaxThreadsNumber(0),
             m_IsInProgress(false),
             m_IsError(false)
@@ -53,7 +52,7 @@ namespace Models {
     public:
         virtual bool getInProgress() const { return m_IsInProgress; }
         void setInProgress(bool value) { m_IsInProgress = value; emit inProgressChanged(); }
-        virtual int getPercent() const { return m_ArtworksCount == 0 ? 0 : (m_ProcessedArtworksCount * 100 / m_ArtworksCount); }
+        virtual int getPercent() const;
         void updateProgress() { emit percentChanged(); }
         bool getIsError() const { return m_IsError; }
         void setIsError(bool value) { m_IsError = value; emit isErrorChanged(); }
@@ -61,6 +60,7 @@ namespace Models {
 
     public:
         Q_INVOKABLE void resetModel();
+        Q_INVOKABLE void resetProgress();
         Q_INVOKABLE void cancelOperation() { cancelProcessing(); }
 
     signals:
@@ -96,7 +96,6 @@ namespace Models {
     private:
         MetadataIO::ArtworksSnapshot m_ArtworksSnapshot;
         volatile int m_ProcessedArtworksCount;
-        volatile int m_ArtworksCount;
         volatile int m_ExistingMaxThreadsNumber;
         volatile bool m_IsInProgress;
         volatile bool m_IsError;

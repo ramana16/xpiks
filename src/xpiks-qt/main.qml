@@ -371,7 +371,7 @@ ApplicationWindow {
             Menu {
                 id: recentDirectoriesMenu
                 title: i18.n + qsTr("&Recent directories")
-                enabled: applicationWindow.openedDialogsCount == 0
+                enabled: (applicationWindow.openedDialogsCount == 0) && (recentDirectories.count > 0)
 
                 Instantiator {
                     model: recentDirectories

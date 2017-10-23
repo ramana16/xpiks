@@ -24,7 +24,7 @@ namespace libxpks {
 }
 
 namespace Connectivity {
-    void fillCurlOptions(void *curlHandle, libxpks::net::UploadContext *context, const QString &remoteUrl);
+    void fillCurlOptions(void *curlHandle, const std::shared_ptr<libxpks::net::UploadContext> &context, const QString &remoteUrl);
     QString sanitizeHost(const QString &inputHost);
     void fillProxySettings(void *curlHandle, Models::ProxySettings *proxySettings);
 }

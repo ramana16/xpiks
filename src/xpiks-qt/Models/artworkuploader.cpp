@@ -110,7 +110,7 @@ namespace Models {
 
     void ArtworkUploader::checkCredentials(const QString &host, const QString &username,
                                            const QString &password, bool disablePassiveMode, bool disableEPSV) const {
-        libxpks::net::UploadContext *context = new libxpks::net::UploadContext();
+        std::shared_ptr<libxpks::net::UploadContext> context(new libxpks::net::UploadContext());
 
         context->m_Host = host;
         context->m_Username = username;
@@ -177,7 +177,9 @@ namespace Models {
     }
 
     void ArtworkUploader::doUploadArtworks(const MetadataIO::ArtworksSnapshot &snapshot) {
-        if (snapshot.empty() == 0) { return; }
+        LOG_INFO << snapshot.size() << "artwork(s)";
+
+        if (snapshot.empty()) { return; }
 
         UploadInfoRepository *uploadInfoRepository = m_CommandManager->getUploadInfoRepository();
         std::vector<std::shared_ptr<Models::UploadInfo> > selectedInfos = std::move(uploadInfoRepository->retrieveSelectedUploadInfos());
