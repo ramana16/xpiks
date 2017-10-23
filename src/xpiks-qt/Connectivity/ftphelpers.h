@@ -12,6 +12,7 @@
 #define FTPHELPERS_H
 
 #include <QString>
+#include <memory>
 
 namespace Models {
     class ProxySettings;

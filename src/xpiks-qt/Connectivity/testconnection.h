@@ -12,6 +12,7 @@
 #define TESTCONNECTION_H
 
 #include <QString>
+#include <memory>
 
 namespace libxpks {
     namespace net {
