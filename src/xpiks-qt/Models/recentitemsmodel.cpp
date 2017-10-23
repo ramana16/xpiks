@@ -26,6 +26,10 @@ namespace Models {
         return QString::fromLatin1(raw.toBase64());
     }
 
+    QUrl RecentItemsModel::getLatestItem() const {
+        return QUrl::fromLocalFile(m_LatestUsedItem);
+    }
+
     void RecentItemsModel::deserializeFromSettings(const QString &serialized) {
         LOG_DEBUG << "#";
 
@@ -57,10 +61,19 @@ namespace Models {
         }
 
         m_LatestUsedItem = itemPath;
+
+        emit recentItemsCountChanged();
     }
 
-    QUrl RecentItemsModel::getLatestItem() const {
-        return QUrl::fromLocalFile(m_LatestUsedItem);
+    QStringList RecentItemsModel::getAllRecentFiles() {
+        QStringList items;
+        items.reserve(m_RecentItems.size());
+
+        for (auto &item: m_RecentItems) {
+            items.push_back(item);
+        }
+
+        return items;
     }
 
     bool RecentItemsModel::doPushItem(const QString &itemPath) {
@@ -102,5 +115,7 @@ namespace Models {
             deserializeFromSettings(serialized);
         }
         endResetModel();
+
+        emit recentItemsCountChanged();
     }
 }

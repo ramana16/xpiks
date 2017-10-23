@@ -393,7 +393,22 @@ ApplicationWindow {
             Menu {
                 id: recentFilesMenu
                 title: i18.n + qsTr("&Recent files")
-                enabled: applicationWindow.openedDialogsCount == 0
+                enabled: (applicationWindow.openedDialogsCount == 0) && (recentFiles.count > 0)
+
+                MenuItem {
+                    text: i18.n + qsTr("Open all")
+
+                    onTriggered: {
+                        var filesAdded = artItemsModel.addAllRecentFiles()
+                        if (filesAdded === 0) {
+                            noNewFilesDialog.open()
+                        }
+                    }
+                }
+
+                MenuSeparator {
+                    visible: recentFiles.count > 0
+                }
 
                 Instantiator {
                     model: recentFiles

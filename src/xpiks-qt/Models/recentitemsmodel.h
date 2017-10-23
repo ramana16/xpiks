@@ -22,18 +22,26 @@ namespace Models {
     class RecentItemsModel: public QAbstractListModel
     {
         Q_OBJECT
+        Q_PROPERTY(int count READ getRecentItemsCount NOTIFY recentItemsCountChanged)
     public:
         RecentItemsModel();
         RecentItemsModel(int items): m_MaxRecentItems(items) {}
 
     public:
+        int getMaxRecentItems() const { return m_MaxRecentItems; }
+        int getRecentItemsCount() const { return m_RecentItems.size(); }
+
+    public:
         Q_INVOKABLE QString serializeForSettings();
+        Q_INVOKABLE QUrl getLatestItem() const;
+
+    public:
         void deserializeFromSettings(const QString &serialized);
         void pushItem(const QString &directoryPath);
-        Q_INVOKABLE QUrl getLatestItem() const;
-        int getMaxRecentItems() const { return m_MaxRecentItems; }
+        QStringList getAllRecentFiles();
 
 #ifdef CORE_TESTS
+    public:
         QString getLatestUsedItem() const { return m_LatestUsedItem; }
 #endif
 
@@ -49,6 +57,9 @@ namespace Models {
 
     public slots:
         void onRecentItemsUpdated(const QString &serialized);
+
+    signals:
+        void recentItemsCountChanged();
 
     private:
         QSet<QString> m_ItemsSet;

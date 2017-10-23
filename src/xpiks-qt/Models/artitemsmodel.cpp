@@ -518,6 +518,13 @@ namespace Models {
         return filesAdded;
     }
 
+    int ArtItemsModel::addAllRecentFiles() {
+        LOG_DEBUG << "#";
+        Models::RecentFilesModel *recentFiles = m_CommandManager->getRecentFiles();
+        int filesAdded = addFiles(recentFiles->getAllRecentFiles());
+        return filesAdded;
+    }
+
     void ArtItemsModel::initDescriptionHighlighting(int metadataIndex, QQuickTextDocument *document) {
         if (0 <= metadataIndex && metadataIndex < getArtworksCount()) {
             ArtworkMetadata *metadata = accessArtwork(metadataIndex);
