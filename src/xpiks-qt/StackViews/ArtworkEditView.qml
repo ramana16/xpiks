@@ -184,7 +184,10 @@ Rectangle {
 
         MenuItem {
             text: i18.n + qsTr("Copy to Quick Buffer")
-            onTriggered: filteredArtItemsModel.copyToQuickBuffer(itemPreviewMenu.index)
+            onTriggered: {
+                filteredArtItemsModel.copyToQuickBuffer(itemPreviewMenu.index)
+                uiManager.activateQuickBufferTab()
+            }
         }
     }
 

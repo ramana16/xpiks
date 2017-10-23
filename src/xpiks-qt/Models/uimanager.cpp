@@ -131,9 +131,15 @@ namespace Models {
         justEdited();
     }
 
-    void UIManager::addSystemTab(const QString tabIconComponent, const QString &tabComponent) {
+    void UIManager::activateQuickBufferTab() {
+        if (m_TabsModel.activateSystemTab(QUICKBUFFER_TAB_ID)) {
+            m_ActiveTabs.reactivateMostRecentTab();
+        }
+    }
+
+    void UIManager::addSystemTab(int systemTabID, const QString tabIconComponent, const QString &tabComponent) {
         LOG_INFO << "icon" << tabIconComponent << "contents" << tabComponent;
-        m_TabsModel.addSystemTab(tabIconComponent, tabComponent);
+        m_TabsModel.addSystemTab(systemTabID, tabIconComponent, tabComponent);
         generateNextTabID();
     }
 

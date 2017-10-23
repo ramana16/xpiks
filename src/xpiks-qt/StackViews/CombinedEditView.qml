@@ -979,8 +979,10 @@ Rectangle {
             StyledButton {
                 text: i18.n + qsTr("Copy to Quick Buffer")
                 width: 160
+                enabled: (combinedArtworks.title.length > 0) || (combinedArtworks.description.length > 0) || (combinedArtworks.keywordsCount > 0)
                 onClicked: {
                     combinedArtworks.copyToQuickBuffer()
+                    uiManager.activateQuickBufferTab()
                 }
             }
 

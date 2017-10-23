@@ -831,7 +831,10 @@ ApplicationWindow {
 
         MenuItem {
             text: i18.n + qsTr("Copy to Quick Buffer")
-            onTriggered: filteredArtItemsModel.copyToQuickBuffer(artworkContextMenu.index)
+            onTriggered: {
+                filteredArtItemsModel.copyToQuickBuffer(artworkContextMenu.index)
+                uiManager.activateQuickBufferTab()
+            }
         }
 
         MenuItem {

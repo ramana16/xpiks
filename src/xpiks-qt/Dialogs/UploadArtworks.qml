@@ -313,7 +313,7 @@ Item {
                                 height: 14
                                 anchors.verticalCenterOffset: 1
                                 isActive: false
-                                //disabledColor: uiColors.closeIconInactiveColor
+                                disabledColor: uiColors.labelInactiveForeground
 
                                 onItemClicked: {
                                     confirmRemoveItemDialog.itemIndex = sourceWrapper.delegateIndex

@@ -57,10 +57,12 @@ namespace QMLExtensions {
         return roles;
     }
 
-    void TabsModel::addSystemTab(const QString &iconPath, const QString &componentPath) {
+    void TabsModel::addSystemTab(int systemTabID, const QString &iconPath, const QString &componentPath) {
         LOG_INFO << iconPath << componentPath;
         addTab(0, iconPath, componentPath);
-        m_TabsList.last().m_IsSystemTab = true;
+        auto &tab = m_TabsList.last();
+        tab.m_IsSystemTab = true;
+        tab.m_InternalTabID = systemTabID;
     }
 
     void TabsModel::addPluginTab(int tabID, const QString &iconPath, const QString &componentPath) {
@@ -110,9 +112,39 @@ namespace QMLExtensions {
         return index;
     }
 
+    int TabsModel::findSystemTabIndexByID(int tabID) {
+        int index = -1;
+        const int size = m_TabsList.size();
+        for (int i = 0; i < size; i++) {
+            auto &tab = m_TabsList[i];
+            if (!tab.m_IsSystemTab) { continue; }
+
+            if (tab.m_InternalTabID == tabID) {
+                index = i;
+                break;
+            }
+        }
+
+        return index;
+    }
+
     bool TabsModel::isTabActive(int index) {
         bool found = m_ActiveTabs.contains(index);
         return found;
+    }
+
+    bool TabsModel::activateSystemTab(int systemTabID) {
+        bool activated = false;
+
+        const int index = findSystemTabIndexByID(systemTabID);
+        const int mostRecentIndex = getMostRecentIndex();
+
+        if ((index >= 0) && (mostRecentIndex != index)) {
+            activateTab(index);
+            activated = true;
+        }
+
+        return activated;
     }
 
     void TabsModel::activateTab(int index) {

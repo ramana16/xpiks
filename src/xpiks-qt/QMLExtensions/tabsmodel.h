@@ -19,6 +19,10 @@
 #include <vector>
 #include <utility>
 
+#define FILES_FOLDERS_TAB_ID 3
+#define QUICKBUFFER_TAB_ID 5
+#define TRANSLATOR_TAB_ID 7
+
 namespace QMLExtensions {
     class TabsModel : public QAbstractListModel
     {
@@ -53,6 +57,7 @@ namespace QMLExtensions {
             QString m_TabIconPath;
             QString m_TabComponentPath;
             int m_ExternalTabID;
+            int m_InternalTabID;
             unsigned int m_CacheTag;
             bool m_IsSystemTab;
         };
@@ -70,11 +75,13 @@ namespace QMLExtensions {
 
     public:
         int getTabsCount() const { return m_TabsList.size(); }
-        void addSystemTab(const QString &iconPath, const QString &componentPath);
+        void addSystemTab(int systemTabID, const QString &iconPath, const QString &componentPath);
         void addPluginTab(int tabID, const QString &iconPath, const QString &componentPath);
         bool removePluginTab(int index);
         int findPluginTabIndexByID(int tabID);
+        int findSystemTabIndexByID(int tabID);
         bool isTabActive(int index);
+        bool activateSystemTab(int systemTabID);
         void activateTab(int index);
         void escalateTab(int index);
         bool touchTab(int index);
