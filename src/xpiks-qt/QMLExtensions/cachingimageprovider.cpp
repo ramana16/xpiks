@@ -15,10 +15,7 @@
 #define RECACHE true
 
 namespace QMLExtensions {
-    QImage CachingImageProvider::requestImage(const QString &url, QSize *size, const QSize &requestedSize) {
-        Q_ASSERT(!url.isEmpty());
-        if (url.isEmpty()) { return QImage(); }
-
+    QString prepareUrl(const QString &url) {
         QString id;
 
         if (url.contains(QChar('%'))) {
@@ -28,36 +25,48 @@ namespace QMLExtensions {
             id = url;
         }
 
+        return id;
+    }
+
+    QImage CachingImageProvider::requestImage(const QString &url, QSize *size, const QSize &requestedSize) {
+        Q_ASSERT(!url.isEmpty());
+        if (url.isEmpty()) { return QImage(); }
+
+        const QString id = prepareUrl(url);
+
         QString cachedPath;
         bool needsUpdate = false;
 
         if (m_ImageCachingService->tryGetCachedImage(id, requestedSize, cachedPath, needsUpdate)) {
-            QImage image(cachedPath);
-            *size = image.size();
+            QImage cachedImage(cachedPath);
+            *size = cachedImage.size();
 
             if (needsUpdate) {
                 LOG_INFO << "Recaching image" << id;
                 m_ImageCachingService->cacheImage(id, requestedSize, RECACHE);
             }
 
-            return image;
-        } else {
-            LOG_INTEGR_TESTS_OR_DEBUG << "Not found cached:" << id;
-
-            QImage image(id);
-            QImage result;
-
-            if (requestedSize.isValid()) {
-                m_ImageCachingService->cacheImage(id, requestedSize);
-                result = image.scaled(requestedSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
-            } else {
-                LOG_WARNING << "Size is invalid:" << requestedSize.width() << "x" << requestedSize.height();
-                m_ImageCachingService->cacheImage(id);
-                result = image;
+            if (!cachedImage.isNull()) {
+                return cachedImage;
             }
-
-            *size = result.size();
-            return result;
         }
+
+        LOG_INTEGR_TESTS_OR_DEBUG << "Not found properly cached:" << id;
+
+        QImage originalImage(id);
+        *size = originalImage.size();
+
+        QImage result;
+
+        if (requestedSize.isValid()) {
+            m_ImageCachingService->cacheImage(id, requestedSize);
+            result = originalImage.scaled(requestedSize, Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        } else {
+            LOG_WARNING << "Size is invalid:" << requestedSize.width() << "x" << requestedSize.height();
+            m_ImageCachingService->cacheImage(id);
+            result = originalImage.scaled(m_ImageCachingService->getDefaultSize(), Qt::KeepAspectRatio, Qt::SmoothTransformation);
+        }
+
+        return result;
     }
 }

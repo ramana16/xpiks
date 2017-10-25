@@ -14,6 +14,7 @@
 #include <QObject>
 #include <QString>
 #include <QVector>
+#include <QSize>
 #include <vector>
 #include <memory>
 #include "../Common/baseentity.h"
@@ -45,11 +46,17 @@ namespace QMLExtensions {
         void upgradeCacheStorage();
 
     public:
+        const QSize &getDefaultSize() const { return m_DefaultSize; }
+
+    public:
         void setScale(qreal scale);
         void cacheImage(const QString &key, const QSize &requestedSize, bool recache=false);
         void cacheImage(const QString &key);
         void generatePreviews(const MetadataIO::ArtworksSnapshot &snapshot);
         bool tryGetCachedImage(const QString &key, const QSize &requestedSize, QString &cached, bool &needsUpdate);
+
+    private:
+        void updateDefaultSize();
 
     public slots:
         void screenChangedHandler(QScreen *screen);
@@ -57,6 +64,7 @@ namespace QMLExtensions {
 
     private:
         ImageCachingWorker *m_CachingWorker;
+        QSize m_DefaultSize;
         volatile bool m_IsCancelled;
         qreal m_Scale;
     };

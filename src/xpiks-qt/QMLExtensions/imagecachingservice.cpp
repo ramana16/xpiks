@@ -27,6 +27,7 @@ namespace QMLExtensions {
         m_IsCancelled(false),
         m_Scale(1.0)
     {
+        updateDefaultSize();
     }
 
     void ImageCachingService::startService(const std::shared_ptr<Common::ServiceStartParams> &params) {
@@ -84,6 +85,7 @@ namespace QMLExtensions {
                 m_CachingWorker->setScale(scale);
             }
             LOG_INFO << "Scale is now" << m_Scale;
+            updateDefaultSize();
         }
     }
 
@@ -110,13 +112,15 @@ namespace QMLExtensions {
         requests.reserve(size);
         const bool recache = false;
 
+        updateDefaultSize();
+
         for (size_t i = 0, j = 0; i < size; i++) {
             auto *artwork = snapshot.get(i);
             Models::ImageArtwork *imageArtwork = dynamic_cast<Models::ImageArtwork*>(artwork);
             if (imageArtwork != nullptr) {
                 const bool withDelay = j % 2;
                 requests.emplace_back(new ImageCacheRequest(artwork->getThumbnailPath(),
-                                                            QSize(DEFAULT_THUMB_WIDTH * m_Scale, DEFAULT_THUMB_HEIGHT * m_Scale),
+                                                            m_DefaultSize,
                                                             recache,
                                                             withDelay));
                 j++;
@@ -134,6 +138,11 @@ namespace QMLExtensions {
         } else {
             return false;
         }
+    }
+
+    void ImageCachingService::updateDefaultSize() {
+        m_DefaultSize.setHeight(DEFAULT_THUMB_HEIGHT * m_Scale);
+        m_DefaultSize.setWidth(DEFAULT_THUMB_WIDTH * m_Scale);
     }
 
     void ImageCachingService::screenChangedHandler(QScreen *screen) {
