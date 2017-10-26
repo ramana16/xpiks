@@ -22,14 +22,12 @@ namespace UndoRedo {
         public RemoveArtworksHistoryItem
     {
     public:
-        RemoveDirectoryItem(int commandID, const QString &absolutePath, int startFilesIndex, int startDirectoryIndex, bool isDirectorySelected, bool
-        needsDeselectionOnUndo):
+        RemoveDirectoryItem(int commandID, const QString &absolutePath, int startFilesIndex, int startDirectoryIndex, bool isDirectorySelected):
             RemoveArtworksHistoryItem(commandID, {}, {}, {}, true),
             m_AbsolutePath(absolutePath),
             m_StartFilesIndex(startFilesIndex),
             m_StartDirectoryIndex(startDirectoryIndex),
-            m_IsDirectorySelected(isDirectorySelected),
-            m_NeedsDeselectionOnUndo(needsDeselectionOnUndo)
+            m_IsDirectorySelected(isDirectorySelected)
         {
             QStringList files, vector_files;
             QStringList rawFilenames;
@@ -81,7 +79,6 @@ namespace UndoRedo {
         int m_StartFilesIndex;
         int m_StartDirectoryIndex;
         bool m_IsDirectorySelected;
-        bool m_NeedsDeselectionOnUndo;
     };
 }
 

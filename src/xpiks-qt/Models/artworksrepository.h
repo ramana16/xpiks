@@ -55,7 +55,7 @@ namespace Models {
 
     public:
         void updateCountsForExistingDirectories();
-        void cleanupEmptyDirectories(QVector<RepoDir> &directoriesToRemove,  QVector<int> &indicesToRemove, bool &needsDeselectionOnUndo);
+        void cleanupEmptyDirectories(QVector<RepoDir> &directoriesToRemove,  QVector<int> &indicesToRemove);
         void resetLastUnavailableFilesCount() { m_LastUnavailableFilesCount=0; }
         void stopListeningToUnavailableFiles();
         void insertEmptyDirectory(const QString &absolutePath, int index, bool isSelected);

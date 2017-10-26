@@ -96,8 +96,7 @@ void ArtworkRepositoryTests::addAndRemoveSameFileTest() {
     bool removeResult = repository.removeFile(filename, dirID);
     QVector<Models::ArtworksRepository::RepoDir> directoriesToRemove;
     QVector<int> indicesToRemove;
-    bool needsDeselectionOnUndo;
-    repository.cleanupEmptyDirectories(directoriesToRemove, indicesToRemove, needsDeselectionOnUndo);
+    repository.cleanupEmptyDirectories(directoriesToRemove, indicesToRemove);
 
     QCOMPARE(repository.getArtworksSourcesCount(), 0);
     QCOMPARE(removeResult, true);
@@ -126,8 +125,7 @@ void ArtworkRepositoryTests::removeNotExistingFileTest() {
     bool removeResult = repository.removeFile(filename2, dirID);
     QVector<Models::ArtworksRepository::RepoDir> directoriesToRemove;
     QVector<int> indicesToRemove;
-    bool needsDeselectionOnUndo;
-    repository.cleanupEmptyDirectories(directoriesToRemove, indicesToRemove, needsDeselectionOnUndo);
+    repository.cleanupEmptyDirectories(directoriesToRemove, indicesToRemove);
 
     QCOMPARE(removeResult, false);
     QCOMPARE(repository.getArtworksSourcesCount(), 1);

@@ -81,8 +81,7 @@ namespace Commands {
             Models::ArtworksRepository *artworkRepository = commandManager->getArtworksRepository();
             QVector<Models::ArtworksRepository::RepoDir> removedDirectories;
             QVector<int> indicesToRemove;
-            bool needsDeselectionOnUndo;
-            artworkRepository->cleanupEmptyDirectories(removedDirectories, indicesToRemove, needsDeselectionOnUndo);
+            artworkRepository->cleanupEmptyDirectories(removedDirectories, indicesToRemove);
             artworkRepository->updateCountsForExistingDirectories();
             artworkRepository->unwatchFilePaths(removedItemsFilepathes);
 
@@ -116,7 +115,7 @@ namespace Commands {
                 const auto &fileStartIndex = removedItemsIndices.front();
 
                 std::unique_ptr<UndoRedo::IHistoryItem> removeDirectoryItem(
-                        new UndoRedo::RemoveDirectoryItem(getCommandID(),path, fileStartIndex, directoryIndex, directorySelectedFlag, needsDeselectionOnUndo));
+                        new UndoRedo::RemoveDirectoryItem(getCommandID(),path, fileStartIndex, directoryIndex, directorySelectedFlag));
                 commandManager->recordHistoryItem(removeDirectoryItem);
             }
 

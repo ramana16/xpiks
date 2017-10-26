@@ -36,9 +36,8 @@ namespace Models {
         emit dataChanged(index(0), index(rowCount() - 1), QVector<int>() << UsedImagesCountRole << IsSelectedRole);
     }
 
-    void ArtworksRepository::cleanupEmptyDirectories(QVector<RepoDir> &directoriesToRemove, QVector<int> &indicesToRemove, bool &needsDeselectionOnUndo) {
+    void ArtworksRepository::cleanupEmptyDirectories(QVector<RepoDir> &directoriesToRemove, QVector<int> &indicesToRemove) {
         LOG_DEBUG << "#";
-        needsDeselectionOnUndo = true;
         size_t count = m_DirectoriesList.size();
         indicesToRemove.reserve((int)count);
         directoriesToRemove.reserve((int)count);
@@ -48,10 +47,6 @@ namespace Models {
             if (directory.m_FilesCount == 0) {
                 indicesToRemove.push_back((int)i);
                 directoriesToRemove.push_back(directory);
-            }
-            else
-            {
-                needsDeselectionOnUndo &= !directory.m_IsSelected;
             }
         }
 

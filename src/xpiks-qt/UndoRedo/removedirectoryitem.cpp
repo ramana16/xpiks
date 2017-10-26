@@ -18,10 +18,6 @@ void UndoRedo::RemoveDirectoryItem::undo(const Commands::ICommandManager *comman
     Commands::CommandManager *commandManager = (Commands::CommandManager *)commandManagerInterface;
     Models::ArtworksRepository *artworksRepository = commandManager->getArtworksRepository();
 
-    if (m_NeedsDeselectionOnUndo) {
-        artworksRepository->unselectAllDirectories();
-    }
-
     artworksRepository->insertEmptyDirectory(m_AbsolutePath, m_StartDirectoryIndex, m_IsDirectorySelected);
 
     RemoveArtworksHistoryItem::undo(commandManagerInterface);
