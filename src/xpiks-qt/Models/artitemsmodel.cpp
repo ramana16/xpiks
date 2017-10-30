@@ -385,8 +385,10 @@ namespace Models {
     }
 
     void ArtItemsModel::saveSelectedArtworks(const QVector<int> &selectedIndices, bool overwriteAll, bool useBackups) {
+        LOG_INFO << "overwrite:" << overwriteAll << "useBackups:" << useBackups;
+
         MetadataIO::WeakArtworksSnapshot modifiedSelectedArtworks;
-        int count = selectedIndices.count();
+        const int count = selectedIndices.count();
         modifiedSelectedArtworks.reserve(count/2);
 
         for (int i = 0; i < count; ++i) {
@@ -1170,6 +1172,16 @@ namespace Models {
         LOG_INFO << "Found matches to" << attachedVectors << "file(s)";
 
         return attachedVectors;
+    }
+
+    void ArtItemsModel::unlockAllForIO() {
+        LOG_DEBUG << "#";
+        size_t size = getArtworksCount();
+
+        for (size_t i = 0; i < size; ++i) {
+            ArtworkMetadata *artwork = accessArtwork(i);
+            artwork->setIsLockedIO(false);
+        }
     }
 
     void ArtItemsModel::processUpdateRequests(const std::vector<std::shared_ptr<QMLExtensions::ArtworkUpdateRequest> > &updateRequests) {

@@ -59,7 +59,8 @@ namespace Models {
             FlagIsInitialized = 1 << 2, // is initialized from real file
             FlagIsAlmostInitialized = 1 << 3, // is initialized from cached storage
             FlagIsUnavailable = 1 << 4,
-            FlagIsLockedForEditing = 1 << 5
+            FlagIsLockedForEditing = 1 << 5,
+            FlagIsLockedIO = 1 << 6
         };
 
 #define PROTECT_FLAGS_READ QReadLocker rlocker(&m_FlagsLock); Q_UNUSED(rlocker);
@@ -71,6 +72,7 @@ namespace Models {
         inline bool getIsInitializedFlag() { PROTECT_FLAGS_READ; return Common::HasFlag(m_MetadataFlags, FlagIsInitialized); }
         inline bool getIsAlmostInitializedFlag() { PROTECT_FLAGS_READ; return Common::HasFlag(m_MetadataFlags, FlagIsAlmostInitialized); }
         inline bool getIsLockedForEditingFlag() { PROTECT_FLAGS_READ; return Common::HasFlag(m_MetadataFlags, FlagIsLockedForEditing); }
+        inline bool getIsLockedIOFlag() { PROTECT_FLAGS_READ; return Common::HasFlag(m_MetadataFlags, FlagIsLockedIO); }
 
         inline void setIsModifiedFlag(bool value) { PROTECT_FLAGS_WRITE; Common::ApplyFlag(m_MetadataFlags, value, FlagIsModified); }
         inline void setIsSelectedFlag(bool value) { PROTECT_FLAGS_WRITE; Common::ApplyFlag(m_MetadataFlags, value, FlagsIsSelected); }
@@ -78,6 +80,7 @@ namespace Models {
         inline void setIsInitializedFlag(bool value) { PROTECT_FLAGS_WRITE; Common::ApplyFlag(m_MetadataFlags, value, FlagIsInitialized); }
         inline void setIsAlmostInitializedFlag(bool value) { PROTECT_FLAGS_WRITE; Common::ApplyFlag(m_MetadataFlags, value, FlagIsAlmostInitialized); }
         inline void setIsLockedForEditingFlag(bool value) { PROTECT_FLAGS_WRITE; Common::ApplyFlag(m_MetadataFlags, value, FlagIsLockedForEditing); }
+        inline void setIsLockedIOFlag(bool value) { PROTECT_FLAGS_WRITE; Common::ApplyFlag(m_MetadataFlags, value, FlagIsLockedIO); }
 
 #undef PROTECT_FLAGS_READ
 #undef PROTECT_FLAGS_WRITE
@@ -123,6 +126,9 @@ namespace Models {
 
         bool isLockedForEditing() { return getIsLockedForEditingFlag(); }
         void setIsLockedForEditing(bool value) { setIsLockedForEditingFlag(value); }
+
+        bool isLockedIO() { return getIsLockedIOFlag(); }
+        void setIsLockedIO(bool value) { setIsLockedIOFlag(value); }
 
         virtual void clearModel();
         virtual bool clearKeywords() override;

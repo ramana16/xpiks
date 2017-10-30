@@ -26,17 +26,20 @@ namespace QMLExtensions {
             QuickThumbnailFlag = 1 << 0,
             GoodQualityAllowed = 1 << 1,
             RecacheFlag = 1 << 2,
-            WithDelayFlag = 1 << 3
+            WithDelayFlag = 1 << 3,
+            IsSeparatorFlag = 1 << 4
         };
 
     public:
+        // a constructor for separator item
         VideoCacheRequest():
             m_VideoArtwork(NULL),
             m_Flags(0)
         {
+            Common::ApplyFlag(m_Flags, true, IsSeparatorFlag);
+
             Common::ApplyFlag(m_Flags, true, QuickThumbnailFlag);
             Common::ApplyFlag(m_Flags, true, RecacheFlag);
-            // a constructor for separator item
         }
 
         VideoCacheRequest(Models::VideoArtwork *videoArtwork, bool recache, bool quickThumbnail=true, bool withDelay=false, bool allowGoodQuality=false):
@@ -67,7 +70,7 @@ namespace QMLExtensions {
         bool getGoodQualityAllowed() const { return Common::HasFlag(m_Flags, GoodQualityAllowed); }
         Common::ID_t getArtworkID() const { return m_VideoArtwork->getItemID(); }
         size_t getLastKnownIndex() const { return m_VideoArtwork->getLastKnownIndex(); }
-        bool isSeparator() const { return (m_VideoArtwork == NULL); }
+        bool isSeparator() const { return Common::HasFlag(m_Flags, IsSeparatorFlag); }
         const QString &getThumbnailPath() const { return m_VideoArtwork->getThumbnailPath(); }
 
     public:

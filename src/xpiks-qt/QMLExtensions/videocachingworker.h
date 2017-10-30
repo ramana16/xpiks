@@ -57,8 +57,10 @@ namespace QMLExtensions {
         void cacheImage(const QString &thumbnailPath);
         void applyThumbnail(std::shared_ptr<VideoCacheRequest> &item, const QString &thumbnailPath);
         void saveIndex();
+        bool checkLockedIO(std::shared_ptr<VideoCacheRequest> &item);
         bool checkProcessed(std::shared_ptr<VideoCacheRequest> &item);
         bool isSeparator(const std::shared_ptr<VideoCacheRequest> &item);
+        void sleepIfNeeded(const std::shared_ptr<VideoCacheRequest> &item);
 
     private:
         volatile int m_ProcessedItemsCount;

@@ -23,6 +23,7 @@ namespace Helpers {
 
     public:
         void set();
+        void reset();
         void waitOne();
 
     private:

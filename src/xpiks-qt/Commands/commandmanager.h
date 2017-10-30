@@ -320,6 +320,7 @@ namespace Commands {
         virtual Helpers::DatabaseManager *getDatabaseManager() const { return m_DatabaseManager; }
         virtual MetadataIO::MetadataIOCoordinator *getMetadataIOCoordinator() const { return m_MetadataIOCoordinator; }
         virtual AutoComplete::KeywordsAutoCompleteModel *getAutoCompleteModel() const { return m_AutoCompleteModel; }
+        virtual QMLExtensions::VideoCachingService *getVideoCachingService() const { return m_VideoCachingService; }
 
 #ifdef INTEGRATION_TESTS
         virtual Translation::TranslationManager *getTranslationManager() const { return m_TranslationManager; }

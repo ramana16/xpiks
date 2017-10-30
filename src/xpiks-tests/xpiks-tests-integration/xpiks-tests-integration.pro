@@ -216,7 +216,8 @@ SOURCES += main.cpp \
     ../../xpiks-qt/MetadataIO/csvexportworker.cpp \
     csvexporttest.cpp \
     exiv2iohelpers.cpp \
-    unicodeiotest.cpp
+    unicodeiotest.cpp \
+    ../../xpiks-qt/Helpers/threadhelpers.cpp
 
 RESOURCES +=
 
@@ -468,7 +469,8 @@ HEADERS += \
     ../../../vendors/csv/csv.h \
     exiv2iohelpers.h \
     unicodeiotest.h \
-    ../../xpiks-qt/Common/delayedactionentity.h
+    ../../xpiks-qt/Common/delayedactionentity.h \
+    ../../xpiks-qt/Helpers/threadhelpers.h
 
 INCLUDEPATH += ../../../vendors/tiny-aes
 INCLUDEPATH += ../../../vendors/cpp-libface

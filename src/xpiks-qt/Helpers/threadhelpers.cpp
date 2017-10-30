@@ -25,6 +25,12 @@ namespace Helpers {
         }
     }
 
+    void ManualResetEvent::reset() {
+        QMutexLocker locker(&m_Mutex);
+        Q_UNUSED(locker);
+        m_Flag = false;
+    }
+
     void ManualResetEvent::waitOne() {
         QMutexLocker locker(&m_Mutex);
         Q_UNUSED(locker);

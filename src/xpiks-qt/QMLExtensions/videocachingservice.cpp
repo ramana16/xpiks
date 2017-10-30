@@ -90,4 +90,10 @@ namespace QMLExtensions {
         m_CachingWorker->submitItems(requests);
         m_CachingWorker->submitSaveIndexItem();
     }
+
+    void VideoCachingService::waitWorkerIdle() {
+        LOG_DEBUG << "#";
+        Q_ASSERT(m_CachingWorker != nullptr);
+        m_CachingWorker->waitIdle();
+    }
 }

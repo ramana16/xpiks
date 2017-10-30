@@ -19,6 +19,7 @@
 #include <utility>
 #include <algorithm>
 #include "../Common/defines.h"
+#include "../Helpers/threadhelpers.h"
 
 namespace Common {
     template<typename T>
@@ -198,6 +199,10 @@ namespace Common {
             m_QueueMutex.unlock();
         }
 
+        void waitIdle() {
+            m_IdleEvent.waitOne();
+        }
+
     protected:
         virtual bool initWorker() = 0;
         virtual void processOneItem(std::shared_ptr<T> &item) = 0;
@@ -205,6 +210,8 @@ namespace Common {
         virtual void workerStopped() = 0;
 
         void runWorkerLoop() {
+            m_IdleEvent.set();
+
             for (;;) {
                 if (m_Cancel) {
                     LOG_INFO << "Cancelled. Exiting...";
@@ -212,32 +219,37 @@ namespace Common {
                 }
 
                 bool noMoreItems = false;
+                std::shared_ptr<T> item;
 
                 m_QueueMutex.lock();
-
-                while (m_Queue.empty()) {
-                    bool waitResult = m_WaitAnyItem.wait(&m_QueueMutex);
-                    if (!waitResult) {
-                        LOG_WARNING << "Waiting failed for new items";
+                {
+                    while (m_Queue.empty()) {
+                        bool waitResult = m_WaitAnyItem.wait(&m_QueueMutex);
+                        if (!waitResult) {
+                            LOG_WARNING << "Waiting failed for new items";
+                        }
                     }
+
+                    auto &nextItem = m_Queue.front();
+                    item = nextItem.first;
+                    m_Queue.pop_front();
+
+                    noMoreItems = m_Queue.empty();
                 }
-
-                auto &nextItem = m_Queue.front();
-                std::shared_ptr<T> item = nextItem.first;
-                m_Queue.pop_front();
-
-                noMoreItems = m_Queue.empty();
-
                 m_QueueMutex.unlock();
 
                 if (item.get() == nullptr) { break; }
 
-                try {
-                    processOneItem(item);
+                m_IdleEvent.reset();
+                {
+                    try {
+                        processOneItem(item);
+                    }
+                    catch (...) {
+                        LOG_WARNING << "Exception while processing item!";
+                    }
                 }
-                catch (...) {
-                    LOG_WARNING << "Exception while processing item!";
-                }
+                m_IdleEvent.set();
 
                 if (noMoreItems) {
                     onQueueIsEmpty();
@@ -252,6 +264,7 @@ namespace Common {
         }
 
     private:
+        Helpers::ManualResetEvent m_IdleEvent;
         QWaitCondition m_WaitAnyItem;
         QMutex m_QueueMutex;
         std::deque<std::pair<std::shared_ptr<T>, batch_id_t> > m_Queue;

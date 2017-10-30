@@ -169,7 +169,8 @@ SOURCES += main.cpp \
     MetadataIO/csvexportworker.cpp \
     MetadataIO/csvexportplansmodel.cpp \
     MetadataIO/csvexportproperties.cpp \
-    MetadataIO/csvexportmodel.cpp
+    MetadataIO/csvexportmodel.cpp \
+    Helpers/threadhelpers.cpp
 
 RESOURCES += qml.qrc
 
@@ -402,7 +403,8 @@ HEADERS += \
     MetadataIO/csvexportmodel.h \
     Common/delayedactionentity.h \
     Models/artworkelement.h \
-    Models/previewartworkelement.h
+    Models/previewartworkelement.h \
+    Helpers/threadhelpers.h
 
 DISTFILES += \
     Components/CloseIcon.qml \

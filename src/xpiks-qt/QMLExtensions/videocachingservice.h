@@ -41,6 +41,7 @@ namespace QMLExtensions {
 
     public:
         void generateThumbnails(const MetadataIO::ArtworksSnapshot &snapshot);
+        void waitWorkerIdle();
 
     private:
         VideoCachingWorker *m_CachingWorker;

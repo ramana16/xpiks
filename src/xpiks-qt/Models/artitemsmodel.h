@@ -184,6 +184,7 @@ namespace Models {
         void updateItemsInRangesEx(const QVector<QPair<int, int> > &ranges, const QVector<int> &roles);
         void setAllItemsSelected(bool selected);
         int attachVectors(const QHash<QString, QHash<QString, QString> > &vectorsPaths, QVector<int> &indicesToUpdate) const;
+        void unlockAllForIO();
 
     public:
         // update hub related

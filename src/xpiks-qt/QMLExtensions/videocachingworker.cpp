@@ -68,8 +68,9 @@ namespace QMLExtensions {
     }
 
     void VideoCachingWorker::processOneItem(std::shared_ptr<VideoCacheRequest> &item) {
-        if (checkProcessed(item)) { return; }
+        if (checkLockedIO(item)) { sleepIfNeeded(item); return; }
         if (isSeparator(item)) { saveIndex(); return; }
+        if (checkProcessed(item)) { return; }
 
         const QString &originalPath = item->getFilepath();
         const bool isQuickThumbnail = item->getIsQuickThumbnail();
@@ -92,10 +93,7 @@ namespace QMLExtensions {
                     saveIndex();
                 }
 
-                if (item->getWithDelay()) {
-                    // force context switch for more imporant tasks
-                    QThread::msleep(VIDEO_WORKER_SLEEP_DELAY);
-                }
+                sleepIfNeeded(item);
 
                 if (isQuickThumbnail && item->getGoodQualityAllowed()) {
                     LOG_INTEGR_TESTS_OR_DEBUG << "Regenerating good quality thumb for" << originalPath;
@@ -218,6 +216,14 @@ namespace QMLExtensions {
         m_Cache.sync();
     }
 
+    bool VideoCachingWorker::checkLockedIO(std::shared_ptr<VideoCacheRequest> &item) {
+        Models::VideoArtwork *video = item->getArtwork();
+        Q_ASSERT(video != nullptr);
+        if (video->isLockedIO()) {
+            this->submitItem(item);
+        }
+    }
+
     bool VideoCachingWorker::checkProcessed(std::shared_ptr<VideoCacheRequest> &item) {
         if (item->getNeedRecache()) { return false; }
 
@@ -241,5 +247,12 @@ namespace QMLExtensions {
     bool VideoCachingWorker::isSeparator(const std::shared_ptr<VideoCacheRequest> &item) {
         bool result = item->isSeparator();
         return result;
+    }
+
+    void VideoCachingWorker::sleepIfNeeded(const std::shared_ptr<VideoCacheRequest> &item) {
+        if (item->getWithDelay()) {
+            // force context switch for more imporant tasks
+            QThread::msleep(VIDEO_WORKER_SLEEP_DELAY);
+        }
     }
 }
