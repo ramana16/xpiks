@@ -217,11 +217,16 @@ namespace QMLExtensions {
     }
 
     bool VideoCachingWorker::checkLockedIO(std::shared_ptr<VideoCacheRequest> &item) {
+        bool isLocked = false;
+
         Models::VideoArtwork *video = item->getArtwork();
         Q_ASSERT(video != nullptr);
         if (video->isLockedIO()) {
             this->submitItem(item);
+            isLocked = true;
         }
+
+        return isLocked;
     }
 
     bool VideoCachingWorker::checkProcessed(std::shared_ptr<VideoCacheRequest> &item) {
