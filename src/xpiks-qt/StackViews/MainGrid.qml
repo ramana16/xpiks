@@ -492,6 +492,7 @@ ColumnLayout {
 
                 GridView {
                     id: artworksHost
+                    property bool isEditingAllowed: filteredArtItemsModel.selectedArtworksCount == 0
                     anchors.fill: parent
                     anchors.rightMargin: mainScrollView.areScrollbarsVisible ? 10 : 0
                     model: filteredArtItemsModel
@@ -815,6 +816,13 @@ ColumnLayout {
                                                 cache: true
                                             }
 
+                                            Rectangle {
+                                                anchors.fill: parent
+                                                color: "transparent"
+                                                border.color: uiColors.artworkActiveColor
+                                                border.width: rowWrapper.isItemSelected ? 1 : 0
+                                            }
+
                                             MouseArea {
                                                 anchors.fill: parent
                                                 propagateComposedEvents: true
@@ -913,6 +921,7 @@ ColumnLayout {
                                             border.width: descriptionTextInput.activeFocus ? 1 : 0
                                             clip: true
                                             focus: false
+                                            enabled: artworksHost.isEditingAllowed
 
                                             Flickable {
                                                 id: descriptionFlick
@@ -1014,7 +1023,7 @@ ColumnLayout {
                                             id: titleRect
                                             height: 30
                                             visible: columnLayout.isWideEnough
-                                            enabled: columnLayout.isWideEnough
+                                            enabled: columnLayout.isWideEnough && artworksHost.isEditingAllowed
                                             width: columnLayout.isWideEnough ? ((columnLayout.width / 2) - 10) : 0
                                             anchors.right: parent.right
                                             anchors.top: descriptionText.bottom
@@ -1174,6 +1183,7 @@ ColumnLayout {
                                                 scrollStep: keywordHeight
                                                 stealWheel: false
                                                 focus: true
+                                                enabled: artworksHost.isEditingAllowed
 
                                                 function acceptCompletion(completionID) {
                                                     var accepted = artItemsModel.acceptCompletionAsPreset(rowWrapper.getIndex(), completionID);
@@ -1194,6 +1204,7 @@ ColumnLayout {
                                                     hasSpellCheckError: !iscorrect
                                                     hasDuplicate: hasduplicate
                                                     onRemoveClicked: keywordsWrapper.removeKeyword(kw.delegateIndex)
+                                                    closeIconDisabledColor: rowWrapper.isHighlighted ? uiColors.closeIconDisabledColor : uiColors.closeIconInactiveColor
 
                                                     onActionDoubleClicked: {
                                                         var callbackObject = {
