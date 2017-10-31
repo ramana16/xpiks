@@ -1159,6 +1159,8 @@ void Commands::CommandManager::beforeDestructionCallback() const {
     #endif
 #endif
 
+    clearCurrentItem();
+
     m_ArtworksRepository->stopListeningToUnavailableFiles();
 
     m_ArtItemsModel->disconnect();

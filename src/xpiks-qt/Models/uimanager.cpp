@@ -27,6 +27,7 @@ namespace Models {
     UIManager::UIManager(SettingsModel *settingsModel, QObject *parent) :
         QObject(parent),
         Common::StatefulEntity("uimanager"),
+        Common::DelayedActionEntity(500, MAX_SAVE_PAUSE_RESTARTS),
         m_SettingsModel(settingsModel),
         m_TabID(42),
         m_SaveTimerId(-1),
@@ -54,6 +55,7 @@ namespace Models {
     }
 
     void UIManager::registerCurrentItem(std::shared_ptr<QuickBuffer::ICurrentEditable> &currentItem) {
+        LOG_DEBUG << "#";
         m_CurrentEditable = std::move(currentItem);
         emit currentEditableChanged();
     }
@@ -82,7 +84,7 @@ namespace Models {
         const int current = getArtworkEditRightPaneWidth();
         if (current != value) {
             setStateValue(Constants::artworkEditRightPaneWidth, value);
-            justEdited();
+            justChanged();
             emit artworkEditRightPaneWidthChanged();
         }
     }
@@ -94,7 +96,7 @@ namespace Models {
     void UIManager::setAppWidth(int width) {
         LOG_DEBUG << width;
         setStateValue(Constants::appWindowWidth, width);
-        justEdited();
+        justChanged();
     }
 
     int UIManager::getAppHeight(int defaultHeight) {
@@ -104,7 +106,7 @@ namespace Models {
     void UIManager::setAppHeight(int height) {
         LOG_DEBUG << height;
         setStateValue(Constants::appWindowHeight, height);
-        justEdited();
+        justChanged();
     }
 
     int UIManager::getAppPosX(int defaultPosX) {
@@ -116,7 +118,7 @@ namespace Models {
     void UIManager::setAppPosX(int x) {
         LOG_DEBUG << x;
         setStateValue(Constants::appWindowX, x);
-        justEdited();
+        justChanged();
     }
 
     int UIManager::getAppPosY(int defaultPosY) {
@@ -128,7 +130,7 @@ namespace Models {
     void UIManager::setAppPosY(int y) {
         LOG_DEBUG << y;
         setStateValue(Constants::appWindowY, y);
-        justEdited();
+        justChanged();
     }
 
     void UIManager::activateQuickBufferTab() {
@@ -224,38 +226,10 @@ namespace Models {
 
         setStateValue(Constants::artworkEditRightPaneWidth, DEFAULT_ARTWORK_EDIT_RIGHT_PANE_WIDTH);
 
-        justEdited();
+        justChanged();
     }
 
-    void UIManager::justEdited() {
-        if (m_SaveRestartsCount < MAX_SAVE_PAUSE_RESTARTS) {
-            if (m_SaveTimerId != -1) {
-                this->killTimer(m_SaveTimerId);
-                LOG_INTEGR_TESTS_OR_DEBUG << "killed timer" << m_SaveTimerId;
-            }
-
-            m_SaveTimerId = this->startTimer(400, Qt::VeryCoarseTimer);
-            LOG_INTEGR_TESTS_OR_DEBUG << "started timer" << m_SaveTimerId;
-            m_SaveRestartsCount++;
-        } else {
-            Q_ASSERT(m_SaveTimerId != -1);
-            LOG_INFO << "Maximum backup delays occured, forcing backup";
-        }
-    }
-
-    void UIManager::timerEvent(QTimerEvent *event) {
-        if (event == nullptr) { return; }
-
-        LOG_DEBUG << "timer" << event->timerId();
-
-        if (event->timerId() == m_SaveTimerId) {
-            m_SaveRestartsCount = 0;
-            m_SaveTimerId = -1;
-
-            syncState();
-        }
-
-        // one time event
-        this->killTimer(event->timerId());
+    void UIManager::doOnTimer() {
+        syncState();
     }
 }

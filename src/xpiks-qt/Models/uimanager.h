@@ -22,13 +22,18 @@
 #include "../QMLExtensions/tabsmodel.h"
 #include "../Common/statefulentity.h"
 #include "../Helpers/constants.h"
+#include "../Common/delayedactionentity.h"
 
 namespace Models {
     class ArtworkMetadata;
     class ArtworkProxyBase;
     class SettingsModel;
 
-    class UIManager: public QObject, public Common::StatefulEntity
+    class UIManager:
+            public QObject,
+            public Common::StatefulEntity,
+            public Common::DelayedActionEntity
+
     {
         Q_OBJECT
         Q_PROPERTY(bool hasCurrentEditable READ getHasCurrentEditable NOTIFY currentEditableChanged)
@@ -48,6 +53,8 @@ namespace Models {
 
     public:
         void registerCurrentItem(std::shared_ptr<QuickBuffer::ICurrentEditable> &currentItem);
+
+    public:
         QMLExtensions::TabsModel *getTabsModel() { return &m_TabsModel; }
         QMLExtensions::ActiveTabsModel *getActiveTabs() { return &m_ActiveTabs; }
         QMLExtensions::InactiveTabsModel *getInactiveTabs() { return &m_InactiveTabs; }
@@ -86,9 +93,12 @@ namespace Models {
         void keywordHeightChanged(double value);
         void artworkEditRightPaneWidthChanged();
 
+        // DelayedActionEntity implementation
     protected:
-        void justEdited();
-        virtual void timerEvent(QTimerEvent *event) override;
+        virtual void doKillTimer(int timerId) override { this->killTimer(timerId); }
+        virtual int doStartTimer(int interval, Qt::TimerType timerType) override { return this->startTimer(interval, timerType); }
+        virtual void doOnTimer() override;
+        virtual void timerEvent(QTimerEvent *event) override { onQtTimer(event); }
 
     private:
         Models::SettingsModel *m_SettingsModel;
