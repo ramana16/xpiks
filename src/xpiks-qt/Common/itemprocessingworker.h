@@ -207,7 +207,7 @@ namespace Common {
                     m_Queue.clear();
                 }
 
-                Common::flag_t flags;
+                Common::flag_t flags = 0;
                 Common::SetFlag(flags, FlagIsStopper);
 
                 m_Queue.emplace_back(std::shared_ptr<T>(), 0, flags);

@@ -36,6 +36,7 @@ namespace QMLExtensions {
 
     VideoCachingWorker::VideoCachingWorker(Helpers::DatabaseManager *dbManager, QObject *parent) :
         QObject(parent),
+        ItemProcessingWorker(2),
         m_ProcessedItemsCount(0),
         m_Cache(dbManager)
     {
