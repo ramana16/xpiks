@@ -30,11 +30,11 @@ namespace Warnings {
 
     protected:
         virtual bool initWorker() override;
+        virtual void processOneItemEx(Common::flag_t flags, std::shared_ptr<IWarningsItem> &item) override;
         virtual void processOneItem(std::shared_ptr<IWarningsItem> &item) override;
 
     private:
         void processWarningsItem(std::shared_ptr<WarningsItem> &item);
-        void sleepIfNeeded(std::shared_ptr<WarningsItem> &item);
         void initValuesFromSettings();
 
     protected:

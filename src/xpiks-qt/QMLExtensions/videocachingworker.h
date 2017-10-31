@@ -31,6 +31,7 @@ namespace QMLExtensions {
 
     protected:
         virtual bool initWorker() override;
+        virtual void processOneItemEx(Common::flag_t flags, std::shared_ptr<VideoCacheRequest> &item) override;
         virtual void processOneItem(std::shared_ptr<VideoCacheRequest> &item) override;
 
     private:
@@ -50,7 +51,6 @@ namespace QMLExtensions {
 
     public:
         bool tryGetVideoThumbnail(const QString &key, QString &cachedPath, bool &needsUpdate);
-        void submitSaveIndexItem();
 
     private:
         bool saveThumbnail(QImage &image, const QString &originalPath, bool isQuickThumbnail, QString &thumbnailPath);
@@ -59,8 +59,6 @@ namespace QMLExtensions {
         void saveIndex();
         bool checkLockedIO(std::shared_ptr<VideoCacheRequest> &item);
         bool checkProcessed(std::shared_ptr<VideoCacheRequest> &item);
-        bool isSeparator(const std::shared_ptr<VideoCacheRequest> &item);
-        void sleepIfNeeded(const std::shared_ptr<VideoCacheRequest> &item);
 
     private:
         volatile int m_ProcessedItemsCount;

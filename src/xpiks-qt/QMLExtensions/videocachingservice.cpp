@@ -72,23 +72,20 @@ namespace QMLExtensions {
         std::vector<std::shared_ptr<VideoCacheRequest> > requests;
         requests.reserve(size);
 
-        for (size_t i = 0, j = 0; i < size; i++) {
+        for (size_t i = 0; i < size; i++) {
             auto *artwork = snapshot.get(i);
             Models::VideoArtwork *videoArtwork = dynamic_cast<Models::VideoArtwork *>(artwork);
             if (videoArtwork != nullptr) {
-                const bool withDelay = j % 2 == 0;
                 const bool quickThumbnail = true, dontRecache = false;
                 requests.emplace_back(new VideoCacheRequest(videoArtwork,
                                                             dontRecache,
                                                             quickThumbnail,
-                                                            withDelay,
                                                             goodQualityAllowed));
-                j++;
             }
         }
 
         m_CachingWorker->submitItems(requests);
-        m_CachingWorker->submitSaveIndexItem();
+        m_CachingWorker->submitSeparator();
     }
 
     void VideoCachingService::waitWorkerIdle() {

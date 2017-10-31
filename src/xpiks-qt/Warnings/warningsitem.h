@@ -21,17 +21,11 @@
 #include "iwarningsitem.h"
 
 namespace Warnings {
-    class EmptyWarningsItem: public IWarningsItem {
-    public:
-        virtual void submitWarnings(Common::flag_t) override { /* BUMP */ }
-    };
-
     class WarningsItem: public IWarningsItem {
     public:
-        WarningsItem(Models::ArtworkMetadata *checkableItem, Common::WarningsCheckFlags checkingFlags = Common::WarningsCheckFlags::All, bool withDelay = false):
+        WarningsItem(Models::ArtworkMetadata *checkableItem, Common::WarningsCheckFlags checkingFlags = Common::WarningsCheckFlags::All):
             m_CheckableItem(checkableItem),
-            m_CheckingFlags(checkingFlags),
-            m_WithDelay(withDelay)
+            m_CheckingFlags(checkingFlags)
         {
             checkableItem->acquire();
             m_Description = checkableItem->getDescription();
@@ -78,7 +72,6 @@ namespace Warnings {
         }
 
     public:
-        bool getWithDelay() const { return m_WithDelay; }
         bool needCheckAll() const { return m_CheckingFlags == Common::WarningsCheckFlags::All; }
         Common::WarningsCheckFlags getCheckingFlags() const { return m_CheckingFlags; }
         const QString &getDescription() const { return m_Description; }
@@ -106,7 +99,6 @@ namespace Warnings {
         QString m_Title;
         QSet<QString> m_KeywordsSet;
         Common::WarningsCheckFlags m_CheckingFlags;
-        bool m_WithDelay;
     };
 }
 

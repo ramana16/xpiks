@@ -29,10 +29,12 @@
 
 #define MINIMUM_LENGTH_FOR_STEMMING 3
 #define SPELLCHECK_WORKER_SLEEP_DELAY 500
+#define SPELLCHECK_DELAY_PERIOD 50
 
 namespace SpellCheck {
     SpellCheckWorker::SpellCheckWorker(Helpers::AsyncCoordinator *initCoordinator, Models::SettingsModel *settingsModel, QObject *parent):
         QObject(parent),
+        ItemProcessingWorker(SPELLCHECK_DELAY_PERIOD),
         m_InitCoordinator(initCoordinator),
         m_SettingsModel(settingsModel),
         m_Hunspell(NULL),
@@ -131,23 +133,27 @@ namespace SpellCheck {
         return initResult;
     }
 
+    void SpellCheckWorker::processOneItemEx(Common::flag_t flags, std::shared_ptr<ISpellCheckItem> &item) {
+        if (getIsSeparatorFlag(flags)) {
+            emit queueIsEmpty();
+        } else {
+            ItemProcessingWorker::processOneItemEx(flags, item);
+
+            if (getWithDelayFlag(flags)) {
+                QThread::msleep(SPELLCHECK_WORKER_SLEEP_DELAY);
+            }
+        }
+    }
+
     void SpellCheckWorker::processOneItem(std::shared_ptr<ISpellCheckItem> &item) {
-        auto separatorItem = std::dynamic_pointer_cast<SpellCheckSeparatorItem>(item);
         auto queryItem = std::dynamic_pointer_cast<SpellCheckItem>(item);
         auto addWordItem = std::dynamic_pointer_cast<ModifyUserDictItem>(item);
 
         if (queryItem) {
             processQueryItem(queryItem);
-        } else if (separatorItem) {
-            processSeparatorItem(separatorItem);
         } else if (addWordItem) {
             processChangeUserDict(addWordItem);
         }
-    }
-
-    void SpellCheckWorker::processSeparatorItem(std::shared_ptr<SpellCheckSeparatorItem> &item) {
-        Q_UNUSED(item);
-        emit queueIsEmpty();
     }
 
     void SpellCheckWorker::processQueryItem(std::shared_ptr<SpellCheckItem> &item) {
@@ -193,8 +199,6 @@ namespace SpellCheck {
             item->requestSuggestions();
             this->submitItem(item);
         }
-
-        sleepIfNeeded(item);
     }
 
     void SpellCheckWorker::processChangeUserDict(std::shared_ptr<ModifyUserDictItem> &item) {
@@ -216,13 +220,6 @@ namespace SpellCheck {
         }
 
         signalUserDictWordsCount();
-    }
-
-    void SpellCheckWorker::sleepIfNeeded(const std::shared_ptr<SpellCheckItem> &item) {
-        if (item->getWithDelay()) {
-            // force context switch for more imporant tasks
-            QThread::msleep(SPELLCHECK_WORKER_SLEEP_DELAY);
-        }
     }
 
     QStringList SpellCheckWorker::retrieveCorrections(const QString &word) {

@@ -36,6 +36,7 @@ namespace QMLExtensions {
 
     ImageCachingWorker::ImageCachingWorker(Helpers::AsyncCoordinator *initCoordinator, Helpers::DatabaseManager *dbManager, QObject *parent):
         QObject(parent),
+        ItemProcessingWorker(2),
         m_InitCoordinator(initCoordinator),
         m_ProcessedItemsCount(0),
         m_Cache(dbManager),
@@ -71,12 +72,24 @@ namespace QMLExtensions {
         return true;
     }
 
+    void ImageCachingWorker::processOneItemEx(Common::flag_t flags, std::shared_ptr<ImageCacheRequest> &item) {
+        if (getIsSeparatorFlag(flags)) {
+            saveIndex();
+        } else {
+            ItemProcessingWorker::processOneItemEx(flags, item);
+
+            if (getWithDelayFlag(flags)) {
+                // force context switch for more imporant tasks
+                QThread::msleep(IMAGE_CACHING_WORKER_SLEEP_DELAY);
+            }
+        }
+    }
+
     void ImageCachingWorker::processOneItem(std::shared_ptr<ImageCacheRequest> &item) {
         if (isProcessed(item)) {
             LOG_FOR_DEBUG << item->getFilepath() << "is processed";
             return;
         }
-        if (isSeparator(item)) { saveIndex(); return; }
 
         const QString &originalPath = item->getFilepath();
         QSize requestedSize = item->getRequestedSize();
@@ -120,11 +133,6 @@ namespace QMLExtensions {
         if (m_ProcessedItemsCount % IMAGES_INDEX_BACKUP_STEP == 0) {
             saveIndex();
         }
-
-        if (item->getWithDelay()) {
-            // force context switch for more imporant tasks
-            QThread::msleep(IMAGE_CACHING_WORKER_SLEEP_DELAY);
-        }
     }
 
     void ImageCachingWorker::workerStopped() {
@@ -155,11 +163,6 @@ namespace QMLExtensions {
         }
 
         return found;
-    }
-
-    void ImageCachingWorker::submitSaveIndexItem() {
-        std::shared_ptr<ImageCacheRequest> separatorItem(new ImageCacheRequest("", QSize(), true, false));
-        this->submitItem(separatorItem);
     }
 
     QString getOldCacheFilepath() {
@@ -225,10 +228,5 @@ namespace QMLExtensions {
         }
 
         return isAlreadyProcessed;
-    }
-
-    bool ImageCachingWorker::isSeparator(const std::shared_ptr<ImageCacheRequest> &item) {
-        bool result = item->getFilepath().isEmpty() && item->getNeedRecache() && (!item->getWithDelay());
-        return result;
     }
 }

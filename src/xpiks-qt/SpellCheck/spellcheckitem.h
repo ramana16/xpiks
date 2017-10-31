@@ -97,13 +97,6 @@ namespace SpellCheck {
         Common::WordAnalysisFlags m_WordAnalysisFlag;
     };
 
-    class SpellCheckSeparatorItem:
-        public ISpellCheckItem
-    {
-    public:
-        virtual ~SpellCheckSeparatorItem() {}
-    };
-
     class SpellCheckItem:
         public SpellCheckItemBase
     {
@@ -125,16 +118,11 @@ namespace SpellCheck {
         virtual void submitSpellCheckResult();
 
         bool getIsOnlyOneKeyword() const { return m_OnlyOneKeyword; }
-        bool getWithDelay() const { return m_WithDelay; }
-
-    public:
-        void setWithDelay() { m_WithDelay = true; }
 
     private:
         Common::BasicKeywordsModel *m_SpellCheckable;
         Common::SpellCheckFlags m_SpellCheckFlags;
         volatile bool m_OnlyOneKeyword;
-        bool m_WithDelay;
     };
 
     class ModifyUserDictItem:

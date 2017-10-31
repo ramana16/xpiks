@@ -74,13 +74,12 @@ namespace SpellCheck {
 
     protected:
         virtual bool initWorker() override;
+        virtual void processOneItemEx(Common::flag_t flags, std::shared_ptr<ISpellCheckItem> &item) override;
         virtual void processOneItem(std::shared_ptr<ISpellCheckItem> &item) override;
 
     private:
-        void processSeparatorItem(std::shared_ptr<SpellCheckSeparatorItem> &item);
         void processQueryItem(std::shared_ptr<SpellCheckItem> &item);
         void processChangeUserDict(std::shared_ptr<ModifyUserDictItem> &item);
-        void sleepIfNeeded(const std::shared_ptr<SpellCheckItem> &item);
 
     protected:
         virtual void onQueueIsEmpty() override {

@@ -137,14 +137,13 @@ namespace SpellCheck {
             std::shared_ptr<SpellCheckItem> item(new SpellCheckItem(itemToCheck, Common::SpellCheckFlags::All, flags),
                 deleter);
             itemToCheck->connectSignals(item.get());
-            if ((i + 1) % 50 == 0) { item->setWithDelay(); }
             items.emplace_back(std::dynamic_pointer_cast<ISpellCheckItem>(item));
         }
 
         LOG_INFO << size << "item(s)";
 
         m_SpellCheckWorker->submitItems(items);
-        m_SpellCheckWorker->submitItem(std::shared_ptr<ISpellCheckItem>(new SpellCheckSeparatorItem()));
+        m_SpellCheckWorker->submitSeparator();
     }
 
     // used for spellchecking after adding a word to user dictionary
@@ -176,7 +175,7 @@ namespace SpellCheck {
         LOG_INFO << size << "item(s)";
 
         m_SpellCheckWorker->submitItems(items);
-        m_SpellCheckWorker->submitItem(std::shared_ptr<ISpellCheckItem>(new SpellCheckSeparatorItem()));
+        m_SpellCheckWorker->submitSeparator();
     }
 
     void SpellCheckerService::submitKeyword(Common::BasicKeywordsModel *itemToCheck, int keywordIndex) {

@@ -67,9 +67,21 @@ namespace QMLExtensions {
         return true;
     }
 
+    void VideoCachingWorker::processOneItemEx(Common::flag_t flags, std::shared_ptr<VideoCacheRequest> &item) {
+        if (getIsSeparatorFlag(flags)) {
+            saveIndex();
+        } else {
+            ItemProcessingWorker::processOneItemEx(flags, item);
+
+            if (getWithDelayFlag(flags)) {
+                // force context switch for more imporant tasks
+                QThread::msleep(VIDEO_WORKER_SLEEP_DELAY);
+            }
+        }
+    }
+
     void VideoCachingWorker::processOneItem(std::shared_ptr<VideoCacheRequest> &item) {
-        if (isSeparator(item)) { saveIndex(); return; }
-        if (checkLockedIO(item)) { sleepIfNeeded(item); return; }
+        if (checkLockedIO(item)) { return; }
         if (checkProcessed(item)) { return; }
 
         const QString &originalPath = item->getFilepath();
@@ -92,8 +104,6 @@ namespace QMLExtensions {
                 if (m_ProcessedItemsCount % VIDEO_INDEX_BACKUP_STEP == 0) {
                     saveIndex();
                 }
-
-                sleepIfNeeded(item);
 
                 if (isQuickThumbnail && item->getGoodQualityAllowed()) {
                     LOG_INTEGR_TESTS_OR_DEBUG << "Regenerating good quality thumb for" << originalPath;
@@ -166,11 +176,6 @@ namespace QMLExtensions {
         }
 
         return found;
-    }
-
-    void VideoCachingWorker::submitSaveIndexItem() {
-        std::shared_ptr<VideoCacheRequest> separatorItem(new VideoCacheRequest());
-        this->submitItem(separatorItem);
     }
 
     bool VideoCachingWorker::saveThumbnail(QImage &image, const QString &originalPath, bool isQuickThumbnail, QString &thumbnailPath) {
@@ -250,17 +255,5 @@ namespace QMLExtensions {
         }
 
         return isAlreadyProcessed;
-    }
-
-    bool VideoCachingWorker::isSeparator(const std::shared_ptr<VideoCacheRequest> &item) {
-        bool result = item->isSeparator();
-        return result;
-    }
-
-    void VideoCachingWorker::sleepIfNeeded(const std::shared_ptr<VideoCacheRequest> &item) {
-        if (item->getWithDelay()) {
-            // force context switch for more imporant tasks
-            QThread::msleep(VIDEO_WORKER_SLEEP_DELAY);
-        }
     }
 }

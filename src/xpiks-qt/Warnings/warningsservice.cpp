@@ -112,15 +112,12 @@ namespace Warnings {
 
         for (size_t i = 0; i < size; ++i) {
             Models::ArtworkMetadata *item = items.at(i);
-            const bool withDelay = ((i+1) % 50 == 0);
-            const Common::WarningsCheckFlags flags = Common::WarningsCheckFlags::All;
-            itemsToSubmit.emplace_back(new WarningsItem(item, flags, withDelay));
+            itemsToSubmit.emplace_back(new WarningsItem(item));
         }
-
-        itemsToSubmit.emplace_back(new EmptyWarningsItem());
 
         LOG_INFO << "Submitting" << size << "item(s)";
         m_WarningsWorker->submitItems(itemsToSubmit);
+        m_WarningsWorker->submitSeparator();
     }
 
     void WarningsService::setCommandManager(Commands::CommandManager *commandManager) {

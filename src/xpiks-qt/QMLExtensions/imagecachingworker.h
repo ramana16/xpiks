@@ -31,6 +31,7 @@ namespace QMLExtensions {
 
     protected:
         virtual bool initWorker() override;
+        virtual void processOneItemEx(Common::flag_t flags, std::shared_ptr<ImageCacheRequest> &item) override;
         virtual void processOneItem(std::shared_ptr<ImageCacheRequest> &item) override;
 
     protected:
@@ -49,13 +50,11 @@ namespace QMLExtensions {
         void setScale(qreal scale) { m_Scale = scale; }
         bool tryGetCachedImage(const QString &key, const QSize &requestedSize,
                                QString &cached, bool &needsUpdate);
-        void submitSaveIndexItem();
         bool upgradeCacheStorage();
 
     private:
         void saveIndex();
         bool isProcessed(std::shared_ptr<ImageCacheRequest> &item);
-        bool isSeparator(const std::shared_ptr<ImageCacheRequest> &item);
 
     private:
         Helpers::AsyncCoordinator *m_InitCoordinator;

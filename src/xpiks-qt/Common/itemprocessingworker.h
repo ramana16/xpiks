@@ -16,8 +16,9 @@
 #include <deque>
 #include <memory>
 #include <vector>
-#include <utility>
+#include <tuple>
 #include <algorithm>
+#include "../Common/flags.h"
 #include "../Common/defines.h"
 #include "../Helpers/threadhelpers.h"
 
@@ -27,28 +28,61 @@ namespace Common {
     {
     public:
         typedef quint32 batch_id_t;
+        typedef std::tuple<std::shared_ptr<T>, Common::flag_t, batch_id_t> ItemType;
 
     public:
-        ItemProcessingWorker():
+        ItemProcessingWorker(int delayPeriod = 0xffffffff):
             m_BatchID(1),
+            m_DelayPeriod(delayPeriod),
             m_Cancel(false),
             m_IsRunning(false)
         { }
 
         virtual ~ItemProcessingWorker() { }
 
+    private:
+        enum WorkerFlags {
+            FlagIsSeparator = 1 << 0,
+            FlagIsStopper = 1 << 1,
+            FlagIsWithDelay = 1 << 2
+        };
+
+    protected:
+        inline bool getIsSeparatorFlag(Common::flag_t flags) const { return Common::HasFlag(FlagIsSeparator, flags); }
+        inline bool getIsStopperFlag(Common::flag_t flags) const { return Common::HasFlag(FlagIsStopper, flags); }
+        inline bool getWithDelayFlag(Common::flag_t flags) const { return Common::HasFlag(FlagIsWithDelay, flags); }
+
     public:
+        void submitSeparator() {
+            if (m_Cancel) { return; }
+
+            m_QueueMutex.lock();
+            {
+                Common::flag_t flags = 0;
+                Common::SetFlag(flags, FlagIsSeparator);
+
+                bool wasEmpty = m_Queue.empty();
+                m_Queue.emplace_back(std::shared_ptr<T>(), 0, flags);
+
+                if (wasEmpty) {
+                    m_WaitAnyItem.wakeOne();
+                }
+            }
+            m_QueueMutex.unlock();
+        }
+
         batch_id_t submitItem(const std::shared_ptr<T> &item) {
             if (m_Cancel) {
                 return 0;
             }
 
             batch_id_t batchID;
+            Common::flag_t flags = 0;
             m_QueueMutex.lock();
             {
                 batchID = getNextBatchID();
                 bool wasEmpty = m_Queue.empty();
-                m_Queue.emplace_back(item, batchID);
+                m_Queue.emplace_back(item, batchID, flags);
 
                 if (wasEmpty) {
                     m_WaitAnyItem.wakeOne();
@@ -65,11 +99,12 @@ namespace Common {
             }
 
             batch_id_t batchID;
+            Common::flag_t flags = 0;
             m_QueueMutex.lock();
             {
                 batchID = getNextBatchID();
                 bool wasEmpty = m_Queue.empty();
-                m_Queue.emplace_front(item, batchID);
+                m_Queue.emplace_front(item, batchID, flags);
 
                 if (wasEmpty) {
                     m_WaitAnyItem.wakeOne();
@@ -86,41 +121,20 @@ namespace Common {
             }
 
             batch_id_t batchID;
+            Common::flag_t commonFlags = 0;
             m_QueueMutex.lock();
             {
                 batchID = getNextBatchID();
                 bool wasEmpty = m_Queue.empty();
 
-                size_t size = items.size();
+                const size_t size = items.size();
                 for (size_t i = 0; i < size; ++i) {
                     auto &item = items.at(i);
-                    m_Queue.emplace_back(item, batchID);
-                }
 
-                if (wasEmpty) {
-                    m_WaitAnyItem.wakeOne();
-                }
-            }
-            m_QueueMutex.unlock();
+                    Common::flag_t flags = commonFlags;
+                    if (i % m_DelayPeriod == 0) { Common::SetFlag(flags, FlagIsWithDelay); }
 
-            return batchID;
-        }
-
-        batch_id_t submitFirst(const std::vector<std::shared_ptr<T> > &items) {
-            if (m_Cancel) {
-                return 0;
-            }
-
-            batch_id_t batchID;
-            m_QueueMutex.lock();
-            {
-                batchID = getNextBatchID();
-                bool wasEmpty = m_Queue.empty();
-
-                size_t size = items.size();
-                for (size_t i = 0; i < size; ++i) {
-                    auto &item = items.at(i);
-                    m_Queue.emplace_front(item, batchID);
+                    m_Queue.emplace_back(item, batchID, flags);
                 }
 
                 if (wasEmpty) {
@@ -149,8 +163,8 @@ namespace Common {
             m_QueueMutex.lock();
             {
                 m_Queue.erase(std::remove_if(m_Queue.begin(), m_Queue.end(),
-                                             [&batchID](const std::pair<std::shared_ptr<T>, batch_id_t> &item) {
-                    return item.second == batchID;
+                                             [&batchID](const ItemType &item) {
+                    return std::get<1>(item) == batchID;
                 }),
                               m_Queue.end());
 
@@ -193,7 +207,10 @@ namespace Common {
                     m_Queue.clear();
                 }
 
-                m_Queue.emplace_back(std::shared_ptr<T>(), 0);
+                Common::flag_t flags;
+                Common::SetFlag(flags, FlagIsStopper);
+
+                m_Queue.emplace_back(std::shared_ptr<T>(), 0, flags);
                 m_WaitAnyItem.wakeOne();
             }
             m_QueueMutex.unlock();
@@ -209,6 +226,11 @@ namespace Common {
         virtual void onQueueIsEmpty() = 0;
         virtual void workerStopped() = 0;
 
+        virtual void processOneItemEx(Common::flag_t flags, std::shared_ptr<T> &item) {
+            Q_UNUSED(flags);
+            processOneItem(item);
+        }
+
         void runWorkerLoop() {
             m_IdleEvent.set();
 
@@ -220,6 +242,7 @@ namespace Common {
 
                 bool noMoreItems = false;
                 std::shared_ptr<T> item;
+                Common::flag_t flags = 0;
 
                 m_QueueMutex.lock();
                 {
@@ -231,19 +254,20 @@ namespace Common {
                     }
 
                     auto &nextItem = m_Queue.front();
-                    item = nextItem.first;
+                    item = std::get<0>(nextItem);
+                    flags = std::get<2>(nextItem);
                     m_Queue.pop_front();
 
                     noMoreItems = m_Queue.empty();
                 }
                 m_QueueMutex.unlock();
 
-                if (item.get() == nullptr) { break; }
+                if ((item.get() == nullptr) && getIsStopperFlag(flags)) { break; }
 
                 m_IdleEvent.reset();
                 {
                     try {
-                        processOneItem(item);
+                        processOneItemEx(flags, item);
                     }
                     catch (...) {
                         LOG_WARNING << "Exception while processing item!";
@@ -267,8 +291,9 @@ namespace Common {
         Helpers::ManualResetEvent m_IdleEvent;
         QWaitCondition m_WaitAnyItem;
         QMutex m_QueueMutex;
-        std::deque<std::pair<std::shared_ptr<T>, batch_id_t> > m_Queue;
+        std::deque<ItemType> m_Queue;
         batch_id_t m_BatchID;
+        unsigned int m_DelayPeriod;
         volatile bool m_Cancel;
         volatile bool m_IsRunning;
     };

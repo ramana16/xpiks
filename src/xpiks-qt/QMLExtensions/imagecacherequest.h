@@ -14,32 +14,28 @@
 #include <QString>
 #include <QSize>
 
-namespace QMLExtensions {    
+namespace QMLExtensions {
 
 #define DEFAULT_THUMB_HEIGHT 150
 #define DEFAULT_THUMB_WIDTH 150
 
     class ImageCacheRequest {
     public:
-        ImageCacheRequest(const QString &filepath, const QSize &requestedSize, bool recache, bool withDelay=false):
+        ImageCacheRequest(const QString &filepath, const QSize &requestedSize, bool recache):
             m_Filepath(filepath),
             m_RequestedSize(requestedSize),
-            m_Recache(recache),
-            m_WithDelay(withDelay)
-        {
-        }
+            m_Recache(recache)
+        { }
 
     public:
         const QString &getFilepath() const { return m_Filepath; }
         const QSize &getRequestedSize() const { return m_RequestedSize; }
         bool getNeedRecache() const { return m_Recache; }
-        bool getWithDelay() const { return m_WithDelay; }
 
     private:
         QString m_Filepath;
         QSize m_RequestedSize;
         bool m_Recache;
-        bool m_WithDelay;
     };
 }
 

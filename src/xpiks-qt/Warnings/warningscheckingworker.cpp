@@ -21,6 +21,7 @@
 #include "warningsitem.h"
 
 #define WARNINGS_WORKER_SLEEP_INTERVAL 500
+#define WARNINGS_DELAY_PERIOD 50
 
 namespace Warnings {
     QSet<QString> toLowerSet(const QStringList &from) {
@@ -35,6 +36,7 @@ namespace Warnings {
     WarningsCheckingWorker::WarningsCheckingWorker(WarningsSettingsModel *warningsSettingsModel,
                                                    QObject *parent):
         QObject(parent),
+        ItemProcessingWorker(WARNINGS_DELAY_PERIOD),
         m_WarningsSettingsModel(warningsSettingsModel)
     {
         Q_ASSERT(warningsSettingsModel != nullptr);
@@ -45,14 +47,24 @@ namespace Warnings {
         return true;
     }
 
+    void WarningsCheckingWorker::processOneItemEx(Common::flag_t flags, std::shared_ptr<IWarningsItem> &item) {
+        if (getIsSeparatorFlag(flags)) {
+            emit queueIsEmpty();
+        } else {
+            ItemProcessingWorker::processOneItemEx(flags, item);
+
+            if (getWithDelayFlag(flags)) {
+                QThread::msleep(WARNINGS_WORKER_SLEEP_INTERVAL);
+            }
+        }
+    }
+
     void WarningsCheckingWorker::processOneItem(std::shared_ptr<IWarningsItem> &item) {
         std::shared_ptr<WarningsItem> warningItem = std::dynamic_pointer_cast<WarningsItem>(item);
-        std::shared_ptr<EmptyWarningsItem> emptyItem = std::dynamic_pointer_cast<EmptyWarningsItem>(item);
+        Q_ASSERT(warningItem);
 
         if (warningItem) {
             processWarningsItem(warningItem);
-        } else if (emptyItem) {
-            emit queueIsEmpty();
         }
     }
 
@@ -87,15 +99,6 @@ namespace Warnings {
         }
 
         item->submitWarnings(warningsFlags);
-
-        sleepIfNeeded(item);
-    }
-
-    void WarningsCheckingWorker::sleepIfNeeded(std::shared_ptr<WarningsItem> &item) {
-        if (item->getWithDelay()) {
-            // force context switch for more important tasks
-            QThread::msleep(WARNINGS_WORKER_SLEEP_INTERVAL);
-        }
     }
 
     Common::flag_t WarningsCheckingWorker::checkDimensions(std::shared_ptr<WarningsItem> &wi) const {

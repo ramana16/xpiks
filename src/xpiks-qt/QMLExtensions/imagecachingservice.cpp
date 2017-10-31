@@ -72,7 +72,7 @@ namespace QMLExtensions {
         if ((m_CachingWorker != NULL) && !m_IsCancelled) {
             bool migrated = m_CachingWorker->upgradeCacheStorage();
             if (migrated) {
-                m_CachingWorker->submitSaveIndexItem();
+                m_CachingWorker->submitSeparator();
             }
         }
     }
@@ -114,21 +114,18 @@ namespace QMLExtensions {
 
         updateDefaultSize();
 
-        for (size_t i = 0, j = 0; i < size; i++) {
+        for (size_t i = 0; i < size; i++) {
             auto *artwork = snapshot.get(i);
             Models::ImageArtwork *imageArtwork = dynamic_cast<Models::ImageArtwork*>(artwork);
             if (imageArtwork != nullptr) {
-                const bool withDelay = j % 2;
                 requests.emplace_back(new ImageCacheRequest(artwork->getThumbnailPath(),
                                                             m_DefaultSize,
-                                                            recache,
-                                                            withDelay));
-                j++;
+                                                            recache));
             }
         }
 
         m_CachingWorker->submitItems(requests);
-        m_CachingWorker->submitSaveIndexItem();
+        m_CachingWorker->submitSeparator();
     }
 
     bool ImageCachingService::tryGetCachedImage(const QString &key, const QSize &requestedSize,
