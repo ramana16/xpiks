@@ -24,28 +24,25 @@ Xpiks is a free and open source keywording and uploading tool for microstock pho
 
 **Main features:**
 
-- adding/editing XMP/IPTC metadata (title, description, keywords)
-- uploading images to Stock Agencies' FTP hosts (saves encrypted credentials for each host)
+- XMP/IPTC/EXIF metadata editing in images, vectors and videos
+- FTP upload to predefined or custom hosts
+- extensive keywording capabilities (autocompletion, spellchecking)
 - keywords suggestion based on Shutterstock API, iStock, Fotolia or the local library
-- search through loaded images by any metadata (keywords, description, title)
-- ability to upload vector files with images (with automatic zipping if needed)
+- automatic zipping of vector and preview for selected microstocks
 - checks for potential problems before upload (insufficient resolution, missing metadata etc.)
-- automatically checks spelling of description, title and keywords
-- autocompletion for keywords (English dictionary)
 - keywords presets to automate your work
-- unsaved work is backed up so you can continue work later without actual writing metadata to images
 - localized to other languages (Ukrainian, Portugese, Spanish, Catalan, Russian, French, German) 
+- extensible with plugins
 - works under Linux, OS X and Windows
-- written in C++ with Qt 5.5
 
 **How to build**
 
-Please see the BUILD.md file
+Please see the [BUILD.md](https://github.com/ribtoks/xpiks/blob/master/BUILD.md) file
 
 **How to install**
 
-Please see the INSTALL.md file
+Please see the [INSTALL.md](https://github.com/ribtoks/xpiks/blob/master/INSTALL.md) file
 
 **How to contribute**
 
-Please see the CONTRIBUTING.md file
+Please see the [CONTRIBUTING.md](https://github.com/ribtoks/xpiks/blob/master/CONTRIBUTING.md) file
