@@ -27,7 +27,8 @@ namespace QMLExtensions {
             GoodQualityAllowed = 1 << 1,
             RecacheFlag = 1 << 2,
             WithDelayFlag = 1 << 3,
-            IsSeparatorFlag = 1 << 4
+            IsSeparatorFlag = 1 << 4,
+            RepeatRequestFlag = 1 << 5
         };
 
     public:
@@ -72,8 +73,11 @@ namespace QMLExtensions {
         size_t getLastKnownIndex() const { return m_VideoArtwork->getLastKnownIndex(); }
         bool isSeparator() const { return Common::HasFlag(m_Flags, IsSeparatorFlag); }
         const QString &getThumbnailPath() const { return m_VideoArtwork->getThumbnailPath(); }
+        bool isRepeated() const { return Common::HasFlag(m_Flags, RepeatRequestFlag); }
 
     public:
+        void repeatRequestOnce() { if (!isRepeated()) { setRepeatRequest(); } }
+        void setRepeatRequest() { Common::ApplyFlag(m_Flags, true, RepeatRequestFlag); }
         void setGoodQualityRequest() { Common::ApplyFlag(m_Flags, false, QuickThumbnailFlag); }
         void setThumbnailPath(const QString &path) { m_VideoArtwork->setThumbnailPath(path); }
         void setVideoMetadata(const libthmbnlr::VideoFileMetadata &metadata) { m_VideoArtwork->setVideoMetadata(metadata); }

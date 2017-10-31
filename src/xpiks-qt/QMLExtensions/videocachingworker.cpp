@@ -79,11 +79,11 @@ namespace QMLExtensions {
 
         std::vector<uint8_t> buffer;
         int width = 0, height = 0;
+        bool needsRefresh = false, success = false;
 
         if (createThumbnail(item, buffer, width, height)) {
             QString thumbnailPath;
             QImage image((unsigned char*)&buffer[0], width, height, QImage::Format_RGB888);
-            bool needsRefresh = false;
 
             if (saveThumbnail(image, originalPath, isQuickThumbnail, thumbnailPath)) {
                 cacheImage(thumbnailPath);
@@ -100,15 +100,18 @@ namespace QMLExtensions {
                     item->setGoodQualityRequest();
                     needsRefresh = true;
                 }
-            } else {
-                // TODO: change global retry to smth smarter
-                LOG_WARNING << "Retrying creating thumbnail which failed to save";
-                needsRefresh = true;
-            }
 
-            if (needsRefresh) {
-                this->submitItem(item);
-            }
+                success = true;
+            } else { /* // TODO: change global retry to smth smarter */ }
+        }
+
+        if (!success) {
+            item->repeatRequestOnce();
+            needsRefresh = true;
+        }
+
+        if (needsRefresh) {
+            this->submitItem(item);
         }
     }
 
