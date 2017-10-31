@@ -50,6 +50,11 @@ namespace Connectivity {
     protected:
         virtual QHash<int, QByteArray> roleNames() const override;
 
+#ifdef INTEGRATION_TESTS
+    public:
+        const QVector<QPair<QString, QStringList> > &getFailedUploads() const { return m_FtpInfo; }
+#endif
+
     private:
         QVector<QPair<QString, QStringList> > m_FtpInfo;
         int m_FailedImagesCount;

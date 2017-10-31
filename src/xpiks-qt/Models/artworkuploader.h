@@ -87,6 +87,12 @@ namespace Models {
 
         void initializeStocksList(Helpers::AsyncCoordinator *initCoordinator);
 
+
+#ifdef INTEGRATION_TESTS
+    public:
+        Connectivity::UploadWatcher *accessWatcher() { return &m_UploadWatcher; }
+#endif
+
     private:
         void doUploadArtworks(const MetadataIO::ArtworksSnapshot &snapshot);
 

@@ -217,7 +217,8 @@ SOURCES += main.cpp \
     csvexporttest.cpp \
     exiv2iohelpers.cpp \
     unicodeiotest.cpp \
-    ../../xpiks-qt/Helpers/threadhelpers.cpp
+    ../../xpiks-qt/Helpers/threadhelpers.cpp \
+    faileduploadstest.cpp
 
 RESOURCES +=
 
@@ -470,7 +471,8 @@ HEADERS += \
     exiv2iohelpers.h \
     unicodeiotest.h \
     ../../xpiks-qt/Common/delayedactionentity.h \
-    ../../xpiks-qt/Helpers/threadhelpers.h
+    ../../xpiks-qt/Helpers/threadhelpers.h \
+    faileduploadstest.h
 
 INCLUDEPATH += ../../../vendors/tiny-aes
 INCLUDEPATH += ../../../vendors/cpp-libface

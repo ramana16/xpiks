@@ -46,11 +46,20 @@ int SaveVideoBasicTest::doTest() {
     VERIFY(video->getImageSize().height() == 400, "Video height was read incorrectly");
 
     QStringList keywords; keywords << "untitled" << "first" << "video";
-    QString title = "Title for the video";
-    QString description = "Description for the video";
-    artwork->setDescription(description);
-    artwork->setTitle(title);
-    artwork->getBasicModel()->setKeywords(keywords);
+    const QString title = "Title for the video";
+    const QString description = "Description for the video";
+    bool setSuccess = false;
+
+    setSuccess = artwork->setDescription(description);
+    VERIFY(setSuccess == true, "Failed to set video description");
+    setSuccess = false;
+
+    setSuccess = artwork->setTitle(title);
+    VERIFY(setSuccess == true, "Failed to set video title");
+    setSuccess = false;
+
+    artwork->setKeywords(keywords);
+
     artwork->setIsSelected(true);
 
     bool doOverwrite = true, dontSaveBackups = false;

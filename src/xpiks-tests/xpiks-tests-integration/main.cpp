@@ -108,6 +108,7 @@
 #include "autocompletepresetstest.h"
 #include "csvexporttest.h"
 #include "unicodeiotest.h"
+#include "faileduploadstest.h"
 
 #if defined(WITH_PLUGINS)
 #undef WITH_PLUGINS
@@ -189,7 +190,7 @@ int main(int argc, char *argv[]) {
 
     std::cout << "Initialized application" << std::endl;
 
-    qSetMessagePattern("%{time hh:mm:ss.zzz} %{type} T#%{threadid} %{function} - %{message}");    
+    qSetMessagePattern("%{time hh:mm:ss.zzz} %{type} T#%{threadid} %{function} - %{message}");
     qInstallMessageHandler(myMessageHandler);
     qRegisterMetaType<Common::SpellCheckFlags>("Common::SpellCheckFlags");
 
@@ -267,7 +268,7 @@ int main(int argc, char *argv[]) {
 
     MetadataIO::MetadataIOCoordinator metadataIOCoordinator;
     Connectivity::TelemetryService telemetryService("1234567890", false);
-    Plugins::PluginManager pluginManager;    
+    Plugins::PluginManager pluginManager;
     Helpers::DatabaseManager databaseManager;
     SpellCheck::DuplicatesReviewModel duplicatesModel(&colorsModel);
     MetadataIO::CsvExportModel csvExportModel;
@@ -331,7 +332,7 @@ int main(int argc, char *argv[]) {
     settingsModel.setExifToolPath("c:/projects/xpiks-deps/windows-3rd-party-bin/exiftool.exe");
 #endif
 
-    commandManager.connectEntitiesSignalsSlots();    
+    commandManager.connectEntitiesSignalsSlots();
     commandManager.afterConstructionCallback();
 
     int result = 0;
@@ -347,6 +348,7 @@ int main(int argc, char *argv[]) {
     integrationTests.append(new SaveFileLegacyTest(&commandManager));
 #ifndef TRAVIS_CI
     integrationTests.append(new SaveVideoBasicTest(&commandManager));
+    integrationTests.append(new FailedUploadsTest(&commandManager));
 #endif
     integrationTests.append(new SpellCheckMultireplaceTest(&commandManager));
     integrationTests.append(new SpellCheckCombinedModelTest(&commandManager));
