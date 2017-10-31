@@ -20,6 +20,8 @@
 #include "warningssettingsmodel.h"
 #include "warningsitem.h"
 
+#define WARNINGS_WORKER_SLEEP_INTERVAL 500
+
 namespace Warnings {
     QSet<QString> toLowerSet(const QStringList &from) {
         QSet<QString> result;
@@ -85,6 +87,15 @@ namespace Warnings {
         }
 
         item->submitWarnings(warningsFlags);
+
+        sleepIfNeeded(item);
+    }
+
+    void WarningsCheckingWorker::sleepIfNeeded(std::shared_ptr<WarningsItem> &item) {
+        if (item->getWithDelay()) {
+            // force context switch for more important tasks
+            QThread::msleep(WARNINGS_WORKER_SLEEP_INTERVAL);
+        }
     }
 
     Common::flag_t WarningsCheckingWorker::checkDimensions(std::shared_ptr<WarningsItem> &wi) const {

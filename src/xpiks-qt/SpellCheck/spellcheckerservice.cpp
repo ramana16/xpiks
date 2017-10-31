@@ -137,6 +137,7 @@ namespace SpellCheck {
             std::shared_ptr<SpellCheckItem> item(new SpellCheckItem(itemToCheck, Common::SpellCheckFlags::All, flags),
                 deleter);
             itemToCheck->connectSignals(item.get());
+            if ((i + 1) % 50 == 0) { item->setWithDelay(); }
             items.emplace_back(std::dynamic_pointer_cast<ISpellCheckItem>(item));
         }
 

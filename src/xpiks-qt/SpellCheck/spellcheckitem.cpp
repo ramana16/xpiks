@@ -38,7 +38,9 @@ namespace SpellCheck {
         SpellCheckItemBase(wordAnalysisFlag),
         m_SpellCheckable(spellCheckable),
         m_SpellCheckFlags(spellCheckFlags),
-        m_OnlyOneKeyword(true) {
+        m_OnlyOneKeyword(true),
+        m_WithDelay(false)
+    {
         Q_ASSERT(Common::HasFlag(spellCheckFlags, Common::SpellCheckFlags::Keywords));
         Q_ASSERT(spellCheckable != NULL);
 
@@ -63,7 +65,9 @@ namespace SpellCheck {
         SpellCheckItemBase(wordAnalysisFlags),
         m_SpellCheckable(spellCheckable),
         m_SpellCheckFlags(spellCheckFlags),
-        m_OnlyOneKeyword(false) {
+        m_OnlyOneKeyword(false),
+        m_WithDelay(false)
+    {
         Q_ASSERT(spellCheckable != NULL);
         spellCheckable->acquire();
 
@@ -98,7 +102,8 @@ namespace SpellCheck {
         SpellCheckItemBase(wordAnalysisFlags),
         m_SpellCheckable(spellCheckable),
         m_SpellCheckFlags(Common::SpellCheckFlags::All),
-        m_OnlyOneKeyword(false)
+        m_OnlyOneKeyword(false),
+        m_WithDelay(false)
     {
         Q_ASSERT(spellCheckable != NULL);
         spellCheckable->acquire();

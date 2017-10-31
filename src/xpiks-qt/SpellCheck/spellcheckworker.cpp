@@ -28,6 +28,7 @@
 #define EN_HUNSPELL_AFF "en_US.aff"
 
 #define MINIMUM_LENGTH_FOR_STEMMING 3
+#define SPELLCHECK_WORKER_SLEEP_DELAY 500
 
 namespace SpellCheck {
     SpellCheckWorker::SpellCheckWorker(Helpers::AsyncCoordinator *initCoordinator, Models::SettingsModel *settingsModel, QObject *parent):
@@ -192,6 +193,8 @@ namespace SpellCheck {
             item->requestSuggestions();
             this->submitItem(item);
         }
+
+        sleepIfNeeded(item);
     }
 
     void SpellCheckWorker::processChangeUserDict(std::shared_ptr<ModifyUserDictItem> &item) {
@@ -213,6 +216,13 @@ namespace SpellCheck {
         }
 
         signalUserDictWordsCount();
+    }
+
+    void SpellCheckWorker::sleepIfNeeded(const std::shared_ptr<SpellCheckItem> &item) {
+        if (item->getWithDelay()) {
+            // force context switch for more imporant tasks
+            QThread::msleep(SPELLCHECK_WORKER_SLEEP_DELAY);
+        }
     }
 
     QStringList SpellCheckWorker::retrieveCorrections(const QString &word) {

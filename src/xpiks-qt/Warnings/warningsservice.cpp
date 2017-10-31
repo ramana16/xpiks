@@ -112,7 +112,9 @@ namespace Warnings {
 
         for (size_t i = 0; i < size; ++i) {
             Models::ArtworkMetadata *item = items.at(i);
-            itemsToSubmit.emplace_back(new WarningsItem(item));
+            const bool withDelay = ((i+1) % 50 == 0);
+            const Common::WarningsCheckFlags flags = Common::WarningsCheckFlags::All;
+            itemsToSubmit.emplace_back(new WarningsItem(item, flags, withDelay));
         }
 
         itemsToSubmit.emplace_back(new EmptyWarningsItem());

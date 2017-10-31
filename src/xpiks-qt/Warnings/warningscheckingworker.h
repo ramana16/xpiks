@@ -34,6 +34,7 @@ namespace Warnings {
 
     private:
         void processWarningsItem(std::shared_ptr<WarningsItem> &item);
+        void sleepIfNeeded(std::shared_ptr<WarningsItem> &item);
         void initValuesFromSettings();
 
     protected:
