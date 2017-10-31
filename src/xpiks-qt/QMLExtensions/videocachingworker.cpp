@@ -68,8 +68,8 @@ namespace QMLExtensions {
     }
 
     void VideoCachingWorker::processOneItem(std::shared_ptr<VideoCacheRequest> &item) {
-        if (checkLockedIO(item)) { sleepIfNeeded(item); return; }
         if (isSeparator(item)) { saveIndex(); return; }
+        if (checkLockedIO(item)) { sleepIfNeeded(item); return; }
         if (checkProcessed(item)) { return; }
 
         const QString &originalPath = item->getFilepath();
