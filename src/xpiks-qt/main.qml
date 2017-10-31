@@ -788,6 +788,20 @@ ApplicationWindow {
             }
 
             MenuItem {
+                text: "Terms and Conditions"
+                onTriggered: {
+                    var licenseText = settingsModel.termsAndConditionsText;
+                    if (licenseText.length > 0) {
+                        Common.launchDialog("Dialogs/TermsAndConditionsDialog.qml",
+                                            applicationWindow,
+                                            {
+                                                termsText: licenseText
+                                            })
+                    }
+                }
+            }
+
+            MenuItem {
                 text: "Master password"
                 onTriggered: {
                     var callbackObject = {
@@ -798,6 +812,24 @@ ApplicationWindow {
                     Common.launchDialog("Dialogs/EnterMasterPasswordDialog.qml",
                                         applicationWindow,
                                         {callbackObject: callbackObject})
+                }
+            }
+
+            MenuItem {
+                text: "Master password setup"
+                onTriggered: {
+                    var callbackObject = {
+                        onCancel: function() { },
+                        onSuccess: function() { }
+                    }
+
+                    Common.launchDialog("Dialogs/MasterPasswordSetupDialog.qml",
+                                        applicationWindow,
+                                        {
+                                            componentParent: applicationWindow,
+                                            firstTime: false,
+                                            callbackObject: callbackObject
+                                        });
                 }
             }
 
@@ -819,6 +851,37 @@ ApplicationWindow {
                 text: "CSV export"
                 onTriggered: {
                     Common.launchDialog("Dialogs/CsvExportDialog.qml", applicationWindow, {})
+                }
+            }
+
+            MenuItem {
+                text: "Translate dialog"
+                onTriggered: {
+                    Common.launchDialog("Dialogs/TranslationPreviewDialog.qml", applicationWindow, {})
+                }
+            }
+
+            MenuItem {
+                text: "Failed uploads dialog"
+                onTriggered: {
+                    Common.launchDialog("Dialogs/FailedUploadArtworks.qml", applicationWindow, {})
+                }
+            }
+
+            MenuItem {
+                text: "Proxy setup dialog"
+                onTriggered: {
+                    var callbackObject = {
+                        onSuccess: function() {},
+                        onCancel: function() {}
+                    }
+                    Common.launchDialog("Dialogs/ProxySetupDialog.qml",
+                                        applicationWindow,
+                                        {
+                                            componentParent: applicationWindow,
+                                            firstTime: false,
+                                            callbackObject: callbackObject
+                                        });
                 }
             }
         }

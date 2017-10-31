@@ -907,31 +907,45 @@ Item {
                     height: parent.height
                     spacing: 20
 
-                    StyledText {
-                        visible: !skipUploadItems && (!artworkUploader.inProgress) && (uploadWatcher.failedImagesCount === 0)
-                        enabled: uploadArtworksComponent.uploadEnabled && !skipUploadItems
+                    StyledLink {
+                        color: isPressed ? uiColors.linkClickedColor : (warningsModel.warningsCount > 0 ? uiColors.artworkModifiedColor : uiColors.labelInactiveForeground)
                         text: i18.n + getOriginalText()
-                        color: uploadWarmingsMA.pressed ? uiColors.linkClickedColor : warningsModel.warningsCount > 0 ? uiColors.artworkModifiedColor : uiColors.labelActiveForeground
+                        enabled: uploadArtworksComponent.uploadEnabled && !skipUploadItems
+                        visible: !skipUploadItems && (!artworkUploader.inProgress) && (uploadWatcher.failedImagesCount === 0)
 
                         function getOriginalText() {
                             return warningsModel.warningsCount == 1 ? qsTr("1 warning") : qsTr("%1 warnings").arg(warningsModel.warningsCount)
                         }
 
-                        MouseArea {
-                            id: uploadWarmingsMA
-                            anchors.fill: parent
-                            cursorShape: warningsModel.warningsCount > 0 ? Qt.PointingHandCursor : Qt.ArrowCursor
-                            enabled: warningsModel.warningsCount > 0
-                            onClicked: {
-                                if (warningsModel.warningsCount > 0) {
-                                    Common.launchDialog("Dialogs/WarningsDialog.qml",
-                                                        uploadArtworksComponent.componentParent,
-                                                        {
-                                                            componentParent: uploadArtworksComponent.componentParent,
-                                                            isRestricted: true
-                                                        });
-                                }
+                        onClicked: {
+                            if (warningsModel.warningsCount > 0) {
+                                Common.launchDialog("Dialogs/WarningsDialog.qml",
+                                                    uploadArtworksComponent.componentParent,
+                                                    {
+                                                        componentParent: uploadArtworksComponent.componentParent,
+                                                        isRestricted: true
+                                                    });
                             }
+                        }
+                    }
+
+                    StyledLink {
+                        id: failedArtworksStatus
+                        visible: !skipUploadItems && (uploadWatcher.failedImagesCount > 0)
+                        enabled: uploadArtworksComponent.uploadEnabled && !skipUploadItems && (uploadWatcher.failedImagesCount > 0)
+                        text: i18.n + getOriginalText()
+                        color: isPressed ? uiColors.linkClickedColor : uiColors.artworkModifiedColor
+
+                        function getOriginalText() {
+                            return uploadWatcher.failedImagesCount === 1 ?
+                                        qsTr("1 failed upload") :
+                                        qsTr("%1 failed uploads").arg(uploadWatcher.failedImagesCount)
+                        }
+
+                        onClicked: {
+                            Common.launchDialog("Dialogs/FailedUploadArtworks.qml",
+                                                uploadArtworksComponent.componentParent,
+                                                {})
                         }
                     }
 

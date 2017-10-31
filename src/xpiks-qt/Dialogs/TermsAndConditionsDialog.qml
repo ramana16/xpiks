@@ -150,7 +150,9 @@ Item {
                     tooltip: i18.n + qsTr("Close Xpiks")
                     onClicked: {
                         closePopup()
-                        Qt.quit()
+                        if (!debug) {
+                            Qt.quit()
+                        }
                     }
                 }
             }
