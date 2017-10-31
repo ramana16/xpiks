@@ -68,11 +68,11 @@ namespace QMLExtensions {
         return true;
     }
 
-    void VideoCachingWorker::processOneItemEx(Common::flag_t flags, std::shared_ptr<VideoCacheRequest> &item) {
+    void VideoCachingWorker::processOneItemEx(std::shared_ptr<VideoCacheRequest> &item, batch_id_t batchID, Common::flag_t flags) {
         if (getIsSeparatorFlag(flags)) {
             saveIndex();
         } else {
-            ItemProcessingWorker::processOneItemEx(flags, item);
+            ItemProcessingWorker::processOneItemEx(item, batchID, flags);
 
             if (getWithDelayFlag(flags)) {
                 // force context switch for more imporant tasks

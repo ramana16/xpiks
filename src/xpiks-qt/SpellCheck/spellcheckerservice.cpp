@@ -90,7 +90,6 @@ namespace SpellCheck {
 
     bool SpellCheckerService::isBusy() const {
         bool isBusy = (m_SpellCheckWorker != NULL) && (m_SpellCheckWorker->hasPendingJobs());
-
         return isBusy;
     }
 
@@ -201,7 +200,8 @@ namespace SpellCheck {
             return QStringList();
         }
 
-        return m_SpellCheckWorker->retrieveCorrections(word);
+        QStringList corrections = m_SpellCheckWorker->retrieveCorrections(word);
+        return corrections;
     }
 
     void SpellCheckerService::restartWorker() {

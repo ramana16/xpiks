@@ -133,11 +133,11 @@ namespace SpellCheck {
         return initResult;
     }
 
-    void SpellCheckWorker::processOneItemEx(Common::flag_t flags, std::shared_ptr<ISpellCheckItem> &item) {
+    void SpellCheckWorker::processOneItemEx(std::shared_ptr<ISpellCheckItem> &item, batch_id_t batchID, Common::flag_t flags) {
         if (getIsSeparatorFlag(flags)) {
             emit queueIsEmpty();
         } else {
-            ItemProcessingWorker::processOneItemEx(flags, item);
+            ItemProcessingWorker::processOneItemEx(item, batchID, flags);
 
             if (getWithDelayFlag(flags)) {
                 QThread::msleep(SPELLCHECK_WORKER_SLEEP_DELAY);

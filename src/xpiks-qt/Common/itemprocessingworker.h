@@ -48,9 +48,9 @@ namespace Common {
         };
 
     protected:
-        inline bool getIsSeparatorFlag(Common::flag_t flags) const { return Common::HasFlag(FlagIsSeparator, flags); }
-        inline bool getIsStopperFlag(Common::flag_t flags) const { return Common::HasFlag(FlagIsStopper, flags); }
-        inline bool getWithDelayFlag(Common::flag_t flags) const { return Common::HasFlag(FlagIsWithDelay, flags); }
+        inline bool getIsSeparatorFlag(Common::flag_t flags) const { return Common::HasFlag(flags, FlagIsSeparator); }
+        inline bool getIsStopperFlag(Common::flag_t flags) const { return Common::HasFlag(flags, FlagIsStopper); }
+        inline bool getWithDelayFlag(Common::flag_t flags) const { return Common::HasFlag(flags, FlagIsWithDelay); }
 
     public:
         void submitSeparator() {
@@ -226,8 +226,9 @@ namespace Common {
         virtual void onQueueIsEmpty() = 0;
         virtual void workerStopped() = 0;
 
-        virtual void processOneItemEx(Common::flag_t flags, std::shared_ptr<T> &item) {
+        virtual void processOneItemEx(std::shared_ptr<T> &item, batch_id_t batchID, Common::flag_t flags) {
             Q_UNUSED(flags);
+            Q_UNUSED(batchID);
             processOneItem(item);
         }
 
@@ -243,6 +244,7 @@ namespace Common {
                 bool noMoreItems = false;
                 std::shared_ptr<T> item;
                 Common::flag_t flags = 0;
+                batch_id_t batchID = 0;
 
                 m_QueueMutex.lock();
                 {
@@ -255,6 +257,7 @@ namespace Common {
 
                     auto &nextItem = m_Queue.front();
                     item = std::get<0>(nextItem);
+                    batchID = std::get<1>(nextItem);
                     flags = std::get<2>(nextItem);
                     m_Queue.pop_front();
 
@@ -267,7 +270,7 @@ namespace Common {
                 m_IdleEvent.reset();
                 {
                     try {
-                        processOneItemEx(flags, item);
+                        processOneItemEx(item, batchID, flags);
                     }
                     catch (...) {
                         LOG_WARNING << "Exception while processing item!";

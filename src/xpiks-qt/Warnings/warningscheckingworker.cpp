@@ -47,11 +47,11 @@ namespace Warnings {
         return true;
     }
 
-    void WarningsCheckingWorker::processOneItemEx(Common::flag_t flags, std::shared_ptr<IWarningsItem> &item) {
+    void WarningsCheckingWorker::processOneItemEx(std::shared_ptr<IWarningsItem> &item, batch_id_t batchID, Common::flag_t flags) {
         if (getIsSeparatorFlag(flags)) {
             emit queueIsEmpty();
         } else {
-            ItemProcessingWorker::processOneItemEx(flags, item);
+            ItemProcessingWorker::processOneItemEx(item, batchID, flags);
 
             if (getWithDelayFlag(flags)) {
                 QThread::msleep(WARNINGS_WORKER_SLEEP_INTERVAL);

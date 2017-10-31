@@ -74,7 +74,7 @@ namespace SpellCheck {
 
     protected:
         virtual bool initWorker() override;
-        virtual void processOneItemEx(Common::flag_t flags, std::shared_ptr<ISpellCheckItem> &item) override;
+        virtual void processOneItemEx(std::shared_ptr<ISpellCheckItem> &item, batch_id_t batchID, Common::flag_t flags) override;
         virtual void processOneItem(std::shared_ptr<ISpellCheckItem> &item) override;
 
     private:

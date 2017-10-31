@@ -72,11 +72,13 @@ namespace QMLExtensions {
         return true;
     }
 
-    void ImageCachingWorker::processOneItemEx(Common::flag_t flags, std::shared_ptr<ImageCacheRequest> &item) {
+    void ImageCachingWorker::processOneItemEx(std::shared_ptr<ImageCacheRequest> &item, batch_id_t batchID, Common::flag_t flags) {
+        Q_UNUSED(batchID);
+
         if (getIsSeparatorFlag(flags)) {
             saveIndex();
         } else {
-            ItemProcessingWorker::processOneItemEx(flags, item);
+            ItemProcessingWorker::processOneItemEx(item, batchID, flags);
 
             if (getWithDelayFlag(flags)) {
                 // force context switch for more imporant tasks
