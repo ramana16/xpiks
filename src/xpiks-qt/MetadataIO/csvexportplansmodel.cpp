@@ -275,6 +275,16 @@ namespace MetadataIO {
             const QString planName2 = val2.value(PLAN_NAME_KEY).toString();
             int result = QString::compare(planName1, planName2);
             return result;
+        } else if (val1.contains(PROPERTY_TYPE_KEY) && val2.contains(PROPERTY_TYPE_KEY)) {
+            const QString columnName1 = val1.value(COLUMN_NAME_KEY).toString();
+            const QString columnName2 = val2.value(COLUMN_NAME_KEY).toString();
+
+            const int type1 = val1.value(PROPERTY_TYPE_KEY).toInt(-1);
+            const int type2 = val2.value(PROPERTY_TYPE_KEY).toInt(-1);
+
+            if ((type1 != -1) && (type1 == type2) && (columnName1 == columnName2)) {
+                return 0;
+            }
         }
 
         return 1;

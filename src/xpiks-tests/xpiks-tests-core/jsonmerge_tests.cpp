@@ -10,6 +10,36 @@ struct NameJsonComparer: public Helpers::CompareValuesJson
     }
 };
 
+#define PLAN_NAME_KEY QLatin1String("name")
+#define PROPERTY_TYPE_KEY QLatin1String("propertyType")
+#define PROPERTY_NAME_KEY QLatin1String("propertyName")
+#define COLUMN_NAME_KEY QLatin1String("columnName")
+
+struct PlanNameJsonComparer: public Helpers::CompareValuesJson
+{
+    virtual int operator()(const QJsonObject &val1, const QJsonObject &val2) {
+        if (val1.contains(PLAN_NAME_KEY) && val2.contains(PLAN_NAME_KEY)) {
+            const QString planName1 = val1.value(PLAN_NAME_KEY).toString();
+            const QString planName2 = val2.value(PLAN_NAME_KEY).toString();
+
+            int result = QString::compare(planName1, planName2);
+            return result;
+        } else if (val1.contains(PROPERTY_TYPE_KEY) && val2.contains(PROPERTY_TYPE_KEY)) {
+            const QString columnName1 = val1.value(COLUMN_NAME_KEY).toString();
+            const QString columnName2 = val2.value(COLUMN_NAME_KEY).toString();
+
+            const int type1 = val1.value(PROPERTY_TYPE_KEY).toInt(-1);
+            const int type2 = val2.value(PROPERTY_TYPE_KEY).toInt(-1);
+
+            if ((type1 != -1) && (type1 == type2) && (columnName1 == columnName2)) {
+                return 0;
+            }
+        }
+
+        return 1;
+    }
+};
+
 void JsonMergeTests::mergeArraysOfObjectsTest() {
     const char *localJson = R"JSON(
                              {
@@ -326,8 +356,92 @@ void JsonMergeTests::mergeExistingElementsTest() {
     QJsonDocument remoteDoc = QJsonDocument::fromJson(remoteJsonData, &error); QCOMPARE(error.error, QJsonParseError::NoError);
     QJsonDocument mergedDoc = QJsonDocument::fromJson(mergedJsonData, &error); QCOMPARE(error.error, QJsonParseError::NoError);
 
-    NameJsonComparer comparer;
+    PlanNameJsonComparer comparer;
     Helpers::mergeJson(remoteDoc, localDoc, false, comparer);
 
+    qDebug() << "local" << localDoc.toJson(QJsonDocument::Compact);
+    qDebug() << "merged" << mergedDoc.toJson(QJsonDocument::Compact);
+
     QCOMPARE(localDoc, mergedDoc);
+}
+
+void JsonMergeTests::mergeSelfTest() {
+    const char *oneJson = R"JSON(
+                          {
+                              "plans": [
+                                  {
+                                      "issystem": true,
+                                      "name": "Shutterstock Video *",
+                                      "properties": [
+                                          {
+                                              "columnName": "Filename",
+                                              "propertyName": "Filename",
+                                              "propertyType": 1
+                                          },
+                                          {
+                                              "columnName": "Description",
+                                              "propertyName": "Description",
+                                              "propertyType": 3
+                                          },
+                                          {
+                                              "columnName": "Categories",
+                                              "propertyName": "Empty",
+                                              "propertyType": 0
+                                          },
+                                          {
+                                              "columnName": "Editorial",
+                                              "propertyName": "Empty",
+                                              "propertyType": 0
+                                          }
+                                      ]
+                                  },
+                                  {
+                                      "issystem": true,
+                                      "name": "Pond5 Video *",
+                                      "properties": [
+                                          {
+                                              "columnName": "ClipId",
+                                              "propertyName": "Empty",
+                                              "propertyType": 0
+                                          },
+                                          {
+                                              "columnName": "OriginalFilename",
+                                              "propertyName": "Filename",
+                                              "propertyType": 1
+                                          },
+                                          {
+                                              "columnName": "Keywords",
+                                              "propertyName": "Keywords",
+                                              "propertyType": 4
+                                          }
+                                      ]
+                                  }
+                              ]
+                          }
+)JSON";
+
+    QByteArray localJsonData(oneJson);
+    QByteArray remoteJsonData(oneJson);
+    QByteArray mergedJsonData(oneJson);
+
+    QJsonParseError error;
+    QJsonDocument localDoc = QJsonDocument::fromJson(localJsonData, &error); QCOMPARE(error.error, QJsonParseError::NoError);
+    QJsonDocument remoteDoc = QJsonDocument::fromJson(remoteJsonData, &error); QCOMPARE(error.error, QJsonParseError::NoError);
+    QJsonDocument mergedDoc = QJsonDocument::fromJson(mergedJsonData, &error); QCOMPARE(error.error, QJsonParseError::NoError);
+
+    QCOMPARE(localDoc, mergedDoc);
+
+    PlanNameJsonComparer comparer;
+    Helpers::mergeJson(remoteDoc, localDoc, false, comparer);
+
+    auto localJson = localDoc.toJson(QJsonDocument::Compact);
+    auto remoteJson = mergedDoc.toJson(QJsonDocument::Compact);
+
+    QCOMPARE(localJson, remoteJson);
+
+    //qDebug() << "local" << localJson;
+    //qDebug() << "merged" << remoteJson;
+
+    // does not work
+    // QCOMPARE(localDoc, mergedDoc);
 }

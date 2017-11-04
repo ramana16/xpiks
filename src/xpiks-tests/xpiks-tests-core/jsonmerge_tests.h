@@ -11,6 +11,7 @@ private slots:
     void mergeArraysOfStringsTest();
     void mergeOverwriteTest();
     void mergeExistingElementsTest();
+    void mergeSelfTest();
 };
 
 #endif // JSONMERGE_TESTS_H
