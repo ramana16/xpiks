@@ -20,20 +20,22 @@ namespace MetadataIO {
     class ArtworkSessionSnapshot
     {
     public:
-        ArtworkSessionSnapshot(Models::ArtworkMetadata *metadata);
+        ArtworkSessionSnapshot(Models::ArtworkMetadata *metadata, bool addedAsDirectory);
 
     public:
         const QString &getArtworkFilePath() const { return m_ArtworkPath; }
         const QString &getAttachedVectorPath() const { return m_VectorPath; }
+        const bool getAddedAsDirectory() const { return m_AddedAsDirectory; }
 
     private:
         QString m_ArtworkPath;
         QString m_VectorPath;
+        bool m_AddedAsDirectory;
     };
 
     class SessionSnapshot {
     public:
-        SessionSnapshot(const std::deque<Models::ArtworkMetadata *> &artworksList);
+        SessionSnapshot(const std::deque<Models::ArtworkMetadata *> &artworksList,  const QSet<uint64_t> &addedAsDirectoryIds);
 
         SessionSnapshot(SessionSnapshot &&other) {
             m_ArtworksSnapshot.swap(other.m_ArtworksSnapshot);

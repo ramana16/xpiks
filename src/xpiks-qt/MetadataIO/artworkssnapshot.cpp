@@ -11,9 +11,10 @@
 #include "artworkssnapshot.h"
 
 namespace MetadataIO {
-    ArtworkSessionSnapshot::ArtworkSessionSnapshot(Models::ArtworkMetadata *metadata) {
+    ArtworkSessionSnapshot::ArtworkSessionSnapshot(Models::ArtworkMetadata *metadata, bool addedAsDirectory) {
         Q_ASSERT(metadata != nullptr);
         m_ArtworkPath = metadata->getFilepath();
+        m_AddedAsDirectory = addedAsDirectory;
 
         Models::ImageArtwork *image = dynamic_cast<Models::ImageArtwork*>(metadata);
         if (image != nullptr && image->hasVectorAttached()){
@@ -21,12 +22,15 @@ namespace MetadataIO {
         }
     }
 
-    SessionSnapshot::SessionSnapshot(const std::deque<Models::ArtworkMetadata *> &artworksList) {
+    SessionSnapshot::SessionSnapshot(const std::deque<Models::ArtworkMetadata *> &artworksList,  const QSet<uint64_t> &addedAsDirectoryIds) {
         LOG_DEBUG << "Creating snapshot of" << artworksList.size() << "artwork(s)";
 
         m_ArtworksSnapshot.reserve(artworksList.size());
         for (const auto &artwork: artworksList) {
-            m_ArtworksSnapshot.emplace_back(new MetadataIO::ArtworkSessionSnapshot(artwork));
+            const auto &directoryID = artwork->getDirectoryID();
+            bool addedAsDirecoty = addedAsDirectoryIds.find(directoryID) != addedAsDirectoryIds.end();
+
+            m_ArtworksSnapshot.emplace_back(new MetadataIO::ArtworkSessionSnapshot(artwork, addedAsDirecoty));
         }
     }
 

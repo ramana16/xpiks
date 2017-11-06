@@ -30,6 +30,7 @@
 #define OPENED_FILES_KEY "openedFiles"
 #define FILE_KEY "file"
 #define VECTOR_KEY "vector"
+#define ADDED_AS_DIRECTORY_KEY "asDirectory"
 
 namespace Models {
     SessionManager::SessionManager():
@@ -83,6 +84,9 @@ namespace Models {
                 jsonObject.insert(VECTOR_KEY, vectorPath);
             }
 
+            bool addedAsDirectory = item->getAddedAsDirectory();
+            jsonObject.insert(ADDED_AS_DIRECTORY_KEY, addedAsDirectory);
+
             filesList.append(jsonObject);
         }
 
@@ -130,13 +134,13 @@ namespace Models {
         for (const auto &item: filesArray) {
             QJsonObject obj = item.toObject();
             QString filePath = obj.value(FILE_KEY).toString().trimmed();
+            bool addedAsDirectory =  obj.value(ADDED_AS_DIRECTORY_KEY).toBool();
 
             if (filePath.isEmpty()) {
                 continue;
             }
 
-            m_Filenames.append(filePath);
-
+            m_Filenames.emplace_back(filePath, addedAsDirectory);
             QString vectorPath = obj.value(VECTOR_KEY).toString().trimmed();
             if (!vectorPath.isEmpty()) {
                 m_Vectors.append(vectorPath);

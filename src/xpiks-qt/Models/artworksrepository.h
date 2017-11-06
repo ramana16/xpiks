@@ -23,6 +23,7 @@
 
 #include "../Common/abstractlistmodel.h"
 #include "../Common/baseentity.h"
+#include "../Common/flags.h"
 
 namespace Models {
     class ArtworksRepository : public Common::AbstractListModel, public Common::BaseEntity {
@@ -41,16 +42,20 @@ namespace Models {
 
     public:
         struct RepoDir {
-            RepoDir (QString absolutePath, qint64 id, int count, bool selected,  bool isAddedAsDirectory):
-                m_AbsolutePath(absolutePath), m_Id(id), m_FilesCount(count), m_IsSelected(selected), m_IsAddedAsDirectory(isAddedAsDirectory)
+            RepoDir (QString absolutePath, qint64 id, int count):
+                m_AbsolutePath(absolutePath), m_Id(id), m_FilesCount(count)
             { }
             RepoDir() = default;
+
+            inline void setSelectedFlag(bool value) { Common::ApplyFlag(m_DirectoryFlags, value, Common::DirectoryFlags::IsSelected); }
+            inline void setAddedAsDirectoryFlag(bool value) { Common::ApplyFlag(m_DirectoryFlags, value, Common::DirectoryFlags::IsAddedAsDirectory); }
+            inline bool getSelectedFlag() const { return Common::HasFlag(m_DirectoryFlags, Common::DirectoryFlags::IsSelected); }
+            inline bool getAddedAsDirectoryFlag() const { return Common::HasFlag(m_DirectoryFlags, Common::DirectoryFlags::IsAddedAsDirectory); }
 
             QString m_AbsolutePath = QString("");
             qint64 m_Id = 0;
             int m_FilesCount = 0;
-            bool m_IsSelected = true;
-            bool m_IsAddedAsDirectory = false;
+            Common::flag_t m_DirectoryFlags;
         };
 
     public:
@@ -58,7 +63,7 @@ namespace Models {
         void cleanupEmptyDirectories(QVector<RepoDir> &directoriesToRemove,  QVector<int> &indicesToRemove);
         void resetLastUnavailableFilesCount() { m_LastUnavailableFilesCount=0; }
         void stopListeningToUnavailableFiles();
-        void insertEmptyDirectory(const QString &absolutePath, int index, bool isSelected);
+        void insertEmptyDirectory(const QString &absolutePath, size_t index, bool isSelected);
 
     public:
         bool beginAccountingFiles(const QStringList &items);
@@ -105,7 +110,7 @@ namespace Models {
 
     public:
         const QString &getDirectory(int index) const { return m_DirectoriesList[index].m_AbsolutePath; }
-        const bool getFullFlag(int index) const { return m_DirectoriesList[index].m_IsAddedAsDirectory; }
+        const bool getAddedAsDirectoryFlag(int index) const { return m_DirectoriesList[index].getAddedAsDirectoryFlag(); }
 #ifdef CORE_TESTS
         int getFilesCountForDirectory(const QString &directory) const { size_t index; tryFindDirectory(directory, index); return m_DirectoriesList[index].m_FilesCount; }
         int getFilesCountForDirectory(int index) const { return m_DirectoriesList[index].m_FilesCount; }
@@ -115,6 +120,7 @@ namespace Models {
 #ifdef INTEGRATION_TESTS
         void resetEverything();
 #endif
+        QSet<uint64_t> getIdsAddedAsDirectory() const;
 
     public:
         virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -133,7 +139,7 @@ namespace Models {
             qint64 idToRemove = directoryToRemove.m_Id;
             if (!allAreSelected())
             {
-                const bool oldIsSelected = directoryToRemove.m_IsSelected;
+                const bool oldIsSelected = directoryToRemove.getSelectedFlag();
                 const bool newIsSelected = false; // unselect folder to be deleted
                 changeSelectedState(index, newIsSelected, oldIsSelected);
             }

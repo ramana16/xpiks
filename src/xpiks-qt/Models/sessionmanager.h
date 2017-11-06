@@ -41,7 +41,7 @@ namespace Models {
         void readSessionFromFile();
 
     public:
-        const QStringList &getFilenames() const { return m_Filenames; }
+        const std::vector<std::pair<QString, bool>> &getFilenames() const { return m_Filenames; }
         const QStringList &getVectors() const { return m_Vectors; }
 
 #ifdef INTEGRATION_TESTS
@@ -69,7 +69,7 @@ namespace Models {
         QString m_LocalConfigPath;
         QJsonObject m_SessionJson;
         QMutex m_Mutex;
-        QStringList m_Filenames;
+        std::vector<std::pair<QString, bool>> m_Filenames;
         QStringList m_Vectors;
         volatile bool m_CanRestore;
     };

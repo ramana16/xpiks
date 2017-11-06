@@ -29,17 +29,17 @@ namespace UndoRedo {
             m_StartDirectoryIndex(startDirectoryIndex),
             m_IsDirectorySelected(isDirectorySelected)
         {
-            QStringList files, vector_files;
+            QStringList files, vectorFiles;
             QStringList rawFilenames;
             Helpers::extractFiles(m_AbsolutePath, rawFilenames);
-            Helpers::extractImagesAndVectors(rawFilenames, files, vector_files);
-            size_t vector_size = vector_files.length();
+            Helpers::extractImagesAndVectors(rawFilenames, files, vectorFiles);
+            size_t vectorSize = vectorFiles.length();
 
-            QHash<QString, QString> vectors_hash;
-            for (int i = 0; i < vector_size; ++i) {
-                const QString &path = vector_files.at(i);
+            QHash<QString, QString> vectorsHash;
+            for (int i = 0; i < vectorSize; ++i) {
+                const QString &path = vectorFiles.at(i);
                 QFileInfo fi(path);
-                vectors_hash.insert(fi.baseName().toLower(), path);
+                vectorsHash.insert(fi.baseName().toLower(), path);
             }
 
             QStringList vectors;
@@ -47,8 +47,8 @@ namespace UndoRedo {
             for (const auto &file : files) {
                 QFileInfo fi(file);
                 vectors.push_back({});
-                if (vectors_hash.contains(fi.baseName().toLower())) {
-                    vectors.last() = vectors_hash[fi.baseName().toLower()];
+                if (vectorsHash.contains(fi.baseName().toLower())) {
+                    vectors.last() = vectorsHash[fi.baseName().toLower()];
                 }
             }
 

@@ -185,7 +185,7 @@ namespace Models {
     void ArtItemsModel::removeArtworksDirectory(int index) {
         LOG_INFO << "Remove artworks directory at" << index;
         const QString &directory = m_CommandManager->getArtworksRepository()->getDirectory(index);
-        const bool isFullDirectory =  m_CommandManager->getArtworksRepository()->getFullFlag(index);
+        const bool isFullDirectory =  m_CommandManager->getArtworksRepository()->getAddedAsDirectoryFlag(index);
         LOG_CORE_TESTS << "Removing directory:" << directory;
 
         QDir dir(directory);
@@ -344,7 +344,7 @@ namespace Models {
         }
 
         foreach(const QUrl &dirUrl, directories) {
-            Helpers::extractFiles(dirUrl.toLocalFile(), filesToImport);
+            doAddDirectory(dirUrl.toLocalFile(), filesToImport);
         }
 
         int importedCount = addFiles(filesToImport);
@@ -1255,7 +1255,7 @@ namespace Models {
         QStringList files;
 
         foreach(const QString &directory, directories) {
-            Helpers::extractFiles(directory, files);
+            doAddDirectory(directory, files);
         }
 
         if (files.count() > 0) {
@@ -1264,6 +1264,23 @@ namespace Models {
         }
 
         return filesCount;
+    }
+
+    void ArtItemsModel::doAddDirectory(const QString &directory, QStringList &filesList) {
+        QDir dir(directory);
+
+        dir.setFilter(QDir::NoDotAndDotDot | QDir::Files);
+
+        QFileInfoList items = dir.entryInfoList();
+        int size = items.size();
+        filesList.reserve(filesList.size() + size);
+
+        for (int i = 0; i < size; ++i) {
+            QString filepath = items.at(i).absoluteFilePath();
+            filesList.append(filepath);
+        }
+
+        LOG_INFO << filesList.length() << "file(s) found";
     }
 
     int ArtItemsModel::addFiles(const QStringList &rawFilenames, bool isFullDirectory) {

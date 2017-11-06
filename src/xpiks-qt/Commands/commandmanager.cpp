@@ -1100,19 +1100,45 @@ int Commands::CommandManager::restoreReadSession() {
     // we should have saved all vectors from that session
     const bool autoFindVectors = false;
     auto &filenames = m_SessionManager->getFilenames();
+    QStringList filesAddedAsDirectory;
+    QStringList filesAddedStandalone;
+    const auto &size = filenames.size();
+    filesAddedAsDirectory.reserve(size);
+    filesAddedStandalone.reserve(size);
+
+    for (const auto &item : filenames) {
+        const auto &filename = item.first;
+        const auto &addedAsDirectory = item.second;
+        auto &names = addedAsDirectory ? filesAddedAsDirectory : filesAddedStandalone;
+        names.append(filename);
+    }
+
     auto &vectors = m_SessionManager->getVectors();
 
     if (filenames.empty()) {
         LOG_INFO << "Session was empty";
         return 0;
     }
-    bool isFullDirectory = false;
-    std::shared_ptr<Commands::AddArtworksCommand> addArtworksCommand(new Commands::AddArtworksCommand(filenames, vectors, autoFindVectors, isFullDirectory));
-    std::shared_ptr<Commands::ICommandResult> result = processCommand(addArtworksCommand);
-    std::shared_ptr<Commands::AddArtworksCommandResult> addArtworksResult = std::dynamic_pointer_cast<Commands::AddArtworksCommandResult>(result);
 
-    int newFilesCount = addArtworksResult->m_NewFilesAdded;
-    LOG_INFO << newFilesCount << "file(s) restored from session";
+    int newFilesCount = 0;
+
+    auto proceed = [&](const QStringList &files, bool addedAsDirectory) -> void {
+                       if (files.empty())
+                       {
+                           return;
+                       }
+                       std::shared_ptr<Commands::AddArtworksCommand> addArtworksCommand(new Commands::AddArtworksCommand(files, vectors, autoFindVectors,
+                                                                                                                         addedAsDirectory));
+                       std::shared_ptr<Commands::ICommandResult> result = processCommand(addArtworksCommand);
+                       std::shared_ptr<Commands::AddArtworksCommandResult> addArtworksResult =
+                           std::dynamic_pointer_cast<Commands::AddArtworksCommandResult>(result);
+
+                       newFilesCount += addArtworksResult->m_NewFilesAdded;
+
+                       LOG_INFO << newFilesCount << "file(s) restored from session";
+                   };
+    proceed(filesAddedAsDirectory, true);
+    proceed(filesAddedStandalone, false);
 
     m_SessionManager->onAfterRestore();
 
@@ -1139,7 +1165,8 @@ void Commands::CommandManager::saveSessionInBackground() {
     }
 
     auto artworkList = m_ArtItemsModel->getArtworkList();
-    std::unique_ptr<MetadataIO::SessionSnapshot> sessionSnapshot(new MetadataIO::SessionSnapshot(artworkList));
+    auto addedAsDirectoryIds = m_ArtworksRepository->getIdsAddedAsDirectory();
+    std::unique_ptr<MetadataIO::SessionSnapshot> sessionSnapshot(new MetadataIO::SessionSnapshot(artworkList, addedAsDirectoryIds));
 
     m_MaintenanceService->saveSession(sessionSnapshot, m_SessionManager);
 #endif

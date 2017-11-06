@@ -75,20 +75,21 @@ namespace Models {
         }
     }
 
-    void ArtworksRepository::insertEmptyDirectory(const QString &absolutePath, int index, bool isSelected)
-    {
+    void ArtworksRepository::insertEmptyDirectory(const QString &absolutePath, size_t index, bool isSelected) {
         int size = m_DirectoriesList.size();
-        if (size ==0)
-        {
+
+        if (size == 0) {
             index = 0;
-        }
-        else if (index > size)
-        {
+        } else if (index > size) {
             index = size;
         }
+
         beginInsertRows(QModelIndex(), index, index);
         qint64 id = generateNextID();
-        m_DirectoriesList.insert(m_DirectoriesList.begin() + index, {absolutePath, id, 0, isSelected, true});
+        m_DirectoriesList.insert(m_DirectoriesList.begin() + index, {absolutePath, id, 0});
+        auto &item = m_DirectoriesList.back();
+        item.setSelectedFlag(isSelected);
+        item.setAddedAsDirectoryFlag(true);
         m_DirectoryIdToIndex[id] = index;
         m_CommandManager->addToRecentDirectories(absolutePath);
         endInsertRows();
@@ -158,7 +159,7 @@ namespace Models {
         const size_t size = m_DirectoriesList.size();
         size_t index = m_DirectoryIdToIndex.value(directoryID, size);
         if (index < size) {
-            isSelected = m_DirectoriesList[index].m_IsSelected;
+            isSelected = m_DirectoriesList[index].getSelectedFlag();
         }
 
         return isSelected;
@@ -178,7 +179,10 @@ namespace Models {
             if (!alreadyExists) {
                 qint64 id = generateNextID();
                 LOG_INFO << "Adding new directory" << absolutePath << "with index" << m_DirectoriesList.size() << "and id" << id;
-                m_DirectoriesList.emplace_back(absolutePath, id, 0, true, isFullDirectory);
+                m_DirectoriesList.emplace_back(absolutePath, id, 0);
+                auto &item = m_DirectoriesList.back();
+                item.setSelectedFlag(true);
+                item.setAddedAsDirectoryFlag(isFullDirectory);
                 index = m_DirectoriesList.size() - 1;
                 m_DirectoryIdToIndex[id] = index;
                 directoryID = id;
@@ -199,7 +203,8 @@ namespace Models {
             m_FilesSet.insert(filepath);
             auto &item = m_DirectoriesList[index];
             item.m_FilesCount = occurances + 1;
-            item.m_IsAddedAsDirectory = item.m_IsAddedAsDirectory || isFullDirectory;
+            const bool isAddedAsDirectory = item.getSelectedFlag();
+            item.setSelectedFlag(isAddedAsDirectory || isFullDirectory);
             wasModified = true;
         }
 
@@ -298,6 +303,18 @@ namespace Models {
         return isUnavailable;
     }
 
+    QSet<uint64_t> ArtworksRepository::getIdsAddedAsDirectory() const {
+        QSet<uint64_t> dirIds;
+
+        for (const auto &dir : m_DirectoriesList) {
+            if (dir.getAddedAsDirectoryFlag()) {
+                dirIds.insert(dir.m_Id);
+            }
+        }
+
+        return dirIds;
+    }
+
 #ifdef INTEGRATION_TESTS
     void ArtworksRepository::resetEverything() {
         m_DirectoriesList.clear();
@@ -327,7 +344,7 @@ namespace Models {
         case UsedImagesCountRole:
             return directory.m_FilesCount;
         case IsSelectedRole:
-            return !allAreSelected() && directory.m_IsSelected;
+            return !allAreSelected() && directory.getSelectedFlag();
         default:
             return QVariant();
         }
@@ -340,7 +357,7 @@ namespace Models {
 
         auto &directory = m_DirectoriesList.at(row);
 
-        bool oldValue = directory.m_IsSelected;
+        bool oldValue = directory.getSelectedFlag();
         bool newValue = !oldValue;
         if (changeSelectedState(row, newValue, oldValue)) {
             updateSelectedState();
@@ -355,21 +372,18 @@ namespace Models {
 
     void ArtworksRepository::selectDirectory(const QString &path)
     {
-        for (const auto &directory : m_DirectoriesList)
+        size_t index = 0;
+        bool found = tryFindDirectory(path, index);
+        if (found)
         {
-            if (directory.m_AbsolutePath == path)
-            {
-                int index = directory.m_Id;
-                selectDirectory(index);
-                return;
-            }
+            selectDirectory(index);
         }
     }
 
     bool ArtworksRepository::setDirectorySelected(size_t index, bool value) {
         auto &directory = m_DirectoriesList[index];
-        bool changed = directory.m_IsSelected != value;
-        directory.m_IsSelected = value;
+        bool changed = directory.getSelectedFlag() != value;
+        directory.setSelectedFlag(value);
 
         return changed;
     }
@@ -428,7 +442,7 @@ namespace Models {
         size_t count = 0;
 
         for (auto &directory: m_DirectoriesList) {
-            if (directory.m_IsSelected) {
+            if (directory.getSelectedFlag()) {
                 count++;
             }
         }
@@ -440,7 +454,7 @@ namespace Models {
         bool anyUnselected = false;
 
         for (auto &item: m_DirectoriesList) {
-            if (!item.m_IsSelected) {
+            if (!item.getSelectedFlag()) {
                 anyUnselected = true;
                 break;
             }

@@ -110,7 +110,7 @@ namespace Commands {
 
                 const auto &directory = removedDirectories.front();
                 const auto &path = directory.m_AbsolutePath;
-                const auto &directorySelectedFlag = directory.m_IsSelected;
+                const auto &directorySelectedFlag = directory.getSelectedFlag();
                 const auto &directoryIndex = indicesToRemove.front();
                 const auto &fileStartIndex = removedItemsIndices.front();
 
