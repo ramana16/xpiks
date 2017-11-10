@@ -13,6 +13,7 @@ import QtQuick.Controls 1.1
 import QtQuick.Layouts 1.1
 import QtQuick.Dialogs 1.1
 import QtQuick.Controls.Styles 1.1
+import QtQml 2.2
 import xpiks 1.0
 import "../Constants"
 import "../Common.js" as Common;
@@ -114,8 +115,8 @@ Rectangle {
                 delegate: MenuItem {
                     text: name
                     onTriggered: {
-                        var presetIndex = filteredPresetsModel.getOriginalIndex(index)
-                        combinedArtworks.expandPreset(wordRightClickMenu.keywordIndex, presetIndex);
+                        var presetID = filteredPresetsModel.getOriginalID(index)
+                        combinedArtworks.expandPreset(wordRightClickMenu.keywordIndex, presetID);
                     }
                 }
             }
@@ -124,22 +125,46 @@ Rectangle {
 
     Menu {
         id: presetsMenu
-        property int artworkIndex
 
         Menu {
             id: subMenu
+            property var defaultGroupModel: presetsGroups.getDefaultGroupModel()
             title: i18.n + qsTr("Insert preset")
 
             Instantiator {
-                model: presetsModel
-                onObjectAdded:{
-                    subMenu.insertItem( index, object )
-                }
+                model: presetsGroups
+                onObjectAdded: subMenu.insertItem( index, object )
                 onObjectRemoved: subMenu.removeItem( object )
+                delegate: Menu {
+                    id: groupMenu
+                    property int delegateIndex: index
+                    property var groupModel: presetsGroups.getGroupModel(index)
+                    title: gname
+
+                    Instantiator {
+                        model: groupMenu.groupModel
+                        onObjectAdded: groupMenu.insertItem( index, object )
+                        onObjectRemoved: groupMenu.removeItem( object )
+
+                        delegate: MenuItem {
+                            text: name
+                            onTriggered: {
+                                combinedArtworks.addPreset(groupMenu.groupModel.getOriginalID(index));
+                            }
+                        }
+                    }
+                }
+            }
+
+            Instantiator {
+                model: subMenu.defaultGroupModel
+                onObjectAdded: subMenu.insertItem( index, object )
+                onObjectRemoved: subMenu.removeItem( object )
+
                 delegate: MenuItem {
                     text: name
                     onTriggered: {
-                        combinedArtworks.addPreset(index);
+                        combinedArtworks.addPreset(subMenu.defaultGroupModel.getOriginalID(index));
                     }
                 }
             }

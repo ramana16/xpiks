@@ -170,7 +170,8 @@ SOURCES += main.cpp \
     MetadataIO/csvexportplansmodel.cpp \
     MetadataIO/csvexportproperties.cpp \
     MetadataIO/csvexportmodel.cpp \
-    Helpers/threadhelpers.cpp
+    Helpers/threadhelpers.cpp \
+    KeywordsPresets/presetgroupsmodel.cpp
 
 RESOURCES += qml.qrc
 
@@ -404,7 +405,8 @@ HEADERS += \
     Common/delayedactionentity.h \
     Models/artworkelement.h \
     Models/previewartworkelement.h \
-    Helpers/threadhelpers.h
+    Helpers/threadhelpers.h \
+    KeywordsPresets/presetgroupsmodel.h
 
 DISTFILES += \
     Components/CloseIcon.qml \
@@ -493,7 +495,8 @@ DISTFILES += \
     StackViews/DuplicatesReView.qml \
     StyledControls/StyledLink.qml \
     Dialogs/CsvExportDialog.qml \
-    Components/DotsButton.qml
+    Components/DotsButton.qml \
+    Dialogs/AddPresetGroupDialog.qml
 
 lupdate_only {
 SOURCES += *.qml \

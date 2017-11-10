@@ -524,9 +524,9 @@ void ArtworkMetadataTests::addNewKeywordsEmitsModifiedTest() {
     QSignalSpy modifiedSpy(&metadata, SIGNAL(modifiedChanged(bool)));
     QSignalSpy addedSpy(metadata.getBasicModel(), SIGNAL(rowsInserted(QModelIndex,int,int)));
 
-    int addedCount = metadata.appendKeywords(QStringList() << "keyword1" << "keyword2");
+    size_t addedCount = metadata.appendKeywords(QStringList() << "keyword1" << "keyword2");
 
-    QCOMPARE(addedCount, 2);
+    QCOMPARE(addedCount, (size_t)2);
 
     QCOMPARE(modifiedSpy.count(), 1);
     QList<QVariant> modifyArguments = modifiedSpy.takeFirst();
@@ -541,16 +541,16 @@ void ArtworkMetadataTests::addNewKeywordsEmitsModifiedTest() {
 void ArtworkMetadataTests::addExistingKeywordsDoesNotEmitModifiedTest() {
     Mocks::ArtworkMetadataMock metadata("file.jpg");
     metadata.initAsEmpty();
-    int addedCount = metadata.appendKeywords(QStringList() << "keyword1" << "keyword2");
+    size_t addedCount = metadata.appendKeywords(QStringList() << "keyword1" << "keyword2");
 
-    QCOMPARE(addedCount, 2);
+    QCOMPARE(addedCount, (size_t)2);
 
     QSignalSpy modifiedSpy(&metadata, SIGNAL(modifiedChanged(bool)));
     QSignalSpy addedSpy(metadata.getBasicModel(), SIGNAL(rowsInserted(QModelIndex,int,int)));
 
     addedCount = metadata.appendKeywords(QStringList() << "keyword1" << "keyword2");
 
-    QCOMPARE(addedCount, 0);
+    QCOMPARE(addedCount, (size_t)0);
     QCOMPARE(metadata.rowCount(), 2);
     QCOMPARE(modifiedSpy.count(), 0);
     QCOMPARE(addedSpy.count(), 0);

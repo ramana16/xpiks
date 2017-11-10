@@ -90,5 +90,6 @@
         <file>StyledControls/StyledLink.qml</file>
         <file>Dialogs/CsvExportDialog.qml</file>
         <file>Components/DotsButton.qml</file>
+        <file>Dialogs/AddPresetGroupDialog.qml</file>
     </qresource>
 </RCC>

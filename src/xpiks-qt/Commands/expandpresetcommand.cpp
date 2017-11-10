@@ -20,7 +20,7 @@ namespace Commands {
     }
 
     std::shared_ptr<ICommandResult> ExpandPresetCommand::execute(const ICommandManager *commandManagerInterface) const {
-        LOG_INFO << "Expand preset" << m_PresetIndex;
+        LOG_INFO << "Expand preset" << m_PresetID;
 
         CommandManager *commandManager = (CommandManager*)commandManagerInterface;
         auto *presetsModel = commandManager->getPresetsModel();
@@ -30,10 +30,10 @@ namespace Commands {
         std::vector<UndoRedo::ArtworkMetadataBackup> artworksBackups;
         MetadataIO::WeakArtworksSnapshot affectedArtworks;
 
-        if (presetsModel->tryGetPreset(m_PresetIndex, keywords)) {
+        if (presetsModel->tryGetPreset(m_PresetID, keywords)) {
             Models::ArtworkMetadata *artwork = m_ArtworkLocker.getArtworkMetadata();
 
-            indexToUpdate = artwork->getLastKnownIndex();
+            indexToUpdate = (int)artwork->getLastKnownIndex();
             artworksBackups.emplace_back(artwork);
 
             if (m_KeywordIndex != -1) {

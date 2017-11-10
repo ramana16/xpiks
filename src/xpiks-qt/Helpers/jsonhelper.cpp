@@ -11,14 +11,14 @@
 #include "jsonhelper.h"
 
 namespace Helpers {
-    bool mergeJsonArrays (const QJsonArray &arrayFrom, QJsonArray &arrayTo, CompareValuesJson &comparer);
-    bool mergeJsonObjects (const QJsonObject &objectMergeFrom, QJsonObject &objectMergeTo, CompareValuesJson &comparer);
+    bool mergeJsonArrays(const QJsonArray &arrayFrom, QJsonArray &arrayTo, CompareValuesJson &comparer);
+    bool mergeJsonObjects(const QJsonObject &objectMergeFrom, QJsonObject &objectMergeTo, CompareValuesJson &comparer);
 
     bool mergeArraysOfObjects(const QJsonArray &arrayFrom, QJsonArray &arrayTo, CompareValuesJson &comparer);
     int findObjectIndex(const QJsonArray &array, int minIndex, const QJsonObject &object, CompareValuesJson &comparer);
     bool mergeArraysOfStrings(const QJsonArray &arrayFrom, QJsonArray &arrayTo);
 
-    bool mergeJsonArrays (const QJsonArray &arrayFrom, QJsonArray &arrayTo, CompareValuesJson &comparer) {
+    bool mergeJsonArrays(const QJsonArray &arrayFrom, QJsonArray &arrayTo, CompareValuesJson &comparer) {
         LOG_DEBUG << "#";
 
         if (arrayTo.isEmpty()) {

@@ -38,6 +38,8 @@ Item {
         presetEditComponent.destroy();
     }
 
+    signal dismissComboboxes()
+
     PropertyAnimation { target: presetEditComponent; property: "opacity";
         duration: 400; from: 0; to: 1;
         easing.type: Easing.InOutQuad ; running: true }
@@ -75,6 +77,7 @@ Item {
         anchors.fill: parent
 
         MouseArea {
+            id: backgroundMA
             anchors.fill: parent
             onWheel: wheel.accepted = true
             onClicked: mouse.accepted = true
@@ -113,183 +116,180 @@ Item {
         Rectangle {
             id: dialogWindow
             width: 700
-            height: 350
+            height: 450
             color: uiColors.popupBackgroundColor
             anchors.centerIn: parent
             Component.onCompleted: anchors.centerIn = undefined
 
-            Item {
-                id: listPanel
+            Rectangle {
+                id: leftPanel
+                color: uiColors.defaultControlColor
                 anchors.left: parent.left
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
                 width: 250
+                //enabled: !csvExportModel.isExporting
 
-                ColumnLayout {
-                    id: presetsStack
-                    anchors.fill: parent
-                    anchors.leftMargin: 20
-                    anchors.topMargin: 20
-                    anchors.bottomMargin: 20
-                    spacing: 0
+                ListView {
+                    id: presetNamesListView
+                    model: presetsModel
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    anchors.bottom: leftFooter.top
+                    anchors.topMargin: 30
+                    anchors.bottomMargin: 10
+                    clip: true
+                    boundsBehavior: Flickable.StopAtBounds
 
-                    StyledText {
-                        text: i18.n + qsTr("Presets:")
-                        isActive: false
+                    add: Transition {
+                        NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 230 }
                     }
 
-                    Item {
-                        height: 4
+                    remove: Transition {
+                        NumberAnimation { property: "opacity"; to: 0; duration: 230 }
                     }
 
-                    Rectangle {
-                        height: 5
+                    displaced: Transition {
+                        NumberAnimation { properties: "x,y"; duration: 230 }
+                    }
+
+                    addDisplaced: Transition {
+                        NumberAnimation { properties: "x,y"; duration: 230 }
+                    }
+
+                    removeDisplaced: Transition {
+                        NumberAnimation { properties: "x,y"; duration: 230 }
+                    }
+
+                    delegate: Rectangle {
+                        id: sourceWrapper
+                        property variant myData: model
+                        property int delegateIndex: index
+                        property bool isCurrent: ListView.isCurrentItem
+                        color: ListView.isCurrentItem ? uiColors.popupBackgroundColor : (exportPlanMA.containsMouse ? uiColors.panelColor :  leftPanel.color)
                         anchors.left: parent.left
                         anchors.right: parent.right
-                        color: uiColors.defaultControlColor
-                    }
+                        height: 50
 
-                    Rectangle {
-                        color: uiColors.defaultControlColor
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        Layout.fillHeight: true
-
-                        StyledScrollView {
+                        MouseArea {
+                            id: exportPlanMA
+                            hoverEnabled: true
                             anchors.fill: parent
-                            anchors.margins: { left: 5; top: 5; right: 5; bottom: 5 }
+                            //propagateComposedEvents: true
+                            //preventStealing: false
 
-                            ListView {
-                                id: presetNamesListView
-                                model: presetsModel
-                                boundsBehavior: Flickable.StopAtBounds
+                            onClicked: {
+                                if (presetNamesListView.currentIndex != sourceWrapper.delegateIndex) {
+                                    presetNamesListView.currentIndex = sourceWrapper.delegateIndex
 
-                                spacing: 10
-
-                                add: Transition {
-                                    NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 230 }
+                                    groupsCombobox.updateSelectedGroup()
+                                    //uploadInfos.updateProperties(sourceWrapper.delegateIndex)
                                 }
+                            }
+                        }
 
-                                remove: Transition {
-                                    NumberAnimation { property: "opacity"; to: 0; duration: 230 }
+                        RowLayout {
+                            spacing: 10
+                            anchors.fill: parent
+
+                            Item {
+                                width: 10
+                            }
+
+                            StyledText {
+                                id: infoTitle
+                                Layout.fillWidth: true
+                                anchors.verticalCenter: parent.verticalCenter
+                                height: 31
+                                text: name
+                                elide: Text.ElideMiddle
+                            }
+
+                            CloseIcon {
+                                id: closeIcon
+                                width: 14
+                                height: 14
+                                anchors.verticalCenterOffset: 1
+                                isActive: false
+
+                                onItemClicked: {
+                                    confirmRemoveItemDialog.itemIndex = sourceWrapper.delegateIndex
+                                    confirmRemoveItemDialog.open()
                                 }
+                            }
 
-                                displaced: Transition {
-                                    NumberAnimation { properties: "x,y"; duration: 230 }
-                                }
-
-                                addDisplaced: Transition {
-                                    NumberAnimation { properties: "x,y"; duration: 230 }
-                                }
-
-                                removeDisplaced: Transition {
-                                    NumberAnimation { properties: "x,y"; duration: 230 }
-                                }
-
-                                delegate: Rectangle {
-                                    id: sourceWrapper
-                                    property variant myData: model
-                                    property int delegateIndex: index
-                                    property bool isSelected: ListView.isCurrentItem
-                                    color: isSelected ? uiColors.selectedArtworkBackground : uiColors.defaultDarkColor
-                                    width: parent.width - 10
-                                    anchors.left: parent.left
-                                    anchors.leftMargin: 5
-                                    height: 31
-
-                                    MouseArea {
-                                        anchors.fill: parent
-                                        onClicked: {
-                                            if (presetNamesListView.currentIndex != sourceWrapper.delegateIndex) {
-                                                presetNamesListView.currentIndex = sourceWrapper.delegateIndex
-                                            }
-                                        }
-                                    }
-
-                                    RowLayout {
-                                        spacing: 10
-                                        anchors.fill: parent
-
-                                        Item {
-                                            width: 1
-                                        }
-
-                                        StyledText {
-                                            id: infoTitle
-                                            Layout.fillWidth: true
-                                            anchors.verticalCenter: parent.verticalCenter
-                                            height: 31
-                                            text: name
-                                            font.bold: sourceWrapper.isSelected
-                                            elide: Text.ElideMiddle
-                                        }
-
-                                        CloseIcon {
-                                            id: closeIcon
-                                            width: 14
-                                            height: 14
-                                            anchors.verticalCenterOffset: 1
-                                            isActive: false
-
-                                            onItemClicked: {
-                                                confirmRemoveItemDialog.itemIndex = sourceWrapper.delegateIndex
-                                                confirmRemoveItemDialog.open()
-                                            }
-                                        }
-
-                                        Item {
-                                            id: placeholder2
-                                            width: 1
-                                        }
-                                    }
-                                }
-
-                                Component.onCompleted: {
-                                    if (count > 0) {
-                                        titleText.forceActiveFocus()
-                                        titleText.cursorPosition = titleText.text.length
-                                    }
-                                }
+                            Item {
+                                id: placeholder2
+                                width: 15
                             }
                         }
                     }
 
-                    Rectangle {
-                        color: uiColors.defaultControlColor
-                        height: 40
-                        anchors.left: parent.left
-                        anchors.right: parent.right
+                    Component.onCompleted: {
+                        if (count > 0) {
+                            titleText.forceActiveFocus()
+                            titleText.cursorPosition = titleText.text.length
+                        }
+                    }
+                }
 
-                        StyledAddHostButton {
-                            id: addPresetButton
-                            anchors.left: parent.left
-                            anchors.right: parent.right
-                            anchors.leftMargin: 10
-                            anchors.rightMargin: 10
-                            anchors.verticalCenter: parent.verticalCenter
-                            text: i18.n + qsTr("Add new", "preset")
-                            onClicked: {
-                                presetsModel.addItem()
-                                presetNamesListView.currentIndex = presetNamesListView.count - 1
+                CustomScrollbar {
+                    id: exportPlansScroll
+                    anchors.topMargin: 0
+                    anchors.bottomMargin: 0
+                    anchors.rightMargin: 0
+                    flickable: presetNamesListView
+                    canShow: !backgroundMA.containsMouse && !rightPanelMA.containsMouse
+                }
 
-                                titleText.forceActiveFocus()
-                                titleText.cursorPosition = titleText.text.length
-                            }
+                Item {
+                    id: leftFooter
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    anchors.bottom: parent.bottom
+                    height: 50
+
+                    StyledBlackButton {
+                        id: addPresetButton
+                        width: 210
+                        height: 30
+                        anchors.centerIn: parent
+                        text: i18.n + qsTr("Add new", "preset")
+                        onClicked: {
+                            presetsModel.addItem()
+                            presetNamesListView.currentIndex = presetNamesListView.count - 1
+
+                            // fake "default" group
+                            groupsCombobox.selectedIndex = 0
+
+                            titleText.forceActiveFocus()
+                            titleText.cursorPosition = titleText.text.length
                         }
                     }
                 }
             }
 
             Item {
-                id: editsPanel
-                anchors.left: listPanel.right
-                anchors.top: parent.top
+                id: rightPanel
+                anchors.left: leftPanel.right
                 anchors.right: parent.right
-                anchors.bottom: bottomPanel.top
+                anchors.top: parent.top
+                anchors.bottom: footer.top
+
+                MouseArea {
+                    id: rightPanelMA
+                    anchors.fill: parent
+                    hoverEnabled: true
+
+                    onClicked: presetEditComponent.dismissComboboxes()
+                }
 
                 ColumnLayout {
                     anchors.fill: parent
-                    anchors.margins: 20
+                    anchors.leftMargin: 20
+                    anchors.rightMargin: 20
+                    anchors.topMargin: 20
                     spacing: 4
 
                     StyledText {
@@ -301,13 +301,14 @@ Item {
                         id: titleWrapper
                         border.width: titleText.activeFocus ? 1 : 0
                         border.color: uiColors.artworkActiveColor
-                        Layout.fillWidth: true
+                        anchors.left: parent.left
+                        anchors.right: parent.right
                         color: enabled ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
                         height: 30
 
                         StyledTextInput {
                             id: titleText
-                            height: 30
+                            height: parent.height
                             anchors.left: parent.left
                             anchors.right: parent.right
                             anchors.rightMargin: 5
@@ -357,7 +358,85 @@ Item {
                     }
 
                     Item {
-                        height: 1
+                        height: 12
+                    }
+
+                    StyledText {
+                        text: i18.n + qsTr("Group:")
+                        isActive: presetNamesListView.count > 0
+                    }
+
+                    CustomComboBox {
+                        id: groupsCombobox
+                        model: presetsGroups.groupNames
+                        hasLastItemAction: true
+                        enabled: presetNamesListView.count > 0
+                        lastActionText: i18.n + qsTr("Add group...", "preset group")
+                        width: 200
+                        height: 24
+                        itemHeight: 28
+                        showColorSign: false
+                        z: 100500
+                        isBelow: true
+
+                        onComboIndexChanged: {
+                            if (presetNamesListView.currentItem) {
+                                var groupID = presetsGroups.findGroupIdByIndex(selectedIndex - 1)
+                                presetNamesListView.currentItem.myData.editgroup = groupID
+                            }
+                        }
+
+                        onLastItemActionInvoked: {
+                            var callbackObject = {
+                                onSuccess: function(groupName) {
+                                    var groupID = presetsGroups.addGroup(groupName)
+                                    if (presetNamesListView.currentItem) {
+                                        presetNamesListView.currentItem.myData.editgroup = groupID
+                                    }
+                                    groupsCombobox.closePopup()
+                                    groupsCombobox.selectedIndex = (presetsGroups.getGroupsCount() - 1) + 1
+                                },
+                                onClose: function() {
+                                    groupsCombobox.closePopup()
+                                }
+                            }
+
+                            Common.launchDialog("Dialogs/AddPresetGroupDialog.qml",
+                                                componentParent,
+                                                {
+                                                    callbackObject: callbackObject
+                                                })
+                        }
+
+                        function updateSelectedGroup() {
+                            if (presetNamesListView.currentItem) {
+                                var groupID = presetNamesListView.currentItem.myData.group
+                                var groupIndex = presetsGroups.findGroupIndexById(groupID);
+                                if (groupIndex !== -1) {
+                                    // take into account empty group
+                                    groupsCombobox.selectedIndex = (groupIndex + 1)
+                                } else {
+                                    groupsCombobox.selectedIndex = 0
+                                }
+                            } else {
+                                groupsCombobox.selectedIndex = 0
+                            }
+                        }
+
+                        Component.onCompleted: {
+                            groupsCombobox.updateSelectedGroup()
+                        }
+
+                        Connections {
+                            target: presetEditComponent
+                            onDismissComboboxes: {
+                                groupsCombobox.closePopup()
+                            }
+                        }
+                    }
+
+                    Item {
+                        height: 12
                     }
 
                     RowLayout {
@@ -422,14 +501,14 @@ Item {
                                 onActionDoubleClicked: {
                                     var callbackObject = {
                                         onSuccess: function(replacement) {
-                                            presetsModel.editKeyword(kw.delegateIndex, replacement)
+                                            presetsModel.editKeyword(presetNamesListView.currentIndex, kw.delegateIndex, replacement)
                                         },
                                         onClose: function() {
                                             flv.activateEdit()
                                         }
                                     }
 
-                                    var basicModel = presetsModel.getBasicModel(presetNamesListView.currentIndex)
+                                    var basicModel = presetsModel.getKeywordsModel(presetNamesListView.currentIndex)
 
                                     Common.launchDialog("Dialogs/EditKeywordDialog.qml",
                                                         componentParent,
@@ -474,56 +553,65 @@ Item {
                 }
             }
 
-            RowLayout {
-                id: bottomPanel
-                anchors.leftMargin: 20
-                anchors.left: listPanel.right
+            Item {
+                id: footer
+                anchors.left: leftPanel.right
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
-                height: childrenRect.height
-                anchors.bottomMargin: 20
-                anchors.rightMargin: 20
+                height: 50
+                //color: uiColors.defaultDarkColor
 
-                StyledLink {
-                    id: plainTextText
-                    text: i18.n + qsTr("<u>edit in plain text</u>")
-                    normalLinkColor: uiColors.labelActiveForeground
-                    enabled: presetNamesListView.currentItem ? true : false
-                    visible: presetNamesListView.count > 0
-                    onClicked: {
-                        if (!presetNamesListView.currentItem) { return; }
+                RowLayout {
+                    id: footerRow
+                    anchors.fill: parent
+                    anchors.leftMargin: 20
+                    anchors.rightMargin: 20
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    spacing: 20
 
-                        var callbackObject = {
-                            onSuccess: function(text, spaceIsSeparator) {
-                                presetsModel.plainTextEdit(presetNamesListView.currentIndex, text, spaceIsSeparator)
-                            },
-                            onClose: function() {
-                                flv.activateEdit()
+                    StyledLink {
+                        id: plainTextText
+                        text: i18.n + qsTr("<u>edit in plain text</u>")
+                        normalLinkColor: uiColors.labelActiveForeground
+                        enabled: presetNamesListView.currentItem ? true : false
+                        visible: presetNamesListView.count > 0
+                        anchors.verticalCenter: parent.verticalCenter
+                        onClicked: {
+                            if (!presetNamesListView.currentItem) { return; }
+
+                            var callbackObject = {
+                                onSuccess: function(text, spaceIsSeparator) {
+                                    presetsModel.plainTextEdit(presetNamesListView.currentIndex, text, spaceIsSeparator)
+                                },
+                                onClose: function() {
+                                    flv.activateEdit()
+                                }
                             }
+
+                            var basicModel = presetsModel.getKeywordsModel(presetNamesListView.currentIndex)
+
+                            Common.launchDialog("../Dialogs/PlainTextKeywordsDialog.qml",
+                                                applicationWindow,
+                                                {
+                                                    callbackObject: callbackObject,
+                                                    keywordsText: presetNamesListView.currentItem.myData.keywordsstring,
+                                                    keywordsModel: basicModel
+                                                });
                         }
-
-                        var basicModel =  presetsModel.getKeywordsModel(presetNamesListView.currentIndex)
-
-                        Common.launchDialog("../Dialogs/PlainTextKeywordsDialog.qml",
-                                            applicationWindow,
-                                            {
-                                                callbackObject: callbackObject,
-                                                keywordsText: presetNamesListView.currentItem.myData.keywordsstring,
-                                                keywordsModel: basicModel
-                                            });
                     }
-                }
 
-                Item {
-                    Layout.fillWidth: true
-                }
+                    Item {
+                        Layout.fillWidth: true
+                    }
 
-                StyledButton {
-                    text: i18.n + qsTr("Close")
-                    width: 100
-                    onClicked: {
-                        presetsModel.saveToConfig();
-                        closePopup();
+                    StyledButton {
+                        text: i18.n + qsTr("Close")
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 100
+                        onClicked: {
+                            closePopup();
+                        }
                     }
                 }
             }

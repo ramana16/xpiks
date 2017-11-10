@@ -26,6 +26,7 @@
 #include "../Common/baseentity.h"
 #include "../Common/ibasicartwork.h"
 #include "../Common/iartworkssource.h"
+#include "../KeywordsPresets/ipresetsmanager.h"
 #include "../Helpers/ifilenotavailablemodel.h"
 
 namespace Common {
@@ -134,14 +135,14 @@ namespace Models {
 
         /*Q_INVOKABLE*/ void detachVectorsFromSelected(const QVector<int> &selectedIndices);
 
-        Q_INVOKABLE void expandPreset(int artworkIndex, int keywordIndex, int presetIndex);
+        Q_INVOKABLE void expandPreset(int artworkIndex, int keywordIndex, unsigned int presetID);
         Q_INVOKABLE void expandLastAsPreset(int metadataIndex);
-        Q_INVOKABLE void addPreset(int metadataIndex, int presetIndex);
+        Q_INVOKABLE void addPreset(int metadataIndex, unsigned int presetID);
         Q_INVOKABLE bool acceptCompletionAsPreset(int metadataIndex, int completionID);
         Q_INVOKABLE void initSuggestion(int metadataIndex);
         Q_INVOKABLE void setupDuplicatesModel(int metadataIndex);
 
-        void fillFromQuickBuffer(int metadataIndex);
+        void fillFromQuickBuffer(size_t metadataIndex);
 
     public:
         virtual int rowCount(const QModelIndex &parent=QModelIndex()) const override;

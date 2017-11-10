@@ -16,7 +16,7 @@ int PresetsTest::doTest() {
     auto *presetKeywordsModelConfig = presetKeywordsModel->getKeywordsModelConfig();
 
     typedef KeywordsPresets::PresetData PresetData;
-    QVector<PresetData> presetDataVector;
+    std::vector<PresetData> presetDataVector;
     presetDataVector.push_back({QStringList() << QString("key1") << QString("key2"), QString("name1")});
     presetDataVector.push_back({QStringList() << QString("key3") << QString("key4"), QString("name2")});
 
@@ -38,8 +38,8 @@ int PresetsTest::doTest() {
     QThread::sleep(1);
 
     auto &presetDataNew = presetKeywordsModelConfig->getPresetData();
-    int size = presetDataNew.size();
-    VERIFY(size == goldPresetDataVector.size(), "Error in verifying config data size");
+    size_t size = presetDataNew.size();
+    VERIFY((int)size == goldPresetDataVector.size(), "Error in verifying config data size");
 
     for (int i = 0; i < size; i++) {
         VERIFY(presetDataNew[i].m_Keywords == goldPresetDataVector[i].m_Keywords, "Error in verifying config data item keywords");

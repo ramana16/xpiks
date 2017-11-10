@@ -48,7 +48,7 @@ namespace Commands {
             if (succeeded) {
                 LOG_FOR_TESTS << "Succeeded";
                 itemsToSave.push_back(artwork);
-                indicesToUpdate.append(artwork->getLastKnownIndex());
+                indicesToUpdate.append((int)artwork->getLastKnownIndex());
             } else {
                 LOG_INFO << "Failed to replace [" << m_ReplaceWhat << "] to [" << m_ReplaceTo << "] in" << artwork->getFilepath();
             }

@@ -28,22 +28,22 @@ void AutoCompletePresetsTest::setup() {
 
     KeywordsPresets::PresetKeywordsModel *presetsModel = m_CommandManager->getPresetsModel();
     bool dummyAdded;
-    int dummyIndex;
-    presetsModel->addOrUpdatePreset(FIRST_PRESET, QStringList() << "test" << "another" << "keyword", dummyIndex, dummyAdded);
-    presetsModel->addOrUpdatePreset(SECOND_PRESET, QStringList() << "yet" << "other" << "keywords", dummyIndex, dummyAdded);
+    KeywordsPresets::ID_t dummyID;
+    presetsModel->addOrUpdatePreset(FIRST_PRESET, QStringList() << "test" << "another" << "keyword", dummyID, dummyAdded);
+    presetsModel->addOrUpdatePreset(SECOND_PRESET, QStringList() << "yet" << "other" << "keywords", dummyID, dummyAdded);
 }
 
 void AutoCompletePresetsTest::teardown() {
     IntegrationTestBase::teardown();
 
     KeywordsPresets::PresetKeywordsModel *presetsModel = m_CommandManager->getPresetsModel();
-    int index;
-    if (presetsModel->tryFindPresetByFullName(FIRST_PRESET, true, index)) {
-        presetsModel->removeItem(index);
+    KeywordsPresets::ID_t id;
+    if (presetsModel->tryFindPresetByFullName(FIRST_PRESET, true, id)) {
+        presetsModel->removePresetByID(id);
     }
 
-    if (presetsModel->tryFindPresetByFullName(SECOND_PRESET, true, index)) {
-        presetsModel->removeItem(index);
+    if (presetsModel->tryFindPresetByFullName(SECOND_PRESET, true, id)) {
+        presetsModel->removePresetByID(id);
     }
 }
 

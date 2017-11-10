@@ -31,7 +31,8 @@ DISTFILES += \
     tst_ArtworkEditView.qml \
     tst_CsvExportDialog.qml \
     ../../xpiks-qt/Dialogs/CsvExportDialog.qml \
-    tst_UploadDialog.qml
+    tst_UploadDialog.qml \
+    tst_PresetsEditDialog.qml
 
 HEADERS += \
     ../../xpiks-qt/Helpers/clipboardhelper.h \

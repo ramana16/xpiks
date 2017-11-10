@@ -13,6 +13,7 @@
 
 #include <QString>
 #include "../Common/ibasicartwork.h"
+#include "../KeywordsPresets/ipresetsmanager.h"
 
 namespace QuickBuffer {
     class ICurrentEditable {
@@ -29,9 +30,9 @@ namespace QuickBuffer {
         virtual void setDescription(const QString &description) = 0;
         virtual void setKeywords(const QStringList &keywords) = 0;
 
-        virtual bool appendPreset(int presetIndex) = 0;
-        virtual bool expandPreset(int keywordIndex, int presetIndex) = 0;
-        virtual bool removePreset(int presetIndex) = 0;
+        virtual bool appendPreset(KeywordsPresets::ID_t presetID) = 0;
+        virtual bool expandPreset(int keywordIndex, KeywordsPresets::ID_t presetID) = 0;
+        virtual bool removePreset(KeywordsPresets::ID_t presetID) = 0;
 
         virtual bool hasKeywords(const QStringList &keywordsList) = 0;
 

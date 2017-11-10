@@ -745,7 +745,7 @@ void Commands::CommandManager::updateArtworksAtIndices(const QVector<int> &indic
 void Commands::CommandManager::updateArtworks(const MetadataIO::WeakArtworksSnapshot &artworks) const {
     if (m_ArtItemsModel != nullptr) {
         QVector<int> indices;
-        indices.reserve(artworks.size());
+        indices.reserve((int)artworks.size());
         for (auto *artwork: artworks) {
             indices.push_back((int)artwork->getLastKnownIndex());
         }
@@ -1209,6 +1209,9 @@ void Commands::CommandManager::generateCompletions(const QString &prefix, Common
     if (m_AutoCompleteService != NULL) {
         m_AutoCompleteService->generateCompletions(prefix, source);
     }
+#else
+    Q_UNUSED(prefix);
+    Q_UNUSED(source);
 #endif
 }
 

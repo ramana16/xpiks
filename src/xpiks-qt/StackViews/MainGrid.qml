@@ -14,6 +14,7 @@ import QtQuick.Controls 1.1
 import QtQuick.Controls.Styles 1.1
 import QtQuick.Layouts 1.1
 import QtQuick.Window 2.0
+import QtQml 2.2
 import xpiks 1.0
 import "../Constants" 1.0
 import "../StyledControls"
@@ -80,8 +81,8 @@ ColumnLayout {
                 delegate: MenuItem {
                     text: name
                     onTriggered: {
-                        var presetIndex = filteredPresetsModel.getOriginalIndex(index)
-                        artItemsModel.expandPreset(wordRightClickMenu.artworkIndex, wordRightClickMenu.keywordIndex, presetIndex);
+                        var presetID = filteredPresetsModel.getOriginalID(index)
+                        artItemsModel.expandPreset(wordRightClickMenu.artworkIndex, wordRightClickMenu.keywordIndex, presetID);
                     }
                 }
             }
@@ -94,18 +95,43 @@ ColumnLayout {
 
         Menu {
             id: subMenu
+            property var defaultGroupModel: presetsGroups.getDefaultGroupModel()
             title: i18.n + qsTr("Insert preset")
 
             Instantiator {
-                model: presetsModel
-                onObjectAdded:{
-                    subMenu.insertItem( index, object )
-                }
+                model: presetsGroups
+                onObjectAdded: subMenu.insertItem( index, object )
                 onObjectRemoved: subMenu.removeItem( object )
+                delegate: Menu {
+                    id: groupMenu
+                    property int delegateIndex: index
+                    property var groupModel: presetsGroups.getGroupModel(groupMenu.delegateIndex)
+                    title: gname
+
+                    Instantiator {
+                        model: groupMenu.groupModel
+                        onObjectAdded: groupMenu.insertItem( index, object )
+                        onObjectRemoved: groupMenu.removeItem( object )
+
+                        delegate: MenuItem {
+                            text: name
+                            onTriggered: {
+                                artItemsModel.addPreset(presetsMenu.artworkIndex, groupMenu.groupModel.getOriginalID(index));
+                            }
+                        }
+                    }
+                }
+            }
+
+            Instantiator {
+                model: subMenu.defaultGroupModel
+                onObjectAdded: subMenu.insertItem( index, object )
+                onObjectRemoved: subMenu.removeItem( object )
+
                 delegate: MenuItem {
                     text: name
                     onTriggered: {
-                        artItemsModel.addPreset(presetsMenu.artworkIndex, filteredPresetsModel.getOriginalIndex(index));
+                        artItemsModel.addPreset(presetsMenu.artworkIndex, subMenu.defaultGroupModel.getOriginalID(index));
                     }
                 }
             }

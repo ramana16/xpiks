@@ -136,13 +136,13 @@ namespace Models {
         m_CommandManager->processCommand(deleteKeywordsCommand);
     }
 
-    bool DeleteKeywordsViewModel::addPreset(int presetIndex) {
+    bool DeleteKeywordsViewModel::addPreset(KeywordsPresets::ID_t presetID) {
         bool success = false;
-        LOG_INFO << "preset" << presetIndex;
+        LOG_INFO << "preset" << presetID;
         auto *presetsModel = m_CommandManager->getPresetsModel();
         QStringList keywords;
 
-        if (presetsModel->tryGetPreset(presetIndex, keywords)) {
+        if (presetsModel->tryGetPreset(presetID, keywords)) {
             if (m_KeywordsToDeleteModel.appendKeywords(keywords) > 0) {
                 emit keywordsToDeleteCountChanged();
 

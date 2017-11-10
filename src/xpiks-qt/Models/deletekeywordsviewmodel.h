@@ -17,6 +17,7 @@
 #include "../Common/baseentity.h"
 #include "../Common/basickeywordsmodel.h"
 #include "../Models/artworksviewmodel.h"
+#include "../KeywordsPresets/ipresetsmanager.h"
 
 namespace Models {
     class DeleteKeywordsViewModel: public Models::ArtworksViewModel
@@ -79,7 +80,7 @@ namespace Models {
         Q_INVOKABLE void appendKeywordToDelete(const QString &keyword);
         Q_INVOKABLE void pasteKeywordsToDelete(const QStringList &keywords);
         Q_INVOKABLE void deleteKeywords();
-        Q_INVOKABLE bool addPreset(int presetIndex);
+        Q_INVOKABLE bool addPreset(KeywordsPresets::ID_t presetID);
 
     private:
         void recombineKeywords();

@@ -40,7 +40,7 @@ namespace Models {
         void setIsSelected(bool value) { setIsSelectedFlag(value); }
 
     public:
-        int getOriginalIndex() const { return getArtworkMetadata()->getLastKnownIndex(); }
+        size_t getOriginalIndex() const { return getArtworkMetadata()->getLastKnownIndex(); }
 
 #ifdef CORE_TESTS
         void freeMetadata() {

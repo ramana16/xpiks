@@ -299,16 +299,16 @@ namespace Models {
         }
     }
 
-    void ArtworkProxyModel::expandPreset(int keywordIndex, int presetIndex) {
-        doExpandPreset(keywordIndex, presetIndex);
+    void ArtworkProxyModel::expandPreset(int keywordIndex, unsigned int presetID) {
+        doExpandPreset(keywordIndex, (KeywordsPresets::ID_t)presetID);
     }
 
     void ArtworkProxyModel::expandLastKeywordAsPreset() {
         doExpandLastKeywordAsPreset();
     }
 
-    void ArtworkProxyModel::addPreset(int presetIndex) {
-        doAddPreset(presetIndex);
+    void ArtworkProxyModel::addPreset(unsigned int presetID) {
+        doAddPreset((KeywordsPresets::ID_t)presetID);
     }
 
     void ArtworkProxyModel::initSuggestion() {

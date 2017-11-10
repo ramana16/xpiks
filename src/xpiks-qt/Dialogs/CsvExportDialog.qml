@@ -388,7 +388,7 @@ Item {
                 anchors.top: rightHeader.top
                 anchors.bottom: footer.top
                 property bool isSystemPlan: exportPlanModelsListView.currentItem ? exportPlanModelsListView.currentItem.myData.issystem : false
-                enabled: !csvExportModel.isExporting && (exportPlanModelsListView.count > 0) && !isSystemPlan
+                enabled: !csvExportModel.isExporting && (exportPlanModelsListView.count > 0)
 
                 MouseArea {
                     id: rightPanelMA
@@ -430,6 +430,7 @@ Item {
                         height: 24
                         anchors.left: parent.left
                         anchors.leftMargin: 33
+                        enabled: parent.enabled && !rightPanel.isSystemPlan
 
                         StyledTextInput {
                             id: titleText
@@ -556,6 +557,7 @@ Item {
                                 height: 30
                                 focus: true
                                 z: propertiesCombobox.isOpened ? 100500 : 0
+                                enabled: columnsListView.enabled && !rightPanel.isSystemPlan
 
                                 function focusEditing() {
                                     columnNameText.forceActiveFocus()
@@ -683,6 +685,7 @@ Item {
                                 anchors.left: parent.left
                                 anchors.right: parent.right
                                 height: 50
+                                enabled: columnsListView.enabled && !rightPanel.isSystemPlan
 
                                 GlyphButton {
                                     id: addColumnButton
@@ -780,7 +783,8 @@ Item {
                     anchors.fill: parent
                     anchors.leftMargin: 20
                     anchors.rightMargin: 20
-                    height: parent.height
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
                     spacing: 20
 
                     Item {
@@ -804,8 +808,8 @@ Item {
 
                     StyledButton {
                         text: i18.n + qsTr("Close")
-                        width: 110
                         anchors.verticalCenter: parent.verticalCenter
+                        width: 110
                         enabled: !csvExportModel.isExporting
                         onClicked: {
                             closePopup()

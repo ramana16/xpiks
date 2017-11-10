@@ -125,9 +125,9 @@ namespace Models {
         Q_INVOKABLE QString retrieveFileSize() const;
         Q_INVOKABLE QString getDateTaken() const;
         Q_INVOKABLE QString getAttachedVectorPath() const;
-        Q_INVOKABLE void expandPreset(int keywordIndex, int presetIndex);
+        Q_INVOKABLE void expandPreset(int keywordIndex, unsigned int presetID);
         Q_INVOKABLE void expandLastKeywordAsPreset();
-        Q_INVOKABLE void addPreset(int presetIndex);
+        Q_INVOKABLE void addPreset(unsigned int presetID);
         Q_INVOKABLE void initSuggestion();
         Q_INVOKABLE void registerAsCurrentItem();
         Q_INVOKABLE void copyToQuickBuffer();

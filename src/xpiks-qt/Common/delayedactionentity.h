@@ -52,16 +52,19 @@ namespace Common {
                 m_LastTimerId = -1;
 
                 doOnTimer();
-            }
 
-            // one time event
-            doKillTimer(event->timerId());
+                // one time event
+                doKillTimer(event->timerId());
+            } else {
+                callBaseTimer(event);
+            }
         }
 
     protected:
         virtual void doKillTimer(int timerId) = 0;
         virtual int doStartTimer(int interval, Qt::TimerType timerType) = 0;
         virtual void doOnTimer() = 0;
+        virtual void callBaseTimer(QTimerEvent *event) = 0;
 
     private:
         int m_RestartsCount;

@@ -904,12 +904,14 @@ Item {
                     anchors.fill: parent
                     anchors.leftMargin: 20
                     anchors.rightMargin: 20
-                    height: parent.height
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
                     spacing: 20
 
                     StyledLink {
                         color: isPressed ? uiColors.linkClickedColor : (warningsModel.warningsCount > 0 ? uiColors.artworkModifiedColor : uiColors.labelInactiveForeground)
                         text: i18.n + getOriginalText()
+                        anchors.verticalCenter: parent.verticalCenter
                         enabled: uploadArtworksComponent.uploadEnabled && !skipUploadItems
                         visible: !skipUploadItems && (!artworkUploader.inProgress) && (uploadWatcher.failedImagesCount === 0)
 
@@ -935,6 +937,7 @@ Item {
                         enabled: uploadArtworksComponent.uploadEnabled && !skipUploadItems && (uploadWatcher.failedImagesCount > 0)
                         text: i18.n + getOriginalText()
                         color: isPressed ? uiColors.linkClickedColor : uiColors.artworkModifiedColor
+                        anchors.verticalCenter: parent.verticalCenter
 
                         function getOriginalText() {
                             return uploadWatcher.failedImagesCount === 1 ?
@@ -958,6 +961,7 @@ Item {
                         enabled: uploadArtworksComponent.uploadEnabled && !skipUploadItems
                         text: i18.n + (artworkUploader.inProgress ? qsTr("Stop") : qsTr("Start Upload"))
                         width: 130
+                        anchors.verticalCenter: parent.verticalCenter
                         onClicked: {
                             if (!artworkUploader.inProgress) {
                                 if (uploadInfos.getSelectedInfosCount() === 0) {

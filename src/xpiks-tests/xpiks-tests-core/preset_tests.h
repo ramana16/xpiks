@@ -16,6 +16,16 @@ private slots:
     void strictFindPresetByNameTest();
     void findPresetWithLongNamesByNameTest();
     void addPresetKeywordsWithDuplicatesTest();
+    void addRemovePresetTest();
+    void parallelAccessTest();
+    void addAndRetrieveTest();
+    void registerTwiceTest();
+    void addAndRegisterTest();
+    void addPresetTwiceTest();
+    void registerWithAnotherNameTest();
+    void addWithAnotherNameTest();
+    void registerGroupTwiceTest();
+    void setPresetUnknownGroupTest();
 };
 
 #endif // PRESETTESTS_H

@@ -16,15 +16,19 @@
 #include <QPair>
 
 namespace KeywordsPresets {
+    typedef unsigned int ID_t;
+
     class IPresetsManager {
     public:
         virtual ~IPresetsManager() {}
 
-        virtual bool tryGetPreset(int presetIndex, QStringList &keywords) = 0;
-        virtual bool tryFindSinglePresetByName(const QString &name, bool strictMatch, int &index) = 0;
+        virtual bool tryGetPreset(ID_t id, QStringList &keywords) = 0;
+        virtual bool tryFindSinglePresetByName(const QString &name, bool strictMatch, ID_t &id) = 0;
         virtual void findPresetsByName(const QString &name, QVector<QPair<int, QString> > &results) = 0;
-        virtual void findOrRegisterPreset(const QString &name, const QStringList &keywords, int &index) = 0;
-        virtual void addOrUpdatePreset(const QString &name, const QStringList &keywords, int &index, bool &isAdded) = 0;
+        virtual void findOrRegisterPreset(const QString &name, const QStringList &keywords, ID_t &id) = 0;
+        virtual void addOrUpdatePreset(const QString &name, const QStringList &keywords, ID_t &id, bool &isAdded) = 0;
+        virtual bool setPresetGroup(ID_t presetID, int groupID) = 0;
+        virtual void findOrRegisterGroup(const QString &groupName, int &groupID) = 0;
         virtual void requestBackup() = 0;
         virtual void refreshPresets() = 0;
         virtual void triggerPresetsUpdated() = 0;

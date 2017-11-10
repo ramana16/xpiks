@@ -266,13 +266,13 @@ namespace Models {
         return keywordsModel->hasDescriptionWordSpellError(word);
     }
 
-    bool ArtworkProxyBase::doExpandPreset(int keywordIndex, int presetIndex) {
+    bool ArtworkProxyBase::doExpandPreset(int keywordIndex, KeywordsPresets::ID_t presetID) {
         bool success = false;
-        LOG_INFO << "keyword" << keywordIndex << "preset" << presetIndex;
+        LOG_INFO << "keyword" << keywordIndex << "preset" << presetID;
         auto *presetsModel = m_CommandManager->getPresetsModel();
         QStringList keywords;
 
-        if (presetsModel->tryGetPreset(presetIndex, keywords)) {
+        if (presetsModel->tryGetPreset(presetID, keywords)) {
             auto *metadataOperator = getMetadataOperator();
             if (metadataOperator->expandPreset(keywordIndex, keywords)) {
                 signalKeywordsCountChanged();
@@ -285,13 +285,13 @@ namespace Models {
         return success;
     }
 
-    bool ArtworkProxyBase::doAppendPreset(int presetIndex) {
+    bool ArtworkProxyBase::doAppendPreset(KeywordsPresets::ID_t presetID) {
         bool success = false;
-        LOG_INFO << "preset" << presetIndex;
+        LOG_INFO << "preset ID" << presetID;
         auto *presetsModel = m_CommandManager->getPresetsModel();
         QStringList keywords;
 
-        if (presetsModel->tryGetPreset(presetIndex, keywords)) {
+        if (presetsModel->tryGetPreset(presetID, keywords)) {
             auto *metadataOperator = getMetadataOperator();
             if (metadataOperator->appendPreset(keywords)) {
                 signalKeywordsCountChanged();
@@ -312,10 +312,10 @@ namespace Models {
         int keywordIndex = keywordsModel->getKeywordsCount() - 1;
         QString lastKeyword = keywordsModel->retrieveKeyword(keywordIndex);
         auto *presetsModel = m_CommandManager->getPresetsModel();
-        int presetIndex = -1;
+        KeywordsPresets::ID_t presetID = 0;
 
-        if (presetsModel->tryFindSinglePresetByName(lastKeyword, false, presetIndex)) {
-            success = doExpandPreset(keywordIndex, presetIndex);
+        if (presetsModel->tryFindSinglePresetByName(lastKeyword, false, presetID)) {
+            success = doExpandPreset(keywordIndex, presetID);
         } else {
             LOG_DEBUG << "Preset not found";
         }
@@ -323,26 +323,26 @@ namespace Models {
         return success;
     }
 
-    bool ArtworkProxyBase::doAddPreset(int presetIndex) {
-        LOG_INFO << presetIndex;
+    bool ArtworkProxyBase::doAddPreset(KeywordsPresets::ID_t presetID) {
+        LOG_INFO << presetID;
         bool success = false;
         auto *presetsModel = m_CommandManager->getPresetsModel();
         QStringList keywords;
 
-        if (presetsModel->tryGetPreset(presetIndex, keywords)) {
+        if (presetsModel->tryGetPreset(presetID, keywords)) {
             success = doAppendKeywords(keywords) > 0;
         }
 
         return success;
     }
 
-    bool ArtworkProxyBase::doRemovePreset(int presetIndex) {
-        LOG_INFO << presetIndex;
+    bool ArtworkProxyBase::doRemovePreset(KeywordsPresets::ID_t presetID) {
+        LOG_INFO << presetID;
         bool success = false;
         auto *presetsModel = m_CommandManager->getPresetsModel();
         QStringList keywords;
 
-        if (presetsModel->tryGetPreset(presetIndex, keywords)) {
+        if (presetsModel->tryGetPreset(presetID, keywords)) {
             for (auto &keyword: keywords) {
                 keyword = keyword.toLower();
             }
@@ -431,10 +431,10 @@ namespace Models {
             return false;
         }
 
-        const int presetIndex = completionItem->getPresetIndex();
+        const int presetID = completionItem->getPresetID();
 
         if (completionItem->isPreset() || (completionItem->canBePreset() && completionItem->shouldExpandPreset())) {
-            accepted = doAddPreset(presetIndex);
+            accepted = doAddPreset(presetID);
         }/* --------- this is handled in the edit field -----------
             else if (completionItem->isKeyword()) {
             doAppendKeyword(completionItem->getCompletion());

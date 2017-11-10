@@ -38,7 +38,7 @@ std::shared_ptr<Commands::ICommandResult> Commands::PasteKeywordsCommand::execut
         auto &item = m_RawSnapshot.at(i);
         Models::ArtworkMetadata *artwork = item->getArtworkMetadata();
 
-        indicesToUpdate.append(artwork->getLastKnownIndex());
+        indicesToUpdate.append((int)artwork->getLastKnownIndex());
         artworksBackups.emplace_back(artwork);
 
         artwork->appendKeywords(m_KeywordsList);

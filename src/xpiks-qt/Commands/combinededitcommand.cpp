@@ -73,7 +73,7 @@ std::shared_ptr<Commands::ICommandResult> Commands::CombinedEditCommand::execute
         Models::ArtworkMetadata *artwork = locker->getArtworkMetadata();
 
         artworksBackups.emplace_back(artwork);
-        indicesToUpdate.append(artwork->getLastKnownIndex());
+        indicesToUpdate.append((int)artwork->getLastKnownIndex());
 
         setKeywords(artwork);
         setDescription(artwork);

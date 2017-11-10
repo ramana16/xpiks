@@ -37,7 +37,7 @@ namespace AutoComplete {
 
         const size_t initialSize = completions.size();
 
-        m_PresetsModel->foreachPreset([&completions, &searchTerm](int index, KeywordsPresets::PresetModel *preset) {
+        m_PresetsModel->foreachPreset([&completions, &searchTerm](size_t, KeywordsPresets::PresetModel *preset) {
             const QString &presetName = preset->m_PresetName;
 
             bool canAdd = false;
@@ -59,7 +59,7 @@ namespace AutoComplete {
             bool shouldContinue = true;
 
             if (canAdd) {
-                completions.push_back(CompletionResult(presetName, index));
+                completions.push_back(CompletionResult(presetName, preset->m_ID));
 
                 if (completions.size() >= MAX_PRESETS_IN_AC_COUNT) {
                     shouldContinue = false;

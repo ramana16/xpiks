@@ -18,7 +18,7 @@
 #include "../Commands/deletekeywordscommand.h"
 
 namespace QuickBuffer {
-    CurrentEditableArtwork::CurrentEditableArtwork(Models::ArtworkMetadata *artworkMetadata, int originalIndex, Commands::CommandManager * const commandManager):
+    CurrentEditableArtwork::CurrentEditableArtwork(Models::ArtworkMetadata *artworkMetadata, size_t originalIndex, Commands::CommandManager * const commandManager):
         m_CommandManager(commandManager),
         m_OriginalIndex(originalIndex)
     {
@@ -63,35 +63,35 @@ namespace QuickBuffer {
         m_ArtworkMetadata->setKeywords(keywords);
     }
 
-    bool CurrentEditableArtwork::appendPreset(int presetIndex) {
+    bool CurrentEditableArtwork::appendPreset(KeywordsPresets::ID_t presetID) {
         bool success = false;
-        LOG_INFO << "preset" << presetIndex;
+        LOG_INFO << "preset" << presetID;
 
-        std::shared_ptr<Commands::ExpandPresetCommand> expandPresetCommand(new Commands::ExpandPresetCommand(m_ArtworkMetadata, presetIndex));
+        std::shared_ptr<Commands::ExpandPresetCommand> expandPresetCommand(new Commands::ExpandPresetCommand(m_ArtworkMetadata, presetID));
         std::shared_ptr<Commands::ICommandResult> result = m_CommandManager->processCommand(expandPresetCommand);
         success = result->getStatus() == 0;
 
         return success;
     }
 
-    bool CurrentEditableArtwork::expandPreset(int keywordIndex, int presetIndex) {
+    bool CurrentEditableArtwork::expandPreset(int keywordIndex, KeywordsPresets::ID_t presetID) {
         bool success = false;
-        LOG_INFO << "keyword" << keywordIndex << "preset" << presetIndex;
+        LOG_INFO << "keyword" << keywordIndex << "preset" << presetID;
 
-        std::shared_ptr<Commands::ExpandPresetCommand> expandPresetCommand(new Commands::ExpandPresetCommand(m_ArtworkMetadata, presetIndex, keywordIndex));
+        std::shared_ptr<Commands::ExpandPresetCommand> expandPresetCommand(new Commands::ExpandPresetCommand(m_ArtworkMetadata, presetID, keywordIndex));
         std::shared_ptr<Commands::ICommandResult> result = m_CommandManager->processCommand(expandPresetCommand);
         success = result->getStatus() == 0;
 
         return success;
     }
 
-    bool CurrentEditableArtwork::removePreset(int presetIndex) {
+    bool CurrentEditableArtwork::removePreset(KeywordsPresets::ID_t presetID) {
         bool success = false;
-        LOG_INFO << "preset" << presetIndex;
+        LOG_INFO << "preset" << presetID;
         auto *presetsModel = m_CommandManager->getPresetsModel();
         QStringList keywords;
 
-        if (presetsModel->tryGetPreset(presetIndex, keywords)) {
+        if (presetsModel->tryGetPreset(presetID, keywords)) {
             MetadataIO::ArtworksSnapshot::Container artworksList;
             artworksList.emplace_back(new Models::ArtworkMetadataLocker(m_ArtworkMetadata));
 
@@ -116,6 +116,6 @@ namespace QuickBuffer {
     }
 
     void CurrentEditableArtwork::update() {
-        m_CommandManager->updateArtworksAtIndices(QVector<int>() << m_OriginalIndex);
+        m_CommandManager->updateArtworksAtIndices(QVector<int>() << (int)m_OriginalIndex);
     }
 }

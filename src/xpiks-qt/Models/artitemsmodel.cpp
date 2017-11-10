@@ -618,12 +618,12 @@ namespace Models {
         }
     }
 
-    void ArtItemsModel::expandPreset(int artworkIndex, int keywordIndex, int presetIndex) {
-        LOG_INFO << "item" << artworkIndex << "keyword" << keywordIndex << "preset" << presetIndex;
+    void ArtItemsModel::expandPreset(int artworkIndex, int keywordIndex, unsigned int presetID) {
+        LOG_INFO << "item" << artworkIndex << "keyword" << keywordIndex << "preset" << presetID;
 
         if (0 <= artworkIndex && artworkIndex < getArtworksCount()) {
             ArtworkMetadata *artwork = accessArtwork(artworkIndex);
-            std::shared_ptr<Commands::ExpandPresetCommand> expandPresetCommand(new Commands::ExpandPresetCommand(artwork, presetIndex, keywordIndex));
+            std::shared_ptr<Commands::ExpandPresetCommand> expandPresetCommand(new Commands::ExpandPresetCommand(artwork, (KeywordsPresets::ID_t)presetID, keywordIndex));
             std::shared_ptr<Commands::ICommandResult> result = m_CommandManager->processCommand(expandPresetCommand);
             Q_UNUSED(result);
         }
@@ -639,21 +639,21 @@ namespace Models {
             QString lastKeyword = basicModel->retrieveKeyword(keywordIndex);
 
             auto *presetsModel = m_CommandManager->getPresetsModel();
-            int presetIndex = -1;
-            if (presetsModel->tryFindSinglePresetByName(lastKeyword, false, presetIndex)) {
-                std::shared_ptr<Commands::ExpandPresetCommand> expandPresetCommand(new Commands::ExpandPresetCommand(artwork, presetIndex, keywordIndex));
+            KeywordsPresets::ID_t presetID;
+            if (presetsModel->tryFindSinglePresetByName(lastKeyword, false, presetID)) {
+                std::shared_ptr<Commands::ExpandPresetCommand> expandPresetCommand(new Commands::ExpandPresetCommand(artwork, presetID, keywordIndex));
                 std::shared_ptr<Commands::ICommandResult> result = m_CommandManager->processCommand(expandPresetCommand);
                 Q_UNUSED(result);
             }
         }
     }
 
-    void ArtItemsModel::addPreset(int metadataIndex, int presetIndex) {
-        LOG_INFO << "item" << metadataIndex << "preset" << presetIndex;
+    void ArtItemsModel::addPreset(int metadataIndex, unsigned int presetID) {
+        LOG_INFO << "item" << metadataIndex << "preset" << presetID;
 
         if (0 <= metadataIndex && metadataIndex < rowCount()) {
             ArtworkMetadata *artwork = accessArtwork(metadataIndex);
-            std::shared_ptr<Commands::ExpandPresetCommand> expandPresetCommand(new Commands::ExpandPresetCommand(artwork, presetIndex));
+            std::shared_ptr<Commands::ExpandPresetCommand> expandPresetCommand(new Commands::ExpandPresetCommand(artwork, presetID));
             std::shared_ptr<Commands::ICommandResult> result = m_CommandManager->processCommand(expandPresetCommand);
             Q_UNUSED(result);
         }
@@ -673,11 +673,11 @@ namespace Models {
                 return false;
             }
 
-            const int presetIndex = completionItem->getPresetIndex();
+            const int presetID = completionItem->getPresetID();
 
             if (completionItem->isPreset() ||
                     (completionItem->canBePreset() && completionItem->shouldExpandPreset())) {
-                std::shared_ptr<Commands::ExpandPresetCommand> expandPresetCommand(new Commands::ExpandPresetCommand(artwork, presetIndex));
+                std::shared_ptr<Commands::ExpandPresetCommand> expandPresetCommand(new Commands::ExpandPresetCommand(artwork, presetID));
                 std::shared_ptr<Commands::ICommandResult> result = m_CommandManager->processCommand(expandPresetCommand);
                 Q_UNUSED(result);
                 accepted = true;
@@ -713,10 +713,10 @@ namespace Models {
         }
     }
 
-    void ArtItemsModel::fillFromQuickBuffer(int metadataIndex) {
+    void ArtItemsModel::fillFromQuickBuffer(size_t metadataIndex) {
         LOG_INFO << "item" << metadataIndex;
 
-        if (0 <= metadataIndex && metadataIndex < rowCount()) {
+        if (metadataIndex < m_ArtworkList.size()) {
             ArtworkMetadata *artwork = accessArtwork(metadataIndex);
             auto *quickBuffer = m_CommandManager->getQuickBuffer();
 
@@ -737,7 +737,7 @@ namespace Models {
                                                                                    flags, items, description, title, keywords));
 
             m_CommandManager->processCommand(combinedEditCommand);
-            updateItemAtIndex(metadataIndex);
+            updateItemAtIndex((int)metadataIndex);
         }
     }
 

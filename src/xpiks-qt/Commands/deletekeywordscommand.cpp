@@ -44,7 +44,7 @@ namespace Commands {
             artworksBackups.emplace_back(artwork);
 
             if (artwork->removeKeywords(m_KeywordsSet, m_CaseSensitive)) {
-                indicesToUpdate.append(artwork->getLastKnownIndex());
+                indicesToUpdate.append((int)artwork->getLastKnownIndex());
                 affectedItems.push_back(artwork);
             } else {
                 artworksBackups.pop_back();

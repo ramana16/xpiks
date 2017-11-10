@@ -23,18 +23,18 @@ namespace AutoComplete {
     struct CompletionResult {
         CompletionResult(const QString &completion):
             m_Completion(completion),
-            m_PresetIndex(-1)
+            m_PresetID(-1)
         {
         }
 
-        CompletionResult(const QString &completion, int presetIndex):
+        CompletionResult(const QString &completion, int presetID):
             m_Completion(completion),
-            m_PresetIndex(presetIndex)
+            m_PresetID(presetID)
         {
         }
 
         QString m_Completion;
-        int m_PresetIndex;
+        int m_PresetID;
     };
 
     class CompletionQuery {

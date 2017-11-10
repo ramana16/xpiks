@@ -48,7 +48,7 @@ namespace AutoComplete {
             const int id = m_LastCompletionID.fetchAndAddOrdered(1);
             m_LastGeneratedCompletions.emplace_back(new CompletionItem(result.m_Completion, id));
             m_LastGeneratedCompletions.back()->setIsPreset();
-            m_LastGeneratedCompletions.back()->setPresetIndex(result.m_PresetIndex);
+            m_LastGeneratedCompletions.back()->setPresetID(result.m_PresetID);
         }
     }
 
@@ -70,9 +70,9 @@ namespace AutoComplete {
                 auto &updatedCompletion = completions[i];
 
                 if (lastCompletion->getCompletion() == updatedCompletion.m_Completion) {
-                    if (updatedCompletion.m_PresetIndex != -1) {
-                        LOG_INTEGR_TESTS_OR_DEBUG << "Completion" << i << "is preset with index" << updatedCompletion.m_PresetIndex;
-                        lastCompletion->setPresetIndex(updatedCompletion.m_PresetIndex);
+                    if (updatedCompletion.m_PresetID != -1) {
+                        LOG_INTEGR_TESTS_OR_DEBUG << "Completion" << i << "is preset with ID" << updatedCompletion.m_PresetID;
+                        lastCompletion->setPresetID(updatedCompletion.m_PresetID);
                         lastCompletion->setCanBePreset();
                         anyChanged = true;
                     }

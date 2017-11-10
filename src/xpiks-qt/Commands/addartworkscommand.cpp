@@ -26,8 +26,8 @@
 int findAndAttachVectors(const MetadataIO::WeakArtworksSnapshot &artworksList, QVector<int> &modifiedIndices) {
     LOG_DEBUG << "#";
     int attachedCount = 0;
-    size_t size = artworksList.size();
-    modifiedIndices.reserve(size);
+    const size_t size = artworksList.size();
+    modifiedIndices.reserve((int)size);
 
     for (size_t i = 0; i < size; ++i) {
         Models::ArtworkMetadata *artwork = artworksList.at(i);
@@ -37,7 +37,7 @@ int findAndAttachVectors(const MetadataIO::WeakArtworksSnapshot &artworksList, Q
 
         if (image->hasVectorAttached()) {
             attachedCount++;
-            modifiedIndices.append(i);
+            modifiedIndices.append((int)i);
             continue;
         }
 
@@ -48,7 +48,7 @@ int findAndAttachVectors(const MetadataIO::WeakArtworksSnapshot &artworksList, Q
             if (QFileInfo(item).exists()) {
                 image->attachVector(item);
                 attachedCount++;
-                modifiedIndices.append(i);
+                modifiedIndices.append((int)i);
                 break;
             }
         }

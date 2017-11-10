@@ -46,16 +46,16 @@ namespace QuickBuffer {
         m_ArtworkProxy->setKeywords(keywords);
     }
 
-    bool CurrentEditableProxyArtwork::appendPreset(int presetIndex) {
-        return m_ArtworkProxy->doAppendPreset(presetIndex);
+    bool CurrentEditableProxyArtwork::appendPreset(KeywordsPresets::ID_t presetID) {
+        return m_ArtworkProxy->doAppendPreset(presetID);
     }
 
-    bool CurrentEditableProxyArtwork::expandPreset(int keywordIndex, int presetIndex) {
-        return m_ArtworkProxy->doExpandPreset(keywordIndex, presetIndex);
+    bool CurrentEditableProxyArtwork::expandPreset(int keywordIndex, KeywordsPresets::ID_t presetID) {
+        return m_ArtworkProxy->doExpandPreset(keywordIndex, presetID);
     }
 
-    bool CurrentEditableProxyArtwork::removePreset(int presetIndex) {
-        return m_ArtworkProxy->doRemovePreset(presetIndex);
+    bool CurrentEditableProxyArtwork::removePreset(KeywordsPresets::ID_t presetID) {
+        return m_ArtworkProxy->doRemovePreset(presetID);
     }
 
     bool CurrentEditableProxyArtwork::hasKeywords(const QStringList &keywordsList) {

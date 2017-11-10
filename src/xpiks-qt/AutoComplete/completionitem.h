@@ -36,13 +36,13 @@ namespace AutoComplete {
             m_Completion(completion),
             m_CompletionFlags(0),
             m_ID(id),
-            m_PresetIndex(-1)
+            m_PresetID(-1)
         {}
 
     public:
         const QString &getCompletion() const { return m_Completion; }
         int getID() const { return m_ID; }
-        int getPresetIndex() const { return m_PresetIndex; }
+        int getPresetID() const { return m_PresetID; }
         bool isPreset() const { return getIsPresetFlag() && !getIsKeywordFlag(); }
         bool isKeyword() const { return getIsKeywordFlag(); }
         bool canBePreset() const { return getIsPresetFlag(); }
@@ -53,13 +53,13 @@ namespace AutoComplete {
         void setCanBePreset() { setIsPresetFlag(true); }
         void setIsPreset() { setIsPresetFlag(true); }
         void setShouldExpandPreset() { setShouldExpandPresetFlag(true); }
-        void setPresetIndex(int index) { m_PresetIndex = index; }
+        void setPresetID(int id) { m_PresetID = id; }
 
     private:
         QString m_Completion;
         Common::flag_t m_CompletionFlags;
         int m_ID;
-        int m_PresetIndex;
+        int m_PresetID;
     };
 }
 

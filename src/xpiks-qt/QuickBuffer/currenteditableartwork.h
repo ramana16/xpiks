@@ -26,11 +26,11 @@ namespace QuickBuffer {
     class CurrentEditableArtwork : public ICurrentEditable
     {
     public:
-        CurrentEditableArtwork(Models::ArtworkMetadata *artworkMetadata, int originalIndex, Commands::CommandManager * const commandManager);
+        CurrentEditableArtwork(Models::ArtworkMetadata *artworkMetadata, size_t originalIndex, Commands::CommandManager * const commandManager);
         virtual ~CurrentEditableArtwork();
 
     public:
-        int getOriginalIndex() const { return m_OriginalIndex; }
+        size_t getOriginalIndex() const { return m_OriginalIndex; }
 
         // ICurrentEditable interface
     public:
@@ -44,9 +44,9 @@ namespace QuickBuffer {
         virtual void setDescription(const QString &value) override;
         virtual void setKeywords(const QStringList &keywords) override;
 
-        virtual bool appendPreset(int presetIndex) override;
-        virtual bool expandPreset(int keywordIndex, int presetIndex) override;
-        virtual bool removePreset(int presetIndex) override;
+        virtual bool appendPreset(KeywordsPresets::ID_t presetID) override;
+        virtual bool expandPreset(int keywordIndex, KeywordsPresets::ID_t presetID) override;
+        virtual bool removePreset(KeywordsPresets::ID_t presetID) override;
 
         virtual bool hasKeywords(const QStringList &keywordsList) override;
 
@@ -56,7 +56,7 @@ namespace QuickBuffer {
     private:
         Commands::CommandManager * const m_CommandManager;
         Models::ArtworkMetadata *m_ArtworkMetadata;
-        int m_OriginalIndex;
+        size_t m_OriginalIndex;
     };
 }
 

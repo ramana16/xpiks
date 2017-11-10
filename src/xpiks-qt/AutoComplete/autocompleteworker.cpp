@@ -38,7 +38,7 @@ namespace AutoComplete {
     }
 
     bool AutoCompleteWorker::initWorker() {
-        LOG_INFO << "#";        
+        LOG_INFO << "#";
 
         Helpers::AsyncCoordinatorUnlocker unlocker(m_InitCoordinator);
         Q_UNUSED(unlocker);
@@ -118,10 +118,9 @@ namespace AutoComplete {
         LOG_INTEGR_TESTS_OR_DEBUG << "Updating" << completionsList.size() << "items";
 
         for (auto &result: completionsList) {
-            int presetIndex = -1;
-            const bool haveOnePreset = m_PresetsManager->tryFindSinglePresetByName(result.m_Completion, false, presetIndex);
-            if (haveOnePreset) {
-                result.m_PresetIndex = presetIndex;
+            KeywordsPresets::ID_t presetID;
+            if (m_PresetsManager->tryFindSinglePresetByName(result.m_Completion, false, presetID)) {
+                result.m_PresetID = presetID;
                 anyChanges = true;
             }
         }

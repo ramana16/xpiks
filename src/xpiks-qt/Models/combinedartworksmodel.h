@@ -157,9 +157,9 @@ namespace Models {
 
         Q_INVOKABLE bool hasTitleWordSpellError(const QString &word);
         Q_INVOKABLE bool hasDescriptionWordSpellError(const QString &word);
-        Q_INVOKABLE void expandPreset(int keywordIndex, int presetIndex);
+        Q_INVOKABLE void expandPreset(int keywordIndex, unsigned int presetID);
         Q_INVOKABLE void expandLastKeywordAsPreset();
-        Q_INVOKABLE void addPreset(int presetIndex);
+        Q_INVOKABLE void addPreset(unsigned int presetID);
         Q_INVOKABLE void initSuggestion();
         Q_INVOKABLE void registerAsCurrentItem();
         Q_INVOKABLE void copyToQuickBuffer();
@@ -203,6 +203,7 @@ namespace Models {
         virtual int doStartTimer(int interval, Qt::TimerType timerType) override { return this->startTimer(interval, timerType); }
         virtual void doOnTimer() override;
         virtual void timerEvent(QTimerEvent *event) override { onQtTimer(event); }
+        virtual void callBaseTimer(QTimerEvent *event) override { ArtworksViewModel::timerEvent(event); }
 
     public:
         virtual bool removeUnavailableItems() override;

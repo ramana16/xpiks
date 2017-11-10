@@ -16,6 +16,7 @@
 #include <QStringList>
 #include "commandbase.h"
 #include "../Models/artworkelement.h"
+#include "../KeywordsPresets/ipresetsmanager.h"
 
 namespace Models {
     class ArtworkMetadata;
@@ -26,10 +27,10 @@ namespace Commands {
     {
     public:
         ExpandPresetCommand(Models::ArtworkMetadata *artwork,
-                            int presetIndex, int keywordIndex = -1):
+                            KeywordsPresets::ID_t presetID, int keywordIndex = -1):
             CommandBase(CommandType::ExpandPreset),
             m_ArtworkLocker(artwork),
-            m_PresetIndex(presetIndex),
+            m_PresetID(presetID),
             m_KeywordIndex(keywordIndex)
         { }
 
@@ -40,7 +41,7 @@ namespace Commands {
 
     private:
         Models::ArtworkMetadataLocker m_ArtworkLocker;
-        int m_PresetIndex;
+        KeywordsPresets::ID_t m_PresetID;
         int m_KeywordIndex;
     };
 

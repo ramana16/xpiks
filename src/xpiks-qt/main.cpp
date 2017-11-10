@@ -91,6 +91,7 @@
 #include "Connectivity/requestsservice.h"
 #include "SpellCheck/duplicatesreviewmodel.h"
 #include "MetadataIO/csvexportmodel.h"
+#include "KeywordsPresets/presetgroupsmodel.h"
 #include <ftpcoordinator.h>
 
 void myMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg) {
@@ -216,6 +217,7 @@ int main(int argc, char *argv[]) {
     qRegisterMetaTypeStreamOperators<Models::ProxySettings>("ProxySettings");
     qRegisterMetaType<Common::SpellCheckFlags>("Common::SpellCheckFlags");
     initQSettings();
+
     Models::SettingsModel settingsModel;
     settingsModel.initializeConfigs();
     settingsModel.retrieveAllValues();
@@ -456,6 +458,7 @@ int main(int argc, char *argv[]) {
     rootContext->setContextProperty("switcher", &switcherModel);
     rootContext->setContextProperty("duplicatesModel", &duplicatesModel);
     rootContext->setContextProperty("csvExportModel", &csvExportModel);
+    rootContext->setContextProperty("presetsGroups", presetsModel.getGroupsModel());
 
     rootContext->setContextProperty("tabsModel", uiManager.getTabsModel());
     rootContext->setContextProperty("activeTabs", uiManager.getActiveTabs());

@@ -231,6 +231,7 @@ namespace Models {
         virtual int doStartTimer(int interval, Qt::TimerType timerType) override { return this->startTimer(interval, timerType); }
         virtual void doOnTimer() override;
         virtual void timerEvent(QTimerEvent *event) override { onQtTimer(event); }
+        virtual void callBaseTimer(QTimerEvent *event) override { QObject::timerEvent(event); }
 
     private:
         Common::Hold m_Hold;

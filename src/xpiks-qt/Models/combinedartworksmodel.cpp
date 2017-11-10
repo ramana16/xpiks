@@ -281,8 +281,8 @@ namespace Models {
         return getHasDescriptionWordSpellError(word);
     }
 
-    void CombinedArtworksModel::expandPreset(int keywordIndex, int presetIndex) {
-        if (doExpandPreset(keywordIndex, presetIndex)) {
+    void CombinedArtworksModel::expandPreset(int keywordIndex, unsigned int presetID) {
+        if (doExpandPreset(keywordIndex, (KeywordsPresets::ID_t)presetID)) {
             setKeywordsModified(true);
             justChanged();
         }
@@ -293,8 +293,8 @@ namespace Models {
         justChanged();
     }
 
-    void CombinedArtworksModel::addPreset(int presetIndex) {
-        if (doAddPreset(presetIndex)) {
+    void CombinedArtworksModel::addPreset(unsigned int presetID) {
+        if (doAddPreset((KeywordsPresets::ID_t)presetID)) {
             setKeywordsModified(true);
             justChanged();
         }

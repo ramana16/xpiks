@@ -472,7 +472,10 @@ ApplicationWindow {
                 enabled: (applicationWindow.openedDialogsCount == 0)
                 onTriggered: {
                     console.info("Presets triggered")
-                    Common.launchDialog("Dialogs/PresetsEditDialog.qml", applicationWindow, {})
+                    Common.launchDialog("Dialogs/PresetsEditDialog.qml", applicationWindow,
+                                        {
+                                            componentParent: applicationWindow
+                                        })
                 }
             }
 

@@ -28,6 +28,7 @@ Item {
     property alias selectedIndex: dropDownItems.currentIndex
     property color comboboxBackgroundColor: uiColors.defaultControlColor
     property bool isOpened: comboBox.state != ""
+    property alias count: dropDownItems.count
 
     property bool isBelow: true
     property variant relativeParent: undefined

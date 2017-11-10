@@ -102,6 +102,8 @@ namespace MetadataIO {
         if (XPIKS_MAJOR_VERSION_CHECK(1, 5) ||
                 XPIKS_MAJOR_VERSION_CHECK(1, 4)) {
             m_Version = 1;
+        } else {
+            Q_ASSERT(false);
         }
     }
 

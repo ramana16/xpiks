@@ -16,6 +16,7 @@
 #include "../Common/ibasicartwork.h"
 #include "../Common/basicmetadatamodel.h"
 #include "../Common/imetadataoperator.h"
+#include "../KeywordsPresets/ipresetsmanager.h"
 #include "../QuickBuffer/currenteditableproxyartwork.h"
 
 class QSyntaxHighlighter;
@@ -72,11 +73,11 @@ namespace Models {
         void doPlainTextEdit(const QString &rawKeywords, bool spaceIsSeparator);
         bool getHasTitleWordSpellError(const QString &word);
         bool getHasDescriptionWordSpellError(const QString &word);
-        bool doExpandPreset(int keywordIndex, int presetIndex);
-        bool doAppendPreset(int presetIndex);
+        bool doExpandPreset(int keywordIndex, KeywordsPresets::ID_t presetID);
+        bool doAppendPreset(KeywordsPresets::ID_t presetID);
         bool doExpandLastKeywordAsPreset();
-        bool doAddPreset(int presetIndex);
-        bool doRemovePreset(int presetIndex);
+        bool doAddPreset(KeywordsPresets::ID_t presetID);
+        bool doRemovePreset(KeywordsPresets::ID_t presetID);
         void doInitSuggestion();
         void doRegisterAsCurrentItem();
         void doHandleUserDictChanged(const QStringList &keywords, bool overwritten);

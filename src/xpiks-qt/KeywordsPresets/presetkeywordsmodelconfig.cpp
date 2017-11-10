@@ -15,10 +15,19 @@
 #include <QJsonObject>
 #include <QJsonArray>
 #include "presetkeywordsmodel.h"
+#include "../Common/version.h"
 
 namespace KeywordsPresets {
 #define OVERWRITE_KEY QLatin1String("overwrite")
 #define PRESETKEYS_KEY QLatin1String("presetkeywords")
+#define PRESETGROUPS_KEY QLatin1String("presetgroups")
+
+#define PRESET_NAME_KEY QLatin1String("name")
+#define PRESET_KEYWORDS_KEY QLatin1String("keywords")
+#define PRESET_GROUP_ID_KEY QLatin1String("group")
+
+#define GROUP_NAME_KEY QLatin1String("name")
+#define GROUP_ID_KEY QLatin1String("id")
 
 #ifdef QT_DEBUG
     #ifdef INTEGRATION_TESTS
@@ -32,8 +41,31 @@ namespace KeywordsPresets {
 
 #define OVERWRITE_PRESETS_CONFIG false
 
+    bool tryParsePresetKeywords(const QJsonValue &presetKeywordsValue, QStringList &keywordsList) {
+        bool parsed = false;
+
+        if (presetKeywordsValue.isArray()) {
+            QJsonArray jsonArray = presetKeywordsValue.toArray();
+            const int size = jsonArray.size();
+            keywordsList.reserve(size);
+
+            for (auto item: jsonArray) {
+                if (!item.isString()) {
+                    LOG_WARNING << "value is not string";
+                    continue;
+                }
+
+                keywordsList.append(item.toString());
+            }
+
+            parsed = !keywordsList.empty();
+        }
+
+        return parsed;
+    }
+
     PresetKeywordsModelConfig::PresetKeywordsModelConfig()
-    {}
+    { }
 
     void PresetKeywordsModelConfig::initializeConfigs() {
         LOG_DEBUG << "#";
@@ -48,29 +80,74 @@ namespace KeywordsPresets {
             localConfigPath = LOCAL_PRESETKEYWORDS_LIST_FILE;
         }
 
+        if (XPIKS_MAJOR_VERSION_CHECK(1, 5) ||
+                XPIKS_MAJOR_VERSION_CHECK(1, 4)) {
+            backupXpiks14xPresets(localConfigPath);
+        } else {
+            // remove backup for 1.6
+            Q_ASSERT(false);
+        }
+
         m_Config.initConfig(localConfigPath);
         processLocalConfig(m_Config.getConfig());
     }
 
-    void PresetKeywordsModelConfig::loadFromModel(const std::vector<PresetModel *> &presets) {
-        int size = (int)presets.size();
-        LOG_INTEGR_TESTS_OR_DEBUG << size;
+    void PresetKeywordsModelConfig::loadFromModel(const std::vector<PresetModel *> &presets,
+                                                  const std::vector<GroupModel> &presetGroups) {
+        const size_t presetsSize = presets.size();
+        LOG_INTEGR_TESTS_OR_DEBUG << presets.size() << "presets;" << presetGroups.size() << "groups";
 
         m_PresetData.clear();
-        m_PresetData.resize(size);
+        m_PresetData.resize(presetsSize);
 
-        for (int i = 0; i < size; i++) {
+        for (size_t i = 0; i < presetsSize; i++) {
             auto *item = presets[i];
             auto &name = item->m_PresetName;
             auto &keywordsModel = item->m_KeywordsModel;
+            int groupId = item->m_GroupID;
 
-            m_PresetData[i].m_Keywords = keywordsModel.getKeywords();
-            m_PresetData[i].m_Name = name;
+            auto &presetItem = m_PresetData.at(i);
+
+            presetItem.m_Keywords = keywordsModel.getKeywords();
+            presetItem.m_Name = name;
+            presetItem.m_GroupID = groupId;
+        }
+
+        const size_t groupsSize = presetGroups.size();
+
+        m_PresetGroupsData.clear();
+        m_PresetGroupsData.resize(groupsSize);
+
+        for (size_t i = 0; i < groupsSize; i++) {
+            auto &group = m_PresetGroupsData.at(i);
+            group.m_Name = presetGroups[i].m_Name;
+            group.m_ID = presetGroups[i].m_GroupID;
         }
     }
 
     void PresetKeywordsModelConfig::sync() {
         writeToConfig();
+    }
+
+    void PresetKeywordsModelConfig::backupXpiks14xPresets(const QString &filepath) {
+        LOG_DEBUG << filepath;
+        if (!QFileInfo(filepath).exists()) {
+            LOG_WARNING << filepath << "does not exist";
+            return;
+        }
+
+        QString backupPath = filepath + ".14x.backup";
+
+        if (QFileInfo(backupPath).exists()) {
+            LOG_DEBUG << "Presets backup already exists";
+            return;
+        }
+
+        if (QFile::copy(filepath, backupPath)) {
+            LOG_DEBUG << "Presets backed up to" << backupPath;
+        } else {
+            LOG_WARNING << "Failed to backup presets to" << backupPath;
+        }
     }
 
     bool PresetKeywordsModelConfig::processLocalConfig(const QJsonDocument &document) {
@@ -91,7 +168,7 @@ namespace KeywordsPresets {
                 break;
             }
 
-            QJsonValue presetArrayValue = rootObject[PRESETKEYS_KEY];
+            QJsonValue presetArrayValue = rootObject.value(PRESETKEYS_KEY);
             if (!presetArrayValue.isArray()) {
                 LOG_WARNING << "presetArray array object is not an array";
                 anyError = true;
@@ -100,69 +177,113 @@ namespace KeywordsPresets {
 
             QJsonArray presetArray = presetArrayValue.toArray();
             parsePresetArray(presetArray);
+
+            QJsonValue presetGroupsValue = rootObject.value(PRESETGROUPS_KEY);
+            if (presetGroupsValue.isArray()) {
+                QJsonArray groupsArray = presetGroupsValue.toArray();
+                parsePresetGroups(groupsArray);
+            }
         } while (false);
 
         return anyError;
     }
 
     void PresetKeywordsModelConfig::parsePresetArray(const QJsonArray &array) {
-        QStringList keys;
-        int size = array.size();
-
-        keys.reserve(size);
+        const int size = array.size();
 
         for (int i = 0; i < size; ++i) {
             QJsonValue item = array.at(i);
 
-            if (!item.isObject()) {
-                continue;
-            }
+            if (!item.isObject()) { continue; }
 
             QJsonObject presetKeywordsItem = item.toObject();
-            if (presetKeywordsItem.size() != 1) {
-                continue;
-            }
 
-            QString presetKey = presetKeywordsItem.keys()[0];
-            QJsonValue presetKeywordsValue = presetKeywordsItem.value(presetKey);
+            // legacy format
+            if (presetKeywordsItem.size() == 1) {
+                QString presetName = presetKeywordsItem.keys()[0];
+                QJsonValue presetKeywordsValue = presetKeywordsItem.value(presetName);
+                QStringList keywords;
 
-            if (!presetKeywordsValue.isArray()) {
-                continue;
-            }
-
-            QJsonArray jsonArray = presetKeywordsValue.toArray();
-            QStringList list;
-            int size = jsonArray.size();
-            list.reserve(size);
-
-            for (auto item: jsonArray) {
-                if (!item.isString()) {
-                    LOG_WARNING << "value is not string";
+                if (tryParsePresetKeywords(presetKeywordsValue, keywords)) {
+                    m_PresetData.push_back({keywords, presetName, DEFAULT_GROUP_ID});
+                }
+            } else {
+                QString presetName;
+                QJsonValue presetNameValue = presetKeywordsItem.value(PRESET_NAME_KEY);
+                if (presetNameValue.isString()) {
+                    presetName = presetNameValue.toString();
+                } else {
                     continue;
                 }
 
-                list.append(item.toString());
-            }
+                QJsonValue keywordsValue = presetKeywordsItem.value(PRESET_KEYWORDS_KEY);
+                QStringList keywords;
+                if (!tryParsePresetKeywords(keywordsValue, keywords)) { continue; }
 
-            m_PresetData.push_back({list, presetKey});
+                QJsonValue groupIdValue = presetKeywordsItem.value(PRESET_GROUP_ID_KEY);
+                int groupID = DEFAULT_GROUP_ID;
+                if (groupIdValue.isDouble()) {
+                    groupID = groupIdValue.toInt(DEFAULT_GROUP_ID);
+                }
+
+                m_PresetData.push_back({keywords, presetName, groupID});
+            }
+        }
+    }
+
+    void PresetKeywordsModelConfig::parsePresetGroups(const QJsonArray &array) {
+        const int size = array.size();
+
+        for (int i = 0; i < size; ++i) {
+            QJsonValue item = array.at(i);
+
+            if (!item.isObject()) { continue; }
+
+            QJsonObject groupItem = item.toObject();
+
+            QJsonValue groupNameValue = groupItem.value(GROUP_NAME_KEY);
+            if (!groupNameValue.isString()) { continue; }
+            QString groupName = groupNameValue.toString();
+
+            QJsonValue groupIdValue = groupItem.value(GROUP_ID_KEY);
+            if (!groupIdValue.isDouble()) { continue; }
+            int groupId = groupIdValue.toInt(DEFAULT_GROUP_ID);
+
+            m_PresetGroupsData.push_back({groupName, groupId});
         }
     }
 
     void PresetKeywordsModelConfig::writeToConfig() {
         LOG_DEBUG << "#";
-        QJsonArray jsonArray;
+        QJsonArray presetsArray;
 
         for (auto &item: m_PresetData) {
             QJsonObject object;
             QJsonArray keywords;
             keywords = QJsonArray::fromStringList(item.m_Keywords);
-            object.insert(item.m_Name, keywords);
-            jsonArray.append(object);
+
+            object.insert(PRESET_NAME_KEY, item.m_Name);
+            object.insert(PRESET_KEYWORDS_KEY, keywords);
+            object.insert(PRESET_GROUP_ID_KEY, item.m_GroupID);
+
+            presetsArray.append(object);
+        }
+
+        QJsonArray groupsArray;
+        for (auto &item: m_PresetGroupsData) {
+            QJsonObject object;
+
+            object.insert(GROUP_NAME_KEY, item.m_Name);
+            object.insert(GROUP_ID_KEY, item.m_ID);
+
+            groupsArray.append(object);
         }
 
         QJsonObject rootObject;
         rootObject.insert(OVERWRITE_KEY, OVERWRITE_PRESETS_CONFIG);
-        rootObject.insert(PRESETKEYS_KEY, jsonArray);
+        rootObject.insert(PRESETKEYS_KEY, presetsArray);
+        rootObject.insert(PRESETGROUPS_KEY, groupsArray);
+
         QJsonDocument doc;
         doc.setObject(rootObject);
 

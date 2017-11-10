@@ -109,6 +109,16 @@ Item {
     }
 
     ListModel {
+        id: presetsGroups
+
+        ListElement { gname: "Default" }
+        ListElement { gname: "Nature" }
+
+        function getGroupModel(index) { return {} }
+        function getDefaultGroupModel() { return {} }
+    }
+
+    ListModel {
         id: filteredPresetsModel
         ListElement { name: "Alice" }
         ListElement { name: "Bob" }
