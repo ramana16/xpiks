@@ -39,7 +39,7 @@ namespace UndoRedo {
        virtual ~AddArtworksHistoryItem() { LOG_DEBUG << "#"; }
 
    public:
-        virtual void undo(const Commands::ICommandManager *commandManagerInterface) const override;
+        virtual void undo(const Commands::ICommandManager *commandManagerInterface) override;
 
    public:
         virtual QString getDescription() const override {

@@ -44,7 +44,7 @@ namespace UndoRedo {
         virtual ~ModifyArtworksHistoryItem() { }
 
     public:
-         virtual void undo(const Commands::ICommandManager *commandManagerInterface) const override;
+         virtual void undo(const Commands::ICommandManager *commandManagerInterface) override;
 
     public:
          virtual QString getDescription() const override {

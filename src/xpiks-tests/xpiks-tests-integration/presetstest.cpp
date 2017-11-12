@@ -17,8 +17,8 @@ int PresetsTest::doTest() {
 
     typedef KeywordsPresets::PresetData PresetData;
     std::vector<PresetData> presetDataVector;
-    presetDataVector.push_back({QStringList() << QString("key1") << QString("key2"), QString("name1")});
-    presetDataVector.push_back({QStringList() << QString("key3") << QString("key4"), QString("name2")});
+    presetDataVector.push_back({QStringList() << QString("key1") << QString("key2"), QString("name1"), DEFAULT_GROUP_ID});
+    presetDataVector.push_back({QStringList() << QString("key3") << QString("key4"), QString("name2"), DEFAULT_GROUP_ID});
 
     presetKeywordsModelConfig->initialize(presetDataVector);
     presetKeywordsModel->reload();
@@ -31,17 +31,17 @@ int PresetsTest::doTest() {
     presetKeywordsModel->saveToConfig();
 
     QVector<PresetData> goldPresetDataVector;
-    goldPresetDataVector.push_back({QStringList() << QString("key2"), QString("name1")});
-    goldPresetDataVector.push_back({QStringList() << QString("key3") << QString("key4") << QString("key5"), QString("name2")});
-    goldPresetDataVector.push_back({QStringList() << QString("key6"), QString("name3")});
+    goldPresetDataVector.push_back({QStringList() << QString("key2"), QString("name1"), DEFAULT_GROUP_ID});
+    goldPresetDataVector.push_back({QStringList() << QString("key3") << QString("key4") << QString("key5"), QString("name2"), DEFAULT_GROUP_ID});
+    goldPresetDataVector.push_back({QStringList() << QString("key6"), QString("name3"), DEFAULT_GROUP_ID});
 
     QThread::sleep(1);
 
     auto &presetDataNew = presetKeywordsModelConfig->getPresetData();
-    size_t size = presetDataNew.size();
+    const size_t size = presetDataNew.size();
     VERIFY((int)size == goldPresetDataVector.size(), "Error in verifying config data size");
 
-    for (int i = 0; i < size; i++) {
+    for (size_t i = 0; i < size; i++) {
         VERIFY(presetDataNew[i].m_Keywords == goldPresetDataVector[i].m_Keywords, "Error in verifying config data item keywords");
         VERIFY(presetDataNew[i].m_Name == goldPresetDataVector[i].m_Name, "Error in verifying config data item name");
     }

@@ -24,17 +24,19 @@ namespace UndoRedo {
     public:
         RemoveArtworksHistoryItem(int commandID, const QVector<int> &removedArtworksIndices,
                                   const QStringList &removedArtworksFilepathes,
-                                  const QStringList &removedAttachedVectors):
+                                  const QStringList &removedAttachedVectors,
+                                  bool removedAsDirectory = false):
             HistoryItem(HistoryActionType::RemovedArtworks, commandID),
             m_RemovedArtworksIndices(removedArtworksIndices),
             m_RemovedArtworksPathes(removedArtworksFilepathes),
-            m_RemovedAttachedVectors(removedAttachedVectors)
+            m_RemovedAttachedVectors(removedAttachedVectors),
+            m_RemovedAsDirectory(removedAsDirectory)
         {}
 
         virtual ~RemoveArtworksHistoryItem() { }
 
     public:
-        virtual void undo(const Commands::ICommandManager *commandManagerInterface) const override;
+        virtual void undo(const Commands::ICommandManager *commandManagerInterface) override;
 
     public:
         virtual QString getDescription() const override {
@@ -43,11 +45,16 @@ namespace UndoRedo {
                                QObject::tr("1 item removed");
         }
 
+    protected:
+        void setRemovedArtworksIndices(const QVector<int> &value) { m_RemovedArtworksIndices = value; }
+        void setRemovedArtworksPathes(const QStringList &value) { m_RemovedArtworksPathes = value; }
+        void setRemovedAttachedVectors(const QStringList &value) { m_RemovedAttachedVectors = value; }
 
     private:
         QVector<int> m_RemovedArtworksIndices;
         QStringList m_RemovedArtworksPathes;
         QStringList m_RemovedAttachedVectors;
+        bool m_RemovedAsDirectory;
     };
 }
 

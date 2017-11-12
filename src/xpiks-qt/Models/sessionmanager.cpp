@@ -28,8 +28,10 @@
 #endif
 
 #define OPENED_FILES_KEY "openedFiles"
+#define OPENED_DIRECTORIES_KEY "openedDirectories"
 #define FILE_KEY "file"
 #define VECTOR_KEY "vector"
+#define DIRECTORY_PATH_KEY "dirpath"
 
 namespace Models {
     SessionManager::SessionManager():
@@ -60,19 +62,21 @@ namespace Models {
     void SessionManager::onAfterRestore() {
         m_Filenames.clear();
         m_Vectors.clear();
+        m_FullDirectories.clear();
     }
 
-    void SessionManager::saveToFile(std::vector<std::shared_ptr<MetadataIO::ArtworkSessionSnapshot> > &snapshot) {
+    void SessionManager::saveToFile(std::vector<std::shared_ptr<MetadataIO::ArtworkSessionSnapshot> > &filesSnapshot,
+                                    const QStringList &directoriesSnapshot) {
         if (!m_CanRestore) {
             LOG_INFO << "Session hasn't been initialized yet. Exiting...";
             return;
         }
 
-        LOG_INFO << snapshot.size() << "artwork(s)";
+        LOG_INFO << filesSnapshot.size() << "artwork(s)";
 
         QJsonArray filesList;
 
-        for (auto &item: snapshot) {
+        for (auto &item: filesSnapshot) {
             QJsonObject jsonObject;
 
             auto &filePath = item->getArtworkFilePath();
@@ -87,6 +91,15 @@ namespace Models {
         }
 
         setValue(OPENED_FILES_KEY, filesList);
+
+        QJsonArray directoriesList;
+        for (auto item: directoriesSnapshot) {
+            QJsonObject jsonObject;
+            jsonObject.insert(DIRECTORY_PATH_KEY, item);
+            directoriesList.append(jsonObject);
+        }
+
+        setValue(OPENED_DIRECTORIES_KEY, directoriesList);
 
         QJsonDocument doc;
         doc.setObject(m_SessionJson);
@@ -117,10 +130,20 @@ namespace Models {
             return;
         }
 
-        QJsonArray filesArray = value(OPENED_FILES_KEY).toArray();
+        parseFiles();
+        parseDirectories();
+    }
+
+    void SessionManager::parseFiles() {
+        if (!m_SessionJson.contains(OPENED_FILES_KEY)) { return; }
+
+        QJsonValue openedFilesValue = value(OPENED_FILES_KEY);
+        if (!openedFilesValue.isArray()) { return; }
+
+        QJsonArray filesArray = openedFilesValue.toArray();
 
         if (filesArray.isEmpty()) {
-            LOG_DEBUG << "The session is empty";
+            LOG_DEBUG << "The session does not contain standalone files";
             return;
         }
 
@@ -130,17 +153,38 @@ namespace Models {
         for (const auto &item: filesArray) {
             QJsonObject obj = item.toObject();
             QString filePath = obj.value(FILE_KEY).toString().trimmed();
+            if (filePath.isEmpty()) { continue; }
 
-            if (filePath.isEmpty()) {
-                continue;
-            }
-
-            m_Filenames.append(filePath);
+            m_Filenames.push_back(filePath);
 
             QString vectorPath = obj.value(VECTOR_KEY).toString().trimmed();
             if (!vectorPath.isEmpty()) {
                 m_Vectors.append(vectorPath);
             }
+        }
+    }
+
+    void SessionManager::parseDirectories() {
+        if (!m_SessionJson.contains(OPENED_DIRECTORIES_KEY)) { return; }
+
+        QJsonValue openedDirsValue = value(OPENED_DIRECTORIES_KEY);
+        if (!openedDirsValue.isArray()) { return; }
+
+        QJsonArray dirsArray = openedDirsValue.toArray();
+
+        if (dirsArray.isEmpty()) {
+            LOG_DEBUG << "The session does not contain full directories";
+            return;
+        }
+
+        m_FullDirectories.reserve(dirsArray.size());
+
+        for (const auto &item: dirsArray) {
+            QJsonObject obj = item.toObject();
+            QString dirPath = obj.value(DIRECTORY_PATH_KEY).toString().trimmed();
+            if (dirPath.isEmpty()) { continue; }
+
+            m_FullDirectories.append(dirPath);
         }
     }
 
@@ -154,6 +198,7 @@ namespace Models {
         setValue(OPENED_FILES_KEY, QJsonArray());
         m_Filenames.clear();
         m_Vectors.clear();
+        m_FullDirectories.clear();
     }
 #endif
 }

@@ -70,7 +70,6 @@ namespace Models {
         const int id = m_LastID++;
 
         LOG_INTEGRATION_TESTS << "Creating artwork with ID:" << id << "path:" << filepath;
-
         if (Helpers::couldBeVideo(filepath)) {
             return new VideoArtwork(filepath, id, directoryID);
         } else {
@@ -82,7 +81,7 @@ namespace Models {
         LOG_DEBUG << "#";
         // should be called only from beforeDestruction() !
         // will not cause sync issues on shutdown if no items
-        std::deque<ArtworkMetadata *> artworksToDestroy;
+        decltype(m_ArtworkList) artworksToDestroy;
 
         beginResetModel();
         {
@@ -185,8 +184,10 @@ namespace Models {
 
     void ArtItemsModel::removeArtworksDirectory(int index) {
         LOG_INFO << "Remove artworks directory at" << index;
-        const QString &directory = m_CommandManager->getArtworksRepository()->getDirectory(index);
-        LOG_CORE_TESTS << "Removing directory:" << directory;
+        Models::ArtworksRepository *artworksRepository = m_CommandManager->getArtworksRepository();
+        const QString &directory = artworksRepository->getDirectoryPath(index);
+        const bool isFullDirectory = artworksRepository->getIsFullDirectory(index);
+        LOG_CORE_TESTS << "Removing directory:" << directory << "; full:" << isFullDirectory;
 
         QDir dir(directory);
         QString directoryAbsolutePath = dir.absolutePath();
@@ -202,7 +203,7 @@ namespace Models {
             }
         }
 
-        doRemoveItemsAtIndices(indicesToRemove);
+        doRemoveItemsAtIndices(indicesToRemove, isFullDirectory);
 
         emit modifiedArtworksCountChanged();
     }
@@ -344,10 +345,10 @@ namespace Models {
         }
 
         foreach(const QUrl &dirUrl, directories) {
-            doAddDirectory(dirUrl.toLocalFile(), filesToImport);
+            Helpers::extractFilesFromDirectory(dirUrl.toLocalFile(), filesToImport);
         }
 
-        int importedCount = addFiles(filesToImport);
+        int importedCount = doAddFiles(filesToImport);
         return importedCount;
     }
 
@@ -510,20 +511,20 @@ namespace Models {
 
     int ArtItemsModel::addRecentDirectory(const QString &directory) {
         LOG_INFO << directory;
-        int filesAdded = addDirectories(QStringList() << directory);
+        int filesAdded = doAddDirectories(QStringList() << directory);
         return filesAdded;
     }
 
     int ArtItemsModel::addRecentFile(const QString &file) {
         LOG_INFO << file;
-        int filesAdded = addFiles(QStringList() << file);
+        int filesAdded = doAddFiles(QStringList() << file);
         return filesAdded;
     }
 
     int ArtItemsModel::addAllRecentFiles() {
         LOG_DEBUG << "#";
         Models::RecentFilesModel *recentFiles = m_CommandManager->getRecentFiles();
-        int filesAdded = addFiles(recentFiles->getAllRecentFiles());
+        int filesAdded = doAddFiles(recentFiles->getAllRecentFiles());
         return filesAdded;
     }
 
@@ -713,6 +714,36 @@ namespace Models {
         }
     }
 
+    int ArtItemsModel::addLocalArtworks(const QList<QUrl> &artworksPaths) {
+        LOG_DEBUG << artworksPaths;
+        QStringList fileList;
+        fileList.reserve(artworksPaths.length());
+
+        foreach(const QUrl &url, artworksPaths) {
+            fileList.append(url.toLocalFile());
+        }
+
+        int filesAddedCount = doAddFiles(fileList);
+        return filesAddedCount;
+    }
+
+    int ArtItemsModel::addLocalDirectories(const QList<QUrl> &directories) {
+        LOG_DEBUG << directories;
+        QStringList directoriesList;
+        directoriesList.reserve(directories.length());
+
+        foreach(const QUrl &url, directories) {
+            if (url.isLocalFile()) {
+                directoriesList.append(url.toLocalFile());
+            } else {
+                directoriesList.append(url.path());
+            }
+        }
+
+        int addedFilesCount = doAddDirectories(directoriesList);
+        return addedFilesCount;
+    }
+
     void ArtItemsModel::fillFromQuickBuffer(size_t metadataIndex) {
         LOG_INFO << "item" << metadataIndex;
 
@@ -844,36 +875,6 @@ namespace Models {
         }
 
         return true;
-    }
-
-    int ArtItemsModel::addLocalArtworks(const QList<QUrl> &artworksPaths) {
-        LOG_DEBUG << artworksPaths;
-        QStringList fileList;
-        fileList.reserve(artworksPaths.length());
-
-        foreach(const QUrl &url, artworksPaths) {
-            fileList.append(url.toLocalFile());
-        }
-
-        int filesAddedCount = addFiles(fileList);
-        return filesAddedCount;
-    }
-
-    int ArtItemsModel::addLocalDirectories(const QList<QUrl> &directories) {
-        LOG_DEBUG << directories;
-        QStringList directoriesList;
-        directoriesList.reserve(directories.length());
-
-        foreach(const QUrl &url, directories) {
-            if (url.isLocalFile()) {
-                directoriesList.append(url.toLocalFile());
-            } else {
-                directoriesList.append(url.path());
-            }
-        }
-
-        int addedFilesCount = addDirectories(directoriesList);
-        return addedFilesCount;
     }
 
     void ArtItemsModel::spellCheckErrorsChanged() {
@@ -1249,68 +1250,31 @@ namespace Models {
         emit dataChanged(topLeft, bottomRight, roles);
     }
 
-    int ArtItemsModel::addDirectories(const QStringList &directories) {
+    int ArtItemsModel::doAddDirectories(const QStringList &directories) {
         LOG_INFO << directories;
         int filesCount = 0;
         QStringList files;
 
         foreach(const QString &directory, directories) {
-            doAddDirectory(directory, files);
+            Helpers::extractFilesFromDirectory(directory, files);
         }
 
         if (files.count() > 0) {
-            filesCount = addFiles(files);
+            const bool isFullDirectory = true;
+            filesCount = doAddFiles(files, isFullDirectory);
         }
 
         return filesCount;
     }
 
-    void ArtItemsModel::doAddDirectory(const QString &directory, QStringList &filesList) {
-        QDir dir(directory);
-
-        dir.setFilter(QDir::NoDotAndDotDot | QDir::Files);
-
-        QFileInfoList items = dir.entryInfoList();
-        int size = items.size();
-        filesList.reserve(filesList.size() + size);
-
-        for (int i = 0; i < size; ++i) {
-            QString filepath = items.at(i).absoluteFilePath();
-            filesList.append(filepath);
-        }
-
-        LOG_INFO << filesList.length() << "file(s) found";
-    }
-
-    int ArtItemsModel::addFiles(const QStringList &rawFilenames) {
-        LOG_INFO << rawFilenames.length() << "file(s)";
+    int ArtItemsModel::doAddFiles(const QStringList &rawFilenames, bool isFullDirectory) {
         QStringList filenames, vectors;
-        filenames.reserve(rawFilenames.length());
-        vectors.reserve(rawFilenames.length());
-
-        foreach(const QString &filepath, rawFilenames) {
-            QFileInfo fi(filepath);
-            const QString suffix = fi.suffix().toLower();
-
-            if (Helpers::isImageExtension(suffix) ||
-                    Helpers::isVideoExtension(suffix)) {
-                filenames.append(filepath);
-            } else if (suffix == QLatin1String("png")) {
-                LOG_WARNING << "PNG is unsupported file format";
-            } else {
-                if (suffix == QLatin1String("eps") ||
-                    suffix == QLatin1String("ai")) {
-                    vectors.append(filepath);
-                } else if (suffix != QLatin1String(Constants::METADATA_BACKUP_SUFFIX)) {
-                    LOG_WARNING << "Unsupported extension of file" << filepath;
-                }
-            }
-        }
+        Helpers::splitMediaFiles(rawFilenames, filenames, vectors);
 
         Models::SettingsModel *settingsModel = m_CommandManager->getSettingsModel();
         bool autoFindVectors = settingsModel->getAutoFindVectors();
 
-        std::shared_ptr<Commands::AddArtworksCommand> addArtworksCommand(new Commands::AddArtworksCommand(filenames, vectors, autoFindVectors));
+        std::shared_ptr<Commands::AddArtworksCommand> addArtworksCommand(new Commands::AddArtworksCommand(filenames, vectors, autoFindVectors, isFullDirectory));
         std::shared_ptr<Commands::ICommandResult> result = m_CommandManager->processCommand(addArtworksCommand);
         std::shared_ptr<Commands::AddArtworksCommandResult> addArtworksResult = std::dynamic_pointer_cast<Commands::AddArtworksCommandResult>(result);
 
@@ -1390,8 +1354,8 @@ namespace Models {
 
         ArtworksRepository *artworkRepository = m_CommandManager->getArtworksRepository();
 
-        std::deque<ArtworkMetadata *>::iterator itBegin = m_ArtworkList.begin() + start;
-        std::deque<ArtworkMetadata *>::iterator itEnd = m_ArtworkList.begin() + (end + 1);
+        auto itBegin = m_ArtworkList.begin() + start;
+        auto itEnd = m_ArtworkList.begin() + (end + 1);
 
         std::vector<ArtworkMetadata *> itemsToDelete(itBegin, itEnd);
         m_ArtworkList.erase(itBegin, itEnd);
@@ -1440,15 +1404,15 @@ namespace Models {
         }
     }
 
-    void ArtItemsModel::doRemoveItemsAtIndices(QVector<int> &indicesToRemove) {
+    void ArtItemsModel::doRemoveItemsAtIndices(QVector<int> &indicesToRemove, bool isFullDirectory) {
         qSort(indicesToRemove);
         QVector<QPair<int, int> > rangesToRemove;
         Helpers::indicesToRanges(indicesToRemove, rangesToRemove);
-        doRemoveItemsInRanges(rangesToRemove);
+        doRemoveItemsInRanges(rangesToRemove, isFullDirectory);
     }
 
-    void ArtItemsModel::doRemoveItemsInRanges(const QVector<QPair<int, int> > &rangesToRemove) {
-        std::shared_ptr<Commands::RemoveArtworksCommand> removeArtworksCommand(new Commands::RemoveArtworksCommand(rangesToRemove));
+    void ArtItemsModel::doRemoveItemsInRanges(const QVector<QPair<int, int> > &rangesToRemove, bool isFullDirectory) {
+        std::shared_ptr<Commands::RemoveArtworksCommand> removeArtworksCommand(new Commands::RemoveArtworksCommand(rangesToRemove, isFullDirectory));
 
         m_CommandManager->processCommand(removeArtworksCommand);
     }

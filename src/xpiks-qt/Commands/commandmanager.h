@@ -259,6 +259,7 @@ namespace Commands {
         void executeMaintenanceJobs();
         void readSession();
         int restoreReadSession();
+        int restoreFiles(const QStringList &filenames, const QStringList &vectors);
 
     public:
 #ifdef INTEGRATION_TESTS

@@ -19,7 +19,7 @@
 #include "../Models/imageartwork.h"
 #include "addartworksitem.h"
 
-void UndoRedo::RemoveArtworksHistoryItem::undo(const Commands::ICommandManager *commandManagerInterface) const {
+void UndoRedo::RemoveArtworksHistoryItem::undo(const Commands::ICommandManager *commandManagerInterface) {
     LOG_INFO << "#";
 
     Commands::CommandManager *commandManager = (Commands::CommandManager*)commandManagerInterface;
@@ -57,17 +57,17 @@ void UndoRedo::RemoveArtworksHistoryItem::undo(const Commands::ICommandManager *
         for (int j = 0; j < count; ++j) {
             const QString &filepath = m_RemovedArtworksPathes[j + usedCount];
             qint64 directoryID = 0;
-            if (artworksRepository->accountFile(filepath, directoryID)) {
-                Models::ArtworkMetadata *metadata = artItemsModel->createMetadata(filepath, directoryID);
-                commandManager->connectArtworkSignals(metadata);
+            if (artworksRepository->accountFile(filepath, directoryID, m_RemovedAsDirectory)) {
+                Models::ArtworkMetadata *artwork = artItemsModel->createMetadata(filepath, directoryID);
+                commandManager->connectArtworkSignals(artwork);
 
-                artItemsModel->insertArtwork(j + startRow, metadata);
-                artworksToImport.append(metadata);
+                artItemsModel->insertArtwork(j + startRow, artwork);
+                artworksToImport.append(artwork);
                 watchList.append(filepath);
 
                 const QString &vectorPath = m_RemovedAttachedVectors.at(j);
                 if (!vectorPath.isEmpty()) {
-                    Models::ImageArtwork *image = dynamic_cast<Models::ImageArtwork*>(metadata);
+                    Models::ImageArtwork *image = dynamic_cast<Models::ImageArtwork*>(artwork);
                     if (image != NULL) {
                         image->attachVector(vectorPath);
                         attachedVectors++;

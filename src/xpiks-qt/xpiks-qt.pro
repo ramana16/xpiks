@@ -171,7 +171,8 @@ SOURCES += main.cpp \
     MetadataIO/csvexportproperties.cpp \
     MetadataIO/csvexportmodel.cpp \
     Helpers/threadhelpers.cpp \
-    KeywordsPresets/presetgroupsmodel.cpp
+    KeywordsPresets/presetgroupsmodel.cpp \
+    UndoRedo/removedirectoryitem.cpp
 
 RESOURCES += qml.qrc
 
@@ -406,7 +407,8 @@ HEADERS += \
     Models/artworkelement.h \
     Models/previewartworkelement.h \
     Helpers/threadhelpers.h \
-    KeywordsPresets/presetgroupsmodel.h
+    KeywordsPresets/presetgroupsmodel.h \
+    UndoRedo/removedirectoryitem.h
 
 DISTFILES += \
     Components/CloseIcon.qml \

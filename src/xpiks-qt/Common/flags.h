@@ -171,6 +171,13 @@ namespace Common {
         All = Spelling | Stemming
     };
 
+    enum struct DirectoryFlags: flag_t {
+        None = 0,
+        IsSelected = 1 << 0,
+        IsAddedAsDirectory = 1 << 1,
+        IsRemoved = 1 << 2
+    };
+
     const char *warningsFlagToString(WarningsCheckFlags flags);
 
     template<typename FlagType>

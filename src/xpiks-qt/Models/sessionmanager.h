@@ -19,6 +19,7 @@
 
 namespace MetadataIO {
     class ArtworkSessionSnapshot;
+    class SessionSnapshot;
 }
 
 namespace Models {
@@ -37,12 +38,18 @@ namespace Models {
         void initialize();
         void onBeforeRestore();
         void onAfterRestore();
-        void saveToFile(std::vector<std::shared_ptr<MetadataIO::ArtworkSessionSnapshot> > &snapshot);
+        void saveToFile(std::vector<std::shared_ptr<MetadataIO::ArtworkSessionSnapshot> > &filesSnapshot,
+                        const QStringList &directoriesSnapshot);
         void readSessionFromFile();
+
+    private:
+        void parseFiles();
+        void parseDirectories();
 
     public:
         const QStringList &getFilenames() const { return m_Filenames; }
         const QStringList &getVectors() const { return m_Vectors; }
+        const QStringList &getFullDirectories() const { return m_FullDirectories; }
 
 #ifdef INTEGRATION_TESTS
         int itemsCount() const;
@@ -71,6 +78,7 @@ namespace Models {
         QMutex m_Mutex;
         QStringList m_Filenames;
         QStringList m_Vectors;
+        QStringList m_FullDirectories;
         volatile bool m_CanRestore;
     };
 }

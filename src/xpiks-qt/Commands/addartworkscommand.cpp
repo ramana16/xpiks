@@ -20,42 +20,9 @@
 #include "../UndoRedo/addartworksitem.h"
 #include "../Common/defines.h"
 #include "../Helpers/filehelpers.h"
+#include "../Helpers/artworkshelpers.h"
 #include "../Models/imageartwork.h"
 #include "../MetadataIO/artworkssnapshot.h"
-
-int findAndAttachVectors(const MetadataIO::WeakArtworksSnapshot &artworksList, QVector<int> &modifiedIndices) {
-    LOG_DEBUG << "#";
-    int attachedCount = 0;
-    const size_t size = artworksList.size();
-    modifiedIndices.reserve((int)size);
-
-    for (size_t i = 0; i < size; ++i) {
-        Models::ArtworkMetadata *artwork = artworksList.at(i);
-        Models::ImageArtwork *image = dynamic_cast<Models::ImageArtwork *>(artwork);
-
-        if (image == NULL) { continue; }
-
-        if (image->hasVectorAttached()) {
-            attachedCount++;
-            modifiedIndices.append((int)i);
-            continue;
-        }
-
-        const QString &filepath = image->getFilepath();
-        QStringList vectors = Helpers::convertToVectorFilenames(filepath);
-
-        foreach (const QString &item, vectors) {
-            if (QFileInfo(item).exists()) {
-                image->attachVector(item);
-                attachedCount++;
-                modifiedIndices.append((int)i);
-                break;
-            }
-        }
-    }
-
-    return attachedCount;
-}
 
 void accountVectors(Models::ArtworksRepository *artworksRepository, const MetadataIO::WeakArtworksSnapshot &artworks) {
     LOG_DEBUG << "#";
@@ -101,7 +68,7 @@ std::shared_ptr<Commands::ICommandResult> Commands::AddArtworksCommand::execute(
             const QString &filename = m_FilePathes[i];
             qint64 directoryID = 0;
 
-            if (artworksRepository->accountFile(filename, directoryID)) {
+            if (artworksRepository->accountFile(filename, directoryID, m_IsFullDirectory)) {
                 Models::ArtworkMetadata *metadata = artItemsModel->createMetadata(filename, directoryID);
                 commandManager->connectArtworkSignals(metadata);
 
@@ -130,7 +97,7 @@ std::shared_ptr<Commands::ICommandResult> Commands::AddArtworksCommand::execute(
 
     if (m_AutoDetectVectors) {
         QVector<int> autoAttachedIndices;
-        attachedCount = findAndAttachVectors(artworksToImport.getWeakSnapshot(), autoAttachedIndices);
+        attachedCount = Helpers::findAndAttachVectors(artworksToImport.getWeakSnapshot(), autoAttachedIndices);
 
         foreach (int index, autoAttachedIndices) {
             modifiedIndices.append(initialCount + index);
@@ -140,7 +107,7 @@ std::shared_ptr<Commands::ICommandResult> Commands::AddArtworksCommand::execute(
     if (newFilesCount > 0) {
         commandManager->readMetadata(artworksToImport);
         accountVectors(artworksRepository, artworksToImport.getWeakSnapshot());
-        artworksRepository->updateCountsForExistingDirectories();
+        artworksRepository->refresh();
 
         std::unique_ptr<UndoRedo::IHistoryItem> addArtworksItem(new UndoRedo::AddArtworksHistoryItem(getCommandID(), initialCount, newFilesCount));
         commandManager->recordHistoryItem(addArtworksItem);

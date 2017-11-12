@@ -14,6 +14,7 @@
 #include <QVector>
 #include <vector>
 #include <memory>
+#include "../MetadataIO/artworkssnapshot.h"
 
 namespace Models {
     class ArtworkMetadata;
@@ -29,6 +30,7 @@ namespace Helpers {
                           std::vector<std::shared_ptr<Models::ArtworkMetadataLocker> > &videoRawSnapshot);
     int retrieveImagesCount(const std::vector<std::shared_ptr<Models::ArtworkMetadataLocker> > &rawSnapshot);
     int retrieveVideosCount(const std::vector<std::shared_ptr<Models::ArtworkMetadataLocker> > &rawSnapshot);
+    int findAndAttachVectors(const MetadataIO::WeakArtworksSnapshot &artworksList, QVector<int> &modifiedIndices);
 }
 
 #endif // ARTWORKSHELPERS_H

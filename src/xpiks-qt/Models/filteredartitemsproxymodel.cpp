@@ -91,7 +91,7 @@ namespace Models {
 
         ArtItemsModel *artItemsModel = getArtItemsModel();
         const ArtworksRepository *artworksRepository = m_CommandManager->getArtworksRepository();
-        const QString &directory = artworksRepository->getDirectory(directoryIndex);
+        const QString &directory = artworksRepository->getDirectoryPath(directoryIndex);
 
         LOG_DEBUG << directory;
 
@@ -627,7 +627,7 @@ namespace Models {
             Q_ASSERT(repository != NULL);
             qint64 directoryID = metadata->getDirectoryID();
 
-            bool directoryIsIncluded = repository->isDirectoryIncluded(directoryID);
+            bool directoryIsIncluded = repository->isDirectorySelected(directoryID);
             if (directoryIsIncluded) {
                 hasMatch = true;
 

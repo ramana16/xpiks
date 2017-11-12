@@ -281,6 +281,7 @@ int main(int argc, char *argv[]) {
     userId.remove(QRegExp("[{}-]."));
 
     Models::ArtworksRepository artworkRepository;
+    Models::FilteredArtworksRepository filteredArtworksRepository(&artworkRepository);
     Models::ArtItemsModel artItemsModel;
     Models::CombinedArtworksModel combinedArtworksModel;
     Models::UploadInfoRepository uploadInfoRepository;
@@ -429,7 +430,7 @@ int main(int argc, char *argv[]) {
 
     QQmlContext *rootContext = engine.rootContext();
     rootContext->setContextProperty("artItemsModel", &artItemsModel);
-    rootContext->setContextProperty("artworkRepository", &artworkRepository);
+    rootContext->setContextProperty("artworkRepository", &filteredArtworksRepository);
     rootContext->setContextProperty("combinedArtworks", &combinedArtworksModel);
     rootContext->setContextProperty("secretsManager", &secretsManager);
     rootContext->setContextProperty("undoRedoManager", &undoRedoManager);

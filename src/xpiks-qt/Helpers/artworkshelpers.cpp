@@ -12,6 +12,7 @@
 #include "../Models/artworkmetadata.h"
 #include "../Models/imageartwork.h"
 #include "../Models/videoartwork.h"
+#include "filehelpers.h"
 
 namespace Helpers {
     void splitImagesVideo(const QVector<Models::ArtworkMetadata *> &artworks, QVector<Models::ArtworkMetadata *> &imageArtworks, QVector<Models::ArtworkMetadata *> &videoArtworks) {
@@ -102,4 +103,37 @@ namespace Helpers {
         return count;
     }
 
+    int findAndAttachVectors(const MetadataIO::WeakArtworksSnapshot &artworksList, QVector<int> &modifiedIndices) {
+        LOG_DEBUG << "#";
+        int attachedCount = 0;
+        const size_t size = artworksList.size();
+        modifiedIndices.reserve((int)size);
+
+        for (size_t i = 0; i < size; ++i) {
+            Models::ArtworkMetadata *artwork = artworksList.at(i);
+            Models::ImageArtwork *image = dynamic_cast<Models::ImageArtwork *>(artwork);
+
+            if (image == NULL) { continue; }
+
+            if (image->hasVectorAttached()) {
+                attachedCount++;
+                modifiedIndices.append((int)i);
+                continue;
+            }
+
+            const QString &filepath = image->getFilepath();
+            QStringList vectors = Helpers::convertToVectorFilenames(filepath);
+
+            foreach (const QString &item, vectors) {
+                if (QFileInfo(item).exists()) {
+                    image->attachVector(item);
+                    attachedCount++;
+                    modifiedIndices.append((int)i);
+                    break;
+                }
+            }
+        }
+
+        return attachedCount;
+    }
 }

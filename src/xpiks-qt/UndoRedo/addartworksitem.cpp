@@ -14,7 +14,7 @@
 #include "../Models/artitemsmodel.h"
 #include "../Common/defines.h"
 
-void UndoRedo::AddArtworksHistoryItem::undo(const Commands::ICommandManager *commandManagerInterface) const {
+void UndoRedo::AddArtworksHistoryItem::undo(const Commands::ICommandManager *commandManagerInterface) {
     LOG_INFO << "#";
 
     Commands::CommandManager *commandManager = (Commands::CommandManager*)commandManagerInterface;

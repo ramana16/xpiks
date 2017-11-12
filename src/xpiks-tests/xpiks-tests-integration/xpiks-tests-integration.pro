@@ -219,7 +219,10 @@ SOURCES += main.cpp \
     unicodeiotest.cpp \
     ../../xpiks-qt/Helpers/threadhelpers.cpp \
     faileduploadstest.cpp \
-    ../../xpiks-qt/KeywordsPresets/presetgroupsmodel.cpp
+    undoadddirectorytest.cpp \
+    ../../xpiks-qt/KeywordsPresets/presetgroupsmodel.cpp \
+    ../../xpiks-qt/UndoRedo/removedirectoryitem.cpp \
+    undorestoresessiontest.cpp
 
 RESOURCES +=
 
@@ -474,7 +477,10 @@ HEADERS += \
     ../../xpiks-qt/Common/delayedactionentity.h \
     ../../xpiks-qt/Helpers/threadhelpers.h \
     faileduploadstest.h \
-    ../../xpiks-qt/KeywordsPresets/presetgroupsmodel.h
+    ../../xpiks-qt/KeywordsPresets/presetgroupsmodel.h \
+    undoadddirectorytest.h \
+    ../../xpiks-qt/UndoRedo/removedirectoryitem.h \
+    undorestoresessiontest.h
 
 INCLUDEPATH += ../../../vendors/tiny-aes
 INCLUDEPATH += ../../../vendors/cpp-libface

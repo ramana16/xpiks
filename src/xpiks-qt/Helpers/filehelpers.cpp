@@ -14,6 +14,7 @@
 #include <QDir>
 #include <QVector>
 #include "../Common/defines.h"
+#include "../Helpers/constants.h"
 #include "../Models/artworkmetadata.h"
 #include "../Models/imageartwork.h"
 
@@ -151,5 +152,61 @@ namespace Helpers {
         return isImageExtension(extension) ||
                 isVectorExtension(extension) ||
                 isVideoExtension(extension);
+    }
+}
+
+void Helpers::extractFilesFromDirectory(const QString &directory, QStringList &filesList) {
+#ifndef CORE_TESTS
+    QDir dir(directory);
+
+    dir.setFilter(QDir::NoDotAndDotDot | QDir::Files);
+
+    QFileInfoList items = dir.entryInfoList();
+    int size = items.size();
+    filesList.reserve(filesList.size() + size);
+
+    for (int i = 0; i < size; ++i) {
+        QString filepath = items.at(i).absoluteFilePath();
+        filesList.append(filepath);
+    }
+#else
+    QString filePattern = ARTWORK_JPG_PATTERN;
+    QString root = directory;
+
+    if (!root.endsWith('/')) {
+        root.append('/');
+    }
+
+    for (int i = 0; i < 10; i++) {
+        QString nextFile = root + filePattern.arg(i);
+        filesList.append(nextFile);
+    }
+#endif
+
+    LOG_INFO << filesList.length() << "file(s) found";
+}
+
+void Helpers::splitMediaFiles(const QStringList &rawFilenames, QStringList &filenames, QStringList &vectors) {
+    LOG_INFO << rawFilenames.length() << "file(s)";
+    filenames.reserve(rawFilenames.length());
+    vectors.reserve(rawFilenames.length());
+
+    foreach(const QString &filepath, rawFilenames) {
+        QFileInfo fi(filepath);
+        const QString suffix = fi.suffix().toLower();
+
+        if (Helpers::isImageExtension(suffix) ||
+                Helpers::isVideoExtension(suffix)) {
+            filenames.append(filepath);
+        } else if (suffix == QLatin1String("png")) {
+            LOG_WARNING << "PNG is unsupported file format";
+        } else {
+            if (suffix == QLatin1String("eps") ||
+                suffix == QLatin1String("ai")) {
+                vectors.append(filepath);
+            } else if (suffix != QLatin1String(Constants::METADATA_BACKUP_SUFFIX)) {
+                LOG_WARNING << "Unsupported extension of file" << filepath;
+            }
+        }
     }
 }

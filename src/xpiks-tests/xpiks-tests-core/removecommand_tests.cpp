@@ -19,7 +19,7 @@ void RemoveCommandTests::removeArtworksFromEmptyRepository() {
 
     QVector<QPair<int, int> > indicesToRemove;
     indicesToRemove.append(qMakePair(0, 2));
-    std::shared_ptr<Commands::RemoveArtworksCommand> removeArtworkCommand(new Commands::RemoveArtworksCommand(indicesToRemove));
+    std::shared_ptr<Commands::RemoveArtworksCommand> removeArtworkCommand(new Commands::RemoveArtworksCommand(indicesToRemove, false));
 
     QSignalSpy rowsRemovedItemsStart(&artItemsMock, SIGNAL(rowsAboutToBeRemoved(QModelIndex,int,int)));
     QSignalSpy rowsRemovedItemsEnd(&artItemsMock, SIGNAL(rowsRemoved(QModelIndex,int,int)));
@@ -60,11 +60,11 @@ void RemoveCommandTests::removeAllArtworksFromRepository() {
     int itemsToAdd = 5;
     commandManagerMock.generateAndAddArtworks(itemsToAdd);
 
-    int dirsCount = artworksRepository.getArtworksSourcesCount();
+    int dirsCount = artworksRepository.rowCount();
 
     QVector<QPair<int, int> > indicesToRemove;
     indicesToRemove.append(qMakePair(0, itemsToAdd - 1));
-    std::shared_ptr<Commands::RemoveArtworksCommand> removeArtworkCommand(new Commands::RemoveArtworksCommand(indicesToRemove));
+    std::shared_ptr<Commands::RemoveArtworksCommand> removeArtworkCommand(new Commands::RemoveArtworksCommand(indicesToRemove, false));
 
     QSignalSpy rowsRemovedItemsStart(&artItemsMock, SIGNAL(rowsAboutToBeRemoved(QModelIndex,int,int)));
     QSignalSpy rowsRemovedItemsEnd(&artItemsMock, SIGNAL(rowsRemoved(QModelIndex,int,int)));
@@ -87,10 +87,25 @@ void RemoveCommandTests::removeAllArtworksFromRepository() {
     QCOMPARE(rowsRemovedSpyArguments.at(1).toInt(), 0);
     QCOMPARE(rowsRemovedSpyArguments.at(2).toInt(), itemsToAdd - 1);
 
+    QCOMPARE(rowsRemovedRepositoryStart.count(), 0);
+    QCOMPARE(rowsRemovedRepositoryEnd.count(), 0);
+
     QCOMPARE(rowsRemovedItemsEnd.count(), 1);
     QList<QVariant> rowsRemovedFinishedSpyArguments = rowsRemovedItemsEnd.takeFirst();
     QCOMPARE(rowsRemovedFinishedSpyArguments.at(1).toInt(), 0);
     QCOMPARE(rowsRemovedFinishedSpyArguments.at(2).toInt(), itemsToAdd - 1);
+
+    QCOMPARE(dataChangedInRepository.count(), 1);
+    QList<QVariant> dataChangedSpyArguments = dataChangedInRepository.takeFirst();
+    QCOMPARE(dataChangedSpyArguments.at(1).toInt(), 0);
+    // no more directories and rowCount() == 0 in event raising
+    QCOMPARE(dataChangedSpyArguments.at(2).toInt(), 0);
+
+    QCOMPARE(modifiedFilesChanged.count(), 1);
+
+    // ------
+
+    artworksRepository.cleanupEmptyDirectories();
 
     QCOMPARE(rowsRemovedRepositoryStart.count(), 1);
     QList<QVariant> repositoriesRemovedSpyArguments = rowsRemovedRepositoryStart.takeFirst();
@@ -101,13 +116,4 @@ void RemoveCommandTests::removeAllArtworksFromRepository() {
     QList<QVariant> repositoriesRemovedFinishedSpyArguments = rowsRemovedRepositoryEnd.takeFirst();
     QCOMPARE(repositoriesRemovedFinishedSpyArguments.at(1).toInt(), 0);
     QCOMPARE(repositoriesRemovedFinishedSpyArguments.at(2).toInt(), dirsCount - 1);
-
-    // we get additional signals, because before deleting the direcory, we unselect it
-    QCOMPARE(dataChangedInRepository.count(), 2);
-    QList<QVariant> dataChangedSpyArguments = dataChangedInRepository.takeFirst();
-    QCOMPARE(dataChangedSpyArguments.at(1).toInt(), 0);
-    // no more directories and rowCount() == 0 in event raising
-    QCOMPARE(dataChangedSpyArguments.at(2).toInt(), 0);
-
-    QCOMPARE(modifiedFilesChanged.count(), 1);
 }

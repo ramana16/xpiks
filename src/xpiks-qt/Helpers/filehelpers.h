@@ -13,6 +13,19 @@
 
 #include <QStringList>
 
+#ifdef CORE_TESTS
+    #ifdef Q_OS_WIN
+        #define DIRECTORY_PATH "C:/path/to/some/directory"
+    #else
+        #define DIRECTORY_PATH "/path/to/some/directory"
+    #endif
+
+    #define ARTWORK_JPG_PATTERN "artwork%2.jpg"
+
+    #define ARTWORK_PATH DIRECTORY_PATH "_%1/" ARTWORK_JPG_PATTERN
+    #define VECTOR_PATH DIRECTORY_PATH "_%1/artwork%2.eps"
+#endif
+
 namespace Models {
     class ArtworkMetadata;
 }
@@ -29,6 +42,8 @@ namespace Helpers {
     bool isSupportedExtension(const QString &extension);
     QString describeFileSize(qint64 filesizeBytes);
     bool ensureDirectoryExists(const QString &path);
+    void extractFilesFromDirectory(const QString &directory, QStringList &filesList);
+    void splitMediaFiles(const QStringList &rawFilenames, QStringList &filenames, QStringList &vectors);
 }
 
 #endif // FILENAMESHELPERS

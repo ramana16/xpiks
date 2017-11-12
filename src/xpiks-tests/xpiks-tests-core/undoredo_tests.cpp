@@ -3,6 +3,7 @@
 #include <QSignalSpy>
 #include "Mocks/commandmanagermock.h"
 #include "Mocks/artitemsmodelmock.h"
+#include "Mocks/artworksrepositorymock.h"
 #include "../../xpiks-qt/Commands/addartworkscommand.h"
 #include "../../xpiks-qt/Commands/removeartworkscommand.h"
 #include "../../xpiks-qt/Commands/combinededitcommand.h"
@@ -18,7 +19,7 @@
 #define SETUP_TEST \
     Mocks::CommandManagerMock commandManagerMock; \
     Mocks::ArtItemsModelMock artItemsMock; \
-    Models::ArtworksRepository artworksRepository; \
+    Mocks::ArtworksRepositoryMock artworksRepository; \
     commandManagerMock.InjectDependency(&artworksRepository); \
     Models::ArtItemsModel *artItemsModel = &artItemsMock; \
     commandManagerMock.InjectDependency(artItemsModel); \
@@ -31,7 +32,7 @@ void UndoRedoTests::undoAddCommandTest() {
     QStringList filenames;
     filenames << "/path/to/test/image1.jpg";
 
-    std::shared_ptr<Commands::AddArtworksCommand> addArtworksCommand(new Commands::AddArtworksCommand(filenames, QStringList(), false));
+    std::shared_ptr<Commands::AddArtworksCommand> addArtworksCommand(new Commands::AddArtworksCommand(filenames, QStringList(), false, false));
     auto result = commandManagerMock.processCommand(addArtworksCommand);
     auto addArtworksResult = std::dynamic_pointer_cast<Commands::AddArtworksCommandResult>(result);
     int newFilesCount = addArtworksResult->m_NewFilesAdded;
@@ -51,7 +52,7 @@ void UndoRedoTests::undoUndoAddCommandTest() {
     QStringList filenames;
     filenames << "/path/to/test/image1.jpg";
 
-    std::shared_ptr<Commands::AddArtworksCommand> addArtworksCommand(new Commands::AddArtworksCommand(filenames, QStringList(), false));
+    std::shared_ptr<Commands::AddArtworksCommand> addArtworksCommand(new Commands::AddArtworksCommand(filenames, QStringList(), false, false));
     auto result = commandManagerMock.processCommand(addArtworksCommand);
     auto addArtworksResult = std::dynamic_pointer_cast<Commands::AddArtworksCommandResult>(result);
     int newFilesCount = addArtworksResult->m_NewFilesAdded;
@@ -78,7 +79,7 @@ void UndoRedoTests::undoUndoAddWithVectorsTest() {
     filenames << "/path/to/test/image1.jpg" << "/path/to/test/image2.jpg" << "/path/to/test/image3.jpg";
     vectors << "/path/to/test/image3.jpg" << "/path/to/test/image1.eps";
 
-    std::shared_ptr<Commands::AddArtworksCommand> addArtworksCommand(new Commands::AddArtworksCommand(filenames, vectors, false));
+    std::shared_ptr<Commands::AddArtworksCommand> addArtworksCommand(new Commands::AddArtworksCommand(filenames, vectors, false, false));
     auto result = commandManagerMock.processCommand(addArtworksCommand);
     auto addArtworksResult = std::dynamic_pointer_cast<Commands::AddArtworksCommandResult>(result);
     int newFilesCount = addArtworksResult->m_NewFilesAdded;
@@ -114,7 +115,7 @@ void UndoRedoTests::undoRemoveItemsTest() {
 
     QVector<QPair<int, int> > indicesToRemove;
     indicesToRemove.append(qMakePair(1, 3));
-    std::shared_ptr<Commands::RemoveArtworksCommand> removeArtworkCommand(new Commands::RemoveArtworksCommand(indicesToRemove));
+    std::shared_ptr<Commands::RemoveArtworksCommand> removeArtworkCommand(new Commands::RemoveArtworksCommand(indicesToRemove, false));
     auto result = commandManagerMock.processCommand(removeArtworkCommand);
     auto removeArtworksResult = std::dynamic_pointer_cast<Commands::RemoveArtworksCommandResult>(result);
     int artworksRemovedCount = removeArtworksResult->m_RemovedArtworksCount;
@@ -127,6 +128,85 @@ void UndoRedoTests::undoRemoveItemsTest() {
     QCOMPARE(artItemsMock.getArtworksCount(), itemsToAdd);
 }
 
+void UndoRedoTests::undoRemoveAddFullDirectoryTest() {
+    SETUP_TEST;
+    Models::SettingsModel settingsModel;
+    commandManagerMock.InjectDependency(&settingsModel);
+    settingsModel.setAutoFindVectors(false);
+
+    QList<QUrl> dirs;
+    dirs << QUrl::fromLocalFile(DIRECTORY_PATH);
+    int addedCount = artItemsModel->addLocalDirectories(dirs);
+
+    artItemsMock.removeItemsAtIndices({{1, 3}});
+    QCOMPARE(artItemsMock.getArtworksCount(), addedCount - 3);
+
+    artItemsMock.removeArtworksDirectory(0);
+
+    QCOMPARE(artItemsMock.getArtworksCount(), 0);
+
+    bool undoStatus = undoRedoManager.undoLastAction();
+    QVERIFY(undoStatus);
+
+    QVERIFY(artItemsMock.getArtworksCount() == addedCount);
+}
+
+void UndoRedoTests::undoRemoveNotFullDirectoryTest() {
+    SETUP_TEST;
+    Models::SettingsModel settingsModel;
+    commandManagerMock.InjectDependency(&settingsModel);
+    settingsModel.setAutoFindVectors(false);
+
+    QList<QUrl> dirs;
+    dirs << QUrl::fromLocalFile(DIRECTORY_PATH);
+    int addedCount = artItemsModel->addLocalDirectories(dirs);
+
+    artworksRepository.unsetWasAddedAsFullDirectory(0);
+
+    artItemsMock.removeItemsAtIndices({{1, 3}});
+    QCOMPARE(artItemsMock.getArtworksCount(), addedCount - 3);
+
+    artItemsMock.removeArtworksDirectory(0);
+
+    QCOMPARE(artItemsMock.getArtworksCount(), 0);
+
+    bool undoStatus = undoRedoManager.undoLastAction();
+    QVERIFY(undoStatus);
+
+    QVERIFY(artItemsMock.getArtworksCount() == addedCount - 3);
+}
+
+void UndoRedoTests::undoRemoveLaterFullDirectoryTest() {
+    SETUP_TEST;
+    int itemsToAdd = 5;
+    commandManagerMock.generateAndAddArtworks(itemsToAdd, false);
+    const int addedFromSecondDir = artworksRepository.getFilesCountForDirectory(1);
+
+    Models::SettingsModel settingsModel;
+    commandManagerMock.InjectDependency(&settingsModel);
+    settingsModel.setAutoFindVectors(false);
+
+    QList<QUrl> dirs;
+    dirs << QUrl::fromLocalFile(DIRECTORY_PATH "_0");
+    artItemsModel->addLocalDirectories(dirs);
+
+    const int maxCount = artItemsModel->getArtworksCount();
+    qDebug() << "max count is" << maxCount;
+
+    // removing selected files from 1st directory
+    artItemsMock.removeItemsAtIndices({{0, 0}, {2, 2}, {4, 4}});
+    QCOMPARE(artItemsMock.getArtworksCount(), maxCount - 3);
+
+    artItemsMock.removeArtworksDirectory(0);
+
+    QCOMPARE(artItemsMock.getArtworksCount(), addedFromSecondDir);
+
+    bool undoStatus = undoRedoManager.undoLastAction();
+    QVERIFY(undoStatus);
+
+    QVERIFY(artItemsMock.getArtworksCount() == maxCount);
+}
+
 void UndoRedoTests::undoUndoRemoveItemsTest() {
     SETUP_TEST;
     int itemsToAdd = 5;
@@ -134,7 +214,7 @@ void UndoRedoTests::undoUndoRemoveItemsTest() {
 
     QVector<QPair<int, int> > indicesToRemove;
     indicesToRemove.append(qMakePair(1, 3));
-    std::shared_ptr<Commands::RemoveArtworksCommand> removeArtworkCommand(new Commands::RemoveArtworksCommand(indicesToRemove));
+    std::shared_ptr<Commands::RemoveArtworksCommand> removeArtworkCommand(new Commands::RemoveArtworksCommand(indicesToRemove, false));
     auto result = commandManagerMock.processCommand(removeArtworkCommand);
     auto removeArtworksResult = std::dynamic_pointer_cast<Commands::RemoveArtworksCommandResult>(result);
     int artworksRemovedCount = removeArtworksResult->m_RemovedArtworksCount;

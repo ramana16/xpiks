@@ -18,6 +18,7 @@
 #include "../Models/artworkmetadata.h"
 #include "../Helpers/indiceshelper.h"
 #include "../UndoRedo/removeartworksitem.h"
+#include "../UndoRedo/removedirectoryitem.h"
 #include "../Common/defines.h"
 #include "../Models/imageartwork.h"
 
@@ -27,8 +28,9 @@ namespace Commands {
         CommandManager *commandManager = (CommandManager*)commandManagerInterface;
 
         Models::ArtItemsModel *artItemsModel = commandManager->getArtItemsModel();
+        QSet<qint64> touchedDirectories;
 
-        int count = m_RangesToRemove.count();
+        const int count = m_RangesToRemove.count();
 
         QVector<int> removedItemsIndices;
         removedItemsIndices.reserve(count);
@@ -44,15 +46,16 @@ namespace Commands {
             int last = item.second;
 
             for (int i = first; i <= last; ++i) {
-                Models::ArtworkMetadata *metadata = artItemsModel->getArtwork(i);
-                if (metadata != NULL) {
+                Models::ArtworkMetadata *artwork = artItemsModel->getArtwork(i);
+                if (artwork != NULL) {
                     removedItemsIndices.append(i);
 
-                    if (!metadata->isUnavailable()) {
-                        const QString &filepath = metadata->getFilepath();
+                    if (!artwork->isUnavailable()) {
+                        const QString &filepath = artwork->getFilepath();
                         removedItemsFilepathes.append(filepath);
+                        touchedDirectories.insert(artwork->getDirectoryID());
 
-                        Models::ImageArtwork *image = dynamic_cast<Models::ImageArtwork*>(metadata);
+                        Models::ImageArtwork *image = dynamic_cast<Models::ImageArtwork*>(artwork);
 
                         if (image != NULL && image->hasVectorAttached()) {
                             removedAttachedVectors.append(image->getAttachedVectorPath());
@@ -60,7 +63,6 @@ namespace Commands {
                             removedAttachedVectors.append("");
                         }
                     }
-
                 }
             }
         }
@@ -77,8 +79,8 @@ namespace Commands {
             commandManager->clearCurrentItem();
 
             Models::ArtworksRepository *artworkRepository = commandManager->getArtworksRepository();
-            artworkRepository->cleanupEmptyDirectories();
-            artworkRepository->updateCountsForExistingDirectories();
+            artworkRepository->refresh();
+            artworkRepository->consolidateSelectionForEmpty();
             artworkRepository->unwatchFilePaths(removedItemsFilepathes);
 
             QStringList notEmptyVectors = removedAttachedVectors;
@@ -87,13 +89,28 @@ namespace Commands {
 
             artItemsModel->updateModifiedCount();
 
-            if (!removedItemsFilepathes.empty()) {
-                std::unique_ptr<UndoRedo::IHistoryItem> removeArtworksItem(
-                        new UndoRedo::RemoveArtworksHistoryItem(getCommandID(),
-                                                                removedItemsIndices,
-                                                                removedItemsFilepathes,
-                                                                removedAttachedVectors));
-                commandManager->recordHistoryItem(removeArtworksItem);
+            if (!m_RemoveAsDirectory) {
+                LOG_DEBUG << "removing files one by one";
+                if (!removedItemsFilepathes.empty()) {
+                    std::unique_ptr<UndoRedo::IHistoryItem> removeArtworksItem(
+                            new UndoRedo::RemoveArtworksHistoryItem(getCommandID(),
+                                                                    removedItemsIndices,
+                                                                    removedItemsFilepathes,
+                                                                    removedAttachedVectors));
+                    commandManager->recordHistoryItem(removeArtworksItem);
+                }
+            } else {
+                LOG_DEBUG << "Removing files as directory";
+                Q_ASSERT(touchedDirectories.size() == 1);
+                if (touchedDirectories.size() == 1) {
+                    auto itBegin = touchedDirectories.begin();
+                    qint64 dirID = *itBegin;
+                    int firstArtworkIndex = removedItemsIndices.first();
+
+                    std::unique_ptr<UndoRedo::IHistoryItem> removeDirectoryItem(
+                                new UndoRedo::RemoveDirectoryHistoryItem(getCommandID(), firstArtworkIndex, dirID));
+                    commandManager->recordHistoryItem(removeDirectoryItem);
+                }
             }
 
             commandManager->saveSessionInBackground();

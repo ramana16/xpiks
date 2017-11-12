@@ -24,6 +24,7 @@ Item {
     anchors.fill: parent
 
     property bool isInProgress: false
+    property bool autoImport: false
 
     Keys.onEscapePressed: {
         if (!metadataImportComponent.isInProgress) {
@@ -39,6 +40,11 @@ Item {
 
     Component.onCompleted: {
         focus = true
+
+        if (autoImport) {
+            console.log("Auto import")
+            continueImport()
+        }
     }
 
     signal dialogDestruction();

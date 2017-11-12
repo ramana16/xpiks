@@ -109,6 +109,8 @@
 #include "csvexporttest.h"
 #include "unicodeiotest.h"
 #include "faileduploadstest.h"
+#include "undoadddirectorytest.h"
+#include "undorestoresessiontest.h"
 
 #if defined(WITH_PLUGINS)
 #undef WITH_PLUGINS
@@ -377,6 +379,8 @@ int main(int argc, char *argv[]) {
     integrationTests.append(new AutoCompletePresetsTest(&commandManager));
     integrationTests.append(new CsvExportTest(&commandManager));
     integrationTests.append(new UnicodeIoTest(&commandManager));
+    integrationTests.append(new UndoAddDirectoryTest(&commandManager));
+    integrationTests.append(new UndoRestoreSessionTest(&commandManager));
     // always the last one. insert new tests above
     integrationTests.append(new LocalLibrarySearchTest(&commandManager));
 

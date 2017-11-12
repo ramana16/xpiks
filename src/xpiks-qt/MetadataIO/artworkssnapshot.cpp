@@ -21,7 +21,9 @@ namespace MetadataIO {
         }
     }
 
-    SessionSnapshot::SessionSnapshot(const std::deque<Models::ArtworkMetadata *> &artworksList) {
+    SessionSnapshot::SessionSnapshot(const std::deque<Models::ArtworkMetadata *> &artworksList, const QStringList &fullDirectories):
+        m_DirectoriesSnapshot(fullDirectories)
+    {
         LOG_DEBUG << "Creating snapshot of" << artworksList.size() << "artwork(s)";
 
         m_ArtworksSnapshot.reserve(artworksList.size());

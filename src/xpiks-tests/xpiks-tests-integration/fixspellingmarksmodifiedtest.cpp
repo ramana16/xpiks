@@ -36,7 +36,7 @@ int FixSpellingMarksModifiedTest::doTest() {
 
     MetadataIO::MetadataIOCoordinator *ioCoordinator = m_CommandManager->getMetadataIOCoordinator();
     SignalWaiter waiter;
-    QObject::connect(ioCoordinator, SIGNAL(metadataReadingFinished()), &waiter, SIGNAL(finished()));    
+    QObject::connect(ioCoordinator, SIGNAL(metadataReadingFinished()), &waiter, SIGNAL(finished()));
 
     int addedCount = artItemsModel->addLocalArtworks(files);
     VERIFY(addedCount == files.length(), "Failed to add file");
@@ -63,8 +63,7 @@ int FixSpellingMarksModifiedTest::doTest() {
         VERIFY(false, "Timeout for waiting for initial spellcheck results");
     }
 
-    // wait for finding suggestions
-    QThread::sleep(1);
+    sleepWaitUntil(5, [&]() { return basicModel->hasKeywordsSpellError(); });
 
     VERIFY(basicModel->hasKeywordsSpellError(), "Keywords spell error not detected");
 

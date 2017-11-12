@@ -16,7 +16,7 @@
 #include "../Common/defines.h"
 #include "../MetadataIO/artworkssnapshot.h"
 
-void UndoRedo::ModifyArtworksHistoryItem::undo(const Commands::ICommandManager *commandManagerInterface) const {
+void UndoRedo::ModifyArtworksHistoryItem::undo(const Commands::ICommandManager *commandManagerInterface) {
     LOG_INFO << m_Indices.count() << "item(s) affected";
 
     Commands::CommandManager *commandManager = (Commands::CommandManager*)commandManagerInterface;

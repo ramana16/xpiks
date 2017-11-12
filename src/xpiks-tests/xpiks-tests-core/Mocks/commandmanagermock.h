@@ -6,14 +6,7 @@
 #include "../../xpiks-qt/Models/artworksrepository.h"
 #include "../../xpiks-qt/Models/artworkmetadata.h"
 #include "../../xpiks-qt/Models/imageartwork.h"
-
-#ifdef Q_OS_WIN
-#define ARTWORK_PATH "C:/path/to/somedirectory_%1/artwork%2.jpg"
-#define VECTOR_PATH "C:/path/to/somedirectory_%1/artwork%2.eps"
-#else
-#define ARTWORK_PATH "/path/to/somedirectory_%1/artwork%2.jpg"
-#define VECTOR_PATH "/path/to/somedirectory_%1/artwork%2.eps"
-#endif
+#include "../../xpiks-qt/Helpers/filehelpers.h"
 
 namespace Mocks {
     class CommandManagerMock : public Commands::CommandManager

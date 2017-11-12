@@ -84,7 +84,13 @@ ColumnLayout {
 
                 delegate: Rectangle {
                     id: sourceWrapper
+                    enabled: !isremoved
                     property int delegateIndex: index
+
+                    function getDirectoryIndex() {
+                        return artworkRepository.getOriginalIndex(index)
+                    }
+
                     color: isselected ? uiColors.itemsSourceSelected : uiColors.itemsSourceBackground
                     width: parent.width
                     height: 31
@@ -115,6 +121,7 @@ ColumnLayout {
                             text: path + " (" + usedimagescount + ")"
                             elide: Text.ElideMiddle
                             font.bold: isselected
+                            font.strikeout: isremoved
 
                             MouseArea {
                                 id: selectionMA
@@ -127,6 +134,13 @@ ColumnLayout {
                             }
                         }
 
+                        StyledText {
+                            enabled: debug
+                            visible: debug
+                            text: isfull ? "(full)" : ""
+                            isActive: false
+                        }
+
                         CloseIcon {
                             width: 14
                             height: 14
@@ -136,10 +150,10 @@ ColumnLayout {
 
                             onItemClicked: {
                                 if (mustUseConfirmation()) {
-                                    confirmRemoveDirectoryDialog.directoryIndex = sourceWrapper.delegateIndex
+                                    confirmRemoveDirectoryDialog.directoryIndex = sourceWrapper.getDirectoryIndex()
                                     confirmRemoveDirectoryDialog.open()
                                 } else {
-                                    filteredArtItemsModel.removeArtworksDirectory(sourceWrapper.delegateIndex)
+                                    filteredArtItemsModel.removeArtworksDirectory(sourceWrapper.getDirectoryIndex())
                                 }
                             }
                         }

@@ -86,6 +86,40 @@ void ArtItemsModelTests::removeArtworkDirectorySimpleTest() {
     QCOMPARE(artItemsModelMock.getArtworksCount(), count - firstDirCount);
 }
 
+void ArtItemsModelTests::addRemoveOneByOneFewDirsTest() {
+    // https://github.com/ribtoks/xpiks/issues/467
+    const int count = 2;
+    DECLARE_MODELS_AND_GENERATE(count, false);
+
+    QCOMPARE(artworksRepository.getFilesCountForDirectory(0), 1);
+    QCOMPARE(artworksRepository.getFilesCountForDirectory(1), 1);
+    QCOMPARE(artItemsModelMock.getArtworksCount(), count);
+
+    artItemsModelMock.removeArtworksDirectory(0);
+    artworksRepository.cleanupEmptyDirectories();
+    QCOMPARE(artworksRepository.rowCount(), 1);
+
+    artItemsModelMock.removeArtworksDirectory(0);
+    artworksRepository.cleanupEmptyDirectories();
+    QCOMPARE(artworksRepository.rowCount(), 0);
+
+    QCOMPARE(artItemsModelMock.getArtworksCount(), 0);
+}
+
+void ArtItemsModelTests::addRemoveOneByOneOneDirTest() {
+    // https://github.com/ribtoks/xpiks/issues/467
+    const int count = 1;
+    DECLARE_MODELS_AND_GENERATE(count, false);
+
+    QCOMPARE(artworksRepository.getFilesCountForDirectory(0), 1);
+    QCOMPARE(artItemsModelMock.getArtworksCount(), count);
+
+    artItemsModelMock.removeArtworksDirectory(0);
+    artworksRepository.cleanupEmptyDirectories();
+    QCOMPARE(artworksRepository.rowCount(), 0);
+    QCOMPARE(artItemsModelMock.getArtworksCount(), 0);
+}
+
 void ArtItemsModelTests::setAllSavedResetsModifiedCountTest() {
     const int count = 10;
     DECLARE_MODELS_AND_GENERATE(count, false);

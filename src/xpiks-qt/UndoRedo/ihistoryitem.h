@@ -23,7 +23,7 @@ namespace UndoRedo {
     public:
         virtual ~IHistoryItem() {}
 
-        virtual void undo(const Commands::ICommandManager *commandManager) const = 0;
+        virtual void undo(const Commands::ICommandManager *commandManager) = 0;
         virtual QString getDescription() const = 0;
         virtual int getActionType() const = 0;
         virtual int getCommandID() const = 0;

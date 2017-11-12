@@ -33,15 +33,17 @@ namespace MetadataIO {
 
     class SessionSnapshot {
     public:
-        SessionSnapshot(const std::deque<Models::ArtworkMetadata *> &artworksList);
+        SessionSnapshot(const std::deque<Models::ArtworkMetadata *> &artworksList, const QStringList &fullDirectories);
 
         SessionSnapshot(SessionSnapshot &&other) {
             m_ArtworksSnapshot.swap(other.m_ArtworksSnapshot);
+            m_DirectoriesSnapshot.swap(other.m_DirectoriesSnapshot);
         }
 
         SessionSnapshot &operator=(SessionSnapshot &&other) {
             if (this != &other) {
                 m_ArtworksSnapshot.swap(other.m_ArtworksSnapshot);
+                m_DirectoriesSnapshot.swap(other.m_DirectoriesSnapshot);
             }
 
             return *this;
@@ -49,9 +51,11 @@ namespace MetadataIO {
 
     public:
         std::vector<std::shared_ptr<MetadataIO::ArtworkSessionSnapshot> > &getSnapshot() { return m_ArtworksSnapshot; }
+        const QStringList &getDirectoriesSnapshot() { return m_DirectoriesSnapshot; }
 
     private:
         std::vector<std::shared_ptr<MetadataIO::ArtworkSessionSnapshot> > m_ArtworksSnapshot;
+        QStringList m_DirectoriesSnapshot;
     };
 
     // designed to be used only temporarily

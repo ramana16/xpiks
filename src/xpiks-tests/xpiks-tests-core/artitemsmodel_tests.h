@@ -12,6 +12,8 @@ private slots:
     void unselectAllTest();
     void modificationChangesModifiedCountTest();
     void removeArtworkDirectorySimpleTest();
+    void addRemoveOneByOneFewDirsTest();
+    void addRemoveOneByOneOneDirTest();
     void setAllSavedResetsModifiedCountTest();
     void removingLockedArtworksTest();
     void plainTextEditToEmptyKeywordsTest();

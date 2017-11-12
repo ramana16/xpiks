@@ -21,6 +21,9 @@ namespace Mocks {
             insertIntoUnavailable(vector);
             emit filesUnavailable();
         }
+
+        void setWasAddedAsFullDirectory(int index) { setFullDirectory(index); }
+        void unsetWasAddedAsFullDirectory(int index) { unsetFullDirectory(index); }
     };
 }
 

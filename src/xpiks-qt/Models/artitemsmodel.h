@@ -50,6 +50,12 @@ namespace Models {
     Q_OBJECT
     Q_PROPERTY(int modifiedArtworksCount READ getModifiedArtworksCount NOTIFY modifiedArtworksCountChanged)
 
+#ifndef CORE_TESTS
+        typedef std::deque<ArtworkMetadata *> ArtworksContainer;
+#else
+        typedef std::vector<ArtworkMetadata *> ArtworksContainer;
+#endif
+
     public:
         ArtItemsModel(QObject *parent=0);
 
@@ -141,7 +147,10 @@ namespace Models {
         Q_INVOKABLE bool acceptCompletionAsPreset(int metadataIndex, int completionID);
         Q_INVOKABLE void initSuggestion(int metadataIndex);
         Q_INVOKABLE void setupDuplicatesModel(int metadataIndex);
+        Q_INVOKABLE int addLocalArtworks(const QList<QUrl> &artworksPaths);
+        Q_INVOKABLE int addLocalDirectories(const QList<QUrl> &directories);
 
+    public:
         void fillFromQuickBuffer(size_t metadataIndex);
 
     public:
@@ -151,9 +160,6 @@ namespace Models {
         virtual bool setData(const QModelIndex &index, const QVariant &value, int role=Qt::EditRole) override;
 
     public slots:
-        int addLocalArtworks(const QList<QUrl> &artworksPaths);
-        int addLocalDirectories(const QList<QUrl> &directories);
-
         void itemModifiedChanged(bool) { updateModifiedCount(); }
         void spellCheckErrorsChanged();
         void onFilesUnavailableHandler();
@@ -195,14 +201,12 @@ namespace Models {
     public:
         // IARTWORKSSOURCE
         virtual Common::IBasicArtwork *getBasicArtwork(int index) const override;
-
         virtual int getArtworksCount() const override { return (int)m_ArtworkList.size(); }
 
     private:
         void updateItemAtIndex(int metadataIndex);
-        int addDirectories(const QStringList &directories);
-        void doAddDirectory(const QString &directory, QStringList &filesList);
-        int addFiles(const QStringList &filepath);
+        int doAddDirectories(const QStringList &directories);
+        int doAddFiles(const QStringList &filepath, bool isFullDirectory = false);
 
     private:
         void doCombineArtwork(int index);
@@ -228,8 +232,8 @@ namespace Models {
 
     private:
         void destroyInnerItem(ArtworkMetadata *artwork);
-        void doRemoveItemsAtIndices(QVector<int> &indicesToRemove);
-        void doRemoveItemsInRanges(const QVector<QPair<int, int> > &rangesToRemove);
+        void doRemoveItemsAtIndices(QVector<int> &indicesToRemove, bool isFullDirectory = false);
+        void doRemoveItemsInRanges(const QVector<QPair<int, int> > &rangesToRemove, bool isFullDirectory = false);
         void getSelectedItemsIndices(QVector<int> &indices);
 
     public:
@@ -240,7 +244,7 @@ namespace Models {
 
 #ifdef CORE_TESTS
     public:
-        const std::deque<ArtworkMetadata *> &getFinalizationList() const { return m_FinalizationList; }
+        const ArtworksContainer &getFinalizationList() const { return m_FinalizationList; }
 #endif
 
 #ifdef INTEGRATION_TESTS
@@ -249,13 +253,13 @@ namespace Models {
 #endif
 
     public:
-        const std::deque<ArtworkMetadata *> &getArtworkList() const { return m_ArtworkList; }
+        const ArtworksContainer &getArtworkList() const { return m_ArtworkList; }
 
     private:
-        std::deque<ArtworkMetadata *> m_ArtworkList;
-        std::deque<ArtworkMetadata *> m_FinalizationList;
+        ArtworksContainer m_ArtworkList;
+        ArtworksContainer m_FinalizationList;
 #ifdef QT_DEBUG
-        std::deque<ArtworkMetadata *> m_DestroyedList;
+        ArtworksContainer m_DestroyedList;
 #endif
         qint64 m_LastID;
     };

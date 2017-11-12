@@ -8,6 +8,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+#include "restoresessiontest.h"
 #include "../../xpiks-qt/Models/settingsmodel.h"
 #include "../../xpiks-qt/Models/sessionmanager.h"
 #include "../../xpiks-qt/MetadataIO/metadataiocoordinator.h"
@@ -15,7 +16,6 @@
 #include "../../xpiks-qt/Models/artitemsmodel.h"
 #include "../../xpiks-qt/Models/artworksrepository.h"
 #include "../../xpiks-qt/Models/imageartwork.h"
-#include "restoresessiontest.h"
 #include "signalwaiter.h"
 #include "testshelpers.h"
 
@@ -76,6 +76,7 @@ int RestoreSessionTest::doTest() {
     if (!waiter.wait(20)) {
         VERIFY(false, "Timeout exceeded for reading session metadata.");
     }
+
     VERIFY(!ioCoordinator->getHasErrors(), "Errors in IO Coordinator while reading");
 
     MetadataIO::ArtworksSnapshot newArtworksSnapshot(artItemsModel->getArtworkList());

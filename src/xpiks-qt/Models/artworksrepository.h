@@ -18,16 +18,16 @@
 #include <QSet>
 #include <QTimer>
 #include <QFileSystemWatcher>
-
+#include <QSortFilterProxyModel>
 #include <vector>
 
 #include "../Common/abstractlistmodel.h"
 #include "../Common/baseentity.h"
+#include "../Common/flags.h"
 
 namespace Models {
     class ArtworksRepository : public Common::AbstractListModel, public Common::BaseEntity {
         Q_OBJECT
-        Q_PROPERTY(int artworksSourcesCount READ getArtworksSourcesCount NOTIFY artworksSourcesCountChanged)
     public:
         ArtworksRepository(QObject *parent = 0);
         virtual ~ArtworksRepository() {}
@@ -36,13 +36,38 @@ namespace Models {
         enum ArtworksRepository_Roles {
             PathRole = Qt::UserRole + 1,
             UsedImagesCountRole,
-            IsSelectedRole
+            IsSelectedRole,
+            IsRemovedRole,
+            IsFullRole
         };
 
     public:
-        void updateCountsForExistingDirectories();
-        void cleanupEmptyDirectories();
-        void resetLastUnavailableFilesCount() { m_LastUnavailableFilesCount=0; }
+        struct RepoDir {
+            RepoDir (QString absolutePath, qint64 id, int count):
+                m_AbsolutePath(absolutePath), m_ID(id), m_FilesCount(count), m_DirectoryFlags(0)
+            { }
+            RepoDir() = default;
+
+            inline bool getIsSelectedFlag() const { return Common::HasFlag(m_DirectoryFlags, Common::DirectoryFlags::IsSelected); }
+            inline bool getAddedAsDirectoryFlag() const { return Common::HasFlag(m_DirectoryFlags, Common::DirectoryFlags::IsAddedAsDirectory); }
+            inline bool getIsRemovedFlag() const { return Common::HasFlag(m_DirectoryFlags, Common::DirectoryFlags::IsRemoved); }
+
+            inline void setIsSelectedFlag(bool value) { Common::ApplyFlag(m_DirectoryFlags, value, Common::DirectoryFlags::IsSelected); }
+            inline void setAddedAsDirectoryFlag(bool value) { Common::ApplyFlag(m_DirectoryFlags, value, Common::DirectoryFlags::IsAddedAsDirectory); }
+            inline void setIsRemovedFlag(bool value) { Common::ApplyFlag(m_DirectoryFlags, value, Common::DirectoryFlags::IsRemoved); }
+
+            bool isValid() const { return m_FilesCount > 0; }
+
+            QString m_AbsolutePath = QString("");
+            qint64 m_ID = 0;
+            int m_FilesCount = 0;
+            Common::flag_t m_DirectoryFlags = 0;
+        };
+
+    public:
+        int isEmpty(int index) const;
+        void refresh();
+        void resetLastUnavailableFilesCount() { m_LastUnavailableFilesCount = 0; }
         void stopListeningToUnavailableFiles();
 
     public:
@@ -52,11 +77,12 @@ namespace Models {
     public:
         virtual int getNewDirectoriesCount(const QStringList &items) const;
         int getNewFilesCount(const QStringList &items) const;
-        int getArtworksSourcesCount() const { return (int)m_DirectoriesList.size(); }
         bool canPurgeUnavailableFiles() const { return m_UnavailableFiles.size() == m_LastUnavailableFilesCount; }
-        bool isDirectoryIncluded(qint64 directoryID) const;
+        bool isDirectorySelected(qint64 directoryID) const;
 
     signals:
+        void refreshRequired();
+        void filteringChanged();
         void artworksSourcesCountChanged();
         void fileChanged(const QString &path);
         void filesUnavailable();
@@ -64,20 +90,27 @@ namespace Models {
 #ifdef CORE_TESTS
     public:
         void removeItem(int index) { removeInnerItem(index); }
+
     protected:
         void insertIntoUnavailable(const QString &value) { m_UnavailableFiles.insert(value); }
         const QSet<QString> &getFilesSet() const { return m_FilesSet; }
+        void setFullDirectory(int index) { m_DirectoriesList[index].setAddedAsDirectoryFlag(true); }
+        void unsetFullDirectory(int index) { m_DirectoriesList[index].setAddedAsDirectoryFlag(false); }
 #endif
+
+    public slots:
+        void onUndoStackEmpty();
 
     private slots:
         void checkFileUnavailable(const QString &path);
         void onAvailabilityTimer();
 
     public:
-        bool accountFile(const QString &filepath, qint64 &directoryID);
+        bool accountFile(const QString &filepath, qint64 &directoryID, bool isFullDirectory = false);
         void accountVector(const QString &vectorPath);
         bool removeFile(const QString &filepath, qint64 directoryID);
         void removeVector(const QString &vectorPath);
+        void cleanupEmptyDirectories();
         void purgeUnavailableFiles();
         void watchFilePaths(const QStringList &filePaths);
         void unwatchFilePaths(const QStringList &filePaths);
@@ -89,7 +122,9 @@ namespace Models {
         qint64 generateNextID() { qint64 id = m_LastID; m_LastID++; return id; }
 
     public:
-        const QString &getDirectory(int index) const { return m_DirectoriesList[index].m_AbsolutePath; }
+        bool tryGetDirectoryPath(qint64 directoryID, QString &absolutePath) const;
+        const QString &getDirectoryPath(int index) const { Q_ASSERT((0 <= index) && (index < (int)m_DirectoriesList.size())); return m_DirectoriesList[index].m_AbsolutePath; }
+        bool getIsFullDirectory(int index) const { return m_DirectoriesList[index].getAddedAsDirectoryFlag(); }
 #ifdef CORE_TESTS
         int getFilesCountForDirectory(const QString &directory) const { size_t index; tryFindDirectory(directory, index); return m_DirectoriesList[index].m_FilesCount; }
         int getFilesCountForDirectory(int index) const { return m_DirectoriesList[index].m_FilesCount; }
@@ -99,63 +134,75 @@ namespace Models {
 #ifdef INTEGRATION_TESTS
         void resetEverything();
 #endif
+        QStringList retrieveFullDirectories() const;
+        void restoreFullDirectories(const QStringList &directories);
 
     public:
         virtual int rowCount(const QModelIndex &parent = QModelIndex()) const override;
         virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
     public:
-        Q_INVOKABLE void selectDirectory(int row);
+        void consolidateSelectionForEmpty();
+        void toggleDirectorySelected(size_t row);
 
     protected:
         virtual QHash<int, QByteArray> roleNames() const override;
 
     protected:
-        virtual void removeInnerItem(int index) override {
-            auto &directoryToRemove = m_DirectoriesList.at(index);
-            qint64 idToRemove = directoryToRemove.m_Id;
-            const bool oldIsSelected = directoryToRemove.m_IsSelected;
-            const bool newIsSelected = false; // unselect folder to be deleted
-            changeSelectedState(index, newIsSelected, oldIsSelected);
-            m_DirectoriesList.erase(m_DirectoriesList.begin() + index);
-            m_DirectoryIdToIndex.remove(idToRemove);
-            emit artworksSourcesCountChanged();
-        }
-
+        virtual void removeInnerItem(int index) override;
         virtual bool checkFileExists(const QString &filename, QString &directory) const;
+
+    public:
+        bool unselectAllDirectories() { return setAllSelected(false); }
+        bool selectAllDirectories() { return setAllSelected(true); }
 
     private:
         bool setDirectorySelected(size_t index, bool value);
-        bool changeSelectedState(int row, bool newValue, bool oldValue);
-        bool unselectAllDirectories() { return setAllSelected(false); }
-        bool selectAllDirectories() { return setAllSelected(true); }
+        bool changeSelectedState(size_t row, bool newValue, bool oldValue);
         bool setAllSelected(bool value);
         size_t retrieveSelectedDirsCount() const;
         bool allAreSelected() const;
         bool tryFindDirectory(const QString &directoryPath, size_t &index) const;
-
-    private:
-        struct RepoDir {
-            RepoDir (QString absolutePath, qint64 id, int count, bool selected):
-                m_AbsolutePath(absolutePath), m_Id(id), m_FilesCount(count), m_IsSelected(selected)
-            { }
-            RepoDir() = default;
-
-            QString m_AbsolutePath = QString("");
-            qint64 m_Id = 0;
-            int m_FilesCount = 0;
-            bool m_IsSelected = true;
-        };
+        bool tryFindDirectoryByID(qint64 id, size_t &index) const;
 
     private:
         std::vector<RepoDir> m_DirectoriesList;
-        QHash<qint64, size_t> m_DirectoryIdToIndex;
         QSet<QString> m_FilesSet;
         QFileSystemWatcher m_FilesWatcher;
         QTimer m_Timer;
         QSet<QString> m_UnavailableFiles;
         int m_LastUnavailableFilesCount;
         qint64 m_LastID;
+    };
+
+    class FilteredArtworksRepository: public QSortFilterProxyModel {
+        Q_OBJECT
+        Q_PROPERTY(int artworksSourcesCount READ getArtworksSourcesCount NOTIFY artworksSourcesCountChanged)
+
+    public:
+        FilteredArtworksRepository(ArtworksRepository *artworksRepository);
+
+    public:
+        int getArtworksSourcesCount() { return rowCount(); }
+
+    public:
+        void setArtworksRepository(ArtworksRepository *artworksRepository);
+
+    public:
+        Q_INVOKABLE int getOriginalIndex(int index);
+        Q_INVOKABLE void selectDirectory(int row);
+
+    protected:
+        virtual bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
+
+    signals:
+        void artworksSourcesCountChanged();
+
+    private slots:
+        void onRefreshRequired();
+
+    private:
+        ArtworksRepository *getArtworksRepository() const;
     };
 }
 
