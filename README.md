@@ -18,6 +18,8 @@ Coverity scan: <a href="https://scan.coverity.com/projects/xpiks-qt">
        src="https://scan.coverity.com/projects/8498/badge.svg"/>
 </a>
 
+Code coverage: [![codecov](https://codecov.io/gh/ribtoks/xpiks/branch/master/graph/badge.svg)](https://codecov.io/gh/ribtoks/xpiks)
+
 Code Climate: [![Code Climate](https://codeclimate.com/github/Ribtoks/xpiks/badges/gpa.svg)](https://codeclimate.com/github/Ribtoks/xpiks)
 
 Xpiks is a free and open source keywording and uploading tool for microstock photographers and illustrators. It was written from scratch with aim to make it more usefull, convenient and quicker than existing tools.
