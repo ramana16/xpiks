@@ -77,7 +77,7 @@ script:
   - echo "-------"
   - make
   - export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:../../../libs/
-  - if [ -n "$XPIKS_BINARY" ]; then cppcheck --quiet --error-exitcode=1 . ; fi
+  - if [ -n "$XPIKS_BINARY" ]; then cppcheck --language=c++ --inconclusive --quiet -DQT_DEBUG -DWITH_LOGS -DWITH_PLUGINS -DWITH_STDOUT_LOGS -DTRAVIS_CI -std=c++11 --error-exitcode=1 --suppress=missingIncludeSystem --max-configs=10 . ; fi
   - if [ -n "$CORE_TESTS" ]; then ./xpiks-tests-core; fi
   - if [ -n "$INTEGRATION_TESTS" ]; then ./xpiks-tests-integration; fi
   - if [ -n "$UI_TESTS" ]; then ./xpiks-tests-ui; fi
