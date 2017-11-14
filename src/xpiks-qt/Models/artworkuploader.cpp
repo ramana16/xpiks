@@ -103,6 +103,7 @@ namespace Models {
     }
 
     void ArtworkUploader::updateStocksList() {
+        LOG_DEBUG << "#";
         m_StocksFtpList.initializeConfigs();
     }
 

@@ -33,8 +33,10 @@ namespace AutoComplete {
     protected:
         virtual void processRemoteConfig(const QJsonDocument &remoteDocument, bool overwriteLocal) override;
         virtual bool processLocalConfig(const QJsonDocument &document) override;
+        virtual void processMergedConfig(const QJsonDocument &document) override;
 
     private:
+        void parseConfig(const QJsonDocument &document);
         void parseFtpArray(const QJsonArray &array);
 
     signals:

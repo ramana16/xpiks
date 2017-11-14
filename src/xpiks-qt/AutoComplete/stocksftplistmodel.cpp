@@ -51,6 +51,7 @@ namespace AutoComplete {
     }
 
     void StocksFtpListModel::processRemoteConfig(const QJsonDocument &remoteDocument, bool overwriteLocal) {
+        LOG_DEBUG << "#";
         bool overwrite = false;
 
         if (!overwriteLocal && remoteDocument.isObject()) {
@@ -72,9 +73,18 @@ namespace AutoComplete {
     }
 
     bool StocksFtpListModel::processLocalConfig(const QJsonDocument &document) {
-        bool anyError = false;
+        Q_ASSERT(m_StocksHash.empty());
+        parseConfig(document);
+    }
 
-        m_StocksHash.clear();
+    void StocksFtpListModel::processMergedConfig(const QJsonDocument &document) {
+#ifdef INTEGRATION_TESTS
+        parseConfig(document);
+#endif
+    }
+
+    void StocksFtpListModel::parseConfig(const QJsonDocument &document) {
+        bool anyError = false;
 
         do {
             if (!document.isObject()) {
@@ -106,6 +116,7 @@ namespace AutoComplete {
     }
 
     void StocksFtpListModel::parseFtpArray(const QJsonArray &array) {
+        LOG_DEBUG << array.size() << "ftp hosts";
         QHash<QString, QString> hash;
         QStringList keys;
         int size = array.size();
@@ -139,6 +150,8 @@ namespace AutoComplete {
             m_StocksHash.swap(hash);
             m_StockNames.swap(keys);
             emit stocksListUpdated();
+        } else {
+            LOG_INTEGR_TESTS_OR_DEBUG << "Hash is empty!";
         }
     }
 
