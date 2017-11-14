@@ -594,6 +594,10 @@ travis-ci {
 
     LIBS -= -lthmbnlr
     SOURCES += ../../../vendors/libthmbnlr/thumbnailcreator_stub.cpp
+
+    # gcov
+    QMAKE_CXXFLAGS += -fprofile-arcs -ftest-coverage
+    LIBS += -lgcov
 }
 
 appveyor {

@@ -21,10 +21,11 @@ env:
 addons:
   apt:
     sources:
-    - ubuntu-toolchain-r-test
+      - ubuntu-toolchain-r-test
     packages:
-    - gcc-5
-    - g++-5
+      - lcov
+      - gcc-5
+      - g++-5
 
 before_install:
   - if [ -z "${UI_TESTS+xxx}" ]; then wget https://github.com/hunspell/hunspell/archive/v1.6.0.tar.gz -O /tmp/hunspell.tar.gz; fi
@@ -40,6 +41,7 @@ install:
   - sudo apt-get install -y gdb
   - sudo apt-get install -y libexiv2-dev expat
   - sudo unlink /usr/bin/g++ && sudo ln -s /usr/bin/g++-5 /usr/bin/g++
+  - sudo update-alternatives --install /usr/bin/gcov gcov /usr/bin/gcov-5 90
   - if [ "$CXX" = "g++" ]; then export CXX="g++-5" CC="gcc-5"; fi
 
 before_script:
@@ -50,6 +52,7 @@ before_script:
   - if [ -n "$UI_TESTS" ]; then sh -e /etc/init.d/xvfb start; fi
   - if [ -n "$UI_TESTS" ]; then sleep 3; fi # give xvfb some time to start
   - chmod +x vendors/build_vendors_travis.sh
+  - chmod +x src/xpiks-tests/get_code_cov.sh
 
 script:
   - if [ -z "${UI_TESTS+xxx}" ]; then bash vendors/build_vendors_travis.sh; fi
@@ -76,6 +79,10 @@ script:
   - if [ -n "$CORE_TESTS" ]; then ./xpiks-tests-core; fi
   - if [ -n "$INTEGRATION_TESTS" ]; then ./xpiks-tests-integration; fi
   - if [ -n "$UI_TESTS" ]; then ./xpiks-tests-ui; fi
+
+after_success:
+  - if [ -z "${XPIKS_BINARY+xxx}" ]; ../get_code_cov.sh $(pwd); fi
+  - if [ -z "${XPIKS_BINARY+xxx}" ]; bash <(curl -s https://codecov.io/bash); fi
 
 after_failure:
   - if [ -n "$CORE_TESTS" ]; then for i in $(find ./ -maxdepth 1 -name 'core*' -print); do gdb $(pwd)/xpiks-tests-core core* -ex "thread apply all bt" -ex "set pagination 0" -batch; done; fi
