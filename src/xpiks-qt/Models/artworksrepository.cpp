@@ -441,6 +441,7 @@ namespace Models {
 
     bool ArtworksRepository::setDirectorySelected(size_t index, bool value) {
         auto &directory = m_DirectoriesList[index];
+        //if (!directory.isValid()) { return false; }
 
         bool changed = directory.getIsSelectedFlag() != value;
         directory.setIsSelectedFlag(value);

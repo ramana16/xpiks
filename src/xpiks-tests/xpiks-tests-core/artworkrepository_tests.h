@@ -22,6 +22,20 @@ private slots:
     void selectFolderTest();
     void oneEmptyDirectoryStaysTest();
     void fewEmptyDirectoriesStayTest();
+    // selection tests
+    void allDirsInitiallySelectedTest();
+    void unselectOneSelectsOnlyOneTest();
+    void cannotUnselectTheOnlyOneTest();
+    void toggleSameDirectoryTwiceAllSelectedTest();
+    void unselectLastSelectedSelectsAllTest();
+    void removeOnlySelectedSelectsAllTest();
+    void removeOneOfFewSelectedStaysSameTest();
+    void undoRemoveOnlySelectedSelectsItTest();
+    void undoRemoveOneOfFewSelectedTest();
+    void undoRemoveAfterUserSelectsOtherTest();
+    void undoRemoveAfterUserSelectsFewTest();
+    void undoRemoveOfTheOnlyOneSelectsItTest();
+    void undoRemoveAfterAllOtherSelectedTest();
 };
 
 #endif // ARTWORKREPOSITORYTESTS_H
