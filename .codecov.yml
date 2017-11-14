@@ -1,0 +1,31 @@
+codecov:
+  branch: master
+
+coverage:
+  status:
+    project:
+      default: false
+      tests:
+        base: auto 
+        target: 95%
+        paths: "src/xpiks-tests"
+      app:
+        base: auto 
+        paths: "src/xpiks"
+        target: 60%
+        threshold: 5%
+  range: 50..75
+  round: down
+  precision: 2
+
+flags:
+  # filter the folder(s) you wish to measure by that flag
+  app:
+    paths:
+      - src/xpiks-qt/
+  tests:
+    paths:
+      - src/xpiks-tests/
+
+ignore:
+  - "vendors"
