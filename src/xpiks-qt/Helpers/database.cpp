@@ -115,6 +115,7 @@ namespace Helpers {
 
     Database::Database(int id, AsyncCoordinator *finalizeCoordinator):
         m_ID(id),
+        m_Database(nullptr),
         m_FinalizeCoordinator(finalizeCoordinator),
         m_IsOpened(false)
     {
