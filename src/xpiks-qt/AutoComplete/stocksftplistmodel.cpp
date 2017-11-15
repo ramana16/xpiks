@@ -74,7 +74,8 @@ namespace AutoComplete {
 
     bool StocksFtpListModel::processLocalConfig(const QJsonDocument &document) {
         Q_ASSERT(m_StocksHash.empty());
-        parseConfig(document);
+        bool result = parseConfig(document);
+        return result;
     }
 
     void StocksFtpListModel::processMergedConfig(const QJsonDocument &document) {
@@ -83,7 +84,7 @@ namespace AutoComplete {
 #endif
     }
 
-    void StocksFtpListModel::parseConfig(const QJsonDocument &document) {
+    bool StocksFtpListModel::parseConfig(const QJsonDocument &document) {
         bool anyError = false;
 
         do {

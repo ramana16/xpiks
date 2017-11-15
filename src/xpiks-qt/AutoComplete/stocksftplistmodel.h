@@ -36,7 +36,7 @@ namespace AutoComplete {
         virtual void processMergedConfig(const QJsonDocument &document) override;
 
     private:
-        void parseConfig(const QJsonDocument &document);
+        bool parseConfig(const QJsonDocument &document);
         void parseFtpArray(const QJsonArray &array);
 
     signals:
