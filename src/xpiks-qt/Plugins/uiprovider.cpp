@@ -24,7 +24,8 @@ namespace Plugins {
     UIProvider::UIProvider(QObject *parent):
         QObject(parent),
         m_QmlEngine(NULL),
-        m_Root(NULL)
+        m_Root(NULL),
+        m_UiManager(NULL)
     {
     }
 

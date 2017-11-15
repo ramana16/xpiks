@@ -19,6 +19,7 @@ namespace Models {
     VideoArtwork::VideoArtwork(const QString &filepath, qint64 ID, qint64 directoryID):
         ArtworkMetadata(filepath, ID, directoryID),
         m_VideoFlags(0),
+        m_Duration(0.0),
         m_BitRate(0),
         m_FrameRate(0.0)
     {

@@ -248,8 +248,7 @@ namespace Common {
 
     bool BasicKeywordsModel::appendPreset(const QStringList &presetList) {
         LOG_DEBUG << "#";
-        bool result = false;
-        result = appendKeywords(presetList) > 0;
+        bool result = appendKeywords(presetList) > 0;
         return result;
     }
 

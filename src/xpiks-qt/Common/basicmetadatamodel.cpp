@@ -214,9 +214,7 @@ namespace Common {
         LOG_INFO << "[" << replaceWhat << "] -> [" << replaceTo << "] with flags:" << (int)flags;
         Q_ASSERT(!replaceWhat.isEmpty());
         Q_ASSERT(((int)flags & (int)Common::SearchFlags::Metadata) != 0);
-        bool anyChanged = false;
-
-        anyChanged = BasicKeywordsModel::replace(replaceWhat, replaceTo, flags);
+        bool anyChanged = BasicKeywordsModel::replace(replaceWhat, replaceTo, flags);
 
         const bool needToCheckDescription = Common::HasFlag(flags, Common::SearchFlags::Description);
         if (needToCheckDescription) {

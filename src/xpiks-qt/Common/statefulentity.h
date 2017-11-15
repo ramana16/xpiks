@@ -53,7 +53,7 @@ namespace Common {
             return m_StateJson.value(QLatin1String(key)).toInt(defaultValue);
         }
 
-        inline QString getStateString(const char *key, const QString defaultValue = QString("")) const {
+        inline QString getStateString(const char *key, const QString &defaultValue = QString("")) const {
             return m_StateJson.value(QLatin1String(key)).toString(defaultValue);
         }
 

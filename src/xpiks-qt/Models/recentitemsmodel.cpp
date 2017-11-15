@@ -14,8 +14,9 @@
 #include "../Common/defines.h"
 
 namespace Models {
-    RecentItemsModel::RecentItemsModel():
-        QAbstractListModel()
+    RecentItemsModel::RecentItemsModel(int items):
+        QAbstractListModel(),
+        m_MaxRecentItems(items)
     {
     }
 

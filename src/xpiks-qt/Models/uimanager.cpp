@@ -139,13 +139,13 @@ namespace Models {
         }
     }
 
-    void UIManager::addSystemTab(int systemTabID, const QString tabIconComponent, const QString &tabComponent) {
+    void UIManager::addSystemTab(int systemTabID, const QString &tabIconComponent, const QString &tabComponent) {
         LOG_INFO << "icon" << tabIconComponent << "contents" << tabComponent;
         m_TabsModel.addSystemTab(systemTabID, tabIconComponent, tabComponent);
         generateNextTabID();
     }
 
-    int UIManager::addPluginTab(int pluginID, const QString tabIconComponent, const QString &tabComponent, QObject *tabModel) {
+    int UIManager::addPluginTab(int pluginID, const QString &tabIconComponent, const QString &tabComponent, QObject *tabModel) {
         LOG_INFO << "plugin" << pluginID << "icon" << tabIconComponent << "contents" << tabComponent;
 
         int id = generateNextTabID();

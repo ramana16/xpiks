@@ -79,8 +79,8 @@ namespace Models {
         Q_INVOKABLE void activateQuickBufferTab();
 
     public:
-        void addSystemTab(int systemTabID, const QString tabIconComponent, const QString &tabComponent);
-        int addPluginTab(int pluginID, const QString tabIconComponent, const QString &tabComponent, QObject *tabModel);
+        void addSystemTab(int systemTabID, const QString &tabIconComponent, const QString &tabComponent);
+        int addPluginTab(int pluginID, const QString &tabIconComponent, const QString &tabComponent, QObject *tabModel);
         bool removePluginTab(int pluginID, int tabID);
         void initializeSystemTabs();
         void initializeState();

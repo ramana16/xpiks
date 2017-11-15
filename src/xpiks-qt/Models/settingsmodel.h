@@ -160,7 +160,7 @@ namespace Models {
             return m_ExperimentalJson.value(QLatin1String(key)).toInt(defaultValue);
         }
 
-        inline QString stringValue(const char *key, const QString defaultValue = QString("")) const {
+        inline QString stringValue(const char *key, const QString &defaultValue = QString("")) const {
             return m_SettingsJson.value(QLatin1String(key)).toString(defaultValue);
         }
 
@@ -630,7 +630,6 @@ namespace Models {
         int m_DismissDuration;
         int m_MaxParallelUploads;
         int m_SelectedThemeIndex;
-        int m_SelectedDictIndex;
         bool m_MustUseMasterPassword;
         bool m_MustUseConfirmations;
         bool m_SaveSession;

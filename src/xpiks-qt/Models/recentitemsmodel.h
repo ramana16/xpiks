@@ -24,8 +24,7 @@ namespace Models {
         Q_OBJECT
         Q_PROPERTY(int count READ getRecentItemsCount NOTIFY recentItemsCountChanged)
     public:
-        RecentItemsModel();
-        RecentItemsModel(int items): m_MaxRecentItems(items) {}
+        RecentItemsModel(int items);
 
     public:
         int getMaxRecentItems() const { return m_MaxRecentItems; }
