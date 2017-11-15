@@ -43,7 +43,8 @@ namespace Common {
         volatile bool m_HasDuplicates;
 
         // we like aligned structs
-        char m_Dummy[2];
+        char m_Dummy1 = 0;
+        char m_Dummy2 = 0;
     };
 
     struct KeywordItem {
