@@ -45,6 +45,7 @@ namespace Encryption {
     }
 
     void SecretsManager::setMasterPasswordHash(const QString &hash) {
+        LOG_INTEGRATION_TESTS << hash;
         m_MasterPasswordHash = QByteArray::fromHex(hash.toLatin1());
     }
 
@@ -68,6 +69,7 @@ namespace Encryption {
 
         if (!encodedPassword.isEmpty()) {
             QString key = getKeyForEncryption();
+            LOG_INTEGRATION_TESTS << "key:" << key << "pswd:" << encodedPassword;
             decodedPassword = decodeText(encodedPassword, key);
         }
 
@@ -83,8 +85,7 @@ namespace Encryption {
         return newEncodedPassword;
     }
 
-    bool SecretsManager::testMasterPassword(const QString &masterPasswordCandidate) const
-    {
+    bool SecretsManager::testMasterPassword(const QString &masterPasswordCandidate) const {
         QByteArray hashByteArray = getPasswordHash(masterPasswordCandidate);
         bool equals = hashByteArray == m_MasterPasswordHash;
         return equals;

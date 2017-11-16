@@ -6,6 +6,7 @@
 #include "../../xpiks-qt/Models/filteredartitemsproxymodel.h"
 #include "../../xpiks-qt/Models/artworksrepository.h"
 #include "../../xpiks-qt/Helpers/threadhelpers.h"
+#include "../../xpiks-qt/Models/artworkproxymodel.h"
 
 #define DECLARE_MODELS_AND_GENERATE(count) \
     Mocks::CommandManagerMock commandManagerMock; \
@@ -96,8 +97,7 @@ void PresetTests::appendFromPresetTrivial() {
     QVERIFY(metadata->isModified());
 }
 
-void PresetTests::appendFromPresetWithDuplicates()
-{
+void PresetTests::appendFromPresetWithDuplicates() {
     const int itemsToGenerate = 5;
     DECLARE_MODELS_AND_GENERATE(itemsToGenerate);
     presetKeywordsModel.addItem();
@@ -119,6 +119,53 @@ void PresetTests::appendFromPresetWithDuplicates()
     finalString << "keyword_0" << "keyword_1" << "keyword_2" << "keyword_3" << "keyword_4" << "keyword_5";
     QCOMPARE(metadata->getKeywords(), finalString);
     QVERIFY(metadata->isModified());
+}
+
+void PresetTests::appendToProxyModelTest() {
+    const int itemsToGenerate = 5;
+    DECLARE_MODELS_AND_GENERATE(itemsToGenerate);
+    for (int i = 0; i < itemsToGenerate; i++) {
+        auto *metadata = artItemsModelMock.getMockArtwork(i);
+        metadata->set("title", "description", QStringList());
+    }
+
+    Models::ArtworkProxyModel proxyModel;
+    commandManagerMock.InjectDependency(&proxyModel);
+    proxyModel.setSourceArtwork((QObject*)artItemsModelMock.getMockArtwork(0));
+    artItemsModelMock.setUpdatesBlocked(false);
+
+    QStringList keywords;
+    keywords << "some" << "keywords";
+
+    KeywordsPresets::ID_t id1 = presetKeywordsModel.addItem("test", keywords);
+    proxyModel.addPreset(id1);
+
+    QCOMPARE(artItemsModelMock.getMockArtwork(0)->getKeywords(), keywords);
+    QVERIFY(artItemsModelMock.getMockArtwork(0)->isModified());
+}
+
+void PresetTests::expandLastKeywordInProxyModelTest() {
+    const int itemsToGenerate = 5;
+    DECLARE_MODELS_AND_GENERATE(itemsToGenerate);
+    for (int i = 0; i < itemsToGenerate; i++) {
+        auto *metadata = artItemsModelMock.getMockArtwork(i);
+        metadata->set("title", "description", QStringList() << "keyword_0" << "preset name");
+    }
+
+    Models::ArtworkProxyModel proxyModel;
+    commandManagerMock.InjectDependency(&proxyModel);
+    proxyModel.setSourceArtwork((QObject*)artItemsModelMock.getMockArtwork(0));
+    artItemsModelMock.setUpdatesBlocked(false);
+
+    QStringList keywords;
+    keywords << "some" << "keywords";
+
+    KeywordsPresets::ID_t id1 = presetKeywordsModel.addItem("preset name", keywords);
+    Q_UNUSED(id1);
+    proxyModel.expandLastKeywordAsPreset();
+
+    QVERIFY(artItemsModelMock.getMockArtwork(0)->hasKeywords(keywords));
+    QVERIFY(artItemsModelMock.getMockArtwork(0)->isModified());
 }
 
 void PresetTests::findPresetByNameTest() {
@@ -413,4 +460,25 @@ void PresetTests::setPresetUnknownGroupTest() {
 
     setGroupSuccess = presetKeywordsModel.setPresetGroup(id, groupID);
     QCOMPARE(setGroupSuccess, true);
+}
+
+void PresetTests::addGroupTest() {
+    const int itemsToGenerate = 5;
+    DECLARE_MODELS_AND_GENERATE(itemsToGenerate);
+
+    bool isAdded = false;
+    KeywordsPresets::ID_t id = 0;
+    presetKeywordsModel.addOrUpdatePreset("bike", QStringList() << "downhill" << "slope" <<
+                                          "uphill" << "slope", id, isAdded);
+
+    int groupID = 0;
+    presetKeywordsModel.findOrRegisterGroup("test group", groupID);
+
+    bool success = presetKeywordsModel.setPresetGroup(id, groupID);
+    QVERIFY(success);
+
+    int foundID = 0;
+    bool foundGroup = presetKeywordsModel.tryGetGroupFromIndex(0, foundID);
+    QVERIFY(foundGroup);
+    QCOMPARE(foundID, groupID);
 }

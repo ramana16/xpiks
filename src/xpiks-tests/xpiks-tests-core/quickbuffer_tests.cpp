@@ -28,6 +28,7 @@
 
 void QuickBufferTests::copyArtworkToQuickBufferTest() {
     DECLARE_MODELS_AND_GENERATE(1);
+    QVERIFY(quickBuffer.getIsEmpty());
 
     const QString titleForQB = "title for quick buffer";
     const QString descriptionForQB = "desc for quick buffer";
@@ -45,6 +46,7 @@ void QuickBufferTests::copyArtworkToQuickBufferTest() {
 
 void QuickBufferTests::copyProxyModelToQuickBufferTest() {
     DECLARE_MODELS_AND_GENERATE(1);
+    QVERIFY(quickBuffer.getIsEmpty());
     Models::ArtworkProxyModel proxyModel;
     commandManagerMock.InjectDependency(&proxyModel);
 
@@ -67,6 +69,7 @@ void QuickBufferTests::copyProxyModelToQuickBufferTest() {
 
 void QuickBufferTests::copyCombinedModelToQuickBufferTest() {
     DECLARE_MODELS_AND_GENERATE(1);
+    QVERIFY(quickBuffer.getIsEmpty());
     Models::CombinedArtworksModel combinedModel;
     commandManagerMock.InjectDependency(&combinedModel);
 
@@ -87,7 +90,8 @@ void QuickBufferTests::copyCombinedModelToQuickBufferTest() {
 }
 
 void QuickBufferTests::copyHalfEmptyArtworkToQuickBufferTest() {
-    DECLARE_MODELS_AND_GENERATE(1);
+    DECLARE_MODELS_AND_GENERATE(1);    
+    QVERIFY(quickBuffer.getIsEmpty());
 
     const QString previousDescription = "Previous description int QB";
     quickBuffer.setDescription(previousDescription);
@@ -108,6 +112,7 @@ void QuickBufferTests::copyHalfEmptyArtworkToQuickBufferTest() {
 
 void QuickBufferTests::copyHalfEmptyProxyModelToQuickBufferTest() {
     DECLARE_MODELS_AND_GENERATE(1);
+    QVERIFY(quickBuffer.getIsEmpty());
     Models::ArtworkProxyModel proxyModel;
     commandManagerMock.InjectDependency(&proxyModel);
 
@@ -133,6 +138,7 @@ void QuickBufferTests::copyHalfEmptyProxyModelToQuickBufferTest() {
 
 void QuickBufferTests::copyHalfEmptyCombinedModelToQuickBufferTest() {
     DECLARE_MODELS_AND_GENERATE(1);
+    QVERIFY(quickBuffer.getIsEmpty());
     Models::CombinedArtworksModel combinedModel;
     commandManagerMock.InjectDependency(&combinedModel);
 
@@ -168,7 +174,9 @@ void QuickBufferTests::applyQuickBufferToArtworkTest() {
 
     quickBuffer.setTitle(titleForQB);
     quickBuffer.setDescription(descriptionForQB);
-    quickBuffer.setKeywords(keywordsForQB);
+    for (auto &keyword: keywordsForQB) {
+        quickBuffer.appendKeyword(keyword);
+    }
 
     filteredItemsModel.registerCurrentItem(1);
 
@@ -223,7 +231,7 @@ void QuickBufferTests::applyQuickBufferToCombinedModelTest() {
 
     quickBuffer.setTitle(titleForQB);
     quickBuffer.setDescription(descriptionForQB);
-    quickBuffer.setKeywords(keywordsForQB);
+    quickBuffer.pasteKeywords(keywordsForQB);
 
     filteredItemsModel.selectFilteredArtworks();
     filteredItemsModel.combineSelectedArtworks();
@@ -350,4 +358,22 @@ void QuickBufferTests::cannotApplyWhenNoCurrentItemTest() {
     QCOMPARE(artwork->getTitle(), title);
     QCOMPARE(artwork->getDescription(), description);
     QCOMPARE(artwork->getKeywords(), keywords);
+}
+
+void QuickBufferTests::appendRemoveKeywordsTest() {
+    DECLARE_MODELS_AND_GENERATE(1);
+    QStringList keywordsForQB;
+    keywordsForQB << "brand" << "new" << "keywords";
+
+    for (auto &keyword: keywordsForQB) {
+        quickBuffer.appendKeyword(keyword);
+    }
+
+    QCOMPARE(quickBuffer.getKeywords(), keywordsForQB);
+
+    quickBuffer.removeKeywordAt(0);
+    quickBuffer.removeKeywordAt(1);
+    quickBuffer.removeLastKeyword();
+
+    QVERIFY(quickBuffer.getKeywords().isEmpty());
 }

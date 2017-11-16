@@ -13,16 +13,20 @@ coverage:
       tests:
         base: auto 
         target: 95%
+        if_ci_failed: error
+        only_pulls: false
         paths:
           - src/xpiks-tests/
           - !vendors
       app:
         base: auto 
+        if_ci_failed: error
+        only_pulls: false
+        target: 60%
+        threshold: 5%
         paths:
           - src/xpiks/
           - !vendors/
-        target: 60%
-        threshold: 5%
         
 flags:
   # filter the folder(s) you wish to measure by that flag

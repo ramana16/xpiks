@@ -36,6 +36,7 @@ namespace Models {
         m_FtpCoordinator(ftpCoordinator),
         m_Percent(0) {
         libxpks::net::FtpCoordinator *coordinator = dynamic_cast<libxpks::net::FtpCoordinator *>(ftpCoordinator);
+        Q_ASSERT(coordinator != nullptr);
         QObject::connect(coordinator, &libxpks::net::FtpCoordinator::uploadStarted, this, &ArtworkUploader::onUploadStarted);
         QObject::connect(coordinator, &libxpks::net::FtpCoordinator::uploadFinished, this, &ArtworkUploader::allFinished);
         QObject::connect(coordinator, &libxpks::net::FtpCoordinator::overallProgressChanged, this, &ArtworkUploader::uploaderPercentChanged);

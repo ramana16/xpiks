@@ -12,6 +12,8 @@ private slots:
     void expandFromPresetWithDuplicates();
     void appendFromPresetTrivial();
     void appendFromPresetWithDuplicates();
+    void appendToProxyModelTest();
+    void expandLastKeywordInProxyModelTest();
     void findPresetByNameTest();
     void strictFindPresetByNameTest();
     void findPresetWithLongNamesByNameTest();
@@ -26,6 +28,7 @@ private slots:
     void addWithAnotherNameTest();
     void registerGroupTwiceTest();
     void setPresetUnknownGroupTest();
+    void addGroupTest();
 };
 
 #endif // PRESETTESTS_H

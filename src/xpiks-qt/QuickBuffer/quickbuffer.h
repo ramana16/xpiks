@@ -77,7 +77,6 @@ namespace QuickBuffer {
 
     public:
         bool getIsEmpty();
-        void setFromCurrentEditable();
         void setFromBasicModel(Common::BasicMetadataModel *model);
         void setFromSuggestionArtwork(const std::shared_ptr<Suggestion::SuggestionArtwork> &from);
 

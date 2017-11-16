@@ -83,7 +83,7 @@ namespace Models {
 
         LOG_INFO << "Found" << m_ArtworksSnapshot.size() << "item(s)";
 
-        for (auto &locker: rawSnapshot) {
+        for (auto &locker: m_ArtworksSnapshot.getRawData()) {
             std::shared_ptr<PreviewArtworkElement> preview = std::dynamic_pointer_cast<PreviewArtworkElement>(locker);
             Q_ASSERT(preview);
             Models::ArtworkMetadata *artwork = locker->getArtworkMetadata();

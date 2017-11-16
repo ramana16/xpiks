@@ -49,8 +49,6 @@ namespace Encryption {
 
     public:
         Q_INVOKABLE void setMasterPassword(const QString &masterPassword);
-
-    public:
         Q_INVOKABLE void resetMasterPassword();
         // should be executed on close of Upload dialog
         Q_INVOKABLE void purgeMasterPassword() { m_EncodedMasterPassword.clear(); }

@@ -160,26 +160,6 @@ namespace QuickBuffer {
         return result;
     }
 
-    void QuickBuffer::setFromCurrentEditable() {
-        LOG_DEBUG << "#";
-        auto *uiManager = m_CommandManager->getUIManager();
-        auto currentEditable = uiManager->getCurrentEditable();
-
-        if (currentEditable) {
-            auto title = currentEditable->getTitle();
-            auto description = currentEditable->getDescription();
-            auto keywords = currentEditable->getKeywords();
-
-            if (!title.isEmpty()) { this->setTitle(title); }
-            if (!description.isEmpty()) { this->setDescription(description); }
-            if (!keywords.empty()) { this->setKeywords(keywords); }
-
-            emit isEmptyChanged();
-        } else {
-            LOG_WARNING << "Nothing registered as current item";
-        }
-    }
-
     void QuickBuffer::setFromBasicModel(Common::BasicMetadataModel *model) {
         LOG_DEBUG << "#";
         Q_ASSERT(model != nullptr);

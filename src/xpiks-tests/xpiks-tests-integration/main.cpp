@@ -62,6 +62,7 @@
 #include "../../xpiks-qt/Connectivity/requestsservice.h"
 #include "../../xpiks-qt/SpellCheck/duplicatesreviewmodel.h"
 #include "../../xpiks-qt/MetadataIO/csvexportmodel.h"
+#include "../../xpiks-qt/Models/switchermodel.h"
 
 #include "exiv2iohelpers.h"
 
@@ -71,6 +72,8 @@
 
 #ifdef Q_OS_LINUX
 #include <signal.h>
+#include <exception>
+#include <cstdlib>
 #endif
 
 #include "integrationtestbase.h"
@@ -111,6 +114,7 @@
 #include "faileduploadstest.h"
 #include "undoadddirectorytest.h"
 #include "undorestoresessiontest.h"
+#include "masterpasswordtest.h"
 
 #if defined(WITH_PLUGINS)
 #undef WITH_PLUGINS
@@ -154,8 +158,11 @@ void myMessageHandler(QtMsgType type, const QMessageLogContext &context, const Q
     Helpers::Logger &logger = Helpers::Logger::getInstance();
     logger.log(logLine);
 
-    if (type == QtFatalMsg) {
+    if ((type == QtFatalMsg) || (type == QtWarningMsg)) {
         logger.emergencyFlush();
+    }
+
+    if (type == QtFatalMsg) {
         abort();
     }
 }
@@ -176,6 +183,11 @@ int main(int argc, char *argv[]) {
 
 #if defined(Q_OS_LINUX) && defined(QT_DEBUG)
     signal(SIGABRT, &linuxAbortHandler);
+    std::set_terminate([](){
+        Helpers::Logger &logger = Helpers::Logger::getInstance();
+        logger.emergencyFlush();
+        std::abort();
+    });
 #endif
 
     std::cout << "Started integration tests" << std::endl;
@@ -265,7 +277,7 @@ int main(int argc, char *argv[]) {
     QMLExtensions::VideoCachingService videoCachingService;
     QMLExtensions::ArtworksUpdateHub artworksUpdateHub;
     artworksUpdateHub.setStandardRoles(artItemsModel.getArtworkStandardRoles());
-
+    Models::SwitcherModel switcherModel;
     Connectivity::UpdateService updateService(&settingsModel);
 
     MetadataIO::MetadataIOCoordinator metadataIOCoordinator;
@@ -315,11 +327,13 @@ int main(int argc, char *argv[]) {
     commandManager.InjectDependency(&quickBuffer);
     commandManager.InjectDependency(&maintenanceService);
     commandManager.InjectDependency(&videoCachingService);
+    commandManager.InjectDependency(&switcherModel);
     commandManager.InjectDependency(&requestsService);
     commandManager.InjectDependency(&artworksUpdateHub);
     commandManager.InjectDependency(&databaseManager);
     commandManager.InjectDependency(&duplicatesModel);
     commandManager.InjectDependency(&csvExportModel);
+
 
     commandManager.ensureDependenciesInjected();
 
@@ -381,6 +395,7 @@ int main(int argc, char *argv[]) {
     integrationTests.append(new UnicodeIoTest(&commandManager));
     integrationTests.append(new UndoAddDirectoryTest(&commandManager));
     integrationTests.append(new UndoRestoreSessionTest(&commandManager));
+    integrationTests.append(new MasterPasswordTest(&commandManager));
     // always the last one. insert new tests above
     integrationTests.append(new LocalLibrarySearchTest(&commandManager));
 

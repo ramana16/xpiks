@@ -37,7 +37,7 @@ namespace Encryption {
         void *rawDataVoid = (void*)rawData;
         const char *rawDataChar = static_cast<const char*>(rawDataVoid);
         QByteArray inputData;
-        inputData.append(rawDataChar, rawText.size() * 2 + 1);
+        inputData.append(rawDataChar, rawText.size() * sizeof(QChar) + 1);
 
         const int length = inputData.size();
         int encryptionLength = getAlignedSize(length, 16);
@@ -63,13 +63,15 @@ namespace Encryption {
         QByteArray encodingBuffer(encryptionLength, 0);
 
         QByteArray encodedText = QByteArray::fromHex(hexEncodedText.toLatin1());
+        Q_ASSERT(encodedText.length() <= encryptionLength);
         encodedText.resize(encryptionLength);
 
         AES128_CBC_decrypt_buffer((uint8_t*)encodingBuffer.data(), (uint8_t*)encodedText.data(), encryptionLength, (const uint8_t*)keyData.data(), iv);
 
+        encodingBuffer.append("\0\0");
         void *data = encodingBuffer.data();
         const ushort *decodedData = static_cast<ushort *>(data);
-        QString result = QString::fromUtf16(decodedData);
+        QString result = QString::fromUtf16(decodedData, -1);
         return result;
     }
 }

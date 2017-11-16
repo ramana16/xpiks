@@ -75,9 +75,31 @@ void EncryptionTests::bigRandomTest() {
     QTime time = QTime::currentTime();
     qsrand((uint)time.msec());
 
-    while(iterations--) {
+    while (iterations--) {
         QString key = getRandomString(qrand() % 100);
         QString randomString = getRandomString(qrand() % 1000);
+        QString encoded = Encryption::encodeText(randomString, key);
+        QString decoded = Encryption::decodeText(encoded, key);
+        if (randomString != decoded) {
+            QFAIL(QString("Text: %1\nDecoded: %2\nKey: %3").arg(randomString).arg(decoded).arg(key)
+                  .toStdString().c_str());
+            break;
+        }
+    }
+}
+
+void EncryptionTests::bigRandomTestForSmallValues() {
+#if defined(TRAVIS_CI) || defined(APPVEYOR)
+    int iterations = 10000;
+#else
+    int iterations = 100;
+#endif
+    QTime time = QTime::currentTime();
+    qsrand((uint)time.msec());
+
+    while (iterations--) {
+        QString key = getRandomString(qrand() % 10);
+        QString randomString = getRandomString(qrand() % 10);
         QString encoded = Encryption::encodeText(randomString, key);
         QString decoded = Encryption::decodeText(encoded, key);
         if (randomString != decoded) {

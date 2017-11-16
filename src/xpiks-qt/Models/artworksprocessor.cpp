@@ -51,7 +51,7 @@ namespace Models {
         if (anyUnavailable) {
             m_ArtworksSnapshot.set(artworksListNew);
 
-            if (artworksListNew.empty()) {
+            if (m_ArtworksSnapshot.empty()) {
                 emit requestCloseWindow();
             }
 

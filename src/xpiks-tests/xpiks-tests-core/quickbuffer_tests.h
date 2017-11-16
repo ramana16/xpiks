@@ -25,6 +25,8 @@ private slots:
     void applyHalfEmptyQuickBufferToCombinedModelTest();
 
     void cannotApplyWhenNoCurrentItemTest();
+
+    void appendRemoveKeywordsTest();
 };
 
 #endif // QUICKBUFFERTESTS_H

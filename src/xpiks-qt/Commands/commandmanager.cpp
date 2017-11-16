@@ -553,6 +553,7 @@ void Commands::CommandManager::ensureDependenciesInjected() {
     Q_ASSERT(m_DatabaseManager != NULL);
     Q_ASSERT(m_AutoCompleteModel != NULL);
     Q_ASSERT(m_CsvExportModel != NULL);
+    Q_ASSERT(m_SwitcherModel != NULL);
 #endif
 
 #if !defined(INTEGRATION_TESTS)
@@ -561,7 +562,6 @@ void Commands::CommandManager::ensureDependenciesInjected() {
 
 #if !defined(INTEGRATION_TESTS) && !defined(CORE_TESTS)
     Q_ASSERT(m_UIManager != NULL);
-    Q_ASSERT(m_SwitcherModel != NULL);
 #endif
 }
 
@@ -993,7 +993,7 @@ void Commands::CommandManager::afterConstructionCallback() {
     m_RequestsService->startService();
 #endif
 
-#if !defined(CORE_TESTS) && !defined(INTEGRATION_TESTS)
+#if !defined(CORE_TESTS)
     m_SwitcherModel->updateConfigs();
 #endif
 
@@ -1195,7 +1195,6 @@ void Commands::CommandManager::beforeDestructionCallback() const {
     m_WarningsService->stopService();
     m_AutoCompleteService->stopService();
     m_TranslationService->stopService();
-
 
     m_SettingsModel->syncronizeSettings();
 
