@@ -154,34 +154,21 @@ void ensureUserIdExists(Models::SettingsModel *settings) {
     }
 }
 
-static const char *setHighDpiEnvironmentVariable() {
-    const char *envVarName = 0;
+void setHighDpiEnvironmentVariable() {
     static const char ENV_VAR_QT_DEVICE_PIXEL_RATIO[] = "QT_DEVICE_PIXEL_RATIO";
-
 #ifdef Q_OS_WIN
     bool isWindows = true;
 #else
     bool isWindows = false;
 #endif
 
-#if (QT_VERSION < QT_VERSION_CHECK(5, 6, 0))
     if (isWindows
-        && !qEnvironmentVariableIsSet(ENV_VAR_QT_DEVICE_PIXEL_RATIO)) {
-        envVarName = ENV_VAR_QT_DEVICE_PIXEL_RATIO;
-        qputenv(envVarName, "auto");
-    }
-
-#else
-    if (isWindows
-        && !qEnvironmentVariableIsSet(ENV_VAR_QT_DEVICE_PIXEL_RATIO)     // legacy in 5.6, but still functional
-        && !qEnvironmentVariableIsSet("QT_AUTO_SCREEN_SCALE_FACTOR")
-        && !qEnvironmentVariableIsSet("QT_SCALE_FACTOR")
-        && !qEnvironmentVariableIsSet("QT_SCREEN_SCALE_FACTORS")) {
+            && !qEnvironmentVariableIsSet(ENV_VAR_QT_DEVICE_PIXEL_RATIO)
+            && !qEnvironmentVariableIsSet("QT_AUTO_SCREEN_SCALE_FACTOR")
+            && !qEnvironmentVariableIsSet("QT_SCALE_FACTOR")
+            && !qEnvironmentVariableIsSet("QT_SCREEN_SCALE_FACTORS")) {
         QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
     }
-
-#endif // < Qt 5.6
-    return envVarName;
 }
 
 QString getRunGuardName() {
@@ -213,7 +200,8 @@ int main(int argc, char *argv[]) {
     Connectivity::CurlInitHelper curlInitHelper;
     Q_UNUSED(curlInitHelper);
 
-    const char *highDpiEnvironmentVariable = setHighDpiEnvironmentVariable();
+    setHighDpiEnvironmentVariable();
+
     qRegisterMetaTypeStreamOperators<Models::ProxySettings>("ProxySettings");
     qRegisterMetaType<Common::SpellCheckFlags>("Common::SpellCheckFlags");
     initQSettings();
@@ -272,10 +260,6 @@ int main(int argc, char *argv[]) {
 
     LOG_INFO << "Working directory of Xpiks is:" << QDir::currentPath();
     LOG_DEBUG << "Extra files search locations:" << QStandardPaths::standardLocations(XPIKS_DATA_LOCATION_TYPE);
-
-    if (highDpiEnvironmentVariable) {
-        qunsetenv(highDpiEnvironmentVariable);
-    }
 
     QString userId = settingsModel.getUserAgentId();
     userId.remove(QRegExp("[{}-]."));
