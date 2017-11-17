@@ -70,11 +70,19 @@ HEADERS += \
     MetadataIO/metadatawritingworker.h \
     MetadataIO/readingorchestrator.h \
     MetadataIO/writingorchestrator.h \
-    Connectivity/ftpcoordinator.h
+    Connectivity/ftpcoordinator.h \
+    Connectivity/conectivityhelpers.h \
+    Connectivity/curlftpuploader.h \
+    Connectivity/ftpuploaderworker.h \
+    Connectivity/uploadbatch.h \
+    Connectivity/uploadcontext.h
 
 SOURCES += \
     MetadataIO/metadatareadingworker.cpp \
     MetadataIO/metadatawritingworker.cpp \
     MetadataIO/readingorchestrator.cpp \
     MetadataIO/writingorchestrator.cpp \
-    Connectivity/ftpcoordinator_stub.cpp
+    Connectivity/conectivityhelpers.cpp \
+    Connectivity/curlftpuploader.cpp \
+    Connectivity/ftpcoordinator.cpp \
+    Connectivity/ftpuploaderworker.cpp

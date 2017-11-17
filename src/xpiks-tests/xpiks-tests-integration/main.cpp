@@ -364,8 +364,8 @@ int main(int argc, char *argv[]) {
     integrationTests.append(new SaveFileLegacyTest(&commandManager));
 #ifndef TRAVIS_CI
     integrationTests.append(new SaveVideoBasicTest(&commandManager));
-    integrationTests.append(new FailedUploadsTest(&commandManager));
 #endif
+    integrationTests.append(new FailedUploadsTest(&commandManager));
     integrationTests.append(new SpellCheckMultireplaceTest(&commandManager));
     integrationTests.append(new SpellCheckCombinedModelTest(&commandManager));
     integrationTests.append(new ZipArtworksTest(&commandManager));
