@@ -16,6 +16,7 @@
 #include <QPair>
 #include <QString>
 #include <QStringList>
+#include <QSet>
 #include "historyitem.h"
 
 namespace UndoRedo {
@@ -25,11 +26,15 @@ namespace UndoRedo {
         RemoveArtworksHistoryItem(int commandID, const QVector<int> &removedArtworksIndices,
                                   const QStringList &removedArtworksFilepathes,
                                   const QStringList &removedAttachedVectors,
+                                  const QSet<qint64> &removedSelectedDirectoryIds,
+                                  bool unselectAll,
                                   bool removedAsDirectory = false):
             HistoryItem(HistoryActionType::RemovedArtworks, commandID),
             m_RemovedArtworksIndices(removedArtworksIndices),
             m_RemovedArtworksPathes(removedArtworksFilepathes),
             m_RemovedAttachedVectors(removedAttachedVectors),
+            m_RemovedSelectedDirectoryIds(removedSelectedDirectoryIds),
+            m_UnselectAll(unselectAll),
             m_RemovedAsDirectory(removedAsDirectory)
         {}
 
@@ -49,11 +54,14 @@ namespace UndoRedo {
         void setRemovedArtworksIndices(const QVector<int> &value) { m_RemovedArtworksIndices = value; }
         void setRemovedArtworksPathes(const QStringList &value) { m_RemovedArtworksPathes = value; }
         void setRemovedAttachedVectors(const QStringList &value) { m_RemovedAttachedVectors = value; }
+        void setRemovedSelectedDirectoryIds (const QSet<qint64> &value) { m_RemovedSelectedDirectoryIds = value; }
 
     private:
         QVector<int> m_RemovedArtworksIndices;
         QStringList m_RemovedArtworksPathes;
         QStringList m_RemovedAttachedVectors;
+        QSet<qint64> m_RemovedSelectedDirectoryIds;
+        bool m_UnselectAll;
         bool m_RemovedAsDirectory;
     };
 }

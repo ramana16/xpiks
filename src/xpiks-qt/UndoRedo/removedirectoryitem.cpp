@@ -15,8 +15,8 @@
 #include "../Commands/commandmanager.h"
 #include "../Models/settingsmodel.h"
 
-UndoRedo::RemoveDirectoryHistoryItem::RemoveDirectoryHistoryItem(int commandID, int startFileIndex, qint64 dirID):
-    RemoveArtworksHistoryItem(commandID, {}, {}, {}, true),
+UndoRedo::RemoveDirectoryHistoryItem::RemoveDirectoryHistoryItem(int commandID, int startFileIndex, qint64 dirID, bool wasSelected, bool unselectAll):
+    RemoveArtworksHistoryItem(commandID, {}, {}, {}, {wasSelected ? dirID : -1}, unselectAll, true),
     m_DirectoryID(dirID),
     m_StartFileIndex(startFileIndex)
 {

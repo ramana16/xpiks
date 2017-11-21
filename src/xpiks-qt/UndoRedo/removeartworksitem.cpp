@@ -45,6 +45,11 @@ void UndoRedo::RemoveArtworksHistoryItem::undo(const Commands::ICommandManager *
         artItemsModel->beginAccountingManyFiles();
     }
 
+    if (m_UnselectAll && artworksRepository->allAreSelected())
+    {
+        artworksRepository->unselectAllDirectories();
+    }
+
     for (int i = 0; i < rangesCount; ++i) {
         int startRow = ranges[i].first;
         int endRow = ranges[i].second;
@@ -57,7 +62,7 @@ void UndoRedo::RemoveArtworksHistoryItem::undo(const Commands::ICommandManager *
         for (int j = 0; j < count; ++j) {
             const QString &filepath = m_RemovedArtworksPathes[j + usedCount];
             qint64 directoryID = 0;
-            if (artworksRepository->accountFile(filepath, directoryID, m_RemovedAsDirectory)) {
+            if (artworksRepository->accountFile(filepath, directoryID, m_RemovedAsDirectory, m_RemovedSelectedDirectoryIds)) {
                 Models::ArtworkMetadata *artwork = artItemsModel->createMetadata(filepath, directoryID);
                 commandManager->connectArtworkSignals(artwork);
 
