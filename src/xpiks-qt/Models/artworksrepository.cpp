@@ -138,7 +138,7 @@ namespace Models {
         cleanupEmptyDirectories();
     }
 
-    bool ArtworksRepository::accountFile(const QString &filepath, qint64 &directoryID, bool isFullDirectory) {
+    bool ArtworksRepository::accountFile(const QString &filepath, qint64 &directoryID, bool isFullDirectory, const QSet<qint64> &removedSelectedDirectoryIds) {
         bool wasModified = false;
         QString absolutePath;
 
@@ -166,6 +166,10 @@ namespace Models {
                 auto &item = m_DirectoriesList[index];
                 occurances = item.m_FilesCount;
                 directoryID = item.m_ID;
+                if (removedSelectedDirectoryIds.contains(directoryID))
+                {
+                    item.setIsSelectedFlag(true);
+                }
             }
 
             // watchFilePath(filepath);
@@ -387,8 +391,9 @@ namespace Models {
         }
     }
 
-    void ArtworksRepository::consolidateSelectionForEmpty() {
+    QSet<qint64> ArtworksRepository::consolidateSelectionForEmpty() {
         LOG_DEBUG << "#";
+        QSet<qint64> result;
 
         bool anyChange = false;
 
@@ -400,6 +405,10 @@ namespace Models {
                 auto &directory = m_DirectoriesList[i];
                 if (!directory.isValid()) {
                     const bool oldIsSelected = directory.getIsSelectedFlag();
+                    if (oldIsSelected)
+                    {
+                        result.insert(directory.m_ID);
+                    }
                     if (changeSelectedState(i, newIsSelected, oldIsSelected)) {
                         anyChange = true;
                     }
@@ -415,6 +424,8 @@ namespace Models {
             filteredArtItemsModel->updateFilter();
 #endif
         }
+
+        return result;
     }
 
     void ArtworksRepository::toggleDirectorySelected(size_t row) {
@@ -426,7 +437,7 @@ namespace Models {
 
         const bool oldValue = directory.getIsSelectedFlag();
         const bool newValue = !oldValue;
-        LOG_DEBUG << "old" << oldValue << "new" << newValue;
+        LOG_DEBUG << row << "old" << oldValue << "new" << newValue;
 
         if (changeSelectedState(row, newValue, oldValue)) {
             updateSelectedState();
@@ -441,6 +452,7 @@ namespace Models {
 
     bool ArtworksRepository::setDirectorySelected(size_t index, bool value) {
         auto &directory = m_DirectoriesList[index];
+        //if (!directory.isValid()) { return false; }
 
         bool changed = directory.getIsSelectedFlag() != value;
         directory.setIsSelectedFlag(value);

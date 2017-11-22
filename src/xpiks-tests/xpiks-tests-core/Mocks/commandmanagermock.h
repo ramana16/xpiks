@@ -26,14 +26,19 @@ namespace Mocks {
 
     public:
         void generateAndAddArtworks(size_t count, bool withVector=true) {
+            generateAndAddArtworksEx(count, 2, withVector);
+        }
+
+        void generateAndAddArtworksEx(size_t count, int dirsCount, bool withVector) {
             Q_ASSERT(count >= 0);
+            Q_ASSERT(dirsCount > 0);
             size_t i = 0;
             Models::ArtworksRepository *artworksRepository = getArtworksRepository();
             Models::ArtItemsModel *artItemsModel = getArtItemsModel();
 
             while (i < count) {
-                QString filename = QString(ARTWORK_PATH).arg(i%2).arg(i);
-                QString vectorname = QString(VECTOR_PATH).arg(i%2).arg(i);
+                QString filename = QString(ARTWORK_PATH).arg(i%dirsCount).arg(i);
+                QString vectorname = QString(VECTOR_PATH).arg(i%dirsCount).arg(i);
                 qint64 directoryID;
 
                 if (artworksRepository->accountFile(filename, directoryID)) {

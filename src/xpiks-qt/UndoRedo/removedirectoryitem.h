@@ -26,7 +26,7 @@ namespace UndoRedo {
         public RemoveArtworksHistoryItem
     {
     public:
-        RemoveDirectoryHistoryItem(int commandID, int startFileIndex, qint64 dirID);
+        RemoveDirectoryHistoryItem(int commandID, int startFileIndex, qint64 dirID, bool wasSelected, bool unselectAll);
         virtual ~RemoveDirectoryHistoryItem() {}
 
     private:

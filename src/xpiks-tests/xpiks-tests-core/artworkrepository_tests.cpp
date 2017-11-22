@@ -1,12 +1,15 @@
 #include "artworkrepository_tests.h"
 #include <QSignalSpy>
 #include "Mocks/artitemsmodelmock.h"
+#include "Mocks/artworksrepositorymock.h"
 #include "Mocks/commandmanagermock.h"
 #include "../../xpiks-qt/Models/filteredartitemsproxymodel.h"
 #include "../../xpiks-qt/Models/artworksrepository.h"
 #include "../../xpiks-qt/QuickBuffer/quickbuffer.h"
 #include "../../xpiks-qt/KeywordsPresets/presetkeywordsmodel.h"
 #include "../../xpiks-qt/Models/artworkproxymodel.h"
+#include "../../xpiks-qt/Models/settingsmodel.h"
+#include "../../xpiks-qt/UndoRedo/undoredomanager.h"
 
 #define DECLARE_MODELS_AND_GENERATE(count, withVector) \
     Mocks::CommandManagerMock commandManagerMock;\
@@ -18,6 +21,47 @@
     filteredItemsModel.setSourceModel(&artItemsModelMock);\
     commandManagerMock.InjectDependency(&filteredItemsModel);\
     commandManagerMock.generateAndAddArtworks(count, withVector);
+
+#define SETUP_SELECTION_TEST(count, dirsCount) \
+    Mocks::CommandManagerMock commandManagerMock; \
+    Mocks::ArtItemsModelMock artItemsMock; \
+    Mocks::ArtworksRepositoryMock artworksRepository; \
+    commandManagerMock.InjectDependency(&artworksRepository); \
+    Models::ArtItemsModel *artItemsModel = &artItemsMock; \
+    commandManagerMock.InjectDependency(artItemsModel); \
+    UndoRedo::UndoRedoManager undoRedoManager; \
+    commandManagerMock.InjectDependency(&undoRedoManager); \
+    Models::SettingsModel settingsModel; \
+    commandManagerMock.InjectDependency(&settingsModel); \
+    settingsModel.setAutoFindVectors(false); \
+    commandManagerMock.generateAndAddArtworksEx(count, dirsCount, false); \
+    QCOMPARE((int)artworksRepository.accessRepos().size(), dirsCount);
+
+#define CHECK_ONLY_SELECTED(selectedIndex) \
+    { \
+    QCOMPARE(artworksRepository.accessRepos()[selectedIndex].getIsSelectedFlag(), true);\
+    const size_t size = artworksRepository.accessRepos().size(); \
+    for (size_t i = 0; i < size; i++) { \
+        if (i == selectedIndex) { continue; } \
+        auto &dir = artworksRepository.accessRepos()[i]; \
+        QVERIFY2(dir.getIsSelectedFlag() == false, QString("Directory IS selected at %1").arg(i).toStdString().data()); \
+    } \
+    }
+
+#define CHECK_ALL_SELECTED \
+    {\
+    const size_t size = artworksRepository.accessRepos().size(); \
+    for (size_t i = 0; i < size; i++) { \
+        auto &dir = artworksRepository.accessRepos()[i]; \
+        QVERIFY2(dir.getIsSelectedFlag() == true, QString("Directory is NOT selected at %1").arg(i).toStdString().data()); \
+    } \
+    }
+
+#define CHECK_SELECTED(index) \
+    QCOMPARE(artworksRepository.accessRepos()[index].getIsSelectedFlag(), true);
+
+#define CHECK_UNSELECTED(index) \
+    QCOMPARE(artworksRepository.accessRepos()[index].getIsSelectedFlag(), false);
 
 void ArtworkRepositoryTests::simpleAccountFileTest() {
     Mocks::CommandManagerMock commandManagerMock;
@@ -391,4 +435,199 @@ void ArtworkRepositoryTests::fewEmptyDirectoriesStayTest() {
 
     artworksRepository.cleanupEmptyDirectories();
     QCOMPARE(artworksRepository.rowCount(), 0);
+}
+
+void ArtworkRepositoryTests::allDirsInitiallySelectedTest() {
+    SETUP_SELECTION_TEST(10, 3);
+
+    CHECK_ALL_SELECTED;
+}
+
+void ArtworkRepositoryTests::unselectOneSelectsOnlyOneTest() {
+    SETUP_SELECTION_TEST(10, 3);
+
+    size_t toggleIndex = 0;
+    artworksRepository.toggleDirectorySelected(toggleIndex);
+
+    CHECK_ONLY_SELECTED(toggleIndex);
+}
+
+void ArtworkRepositoryTests::cannotUnselectTheOnlyOneTest() {
+    SETUP_SELECTION_TEST(10, 1);
+
+    artworksRepository.toggleDirectorySelected(0);
+
+    CHECK_ALL_SELECTED;
+}
+
+void ArtworkRepositoryTests::toggleSameDirectoryTwiceAllSelectedTest() {
+    SETUP_SELECTION_TEST(10, 3);
+
+    size_t toggleIndex = 1;
+    artworksRepository.toggleDirectorySelected(toggleIndex);
+
+    CHECK_ONLY_SELECTED(toggleIndex);
+
+    artworksRepository.toggleDirectorySelected(toggleIndex);
+
+    CHECK_ALL_SELECTED;
+}
+
+void ArtworkRepositoryTests::unselectLastSelectedSelectsAllTest() {
+    SETUP_SELECTION_TEST(10, 3);
+
+    artworksRepository.unselectAllDirectories();
+    artworksRepository.accessRepos()[0].setIsSelectedFlag(true);
+
+    artworksRepository.toggleDirectorySelected(0);
+
+    CHECK_ALL_SELECTED;
+}
+
+void ArtworkRepositoryTests::removeOnlySelectedSelectsAllTest() {
+    SETUP_SELECTION_TEST(10, 3);
+
+    size_t toggleIndex = 0;
+    artworksRepository.unselectAllDirectories();
+    artworksRepository.accessRepos()[toggleIndex].setIsSelectedFlag(true);
+
+    artItemsMock.removeArtworksDirectory(0);
+    artworksRepository.cleanupEmptyDirectories();
+
+    CHECK_ALL_SELECTED;
+}
+
+void ArtworkRepositoryTests::removeOneOfFewSelectedStaysSameTest() {
+    SETUP_SELECTION_TEST(10, 3);
+
+    artworksRepository.unselectAllDirectories();
+    artworksRepository.accessRepos()[0].setIsSelectedFlag(true);
+    artworksRepository.accessRepos()[1].setIsSelectedFlag(true);
+
+    artItemsMock.removeArtworksDirectory(0);
+    artworksRepository.cleanupEmptyDirectories();
+
+    CHECK_SELECTED(0);
+    CHECK_UNSELECTED(1);
+}
+
+void ArtworkRepositoryTests::undoRemoveOnlySelectedSelectsItTest() {
+    SETUP_SELECTION_TEST(10, 3);
+
+    size_t toggleIndex = 2;
+    artworksRepository.toggleDirectorySelected(toggleIndex);
+    CHECK_ONLY_SELECTED(toggleIndex);
+
+    artItemsMock.removeArtworksDirectory(toggleIndex);
+
+    bool undoStatus = undoRedoManager.undoLastAction();
+    QVERIFY(undoStatus);
+
+    CHECK_ONLY_SELECTED(toggleIndex);
+}
+
+void ArtworkRepositoryTests::undoRemoveOneOfFewSelectedTest() {
+    SETUP_SELECTION_TEST(10, 3);
+
+    CHECK_ALL_SELECTED;
+
+    size_t toggleIndex = 2;
+    artItemsMock.removeArtworksDirectory(toggleIndex);
+
+    bool undoStatus = undoRedoManager.undoLastAction();
+    QVERIFY(undoStatus);
+
+    CHECK_ALL_SELECTED;
+}
+
+void ArtworkRepositoryTests::undoRemoveAfterUserSelectsOtherTest() {
+    SETUP_SELECTION_TEST(10, 3);
+
+    size_t toggleIndex = 2;
+    artworksRepository.toggleDirectorySelected(toggleIndex);
+    CHECK_ONLY_SELECTED(toggleIndex);
+
+    artItemsMock.removeArtworksDirectory(toggleIndex);
+
+    size_t selectedIndex = 0;
+    artworksRepository.toggleDirectorySelected(selectedIndex);
+    CHECK_ONLY_SELECTED(selectedIndex);
+
+    bool undoStatus = undoRedoManager.undoLastAction();
+    QVERIFY(undoStatus);
+
+    CHECK_SELECTED(selectedIndex);
+    CHECK_UNSELECTED(1);
+    CHECK_SELECTED(toggleIndex);
+}
+
+void ArtworkRepositoryTests::undoRemoveAfterUserSelectsFewTest() {
+    SETUP_SELECTION_TEST(10, 4);
+
+    size_t toggleIndex = 3;
+    artworksRepository.toggleDirectorySelected(toggleIndex);
+    CHECK_ONLY_SELECTED(toggleIndex);
+
+    artItemsMock.removeArtworksDirectory(toggleIndex);
+
+    CHECK_ALL_SELECTED;
+
+    artworksRepository.toggleDirectorySelected(0);
+    CHECK_ONLY_SELECTED(0);
+
+    artworksRepository.toggleDirectorySelected(1);
+    CHECK_SELECTED(0);
+    CHECK_SELECTED(1);
+    CHECK_UNSELECTED(2);
+
+    bool undoStatus = undoRedoManager.undoLastAction();
+    QVERIFY(undoStatus);
+
+    CHECK_SELECTED(0);
+    CHECK_SELECTED(1);
+    CHECK_UNSELECTED(2);
+    CHECK_SELECTED(3); // toggleIndex
+}
+
+void ArtworkRepositoryTests::undoRemoveOfTheOnlyOneSelectsItTest() {
+    SETUP_SELECTION_TEST(10, 1);
+
+    CHECK_ALL_SELECTED;
+
+    artItemsMock.removeArtworksDirectory(0);
+
+    bool undoStatus = undoRedoManager.undoLastAction();
+    QVERIFY(undoStatus);
+
+    CHECK_ALL_SELECTED;
+}
+
+void ArtworkRepositoryTests::undoRemoveAfterAllOtherSelectedTest() {
+    SETUP_SELECTION_TEST(10, 4);
+
+    size_t toggleIndex = 3;
+    artworksRepository.toggleDirectorySelected(toggleIndex);
+    CHECK_ONLY_SELECTED(toggleIndex);
+
+    artItemsMock.removeArtworksDirectory(toggleIndex);
+
+    CHECK_ALL_SELECTED;
+
+    artworksRepository.toggleDirectorySelected(0);
+    CHECK_ONLY_SELECTED(0);
+
+    artworksRepository.toggleDirectorySelected(1);
+    CHECK_SELECTED(0);
+    CHECK_SELECTED(1);
+    CHECK_UNSELECTED(2);
+
+    artworksRepository.toggleDirectorySelected(2);
+    CHECK_SELECTED(0);
+    CHECK_SELECTED(1);
+    CHECK_SELECTED(2);
+
+    bool undoStatus = undoRedoManager.undoLastAction();
+    QVERIFY(undoStatus);
+
+    CHECK_ALL_SELECTED;
 }

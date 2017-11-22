@@ -80,7 +80,10 @@ namespace Commands {
 
             Models::ArtworksRepository *artworkRepository = commandManager->getArtworksRepository();
             artworkRepository->refresh();
-            artworkRepository->consolidateSelectionForEmpty();
+            const auto beforeSelectedCount = artworkRepository->retrieveSelectedDirsCount();
+            const auto removedSelectedDirectoryIds = artworkRepository->consolidateSelectionForEmpty();
+            const auto afterSelectedCount = artworkRepository->retrieveSelectedDirsCount();
+            bool unselectAll = (afterSelectedCount + removedSelectedDirectoryIds.size()) != beforeSelectedCount;
             artworkRepository->unwatchFilePaths(removedItemsFilepathes);
 
             QStringList notEmptyVectors = removedAttachedVectors;
@@ -96,7 +99,9 @@ namespace Commands {
                             new UndoRedo::RemoveArtworksHistoryItem(getCommandID(),
                                                                     removedItemsIndices,
                                                                     removedItemsFilepathes,
-                                                                    removedAttachedVectors));
+                                                                    removedAttachedVectors,
+                                                                    removedSelectedDirectoryIds,
+                                                                    unselectAll));
                     commandManager->recordHistoryItem(removeArtworksItem);
                 }
             } else {
@@ -106,9 +111,9 @@ namespace Commands {
                     auto itBegin = touchedDirectories.begin();
                     qint64 dirID = *itBegin;
                     int firstArtworkIndex = removedItemsIndices.first();
-
+                    const bool wasSelected = removedSelectedDirectoryIds.contains(dirID);
                     std::unique_ptr<UndoRedo::IHistoryItem> removeDirectoryItem(
-                                new UndoRedo::RemoveDirectoryHistoryItem(getCommandID(), firstArtworkIndex, dirID));
+                                new UndoRedo::RemoveDirectoryHistoryItem(getCommandID(), firstArtworkIndex, dirID, wasSelected, unselectAll));
                     commandManager->recordHistoryItem(removeDirectoryItem);
                 }
             }

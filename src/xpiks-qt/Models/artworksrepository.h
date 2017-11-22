@@ -90,6 +90,9 @@ namespace Models {
 #ifdef CORE_TESTS
     public:
         void removeItem(int index) { removeInnerItem(index); }
+        int getFilesCountForDirectory(const QString &directory) const { size_t index; tryFindDirectory(directory, index); return m_DirectoriesList[index].m_FilesCount; }
+        int getFilesCountForDirectory(int index) const { return m_DirectoriesList[index].m_FilesCount; }
+        std::vector<RepoDir> &accessRepos() { return m_DirectoriesList; }
 
     protected:
         void insertIntoUnavailable(const QString &value) { m_UnavailableFiles.insert(value); }
@@ -106,7 +109,7 @@ namespace Models {
         void onAvailabilityTimer();
 
     public:
-        bool accountFile(const QString &filepath, qint64 &directoryID, bool isFullDirectory = false);
+        bool accountFile(const QString &filepath, qint64 &directoryID, bool isFullDirectory = false, const QSet<qint64> &removedSelectedDirectoryIds = {});
         void accountVector(const QString &vectorPath);
         bool removeFile(const QString &filepath, qint64 directoryID);
         void removeVector(const QString &vectorPath);
@@ -125,10 +128,6 @@ namespace Models {
         bool tryGetDirectoryPath(qint64 directoryID, QString &absolutePath) const;
         const QString &getDirectoryPath(int index) const { Q_ASSERT((0 <= index) && (index < (int)m_DirectoriesList.size())); return m_DirectoriesList[index].m_AbsolutePath; }
         bool getIsFullDirectory(int index) const { return m_DirectoriesList[index].getAddedAsDirectoryFlag(); }
-#ifdef CORE_TESTS
-        int getFilesCountForDirectory(const QString &directory) const { size_t index; tryFindDirectory(directory, index); return m_DirectoriesList[index].m_FilesCount; }
-        int getFilesCountForDirectory(int index) const { return m_DirectoriesList[index].m_FilesCount; }
-#endif
         bool isFileUnavailable(const QString &filepath) const;
 
 #ifdef INTEGRATION_TESTS
@@ -142,7 +141,7 @@ namespace Models {
         virtual QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
     public:
-        void consolidateSelectionForEmpty();
+        QSet<qint64> consolidateSelectionForEmpty();
         void toggleDirectorySelected(size_t row);
 
     protected:
@@ -155,13 +154,13 @@ namespace Models {
     public:
         bool unselectAllDirectories() { return setAllSelected(false); }
         bool selectAllDirectories() { return setAllSelected(true); }
+        bool allAreSelected() const;
+        size_t retrieveSelectedDirsCount() const;
 
     private:
         bool setDirectorySelected(size_t index, bool value);
         bool changeSelectedState(size_t row, bool newValue, bool oldValue);
         bool setAllSelected(bool value);
-        size_t retrieveSelectedDirsCount() const;
-        bool allAreSelected() const;
         bool tryFindDirectory(const QString &directoryPath, size_t &index) const;
         bool tryFindDirectoryByID(qint64 id, size_t &index) const;
 
