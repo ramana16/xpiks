@@ -80,10 +80,12 @@ namespace Commands {
 
             Models::ArtworksRepository *artworkRepository = commandManager->getArtworksRepository();
             artworkRepository->refresh();
-            const auto beforeSelectedCount = artworkRepository->retrieveSelectedDirsCount();
+            const size_t beforeSelectedCount = artworkRepository->retrieveSelectedDirsCount();
             const auto removedSelectedDirectoryIds = artworkRepository->consolidateSelectionForEmpty();
-            const auto afterSelectedCount = artworkRepository->retrieveSelectedDirsCount();
-            bool unselectAll = (afterSelectedCount + removedSelectedDirectoryIds.size()) != beforeSelectedCount;
+            const size_t afterSelectedCount = artworkRepository->retrieveSelectedDirsCount();
+            // current selection logic: if all directories become deselected after some action, all become selected
+            // this if statement is supposed to check if this has happened
+            const bool unselectAll = (afterSelectedCount + removedSelectedDirectoryIds.size()) != beforeSelectedCount;
             artworkRepository->unwatchFilePaths(removedItemsFilepathes);
 
             QStringList notEmptyVectors = removedAttachedVectors;

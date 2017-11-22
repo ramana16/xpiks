@@ -45,8 +45,7 @@ void UndoRedo::RemoveArtworksHistoryItem::undo(const Commands::ICommandManager *
         artItemsModel->beginAccountingManyFiles();
     }
 
-    if (m_UnselectAll && artworksRepository->allAreSelected())
-    {
+    if (m_UnselectAll && artworksRepository->allAreSelected()) {
         artworksRepository->unselectAllDirectories();
     }
 
@@ -58,11 +57,14 @@ void UndoRedo::RemoveArtworksHistoryItem::undo(const Commands::ICommandManager *
             artItemsModel->beginAccountingFiles(startRow, endRow);
         }
 
+        Common::flag_t directoryFlags = 0;
+        if (m_RemovedAsDirectory) { Common::SetFlag(directoryFlags, Common::DirectoryFlags::IsAddedAsDirectory); }
+
         int count = endRow - startRow + 1;
         for (int j = 0; j < count; ++j) {
             const QString &filepath = m_RemovedArtworksPathes[j + usedCount];
             qint64 directoryID = 0;
-            if (artworksRepository->accountFile(filepath, directoryID, m_RemovedAsDirectory, m_RemovedSelectedDirectoryIds)) {
+            if (artworksRepository->accountFile(filepath, directoryID, directoryFlags)) {
                 Models::ArtworkMetadata *artwork = artItemsModel->createMetadata(filepath, directoryID);
                 commandManager->connectArtworkSignals(artwork);
 
@@ -82,6 +84,8 @@ void UndoRedo::RemoveArtworksHistoryItem::undo(const Commands::ICommandManager *
                 }
             }
         }
+
+        artworksRepository->restoreDirectoriesSelection(m_RemovedSelectedDirectoryIds);
 
         if (!willResetModel) {
             artItemsModel->endAccountingFiles();

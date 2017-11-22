@@ -63,12 +63,14 @@ std::shared_ptr<Commands::ICommandResult> Commands::AddArtworksCommand::execute(
         artItemsModel->beginAccountingFiles(newFilesCount);
 
         const int count = m_FilePathes.count();
+        Common::flag_t directoryFlags = 0;
+        if (m_IsFullDirectory) { Common::SetFlag(directoryFlags, Common::DirectoryFlags::IsAddedAsDirectory); }
 
         for (int i = 0; i < count; ++i) {
             const QString &filename = m_FilePathes[i];
             qint64 directoryID = 0;
 
-            if (artworksRepository->accountFile(filename, directoryID, m_IsFullDirectory)) {
+            if (artworksRepository->accountFile(filename, directoryID, directoryFlags)) {
                 Models::ArtworkMetadata *metadata = artItemsModel->createMetadata(filename, directoryID);
                 commandManager->connectArtworkSignals(metadata);
 

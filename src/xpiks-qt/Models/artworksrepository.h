@@ -109,7 +109,7 @@ namespace Models {
         void onAvailabilityTimer();
 
     public:
-        bool accountFile(const QString &filepath, qint64 &directoryID, bool isFullDirectory = false, const QSet<qint64> &removedSelectedDirectoryIds = {});
+        bool accountFile(const QString &filepath, qint64 &directoryID, Common::flag_t directoryFlags = 0);
         void accountVector(const QString &vectorPath);
         bool removeFile(const QString &filepath, qint64 directoryID);
         void removeVector(const QString &vectorPath);
@@ -142,6 +142,7 @@ namespace Models {
 
     public:
         QSet<qint64> consolidateSelectionForEmpty();
+        void restoreDirectoriesSelection(const QSet<qint64> &selectedDirectories);
         void toggleDirectorySelected(size_t row);
 
     protected:

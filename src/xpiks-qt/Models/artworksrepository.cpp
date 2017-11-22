@@ -138,7 +138,7 @@ namespace Models {
         cleanupEmptyDirectories();
     }
 
-    bool ArtworksRepository::accountFile(const QString &filepath, qint64 &directoryID, bool isFullDirectory, const QSet<qint64> &removedSelectedDirectoryIds) {
+    bool ArtworksRepository::accountFile(const QString &filepath, qint64 &directoryID, Common::flag_t directoryFlags) {
         bool wasModified = false;
         QString absolutePath;
 
@@ -166,10 +166,6 @@ namespace Models {
                 auto &item = m_DirectoriesList[index];
                 occurances = item.m_FilesCount;
                 directoryID = item.m_ID;
-                if (removedSelectedDirectoryIds.contains(directoryID))
-                {
-                    item.setIsSelectedFlag(true);
-                }
             }
 
             // watchFilePath(filepath);
@@ -177,7 +173,8 @@ namespace Models {
             auto &item = m_DirectoriesList[index];
             item.setIsRemovedFlag(false);
             item.m_FilesCount = occurances + 1;
-            if (isFullDirectory) { item.setAddedAsDirectoryFlag(true); }
+            if (Common::HasFlag(directoryFlags, Common::DirectoryFlags::IsAddedAsDirectory)) { item.setAddedAsDirectoryFlag(true); }
+            if (Common::HasFlag(directoryFlags, Common::DirectoryFlags::IsSelected)) { item.setIsSelectedFlag(true); }
             wasModified = true;
         }
 
@@ -405,10 +402,10 @@ namespace Models {
                 auto &directory = m_DirectoriesList[i];
                 if (!directory.isValid()) {
                     const bool oldIsSelected = directory.getIsSelectedFlag();
-                    if (oldIsSelected)
-                    {
+                    if (oldIsSelected) {
                         result.insert(directory.m_ID);
                     }
+
                     if (changeSelectedState(i, newIsSelected, oldIsSelected)) {
                         anyChange = true;
                     }
@@ -426,6 +423,20 @@ namespace Models {
         }
 
         return result;
+    }
+
+    void ArtworksRepository::restoreDirectoriesSelection(const QSet<qint64> &selectedDirectories) {
+        LOG_DEBUG << "#";
+        if (selectedDirectories.empty()) { return; }
+
+        const size_t size = m_DirectoriesList.size();
+
+        for (size_t i = 0; i < size; i++) {
+            auto &directory = m_DirectoriesList[i];
+            if (selectedDirectories.contains(directory.m_ID)) {
+                directory.setIsSelectedFlag(true);
+            }
+        }
     }
 
     void ArtworksRepository::toggleDirectorySelected(size_t row) {
