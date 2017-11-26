@@ -113,7 +113,13 @@ namespace KeywordsPresets {
 
     int PresetGroupsModel::addGroup(const QString &name) {
         int groupID = 0;
-        findOrRegisterGroup(name, groupID);
+
+        QString sanitizedName = name.trimmed();
+        if (sanitizedName.isEmpty()) {
+            return -1;
+        }
+
+        findOrRegisterGroup(sanitizedName, groupID);
         return groupID;
     }
 

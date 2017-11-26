@@ -231,6 +231,8 @@ namespace Warnings {
             }
         } while (false);
 
+        emit settingsUpdated();
+
         return anyError;
     }
 

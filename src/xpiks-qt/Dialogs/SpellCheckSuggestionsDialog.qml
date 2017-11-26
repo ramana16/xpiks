@@ -167,8 +167,9 @@ Item {
                                     width: 100
                                     height: suggestionsListRect.height
 
-                                    ColumnLayout {
+                                    Column {
                                         anchors.centerIn: parent
+                                        spacing: 3
 
                                         StyledText {
                                             id: originText
@@ -184,6 +185,7 @@ Item {
                                             anchors.horizontalCenter: parent.horizontalCenter
                                             verticalAlignment: Text.AlignVCenter
                                             visible: replacementorigin != word
+                                            enabled: replacementorigin != word
                                             text: replacementorigin
                                             font.pixelSize: 11
                                             color: uiColors.selectedArtworkBackground

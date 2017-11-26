@@ -454,7 +454,6 @@ DISTFILES += \
     Graphics/vector-icon.svg \
     Constants/UIConfig.js \
     Components/SelectedIcon.qml \
-    Components/CustomComboBox.qml \
     Components/CompletionBox.qml \
     Components/EditIcon.qml \
     uncrustify.cfg \
@@ -490,15 +489,55 @@ DISTFILES += \
     CollapserTabs/QuickBufferTab.qml \
     Dialogs/UserDictEditDialog.qml \
     Components/LoaderIcon.qml \
-    Graphics/Icon_donate_black.svg \
-    Graphics/Icon_donate_slategray.svg \
+    Graphics/black/Icon_donate.svg \
+    Graphics/slategray/Icon_donate.svg \
     Dialogs/DonateDialog.qml \
     Components/DonateComponent.qml \
     StackViews/DuplicatesReView.qml \
     StyledControls/StyledLink.qml \
     Dialogs/CsvExportDialog.qml \
     Components/DotsButton.qml \
-    Dialogs/AddPresetGroupDialog.qml
+    Dialogs/AddPresetGroupDialog.qml \
+    Components/DropdownPopup.qml \
+    Components/ComboBoxPopup.qml \
+    Components/ToolButton.qml \
+    Components/CustomTooltip.qml \
+    Graphics/black/Edit_icon_clicked.svg \
+    Graphics/black/Edit_icon_disabled.svg \
+    Graphics/black/Edit_icon_hovered.svg \
+    Graphics/black/Edit_icon_normal.svg \
+    Graphics/black/Remove_icon_clicked.svg \
+    Graphics/black/Remove_icon_disabled.svg \
+    Graphics/black/Remove_icon_hovered.svg \
+    Graphics/black/Remove_icon_normal.svg \
+    Graphics/black/Save_icon_clicked.svg \
+    Graphics/black/Save_icon_disabled.svg \
+    Graphics/black/Save_icon_hovered.svg \
+    Graphics/black/Save_icon_normal.svg \
+    Graphics/black/Upload_icon_clicked.svg \
+    Graphics/black/Upload_icon_disabled.svg \
+    Graphics/black/Upload_icon_hovered.svg \
+    Graphics/black/Upload_icon_normal.svg \
+    Graphics/slategray/Edit_icon_clicked.svg \
+    Graphics/slategray/Edit_icon_disabled.svg \
+    Graphics/slategray/Edit_icon_hovered.svg \
+    Graphics/slategray/Edit_icon_normal.svg \
+    Graphics/slategray/Remove_icon_clicked.svg \
+    Graphics/slategray/Remove_icon_disabled.svg \
+    Graphics/slategray/Remove_icon_hovered.svg \
+    Graphics/slategray/Remove_icon_normal.svg \
+    Graphics/slategray/Save_icon_clicked.svg \
+    Graphics/slategray/Save_icon_disabled.svg \
+    Graphics/slategray/Save_icon_hovered.svg \
+    Graphics/slategray/Save_icon_normal.svg \
+    Graphics/slategray/Upload_icon_clicked.svg \
+    Graphics/slategray/Upload_icon_disabled.svg \
+    Graphics/slategray/Upload_icon_hovered.svg \
+    Graphics/slategray/Upload_icon_normal.svg \
+    Graphics/slategray/More_icon_clicked.svg \
+    Graphics/slategray/More_icon_disabled.svg \
+    Graphics/slategray/More_icon_hovered.svg \
+    Graphics/slategray/More_icon_normal.svg
 
 lupdate_only {
 SOURCES += *.qml \
@@ -584,7 +623,7 @@ win32 {
     LIBS -= -lcurl
 
     CONFIG(debug, debug|release) {
-	EXE_DIR = debug
+        EXE_DIR = debug
         LIBS += -llibcurl_debug
         LIBS -= -lquazip
         LIBS += -lquazipd
@@ -657,13 +696,13 @@ linux-g++-64 {
     BUILDNO = $$system($$PWD/buildno.sh)
 
     UNAME = $$system(cat /proc/version | tr -d \'()\')
-    
+
     contains( UNAME, Debian|Ubuntu ) {
         message("distribution : Debian")
         LIBS -= -lquazip
         LIBS += -lquazip5
     }
-    
+
     contains( UNAME, SUSE ) {
         message("distribution : SUSE")
     }

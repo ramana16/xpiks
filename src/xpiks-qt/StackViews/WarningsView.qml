@@ -51,7 +51,7 @@ Rectangle {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
-        height: 45
+        height: 55
 
         RowLayout {
             anchors.verticalCenter: parent.verticalCenter
@@ -213,16 +213,20 @@ Rectangle {
                     }
                 }
 
-                EditIcon {
-                    backgroundColor: columnRectangle.color
+                ToolButton {
                     anchors.verticalCenter: parent.verticalCenter
-                    anchors.verticalCenterOffset: -5
                     anchors.right: parent.right
                     anchors.rightMargin: 30
                     enabled: !isRestricted && warningsListView.count > 0
                     visible: enabled
-
-                    onActionInvoked: {
+                    normalIcon: uiColors.t + helpersWrapper.getAssetForTheme("Edit_icon_normal.svg", settingsModel.selectedThemeIndex)
+                    disabledIcon: uiColors.t + helpersWrapper.getAssetForTheme("Edit_icon_disabled.svg", settingsModel.selectedThemeIndex)
+                    hoveredIcon: uiColors.t + helpersWrapper.getAssetForTheme("Edit_icon_hovered.svg", settingsModel.selectedThemeIndex)
+                    clickedIcon: uiColors.t + helpersWrapper.getAssetForTheme("Edit_icon_clicked.svg", settingsModel.selectedThemeIndex)
+                    tooltip: i18.n + qsTr("Edit")
+                    iconWidth: 33
+                    iconHeight: 33
+                    onClicked: {
                         var index = imageWrapper.delegateIndex
                         var originalIndex = warningsModel.getOriginalIndex(index);
                         var derivedIndex = filteredArtItemsModel.getDerivedIndex(originalIndex)

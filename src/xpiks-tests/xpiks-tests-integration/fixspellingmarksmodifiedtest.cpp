@@ -54,8 +54,8 @@ int FixSpellingMarksModifiedTest::doTest() {
     QString wrongWord = "abbreviatioe";
     basicModel->appendKeyword(wrongWord);
 
-    QObject::connect(basicModel, SIGNAL(spellCheckErrorsChanged()),
-                     &waiter, SIGNAL(finished()));
+    QObject::connect(basicModel, &Common::BasicMetadataModel::keywordsSpellingChanged,
+                     &waiter, &SignalWaiter::finished);
 
     m_CommandManager->submitItemForSpellCheck(basicModel);
 

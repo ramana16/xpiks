@@ -12,6 +12,7 @@ QT       -= gui
 
 TARGET = xpiks-tests-core
 CONFIG   += console
+CONFIG   += testcase
 CONFIG   -= app_bundle
 CONFIG   += c++11
 

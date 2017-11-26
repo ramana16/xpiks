@@ -24,6 +24,7 @@
 
 // twice average English word length
 #define MAX_EDITING_PAUSE_RESTARTS 12
+#define ARTWORK_EDITING_PAUSE 1000
 
 #ifdef SIZE_MAX
   #define INVALID_INDEX SIZE_MAX
@@ -33,7 +34,7 @@
 
 namespace Models {
     ArtworkMetadata::ArtworkMetadata(const QString &filepath, qint64 ID, qint64 directoryID):
-        Common::DelayedActionEntity(1000, MAX_EDITING_PAUSE_RESTARTS),
+        Common::DelayedActionEntity(ARTWORK_EDITING_PAUSE, MAX_EDITING_PAUSE_RESTARTS),
         m_MetadataModel(m_Hold),
         m_FileSize(0),
         m_ArtworkFilepath(filepath),
@@ -45,7 +46,7 @@ namespace Models {
     {
         m_MetadataModel.setSpellCheckInfo(&m_SpellCheckInfo);
 
-        QObject::connect(&m_MetadataModel, &Common::BasicMetadataModel::spellCheckErrorsChanged, this, &ArtworkMetadata::spellCheckErrorsChanged);
+        QObject::connect(&m_MetadataModel, &Common::BasicMetadataModel::spellingInfoUpdated, this, &ArtworkMetadata::spellingInfoUpdated);
     }
 
     ArtworkMetadata::~ArtworkMetadata() {

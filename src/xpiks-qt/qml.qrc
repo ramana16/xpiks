@@ -45,9 +45,7 @@
         <file>Graphics/vector-icon.svg</file>
         <file>Constants/UIConfig.js</file>
         <file>Components/SelectedIcon.qml</file>
-        <file>Components/CustomComboBox.qml</file>
         <file>Components/CompletionBox.qml</file>
-        <file>Components/EditIcon.qml</file>
         <file>Components/PresentationSlide.qml</file>
         <file>Graphics/faileduploads.png</file>
         <file>Graphics/gears.png</file>
@@ -82,8 +80,8 @@
         <file>Graphics/video-icon.svg</file>
         <file>Graphics/video-icon-s.png</file>
         <file>Graphics/video-default-thumbnail.png</file>
-        <file>Graphics/Icon_donate_black.svg</file>
-        <file>Graphics/Icon_donate_slategray.svg</file>
+        <file>Graphics/black/Icon_donate.svg</file>
+        <file>Graphics/slategray/Icon_donate.svg</file>
         <file>Dialogs/DonateDialog.qml</file>
         <file>Components/DonateComponent.qml</file>
         <file>StackViews/DuplicatesReView.qml</file>
@@ -91,5 +89,51 @@
         <file>Dialogs/CsvExportDialog.qml</file>
         <file>Components/DotsButton.qml</file>
         <file>Dialogs/AddPresetGroupDialog.qml</file>
+        <file>Components/ComboBoxPopup.qml</file>
+        <file>Components/DropdownPopup.qml</file>
+        <file>Components/ToolButton.qml</file>
+        <file>Components/CustomTooltip.qml</file>
+        <file>Graphics/black/Edit_icon_clicked.svg</file>
+        <file>Graphics/black/Edit_icon_disabled.svg</file>
+        <file>Graphics/black/Edit_icon_hovered.svg</file>
+        <file>Graphics/black/Edit_icon_normal.svg</file>
+        <file>Graphics/black/Remove_icon_clicked.svg</file>
+        <file>Graphics/black/Remove_icon_disabled.svg</file>
+        <file>Graphics/black/Remove_icon_hovered.svg</file>
+        <file>Graphics/black/Remove_icon_normal.svg</file>
+        <file>Graphics/black/Save_icon_clicked.svg</file>
+        <file>Graphics/black/Save_icon_disabled.svg</file>
+        <file>Graphics/black/Save_icon_hovered.svg</file>
+        <file>Graphics/black/Save_icon_normal.svg</file>
+        <file>Graphics/black/Upload_icon_clicked.svg</file>
+        <file>Graphics/black/Upload_icon_disabled.svg</file>
+        <file>Graphics/black/Upload_icon_hovered.svg</file>
+        <file>Graphics/black/Upload_icon_normal.svg</file>
+        <file>Graphics/slategray/Edit_icon_clicked.svg</file>
+        <file>Graphics/slategray/Edit_icon_disabled.svg</file>
+        <file>Graphics/slategray/Edit_icon_hovered.svg</file>
+        <file>Graphics/slategray/Edit_icon_normal.svg</file>
+        <file>Graphics/slategray/Remove_icon_clicked.svg</file>
+        <file>Graphics/slategray/Remove_icon_disabled.svg</file>
+        <file>Graphics/slategray/Remove_icon_hovered.svg</file>
+        <file>Graphics/slategray/Remove_icon_normal.svg</file>
+        <file>Graphics/slategray/Save_icon_clicked.svg</file>
+        <file>Graphics/slategray/Save_icon_disabled.svg</file>
+        <file>Graphics/slategray/Save_icon_hovered.svg</file>
+        <file>Graphics/slategray/Save_icon_normal.svg</file>
+        <file>Graphics/slategray/Upload_icon_clicked.svg</file>
+        <file>Graphics/slategray/Upload_icon_disabled.svg</file>
+        <file>Graphics/slategray/Upload_icon_hovered.svg</file>
+        <file>Graphics/slategray/Upload_icon_normal.svg</file>
+        <file>Graphics/Icon_heart.svg</file>
+        <file>Graphics/Icon_heart_clicked.svg</file>
+        <file>Graphics/black/More_icon_clicked.svg</file>
+        <file>Graphics/black/More_icon_disabled.svg</file>
+        <file>Graphics/black/More_icon_hovered.svg</file>
+        <file>Graphics/black/More_icon_normal.svg</file>
+        <file>Graphics/slategray/More_icon_clicked.svg</file>
+        <file>Graphics/slategray/More_icon_disabled.svg</file>
+        <file>Graphics/slategray/More_icon_hovered.svg</file>
+        <file>Graphics/slategray/More_icon_normal.svg</file>
     </qresource>
 </RCC>

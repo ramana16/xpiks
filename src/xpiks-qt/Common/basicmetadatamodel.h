@@ -30,8 +30,13 @@ namespace Common {
             public Common::IMetadataOperator
     {
         Q_OBJECT
+        Q_PROPERTY(bool hasTitleSpellErrors READ hasTitleSpellError NOTIFY titleSpellingChanged)
+        Q_PROPERTY(bool hasDescriptionSpellErrors READ hasDescriptionSpellError NOTIFY descriptionSpellingChanged)
     public:
         BasicMetadataModel(Common::Hold &hold, QObject *parent=0);
+
+    public:
+        Q_INVOKABLE bool hasAnySpellingErrors() { return hasSpellErrors(); }
 
     public:
         void setSpellCheckInfo(SpellCheck::SpellCheckItemInfo *info) { m_SpellCheckInfo = info; }
@@ -100,8 +105,13 @@ namespace Common {
         void clearModel();
 
     public:
-        void notifyDescriptionSpellCheck();
-        void notifyTitleSpellCheck();
+        virtual void notifySpellCheckResults(SpellCheckFlags flags) override;
+        void notifyDescriptionSpellingChanged();
+        void notifyTitleSpellingChanged();
+
+    signals:
+        void titleSpellingChanged();
+        void descriptionSpellingChanged();
 
     private:
         void updateDescriptionSpellErrors(const QHash<QString, Common::WordAnalysisResult> &results, bool withStemInfo);

@@ -21,11 +21,12 @@
 namespace SpellCheck {
     DuplicatesHighlighter::DuplicatesHighlighter(QTextDocument *document,
                                                  QMLExtensions::ColorsModel *colorsModel,
-                                                 SpellCheckErrorsInfo *errorsInfo) :
+                                                 SpellCheckErrorsInfo *errorsInfo,
+                                                 bool highlightAll) :
         QSyntaxHighlighter(document),
         m_SpellCheckErrors(errorsInfo),
         m_ColorsModel(colorsModel),
-        m_HighlighAll(true)
+        m_HighlighAll(highlightAll)
     {
         Q_ASSERT(colorsModel != nullptr);
     }
@@ -43,10 +44,12 @@ namespace SpellCheck {
         duplicatesFormat.setBackground(QBrush(modifiedColor));
         duplicatesFormat.setForeground(QBrush(darkColor));
 
-        Helpers::foreachWord(text,
+        const QString textLower = text.toLower();
+
+        Helpers::foreachWord(textLower,
                              [this](const QString &word) {
             return m_SpellCheckErrors != nullptr ?
-                        this->m_SpellCheckErrors->hasDuplicates(word.toLower()) :
+                        this->m_SpellCheckErrors->hasDuplicates(word) :
                         m_HighlighAll;
         },
         [this, &duplicatesFormat](int start, int length, const QString &) {

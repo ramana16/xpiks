@@ -69,6 +69,9 @@ namespace SpellCheck {
                     m_ColorsModel,
                     spellCheckInfo->getTitleErrors());
 
+        QObject::connect(basicModel, &Common::BasicMetadataModel::hasDuplicatesChanged,
+                         highlighter, &DuplicatesHighlighter::rehighlight);
+
         //QObject::connect(this, &DuplicatesReviewModel::rehighlightRequired,
         //                 highlighter, &DuplicatesHighlighter::rehighlight);
 
@@ -93,6 +96,9 @@ namespace SpellCheck {
                     m_ColorsModel,
                     spellCheckInfo->getDescriptionErrors());
 
+        QObject::connect(basicModel, &Common::BasicMetadataModel::hasDuplicatesChanged,
+                         highlighter, &DuplicatesHighlighter::rehighlight);
+
         //QObject::connect(this, &DuplicatesReviewModel::rehighlightRequired,
         //                 highlighter, &DuplicatesHighlighter::rehighlight);
 
@@ -111,10 +117,13 @@ namespace SpellCheck {
         auto *basicModel = item.m_BasicModel;
         Q_ASSERT(basicModel != nullptr);
 
+        bool hasKeywordsDuplicates = basicModel->hasKeywordsDuplicates();
+
         SpellCheck::DuplicatesHighlighter *highlighter = new SpellCheck::DuplicatesHighlighter(
                     document->textDocument(),
                     m_ColorsModel,
-                    nullptr); // highlight all words
+                    nullptr, // highlight all words
+                    hasKeywordsDuplicates);
 
         QObject::connect(basicModel, &Common::BasicMetadataModel::hasDuplicatesChanged,
                          highlighter, &DuplicatesHighlighter::keywordsDuplicatesChanged);
@@ -139,9 +148,10 @@ namespace SpellCheck {
 
         if (spellCheckInfo->anyTitleDuplicates()) {
             std::vector<int> hits;
+            QString titleLower = title.toLower();
 
-            Helpers::foreachWord(title,
-                                 [&spellCheckInfo](const QString &word){
+            Helpers::foreachWord(titleLower,
+                                 [&spellCheckInfo](const QString &word) {
                 return spellCheckInfo->hasTitleDuplicate(word);
             },
             [&hits](int start, int length, const QString &) {
@@ -173,9 +183,10 @@ namespace SpellCheck {
 
         if (spellCheckInfo->anyDescriptionDuplicates()) {
             std::vector<int> hits;
+            QString descriptionLower = description.toLower();
 
-            Helpers::foreachWord(description,
-                                 [&spellCheckInfo](const QString &word){
+            Helpers::foreachWord(descriptionLower,
+                                 [&spellCheckInfo](const QString &word) {
                 return spellCheckInfo->hasDescriptionDuplicate(word);
             },
             [&hits](int start, int length, const QString &) {

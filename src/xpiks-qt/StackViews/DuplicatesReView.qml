@@ -311,13 +311,23 @@ Rectangle {
                     anchors.bottom: parent.bottom
                     anchors.right: parent.right
 
-                    EditIcon {
-                        backgroundColor: columnRectangle.color
+                    ToolButton {
+                        anchors.verticalCenter: parent.verticalCenter
+                        anchors.right: parent.right
+                        anchors.rightMargin: 30
+                        visible: enabled
+                        normalIcon: uiColors.t + helpersWrapper.getAssetForTheme("Edit_icon_normal.svg", settingsModel.selectedThemeIndex)
+                        disabledIcon: uiColors.t + helpersWrapper.getAssetForTheme("Edit_icon_disabled.svg", settingsModel.selectedThemeIndex)
+                        hoveredIcon: uiColors.t + helpersWrapper.getAssetForTheme("Edit_icon_hovered.svg", settingsModel.selectedThemeIndex)
+                        clickedIcon: uiColors.t + helpersWrapper.getAssetForTheme("Edit_icon_clicked.svg", settingsModel.selectedThemeIndex)
+                        tooltip: i18.n + qsTr("Edit")
+                        iconWidth: 33
+                        iconHeight: 33
                         anchors.verticalCenterOffset: -5
                         anchors.centerIn: parent
                         enabled: !isRestricted && duplicatesListView.count > 0
 
-                        onActionInvoked: {
+                        onClicked: {
                             var index = imageWrapper.delegateIndex
                             var derivedIndex = filteredArtItemsModel.getDerivedIndex(originalIndex)
                             var metadata = filteredArtItemsModel.getArtworkMetadata(derivedIndex)

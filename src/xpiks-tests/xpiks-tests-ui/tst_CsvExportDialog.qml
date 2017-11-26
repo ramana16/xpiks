@@ -61,6 +61,7 @@ Item {
 
     CsvExportDialog {
         id: exportDialog
+        anchors.fill: parent
     }
 
     TestCase {

@@ -33,7 +33,7 @@ int SpellCheckCombinedModelTest::doTest() {
 
     MetadataIO::MetadataIOCoordinator *ioCoordinator = m_CommandManager->getMetadataIOCoordinator();
     SignalWaiter waiter;
-    QObject::connect(ioCoordinator, SIGNAL(metadataReadingFinished()), &waiter, SIGNAL(finished()));    
+    QObject::connect(ioCoordinator, SIGNAL(metadataReadingFinished()), &waiter, SIGNAL(finished()));
 
     int addedCount = artItemsModel->addLocalArtworks(files);
     VERIFY(addedCount == files.length(), "Failed to add file");
@@ -54,8 +54,8 @@ int SpellCheckCombinedModelTest::doTest() {
 
     Models::CombinedArtworksModel *combinedModel = m_CommandManager->getCombinedArtworksModel();
     auto *basicModel = combinedModel->retrieveBasicMetadataModel();
-    QObject::connect(basicModel, SIGNAL(spellCheckErrorsChanged()),
-                     &waiter, SIGNAL(finished()));
+    QObject::connect(basicModel, &Common::BasicMetadataModel::keywordsSpellingChanged,
+                     &waiter, &SignalWaiter::finished);
 
     QString wrongWord = "abbreviatioe";
     combinedModel->setDescription(combinedModel->getDescription() + ' ' + wrongWord);

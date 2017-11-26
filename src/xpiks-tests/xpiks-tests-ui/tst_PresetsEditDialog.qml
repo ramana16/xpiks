@@ -53,6 +53,8 @@ Item {
         function getDefaultGroupModel() { return {} }
 
         function findGroupIndexById(id) { return 0 }
+
+        property var groupNames: ["Default", "Nature"]
     }
 
     ListModel {
@@ -78,6 +80,7 @@ Item {
 
     PresetsEditDialog {
         id: presetEditsDialog
+        anchors.fill: parent
     }
 
     TestCase {

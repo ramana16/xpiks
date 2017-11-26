@@ -61,7 +61,9 @@ namespace Models {
             }
         }
 
-#ifndef INTEGRATION_TESTS
+#if defined(QT_DEBUG) && !defined(INTEGRATION_TESTS)
+        // do not delete in release in order not to crash
+        // if artwork locks were still kept by other entities
         qDeleteAll(m_FinalizationList);
 #endif
     }
@@ -535,7 +537,7 @@ namespace Models {
             SpellCheck::SpellCheckItemInfo *info = metadataModel->getSpellCheckInfo();
             QMLExtensions::ColorsModel *colorsModel = m_CommandManager->getColorsModel();
             info->createHighlighterForDescription(document->textDocument(), colorsModel, metadataModel);
-            metadataModel->notifyDescriptionSpellCheck();
+            metadataModel->notifyDescriptionSpellingChanged();
         }
     }
 
@@ -546,7 +548,7 @@ namespace Models {
             SpellCheck::SpellCheckItemInfo *info = metadataModel->getSpellCheckInfo();
             QMLExtensions::ColorsModel *colorsModel = m_CommandManager->getColorsModel();
             info->createHighlighterForTitle(document->textDocument(), colorsModel, metadataModel);
-            metadataModel->notifyTitleSpellCheck();
+            metadataModel->notifyTitleSpellingChanged();
         }
     }
 
@@ -877,39 +879,6 @@ namespace Models {
         return true;
     }
 
-    void ArtItemsModel::spellCheckErrorsChanged() {
-        LOG_INTEGRATION_TESTS << "#";
-        ArtworkMetadata *item = qobject_cast<ArtworkMetadata *>(sender());
-
-#ifdef QT_DEBUG
-        bool found = false;
-        for (auto *existing: m_ArtworkList) {
-            if (existing == item) {
-                found = true;
-                break;
-            }
-        }
-
-        if (!found) {
-            for (auto *existing: m_FinalizationList) {
-                if (existing == item) {
-                    found = true;
-                    break;
-                }
-            }
-        }
-
-        Q_ASSERT(found);
-#endif
-
-#ifndef QT_DEBUG
-        if (item != NULL)
-#endif
-        {
-            m_CommandManager->submitForWarningsCheck(item, Common::WarningsCheckFlags::Spelling);
-        }
-    }
-
     void ArtItemsModel::onFilesUnavailableHandler() {
         LOG_DEBUG << "#";
         Models::ArtworksRepository *artworksRepository = m_CommandManager->getArtworksRepository();
@@ -957,6 +926,15 @@ namespace Models {
         Q_ASSERT(artwork != nullptr);
         if (artwork != NULL) {
             m_CommandManager->submitItemForSpellCheck(artwork->getBasicModel());
+        }
+    }
+
+    void ArtItemsModel::onArtworkSpellingInfoUpdated() {
+        LOG_INTEGR_TESTS_OR_DEBUG << "#";
+        ArtworkMetadata *artwork = qobject_cast<ArtworkMetadata *>(sender());
+        Q_ASSERT(artwork != nullptr);
+        if (artwork != NULL) {
+            m_CommandManager->submitForWarningsCheck(artwork, Common::WarningsCheckFlags::Spelling);
         }
     }
 
@@ -1274,7 +1252,11 @@ namespace Models {
         Models::SettingsModel *settingsModel = m_CommandManager->getSettingsModel();
         bool autoFindVectors = settingsModel->getAutoFindVectors();
 
-        std::shared_ptr<Commands::AddArtworksCommand> addArtworksCommand(new Commands::AddArtworksCommand(filenames, vectors, autoFindVectors, isFullDirectory));
+        Common::flag_t flags = 0;
+        Common::ApplyFlag(flags, autoFindVectors, Commands::AddArtworksCommand::FlagAutoFindVectors);
+        Common::ApplyFlag(flags, isFullDirectory, Commands::AddArtworksCommand::FlagIsFullDirectory);
+
+        std::shared_ptr<Commands::AddArtworksCommand> addArtworksCommand(new Commands::AddArtworksCommand(filenames, vectors, flags));
         std::shared_ptr<Commands::ICommandResult> result = m_CommandManager->processCommand(addArtworksCommand);
         std::shared_ptr<Commands::AddArtworksCommandResult> addArtworksResult = std::dynamic_pointer_cast<Commands::AddArtworksCommandResult>(result);
 

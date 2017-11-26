@@ -113,6 +113,43 @@ Rectangle {
         }
     }
 
+    function openDuplicatesView() {
+        artworkProxy.setupDuplicatesModel()
+
+        var wasCollapsed = applicationWindow.leftSideCollapsed
+        mainStackView.push({
+                               item: "qrc:/StackViews/DuplicatesReView.qml",
+                               properties: {
+                                   componentParent: applicationWindow,
+                                   wasLeftSideCollapsed: wasCollapsed
+                               },
+                               destroyOnPop: true
+                           })
+    }
+
+    function openSuggestionView() {
+        var callbackObject = {
+            promoteKeywords: function(keywords) {
+                artworkProxy.pasteKeywords(keywords)
+                updateChangesText()
+            }
+        }
+
+        artworkProxy.initSuggestion()
+
+        Common.launchDialog("Dialogs/KeywordsSuggestion.qml",
+                            componentParent,
+                            {callbackObject: callbackObject});
+    }
+
+    function fixSpelling() {
+        artworkProxy.suggestCorrections()
+        Common.launchDialog("Dialogs/SpellCheckSuggestionsDialog.qml",
+                            componentParent,
+                            {})
+        updateChangesText()
+    }
+
     Menu {
         id: wordRightClickMenu
         property string word
@@ -217,6 +254,92 @@ Rectangle {
         }
     }
 
+    Menu {
+        id: keywordsMoreMenu
+        objectName: "keywordsMoreMenuObject"
+
+        MenuItem {
+            text: i18.n + qsTr("Suggest keywords")
+            onTriggered: {
+                openSuggestionView()
+            }
+        }
+
+        MenuSeparator { }
+
+        MenuItem {
+            text: i18.n + qsTr("Fix spelling")
+            enabled: {
+                return artworkEditComponent.keywordsModel ?
+                            (artworkEditComponent.keywordsModel.hasKeywordsSpellErrors ||
+                             artworkEditComponent.keywordsModel.hasTitleSpellErrors ||
+                             artworkEditComponent.keywordsModel.hasDescriptionSpellErrors)
+                          : false
+            }
+            onTriggered: {
+                fixSpelling()
+            }
+        }
+
+        MenuItem {
+            text: i18.n + qsTr("Show duplicates")
+            enabled: artworkEditComponent.keywordsModel ? artworkEditComponent.keywordsModel.hasDuplicates : false
+            onTriggered: {
+                openDuplicatesView()
+            }
+        }
+
+        MenuSeparator { }
+
+        MenuItem {
+            text: i18.n + qsTr("Copy")
+            enabled: keywordsMoreMenu.keywordsCount > 0
+            onTriggered: {
+                clipboard.setText(artworkProxy.getKeywordsString())
+            }
+        }
+
+        MenuItem {
+            text: i18.n + qsTr("Paste")
+            onTriggered: {
+                flv.paste()
+                flv.activateEdit()
+            }
+        }
+
+        MenuSeparator { }
+
+        MenuItem {
+            text: i18.n + qsTr("Edit in plain text")
+            onTriggered: {
+                var callbackObject = {
+                    onSuccess: function(text, spaceIsSeparator) {
+                        artworkProxy.plainTextEdit(text, spaceIsSeparator)
+                    },
+                    onClose: function() {
+                        flv.activateEdit()
+                    }
+                }
+
+                Common.launchDialog("Dialogs/PlainTextKeywordsDialog.qml",
+                                    applicationWindow,
+                                    {
+                                        callbackObject: callbackObject,
+                                        keywordsText: artworkProxy.getKeywordsString(),
+                                        keywordsModel: artworkProxy.getBasicModel()
+                                    });
+            }
+        }
+
+        MenuItem {
+            text: i18.n + qsTr("Clear")
+            enabled: artworkProxy.keywordsCount > 0
+            onTriggered: {
+                clearKeywordsDialog.open()
+            }
+        }
+    }
+
     Component.onCompleted: {
         focus = true
 
@@ -229,7 +352,8 @@ Rectangle {
         target: helpersWrapper
         onGlobalBeforeDestruction: {
             console.debug("UI:EditArtworkHorizontalDialog # globalBeforeDestruction")
-            //closePopup()
+
+            artworkProxy.resetModel()
         }
     }
 
@@ -346,7 +470,7 @@ Rectangle {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: parent.top
-                height: 45
+                height: 55
                 color: uiColors.defaultDarkColor
 
                 RowLayout {
@@ -477,7 +601,7 @@ Rectangle {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.top: parent.top
-                height: 45
+                height: 55
                 spacing: 0
 
                 Repeater {
@@ -547,8 +671,17 @@ Rectangle {
                             anchors.right: parent.right
 
                             StyledText {
+                                id: titleText
                                 anchors.left: parent.left
                                 text: i18.n + qsTr("Title:")
+                            }
+
+                            StyledText {
+                                anchors.left: titleText.right
+                                anchors.leftMargin: 3
+                                text: "*"
+                                color: uiColors.destructiveColor
+                                visible: artworkProxy.hasTitleSpellErrors
                             }
 
                             StyledText {
@@ -661,8 +794,17 @@ Rectangle {
                             anchors.right: parent.right
 
                             StyledText {
+                                id: descriptionText
                                 anchors.left: parent.left
                                 text: i18.n + qsTr("Description:")
+                            }
+
+                            StyledText {
+                                anchors.left: descriptionText.right
+                                anchors.leftMargin: 3
+                                text: "*"
+                                color: uiColors.destructiveColor
+                                visible: artworkProxy.hasDescriptionSpellErrors
                             }
 
                             StyledText {
@@ -787,6 +929,15 @@ Rectangle {
                                 anchors.left: parent.left
                                 id: keywordsLabel
                                 text: i18.n + qsTr("Keywords:")
+                            }
+
+                            StyledText {
+                                anchors.left: keywordsLabel.right
+                                anchors.leftMargin: 3
+                                anchors.top: keywordsLabel.top
+                                text: "*"
+                                color: uiColors.destructiveColor
+                                visible: artworkProxy.hasKeywordsSpellErrors
                             }
 
                             StyledText {
@@ -941,112 +1092,112 @@ Rectangle {
                             spacing: 5
 
                             StyledLink {
+                                id: fixSpellingLink
                                 text: i18.n + qsTr("Fix spelling")
-                                enabled: artworkEditComponent.keywordsModel ? artworkEditComponent.keywordsModel.hasSpellErrors : false
-                                onClicked: {
-                                    artworkProxy.suggestCorrections()
-                                    Common.launchDialog("Dialogs/SpellCheckSuggestionsDialog.qml",
-                                                        componentParent,
-                                                        {})
-                                    updateChangesText()
+                                property bool canBeShown: {
+                                    return artworkEditComponent.keywordsModel ?
+                                                (artworkEditComponent.keywordsModel.hasKeywordsSpellErrors ||
+                                                 artworkEditComponent.keywordsModel.hasTitleSpellErrors ||
+                                                 artworkEditComponent.keywordsModel.hasDescriptionSpellErrors)
+                                              : false
                                 }
+                                enabled: canBeShown
+                                visible: canBeShown
+                                onClicked: { fixSpelling() }
                             }
 
                             StyledText {
+                                visible: fixSpellingLink.canBeShown
+                                enabled: fixSpellingLink.canBeShown
                                 text: "|"
                                 verticalAlignment: Text.AlignVCenter
                             }
 
                             StyledLink {
                                 id: removeDuplicatesText
-                                text: i18.n + qsTr("Remove Duplicates")
-                                enabled: artworkEditComponent.keywordsModel ? artworkEditComponent.keywordsModel.hasDuplicates : false
-                                onClicked: {
-                                    artworkProxy.setupDuplicatesModel()
-
-                                    var wasCollapsed = applicationWindow.leftSideCollapsed
-                                    mainStackView.push({
-                                                           item: "qrc:/StackViews/DuplicatesReView.qml",
-                                                           properties: {
-                                                               componentParent: applicationWindow,
-                                                               wasLeftSideCollapsed: wasCollapsed
-                                                           },
-                                                           destroyOnPop: true
-                                                       })
-                                }
+                                text: i18.n + qsTr("Show duplicates")
+                                property bool canBeShown: artworkEditComponent.keywordsModel ? artworkEditComponent.keywordsModel.hasDuplicates : false
+                                enabled: canBeShown
+                                visible: canBeShown
+                                onClicked: { openDuplicatesView() }
                             }
 
                             StyledText {
+                                visible: removeDuplicatesText.canBeShown
+                                enabled: removeDuplicatesText.canBeShown
                                 text: "|"
                                 verticalAlignment: Text.AlignVCenter
                             }
 
                             StyledLink {
-                                text: i18.n + qsTr("Suggest")
-                                onClicked: {
-                                    var callbackObject = {
-                                        promoteKeywords: function(keywords) {
-                                            artworkProxy.pasteKeywords(keywords)
-                                            updateChangesText()
-                                        }
-                                    }
-
-                                    artworkProxy.initSuggestion()
-
-                                    Common.launchDialog("Dialogs/KeywordsSuggestion.qml",
-                                                        componentParent,
-                                                        {callbackObject: callbackObject});
-                                }
+                                id: suggestLink
+                                property bool canBeShown: artworkProxy.keywordsCount < warningsModel.minKeywordsCount
+                                visible: canBeShown
+                                enabled: canBeShown
+                                text: i18.n + qsTr("Suggest keywords")
+                                onClicked: { openSuggestionView() }
                             }
 
                             StyledText {
+                                visible: suggestLink.canBeShown
+                                enabled: suggestLink.canBeShown
                                 text: "|"
                                 verticalAlignment: Text.AlignVCenter
                             }
 
                             StyledLink {
+                                id: copyLink
+                                property bool canBeShown: (artworkProxy.keywordsCount > 0) && (!fixSpellingLink.canBeShown) && (!removeDuplicatesText.canBeShown)
                                 text: i18.n + qsTr("Copy")
-                                enabled: artworkProxy.keywordsCount > 0
+                                enabled: canBeShown
+                                visible: canBeShown
                                 onClicked: clipboard.setText(artworkProxy.getKeywordsString())
                             }
 
                             StyledText {
+                                enabled: copyLink.canBeShown
+                                visible: copyLink.canBeShown
                                 text: "|"
                                 verticalAlignment: Text.AlignVCenter
                             }
 
-                            StyledLink {
-                                text: i18.n + qsTr("Clear")
-                                enabled: artworkProxy.keywordsCount > 0
-                                onClicked: clearKeywordsDialog.open()
-                            }
-                        }
+                            Item {
+                                width: childrenRect.width
+                                height: moreLink.height
+                                objectName: "moreLinkHost"
 
-                        Item {
-                            height: 10
-                        }
-
-                        StyledLink {
-                            id: plainTextText
-                            text: i18.n + qsTr("<u>edit in plain text</u>")
-                            normalLinkColor: uiColors.labelActiveForeground
-                            onClicked: {
-                                var callbackObject = {
-                                    onSuccess: function(text, spaceIsSeparator) {
-                                        artworkProxy.plainTextEdit(text, spaceIsSeparator)
-                                    },
-                                    onClose: function() {
-                                        flv.activateEdit()
-                                    }
+                                StyledText {
+                                    id: moreLink
+                                    color: enabled ? (moreMA.pressed ? uiColors.linkClickedColor : uiColors.artworkActiveColor) : (isActive ? uiColors.labelActiveForeground : uiColors.labelInactiveForeground)
+                                    text: i18.n + qsTr("More")
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    // \u25BE - triangle
                                 }
 
-                                Common.launchDialog("Dialogs/PlainTextKeywordsDialog.qml",
-                                                    applicationWindow,
-                                                    {
-                                                        callbackObject: callbackObject,
-                                                        keywordsText: artworkProxy.getKeywordsString(),
-                                                        keywordsModel: artworkProxy.getBasicModel()
-                                                    });
+                                TriangleElement {
+                                    anchors.left: moreLink.right
+                                    anchors.leftMargin: 4
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    // anchors.verticalCenterOffset: isFlipped ? height*0.3 : 0
+                                    //anchors.verticalCenter: parent.verticalCenter
+                                    color: moreLink.color
+                                    isFlipped: true
+                                    width: 8
+                                    height: 6
+                                }
+
+                                MouseArea {
+                                    id: moreMA
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: containsMouse ? Qt.PointingHandCursor : Qt.ArrowCursor
+                                    onClicked: {
+                                        // strange bug with clicking on the keywords field
+                                        if (!containsMouse) { return; }
+
+                                        keywordsMoreMenu.popup()
+                                    }
+                                }
                             }
                         }
                     }
@@ -1190,6 +1341,12 @@ Rectangle {
                     visible: imageMA.containsMouse
                     color: uiColors.panelSelectedColor
                     opacity: 0.6
+                }
+
+                Rectangle {
+                    color: imageMA.containsMouse ? uiColors.artworkBackground : uiColors.defaultDarkerColor
+                    anchors.fill: parent
+                    anchors.margins: 15
                 }
 
                 Image {

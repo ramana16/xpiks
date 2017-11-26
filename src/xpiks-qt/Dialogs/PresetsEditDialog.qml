@@ -38,8 +38,6 @@ Item {
         presetEditComponent.destroy();
     }
 
-    signal dismissComboboxes()
-
     PropertyAnimation { target: presetEditComponent; property: "opacity";
         duration: 400; from: 0; to: 1;
         easing.type: Easing.InOutQuad ; running: true }
@@ -281,8 +279,6 @@ Item {
                     id: rightPanelMA
                     anchors.fill: parent
                     hoverEnabled: true
-
-                    onClicked: presetEditComponent.dismissComboboxes()
                 }
 
                 ColumnLayout {
@@ -366,7 +362,7 @@ Item {
                         isActive: presetNamesListView.count > 0
                     }
 
-                    CustomComboBox {
+                    ComboBoxPopup {
                         id: groupsCombobox
                         model: presetsGroups.groupNames
                         hasLastItemAction: true
@@ -376,10 +372,12 @@ Item {
                         height: 24
                         itemHeight: 28
                         showColorSign: false
-                        z: 100500
-                        isBelow: true
+                        dropDownWidth: width
+                        glowEnabled: true
+                        glowTopMargin: 2
+                        globalParent: presetEditComponent
 
-                        onComboIndexChanged: {
+                        onComboItemSelected: {
                             if (presetNamesListView.currentItem) {
                                 var groupID = presetsGroups.findGroupIdByIndex(selectedIndex - 1)
                                 presetNamesListView.currentItem.myData.editgroup = groupID
@@ -425,13 +423,6 @@ Item {
 
                         Component.onCompleted: {
                             groupsCombobox.updateSelectedGroup()
-                        }
-
-                        Connections {
-                            target: presetEditComponent
-                            onDismissComboboxes: {
-                                groupsCombobox.closePopup()
-                            }
                         }
                     }
 

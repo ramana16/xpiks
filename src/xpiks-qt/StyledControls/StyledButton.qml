@@ -43,7 +43,11 @@ Button {
                 var result = uiColors.defaultControlColor;
 
                 if (control.enabled) {
-                    result = control.pressed ? uiColors.buttonPressedForeground : uiColors.buttonDefaultForeground;
+                    if (control.pressed) {
+                        result = uiColors.buttonPressedForeground
+                    } else {
+                        result = (control.hovered || control.isDefault) ? uiColors.buttonHoverForeground : uiColors.buttonDefaultForeground;
+                    }
                 } else {
                     result = uiColors.buttonDisabledForeground;
                 }

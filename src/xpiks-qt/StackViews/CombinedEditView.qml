@@ -63,6 +63,41 @@ Rectangle {
         combinedArtworks.removeSelectedArtworks()
     }
 
+    function openDuplicatesView() {
+        combinedArtworks.setupDuplicatesModel()
+
+        var wasCollapsed = applicationWindow.leftSideCollapsed
+        mainStackView.push({
+                               item: "qrc:/StackViews/DuplicatesReView.qml",
+                               properties: {
+                                   componentParent: applicationWindow,
+                                   wasLeftSideCollapsed: wasCollapsed
+                               },
+                               destroyOnPop: true
+                           })
+    }
+
+    function openSuggestionView() {
+        var callbackObject = {
+            promoteKeywords: function(keywords) {
+                combinedArtworks.pasteKeywords(keywords)
+            }
+        }
+
+        combinedArtworks.initSuggestion()
+
+        Common.launchDialog("Dialogs/KeywordsSuggestion.qml",
+                            componentParent,
+                            {callbackObject: callbackObject});
+    }
+
+    function fixSpelling() {
+        combinedArtworks.suggestCorrections()
+        Common.launchDialog("Dialogs/SpellCheckSuggestionsDialog.qml",
+                            componentParent,
+                            {})
+    }
+
     MessageDialog {
             id: confirmRemoveArtworksDialog
             property int itemsCount
@@ -171,6 +206,91 @@ Rectangle {
         }
     }
 
+    Menu {
+        id: keywordsMoreMenu
+
+        MenuItem {
+            text: i18.n + qsTr("Suggest keywords")
+            onTriggered: {
+                openSuggestionView()
+            }
+        }
+
+        MenuSeparator { }
+
+        MenuItem {
+            text: i18.n + qsTr("Fix spelling")
+            enabled: {
+                return keywordsWrapper.keywordsModel ?
+                            (keywordsWrapper.keywordsModel.hasKeywordsSpellErrors ||
+                             keywordsWrapper.keywordsModel.hasTitleSpellErrors ||
+                             keywordsWrapper.keywordsModel.hasDescriptionSpellErrors)
+                          : false
+            }
+            onTriggered: {
+                fixSpelling()
+            }
+        }
+
+        MenuItem {
+            text: i18.n + qsTr("Show duplicates")
+            enabled: keywordsWrapper.keywordsModel ? keywordsWrapper.keywordsModel.hasDuplicates : false
+            onTriggered: {
+                openDuplicatesView()
+            }
+        }
+
+        MenuSeparator { }
+
+        MenuItem {
+            text: i18.n + qsTr("Copy")
+            enabled: keywordsMoreMenu.keywordsCount > 0
+            onTriggered: {
+                clipboard.setText(combinedArtworks.getKeywordsString())
+            }
+        }
+
+        MenuItem {
+            text: i18.n + qsTr("Paste")
+            onTriggered: {
+                flv.paste()
+                flv.activateEdit()
+            }
+        }
+
+        MenuSeparator { }
+
+        MenuItem {
+            text: i18.n + qsTr("Edit in plain text")
+            onTriggered: {
+                var callbackObject = {
+                    onSuccess: function(text, spaceIsSeparator) {
+                        combinedArtworks.plainTextEdit(text, spaceIsSeparator)
+                    },
+                    onClose: function() {
+                        flv.activateEdit()
+                    }
+                }
+
+                Common.launchDialog("Dialogs/PlainTextKeywordsDialog.qml",
+                                    applicationWindow,
+                                    {
+                                        callbackObject: callbackObject,
+                                        keywordsText: combinedArtworks.getKeywordsString(),
+                                        keywordsModel: combinedArtworks.getBasicModel()
+                                    });
+            }
+        }
+
+        MenuItem {
+            text: i18.n + qsTr("Clear")
+            enabled: combinedArtworks.keywordsCount > 0
+            onTriggered: {
+                clearKeywordsDialog.open()
+            }
+        }
+    }
+
     Component.onCompleted: {
         focus = true
 
@@ -264,7 +384,7 @@ Rectangle {
         anchors.left: leftSpacer.right
         anchors.right: parent.right
         anchors.top: parent.top
-        height: 45
+        height: 55
         color: uiColors.defaultDarkColor
 
         RowLayout {
@@ -354,10 +474,16 @@ Rectangle {
                     }
 
                     RowLayout {
-                        spacing: 5
+                        spacing: 3
 
                         StyledText {
                             text: i18.n + qsTr("Title:")
+                        }
+
+                        StyledText {
+                            text: "*"
+                            color: uiColors.destructiveColor
+                            visible: combinedArtworks.hasTitleSpellErrors
                         }
 
                         Item {
@@ -517,9 +643,18 @@ Rectangle {
                     RowLayout {
                         anchors.left: parent.left
                         anchors.right: parent.right
+                        spacing: 3
 
                         StyledText {
                             text: i18.n + qsTr("Description:")
+                        }
+
+                        StyledText {
+                            //anchors.left: titleText.right
+                            //anchors.leftMargin: 3
+                            text: "*"
+                            color: uiColors.destructiveColor
+                            visible: combinedArtworks.hasDescriptionSpellErrors
                         }
 
                         Item {
@@ -687,7 +822,7 @@ Rectangle {
                     }
 
                     RowLayout {
-                        spacing: 5
+                        spacing: 3
 
                         StyledText {
                             id: keywordsLabel
@@ -697,6 +832,12 @@ Rectangle {
                         StyledText {
                             text: i18.n + qsTr("(comma-separated)")
                             isActive: false
+                        }
+
+                        StyledText {
+                            text: "*"
+                            color: uiColors.destructiveColor
+                            visible: combinedArtworks.hasKeywordsSpellErrors
                         }
 
                         Item {
@@ -844,140 +985,140 @@ Rectangle {
 
                     Item { height: 3 }
 
-                    Item {
+                    RowLayout {
                         anchors.left: parent.left
+                        anchors.leftMargin: 3
                         anchors.right: parent.right
+                        anchors.rightMargin: 3
                         height: childrenRect.height
+                        spacing: 5
 
-                        RowLayout {
-                            anchors.top: parent.top
-                            anchors.left: parent.left
-                            anchors.leftMargin: 3
-                            anchors.right: parent.right
-                            anchors.rightMargin: 3
-                            spacing: 5
+                        StyledCheckbox {
+                            id: appendKeywordsCheckbox
+                            text: i18.n + qsTr("Only append new keywords")
+                            onClicked: combinedArtworks.appendKeywords = checked
+                            Component.onCompleted: appendKeywordsCheckbox.checked = combinedArtworks.appendKeywords
+                        }
 
-                            StyledLink {
-                                id: plainTextText
-                                text: i18.n + qsTr("<u>edit in plain text</u>")
-                                normalLinkColor: uiColors.labelActiveForeground
-                                onClicked: {
-                                    var callbackObject = {
-                                        onSuccess: function(text, spaceIsSeparator) {
-                                            combinedArtworks.plainTextEdit(text, spaceIsSeparator)
-                                        },
-                                        onClose: function() {
-                                            flv.activateEdit()
-                                        }
-                                    }
+                        Item {
+                            Layout.fillWidth: true
+                        }
 
-                                    Common.launchDialog("Dialogs/PlainTextKeywordsDialog.qml",
-                                                        applicationWindow,
-                                                        {
-                                                            callbackObject: callbackObject,
-                                                            keywordsText: combinedArtworks.getKeywordsString(),
-                                                            keywordsModel: combinedArtworks.getBasicModel()
-                                                        });
-                                }
+                        StyledLink {
+                            id: fixSpellingLink
+                            text: i18.n + qsTr("Fix spelling")
+                            property bool canBeShown: {
+                                return keywordsWrapper.keywordsModel ?
+                                            (keywordsWrapper.keywordsModel.hasKeywordsSpellErrors ||
+                                             keywordsWrapper.keywordsModel.hasTitleSpellErrors ||
+                                             keywordsWrapper.keywordsModel.hasDescriptionSpellErrors)
+                                          : false
                             }
+                            enabled: canBeShown
+                            visible: canBeShown
+                            onClicked: { fixSpelling() }
+                        }
 
-                            Item {
-                                Layout.fillWidth: true
-                            }
+                        StyledText {
+                            visible: fixSpellingLink.canBeShown
+                            enabled: fixSpellingLink.canBeShown
+                            text: "|"
+                            verticalAlignment: Text.AlignVCenter
+                        }
 
-                            StyledLink {
-                                text: i18.n + qsTr("Fix spelling")
-                                enabled: keywordsWrapper.keywordsModel ? keywordsWrapper.keywordsModel.hasSpellErrors : false
-                                onClicked: {
-                                    Common.launchDialog("Dialogs/SpellCheckSuggestionsDialog.qml",
-                                                        componentParent,
-                                                        {})
-                                }
+                        StyledLink {
+                            id: removeDuplicatesText
+                            text: i18.n + qsTr("Show duplicates")
+                            property bool canBeShown: keywordsWrapper.keywordsModel ? keywordsWrapper.keywordsModel.hasDuplicates : false
+                            enabled: canBeShown
+                            visible: canBeShown
+                            onClicked: {
+                                openDuplicatesView()
                             }
+                        }
+
+                        StyledText {
+                            visible: removeDuplicatesText.canBeShown
+                            enabled: removeDuplicatesText.canBeShown
+                            text: "|"
+                            verticalAlignment: Text.AlignVCenter
+                        }
+
+                        StyledLink {
+                            id: suggestLink
+                            text: i18.n + qsTr("Suggest keywords")
+                            property bool canBeShown: combinedArtworks.keywordsCount < warningsModel.minKeywordsCount
+                            visible: canBeShown
+                            enabled: canBeShown
+                            onClicked: {
+                                openSuggestionView()
+                            }
+                        }
+
+                        StyledText {
+                            visible: suggestLink.canBeShown
+                            enabled: suggestLink.canBeShown
+                            text: "|"
+                            verticalAlignment: Text.AlignVCenter
+                        }
+
+                        StyledLink {
+                            id: copyLink
+                            property bool canBeShown: combinedArtworks.keywordsCount > 0
+                            text: i18.n + qsTr("Copy")
+                            enabled: canBeShown
+                            visible: canBeShown
+                            onClicked: clipboard.setText(combinedArtworks.getKeywordsString())
+                        }
+
+                        StyledText {
+                            enabled: copyLink.canBeShown
+                            visible: copyLink.canBeShown
+                            text: "|"
+                            verticalAlignment: Text.AlignVCenter
+                        }
+
+                        Item {
+                            width: childrenRect.width
+                            height: moreLink.height
 
                             StyledText {
-                                text: "|"
-                                verticalAlignment: Text.AlignVCenter
+                                id: moreLink
+                                color: enabled ? (moreMA.pressed ? uiColors.linkClickedColor : uiColors.artworkActiveColor) : (isActive ? uiColors.labelActiveForeground : uiColors.labelInactiveForeground)
+                                text: i18.n + qsTr("More")
+                                anchors.verticalCenter: parent.verticalCenter
+                                // \u25BE - triangle
                             }
 
-                            StyledLink {
-                                id: removeDuplicatesText
-                                text: i18.n + qsTr("Remove Duplicates")
-                                enabled: keywordsWrapper.keywordsModel ? keywordsWrapper.keywordsModel.hasDuplicates : false
+                            TriangleElement {
+                                anchors.left: moreLink.right
+                                anchors.leftMargin: 4
+                                anchors.verticalCenter: parent.verticalCenter
+                                // anchors.verticalCenterOffset: isFlipped ? height*0.3 : 0
+                                //anchors.verticalCenter: parent.verticalCenter
+                                color: moreLink.color
+                                isFlipped: true
+                                width: 8
+                                height: 6
+                            }
+
+                            MouseArea {
+                                id: moreMA
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: containsMouse ? Qt.PointingHandCursor : Qt.ArrowCursor
                                 onClicked: {
-                                    combinedArtworks.setupDuplicatesModel()
+                                    // strange bug with clicking on the keywords field
+                                    if (!containsMouse) { return; }
 
-                                    var wasCollapsed = applicationWindow.leftSideCollapsed
-                                    mainStackView.push({
-                                                           item: "qrc:/StackViews/DuplicatesReView.qml",
-                                                           properties: {
-                                                               componentParent: applicationWindow,
-                                                               wasLeftSideCollapsed: wasCollapsed
-                                                           },
-                                                           destroyOnPop: true
-                                                       })
-                                }
-                            }
-
-                            StyledText {
-                                text: "|"
-                                verticalAlignment: Text.AlignVCenter
-                            }
-
-                            StyledLink {
-                                text: i18.n + qsTr("Suggest")
-                                onClicked: {
-                                    var callbackObject = {
-                                        promoteKeywords: function(keywords) {
-                                            combinedArtworks.pasteKeywords(keywords)
-                                        }
-                                    }
-
-                                    combinedArtworks.initSuggestion()
-
-                                    Common.launchDialog("Dialogs/KeywordsSuggestion.qml",
-                                                        componentParent,
-                                                        {callbackObject: callbackObject});
-                                }
-                            }
-
-                            StyledText {
-                                text: "|"
-                                verticalAlignment: Text.AlignVCenter
-                            }
-
-                            StyledLink {
-                                text: i18.n + qsTr("Copy")
-                                enabled: combinedArtworks.keywordsCount > 0
-                                onClicked: clipboard.setText(combinedArtworks.getKeywordsString())
-                            }
-
-                            StyledText {
-                                text: "|"
-                                verticalAlignment: Text.AlignVCenter
-                            }
-
-                            StyledLink {
-                                text: i18.n + qsTr("Clear")
-                                enabled: combinedArtworks.keywordsCount > 0
-                                onClicked: {
-                                    if (combinedArtworks.keywordsCount > 0) {
-                                        clearKeywordsDialog.open()
-                                    }
+                                    keywordsMoreMenu.popup()
                                 }
                             }
                         }
-                    }
 
-                    Item {
-                        height: 10
-                    }
-
-                    StyledCheckbox {
-                        id: appendKeywordsCheckbox
-                        text: i18.n + qsTr("Only append new keywords")
-                        onClicked: combinedArtworks.appendKeywords = checked
-                        Component.onCompleted: appendKeywordsCheckbox.checked = combinedArtworks.appendKeywords
+                        Item {
+                            width: 1
+                        }
                     }
                 }
             }
@@ -1148,6 +1289,12 @@ Rectangle {
                     visible: !isselected && imageMA.containsMouse
                     color: uiColors.panelSelectedColor
                     opacity: 0.6
+                }
+
+                Rectangle {
+                    color: imageMA.containsMouse ? uiColors.artworkBackground : uiColors.defaultDarkerColor
+                    anchors.fill: parent
+                    anchors.margins: 15
                 }
 
                 Image {

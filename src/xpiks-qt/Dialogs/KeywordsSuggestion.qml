@@ -23,6 +23,7 @@ import xpiks 1.0
 
 Item {
     id: keywordsSuggestionComponent
+    objectName: "keywordsSuggestionComponent"
     anchors.fill: parent
     property var callbackObject
     property bool initialized: false
@@ -120,9 +121,6 @@ Item {
                 var tmp = mapToItem(keywordsSuggestionComponent, mouse.x, mouse.y);
                 old_x = tmp.x;
                 old_y = tmp.y;
-
-                sourceComboBox.closePopup()
-                searchTypeCombobox.closePopup()
             }
 
             onPositionChanged: {
@@ -150,7 +148,6 @@ Item {
             color: uiColors.popupBackgroundColor
             anchors.centerIn: parent
             Component.onCompleted: anchors.centerIn = undefined
-            z: 1000
 
             Item {
                 id: previewsPanel
@@ -168,7 +165,6 @@ Item {
                     anchors.top: parent.top
                     anchors.right: parent.right
                     height: childrenRect.height
-                    z: 100500
 
                     Rectangle {
                         id: searchRect
@@ -191,7 +187,7 @@ Item {
                         }
                     }
 
-                    CustomComboBox {
+                    ComboBoxPopup {
                         id: searchTypeCombobox
                         anchors.left: searchRect.right
                         model: [i18.n + qsTr("All Images"),
@@ -202,7 +198,11 @@ Item {
                         height: 24
                         itemHeight: 28
                         showColorSign: false
-                        onComboIndexChanged: {
+                        dropDownWidth: 150
+                        glowEnabled: true
+                        glowTopMargin: 2
+                        globalParent: keywordsSuggestionComponent
+                        onComboItemSelected: {
                         }
                     }
 
@@ -234,14 +234,6 @@ Item {
                         enabled: !keywordsSuggestor.isInProgress
                         flickableDirection: Flickable.VerticalFlick
                         boundsBehavior: Flickable.StopAtBounds
-
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: {
-                                searchTypeCombobox.closePopup()
-                                sourceComboBox.closePopup()
-                            }
-                        }
 
                         Flow {
                             id: flow
@@ -297,8 +289,6 @@ Item {
                                                 contextMenu.popup()
                                             } else {
                                                 keywordsSuggestor.setArtworkSelected(delegateIndex, !isselected)
-                                                searchTypeCombobox.closePopup()
-                                                sourceComboBox.closePopup()
                                             }
                                         }
                                     }
@@ -330,14 +320,6 @@ Item {
                             text: keywordsSuggestor.lastErrorString
                             color: uiColors.selectedArtworkBackground
                         }
-
-                        MouseArea {
-                            anchors.fill: parent
-                            onClicked: {
-                                searchTypeCombobox.closePopup()
-                                sourceComboBox.closePopup()
-                            }
-                        }
                     }
 
                     LoaderIcon {
@@ -366,9 +348,8 @@ Item {
                     anchors.right: parent.right
                     anchors.top: parent.top
                     height: childrenRect.height
-                    z: 100500 - 1
 
-                    CustomComboBox {
+                    ComboBoxPopup {
                         id: sourceComboBox
                         model: keywordsSuggestor.getEngineNames()
                         anchors.right: parent.right
@@ -376,7 +357,12 @@ Item {
                         height: 24
                         itemHeight: 28
                         enabled: !keywordsSuggestor.isInProgress
-                        onComboIndexChanged: {
+                        dropDownWidth: 200
+                        glowEnabled: true
+                        glowTopMargin: 2
+                        globalParent: keywordsSuggestionComponent
+
+                        onComboItemSelected: {
                             keywordsSuggestor.selectedSourceIndex = sourceComboBox.selectedIndex
                         }
 
@@ -455,11 +441,6 @@ Item {
 
                             onTagsPasted: {
                                 //suggestedKeywordsWrapper.pasteKeywords(tagsList)
-                            }
-
-                            onClickedInside: {
-                                searchTypeCombobox.closePopup()
-                                sourceComboBox.closePopup()
                             }
                         }
 
@@ -555,11 +536,6 @@ Item {
 
                             onTagsPasted: {
                                 //keywordsWrapper.pasteKeywords(tagsList)
-                            }
-
-                            onClickedInside: {
-                                searchTypeCombobox.closePopup()
-                                sourceComboBox.closePopup()
                             }
                         }
 

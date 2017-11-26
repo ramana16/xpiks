@@ -28,7 +28,8 @@ namespace SpellCheck {
     public:
         DuplicatesHighlighter(QTextDocument *document,
                               QMLExtensions::ColorsModel *colorsModel,
-                              SpellCheckErrorsInfo *errorsInfo);
+                              SpellCheckErrorsInfo *errorsInfo,
+                              bool highlightAll = true);
         virtual ~DuplicatesHighlighter();
 
     protected:

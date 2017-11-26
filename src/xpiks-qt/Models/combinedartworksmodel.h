@@ -38,6 +38,9 @@ namespace Models {
         Q_OBJECT
         Q_PROPERTY(QString description READ getDescription WRITE setDescription NOTIFY descriptionChanged)
         Q_PROPERTY(QString title READ getTitle WRITE setTitle NOTIFY titleChanged)
+        Q_PROPERTY(bool hasTitleSpellErrors READ getHasTitleSpellErrors NOTIFY titleSpellingChanged)
+        Q_PROPERTY(bool hasDescriptionSpellErrors READ getHasDescriptionSpellError NOTIFY descriptionSpellingChanged)
+        Q_PROPERTY(bool hasKeywordsSpellErrors READ getHasKeywordsSpellError NOTIFY keywordsSpellingChanged)
         Q_PROPERTY(int keywordsCount READ getKeywordsCount NOTIFY keywordsCountChanged)
         Q_PROPERTY(bool changeDescription READ getChangeDescription WRITE setChangeDescription NOTIFY changeDescriptionChanged)
         Q_PROPERTY(bool changeTitle READ getChangeTitle WRITE setChangeTitle NOTIFY changeTitleChanged)
@@ -118,6 +121,9 @@ namespace Models {
         void artworkUnavailable(int index);
         void completionsAvailable();
         void editingPaused();
+        void titleSpellingChanged();
+        void descriptionSpellingChanged();
+        void keywordsSpellingChanged();
 
     protected:
         virtual void signalDescriptionChanged() override { emit descriptionChanged(); }
@@ -175,7 +181,8 @@ namespace Models {
         bool findNonEmptyData(std::function<bool (const ArtworkElement *)> pred, int &index, ArtworkMetadata *&artworkMetadata);
 
     public slots:
-        void spellCheckErrorsChangedHandler();
+        void onDescriptionSpellingChanged();
+        void onTitleSpellingChanged();
         void spellCheckErrorsFixedHandler();
 
     public slots:

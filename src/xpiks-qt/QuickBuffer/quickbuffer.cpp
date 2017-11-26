@@ -20,11 +20,13 @@ namespace QuickBuffer {
         QObject(parent),
         ArtworkProxyBase(),
         m_BasicModel(m_HoldPlaceholder, this)
-    {        
+    {
         m_BasicModel.setSpellCheckInfo(&m_SpellCheckInfo);
 
-        QObject::connect(&m_BasicModel, &Common::BasicMetadataModel::spellCheckErrorsChanged,
-                         this, &QuickBuffer::spellCheckErrorsChangedHandler);
+        QObject::connect(&m_BasicModel, &Common::BasicMetadataModel::titleSpellingChanged,
+                         this, &QuickBuffer::onTitleSpellingChanged);
+        QObject::connect(&m_BasicModel, &Common::BasicMetadataModel::descriptionSpellingChanged,
+                         this, &QuickBuffer::onDescriptionSpellingChanged);
 
 //        QObject::connect(&m_BasicModel, SIGNAL(completionsAvailable()),
 //                         this, SIGNAL(completionsAvailable()));
@@ -42,9 +44,12 @@ namespace QuickBuffer {
         signalKeywordsCountChanged();
     }
 
-    void QuickBuffer::spellCheckErrorsChangedHandler() {
-        emit descriptionChanged();
+    void QuickBuffer::onTitleSpellingChanged() {
         emit titleChanged();
+    }
+
+    void QuickBuffer::onDescriptionSpellingChanged() {
+        emit descriptionChanged();
     }
 
     void QuickBuffer::userDictUpdateHandler(const QStringList &keywords, bool overwritten) {

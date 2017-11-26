@@ -101,6 +101,7 @@ Item {
                     text: parent.itemText
                     anchors.left: parent.left
                     anchors.verticalCenter: parent.verticalCenter
+                    anchors.verticalCenterOffset: -1
                     anchors.leftMargin: 16
                     color: isSelected ? uiColors.whiteColor : uiColors.inputBackgroundColor
                     anchors.right: presetMarkText.left
@@ -116,6 +117,7 @@ Item {
                     anchors.right: parent.right
                     anchors.rightMargin: 25
                     anchors.verticalCenter: parent.verticalCenter
+                    anchors.verticalCenterOffset: -1
                 }
 
                 Rectangle {
@@ -128,7 +130,6 @@ Item {
                     anchors.right: parent.right
                     anchors.leftMargin: 6
                     anchors.rightMargin: 20
-                    anchors.bottomMargin: -height/2
                 }
 
                 MouseArea {

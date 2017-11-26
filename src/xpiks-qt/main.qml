@@ -283,8 +283,7 @@ ApplicationWindow {
         onTriggered: {
             if (filteredArtItemsModel.selectedArtworksCount == 0) {
                 mustSelectDialog.open()
-            }
-            else {
+            } else {
                 var modifiedSelectedCount = filteredArtItemsModel.getModifiedSelectedCount();
 
                 if (filteredArtItemsModel.selectedArtworksCount > 0 && modifiedSelectedCount > 0) {
@@ -312,8 +311,7 @@ ApplicationWindow {
         onTriggered: {
             if (filteredArtItemsModel.selectedArtworksCount === 0) {
                 mustSelectDialog.open()
-            }
-            else {
+            } else {
                 var itemsCount = filteredArtItemsModel.selectedArtworksCount
                 if (itemsCount > 0) {
                     if (mustUseConfirmation()) {
@@ -361,6 +359,119 @@ ApplicationWindow {
                                 {
                                     logText: allText
                                 });
+        }
+    }
+
+    Action {
+        id: fixSpellingInSelectedAction
+        text: i18.n + qsTr("&Fix spelling")
+        enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
+        onTriggered: {
+            console.info("Fix spelling in selected triggered")
+            filteredArtItemsModel.suggestCorrectionsForSelected()
+            Common.launchDialog("Dialogs/SpellCheckSuggestionsDialog.qml",
+                                applicationWindow,
+                                {})
+        }
+    }
+
+    Action {
+        id: fixDuplicatesInSelectedAction
+        text: i18.n + qsTr("&Show duplicates")
+        enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
+        onTriggered: {
+            console.info("Fix duplicates in selected triggered")
+            filteredArtItemsModel.reviewDuplicatesInSelected()
+
+            var wasCollapsed = applicationWindow.leftSideCollapsed
+            applicationWindow.collapseLeftPane()
+            mainStackView.push({
+                                   item: "qrc:/StackViews/DuplicatesReView.qml",
+                                   properties: {
+                                       componentParent: applicationWindow,
+                                       wasLeftSideCollapsed: wasCollapsed
+                                   },
+                                   destroyOnPop: true
+                               })
+        }
+    }
+
+    Action {
+        id: removeMetadataAction
+        text: i18.n + qsTr("&Remove metadata")
+        enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
+        onTriggered: {
+            console.info("Remove metadata from selected triggered")
+            removeMetadataDialog.open()
+        }
+    }
+
+    Action {
+        id: deleteKeywordsAction
+        text: i18.n + qsTr("&Delete keywords")
+        enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
+        onTriggered: {
+            console.info("Delete keywords from selected triggered")
+            filteredArtItemsModel.deleteKeywordsFromSelected()
+            openDeleteKeywordsDialog()
+        }
+    }
+
+    Action {
+        id: detachVectorsAction
+        text: i18.n + qsTr("&Detach vectors")
+        enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
+        onTriggered: {
+            console.info("Detach vectors from selected triggered")
+            filteredArtItemsModel.detachVectorFromSelected()
+        }
+    }
+
+    Action {
+        id: createArchivesAction
+        text: i18.n + qsTr("&Create archives")
+        enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
+        onTriggered: {
+            console.info("Zip archives triggered")
+
+            filteredArtItemsModel.setSelectedForZipping()
+            Common.launchDialog("Dialogs/ZipArtworksDialog.qml",
+                                applicationWindow,
+                                {});
+        }
+    }
+
+    Action {
+        id: exportToCsvAction
+        text: i18.n + qsTr("&Export to CSV")
+        enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
+        onTriggered: {
+            console.info("CSV export triggered")
+
+            filteredArtItemsModel.setSelectedForCsvExport()
+            Common.launchDialog("Dialogs/CsvExportDialog.qml",
+                                applicationWindow,
+                                {});
+        }
+    }
+
+    Action {
+        id: reimportMetadataAction
+        text: i18.n + qsTr("&Reimport metadata")
+        enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
+        onTriggered: {
+            console.info("Reimport metadata triggered")
+            filteredArtItemsModel.reimportMetadataForSelected()
+        }
+    }
+
+    Action {
+        id: overwriteMetadataAction
+        text: i18.n + qsTr("&Overwrite metadata")
+        enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
+        onTriggered: {
+            console.info("Overwrite metadata triggered")
+            Common.launchDialog("Dialogs/ExportMetadata.qml", applicationWindow, {overwriteAll: true})
         }
     }
 
@@ -510,109 +621,15 @@ ApplicationWindow {
             Menu {
                 title: i18.n + qsTr("&Selected artworks")
 
-                MenuItem {
-                    text: i18.n + qsTr("&Fix spelling")
-                    enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
-                    onTriggered: {
-                        console.info("Fix spelling in selected triggered")
-                        filteredArtItemsModel.suggestCorrectionsForSelected()
-                        Common.launchDialog("Dialogs/SpellCheckSuggestionsDialog.qml",
-                                            applicationWindow,
-                                            {})
-                    }
-                }
-
-                MenuItem {
-                    text: i18.n + qsTr("&Fix duplicates")
-                    enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
-                    onTriggered: {
-                        console.info("Fix duplicates in selected triggered")
-                        filteredArtItemsModel.reviewDuplicatesInSelected()
-
-                        var wasCollapsed = applicationWindow.leftSideCollapsed
-                        applicationWindow.collapseLeftPane()
-                        mainStackView.push({
-                                               item: "qrc:/StackViews/DuplicatesReView.qml",
-                                               properties: {
-                                                   componentParent: applicationWindow,
-                                                   wasLeftSideCollapsed: wasCollapsed
-                                               },
-                                               destroyOnPop: true
-                                           })
-                    }
-                }
-
-                MenuItem {
-                    text: i18.n + qsTr("&Remove metadata")
-                    enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
-                    onTriggered: {
-                        console.info("Remove metadata from selected triggered")
-                        removeMetadataDialog.open()
-                    }
-                }
-
-                MenuItem {
-                    text: i18.n + qsTr("&Delete keywords")
-                    enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
-                    onTriggered: {
-                        console.info("Delete keywords from selected triggered")
-                        filteredArtItemsModel.deleteKeywordsFromSelected()
-                        openDeleteKeywordsDialog()
-                    }
-                }
-
-                MenuItem {
-                    text: i18.n + qsTr("&Detach vectors")
-                    enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
-                    onTriggered: {
-                        console.info("Detach vectors from selected triggered")
-                        filteredArtItemsModel.detachVectorFromSelected()
-                    }
-                }
-
-                MenuItem {
-                    text: i18.n + qsTr("&Create archives")
-                    enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
-                    onTriggered: {
-                        console.info("Zip archives triggered")
-
-                        filteredArtItemsModel.setSelectedForZipping()
-                        Common.launchDialog("Dialogs/ZipArtworksDialog.qml",
-                                            applicationWindow,
-                                            {});
-                    }
-                }
-
-                MenuItem {
-                    text: i18.n + qsTr("&Export to CSV")
-                    enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
-                    onTriggered: {
-                        console.info("CSV export triggered")
-
-                        filteredArtItemsModel.setSelectedForCsvExport()
-                        Common.launchDialog("Dialogs/CsvExportDialog.qml",
-                                            applicationWindow,
-                                            {});
-                    }
-                }
-
-                MenuItem {
-                    text: i18.n + qsTr("&Reimport metadata")
-                    enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
-                    onTriggered: {
-                        console.info("Reimport metadata triggered")
-                        filteredArtItemsModel.reimportMetadataForSelected()
-                    }
-                }
-
-                MenuItem {
-                    text: i18.n + qsTr("&Overwrite metadata")
-                    enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
-                    onTriggered: {
-                        console.info("Overwrite metadata triggered")
-                        Common.launchDialog("Dialogs/ExportMetadata.qml", applicationWindow, {overwriteAll: true})
-                    }
-                }
+                MenuItem { action: fixSpellingInSelectedAction }
+                MenuItem { action: fixDuplicatesInSelectedAction }
+                MenuItem { action: removeMetadataAction }
+                MenuItem { action: deleteKeywordsAction }
+                MenuItem { action: detachVectorsAction }
+                MenuItem { action: createArchivesAction }
+                MenuItem { action: exportToCsvAction }
+                MenuItem { action: reimportMetadataAction }
+                MenuItem { action: overwriteMetadataAction }
             }
         }
 
@@ -894,6 +911,15 @@ ApplicationWindow {
         id: artworkContextMenu
         property string filename
         property int index
+
+        MenuItem {
+            text: i18.n + qsTr("Edit")
+            onTriggered: {
+                var originalIndex = filteredArtItemsModel.getOriginalIndex(artworkContextMenu.index)
+                var metadata = filteredArtItemsModel.getArtworkMetadata(artworkContextMenu.index)
+                startOneItemEditing(metadata, artworkContextMenu.index, originalIndex)
+            }
+        }
 
         MenuItem {
             text: i18.n + qsTr("Copy to Quick Buffer")
@@ -1184,7 +1210,7 @@ ApplicationWindow {
 
     Timer {
         id: donateTimer
-        interval: 5000
+        interval: 15000
         repeat: true
         running: false
         triggeredOnStart: false
@@ -1207,6 +1233,7 @@ ApplicationWindow {
     }
 
     Rectangle {
+        id: globalHost
         color: uiColors.defaultDarkColor
         anchors.fill: parent
 
@@ -1259,7 +1286,7 @@ ApplicationWindow {
                 property int currentIndex: 0
                 property bool moreTabsAvailable: tabsModel.tabsCount > 3
                 property real expanderWidth: tabsHolder.moreTabsAvailable ? plusTab.width : 0
-                height: 45
+                height: 55
                 spacing: 0
 
                 Repeater {
@@ -1602,29 +1629,6 @@ ApplicationWindow {
                 Connections {
                     target: languagesModel
                     onLanguageChanged: filteredCountText.updateText()
-                }
-            }
-
-            StyledText {
-                text: "|"
-                isActive: false
-                verticalAlignment: Text.AlignVCenter
-            }
-
-            StyledLink {
-                text: i18.n + getOriginalText()
-                color: uiColors.labelInactiveForeground
-                verticalAlignment: Text.AlignVCenter
-                enabled: mainStackView.areActionsAllowed
-
-                function getOriginalText() {
-                    return filteredArtItemsModel.selectedArtworksCount > 1 ? qsTr("%1 selected items").arg(filteredArtItemsModel.selectedArtworksCount) : (filteredArtItemsModel.selectedArtworksCount === 1 ? qsTr("1 selected item") : qsTr("No selected items"))
-                }
-
-                onClicked: {
-                    if (filteredArtItemsModel.selectedArtworksCount > 0) {
-                        filteredArtItemsModel.searchTerm = "x:selected"
-                    }
                 }
             }
 

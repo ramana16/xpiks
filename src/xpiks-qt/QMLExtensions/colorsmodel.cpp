@@ -51,6 +51,7 @@
 #define BUTTON_DEFAULT_BACKGROUND "buttonDefaultBackground"
 #define BUTTON_DEFAULT_FOREGROUND "buttonDefaultForeground"
 #define BUTTON_HOVER_BACKGROUND "buttonHoverBackground"
+#define BUTTON_HOVER_FOREGROUND "buttonHoverForeground"
 #define BUTTON_PRESSED_BACKGROUND "buttonPressedBackground"
 #define BUTTON_PRESSED_FOREGROUND "buttonPressedForeground"
 #define BUTTON_DISABLED_FOREGROUND "buttonDisabledForeground"
@@ -110,8 +111,9 @@ ColorsMap createBlackTheme() {
     BlackTheme[BUTTON_DEFAULT_BACKGROUND] = BlackTheme[DEFAULT_CONTROL_COLOR];
     BlackTheme[BUTTON_DEFAULT_FOREGROUND] = BlackTheme[LABEL_ACTIVE_FOREGROUND];
     BlackTheme[BUTTON_HOVER_BACKGROUND] = BlackTheme[ARTWORK_ACTIVE_COLOR];
+    BlackTheme[BUTTON_HOVER_FOREGROUND] = BlackTheme[WHITE_COLOR];
     BlackTheme[BUTTON_PRESSED_BACKGROUND] = BlackTheme[DEFAULT_CONTROL_COLOR];
-    BlackTheme[BUTTON_PRESSED_FOREGROUND] = BlackTheme[WHITE_COLOR];
+    BlackTheme[BUTTON_PRESSED_FOREGROUND] = BlackTheme[LABEL_ACTIVE_FOREGROUND];
     BlackTheme[BUTTON_DISABLED_FOREGROUND] = BlackTheme[INPUT_BACKGROUND];
 
     BlackTheme[LINK_CLICKED_COLOR] = BlackTheme[WHITE_COLOR];
@@ -176,8 +178,9 @@ ColorsMap createSlateGrayTheme() {
     SlateGrayTheme[BUTTON_DEFAULT_BACKGROUND] = SlateGrayTheme[DEFAULT_CONTROL_COLOR];
     SlateGrayTheme[BUTTON_DEFAULT_FOREGROUND] = SlateGrayTheme[LABEL_ACTIVE_FOREGROUND];
     SlateGrayTheme[BUTTON_HOVER_BACKGROUND] = SlateGrayTheme[ARTWORK_ACTIVE_COLOR];
+    SlateGrayTheme[BUTTON_HOVER_FOREGROUND] = SlateGrayTheme[WHITE_COLOR];
     SlateGrayTheme[BUTTON_PRESSED_BACKGROUND] = SlateGrayTheme[DEFAULT_CONTROL_COLOR];
-    SlateGrayTheme[BUTTON_PRESSED_FOREGROUND] = SlateGrayTheme[WHITE_COLOR];
+    SlateGrayTheme[BUTTON_PRESSED_FOREGROUND] = SlateGrayTheme[LABEL_ACTIVE_FOREGROUND];
     SlateGrayTheme[BUTTON_DISABLED_FOREGROUND] = SlateGrayTheme[INPUT_BACKGROUND];
 
     SlateGrayTheme[LINK_CLICKED_COLOR] = SlateGrayTheme[WHITE_COLOR];
@@ -307,6 +310,7 @@ namespace QMLExtensions {
         setButtonDefaultBackground(getColor(BUTTON_DEFAULT_BACKGROUND, theme, fallback));
         setButtonDefaultForeground(getColor(BUTTON_DEFAULT_FOREGROUND, theme, fallback));
         setButtonHoverBackground(getColor(BUTTON_HOVER_BACKGROUND, theme, fallback));
+        setButtonHoverForeground(getColor(BUTTON_HOVER_FOREGROUND, theme, fallback));
         setButtonPressedBackground(getColor(BUTTON_PRESSED_BACKGROUND, theme, fallback));
         setButtonPressedForeground(getColor(BUTTON_PRESSED_FOREGROUND, theme, fallback));
         setButtonDisabledForeground(getColor(BUTTON_DISABLED_FOREGROUND, theme, fallback));

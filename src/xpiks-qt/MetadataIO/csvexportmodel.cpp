@@ -438,6 +438,11 @@ namespace MetadataIO {
         m_CurrentColumnsModel.setupModel(row, m_ExportPlans[row]);
     }
 
+    void CsvExportModel::requestSave() {
+        LOG_DEBUG << "#";
+        justChanged();
+    }
+
     void CsvExportModel::saveExportPlans() {
         LOG_DEBUG << "#";
         m_ExportPlansModel.sync(m_ExportPlans);

@@ -78,19 +78,16 @@ namespace AutoComplete {
 
         std::vector<CompletionResult> completionsList;
         auto *basicModel = item->getBasicModel();
-        bool needToNotify = false;
 
         if (onlyFindPresets) {
             if (m_PresetsCompletionEngine.generateCompletions(*item.get(), completionsList)) {
                 auto &completionsModel = m_AutoCompleteModel->getInnerModel();
                 completionsModel.setPresetCompletions(completionsList);
-                needToNotify = true;
             }
         } else {
             if (m_FaceCompletionEngine.generateCompletions(*item.get(), completionsList)) {
                 auto &completionsModel = m_AutoCompleteModel->getInnerModel();
                 completionsModel.setKeywordCompletions(completionsList);
-                needToNotify = true;
 
                 item->setCompletions(completionsList);
                 item->setNeedsUpdate();

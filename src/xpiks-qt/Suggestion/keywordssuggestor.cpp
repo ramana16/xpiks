@@ -367,7 +367,7 @@ namespace Suggestion {
             if (row <= m_LoadedPreviewsNumber) {
                 return suggestionArtwork->getUrl();
             } else {
-                return QVariant();
+                return QString("");
             }
 #else
             return suggestionArtwork->getUrl();

@@ -136,6 +136,7 @@ namespace Models {
     void ArtworksRepository::onUndoStackEmpty() {
         LOG_DEBUG << "#";
         cleanupEmptyDirectories();
+        emit artworksSourcesCountChanged();
     }
 
     bool ArtworksRepository::accountFile(const QString &filepath, qint64 &directoryID, Common::flag_t directoryFlags) {
@@ -318,6 +319,7 @@ namespace Models {
     }
 
     QStringList ArtworksRepository::retrieveFullDirectories() const {
+        LOG_DEBUG << "#";
         QStringList directoriesList;
 
         for (auto &dir: m_DirectoriesList) {
@@ -325,6 +327,8 @@ namespace Models {
                 directoriesList.push_back(dir.m_AbsolutePath);
             }
         }
+
+        LOG_INTEGR_TESTS_OR_DEBUG << directoriesList;
 
         return directoriesList;
     }
@@ -340,6 +344,8 @@ namespace Models {
                 LOG_DEBUG << dir << "marked as full";
                 m_DirectoriesList[index].setAddedAsDirectoryFlag(true);
                 anyChanged = true;
+            } else {
+                LOG_WARNING << "Failed to find directory" << dir;
             }
         }
 
@@ -422,6 +428,7 @@ namespace Models {
 #endif
         }
 
+        emit artworksSourcesCountChanged();
         return result;
     }
 

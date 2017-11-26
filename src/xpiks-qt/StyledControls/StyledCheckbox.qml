@@ -19,6 +19,7 @@ CheckBox {
     property int indicatorHeight: 17
     checked: true
     property color labelColor: enabled ? uiColors.labelActiveForeground : (isContrast ? uiColors.inputBackgroundColor : uiColors.labelInactiveForeground)
+    property color defaultBoxColor: uiColors.defaultControlColor
     property bool isBold: false
 
     style: CheckBoxStyle {
@@ -27,7 +28,7 @@ CheckBox {
         indicator: Rectangle {
             implicitHeight: indicatorHeight
             implicitWidth: indicatorWidth
-            color: (control.checked || control.hovered) ? uiColors.artworkActiveColor : (isContrast ? uiColors.defaultDarkColor : uiColors.defaultControlColor)
+            color: (control.checked || control.hovered) ? uiColors.artworkActiveColor : (isContrast ? uiColors.defaultDarkColor : control.defaultBoxColor)
             opacity: control.hovered ? 0.6 : 1
 
             Rectangle {

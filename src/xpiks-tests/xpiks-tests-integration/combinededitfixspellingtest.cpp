@@ -55,8 +55,8 @@ int CombinedEditFixSpellingTest::doTest() {
     QString nextDescription = basicModel->getDescription() + ' ' + wrongWord;
     basicModel->setDescription(nextDescription);
 
-    QObject::connect(basicModel, SIGNAL(spellCheckErrorsChanged()),
-                     &waiter, SIGNAL(finished()));
+    QObject::connect(basicModel, &Common::BasicMetadataModel::descriptionSpellingChanged,
+                     &waiter, &SignalWaiter::finished);
 
     m_CommandManager->submitItemForSpellCheck(basicModel);
 
@@ -92,8 +92,8 @@ int CombinedEditFixSpellingTest::doTest() {
     VERIFY(combinedKeywordsModel->hasDescriptionSpellError(), "Description spell error was not propagated");
 
     SignalWaiter combinedEditWaiter;
-    QObject::connect(combinedKeywordsModel, SIGNAL(spellCheckErrorsChanged()),
-                     &combinedEditWaiter, SIGNAL(finished()));
+    QObject::connect(combinedKeywordsModel, &Common::BasicMetadataModel::descriptionSpellingChanged,
+                     &combinedEditWaiter, &SignalWaiter::finished);
 
     spellSuggestor->submitCorrections();
 

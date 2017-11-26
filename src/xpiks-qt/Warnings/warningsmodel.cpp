@@ -140,6 +140,26 @@ namespace Warnings {
     {
     }
 
+    void WarningsModel::setWarningsSettingsModel(const WarningsSettingsModel *warningsSettingsModel) {
+        Q_ASSERT(warningsSettingsModel != nullptr);
+        m_WarningsSettingsModel = warningsSettingsModel;
+
+#ifndef CORE_TESTS
+        QObject::connect(warningsSettingsModel, &WarningsSettingsModel::settingsUpdated,
+                         this, &WarningsModel::warningsSettingsUpdated);
+#endif
+    }
+
+    int WarningsModel::getMinKeywordsCount() const {
+        int count = 0;
+
+        if (m_WarningsSettingsModel != nullptr) {
+            count = m_WarningsSettingsModel->getMinKeywordsCount();
+        }
+
+        return count;
+    }
+
     QStringList WarningsModel::describeWarnings(int index) const {
         Q_ASSERT(m_WarningsSettingsModel != nullptr);
         QStringList descriptions;

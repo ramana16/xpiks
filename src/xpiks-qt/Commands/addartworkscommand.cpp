@@ -51,6 +51,7 @@ std::shared_ptr<Commands::ICommandResult> Commands::AddArtworksCommand::execute(
     const int newFilesCount = artworksRepository->getNewFilesCount(m_FilePathes);
     const int initialCount = artItemsModel->rowCount();
     const bool filesWereAccounted = artworksRepository->beginAccountingFiles(m_FilePathes);
+    const bool isFullDirectory = getIsFullDirectoryFlag();
 
     MetadataIO::ArtworksSnapshot artworksToImport;
     artworksToImport.reserve(newFilesCount);
@@ -97,7 +98,7 @@ std::shared_ptr<Commands::ICommandResult> Commands::AddArtworksCommand::execute(
 
     int attachedCount = artItemsModel->attachVectors(vectorsHash, modifiedIndices);
 
-    if (m_AutoDetectVectors) {
+    if (getAutoFindVectorsFlag()) {
         QVector<int> autoAttachedIndices;
         attachedCount = Helpers::findAndAttachVectors(artworksToImport.getWeakSnapshot(), autoAttachedIndices);
 
@@ -107,19 +108,7 @@ std::shared_ptr<Commands::ICommandResult> Commands::AddArtworksCommand::execute(
     }
 
     if (newFilesCount > 0) {
-        commandManager->readMetadata(artworksToImport);
-        accountVectors(artworksRepository, artworksToImport.getWeakSnapshot());
-        artworksRepository->refresh();
-
-        std::unique_ptr<UndoRedo::IHistoryItem> addArtworksItem(new UndoRedo::AddArtworksHistoryItem(getCommandID(), initialCount, newFilesCount));
-        commandManager->recordHistoryItem(addArtworksItem);
-
-        // Generating previews was in the metadata io coordinator
-        // called _after_ the reading to make reading (in Xpiks)
-        // as fast as possible. Not needed if using only exiftool now
-        commandManager->generatePreviews(artworksToImport);
-        commandManager->addToRecentFiles(filesToWatch);
-        commandManager->saveSessionInBackground();
+        afterAddedHandler(commandManager, artworksToImport, filesToWatch, initialCount, newFilesCount);
     }
 
     artItemsModel->raiseArtworksAdded(newFilesCount, attachedCount);
@@ -127,6 +116,27 @@ std::shared_ptr<Commands::ICommandResult> Commands::AddArtworksCommand::execute(
 
     std::shared_ptr<AddArtworksCommandResult> result(new AddArtworksCommandResult(newFilesCount));
     return result;
+}
+
+void Commands::AddArtworksCommand::afterAddedHandler(CommandManager *commandManager, const MetadataIO::ArtworksSnapshot &artworksToImport, QStringList filesToWatch, int initialCount, int newFilesCount) const {
+    Models::ArtworksRepository *artworksRepository = commandManager->getArtworksRepository();
+
+    commandManager->readMetadata(artworksToImport);
+    accountVectors(artworksRepository, artworksToImport.getWeakSnapshot());
+    artworksRepository->refresh();
+
+    std::unique_ptr<UndoRedo::IHistoryItem> addArtworksItem(new UndoRedo::AddArtworksHistoryItem(getCommandID(), initialCount, newFilesCount));
+    commandManager->recordHistoryItem(addArtworksItem);
+
+    // Generating previews was in the metadata io coordinator
+    // called _after_ the reading to make reading (in Xpiks)
+    // as fast as possible. Not needed if using only exiftool now
+    commandManager->generatePreviews(artworksToImport);
+    commandManager->addToRecentFiles(filesToWatch);
+
+    if (!getIsSessionRestore()) {
+        commandManager->saveSessionInBackground();
+    }
 }
 
 void Commands::AddArtworksCommand::decomposeVectors(QHash<QString, QHash<QString, QString> > &vectors) const {

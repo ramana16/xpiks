@@ -23,7 +23,7 @@ namespace Common {
     }
 
     void StatefulEntity::initState() {
-        LOG_DEBUG << "#";
+        LOG_DEBUG << m_StateName;
         QString localConfigPath;
 
 #if defined(QT_DEBUG)

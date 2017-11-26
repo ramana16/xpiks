@@ -19,8 +19,6 @@ import "../Constants/UIConfig.js" as UIConfig
 
 ColumnLayout {
     anchors.fill: parent
-    anchors.leftMargin: 10
-    anchors.rightMargin: 10
     anchors.topMargin: 15
     anchors.bottomMargin: 10
     spacing: 0
@@ -31,6 +29,8 @@ ColumnLayout {
         height: 30
         anchors.left: parent.left
         anchors.right: parent.right
+        anchors.leftMargin: 10
+        anchors.rightMargin: 10
         text: i18.n + qsTr("Add directory")
         onClicked: chooseDirectoryDialog.open()
         enabled: (applicationWindow.openedDialogsCount == 0)
@@ -45,6 +45,8 @@ ColumnLayout {
         height: 30
         anchors.left: parent.left
         anchors.right: parent.right
+        anchors.leftMargin: 10
+        anchors.rightMargin: 10
         text: i18.n + qsTr("Add files", "button")
         action: addFilesAction
     }
@@ -58,137 +60,125 @@ ColumnLayout {
         anchors.left: parent.left
         anchors.right: parent.right
 
-        StyledScrollView {
+        ListView {
+            id: sourcesListView
+            model: artworkRepository
+            boundsBehavior: Flickable.StopAtBounds
             anchors.fill: parent
-            anchors.topMargin: 5
 
-            ListView {
-                id: sourcesListView
-                model: artworkRepository
-                boundsBehavior: Flickable.StopAtBounds
-                anchors.fill: parent
+            displaced: Transition {
+                NumberAnimation { properties: "x,y"; duration: 230 }
+            }
 
-                spacing: 10
+            addDisplaced: Transition {
+                NumberAnimation { properties: "x,y"; duration: 230 }
+            }
 
-                displaced: Transition {
-                    NumberAnimation { properties: "x,y"; duration: 230 }
+            removeDisplaced: Transition {
+                NumberAnimation { properties: "x,y"; duration: 230 }
+            }
+
+            delegate: Rectangle {
+                id: sourceWrapper
+                enabled: !isremoved
+                property int delegateIndex: index
+
+                function getDirectoryIndex() {
+                    return artworkRepository.getOriginalIndex(index)
                 }
 
-                addDisplaced: Transition {
-                    NumberAnimation { properties: "x,y"; duration: 230 }
+                color: isselected ? uiColors.inactiveControlColor : "transparent"
+                anchors.left: parent.left
+                anchors.right: parent.right
+                height: 50
+
+                MouseArea {
+                    id: itemSelectionMA
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: {
+                        artworkRepository.selectDirectory(sourceWrapper.delegateIndex)
+                    }
                 }
 
-                removeDisplaced: Transition {
-                    NumberAnimation { properties: "x,y"; duration: 230 }
+                Rectangle {
+                    anchors.fill: parent
+                    color: uiColors.panelColor
+                    visible: itemSelectionMA.containsMouse
+                    opacity: isselected ? 0.3 : 1
                 }
 
-                delegate: Rectangle {
-                    id: sourceWrapper
-                    enabled: !isremoved
-                    property int delegateIndex: index
+                RowLayout {
+                    spacing: 10
+                    anchors.fill: parent
 
-                    function getDirectoryIndex() {
-                        return artworkRepository.getOriginalIndex(index)
+                    Item {
+                        id: placeholder1
+                        width: 10
                     }
 
-                    color: isselected ? uiColors.itemsSourceSelected : uiColors.itemsSourceBackground
-                    width: parent.width
-                    height: 31
-                    Layout.minimumWidth: 237
+                    Rectangle {
+                        width: 4
+                        height: width
+                        radius: width / 2
+                        color: uiColors.artworkActiveColor
+                        enabled: isselected
+                        visible: isselected
+                    }
 
-                    /*MouseArea {
-                        anchors.fill: parent
-                        onClicked: {
-                            filteredArtItemsModel.selectDirectory(sourceWrapper.delegateIndex)
-                        }
-                    }*/
+                    StyledText {
+                        id: directoryPath
+                        Layout.fillWidth: true
+                        anchors.verticalCenter: parent.verticalCenter
+                        height: parent.height
+                        color: uiColors.itemsSourceForeground
+                        text: path + " (" + usedimagescount + ")"
+                        elide: Text.ElideMiddle
+                        font.bold: isselected
+                        font.strikeout: isremoved
+                    }
 
-                    RowLayout {
-                        spacing: 10
-                        anchors.fill: parent
+                    StyledText {
+                        enabled: debug
+                        visible: debug
+                        text: isfull ? "(full)" : ""
+                        isActive: false
+                    }
 
-                        Item {
-                            id: placeholder1
-                            width: 1
-                        }
+                    CloseIcon {
+                        width: 14
+                        height: 14
+                        anchors.verticalCenter: parent.verticalCenter
+                        isActive: false
+                        crossOpacity: 1
+                        thickness: 2
 
-                        StyledText {
-                            id: directoryPath
-                            Layout.fillWidth: true
-                            anchors.verticalCenter: parent.verticalCenter
-                            height: 31
-                            color: uiColors.itemsSourceForeground
-                            text: path + " (" + usedimagescount + ")"
-                            elide: Text.ElideMiddle
-                            font.bold: isselected
-                            font.strikeout: isremoved
-
-                            MouseArea {
-                                id: selectionMA
-                                anchors.fill: parent
-                                cursorShape: Qt.PointingHandCursor
-                                hoverEnabled: true
-                                onClicked: {
-                                    artworkRepository.selectDirectory(sourceWrapper.delegateIndex)
-                                }
+                        onItemClicked: {
+                            if (mustUseConfirmation()) {
+                                confirmRemoveDirectoryDialog.directoryIndex = sourceWrapper.getDirectoryIndex()
+                                confirmRemoveDirectoryDialog.open()
+                            } else {
+                                filteredArtItemsModel.removeArtworksDirectory(sourceWrapper.getDirectoryIndex())
                             }
                         }
+                    }
 
-                        StyledText {
-                            enabled: debug
-                            visible: debug
-                            text: isfull ? "(full)" : ""
-                            isActive: false
-                        }
-
-                        CloseIcon {
-                            width: 14
-                            height: 14
-                            anchors.verticalCenter: parent.verticalCenter
-                            isActive: false
-                            crossOpacity: 1
-
-                            onItemClicked: {
-                                if (mustUseConfirmation()) {
-                                    confirmRemoveDirectoryDialog.directoryIndex = sourceWrapper.getDirectoryIndex()
-                                    confirmRemoveDirectoryDialog.open()
-                                } else {
-                                    filteredArtItemsModel.removeArtworksDirectory(sourceWrapper.getDirectoryIndex())
-                                }
-                            }
-                        }
-
-                        Item {
-                            id: placeholder2
-                            width: 1
-                        }
+                    Item {
+                        id: placeholder2
+                        width: 10
                     }
                 }
             }
-        }
-    }
 
-    StyledBlackButton {
-        implicitHeight: 30
-        height: 30
-        anchors.left: parent.left
-        anchors.right: parent.right
-        text: i18.n + qsTr("Support Xpiks")
-        defaultForeground: uiColors.goldColor
-        hoverForeground: uiColors.buttonDefaultForeground
-        visible: {
-            if (switcher.isDonationCampaign1Active) {
-                if ((artworkRepository.artworksSourcesCount > 0) ||
-                        (switcher.isDonateCampaign1LinkClicked)) {
-                    return true
-                }
+            CustomScrollbar {
+                id: filesFoldersScrollbar
+                anchors.topMargin: 0
+                anchors.bottomMargin: 0
+                anchors.rightMargin: 0
+                flickable: sourcesListView
+                //canShow: leftPanelMA.containsMouse
             }
-
-            return false
-        }
-        onClicked: {
-            Qt.openUrlExternally(switcher.donateCampaign1Link)
-            switcher.setDonateCampaign1LinkClicked()
         }
     }
 }

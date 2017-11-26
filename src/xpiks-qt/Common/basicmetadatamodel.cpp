@@ -74,7 +74,7 @@ namespace Common {
 
         for (int i = 0; i < length; ++i) {
             const QString &word = descriptionWords.at(i);
-            if (m_SpellCheckInfo->hasDescriptionError(word)) {
+            if (m_SpellCheckInfo->hasDescriptionError(word.toLower())) {
                 LOG_DEBUG << word << "has wrong spelling";
 
                 misspelledWords.append(word);
@@ -94,7 +94,7 @@ namespace Common {
 
         for (int i = 0; i < length; ++i) {
             const QString &word = titleWords.at(i);
-            if (m_SpellCheckInfo->hasTitleError(word)) {
+            if (m_SpellCheckInfo->hasTitleError(word.toLower())) {
                 LOG_DEBUG << word << "has wrong spelling";
 
                 misspelledWords.append(word);
@@ -239,7 +239,7 @@ namespace Common {
         const QStringList &descriptionWords = getDescriptionWords();
 
         foreach(const QString &word, descriptionWords) {
-            if (m_SpellCheckInfo->hasDescriptionError(word)) {
+            if (m_SpellCheckInfo->hasDescriptionError(word.toLower())) {
                 anyError = true;
                 break;
             }
@@ -254,7 +254,7 @@ namespace Common {
         const QStringList &titleWords = getTitleWords();
 
         foreach(const QString &word, titleWords) {
-            if (m_SpellCheckInfo->hasTitleError(word)) {
+            if (m_SpellCheckInfo->hasTitleError(word.toLower())) {
                 anyError = true;
                 break;
             }
@@ -264,11 +264,11 @@ namespace Common {
     }
 
     bool BasicMetadataModel::hasDescriptionWordSpellError(const QString &word) {
-        return m_SpellCheckInfo->hasDescriptionError(word);
+        return m_SpellCheckInfo->hasDescriptionError(word.toLower());
     }
 
     bool BasicMetadataModel::hasTitleWordSpellError(const QString &word) {
-        return m_SpellCheckInfo->hasTitleError(word);
+        return m_SpellCheckInfo->hasTitleError(word.toLower());
     }
 
     bool BasicMetadataModel::hasSpellErrors() {
@@ -346,12 +346,26 @@ namespace Common {
         clearKeywords();
     }
 
-    void BasicMetadataModel::notifyDescriptionSpellCheck() {
-        emit spellCheckResultsReady();
+    void BasicMetadataModel::notifySpellCheckResults(SpellCheckFlags flags) {
+        LOG_INTEGR_TESTS_OR_DEBUG << (int)flags;
+
+        if (Common::HasFlag(flags, Common::SpellCheckFlags::Description)) {
+            notifyDescriptionSpellingChanged();
+        }
+
+        if (Common::HasFlag(flags, Common::SpellCheckFlags::Title)) {
+            notifyTitleSpellingChanged();
+        }
+
+        BasicKeywordsModel::notifySpellCheckResults(flags);
     }
 
-    void BasicMetadataModel::notifyTitleSpellCheck() {
-        emit spellCheckResultsReady();
+    void BasicMetadataModel::notifyDescriptionSpellingChanged() {
+        emit descriptionSpellingChanged();
+    }
+
+    void BasicMetadataModel::notifyTitleSpellingChanged() {
+        emit titleSpellingChanged();
     }
 
     void BasicMetadataModel::updateDescriptionSpellErrors(const QHash<QString, Common::WordAnalysisResult> &results, bool withStemInfo) {
@@ -362,13 +376,14 @@ namespace Common {
 
         foreach(const QString &word, descriptionWords) {
             Common::WordAnalysisResult wordResult = results.value(word, defaultWordAnalysisResult);
+            const QString lowerWord = word.toLower();
 
             if (wordResult.m_IsCorrect == false) {
-                descriptionErrors.insert(word.toLower());
+                descriptionErrors.insert(lowerWord);
             }
 
             if (withStemInfo && wordResult.m_HasDuplicates) {
-                descriptionDuplicates.insert(word);
+                descriptionDuplicates.insert(lowerWord);
             }
         }
 
@@ -385,15 +400,16 @@ namespace Common {
         QStringList titleWords = getTitleWords();
         Common::WordAnalysisResult defaultWordAnalysisResult;
 
-        foreach(const QString &word, titleWords) {            
+        foreach(const QString &word, titleWords) {
             Common::WordAnalysisResult wordResult = results.value(word, defaultWordAnalysisResult);
+            const QString lowerWord = word.toLower();
 
             if (wordResult.m_IsCorrect == false) {
-                titleErrors.insert(word.toLower());
+                titleErrors.insert(lowerWord);
             }
 
             if (withStemInfo && wordResult.m_HasDuplicates) {
-                titleDuplicates.insert(word);
+                titleDuplicates.insert(lowerWord);
             }
         }
 

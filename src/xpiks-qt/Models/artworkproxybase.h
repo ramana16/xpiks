@@ -66,6 +66,8 @@ namespace Models {
         QString doGetKeywordsString();
         void doSuggestCorrections();
         void doSetupDuplicatesModel();
+
+    protected:
         QSyntaxHighlighter *doCreateDescriptionHighligher(QQuickTextDocument *document);
         QSyntaxHighlighter *doCreateTitleHighlighter(QQuickTextDocument *document);
         void doSpellCheckDescription();
@@ -73,11 +75,18 @@ namespace Models {
         void doPlainTextEdit(const QString &rawKeywords, bool spaceIsSeparator);
         bool getHasTitleWordSpellError(const QString &word);
         bool getHasDescriptionWordSpellError(const QString &word);
+        bool getHasTitleSpellErrors();
+        bool getHasDescriptionSpellError();
+        bool getHasKeywordsSpellError();
+
+    protected:
         bool doExpandPreset(int keywordIndex, KeywordsPresets::ID_t presetID);
         bool doAppendPreset(KeywordsPresets::ID_t presetID);
         bool doExpandLastKeywordAsPreset();
         bool doAddPreset(KeywordsPresets::ID_t presetID);
         bool doRemovePreset(KeywordsPresets::ID_t presetID);
+
+    protected:
         void doInitSuggestion();
         void doRegisterAsCurrentItem();
         void doHandleUserDictChanged(const QStringList &keywords, bool overwritten);

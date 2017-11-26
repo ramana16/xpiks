@@ -10,6 +10,7 @@
 
 import QtQuick 2.2
 import QtQuick.Layouts 1.1
+import QtQuick.Dialogs 1.1
 import "../Constants" 1.0
 import "../Components"
 import "../StyledControls"
@@ -38,7 +39,7 @@ ColumnLayout {
         height: 10
     }
 
-    CustomComboBox {
+    ComboBoxPopup {
         id: dictionariesComboBox
         model: translationManager.dictionaries
         anchors.left: parent.left
@@ -47,15 +48,18 @@ ColumnLayout {
         itemHeight: 28
         showColorSign: true
         hasLastItemAction: true
+        dropDownWidth: width
+        glowEnabled: true
+        glowTopMargin: 2
+        globalParent: globalHost
         lastActionText: i18.n + qsTr("Add dictionary...")
         comboboxBackgroundColor: uiColors.popupBackgroundColor
-        z: 100500
 
         onLastItemActionInvoked: {
             openDictionaryDialog.open()
         }
 
-        onComboIndexChanged: {
+        onComboItemSelected: {
             translationManager.selectedDictionaryIndex = dictionariesComboBox.selectedIndex
             trTextEdit.forceActiveFocus()
             trTextEdit.cursorPosition = trTextEdit.text.length

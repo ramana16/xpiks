@@ -219,7 +219,7 @@ namespace Models {
         void backupRequired();
         void editingPaused();
         void aboutToBeRemoved();
-        void spellCheckErrorsChanged();
+        void spellingInfoUpdated();
         void thumbnailUpdated();
 
     protected:

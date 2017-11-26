@@ -34,8 +34,6 @@ Item {
         csvExportComponent.destroy()
     }
 
-    signal dismissComboboxes();
-
     Component.onCompleted: focus = true
     Keys.onEscapePressed: closePopup()
 
@@ -394,8 +392,6 @@ Item {
                     id: rightPanelMA
                     anchors.fill: parent
                     hoverEnabled: true
-
-                    onClicked: csvExportComponent.dismissComboboxes()
                 }
 
                 ColumnLayout {
@@ -556,7 +552,6 @@ Item {
                                 anchors.right: parent.right
                                 height: 30
                                 focus: true
-                                z: propertiesCombobox.isOpened ? 100500 : 0
                                 enabled: columnsListView.enabled && !rightPanel.isSystemPlan
 
                                 function focusEditing() {
@@ -636,20 +631,24 @@ Item {
                                         width: 20
                                     }
 
-                                    CustomComboBox {
+                                    ComboBoxPopup {
                                         id: propertiesCombobox
                                         model: propertiesModel
                                         width: 170
                                         height: 24
                                         itemHeight: 28
                                         showColorSign: false
-                                        maxCount: columnsScrollbar.visible ? 4 : 5
+                                        maxCount: 5 //columnsScrollbar.visible ? 4 : 5
                                         //z: 100500 - columnWrapper.delegateIndex
                                         isBelow: true
                                         withRelativePosition: true
-                                        relativeParent: columnsHost
+                                        //relativeParent: columnsHost
+                                        dropDownWidth: 170
+                                        glowEnabled: true
+                                        glowTopMargin: 2
+                                        globalParent: csvExportComponent
 
-                                        onComboIndexChanged: {
+                                        onComboItemSelected: {
                                             myData.editproperty = selectedIndex
                                         }
 
@@ -664,13 +663,6 @@ Item {
 
                                         Component.onCompleted: {
                                             selectedIndex = myData ? myData.property : 0
-                                        }
-
-                                        Connections {
-                                            target: csvExportComponent
-                                            onDismissComboboxes: {
-                                                propertiesCombobox.closePopup()
-                                            }
                                         }
                                     }
 

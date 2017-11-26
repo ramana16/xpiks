@@ -23,9 +23,8 @@ import "../Components"
 import "../Common.js" as Common
 import "../Constants/UIConfig.js" as UIConfig
 
-ColumnLayout {
+Item {
     id: mainGridComponent
-    spacing: 0
     property int myLeftMargin: applicationWindow.leftSideCollapsed ? 0 : 2
 
     Action {
@@ -46,6 +45,56 @@ ColumnLayout {
                 filteredArtItemsModel.unselectFilteredArtworks();
             }
         }
+    }
+
+    function fixDuplicatesAction(artworkIndex) {
+        artItemsModel.setupDuplicatesModel(artworkIndex)
+
+        var wasCollapsed = applicationWindow.leftSideCollapsed
+        applicationWindow.collapseLeftPane()
+        mainStackView.push({
+                               item: "qrc:/StackViews/DuplicatesReView.qml",
+                               properties: {
+                                   componentParent: applicationWindow,
+                                   wasLeftSideCollapsed: wasCollapsed
+                               },
+                               destroyOnPop: true
+                           })
+    }
+
+    function suggestKeywords(artworkIndex) {
+        var callbackObject = {
+            promoteKeywords: function(keywords) {
+                artItemsModel.addSuggestedKeywords(artworkIndex, keywords)
+            }
+        }
+
+        artItemsModel.initSuggestion(artworkIndex)
+
+        Common.launchDialog("../Dialogs/KeywordsSuggestion.qml",
+                            applicationWindow,
+                            {callbackObject: callbackObject});
+    }
+
+    function fixSpelling(artworkIndex) {
+        artItemsModel.suggestCorrections(artworkIndex)
+        Common.launchDialog("../Dialogs/SpellCheckSuggestionsDialog.qml",
+                            applicationWindow,
+                            {})
+    }
+
+    function closeAutoComplete() {
+        if (typeof workflowHost.autoCompleteBox !== "undefined") {
+            workflowHost.autoCompleteBox.closePopup()
+        }
+    }
+
+    function clearFilter() {
+        filteredArtItemsModel.searchTerm = ''
+        if (filterText.length > 0) {
+            filterText.text = ''
+        }
+        filterClearTimer.start()
     }
 
     Menu {
@@ -138,123 +187,157 @@ ColumnLayout {
         }
     }
 
-    function closeAutoComplete() {
-        if (typeof workflowHost.autoCompleteBox !== "undefined") {
-            workflowHost.autoCompleteBox.closePopup()
+    Menu {
+        id: keywordsMoreMenu
+        property int artworkIndex
+        property int filteredIndex
+        property int keywordsCount: 0
+        property var editableTags
+        property bool hasDuplicates: false
+        property bool hasSpellingErrors: false
+
+        MenuItem {
+            text: i18.n + qsTr("Suggest keywords")
+            onTriggered: {
+               suggestKeywords(keywordsMoreMenu.artworkIndex)
+            }
+        }
+
+        MenuSeparator { }
+
+        MenuItem {
+            text: i18.n + qsTr("Fix spelling")
+            enabled: keywordsMoreMenu.hasSpellingErrors
+            onTriggered: {
+                fixSpelling(keywordsMoreMenu.artworkIndex)
+            }
+        }
+
+        MenuItem {
+            text: i18.n + qsTr("Show duplicates")
+            enabled: keywordsMoreMenu.hasDuplicates
+            onTriggered: {
+                fixDuplicatesAction(keywordsMoreMenu.artworkIndex)
+            }
+        }
+
+        MenuSeparator { }
+
+        MenuItem {
+            text: i18.n + qsTr("Copy")
+            enabled: keywordsMoreMenu.keywordsCount > 0
+            onTriggered: {
+                var keywordsString = filteredArtItemsModel.getKeywordsString(keywordsMoreMenu.filteredIndex)
+                clipboard.setText(keywordsString)
+            }
+        }
+
+        MenuItem {
+            text: i18.n + qsTr("Paste")
+            onTriggered: {
+                keywordsMoreMenu.editableTags.paste()
+                keywordsMoreMenu.editableTags.activateEdit()
+            }
+        }
+
+        MenuSeparator { }
+
+        MenuItem {
+            text: i18.n + qsTr("Edit in plain text")
+            onTriggered: {
+                var callbackObject = {
+                    onSuccess: function(text, spaceIsSeparator) {
+                        artItemsModel.plainTextEdit(keywordsMoreMenu.artworkIndex, text, spaceIsSeparator)
+                    },
+                    onClose: function() {
+                        filteredArtItemsModel.focusCurrentItemKeywords(keywordsMoreMenu.filteredIndex)
+                        //flv.activateEdit()
+                    }
+                }
+
+                var basicModel = filteredArtItemsModel.getBasicModel(keywordsMoreMenu.filteredIndex)
+                var keywordsString = filteredArtItemsModel.getKeywordsString(keywordsMoreMenu.filteredIndex)
+
+                Common.launchDialog("../Dialogs/PlainTextKeywordsDialog.qml",
+                                    applicationWindow,
+                                    {
+                                        callbackObject: callbackObject,
+                                        keywordsText: keywordsString,
+                                        keywordsModel: basicModel
+                                    });
+            }
+        }
+
+        MenuItem {
+            text: i18.n + qsTr("Clear")
+            enabled: keywordsMoreMenu.keywordsCount > 0
+            onTriggered: {
+                filteredArtItemsModel.clearKeywords(keywordsMoreMenu.filteredIndex)
+            }
         }
     }
 
-    function clearFilter() {
-        filteredArtItemsModel.searchTerm = ''
-        if (filterText.length > 0) {
-            filterText.text = ''
-        }
-        filterClearTimer.start()
+    Menu {
+        id: selectedArtworksMoreMenu
+
+        MenuItem { action: fixSpellingInSelectedAction }
+        MenuItem { action: fixDuplicatesInSelectedAction }
+        MenuItem { action: removeMetadataAction }
+        MenuItem { action: deleteKeywordsAction }
+        MenuItem { action: detachVectorsAction }
+        MenuItem { action: createArchivesAction }
+        MenuItem { action: exportToCsvAction }
+        MenuItem { action: reimportMetadataAction }
+        MenuItem { action: overwriteMetadataAction }
     }
 
     Rectangle {
-        height: 45
+        id: toolbar
+        height: 55
         color: uiColors.defaultDarkColor
+        // tooltip-related
         z: 2000
         anchors.left: parent.left
         anchors.leftMargin: mainGridComponent.myLeftMargin
         anchors.right: parent.right
+        anchors.top: parent.top
 
         RowLayout {
-            spacing: 10
-            anchors.left: parent.left
-            anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
-            anchors.leftMargin: 0
-            anchors.rightMargin: mainScrollView.areScrollbarsVisible ? 35 : 20
-
-            Item {
-                width: 5
-            }
-
-            LayoutButton {
-                enabled: artworkRepository.artworksSourcesCount > 0
-                anchors.verticalCenter: parent.verticalCenter
-                isListLayout: applicationWindow.listLayout
-                onLayoutChanged: {
-                    applicationWindow.listLayout = !applicationWindow.listLayout
-                    closeAutoComplete()
-                }
-            }
-
-            Item {
-                Layout.fillWidth: true
-            }
-
-            StyledButton {
-                text: i18.n + qsTr("Remove")
-                width: 90
-                action: removeAction
-            }
-
-            StyledButton {
-                text: i18.n + qsTr("Edit")
-                width: 90
-                action: editAction
-            }
-
-            StyledButton {
-                text: i18.n + qsTr("Save")
-                width: mainScrollView.areScrollbarsVisible ? 88 : 98
-                action: saveAction
-            }
-
-            StyledButton {
-                text: i18.n + qsTr("Upload")
-                width: 100
-                action: uploadAction
-            }
-        }
-    }
-
-    Rectangle {
-        anchors.left: parent.left
-        anchors.leftMargin: mainGridComponent.myLeftMargin
-        anchors.right: parent.right
-        Layout.fillHeight: true
-        color: uiColors.defaultControlColor
-
-        Item {
-            id: workflowHost
-            anchors.topMargin: 10
+            spacing: 20
             anchors.fill: parent
-            property var autoCompleteBox
+            anchors.leftMargin: 10
 
-            function onAutoCompleteClose() {
-                autoCompleteBox = undefined
-            }
+            Rectangle {
+                id: checkBoxWrapper
+                height: 35
+                anchors.verticalCenter: parent.verticalCenter
+                width: childrenRect.width
+                property bool isHovered: selectAllMA.containsMouse || selectAllCheckbox.hovered || selectionCombobox.hovered
+                color: (enabled && (isHovered || selectionCombobox.isOpened)) ? (selectionCombobox.isOpened ? uiColors.inactiveControlColor : uiColors.defaultControlColor) : "transparent"
+                enabled: artworkRepository.artworksSourcesCount > 0
 
-            Item {
-                id: filterRect
-                anchors.top: parent.top
-                anchors.left: parent.left
-                anchors.right: parent.right
-                height: 34
+                MouseArea {
+                    id: selectAllMA
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onClicked: {
+                        selectionCombobox.openPopup()
+                    }
+                }
 
                 StyledCheckbox {
                     id: selectAllCheckbox
                     anchors.left: parent.left
-                    anchors.leftMargin: 20
+                    anchors.leftMargin: 10
                     anchors.verticalCenter: parent.verticalCenter
-                    isContrast: true
-                    enabled: artworkRepository.artworksSourcesCount > 0
-                    text: i18.n + getOriginalText()
+                    defaultBoxColor: (checkBoxWrapper.isHovered && !selectionCombobox.isOpened) ? uiColors.inactiveControlColor : uiColors.defaultControlColor
+                    text: ""
                     checked: filteredArtItemsModel.selectedArtworksCount > 0
-
-                    function getOriginalText() {
-                        return filteredArtItemsModel.selectedArtworksCount === 0 ? qsTr("Select all") : qsTr("Select none")
-                    }
 
                     onClicked: {
                         if (checked) {
                             filteredArtItemsModel.selectFilteredArtworks();
-                        }
-                        else {
+                        } else {
                             filteredArtItemsModel.unselectFilteredArtworks();
                         }
                     }
@@ -267,82 +350,361 @@ ColumnLayout {
                     }
                 }
 
-                Rectangle {
-                    anchors.right: searchButton.left
-                    anchors.rightMargin: 10
+                ComboBoxPopup {
+                    id: selectionCombobox
+                    anchors.left: selectAllCheckbox.right
                     anchors.verticalCenter: parent.verticalCenter
-                    color: uiColors.defaultDarkColor
-                    width: (artworkRepository.artworksSourcesCount > 0 && mainScrollView.areScrollbarsVisible) ? 288 : 298
-                    height: UIConfig.textInputHeight
+                    width: 20
+                    height: 28
+                    dropDownWidth: 120
+                    showColorSign: false
+                    showHeader: false
+                    globalParent: globalHost
+                    arrowBackground: "transparent"
+                    arrowDisabledBackground: "transparent"
+                    dockLeft: true
+                    dockLeftMargin: -37
+                    dockTopMargin: 3
+                    maxCount: 6
+                    glowEnabled: false
+                    glowTopMargin: 5
+                    voidSelection: true
 
-                    StyledTextInput {
-                        id: filterText
-                        width: (artworkRepository.artworksSourcesCount > 0 && mainScrollView.areScrollbarsVisible) ? 250 : 260
-                        height: UIConfig.textInputHeight
-                        clip: true
-                        anchors.left: parent.left
-                        anchors.leftMargin: 5
-                        enabled: artworkRepository.artworksSourcesCount > 0
-                        selectionColor: uiColors.inputInactiveForeground
-                        selectedTextColor: uiColors.whiteColor
+                    model: [i18.n + qsTr("All", "select"),
+                        i18.n + qsTr("None", "select"),
+                        i18.n + qsTr("Modified", "select"),
+                        i18.n + qsTr("Images", "select"),
+                        i18.n + qsTr("Vectors", "select"),
+                        i18.n + qsTr("Videos", "select")]
 
-                        onAccepted: {
-                            filteredArtItemsModel.searchTerm = text
+                    onComboItemSelected: {
+                        filteredArtItemsModel.selectArtworksEx(index)
+                    }
+                }
+            }
+
+            StyledText {
+                text: i18.n + qsTr("%1 selected").arg(filteredArtItemsModel.selectedArtworksCount)
+                color: filteredArtItemsModel.selectedArtworksCount > 0 ? uiColors.artworkActiveColor : uiColors.selectedArtworkBackground
+                verticalAlignment: Text.AlignVCenter
+                enabled: mainStackView.areActionsAllowed
+            }
+
+            ToolButton {
+                enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && editAction.enabled
+                normalIcon: uiColors.t + helpersWrapper.getAssetForTheme("Edit_icon_normal.svg", settingsModel.selectedThemeIndex)
+                disabledIcon: uiColors.t + helpersWrapper.getAssetForTheme("Edit_icon_disabled.svg", settingsModel.selectedThemeIndex)
+                hoveredIcon: uiColors.t + helpersWrapper.getAssetForTheme("Edit_icon_hovered.svg", settingsModel.selectedThemeIndex)
+                clickedIcon: uiColors.t + helpersWrapper.getAssetForTheme("Edit_icon_clicked.svg", settingsModel.selectedThemeIndex)
+                tooltip: i18.n + qsTr("Edit")
+                onClicked: editAction.trigger()
+            }
+
+            ToolButton {
+                enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && removeAction.enabled
+                normalIcon: uiColors.t + helpersWrapper.getAssetForTheme("Remove_icon_normal.svg", settingsModel.selectedThemeIndex)
+                disabledIcon: uiColors.t + helpersWrapper.getAssetForTheme("Remove_icon_disabled.svg", settingsModel.selectedThemeIndex)
+                hoveredIcon: uiColors.t + helpersWrapper.getAssetForTheme("Remove_icon_hovered.svg", settingsModel.selectedThemeIndex)
+                clickedIcon: uiColors.t + helpersWrapper.getAssetForTheme("Remove_icon_clicked.svg", settingsModel.selectedThemeIndex)
+                tooltip: i18.n + qsTr("Remove")
+                onClicked: removeAction.trigger()
+            }
+
+            ToolButton {
+                enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && saveAction.enabled
+                normalIcon: uiColors.t + helpersWrapper.getAssetForTheme("Save_icon_normal.svg", settingsModel.selectedThemeIndex)
+                disabledIcon: uiColors.t + helpersWrapper.getAssetForTheme("Save_icon_disabled.svg", settingsModel.selectedThemeIndex)
+                hoveredIcon: uiColors.t + helpersWrapper.getAssetForTheme("Save_icon_hovered.svg", settingsModel.selectedThemeIndex)
+                clickedIcon: uiColors.t + helpersWrapper.getAssetForTheme("Save_icon_clicked.svg", settingsModel.selectedThemeIndex)
+                tooltip: i18.n + qsTr("Save")
+                onClicked: saveAction.trigger()
+            }
+
+            ToolButton {
+                enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && uploadAction.enabled
+                normalIcon: uiColors.t + helpersWrapper.getAssetForTheme("Upload_icon_normal.svg", settingsModel.selectedThemeIndex)
+                disabledIcon: uiColors.t + helpersWrapper.getAssetForTheme("Upload_icon_disabled.svg", settingsModel.selectedThemeIndex)
+                hoveredIcon: uiColors.t + helpersWrapper.getAssetForTheme("Upload_icon_hovered.svg", settingsModel.selectedThemeIndex)
+                clickedIcon: uiColors.t + helpersWrapper.getAssetForTheme("Upload_icon_clicked.svg", settingsModel.selectedThemeIndex)
+                tooltip: i18.n + qsTr("Upload")
+                onClicked: uploadAction.trigger()
+            }
+
+            ToolButton {
+                enabled: filteredArtItemsModel.selectedArtworksCount > 0
+                normalIcon: uiColors.t + helpersWrapper.getAssetForTheme("More_icon_normal.svg", settingsModel.selectedThemeIndex)
+                disabledIcon: uiColors.t + helpersWrapper.getAssetForTheme("More_icon_disabled.svg", settingsModel.selectedThemeIndex)
+                hoveredIcon: uiColors.t + helpersWrapper.getAssetForTheme("More_icon_hovered.svg", settingsModel.selectedThemeIndex)
+                clickedIcon: uiColors.t + helpersWrapper.getAssetForTheme("More_icon_clicked.svg", settingsModel.selectedThemeIndex)
+                tooltip: i18.n + qsTr("More")
+                onClicked: selectedArtworksMoreMenu.popup()
+            }
+
+            Item {
+                Layout.fillWidth: true
+            }
+
+            ToolButton {
+                normalIcon: "qrc:/Graphics/Icon_heart.svg"
+                disabledIcon: "qrc:/Graphics/Icon_heart.svg"
+                hoveredIcon: "qrc:/Graphics/Icon_heart.svg"
+                clickedIcon: "qrc:/Graphics/Icon_heart_clicked.svg"
+                tooltip: i18.n + qsTr("Support Xpiks")
+                iconWidth: 25
+                iconHeight: 25
+                visible: {
+                    if (switcher.isDonationCampaign1Active) {
+                        if ((artworkRepository.artworksSourcesCount > 0) ||
+                                (switcher.isDonateCampaign1LinkClicked)) {
+                            return true
                         }
-
-                        Connections {
-                            target: filteredArtItemsModel
-                            onSearchTermChanged: filterText.text = filteredArtItemsModel.searchTerm
-                        }
                     }
 
-                    CloseIcon {
-                        width: 14
-                        height: 14
-                        anchors.right: parent.right
-                        anchors.rightMargin: 5
-                        enabled: filterText.length > 0
-                        anchors.verticalCenter: parent.verticalCenter
-                        onItemClicked: clearFilter()
-                    }
+                    return false
+                }
+                onClicked: {
+                    Qt.openUrlExternally(switcher.donateCampaign1Link)
+                    switcher.setDonateCampaign1LinkClicked()
+                }
+            }
 
-                    StyledText {
-                        text: i18.n + qsTr("Search...   x:empty  x:modified")
-                        visible: !(filterClearTimer.running || filterText.activeFocus || (filterText.length > 0))
-                        color: uiColors.inputHintForeground
-                        anchors.left: parent.left
-                        anchors.leftMargin: 7
-                        anchors.verticalCenter: parent.verticalCenter
-                    }
+            LayoutButton {
+                enabled: artworkRepository.artworksSourcesCount > 0
+                anchors.verticalCenter: parent.verticalCenter
+                isListLayout: applicationWindow.listLayout
+                onLayoutChanged: {
+                    applicationWindow.listLayout = !applicationWindow.listLayout
+                    closeAutoComplete()
+                }
+            }
 
-                    Timer {
-                        id: filterClearTimer
-                        running: false
-                        interval: 750
-                        repeat: false
+            Rectangle {
+                id: filterTab
+                anchors.bottom: parent.bottom
+                anchors.top: parent.top
+                width: 55
+                enabled: artworkRepository.artworksSourcesCount > 0
+                color: filterWrapper.isOpened ? uiColors.defaultControlColor : uiColors.defaultDarkColor
+
+                ZoomAmplifier {
+                    visible: !filterWrapper.isOpened
+                    enabled: !filterWrapper.isOpened
+                    isPlus: false
+                    showPlus: false
+                    width: 20
+                    height: 20
+                    anchors.centerIn: parent
+                    lineColor: enabled ? (searchTabMA.pressed ? uiColors.whiteColor : (searchTabMA.containsMouse ? uiColors.labelActiveForeground : uiColors.labelInactiveForeground)) : uiColors.selectedArtworkBackground
+                    thickness: 2
+
+                    CustomTooltip {
+                        id: searchTooltip
+                        tooltipText: i18.n + qsTr("Filter")
+                        withOwnMouseArea: false
                     }
                 }
 
-                StyledBlackButton {
-                    id: searchButton
-                    anchors.right: parent.right
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.rightMargin:  mainScrollView.areScrollbarsVisible ? 35 : 20
-                    width: 100
-                    text: i18.n + qsTr("Search")
-                    enabled: artworkRepository.artworksSourcesCount > 0
-                    onClicked: filteredArtItemsModel.searchTerm = filterText.text
+                Item {
+                    id: crossIcon
+                    visible: filterWrapper.isOpened
+                    enabled: filterWrapper.isOpened
+                    property color iconColor: {
+                        var resultColor = uiColors.artworkActiveColor
+                        if (searchTabMA.containsMouse) {
+                            if (searchTabMA.pressed) {
+                                resultColor = uiColors.whiteColor
+                            } else {
+                                resultColor = uiColors.labelActiveForeground
+                            }
+                        }
+
+                        return resultColor
+                    }
+
+                    property double thickness: 2
+                    width: 20
+                    height: 20
+                    anchors.centerIn: parent
+
+                    Rectangle {
+                        color: crossIcon.iconColor
+                        width: parent.width
+                        height: crossIcon.thickness
+                        transformOrigin: Item.Center
+                        rotation: 45
+                        transform: Translate { y: (crossIcon.width - crossIcon.thickness)/2 }
+                    }
+
+                    Rectangle {
+                        color: crossIcon.iconColor
+                        width: parent.width
+                        height: crossIcon.thickness
+                        transformOrigin: Item.Center
+                        rotation: 135
+                        transform: Translate { y: (crossIcon.width - crossIcon.thickness)/2 }
+                    }
                 }
+
+                MouseArea {
+                    id: searchTabMA
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onEntered: { searchTooltip.trigger() }
+                    onExited: { searchTooltip.dismiss() }
+                    onClicked: {
+                        console.info("Toggle artworks filter")
+
+                        if (filterWrapper.isOpened) {
+                            clearFilter()
+                        }
+
+                        filterWrapper.userOpened = !filterWrapper.userOpened
+                    }
+                }
+            }
+        }
+    }
+
+    Rectangle {
+        id: filterWrapper
+        property bool userOpened: false
+        property bool isOpened: (filteredArtItemsModel.searchTerm !== "") || userOpened
+        anchors.left: parent.left
+        anchors.leftMargin: mainGridComponent.myLeftMargin
+        anchors.right: parent.right
+        anchors.top: toolbar.bottom
+        color: uiColors.defaultControlColor
+        height: 0
+        opacity: 0
+
+        states: [
+            State {
+                name: "opened"
+                when: filterWrapper.isOpened
+                PropertyChanges {
+                    target: filterWrapper
+                    height: 45
+                    opacity: 1
+                }
+            }
+        ]
+
+        transitions: Transition {
+            PropertyAnimation {
+                properties: "height, opacity"
+                easing.type: "InOutQuad"
+            }
+        }
+
+        Rectangle {
+            id: filterRect
+            anchors.left: parent.left
+            anchors.leftMargin: 20
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.verticalCenterOffset: 2
+            color: uiColors.defaultDarkColor
+            width: 400
+            height: UIConfig.textInputHeight
+
+            ZoomAmplifier {
+                id: zoomIcon
+                isPlus: false
+                showPlus: false
+                width: 14
+                height: 15
+                anchors.left: parent.left
+                anchors.leftMargin: 10
+                anchors.verticalCenter: parent.verticalCenter
+                lineColor: uiColors.labelInactiveForeground
+                thickness: 1
+            }
+
+            StyledTextInput {
+                id: filterText
+                width: parent.width - 50
+                height: UIConfig.textInputHeight
+                clip: true
+                anchors.left: zoomIcon.right
+                anchors.leftMargin: 10
+                enabled: artworkRepository.artworksSourcesCount > 0
+                selectionColor: uiColors.inputInactiveForeground
+                selectedTextColor: uiColors.whiteColor
+                color: uiColors.inputInactiveForeground
+
+                onAccepted: {
+                    filteredArtItemsModel.searchTerm = text
+                }
+
+                Connections {
+                    target: filteredArtItemsModel
+                    onSearchTermChanged: filterText.text = filteredArtItemsModel.searchTerm
+                }
+            }
+
+            CloseIcon {
+                width: 14
+                height: 14
+                anchors.right: parent.right
+                anchors.rightMargin: 5
+                enabled: filterText.length > 0
+                anchors.verticalCenter: parent.verticalCenter
+                onItemClicked: clearFilter()
+            }
+
+            StyledText {
+                text: i18.n + qsTr("Search...")
+                visible: !(filterClearTimer.running || filterText.activeFocus || (filterText.length > 0))
+                color: uiColors.inputHintForeground
+                anchors.left: filterText.left
+                anchors.verticalCenter: parent.verticalCenter
+            }
+
+            Timer {
+                id: filterClearTimer
+                running: false
+                interval: 750
+                repeat: false
+            }
+        }
+
+        StyledBlackButton {
+            id: searchButton
+            anchors.left: filterRect.right
+            anchors.leftMargin: 20
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.verticalCenterOffset: 2
+            width: 100
+            text: i18.n + qsTr("Search")
+            enabled: artworkRepository.artworksSourcesCount > 0
+            onClicked: filteredArtItemsModel.searchTerm = filterText.text
+        }
+    }
+
+    Rectangle {
+        anchors.left: parent.left
+        anchors.leftMargin: mainGridComponent.myLeftMargin
+        anchors.right: parent.right
+        anchors.top: filterWrapper.bottom
+        anchors.bottom: parent.bottom
+        color: uiColors.defaultControlColor
+
+        Item {
+            id: workflowHost
+            anchors.fill: parent
+            property var autoCompleteBox
+
+            function onAutoCompleteClose() {
+                autoCompleteBox = undefined
             }
 
             Rectangle {
                 id: undoRedoRect
                 color: uiColors.defaultDarkColor
                 width: parent.width
-                height: 4
+                height: 0
                 opacity: 0
-                anchors.topMargin: 0
-                anchors.top: filterRect.bottom
+                anchors.topMargin: 4
+                anchors.top: parent.top
 
                 states: [
                     State {
@@ -351,70 +713,17 @@ ColumnLayout {
                         PropertyChanges {
                             target: undoRedoRect
                             height: 40
+                            opacity: 1
                         }
                     }
                 ]
 
-                transitions: [
-                    Transition {
-                        from: ""; to: "canundo"
-                        ParallelAnimation {
-                            NumberAnimation {
-                                target: undoRedoRect
-                                properties: "height";
-                                from: 4
-                                to: 40
-                                easing.type: "InOutQuad";
-                                duration: 250
-                            }
-                            NumberAnimation {
-                                target: undoRedoRect
-                                properties: "anchors.topMargin";
-                                from: 0
-                                to: 4
-                                easing.type: "InOutQuad";
-                                duration: 250
-                            }
-                            NumberAnimation {
-                                target: undoRedoRect
-                                properties: "opacity";
-                                from: 0
-                                to: 1
-                                easing.type: "InOutQuad";
-                                duration: 250
-                            }
-                        }
-                    },
-                    Transition {
-                        from: "canundo"; to: ""
-                        ParallelAnimation {
-                            NumberAnimation {
-                                target: undoRedoRect
-                                properties: "height";
-                                from: 40
-                                to: 4
-                                easing.type: "InOutQuad";
-                                duration: 250
-                            }
-                            NumberAnimation {
-                                target: undoRedoRect
-                                properties: "anchors.topMargin";
-                                from: 4
-                                to: 0
-                                easing.type: "InOutQuad";
-                                duration: 250
-                            }
-                            NumberAnimation {
-                                target: undoRedoRect
-                                properties: "opacity";
-                                from: 1
-                                to: 0
-                                easing.type: "InOutQuad";
-                                duration: 250
-                            }
-                        }
+                transitions: Transition {
+                    PropertyAnimation {
+                        properties: "height, opacity"
+                        easing.type: "InOutQuad"
                     }
-                ]
+                }
 
                 Rectangle {
                     anchors.left: parent.left
@@ -581,13 +890,20 @@ ColumnLayout {
                         Rectangle {
                             id: rowWrapper
                             objectName: "artworkDelegate"
-                            property bool isHighlighted: isselected || wrappersScope.GridView.isCurrentItem
+                            property bool isHighlighted: isItemSelected || wrappersScope.GridView.isCurrentItem
                             color: isHighlighted ? uiColors.selectedArtworkBackground : uiColors.artworkBackground
                             property var artworkModel: filteredArtItemsModel.getArtworkMetadata(index)
                             property var keywordsModel: filteredArtItemsModel.getBasicModel(index)
                             property int delegateIndex: index
-                            property bool isItemSelected: isselected
+                            property bool isItemSelected: filteredArtItemsModel.s || isselected
                             anchors.fill: parent
+
+                            function popupArtworkContextMenu() {
+                                console.log("Context menu for artwork")
+                                artworkContextMenu.filename = filename;
+                                artworkContextMenu.index = rowWrapper.delegateIndex
+                                artworkContextMenu.popup()
+                            }
 
                             function getIndex() {
                                 return filteredArtItemsModel.getOriginalIndex(index)
@@ -631,8 +947,10 @@ ColumnLayout {
                                     if (directionSign === +1) {
                                         descriptionTextInput.forceActiveFocus()
                                         descriptionTextInput.cursorPosition = descriptionTextInput.text.length
-                                    } else {
+                                    } else if (directionSign === -1) {
                                         flv.activateEdit()
+                                    } else {
+                                        console.warn("Wrong direction sign: " + directionSign)
                                     }
 
                                     artworksHost.positionViewAtIndex(rowWrapper.delegateIndex, GridView.Contain)
@@ -642,8 +960,9 @@ ColumnLayout {
                             Connections {
                                 target: rowWrapper.keywordsModel
 
-                                onSpellCheckResultsReady: {
-                                    descriptionTextInput.deselect()
+                                // HACK:
+                                onDescriptionSpellingChanged: descriptionTextInput.deselect()
+                                onTitleSpellingChanged: {
                                     if (columnLayout.isWideEnough) {
                                         titleTextInput.deselect()
                                     }
@@ -716,8 +1035,8 @@ ColumnLayout {
 
                                 Rectangle {
                                     id: isModifiedRectangle
-                                    color: ismodified ? uiColors.artworkModifiedColor : uiColors.artworkSavedColor
-                                    width: applicationWindow.listLayout ? 6 : 3
+                                    color: ismodified ? uiColors.artworkModifiedColor : "transparent"
+                                    width: 3
                                     anchors.left: parent.left
                                     anchors.top: parent.top
                                     anchors.bottom: parent.bottom
@@ -760,7 +1079,8 @@ ColumnLayout {
                                         //checked: isselected
                                         focus: false
                                         anchors.left: parent.left
-                                        anchors.verticalCenter: parent.verticalCenter
+                                        anchors.top: parent.top
+                                        anchors.topMargin: descriptionText.height + 24
                                         activeFocusOnPress: false
                                         onClicked: editisselected = checked
                                         Component.onCompleted: itemCheckedCheckbox.checked = isselected
@@ -770,10 +1090,18 @@ ColumnLayout {
                                             onAllItemsSelectedChanged: {
                                                 itemCheckedCheckbox.checked = rowWrapper.isItemSelected
                                             }
-                                            onForceUnselected: {
-                                                itemCheckedCheckbox.checked = false
-                                            }
                                         }
+                                    }
+
+                                    DotsButton {
+                                        id: artworkDots
+                                        z: 10
+                                        defaultDotsColor: rowWrapper.isHighlighted ? uiColors.labelInactiveForeground : uiColors.inactiveControlColor
+                                        anchors.top: itemCheckedCheckbox.top
+                                        anchors.topMargin: imageHost.height - artworkDots.height + 2
+                                        anchors.left: parent.left
+                                        anchors.leftMargin: -5
+                                        onDotsClicked: rowWrapper.popupArtworkContextMenu()
                                     }
                                 }
 
@@ -805,6 +1133,11 @@ ColumnLayout {
                                             width: 150
                                             property double desiredHeight: descriptionRect.height + keywordsWrapper.height + keywordsLabel.height + 10
                                             height: desiredHeight > 150 ? 150 : desiredHeight
+
+                                            Rectangle {
+                                                color: rowWrapper.isHighlighted ? uiColors.artworkBackground : uiColors.defaultDarkerColor
+                                                anchors.fill: parent
+                                            }
 
                                             Image {
                                                 id: artworkImage
@@ -872,10 +1205,7 @@ ColumnLayout {
 
                                                 onClicked: {
                                                     if (mouse.button == Qt.RightButton && openedDialogsCount == 0) {
-                                                        console.log("Context menu for artwork")
-                                                        artworkContextMenu.filename = filename;
-                                                        artworkContextMenu.index = rowWrapper.delegateIndex
-                                                        artworkContextMenu.popup()
+                                                        rowWrapper.popupArtworkContextMenu()
                                                     } else {
                                                         if (dblClickTimer.running) {
                                                             dblClickTimer.stop()
@@ -926,12 +1256,28 @@ ColumnLayout {
                                         }
 
                                         StyledText {
+                                            anchors.left: descriptionText.right
+                                            anchors.leftMargin: 3
+                                            text: "*"
+                                            color: uiColors.destructiveColor
+                                            visible: rowWrapper.keywordsModel.hasDescriptionSpellErrors
+                                        }
+
+                                        StyledText {
                                             id: titleText
                                             anchors.left: titleRect.left
                                             anchors.top: parent.top
                                             visible: columnLayout.isWideEnough
                                             text: i18.n + qsTr("Title:")
                                             isActive: rowWrapper.isHighlighted
+                                        }
+
+                                        StyledText {
+                                            anchors.left: titleText.right
+                                            anchors.leftMargin: 3
+                                            text: "*"
+                                            color: uiColors.destructiveColor
+                                            visible: rowWrapper.keywordsModel.hasTitleSpellErrors
                                         }
 
                                         Rectangle {
@@ -1163,6 +1509,15 @@ ColumnLayout {
                                         }
 
                                         StyledText {
+                                            anchors.left: keywordsLabel.right
+                                            anchors.leftMargin: 3
+                                            anchors.top: keywordsLabel.top
+                                            text: "*"
+                                            color: uiColors.destructiveColor
+                                            visible: rowWrapper.keywordsModel.hasKeywordsSpellErrors
+                                        }
+
+                                        StyledText {
                                             text: keywordscount
                                             anchors.right: parent.right
                                             anchors.top: descriptionRect.bottom
@@ -1312,7 +1667,7 @@ ColumnLayout {
 
                                                 onRightClickedInside: {
                                                     filteredPresetsModel.searchTerm = ''
-                                                    presetsMenu.artworkIndex = rowWrapper.delegateIndex
+                                                    presetsMenu.artworkIndex = rowWrapper.getIndex()
                                                     presetsMenu.popup()
                                                 }
                                             }
@@ -1322,6 +1677,7 @@ ColumnLayout {
                                                 anchors.bottomMargin: -5
                                                 anchors.rightMargin: -15
                                                 flickable: flv
+                                                handleColor: rowWrapper.isHighlighted ? uiColors.artworkActiveColor : uiColors.panelSelectedColor
                                             }
                                         }
 
@@ -1333,36 +1689,6 @@ ColumnLayout {
                                             anchors.topMargin: 3
                                             spacing: 5
 
-                                            StyledLink {
-                                                id: plainTextText
-                                                text: i18.n + qsTr("<u>edit in plain text</u>")
-                                                normalLinkColor: uiColors.labelActiveForeground
-                                                visible: rowWrapper.isHighlighted
-                                                onClicked: {
-                                                    var callbackObject = {
-                                                        onSuccess: function(text, spaceIsSeparator) {
-                                                            artItemsModel.plainTextEdit(rowWrapper.getIndex(), text, spaceIsSeparator)
-                                                        },
-                                                        onClose: function() {
-                                                            try {
-                                                                flv.activateEdit()
-                                                            } catch (error) {
-                                                                console.warn(error)
-                                                            }
-                                                        }
-                                                    }
-
-                                                    Common.launchDialog("../Dialogs/PlainTextKeywordsDialog.qml",
-                                                                        applicationWindow,
-                                                                        {
-                                                                            callbackObject: callbackObject,
-                                                                            keywordsText: keywordsstring,
-                                                                            keywordsModel: filteredArtItemsModel.getBasicModel(rowWrapper.delegateIndex)
-
-                                                                        });
-                                                }
-                                            }
-
                                             Item {
                                                 Layout.fillWidth: true
                                             }
@@ -1370,18 +1696,16 @@ ColumnLayout {
                                             StyledLink {
                                                 id: fixSpellingText
                                                 text: i18.n + qsTr("Fix spelling")
-                                                enabled: rowWrapper.keywordsModel ? rowWrapper.keywordsModel.hasSpellErrors : false
-                                                isActive: rowWrapper.isHighlighted
-
-                                                onClicked: {
-                                                    artItemsModel.suggestCorrections(rowWrapper.getIndex())
-                                                    Common.launchDialog("../Dialogs/SpellCheckSuggestionsDialog.qml",
-                                                                        applicationWindow,
-                                                                        {})
-                                                }
+                                                property bool canBeShown: rowWrapper.keywordsModel ? rowWrapper.keywordsModel.hasAnySpellingError : false
+                                                enabled: canBeShown
+                                                visible: canBeShown
+                                                isActive: true //rowWrapper.isHighlighted
+                                                onClicked: { fixSpelling(rowWrapper.getIndex()) }
                                             }
 
                                             StyledText {
+                                                enabled: fixSpellingText.canBeShown
+                                                visible: fixSpellingText.canBeShown
                                                 text: "|"
                                                 isActive: rowWrapper.isHighlighted
                                                 verticalAlignment: Text.AlignVCenter
@@ -1389,71 +1713,99 @@ ColumnLayout {
 
                                             StyledLink {
                                                 id: removeDuplicatesText
-                                                text: i18.n + qsTr("Remove Duplicates")
-                                                enabled: rowWrapper.keywordsModel ? rowWrapper.keywordsModel.hasDuplicates : false
-                                                isActive: rowWrapper.isHighlighted
-
-                                                onClicked: {
-                                                    artItemsModel.setupDuplicatesModel(rowWrapper.getIndex())
-
-                                                    var wasCollapsed = applicationWindow.leftSideCollapsed
-                                                    applicationWindow.collapseLeftPane()
-                                                    mainStackView.push({
-                                                                           item: "qrc:/StackViews/DuplicatesReView.qml",
-                                                                           properties: {
-                                                                               componentParent: applicationWindow,
-                                                                               wasLeftSideCollapsed: wasCollapsed
-                                                                           },
-                                                                           destroyOnPop: true
-                                                                       })
-                                                }
+                                                text: i18.n + qsTr("Show duplicates")
+                                                property bool canBeShown: rowWrapper.keywordsModel ? rowWrapper.keywordsModel.hasDuplicates : false
+                                                enabled: canBeShown
+                                                visible: canBeShown
+                                                isActive: true //rowWrapper.isHighlighted
+                                                onClicked: { fixDuplicatesAction(rowWrapper.getIndex()) }
                                             }
 
                                             StyledText {
+                                                enabled: removeDuplicatesText.canBeShown
+                                                visible: removeDuplicatesText.canBeShown
                                                 text: "|"
                                                 isActive: rowWrapper.isHighlighted
                                                 verticalAlignment: Text.AlignVCenter
                                             }
 
                                             StyledLink {
-                                                text: i18.n + qsTr("Suggest")
-                                                onClicked: {
-                                                    var callbackObject = {
-                                                        promoteKeywords: function(keywords) {
-                                                            artItemsModel.addSuggestedKeywords(rowWrapper.getIndex(), keywords)
-                                                        }
-                                                    }
-
-                                                    artItemsModel.initSuggestion(rowWrapper.getIndex())
-
-                                                    Common.launchDialog("../Dialogs/KeywordsSuggestion.qml",
-                                                                        applicationWindow,
-                                                                        {callbackObject: callbackObject});
-                                                }
+                                                id: suggestLink
+                                                text: i18.n + qsTr("Suggest keywords")
+                                                property bool canBeShown: (keywordscount < warningsModel.minKeywordsCount) && (!removeDuplicatesText.canBeShown) && (!fixSpellingText.canBeShown)
+                                                visible: canBeShown
+                                                enabled: canBeShown
+                                                onClicked: { suggestKeywords(rowWrapper.getIndex()) }
                                             }
 
                                             StyledText {
+                                                visible: suggestLink.canBeShown
+                                                enabled: suggestLink.canBeShown
                                                 text: "|"
                                                 isActive: rowWrapper.isHighlighted
                                                 verticalAlignment: Text.AlignVCenter
                                             }
 
                                             StyledLink {
+                                                id: copyLink
                                                 text: i18.n + qsTr("Copy")
-                                                enabled: keywordscount > 0
+                                                property bool canBeShown: (keywordscount > 0) && (!suggestLink.canBeShown) && (!removeDuplicatesText.canBeShown) && (!fixSpellingText.canBeShown)
+                                                enabled: canBeShown
+                                                visible: canBeShown
                                                 onClicked: clipboard.setText(keywordsstring)
                                             }
 
                                             StyledText {
+                                                visible: copyLink.canBeShown
+                                                enabled: copyLink.canBeShown
                                                 text: "|"
                                                 isActive: rowWrapper.isHighlighted
                                                 verticalAlignment: Text.AlignVCenter
                                             }
 
-                                            StyledLink {
-                                                text: i18.n + qsTr("Clear")
-                                                enabled: keywordscount > 0
-                                                onClicked: filteredArtItemsModel.clearKeywords(rowWrapper.delegateIndex)
+                                            Item {
+                                                width: childrenRect.width
+                                                height: moreLink.height
+
+                                                StyledText {
+                                                    id: moreLink
+                                                    color: enabled ? (moreMA.pressed ? uiColors.linkClickedColor : uiColors.artworkActiveColor) : (isActive ? uiColors.labelActiveForeground : uiColors.labelInactiveForeground)
+                                                    text: i18.n + qsTr("More")
+                                                    property bool isActive: true //rowWrapper.isHighlighted
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                    // \u25BE - triangle
+                                                }
+
+                                                TriangleElement {
+                                                    anchors.left: moreLink.right
+                                                    anchors.leftMargin: 4
+                                                    anchors.verticalCenter: parent.verticalCenter
+                                                    // anchors.verticalCenterOffset: isFlipped ? height*0.3 : 0
+                                                    //anchors.verticalCenter: parent.verticalCenter
+                                                    color: moreLink.color
+                                                    isFlipped: true
+                                                    width: 8
+                                                    height: 6
+                                                }
+
+                                                MouseArea {
+                                                    id: moreMA
+                                                    anchors.fill: parent
+                                                    hoverEnabled: true
+                                                    cursorShape: containsMouse ? Qt.PointingHandCursor : Qt.ArrowCursor
+                                                    onClicked: {
+                                                        // strange bug with clicking on the keywords field
+                                                        if (!containsMouse) { return; }
+
+                                                        keywordsMoreMenu.editableTags = flv
+                                                        keywordsMoreMenu.keywordsCount = keywordscount
+                                                        keywordsMoreMenu.artworkIndex = rowWrapper.getIndex()
+                                                        keywordsMoreMenu.filteredIndex = rowWrapper.delegateIndex
+                                                        keywordsMoreMenu.hasSpellingErrors = rowWrapper.keywordsModel ? rowWrapper.keywordsModel.hasAnySpellingErrors() : false
+                                                        keywordsMoreMenu.hasDuplicates = rowWrapper.keywordsModel ? rowWrapper.keywordsModel.hasDuplicates : false
+                                                        keywordsMoreMenu.popup()
+                                                    }
+                                                }
                                             }
                                         }
                                     }

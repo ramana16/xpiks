@@ -126,7 +126,7 @@ namespace MetadataIO {
         Q_INVOKABLE void addNewPlan();
         Q_INVOKABLE QObject *getColumnsModel();
         Q_INVOKABLE void setCurrentItem(int row);
-        Q_INVOKABLE void requestSave() { justChanged(); }
+        Q_INVOKABLE void requestSave();
         Q_INVOKABLE int getSelectedPlansCount() { return retrieveSelectedPlansCount(); }
 
     private:

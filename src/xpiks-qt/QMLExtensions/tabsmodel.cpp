@@ -152,6 +152,7 @@ namespace QMLExtensions {
         if ((index < 0) || (index >= m_TabsList.size())) { return; }
 
         auto tabsIndices = m_ActiveTabs.toList();
+        Q_ASSERT(tabsIndices.size() == 3);
         qSort(tabsIndices.begin(), tabsIndices.end(), [this](int left, int right) -> bool {
             return this->m_TabsList[left].m_CacheTag < this->m_TabsList[right].m_CacheTag;
         });
@@ -161,26 +162,7 @@ namespace QMLExtensions {
     }
 
     void TabsModel::escalateTab(int index) {
-        LOG_INFO << index;
-        if ((index < 0) || (index >= m_TabsList.size())) { return; }
-
-        auto tabsIndices = m_ActiveTabs.toList();
-        qSort(tabsIndices.begin(), tabsIndices.end(), [this](int left, int right) -> bool {
-            return this->m_TabsList[left].m_CacheTag < this->m_TabsList[right].m_CacheTag;
-        });
-
-        int indexToStay, indexToGo;
-        int first = tabsIndices[0], second = tabsIndices[1];
-        int diff = m_TabsList[first].m_CacheTag - m_TabsList[second].m_CacheTag;
-        if (diff < 0) { indexToGo = first; indexToStay = second; }
-        else if (diff > 0) { indexToGo = second; indexToStay = first; }
-        else {
-            int randIndex = qrand()%2;
-            indexToGo = tabsIndices[randIndex]; indexToStay = tabsIndices[1 - randIndex];
-        }
-
-        m_TabsList[index].m_CacheTag = m_TabsList[tabsIndices[2]].m_CacheTag;
-        touchTab(index);
+        activateTab(index);
     }
 
     bool TabsModel::touchTab(int index) {

@@ -47,7 +47,9 @@ namespace SpellCheck {
         duplicatesFormat.setFontUnderline(true);
         duplicatesFormat.setUnderlineStyle(QTextCharFormat::SingleUnderline);
 
-        Helpers::foreachWord(text,
+        const QString textLower = text.toLower();
+
+        Helpers::foreachWord(textLower,
                              [this](const QString &) { return true; },
         [this, &duplicatesFormat, &wrongSpellingFormat](int start, int length, const QString &word) {
             if (this->m_SpellCheckErrors->hasWrongSpelling(word)) {

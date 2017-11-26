@@ -33,8 +33,10 @@ namespace Models {
     {
         m_CommonKeywordsModel.setSpellCheckInfo(&m_SpellCheckInfo);
 
-        QObject::connect(&m_CommonKeywordsModel, &Common::BasicMetadataModel::spellCheckErrorsChanged,
-                         this, &CombinedArtworksModel::spellCheckErrorsChangedHandler);
+        QObject::connect(&m_CommonKeywordsModel, &Common::BasicMetadataModel::titleSpellingChanged,
+                         this, &CombinedArtworksModel::onTitleSpellingChanged);
+        QObject::connect(&m_CommonKeywordsModel, &Common::BasicMetadataModel::descriptionSpellingChanged,
+                         this, &CombinedArtworksModel::onDescriptionSpellingChanged);
 
         QObject::connect(&m_CommonKeywordsModel, &Common::BasicMetadataModel::completionsAvailable,
                          this, &CombinedArtworksModel::completionsAvailable);
@@ -44,6 +46,13 @@ namespace Models {
 
         QObject::connect(this, &CombinedArtworksModel::editingPaused,
                          this, &CombinedArtworksModel::onEditingPaused);
+
+        QObject::connect(&m_CommonKeywordsModel, &Common::BasicMetadataModel::descriptionSpellingChanged,
+                         this, &CombinedArtworksModel::descriptionSpellingChanged);
+        QObject::connect(&m_CommonKeywordsModel, &Common::BasicMetadataModel::titleSpellingChanged,
+                         this, &CombinedArtworksModel::titleSpellingChanged);
+        QObject::connect(&m_CommonKeywordsModel, &Common::BasicMetadataModel::keywordsSpellingChanged,
+                         this, &CombinedArtworksModel::keywordsSpellingChanged);
     }
 
     void CombinedArtworksModel::setArtworks(MetadataIO::WeakArtworksSnapshot &artworks) {
@@ -238,7 +247,7 @@ namespace Models {
 
         QMLExtensions::ColorsModel *colorsModel = m_CommandManager->getColorsModel();
         info->createHighlighterForDescription(document->textDocument(), colorsModel, &m_CommonKeywordsModel);
-        m_CommonKeywordsModel.notifyDescriptionSpellCheck();
+        m_CommonKeywordsModel.notifyDescriptionSpellingChanged();
     }
 
     void CombinedArtworksModel::initTitleHighlighting(QQuickTextDocument *document) {
@@ -253,7 +262,7 @@ namespace Models {
 
         QMLExtensions::ColorsModel *colorsModel = m_CommandManager->getColorsModel();
         info->createHighlighterForTitle(document->textDocument(), colorsModel, &m_CommonKeywordsModel);
-        m_CommonKeywordsModel.notifyTitleSpellCheck();
+        m_CommonKeywordsModel.notifyTitleSpellingChanged();
     }
 
     void CombinedArtworksModel::assignFromSelected() {
@@ -478,8 +487,11 @@ namespace Models {
         return found || foundOther;
     }
 
-    void CombinedArtworksModel::spellCheckErrorsChangedHandler() {
+    void CombinedArtworksModel::onDescriptionSpellingChanged() {
         emit descriptionChanged();
+    }
+
+    void CombinedArtworksModel::onTitleSpellingChanged() {
         emit titleChanged();
     }
 

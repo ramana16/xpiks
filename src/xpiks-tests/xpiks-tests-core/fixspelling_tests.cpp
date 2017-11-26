@@ -21,7 +21,7 @@
 void FixSpellingTests::fixKeywordsSmokeTest() {
     INIT_FIX_SPELLING_TEST;
 
-    QSignalSpy spellCheckSpy(&basicModel, SIGNAL(spellCheckErrorsChanged()));
+    QSignalSpy spellCheckSpy(&basicModel, SIGNAL(keywordsSpellingChanged()));
 
     basicModel.initialize("title", "description", "keyword1, keyword2");
     basicModel.getRawKeywords()[0].m_IsCorrect = false;
@@ -41,7 +41,7 @@ void FixSpellingTests::fixKeywordsSmokeTest() {
 void FixSpellingTests::noReplacementsSelectedTest() {
     INIT_FIX_SPELLING_TEST;
 
-    QSignalSpy spellCheckSpy(&basicModel, SIGNAL(spellCheckErrorsChanged()));
+    QSignalSpy spellCheckSpy(&basicModel, SIGNAL(keywordsSpellingChanged()));
 
     basicModel.initialize("title", "description", "keyword1, keyword2");
     basicModel.getRawKeywords()[0].m_IsCorrect = false;
@@ -57,7 +57,7 @@ void FixSpellingTests::noReplacementsSelectedTest() {
 void FixSpellingTests::fixAndRemoveDuplicatesTest() {
     INIT_FIX_SPELLING_TEST;
 
-    QSignalSpy spellCheckSpy(&basicModel, SIGNAL(spellCheckErrorsChanged()));
+    QSignalSpy spellCheckSpy(&basicModel, SIGNAL(keywordsSpellingChanged()));
 
     basicModel.initialize("title", "description", "keyword1, keyword2");
     basicModel.getRawKeywords()[0].m_IsCorrect = false;
@@ -83,7 +83,7 @@ void FixSpellingTests::fixAndRemoveDuplicatesTest() {
 void FixSpellingTests::fixAndRemoveDuplicatesCombinedTest() {
     INIT_FIX_SPELLING_TEST;
 
-    QSignalSpy spellCheckSpy(&basicModel, SIGNAL(spellCheckErrorsChanged()));
+    QSignalSpy spellCheckSpy(&basicModel, SIGNAL(keywordsSpellingChanged()));
 
     basicModel.initialize("title", "description", "keyword1, keyword2 item1 test, keyword2 wordtoreplace test");
     basicModel.getRawKeywords()[0].m_IsCorrect = false;
@@ -111,7 +111,7 @@ void FixSpellingTests::fixAndRemoveDuplicatesCombinedTest() {
 void FixSpellingTests::multiReplaceWithCorrectAllTest() {
     INIT_FIX_SPELLING_TEST;
 
-    QSignalSpy spellCheckSpy(&basicModel, SIGNAL(spellCheckErrorsChanged()));
+    QSignalSpy spellCheckSpy(&basicModel, SIGNAL(keywordsSpellingChanged()));
 
     basicModel.initialize("wordtoreplace in title", "description has wordtoreplace too", "wordtoreplace, keyword2, word plus wordtoreplace");
     basicModel.getRawKeywords()[0].m_IsCorrect = false;
@@ -142,7 +142,7 @@ void FixSpellingTests::multiReplaceWithCorrectAllTest() {
 void FixSpellingTests::replaceWithCorrectDescriptionTest() {
     INIT_FIX_SPELLING_TEST;
 
-    QSignalSpy spellCheckSpy(&basicModel, SIGNAL(spellCheckErrorsChanged()));
+    QSignalSpy spellCheckSpy(&basicModel, SIGNAL(keywordsSpellingChanged()));
 
     basicModel.initialize("wordtoreplace in title", "description has wordtoreplace too", "wordtoreplace, keyword2, word plus wordtoreplace");
     basicModel.getRawKeywords()[0].m_IsCorrect = false;
@@ -168,7 +168,7 @@ void FixSpellingTests::replaceWithCorrectDescriptionTest() {
 void FixSpellingTests::replaceWithCorrectTitleTest() {
     INIT_FIX_SPELLING_TEST;
 
-    QSignalSpy spellCheckSpy(&basicModel, SIGNAL(spellCheckErrorsChanged()));
+    QSignalSpy spellCheckSpy(&basicModel, SIGNAL(keywordsSpellingChanged()));
 
     basicModel.initialize("wordtoreplace in title", "description has wordtoreplace too", "wordtoreplace, keyword2, word plus wordtoreplace");
     basicModel.getRawKeywords()[0].m_IsCorrect = false;
@@ -194,7 +194,7 @@ void FixSpellingTests::replaceWithCorrectTitleTest() {
 void FixSpellingTests::replaceWithCorrectKeywordsTest() {
     INIT_FIX_SPELLING_TEST;
 
-    QSignalSpy spellCheckSpy(&basicModel, SIGNAL(spellCheckErrorsChanged()));
+    QSignalSpy spellCheckSpy(&basicModel, SIGNAL(keywordsSpellingChanged()));
 
     basicModel.initialize("wordtoreplace in title", "description has wordtoreplace too", "wordtoreplace, keyword2, word plus wordtoreplace");
     basicModel.getRawKeywords()[0].m_IsCorrect = false;

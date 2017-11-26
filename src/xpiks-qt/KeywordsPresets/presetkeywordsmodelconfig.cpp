@@ -211,10 +211,12 @@ namespace KeywordsPresets {
                 QString presetName;
                 QJsonValue presetNameValue = presetKeywordsItem.value(PRESET_NAME_KEY);
                 if (presetNameValue.isString()) {
-                    presetName = presetNameValue.toString();
+                    presetName = presetNameValue.toString().trimmed();
                 } else {
                     continue;
                 }
+
+                if (presetName.isEmpty()) { continue; }
 
                 QJsonValue keywordsValue = presetKeywordsItem.value(PRESET_KEYWORDS_KEY);
                 QStringList keywords;
@@ -243,7 +245,8 @@ namespace KeywordsPresets {
 
             QJsonValue groupNameValue = groupItem.value(GROUP_NAME_KEY);
             if (!groupNameValue.isString()) { continue; }
-            QString groupName = groupNameValue.toString();
+            QString groupName = groupNameValue.toString().trimmed();
+            if (groupName.isEmpty()) { continue; }
 
             QJsonValue groupIdValue = groupItem.value(GROUP_ID_KEY);
             if (!groupIdValue.isDouble()) { continue; }

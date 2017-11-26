@@ -46,9 +46,16 @@ Item {
     }
 
     QtObject {
+        id: warningsModel
+        property int minKeywordsCount: 7
+    }
+
+    QtObject {
         id: uiManager
         property real keywordHeight: 10
         property int artworkEditRightPaneWidth: 300
+
+        function clearCurrentItem() { }
     }
 
     QtObject {
@@ -66,12 +73,16 @@ Item {
         property string description
         property int keywordsCount: 0
         property bool isValid: true
+        property bool hasKeywordsSpellErrors: false
+        property bool hasTitleSpellErrors: false
+        property bool hasDescriptionSpellErrors: false
 
         function getPropertiesMap() { return {} }
         function initTitleHighlighting() {}
         function initDescriptionHighlighting() {}
         function resetModel() {}
         function registerAsCurrentItem() {}
+        function initSuggestion() {}
 
         signal itemBecomeUnavailable()
         signal completionsAvailable();
@@ -124,12 +135,26 @@ Item {
         ListElement { name: "Bob" }
     }
 
+    QtObject {
+        id: keywordsSuggestor
+        property bool isInProgress: false
+        property string externalurl: ''
+    }
+
     ArtworkEditView {
         id: artworkEditView
+        anchors.fill: parent
     }
 
     TestCase {
         name: "ArtworkEdit"
         when: windowShown
+        property var moreLink
+        property var moreMenu
+
+        function initTestCase() {
+            //moreLink = findChild(artworkEditView, "moreLinkHost")
+            //moreMenu = findChild(artworkEditView, "keywordsMoreMenuObject")
+        }
     }
 }

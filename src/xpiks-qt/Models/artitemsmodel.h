@@ -161,10 +161,10 @@ namespace Models {
 
     public slots:
         void itemModifiedChanged(bool) { updateModifiedCount(); }
-        void spellCheckErrorsChanged();
         void onFilesUnavailableHandler();
         void onArtworkBackupRequested();
         void onArtworkEditingPaused();
+        void onArtworkSpellingInfoUpdated();
         void onUndoStackEmpty();
         void userDictUpdateHandler(const QStringList &keywords, bool overwritten);
         void userDictClearedHandler();

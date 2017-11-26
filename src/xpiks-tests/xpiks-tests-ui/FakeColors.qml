@@ -26,6 +26,7 @@ QtObject {
     property color buttonDefaultBackground: "#12b9bc"
     property color buttonDefaultForeground: labelActiveForeground
     property color buttonHoverBackground: "#283c3f"
+    property color buttonHoverForeground: whiteColor
     property color buttonPressedBackground: "#283c3f"
     property color buttonPressedForeground: whiteColor
     property color buttonDisabledForeground: inputBackgroundColor

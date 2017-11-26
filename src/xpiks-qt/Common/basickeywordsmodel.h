@@ -40,8 +40,9 @@ namespace Common {
             public AbstractListModel
     {
         Q_OBJECT
-        Q_PROPERTY(bool hasSpellErrors READ hasSpellErrors NOTIFY spellCheckErrorsChanged)
+        Q_PROPERTY(bool hasKeywordsSpellErrors READ hasKeywordsSpellError NOTIFY keywordsSpellingChanged)
         Q_PROPERTY(bool hasDuplicates READ hasDuplicates NOTIFY hasDuplicatesChanged)
+        Q_PROPERTY(bool hasAnySpellingError READ hasSpellErrors NOTIFY spellingInfoUpdated)
 
     public:
         BasicKeywordsModel(Common::Hold &hold, QObject *parent=0);
@@ -147,9 +148,12 @@ namespace Common {
         virtual bool hasDuplicates();
 
     public:
-        void notifySpellCheckResults(SpellCheckFlags flags);
+        virtual void notifySpellCheckResults(SpellCheckFlags flags);
         void notifyAboutToBeRemoved() { emit aboutToBeRemoved(); }
         void notifyCompletionsAvailable() { emit completionsAvailable(); }
+
+    protected:
+        void notifyKeywordsSpellingChanged();
 
     public:
         void acquire() { m_Hold.acquire(); }
@@ -164,21 +168,21 @@ namespace Common {
         Q_INVOKABLE bool canEditKeyword(int index, const QString &replacement);
 
     signals:
-        void spellCheckResultsReady();
-        void spellCheckErrorsChanged();
+        void keywordsSpellingChanged();
+        void spellingInfoUpdated();
         void hasDuplicatesChanged();
         void completionsAvailable();
         void aboutToBeRemoved();
         void afterSpellingErrorsFixed();
 
     protected slots:
-        void onSpellCheckRequestReady(Common::SpellCheckFlags flags, size_t index);
+        void onSpellCheckRequestReady(Common::SpellCheckFlags flags, int index);
 
     private:
         void setSpellCheckResultsUnsafe(const std::vector<std::shared_ptr<SpellCheck::SpellCheckQueryItem> > &items);
         bool isReplacedADuplicateUnsafe(size_t index, const QString &existingPrev,
                                         const QString &replacement) const;
-        void emitSpellCheckChanged(int index=-1);
+        void updateKeywordsHighlighting(int index=-1);
 
     private:
         Common::Hold &m_Hold;

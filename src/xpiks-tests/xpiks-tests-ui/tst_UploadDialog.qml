@@ -111,6 +111,7 @@ Item {
 
     UploadArtworks {
         id: uploadDialog
+        anchors.fill: parent
     }
 
     TestCase {

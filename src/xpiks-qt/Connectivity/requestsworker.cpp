@@ -28,6 +28,10 @@ namespace Connectivity {
         SimpleCurlRequest request(url);
         request.setProxySettings(item->getProxySettings());
 
+        if (item->getNoCache()) {
+            request.setRawHeaders(QStringList() << "Cache-Control: no-cache");
+        }
+
         bool success = request.sendRequestSync();
         if (success) {
             item->setResponse(request.getResponseData());

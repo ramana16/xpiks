@@ -266,6 +266,21 @@ namespace Models {
         return keywordsModel->hasDescriptionWordSpellError(word);
     }
 
+    bool ArtworkProxyBase::getHasTitleSpellErrors() {
+        auto *keywordsModel = getBasicMetadataModel();
+        return keywordsModel->hasTitleSpellError();
+    }
+
+    bool ArtworkProxyBase::getHasDescriptionSpellError() {
+        auto *keywordsModel = getBasicMetadataModel();
+        return keywordsModel->hasDescriptionSpellError();
+    }
+
+    bool ArtworkProxyBase::getHasKeywordsSpellError() {
+        auto *keywordsModel = getBasicMetadataModel();
+        return keywordsModel->hasKeywordsSpellError();
+    }
+
     bool ArtworkProxyBase::doExpandPreset(int keywordIndex, KeywordsPresets::ID_t presetID) {
         bool success = false;
         LOG_INFO << "keyword" << keywordIndex << "preset" << presetID;

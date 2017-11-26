@@ -14,17 +14,35 @@
 #include <QStringList>
 #include <QHash>
 #include "commandbase.h"
+#include "../Common/flags.h"
+
+namespace MetadataIO {
+    class ArtworksSnapshot;
+}
 
 namespace Commands {
+    class CommandManager;
+
     class AddArtworksCommand : public CommandBase
     {
     public:
-        AddArtworksCommand(const QStringList &pathes, const QStringList &vectorPathes, bool autoDetectVectors, bool isFullDirectory) :
+        enum AddArtworksFlags {
+            FlagAutoFindVectors = 1 << 0,
+            FlagIsFullDirectory = 1 << 1,
+            FlagIsSessionRestore = 1 << 2
+        };
+
+    private:
+        inline bool getAutoFindVectorsFlag() const { return Common::HasFlag(m_Flags, FlagAutoFindVectors); }
+        inline bool getIsFullDirectoryFlag() const { return Common::HasFlag(m_Flags, FlagIsFullDirectory); }
+        inline bool getIsSessionRestore() const { return Common::HasFlag(m_Flags, FlagIsSessionRestore); }
+
+    public:
+        AddArtworksCommand(const QStringList &pathes, const QStringList &vectorPathes, Common::flag_t flags) :
             CommandBase(CommandType::AddArtworks),
             m_FilePathes(pathes),
             m_VectorsPathes(vectorPathes),
-            m_AutoDetectVectors(autoDetectVectors),
-            m_IsFullDirectory(isFullDirectory)
+            m_Flags(flags)
         {}
 
         virtual ~AddArtworksCommand();
@@ -33,13 +51,16 @@ namespace Commands {
         virtual std::shared_ptr<ICommandResult> execute(const ICommandManager *commandManagerInterface) const override;
 
     private:
+        void afterAddedHandler(CommandManager *commandManager,
+                               const MetadataIO::ArtworksSnapshot &artworksToImport,
+                               QStringList filesToWatch,
+                               int initialCount, int newFilesCount) const;
         void decomposeVectors(QHash<QString, QHash<QString, QString> > &vectors) const;
 
     public:
         QStringList m_FilePathes;
         QStringList m_VectorsPathes;
-        bool m_AutoDetectVectors;
-        bool m_IsFullDirectory;
+        Common::flag_t m_Flags;
     };
 
     class AddArtworksCommandResult : public CommandResult {

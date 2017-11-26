@@ -49,6 +49,9 @@ namespace Warnings {
     public:
         virtual int operator ()(const QJsonObject &val1, const QJsonObject &val2) override;
 
+    signals:
+        void settingsUpdated();
+
     private:
         QString m_AllowedFilenameCharacters;
         double m_MinMegapixels;

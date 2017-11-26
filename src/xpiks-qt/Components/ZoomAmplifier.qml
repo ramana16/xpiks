@@ -18,6 +18,7 @@ Item {
     property color lineColor: uiColors.artworkActiveColor
     property real circleWidth: item.width*0.75
     property real plusOffset: 0.5
+    property bool showPlus: true
 
     Rectangle {
         id: circle
@@ -36,6 +37,8 @@ Item {
             height: item.thickness
             radius: item.thickness
             color: item.lineColor
+            visible: item.showPlus
+            enabled: item.showPlus
             anchors.centerIn: parent
             anchors.verticalCenterOffset: item.plusOffset
             anchors.horizontalCenterOffset: item.plusOffset
@@ -43,11 +46,12 @@ Item {
 
         Rectangle {
             id: plusVertical
-            visible: item.isPlus
+            visible: item.isPlus && item.showPlus
             height: circle.width/2
             width: item.thickness
             radius: item.thickness
             color: item.lineColor
+            enabled: item.showPlus
             anchors.centerIn: parent
             anchors.verticalCenterOffset: item.plusOffset
             anchors.horizontalCenterOffset: item.plusOffset
@@ -55,13 +59,15 @@ Item {
     }
 
     Rectangle {
-        width: circle.width*0.6
+        width: circle.width*0.7
         height: item.thickness
-        radius: item.thickness
+        radius: 0//item.thickness/2
         color: item.lineColor
         transformOrigin: Item.BottomRight
-        rotation: 43
+        rotation: 45
         anchors.right: parent.right
         anchors.bottom: parent.bottom
+        //anchors.bottomMargin: item.thickness/2
+        anchors.rightMargin: item.thickness/2
     }
 }

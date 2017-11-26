@@ -28,10 +28,11 @@ namespace Connectivity {
         Q_OBJECT
 
     public:
-        ConnectivityRequest(Helpers::RemoteConfig *config, const QString &url, Models::ProxySettings *proxySettings):
+        ConnectivityRequest(Helpers::RemoteConfig *config, const QString &url, Models::ProxySettings *proxySettings, bool noCache = false):
             QObject(),
             m_RemoteConfig(config),
             m_Url(url),
+            m_NoCache(noCache),
             m_ProxySettings(proxySettings)
         {
             Q_ASSERT(config != nullptr);
@@ -39,6 +40,7 @@ namespace Connectivity {
 
     public:
         const QString &getURL() const { return m_Url; }
+        bool getNoCache() const { return m_NoCache; }
         Models::ProxySettings *getProxySettings() const { return m_ProxySettings; }
 
     public:
@@ -50,6 +52,7 @@ namespace Connectivity {
     private:
         Helpers::RemoteConfig *m_RemoteConfig;
         QString m_Url;
+        bool m_NoCache;
         Models::ProxySettings *m_ProxySettings;
     };
 }

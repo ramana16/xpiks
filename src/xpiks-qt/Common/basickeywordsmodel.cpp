@@ -141,7 +141,7 @@ namespace Common {
 
         if (removed) {
             if (!wasCorrect) {
-                emit spellCheckErrorsChanged();
+                notifyKeywordsSpellingChanged();
             }
 
             emit hasDuplicatesChanged();
@@ -170,7 +170,7 @@ namespace Common {
 
         if (removed) {
             if (!wasCorrect) {
-                emit spellCheckErrorsChanged();
+                notifyKeywordsSpellingChanged();
             }
 
             emit hasDuplicatesChanged();
@@ -224,7 +224,7 @@ namespace Common {
         m_KeywordsLock.unlock();
 
         if (result) {
-            emit spellCheckErrorsChanged();
+            notifyKeywordsSpellingChanged();
             emit hasDuplicatesChanged();
         }
 
@@ -747,7 +747,7 @@ namespace Common {
 
     void BasicKeywordsModel::afterReplaceCallback() {
         LOG_DEBUG << "#";
-        emit spellCheckErrorsChanged();
+        emit notifyKeywordsSpellingChanged();
         emit afterSpellingErrorsFixed();
         emit hasDuplicatesChanged();
     }
@@ -866,15 +866,15 @@ namespace Common {
     }
 
     void BasicKeywordsModel::notifySpellCheckResults(Common::SpellCheckFlags flags) {
-        LOG_INTEGR_TESTS_OR_DEBUG << (int)flags;
-
-        if (Common::HasFlag(flags, Common::SpellCheckFlags::Description) ||
-            Common::HasFlag(flags, Common::SpellCheckFlags::Title)) {
-            emit spellCheckResultsReady();
+        if (Common::HasFlag(flags, Common::SpellCheckFlags::Keywords)) {
+            notifyKeywordsSpellingChanged();
         }
 
-        emit spellCheckErrorsChanged();
         emit hasDuplicatesChanged();
+    }
+
+    void BasicKeywordsModel::notifyKeywordsSpellingChanged() {
+        emit keywordsSpellingChanged();
     }
 
     void BasicKeywordsModel::resetSpellCheckResultsUnsafe() {
@@ -906,12 +906,13 @@ namespace Common {
         return canEditKeywordUnsafe(index, replacement);
     }
 
-    void BasicKeywordsModel::onSpellCheckRequestReady(Common::SpellCheckFlags flags, size_t index) {
+    void BasicKeywordsModel::onSpellCheckRequestReady(Common::SpellCheckFlags flags, int index) {
         if (Common::HasFlag(flags, Common::SpellCheckFlags::Keywords)) {
-            emitSpellCheckChanged((int)index);
+            updateKeywordsHighlighting(index);
         }
 
         notifySpellCheckResults(flags);
+        emit spellingInfoUpdated();
     }
 
     void BasicKeywordsModel::setSpellCheckResultsUnsafe(const std::vector<std::shared_ptr<SpellCheck::SpellCheckQueryItem> > &items) {
@@ -990,7 +991,7 @@ namespace Common {
         return isDuplicate;
     }
 
-    void BasicKeywordsModel::emitSpellCheckChanged(int index) {
+    void BasicKeywordsModel::updateKeywordsHighlighting(int index) {
         const int count = (int)m_KeywordsList.size();
 
         if (index == -1) {

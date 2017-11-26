@@ -15,7 +15,7 @@ import "../StyledControls"
 Item {
     id: container
     width: childrenRect.width
-    height: 24
+    height: 20
 
     property bool isListLayout: true
     signal layoutChanged()
@@ -27,10 +27,8 @@ Item {
             } else if (layoutMA.containsMouse) {
                 resultColor = uiColors.labelActiveForeground
             } else {
-                resultColor = uiColors.selectedArtworkBackground
+                resultColor = uiColors.labelInactiveForeground
             }
-        } else {
-            resultColor = uiColors.selectedArtworkBackground
         }
 
         return resultColor
@@ -42,14 +40,14 @@ Item {
         anchors.left: parent.left
         anchors.top: parent.top
         visible: !isListLayout
-        spacing: 5
+        spacing: 4
 
         Repeater {
             model: 3
             delegate: Item {
                 id: row
                 width: parent.width
-                height: parent.height / 3 - 3
+                height: 4
 
                 Rectangle {
                     anchors.left: parent.left
@@ -76,27 +74,24 @@ Item {
         width: height
         height: parent.height
         visible: isListLayout
-        columnSpacing: 5
-        rowSpacing: 5
+        columnSpacing: 4
+        rowSpacing: 4
 
         Repeater {
             model: 9
 
             Rectangle {
-                width: parent.width / 3 - 3
-                height: parent.height / 3 - 3
+                width: 4
+                height: 4
                 color: container.currentColor
             }
         }
     }
 
-    StyledText {
-        anchors.left: parent.left
-        anchors.leftMargin: parent.height + 10
-        anchors.verticalCenter: parent.verticalCenter
-        anchors.verticalCenterOffset: 2
-        text: i18.n + (isListLayout ? qsTr("Grid") : qsTr("List"))
-        color: container.currentColor
+    CustomTooltip {
+        id: customTooltip
+        tooltipText: i18.n + (isListLayout ? qsTr("Grid") : qsTr("List"))
+        withOwnMouseArea: false
     }
 
     MouseArea {
@@ -105,5 +100,7 @@ Item {
         anchors.fill: parent
         hoverEnabled: true
         onClicked: layoutChanged()
+        onEntered: { customTooltip.trigger() }
+        onExited: { customTooltip.dismiss() }
     }
 }

@@ -24,17 +24,16 @@ namespace Warnings {
     {
         Q_OBJECT
         Q_PROPERTY(int warningsCount READ getWarningsCount NOTIFY warningsCountChanged)
+        Q_PROPERTY(int minKeywordsCount READ getMinKeywordsCount NOTIFY warningsSettingsUpdated)
     public:
         WarningsModel(QObject *parent=0);
 
     public:
-        void setWarningsSettingsModel(const WarningsSettingsModel *warningsSettingsModel) {
-            m_WarningsSettingsModel = warningsSettingsModel;
-            Q_ASSERT(warningsSettingsModel != nullptr);
-        }
+        void setWarningsSettingsModel(const WarningsSettingsModel *warningsSettingsModel);
 
     public:
         int getWarningsCount() const { return rowCount(); }
+        int getMinKeywordsCount() const;
 
     public:
         Q_INVOKABLE void setShowSelected() { m_ShowOnlySelected = true; update(); }
@@ -46,6 +45,7 @@ namespace Warnings {
 
     signals:
         void warningsCountChanged();
+        void warningsSettingsUpdated();
 
     public slots:
         void onWarningsCouldHaveChanged(size_t originalIndex);

@@ -156,6 +156,10 @@ Flickable {
         submitCurrentKeyword()
     }
 
+    function paste() {
+        nextTagTextInput.pasteKeywords()
+    }
+
     MouseArea {
         anchors.left: parent.left
         anchors.top: parent.top
@@ -358,6 +362,35 @@ Flickable {
                     }
                 }
 
+                function pasteKeywords() {
+                    var clipboardText = clipboard.getText();
+                    clipboardText = clipboardText.replace(/(\r\n|\n|\r)/gm, '');
+                    var pasted = false
+                    var keywordsToAdd = [];
+
+                    var words = clipboardText.split(/,|;/);
+
+                    if (words.length > 0) {
+                        for (var i = 0; i < words.length; i++) {
+                            var sanitizedTagText = helpersWrapper.sanitizeKeyword(words[i]);
+                            if (helpersWrapper.isKeywordValid(sanitizedTagText)) {
+                                keywordsToAdd.push(sanitizedTagText);
+                            }
+                        }
+
+                        if (keywordsToAdd.length > 1) {
+                            tagsPasted(keywordsToAdd);
+                        } else {
+                            insert(cursorPosition, clipboardText)
+                        }
+
+                        completionCancel()
+                        pasted = true
+                    }
+
+                    return pasted
+                }
+
                 /*validator: RegExpValidator {
                     // copy paste in keys.onpressed Paste
                     regExp: /^(?:\c+(?:-| |$))+$/
@@ -383,28 +416,8 @@ Flickable {
 
                 Keys.onPressed: {
                     if (event.matches(StandardKey.Paste)) {
-                        var clipboardText = clipboard.getText();
-                        clipboardText = clipboardText.replace(/(\r\n|\n|\r)/gm, '');
-                        var keywordsToAdd = [];
-
-                        var words = clipboardText.split(/,|;/);
-
-                        if (words.length > 0) {
-                            for (var i = 0; i < words.length; i++) {
-                                var sanitizedTagText = helpersWrapper.sanitizeKeyword(words[i]);
-                                if (helpersWrapper.isKeywordValid(sanitizedTagText)) {
-                                    keywordsToAdd.push(sanitizedTagText);
-                                }
-                            }
-
-                            if (keywordsToAdd.length > 1) {
-                                tagsPasted(keywordsToAdd);
-                            } else {
-                                insert(cursorPosition, clipboardText)
-                            }
-
-                            completionCancel()
-                            event.accepted = true;
+                        if (pasteKeywords()) {
+                            event.accepted = true
                         }
                     }
                     else if (event.matches(StandardKey.Copy)) {

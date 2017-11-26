@@ -37,6 +37,9 @@ namespace Models {
         Q_OBJECT
         Q_PROPERTY(QString description READ getDescription WRITE setDescription NOTIFY descriptionChanged)
         Q_PROPERTY(QString title READ getTitle WRITE setTitle NOTIFY titleChanged)
+        Q_PROPERTY(bool hasTitleSpellErrors READ getHasTitleSpellErrors NOTIFY titleSpellingChanged)
+        Q_PROPERTY(bool hasDescriptionSpellErrors READ getHasDescriptionSpellError NOTIFY descriptionSpellingChanged)
+        Q_PROPERTY(bool hasKeywordsSpellErrors READ getHasKeywordsSpellError NOTIFY keywordsSpellingChanged)
         Q_PROPERTY(int keywordsCount READ getKeywordsCount NOTIFY keywordsCountChanged)
         Q_PROPERTY(QString thumbPath READ getThumbPath NOTIFY thumbnailChanged)
         Q_PROPERTY(QString filePath READ getFilePath NOTIFY imagePathChanged)
@@ -74,8 +77,10 @@ namespace Models {
         void itemBecomeUnavailable();
         void warningsCouldHaveChanged(size_t originalIndex);
         void duplicatesCouldHaveChanged(size_t originalIndex);
-        void spellingRehighlightRequired();
         void isValidChanged();
+        void titleSpellingChanged();
+        void descriptionSpellingChanged();
+        void keywordsSpellingChanged();
 
     protected:
         virtual void signalDescriptionChanged() override { emit descriptionChanged(); }
@@ -86,7 +91,8 @@ namespace Models {
         void userDictUpdateHandler(const QStringList &keywords, bool overwritten);
         void userDictClearedHandler();
         void afterSpellingErrorsFixedHandler();
-        void spellCheckErrorsChangedHandler();
+        void onDescriptionSpellingChanged();
+        void onTitleSpellingChanged();
         void itemUnavailableHandler(size_t index);
 
     public:
@@ -148,6 +154,8 @@ namespace Models {
         virtual Common::ID_t getSpecialItemID() override;
 
     private:
+        void connectArtworkSignals(ArtworkMetadata *artwork);
+        void updateModelProperties();
         void updateCurrentArtwork();
         void disconnectCurrentArtwork();
         void releaseCurrentArtwork();

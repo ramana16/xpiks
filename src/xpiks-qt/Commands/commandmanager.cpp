@@ -645,14 +645,14 @@ void Commands::CommandManager::connectArtworkSignals(Models::ArtworkMetadata *ar
         QObject::connect(artwork, &Models::ArtworkMetadata::modifiedChanged,
                          m_ArtItemsModel, &Models::ArtItemsModel::itemModifiedChanged);
 
-        QObject::connect(artwork, &Models::ArtworkMetadata::spellCheckErrorsChanged,
-                         m_ArtItemsModel, &Models::ArtItemsModel::spellCheckErrorsChanged);
-
         QObject::connect(artwork, &Models::ArtworkMetadata::backupRequired,
                          m_ArtItemsModel, &Models::ArtItemsModel::onArtworkBackupRequested);
 
         QObject::connect(artwork, &Models::ArtworkMetadata::editingPaused,
                          m_ArtItemsModel, &Models::ArtItemsModel::onArtworkEditingPaused);
+
+        QObject::connect(artwork, &Models::ArtworkMetadata::spellingInfoUpdated,
+                         m_ArtItemsModel, &Models::ArtItemsModel::onArtworkSpellingInfoUpdated);
     }
 
 #if defined(CORE_TESTS) || defined(INTEGRATION_TESTS)
@@ -1055,7 +1055,12 @@ void Commands::CommandManager::afterInnerServicesInitialized() {
 #endif
 #endif
 
-    restoreReadSession();
+    int newFilesAdded = restoreReadSession();
+    if (newFilesAdded > 0) {
+        // immediately save restored session - to beat race between
+        // saving session from Add Command and restoring FULL_DIR flag
+        saveSessionInBackground();
+    }
 
 #if !defined(CORE_TESTS) && !defined(INTEGRATION_TESTS)
     m_SwitcherModel->initialize();
@@ -1112,7 +1117,9 @@ int Commands::CommandManager::restoreReadSession() {
     auto &vectors = m_SessionManager->getVectors();
 
     int newFilesCount = restoreFiles(filenames, vectors);
-    m_ArtworksRepository->restoreFullDirectories(fullDirectories);
+    if (newFilesCount > 0) {
+        m_ArtworksRepository->restoreFullDirectories(fullDirectories);
+    }
 
     m_SessionManager->onAfterRestore();
 
@@ -1125,9 +1132,11 @@ int Commands::CommandManager::restoreFiles(const QStringList &filenames, const Q
     if (filenames.empty()) { return 0; }
 
     // we should have saved all vectors from that session
-    const bool autoFindVectors = false;
+    // directory is considered to be not full and restored later
+    Common::flag_t flags = 0;
+    Common::SetFlag(flags, Commands::AddArtworksCommand::FlagIsSessionRestore);
 
-    std::shared_ptr<Commands::AddArtworksCommand> addArtworksCommand(new Commands::AddArtworksCommand(filenames, vectors, autoFindVectors, false));
+    std::shared_ptr<Commands::AddArtworksCommand> addArtworksCommand(new Commands::AddArtworksCommand(filenames, vectors, flags));
     std::shared_ptr<Commands::ICommandResult> result = processCommand(addArtworksCommand);
     std::shared_ptr<Commands::AddArtworksCommandResult> addArtworksResult =
         std::dynamic_pointer_cast<Commands::AddArtworksCommandResult>(result);

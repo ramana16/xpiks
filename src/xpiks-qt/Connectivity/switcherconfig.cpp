@@ -101,6 +101,8 @@ namespace Connectivity {
     void SwitcherConfig::processRemoteConfig(const QJsonDocument &remoteDocument, bool overwriteLocal) {
         bool overwrite = false;
 
+        LOG_INTEGR_TESTS_OR_DEBUG << remoteDocument;
+
         if (!overwriteLocal && remoteDocument.isObject()) {
             QJsonObject rootObject = remoteDocument.object();
             if (rootObject.contains(OVERWRITE_KEY)) {

@@ -53,8 +53,8 @@ namespace Helpers {
         Q_INVOKABLE bool isVector(const QString &path) const;
         Q_INVOKABLE QString toImagePath(const QString &path) const;
         Q_INVOKABLE void setUpgradeConsent();
-        Q_INVOKABLE void upgradeNow();        
-        Q_INVOKABLE QString getSvgForTheme(const QString &imagePrefix, int themeIndex) const;
+        Q_INVOKABLE void upgradeNow();
+        Q_INVOKABLE QString getAssetForTheme(const QString &assetName, int themeIndex) const;
 
     public:
         void requestCloseApplication() { emit globalCloseRequested(); }

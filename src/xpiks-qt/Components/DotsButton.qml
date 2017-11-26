@@ -16,8 +16,9 @@ Item {
     property real dimension: 28
     width: dimension
     height: dimension
-    property color dotsColor: dotsMA.pressed ? uiColors.whiteColor : (dotsMA.containsMouse ? uiColors.artworkActiveColor : uiColors.labelInactiveForeground)
+    property color dotsColor: dotsMA.pressed ? uiColors.whiteColor : (dotsMA.containsMouse ? uiColors.artworkActiveColor : defaultDotsColor)
     property color highlighColor: uiColors.inputBackgroundColor
+    property color defaultDotsColor: uiColors.labelInactiveForeground
     property real dotDimension: 4
 
     signal dotsClicked()
@@ -29,7 +30,7 @@ Item {
         radius: parent.width/2
         color: root.highlighColor
         visible: dotsMA.containsMouse
-        opacity: dotsMA.pressed ? 0.5 : 0.3
+        opacity: dotsMA.pressed ? 0.6 : 0.4
     }
 
     Item {
@@ -69,6 +70,8 @@ Item {
         id: dotsMA
         hoverEnabled: true
         anchors.fill: parent
+        propagateComposedEvents: false
+        preventStealing: true
         onClicked: dotsClicked()
     }
 }

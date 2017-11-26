@@ -16,7 +16,20 @@ StyledText {
     id: plainText
     property bool isActive: true
     property color normalLinkColor: uiColors.artworkActiveColor
-    color: enabled ? (linkMA.pressed ? uiColors.linkClickedColor : normalLinkColor) : (isActive ? uiColors.labelActiveForeground : uiColors.labelInactiveForeground)
+    property color inactiveLinkColor: uiColors.labelInactiveForeground
+    color: {
+        var resultColor = normalLinkColor;
+
+        if (!enabled) {
+            resultColor = inactiveLinkColor
+        } else if (isPressed) {
+            resultColor = uiColors.linkClickedColor
+        } else if (!isActive) {
+            resultColor = uiColors.labelActiveForeground
+        }
+
+        return resultColor
+    }
     property bool isPressed: linkMA.pressed
 
     signal clicked()

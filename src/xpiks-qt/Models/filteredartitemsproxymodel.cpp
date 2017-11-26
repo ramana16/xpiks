@@ -23,6 +23,7 @@
 #include "../Helpers/filterhelpers.h"
 #include "../Models/previewartworkelement.h"
 #include "../QuickBuffer/quickbuffer.h"
+#include "videoartwork.h"
 
 namespace Models {
     FilteredArtItemsProxyModel::FilteredArtItemsProxyModel(QObject *parent):
@@ -217,6 +218,53 @@ namespace Models {
         m_CommandManager->setArtworksForCsvExport(selectedArtworks);
     }
 
+    void FilteredArtItemsProxyModel::selectArtworksEx(int comboboxSelectionIndex) {
+        const bool isSelected = true;
+        const bool unselectFirst = true;
+
+        switch(comboboxSelectionIndex) {
+        case 0: {
+            // select All
+            this->selectFilteredArtworks();
+            break;
+        }
+        case 1: {
+            // select None
+            this->unselectFilteredArtworks();
+            break;
+        }
+        case 2: {
+            // select Modified
+            this->setFilteredItemsSelectedEx([](ArtworkMetadata *artwork) {
+                return artwork->isModified();
+            }, isSelected, unselectFirst);
+            break;
+        }
+        case 3: {
+            // select Images
+            this->setFilteredItemsSelectedEx([](ArtworkMetadata *artwork) {
+                return dynamic_cast<ImageArtwork*>(artwork) != nullptr;
+            }, isSelected, unselectFirst);
+            break;
+        }
+        case 4: {
+            // select Vectors
+            this->setFilteredItemsSelectedEx([](ArtworkMetadata *artwork) {
+                ImageArtwork *image = dynamic_cast<ImageArtwork*>(artwork);
+                return (image != nullptr) ? image->hasVectorAttached() : false;
+            }, isSelected, unselectFirst);
+            break;
+        }
+        case 5: {
+            // select Videos
+            this->setFilteredItemsSelectedEx([](ArtworkMetadata *artwork) {
+                return dynamic_cast<VideoArtwork*>(artwork) != nullptr;
+            }, isSelected, unselectFirst);
+            break;
+        }
+        }
+    }
+
     void FilteredArtItemsProxyModel::reimportMetadataForSelected() {
         LOG_DEBUG << "#";
         auto selectedArtworks = getSelectedOriginalItems();
@@ -288,6 +336,20 @@ namespace Models {
         }
     }
 
+    void FilteredArtItemsProxyModel::focusCurrentItemKeywords(int index) {
+        LOG_INFO << "index:" << index;
+        if ((0 <= index) && (index < rowCount())) {
+            QModelIndex qIndex = this->index(index, 0);
+            QModelIndex sourceIndex = mapToSource(qIndex);
+            ArtItemsModel *artItemsModel = getArtItemsModel();
+            ArtworkMetadata *metadata = artItemsModel->getArtwork(sourceIndex.row());
+
+            if (metadata != NULL) {
+                metadata->requestFocus(-1);
+            }
+        }
+    }
+
     void FilteredArtItemsProxyModel::toggleSorted() {
         LOG_INFO << "current sorted is" << m_SortingEnabled;
         forceUnselectAllItems();
@@ -330,11 +392,20 @@ namespace Models {
         return item;
     }
 
+    QString FilteredArtItemsProxyModel::getKeywordsString(int index) {
+        int originalIndex = getOriginalIndex(index);
+        ArtItemsModel *artItemsModel = getArtItemsModel();
+        ArtworkMetadata *artwork = artItemsModel->getArtwork(originalIndex);
+        QString keywords = artwork->getKeywordsString();
+        return keywords;
+    }
+
     bool FilteredArtItemsProxyModel::hasTitleWordSpellError(int index, const QString &word) {
         bool result = false;
 
         if (0 <= index && index < rowCount()) {
             int originalIndex = getOriginalIndex(index);
+            LOG_INFO << originalIndex << word;
             ArtItemsModel *artItemsModel = getArtItemsModel();
             ArtworkMetadata *metadata = artItemsModel->getArtwork(originalIndex);
             if (metadata != NULL) {
@@ -351,7 +422,7 @@ namespace Models {
 
         if (0 <= index && index < rowCount()) {
             int originalIndex = getOriginalIndex(index);
-            LOG_INFO << originalIndex;
+            LOG_INFO << originalIndex << word;
             ArtItemsModel *artItemsModel = getArtItemsModel();
             ArtworkMetadata *metadata = artItemsModel->getArtwork(originalIndex);
             if (metadata != NULL) {
@@ -481,26 +552,39 @@ namespace Models {
     }
 
     void FilteredArtItemsProxyModel::setFilteredItemsSelected(bool selected) {
+        setFilteredItemsSelectedEx([](ArtworkMetadata*) { return true; }, selected, false);
+    }
+
+    void FilteredArtItemsProxyModel::setFilteredItemsSelectedEx(const std::function<bool (ArtworkMetadata *)> pred, bool selected, bool unselectFirst) {
         LOG_INFO << selected;
         ArtItemsModel *artItemsModel = getArtItemsModel();
 
         QVector<int> indices;
         int size = this->rowCount();
         indices.reserve(size);
+        int selectedCount = 0;
 
         for (int row = 0; row < size; ++row) {
             QModelIndex proxyIndex = this->index(row, 0);
             QModelIndex originalIndex = this->mapToSource(proxyIndex);
 
             int index = originalIndex.row();
-            ArtworkMetadata *metadata = artItemsModel->getArtwork(index);
-            if (metadata != NULL) {
-                metadata->setIsSelected(selected);
+            ArtworkMetadata *artwork = artItemsModel->getArtwork(index);
+            if (artwork != NULL) {
+                if (unselectFirst) {
+                    artwork->setIsSelected(false);
+                }
+
+                if (pred(artwork)) {
+                    artwork->setIsSelected(selected);
+                    selectedCount++;
+                }
+
                 indices << index;
             }
         }
 
-        LOG_DEBUG << "Set selected" << indices.size() << "item(s) to" << selected;
+        LOG_DEBUG << "Set selected" << selectedCount << "item(s) to" << selected;
         artItemsModel->updateItems(indices, QVector<int>() << ArtItemsModel::IsSelectedRole);
         emit allItemsSelectedChanged();
 
@@ -603,7 +687,7 @@ namespace Models {
         artItemsModel->forceUnselectAllItems();
         m_SelectedArtworksCount = 0;
         emit selectedArtworksCountChanged();
-        emit forceUnselected();
+        emit allItemsSelectedChanged();
         m_CommandManager->clearCurrentItem();
     }
 

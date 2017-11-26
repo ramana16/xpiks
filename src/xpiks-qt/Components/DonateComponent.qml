@@ -23,7 +23,7 @@ ColumnLayout {
     signal donateLinkClicked()
 
     Image {
-        source: uiColors.t + helpersWrapper.getSvgForTheme("qrc:/Graphics/Icon_donate_", settingsModel.selectedThemeIndex)
+        source: uiColors.t + helpersWrapper.getAssetForTheme("Icon_donate.svg", settingsModel.selectedThemeIndex)
         cache: false
         width: 123
         height: 115

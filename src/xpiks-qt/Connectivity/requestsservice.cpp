@@ -16,6 +16,8 @@
 #include "../Models/settingsmodel.h"
 #include "../Common/defines.h"
 
+#define NO_CACHE_ATTRIBUTE true
+
 namespace Connectivity {
     RequestsService::RequestsService(QObject *parent):
         QObject(parent),
@@ -61,7 +63,7 @@ namespace Connectivity {
         LOG_INFO << url;
         Models::ProxySettings *proxySettings = getProxySettings();
 
-        std::shared_ptr<ConnectivityRequest> item(new ConnectivityRequest(config, url, proxySettings));
+        std::shared_ptr<ConnectivityRequest> item(new ConnectivityRequest(config, url, proxySettings, NO_CACHE_ATTRIBUTE));
         m_RequestsWorker->submitItem(item);
     }
 

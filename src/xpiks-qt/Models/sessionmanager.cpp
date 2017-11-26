@@ -72,7 +72,7 @@ namespace Models {
             return;
         }
 
-        LOG_INFO << filesSnapshot.size() << "artwork(s)";
+        LOG_INFO << filesSnapshot.size() << "artwork(s)" << directoriesSnapshot.size() << "directory(ies)";
 
         QJsonArray filesList;
 

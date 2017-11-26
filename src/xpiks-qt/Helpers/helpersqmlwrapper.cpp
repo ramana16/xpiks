@@ -164,10 +164,10 @@ namespace Helpers {
         emit upgradeInitiated();
     }
 
-    QString HelpersQmlWrapper::getSvgForTheme(const QString &imagePrefix, int themeIndex) const {
+    QString HelpersQmlWrapper::getAssetForTheme(const QString &assetName, int themeIndex) const {
         QString themeName = m_ColorsModel->getThemeName(themeIndex);
         themeName.remove(QChar(' '));
-        QString result = imagePrefix + themeName + ".svg";
+        QString result = QString("qrc:/Graphics/%1/%2").arg(themeName.toLower()).arg(assetName);
         return result;
     }
 

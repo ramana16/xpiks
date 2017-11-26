@@ -32,7 +32,7 @@ void UndoRedoTests::undoAddCommandTest() {
     QStringList filenames;
     filenames << "/path/to/test/image1.jpg";
 
-    std::shared_ptr<Commands::AddArtworksCommand> addArtworksCommand(new Commands::AddArtworksCommand(filenames, QStringList(), false, false));
+    std::shared_ptr<Commands::AddArtworksCommand> addArtworksCommand(new Commands::AddArtworksCommand(filenames, QStringList(), 0));
     auto result = commandManagerMock.processCommand(addArtworksCommand);
     auto addArtworksResult = std::dynamic_pointer_cast<Commands::AddArtworksCommandResult>(result);
     int newFilesCount = addArtworksResult->m_NewFilesAdded;
@@ -52,7 +52,7 @@ void UndoRedoTests::undoUndoAddCommandTest() {
     QStringList filenames;
     filenames << "/path/to/test/image1.jpg";
 
-    std::shared_ptr<Commands::AddArtworksCommand> addArtworksCommand(new Commands::AddArtworksCommand(filenames, QStringList(), false, false));
+    std::shared_ptr<Commands::AddArtworksCommand> addArtworksCommand(new Commands::AddArtworksCommand(filenames, QStringList(), 0));
     auto result = commandManagerMock.processCommand(addArtworksCommand);
     auto addArtworksResult = std::dynamic_pointer_cast<Commands::AddArtworksCommandResult>(result);
     int newFilesCount = addArtworksResult->m_NewFilesAdded;
@@ -79,7 +79,7 @@ void UndoRedoTests::undoUndoAddWithVectorsTest() {
     filenames << "/path/to/test/image1.jpg" << "/path/to/test/image2.jpg" << "/path/to/test/image3.jpg";
     vectors << "/path/to/test/image3.jpg" << "/path/to/test/image1.eps";
 
-    std::shared_ptr<Commands::AddArtworksCommand> addArtworksCommand(new Commands::AddArtworksCommand(filenames, vectors, false, false));
+    std::shared_ptr<Commands::AddArtworksCommand> addArtworksCommand(new Commands::AddArtworksCommand(filenames, vectors, 0));
     auto result = commandManagerMock.processCommand(addArtworksCommand);
     auto addArtworksResult = std::dynamic_pointer_cast<Commands::AddArtworksCommandResult>(result);
     int newFilesCount = addArtworksResult->m_NewFilesAdded;

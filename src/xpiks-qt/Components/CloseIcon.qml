@@ -54,15 +54,15 @@ Item {
         }
 
         scale: closeIconMouseArea.pressed ? 0.8 : 1
+    }
 
-        MouseArea {
-            id: closeIconMouseArea
-            anchors.fill: parent
-            hoverEnabled: true
-            preventStealing: true
-            onClicked: {
-                itemClicked()
-            }
+    MouseArea {
+        id: closeIconMouseArea
+        anchors.fill: parent
+        hoverEnabled: true
+        preventStealing: true
+        onClicked: {
+            itemClicked()
         }
     }
 }

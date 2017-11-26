@@ -19,7 +19,7 @@
 #include <QReadWriteLock>
 
 namespace Common {
-    class BasicKeywordsModel;
+    class BasicMetadataModel;
 }
 
 namespace QMLExtensions {
@@ -38,7 +38,7 @@ namespace SpellCheck {
         bool hasDuplicates(const QString &word);
         void setErrorWords(const QSet<QString> &errors);
         void setDuplicates(const QSet<QString> &duplicates);
-        bool removeWordFromSet(const QString &word);
+        bool removeWordFromErrors(const QString &word);
         bool anyError();
         bool anyDuplicate();
         void clear();
@@ -62,10 +62,10 @@ namespace SpellCheck {
         void removeWordsFromErrors(const QStringList &words);
         QSyntaxHighlighter *createHighlighterForDescription(QTextDocument *document,
                                                             QMLExtensions::ColorsModel *colorsModel,
-                                                            Common::BasicKeywordsModel *babasicKeywordsModel);
+                                                            Common::BasicMetadataModel *basicModel);
         QSyntaxHighlighter *createHighlighterForTitle(QTextDocument *document,
                                                       QMLExtensions::ColorsModel *colorsModel,
-                                                      Common::BasicKeywordsModel *babasicKeywordsModel);
+                                                      Common::BasicMetadataModel *basicModel);
 
         bool hasDescriptionError(const QString &word) { return m_DescriptionErrors.hasWrongSpelling(word); }
         bool hasTitleError(const QString &word) { return m_TitleErrors.hasWrongSpelling(word); }

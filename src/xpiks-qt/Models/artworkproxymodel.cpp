@@ -100,7 +100,7 @@ namespace Models {
         signalKeywordsCountChanged();
     }
 
-    void ArtworkProxyModel::spellCheckErrorsChangedHandler() {
+    void ArtworkProxyModel::onDescriptionSpellingChanged() {
         LOG_DEBUG << "#";
 #ifdef QT_DEBUG
         auto *basicModel = qobject_cast<Common::BasicMetadataModel*>(sender());
@@ -108,6 +108,15 @@ namespace Models {
 #endif
 
         emit descriptionChanged();
+    }
+
+    void ArtworkProxyModel::onTitleSpellingChanged() {
+        LOG_DEBUG << "#";
+#ifdef QT_DEBUG
+        auto *basicModel = qobject_cast<Common::BasicMetadataModel*>(sender());
+        Q_ASSERT(basicModel == getBasicMetadataModel());
+#endif
+
         emit titleChanged();
     }
 
@@ -163,21 +172,21 @@ namespace Models {
     void ArtworkProxyModel::initDescriptionHighlighting(QQuickTextDocument *document) {
         auto *highlighter = doCreateDescriptionHighligher(document);
 
-        QObject::connect(this, &ArtworkProxyModel::spellingRehighlightRequired,
+        QObject::connect(this, &ArtworkProxyModel::descriptionSpellingChanged,
                          highlighter, &QSyntaxHighlighter::rehighlight);
 
         auto *basicModel = getBasicMetadataModel();
-        basicModel->notifyDescriptionSpellCheck();
+        basicModel->notifyDescriptionSpellingChanged();
     }
 
     void ArtworkProxyModel::initTitleHighlighting(QQuickTextDocument *document) {
         auto *highlighter = doCreateTitleHighlighter(document);
 
-        QObject::connect(this, &ArtworkProxyModel::spellingRehighlightRequired,
+        QObject::connect(this, &ArtworkProxyModel::titleSpellingChanged,
                          highlighter, &QSyntaxHighlighter::rehighlight);
 
         auto *basicModel = getBasicMetadataModel();
-        basicModel->notifyTitleSpellCheck();
+        basicModel->notifyTitleSpellingChanged();
     }
 
     void ArtworkProxyModel::plainTextEdit(const QString &rawKeywords, bool spaceIsSeparator) {
@@ -210,31 +219,8 @@ namespace Models {
         artwork->setIsLockedForEditing(true);
         m_ArtworkMetadata = artwork;
 
-        auto *keywordsModel = artwork->getBasicModel();
-        QObject::connect(keywordsModel, &Common::BasicMetadataModel::spellCheckErrorsChanged,
-                         this, &ArtworkProxyModel::spellCheckErrorsChangedHandler);
-
-        QObject::connect(keywordsModel, &Common::BasicMetadataModel::completionsAvailable,
-                         this, &ArtworkProxyModel::completionsAvailable);
-
-        QObject::connect(keywordsModel, &Common::BasicMetadataModel::afterSpellingErrorsFixed,
-                         this, &ArtworkProxyModel::afterSpellingErrorsFixedHandler);
-
-        QObject::connect(keywordsModel, &Common::BasicKeywordsModel::spellCheckResultsReady,
-                         this, &ArtworkProxyModel::spellingRehighlightRequired);
-
-        QObject::connect(artwork, SIGNAL(thumbnailUpdated()),
-                         this, SIGNAL(thumbnailChanged()));
-
-        emit descriptionChanged();
-        emit titleChanged();
-        emit keywordsCountChanged();
-        emit thumbnailChanged();
-        emit imagePathChanged();
-
-        m_PropertiesMap.updateProperties(artwork);
-
-        emit isValidChanged();
+        connectArtworkSignals(artwork);
+        updateModelProperties();
     }
 
     void ArtworkProxyModel::resetModel() {
@@ -345,6 +331,47 @@ namespace Models {
         }
 
         return result;
+    }
+
+    void ArtworkProxyModel::connectArtworkSignals(ArtworkMetadata *artwork) {
+        auto *basicModel = artwork->getBasicModel();
+
+        QObject::connect(basicModel, &Common::BasicMetadataModel::descriptionSpellingChanged,
+                         this, &ArtworkProxyModel::onDescriptionSpellingChanged);
+        QObject::connect(basicModel, &Common::BasicMetadataModel::titleSpellingChanged,
+                         this, &ArtworkProxyModel::onTitleSpellingChanged);
+
+        QObject::connect(basicModel, &Common::BasicMetadataModel::completionsAvailable,
+                         this, &ArtworkProxyModel::completionsAvailable);
+
+        QObject::connect(basicModel, &Common::BasicMetadataModel::afterSpellingErrorsFixed,
+                         this, &ArtworkProxyModel::afterSpellingErrorsFixedHandler);
+
+        QObject::connect(basicModel, &Common::BasicMetadataModel::descriptionSpellingChanged,
+                         this, &ArtworkProxyModel::descriptionSpellingChanged);
+        QObject::connect(basicModel, &Common::BasicMetadataModel::titleSpellingChanged,
+                         this, &ArtworkProxyModel::titleSpellingChanged);
+        QObject::connect(basicModel, &Common::BasicMetadataModel::keywordsSpellingChanged,
+                         this, &ArtworkProxyModel::keywordsSpellingChanged);
+
+        QObject::connect(artwork, SIGNAL(thumbnailUpdated()),
+                         this, SIGNAL(thumbnailChanged()));
+    }
+
+    void ArtworkProxyModel::updateModelProperties() {
+        emit descriptionChanged();
+        emit titleChanged();
+        emit keywordsCountChanged();
+        emit thumbnailChanged();
+        emit imagePathChanged();
+        emit titleSpellingChanged();
+        emit descriptionSpellingChanged();
+        emit keywordsSpellingChanged();
+
+        Q_ASSERT(m_ArtworkMetadata != nullptr);
+        m_PropertiesMap.updateProperties(m_ArtworkMetadata);
+
+        emit isValidChanged();
     }
 
     void ArtworkProxyModel::updateCurrentArtwork() {

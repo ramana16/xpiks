@@ -11,7 +11,7 @@
 import QtQuick 2.2
 import QtQuick.Dialogs 1.1
 import QtQuick.Controls 1.1
-import QtQuick.Layouts 1.1
+import QtQuick.Layouts 1.3
 import "../Constants"
 import "../Components"
 import "../StyledControls"
@@ -22,8 +22,8 @@ ApplicationWindow {
     id: settingsWindow
     modality: "ApplicationModal"
     title: i18.n + qsTr("Settings")
-    width: 550
-    height: 350
+    width: 750
+    height: 500
     minimumWidth: width
     maximumWidth: width
     minimumHeight: height
@@ -208,986 +208,1210 @@ ApplicationWindow {
     }
 
     Rectangle {
+        id: globalHost
         color: uiColors.popupBackgroundColor
         anchors.fill: parent
 
         Component.onCompleted: focus = true
         Keys.onEscapePressed: closeSettings()
 
-        StyledTabView {
-            id: tabView
+        Rectangle {
+            id: leftPanel
+            color: uiColors.defaultControlColor
             anchors.left: parent.left
+            anchors.top: parent.top
+            anchors.bottom: footer.top
+            width: 150
+
+            ListView {
+                id: tabNamesListView
+                model: [i18.n + qsTr("Behavior"),
+                    i18.n + qsTr("Interface"),
+                    i18.n + qsTr("External"),
+                    i18.n + qsTr("Upload"),
+                    i18.n + qsTr("System")]
+                anchors.left: parent.left
+                anchors.right: parent.right
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                anchors.topMargin: 30
+                anchors.bottomMargin: 10
+                clip: true
+                boundsBehavior: Flickable.StopAtBounds
+
+                add: Transition {
+                    NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 230 }
+                }
+
+                remove: Transition {
+                    NumberAnimation { property: "opacity"; to: 0; duration: 230 }
+                }
+
+                displaced: Transition {
+                    NumberAnimation { properties: "x,y"; duration: 230 }
+                }
+
+                addDisplaced: Transition {
+                    NumberAnimation { properties: "x,y"; duration: 230 }
+                }
+
+                removeDisplaced: Transition {
+                    NumberAnimation { properties: "x,y"; duration: 230 }
+                }
+
+                onCurrentIndexChanged: {
+                    //csvExportModel.setCurrentItem(tabNamesListView.currentIndex)
+                }
+
+                delegate: Rectangle {
+                    id: sourceWrapper
+                    property variant myData: modelData
+                    property int delegateIndex: index
+                    property bool isCurrent: ListView.isCurrentItem
+                    color: ListView.isCurrentItem ? uiColors.popupBackgroundColor : (exportPlanMA.containsMouse ? uiColors.panelColor :  leftPanel.color)
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    height: 50
+
+                    MouseArea {
+                        id: exportPlanMA
+                        hoverEnabled: true
+                        anchors.fill: parent
+                        //propagateComposedEvents: true
+                        //preventStealing: false
+
+                        onClicked: {
+                            if (tabNamesListView.currentIndex != sourceWrapper.delegateIndex) {
+                                tabNamesListView.currentIndex = sourceWrapper.delegateIndex
+                                tabsHost.currentIndex = sourceWrapper.delegateIndex
+                            }
+                        }
+                    }
+
+                    RowLayout {
+                        spacing: 10
+                        anchors.fill: parent
+
+                        Item {
+                            width: 10
+                        }
+
+                        StyledText {
+                            id: infoTitle
+                            Layout.fillWidth: true
+                            anchors.verticalCenter: parent.verticalCenter
+                            height: 31
+                            text: sourceWrapper.myData
+                            elide: Text.ElideMiddle
+                            font.bold: sourceWrapper.isCurrent
+                            horizontalAlignment: Text.AlignLeft
+                        }
+
+                        Item {
+                            id: placeholder2
+                            width: 15
+                        }
+                    }
+                }
+            }
+
+            CustomScrollbar {
+                id: settingTabsScroll
+                anchors.topMargin: 0
+                anchors.bottomMargin: 0
+                anchors.rightMargin: 0
+                flickable: tabNamesListView
+                canShow: !rightPanelMA.containsMouse
+            }
+        }
+
+        Item {
+            id: rightPanel
+            anchors.left: leftPanel.right
             anchors.right: parent.right
             anchors.top: parent.top
-            anchors.bottom: bottomRow.top
+            anchors.bottom: footer.top
 
-            anchors.margins: 10
-
-            Connections {
-                target: settingsModel
-                onSettingsReset: {
-                    tabView.getTab(tabView.currentIndex).resetRequested();
-                }
+            MouseArea {
+                id: rightPanelMA
+                anchors.fill: parent
+                hoverEnabled: true
             }
 
-            Tab {
-                id: behaviorTab
-                title: i18.n + qsTr("Behavior")
-                signal resetRequested()
+            StackLayout {
+                id: tabsHost
+                anchors.fill: parent
 
                 Item {
+                    id: behaviorTab
+                    signal resetRequested()
                     anchors.fill: parent
+                    anchors.margins: 20
 
-                    ColumnLayout {
-                        id: leftColumn
-                        anchors.left: parent.left
-                        anchors.top: parent.top
-                        anchors.bottom: parent.bottom
-                        width: (parent.width / 2) - 10
-                        anchors.leftMargin: 20
-                        anchors.rightMargin: 20
-                        anchors.topMargin: 20
-                        anchors.bottomMargin: 10
-                        spacing: 20
-
-                        StyledCheckbox {
-                            id: checkForUpdatesCheckbox
-                            text: i18.n + qsTr("Check for updates")
-                            onCheckedChanged: {
-                                settingsModel.checkForUpdates = checked
-                            }
-                            function onResetRequested() {
-                                checked = settingsModel.checkForUpdates
-                            }
-
-                            Component.onCompleted: {
-                                checked = settingsModel.checkForUpdates
-                                behaviorTab.resetRequested.connect(checkForUpdatesCheckbox.onResetRequested)
-                            }
-                        }
-
-                        StyledCheckbox {
-                            id: useConfirmationDialogsCheckbox
-                            text: i18.n + qsTr("Use confirmation dialogs")
-                            onCheckedChanged: {
-                                settingsModel.mustUseConfirmations = checked
-                            }
-                            function onResetRequested() {
-                                checked = settingsModel.mustUseConfirmations
-                            }
-
-                            Component.onCompleted: {
-                                checked = settingsModel.mustUseConfirmations
-                                behaviorTab.resetRequested.connect(useConfirmationDialogsCheckbox.onResetRequested)
-                            }
-
-                        }
-
-                        StyledCheckbox {
-                            id: searchUsingAndCheckbox
-                            text: i18.n + qsTr("Search match all terms")
-                            onCheckedChanged: {
-                                settingsModel.searchUsingAnd = checked
-                            }
-                            function onResetRequested() {
-                                checked = settingsModel.searchUsingAnd
-                            }
-                            Component.onCompleted: {
-                                checked = settingsModel.searchUsingAnd
-                                behaviorTab.resetRequested.connect(searchUsingAndCheckbox.onResetRequested)
-                            }
-                        }
-
-                        StyledCheckbox {
-                            id: searchByFilepathCheckbox
-                            text: i18.n + qsTr("Search by path")
-                            onCheckedChanged: {
-                                settingsModel.searchByFilepath = checked
-                            }
-                            function onResetRequested() {
-                                checked = settingsModel.searchByFilepath
-                            }
-                            Component.onCompleted: {
-                                checked = settingsModel.searchByFilepath
-                                behaviorTab.resetRequested.connect(searchByFilepathCheckbox.onResetRequested)
-                            }
-                        }
-
-                        Item {
-                            Layout.fillHeight: true
-                        }
+                    Connections {
+                        target: settingsModel
+                        onSettingsReset: { resetRequested() }
                     }
 
                     ColumnLayout {
-                        anchors.left: leftColumn.right
-                        anchors.top: parent.top
-                        anchors.bottom: parent.bottom
-                        anchors.right: parent.right
-                        anchors.leftMargin: 20
-                        anchors.rightMargin: 20
-                        anchors.topMargin: 20
-                        anchors.bottomMargin: 10
+                        anchors.fill: parent
                         spacing: 20
+                        anchors.margins: 20
 
-                        StyledCheckbox {
-                            id: searchForVectorCheckbox
-                            text: i18.n + qsTr("Attach vector automatically")
-                            onCheckedChanged: {
-                                settingsModel.autoFindVectors = checked
-                            }
-                            function onResetRequested() {
-                                checked = settingsModel.autoFindVectors
+                        Flow {
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            spacing: 10
+                            property real itemHeight: 40
+                            property real itemWidth: 250
+
+                            Item {
+                                width: parent.itemWidth
+                                height: parent.itemHeight
+
+                                StyledCheckbox {
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: 10
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    id: autoDuplicateSearchCheckbox
+                                    text: i18.n + qsTr("Detect duplicates automatically")
+                                    onCheckedChanged: {
+                                        settingsModel.detectDuplicates = checked
+                                    }
+                                    function onResetRequested() {
+                                        checked = settingsModel.detectDuplicates
+                                    }
+
+                                    Component.onCompleted: {
+                                        checked = settingsModel.detectDuplicates
+                                        behaviorTab.resetRequested.connect(autoDuplicateSearchCheckbox.onResetRequested)
+                                    }
+                                }
                             }
 
-                            Component.onCompleted: {
-                                checked = settingsModel.autoFindVectors
-                                behaviorTab.resetRequested.connect(searchForVectorCheckbox.onResetRequested)
+                            Item {
+                                width: parent.itemWidth
+                                height: parent.itemHeight
+
+                                StyledCheckbox {
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: 10
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    id: autoSpellCheckCheckbox
+                                    text: i18.n + qsTr("Check spelling automatically")
+                                    onCheckedChanged: {
+                                        settingsModel.useSpellCheck = checked
+                                    }
+                                    function onResetRequested() {
+                                        checked = settingsModel.useSpellCheck
+                                    }
+
+                                    Component.onCompleted: {
+                                        checked = settingsModel.useSpellCheck
+                                        behaviorTab.resetRequested.connect(autoSpellCheckCheckbox.onResetRequested)
+                                    }
+                                }
+                            }
+
+                            Item {
+                                width: parent.itemWidth
+                                height: parent.itemHeight
+
+                                StyledCheckbox {
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: 10
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    id: searchUsingAndCheckbox
+                                    text: i18.n + qsTr("Search match all terms")
+                                    onCheckedChanged: {
+                                        settingsModel.searchUsingAnd = checked
+                                    }
+                                    function onResetRequested() {
+                                        checked = settingsModel.searchUsingAnd
+                                    }
+                                    Component.onCompleted: {
+                                        checked = settingsModel.searchUsingAnd
+                                        behaviorTab.resetRequested.connect(searchUsingAndCheckbox.onResetRequested)
+                                    }
+                                }
+                            }
+
+                            Item {
+                                width: parent.itemWidth
+                                height: parent.itemHeight
+
+                                StyledCheckbox {
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: 10
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    id: searchByFilepathCheckbox
+                                    text: i18.n + qsTr("Search by path")
+                                    onCheckedChanged: {
+                                        settingsModel.searchByFilepath = checked
+                                    }
+                                    function onResetRequested() {
+                                        checked = settingsModel.searchByFilepath
+                                    }
+                                    Component.onCompleted: {
+                                        checked = settingsModel.searchByFilepath
+                                        behaviorTab.resetRequested.connect(searchByFilepathCheckbox.onResetRequested)
+                                    }
+                                }
+                            }
+
+                            Item {
+                                width: parent.itemWidth
+                                height: parent.itemHeight
+
+                                StyledCheckbox {
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: 10
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    id: autoCompleteKeywordsCheckbox
+                                    text: i18.n + qsTr("Autocomplete keywords")
+                                    onCheckedChanged: {
+                                        settingsModel.useKeywordsAutoComplete = checked
+                                    }
+                                    function onResetRequested() {
+                                        checked = settingsModel.useKeywordsAutoComplete
+                                    }
+
+                                    Component.onCompleted: {
+                                        checked = settingsModel.useKeywordsAutoComplete
+                                        behaviorTab.resetRequested.connect(autoCompleteKeywordsCheckbox.onResetRequested)
+                                    }
+                                }
+                            }
+
+                            Item {
+                                width: parent.itemWidth
+                                height: parent.itemHeight
+
+                                StyledCheckbox {
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: 10
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    id: autoCompletePresetsCheckbox
+                                    text: i18.n + qsTr("Autocomplete presets")
+                                    onCheckedChanged: {
+                                        settingsModel.usePresetsAutoComplete = checked
+                                    }
+                                    function onResetRequested() {
+                                        checked = settingsModel.usePresetsAutoComplete
+                                    }
+
+                                    Component.onCompleted: {
+                                        checked = settingsModel.usePresetsAutoComplete
+                                        behaviorTab.resetRequested.connect(autoCompletePresetsCheckbox.onResetRequested)
+                                    }
+                                }
+                            }
+
+                            Item {
+                                width: parent.itemWidth
+                                height: parent.itemHeight
+
+                                StyledCheckbox {
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: 10
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    id: searchForVectorCheckbox
+                                    text: i18.n + qsTr("Attach vector automatically")
+                                    onCheckedChanged: {
+                                        settingsModel.autoFindVectors = checked
+                                    }
+                                    function onResetRequested() {
+                                        checked = settingsModel.autoFindVectors
+                                    }
+
+                                    Component.onCompleted: {
+                                        checked = settingsModel.autoFindVectors
+                                        behaviorTab.resetRequested.connect(searchForVectorCheckbox.onResetRequested)
+                                    }
+                                }
                             }
                         }
-
-                        StyledCheckbox {
-                            id: saveSessionCheckbox
-                            text: i18.n + qsTr("Restore last session on startup")
-                            onCheckedChanged: {
-                                settingsModel.saveSession = checked
-                            }
-                            function onResetRequested() {
-                                checked = settingsModel.saveSession
-                            }
-
-                            Component.onCompleted: {
-                                checked = settingsModel.saveSession
-                                behaviorTab.resetRequested.connect(saveSessionCheckbox.onResetRequested)
-                            }
-                        }
-
-                        StyledCheckbox {
-                            id: saveBackupsCheckbox
-                            text: i18.n + qsTr("Save backups for artworks")
-                            onCheckedChanged: {
-                                settingsModel.saveBackups = checked
-                            }
-                            function onResetRequested() {
-                                checked = settingsModel.saveBackups
-                            }
-
-                            Component.onCompleted: {
-                                checked = settingsModel.saveBackups
-                                behaviorTab.resetRequested.connect(saveBackupsCheckbox.onResetRequested)
-                            }
-                        }
-
-                        StyledCheckbox {
-                            id: autoSpellCheckCheckbox
-                            text: i18.n + qsTr("Check spelling automatically")
-                            onCheckedChanged: {
-                                settingsModel.useSpellCheck = checked
-                            }
-                            function onResetRequested() {
-                                checked = settingsModel.useSpellCheck
-                            }
-
-                            Component.onCompleted: {
-                                checked = settingsModel.useSpellCheck
-                                behaviorTab.resetRequested.connect(autoSpellCheckCheckbox.onResetRequested)
-                            }
-                        }
-
-                        StyledCheckbox {
-                            id: autoCompleteKeywordsCheckbox
-                            text: i18.n + qsTr("Autocomplete keywords")
-                            onCheckedChanged: {
-                                settingsModel.useKeywordsAutoComplete = checked
-                            }
-                            function onResetRequested() {
-                                checked = settingsModel.useKeywordsAutoComplete
-                            }
-
-                            Component.onCompleted: {
-                                checked = settingsModel.useKeywordsAutoComplete
-                                behaviorTab.resetRequested.connect(autoCompleteKeywordsCheckbox.onResetRequested)
-                            }
-                        }
-
-                        StyledCheckbox {
-                            id: autoCompletePresetsCheckbox
-                            text: i18.n + qsTr("Autocomplete presets")
-                            onCheckedChanged: {
-                                settingsModel.usePresetsAutoComplete = checked
-                            }
-                            function onResetRequested() {
-                                checked = settingsModel.usePresetsAutoComplete
-                            }
-
-                            Component.onCompleted: {
-                                checked = settingsModel.usePresetsAutoComplete
-                                behaviorTab.resetRequested.connect(autoCompletePresetsCheckbox.onResetRequested)
-                            }
-                        }
-
-                        StyledCheckbox {
-                            id: autoDuplicateSearchCheckbox
-                            text: i18.n + qsTr("Detect duplicates automatically")
-                            onCheckedChanged: {
-                                settingsModel.detectDuplicates = checked
-                            }
-                            function onResetRequested() {
-                                checked = settingsModel.detectDuplicates
-                            }
-
-                            Component.onCompleted: {
-                                checked = settingsModel.detectDuplicates
-                                behaviorTab.resetRequested.connect(autoDuplicateSearchCheckbox.onResetRequested)
-                            }
-                        }
-
 
                         Item {
                             Layout.fillHeight: true
                         }
                     }
                 }
-            }
 
-            Tab {
-                id: uxTab
-                property real sizeSliderValue: settingsModel.keywordSizeScale
-                property real scrollSpeedScale: settingsModel.scrollSpeedScale
-                property int themeIndex: settingsModel.selectedThemeIndex
-                title: i18.n + qsTr("Interface")
-                signal resetRequested()
-
-                ColumnLayout {
+                Item {
+                    id: uxTab
+                    property real sizeSliderValue: settingsModel.keywordSizeScale
+                    property real scrollSpeedScale: settingsModel.scrollSpeedScale
+                    property int themeIndex: settingsModel.selectedThemeIndex
+                    signal resetRequested()
                     anchors.fill: parent
-                    anchors.leftMargin: 20
-                    anchors.rightMargin: 20
-                    anchors.topMargin: 20
-                    anchors.bottomMargin: 10
-                    spacing: 20
+                    anchors.margins: 20
 
-                    RowLayout {
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        z: 10000
-                        spacing: 20
-
-                        StyledText {
-                            text: i18.n + qsTr("Theme:")
-                        }
-
-                        CustomComboBox {
-                            id: themeComboBox
-                            model: uiColors.getThemeNames()
-                            showColorSign: false
-                            width: 130
-                            height: 24
-                            itemHeight: 28
-                            onComboIndexChanged: {
-                                uxTab.themeIndex = themeComboBox.selectedIndex
-                            }
-
-                            function onResetRequested() {
-                                selectedIndex  = settingsModel.selectedThemeIndex
-                            }
-
-                            Component.onCompleted: {
-                                themeComboBox.selectedIndex = settingsModel.selectedThemeIndex
-                                uxTab.resetRequested.connect(themeComboBox.onResetRequested)
-                            }
-                        }
+                    Connections {
+                        target: settingsModel
+                        onSettingsReset: { resetRequested() }
                     }
 
-                    RowLayout {
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        spacing: 20
-
-                        StyledCheckbox {
-                            id: fitArtworksCheckbox
-                            text: i18.n + qsTr("Fit artwork's preview")
-
-                            onCheckedChanged: {
-                                settingsModel.fitSmallPreview = checked
-                            }
-
-                            function onResetRequested() {
-                                checked =  settingsModel.fitSmallPreview
-                            }
-
-                            Component.onCompleted: {
-                                checked = settingsModel.fitSmallPreview
-                                uxTab.resetRequested.connect(fitArtworksCheckbox.onResetRequested)
-                            }
-                        }
-                    }
-
-                    Item {
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        height: row.height
+                    ColumnLayout {
+                        anchors.fill: parent
+                        anchors.leftMargin: 20
+                        anchors.rightMargin: 20
+                        anchors.topMargin: 20
+                        anchors.bottomMargin: 10
+                        spacing: 30
 
                         RowLayout {
                             anchors.left: parent.left
-                            id: row
-                            spacing: 10
+                            anchors.right: parent.right
+                            z: 10000
+                            spacing: 20
 
                             StyledText {
-                                text: i18.n + qsTr("Keywords size")
+                                text: i18.n + qsTr("Theme:")
                             }
 
-                            StyledSlider {
-                                id: keywordSizeSlider
-                                width: 150
-                                minimumValue: 1.0
-                                maximumValue: 1.2
-                                stepSize: 0.0001
-                                orientation: Qt.Horizontal
+                            ComboBoxPopup {
+                                id: themeComboBox
+                                model: uiColors.getThemeNames()
+                                showColorSign: false
+                                width: 130
+                                height: 24
+                                itemHeight: 28
+                                dropDownWidth: 130
+                                glowEnabled: true
+                                glowTopMargin: 2
+                                globalParent: globalHost
 
-                                Component.onCompleted: {
-                                    keywordSizeSlider.value = uxTab.sizeSliderValue
-                                    uxTab.resetRequested.connect(keywordSizeSlider.onResetRequested)
-                                    // do not use direct onValueChanged because of glitch with reassignning min. value
-                                    keywordSizeSlider.onValueChanged.connect(keywordSizeSlider.valueChangedHandler)
+                                onComboItemSelected: {
+                                    uxTab.themeIndex = themeComboBox.selectedIndex
                                 }
 
                                 function onResetRequested() {
-                                    value = settingsModel.keywordSizeScale
-                                    uxTab.sizeSliderValue = value
+                                    selectedIndex  = settingsModel.selectedThemeIndex
                                 }
 
-                                function valueChangedHandler() {
-                                    uxTab.sizeSliderValue = value
+                                Component.onCompleted: {
+                                    themeComboBox.selectedIndex = settingsModel.selectedThemeIndex
+                                    uxTab.resetRequested.connect(themeComboBox.onResetRequested)
                                 }
                             }
                         }
 
-                        Rectangle {
-                            id: keywordPreview
-                            anchors.left: row.right
-                            anchors.leftMargin: 10
-                            anchors.verticalCenter: row.verticalCenter
-                            color: uiColors.inputForegroundColor
+                        RowLayout {
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            spacing: 20
 
-                            width: childrenRect.width
-                            height: childrenRect.height
+                            StyledCheckbox {
+                                id: fitArtworksCheckbox
+                                text: i18.n + qsTr("Fit artwork's preview")
 
-                            Item {
+                                onCheckedChanged: {
+                                    settingsModel.fitSmallPreview = checked
+                                }
+
+                                function onResetRequested() {
+                                    checked =  settingsModel.fitSmallPreview
+                                }
+
+                                Component.onCompleted: {
+                                    checked = settingsModel.fitSmallPreview
+                                    uxTab.resetRequested.connect(fitArtworksCheckbox.onResetRequested)
+                                }
+                            }
+                        }
+
+                        Item {
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            height: row.height
+
+                            RowLayout {
                                 anchors.left: parent.left
-                                anchors.top: parent.top
-                                id: tagTextRect
-                                width: childrenRect.width + 5
-                                height: 20*uxTab.sizeSliderValue + (uxTab.sizeSliderValue - 1)*10
+                                id: row
+                                spacing: 10
 
                                 StyledText {
-                                    id: keywordText
+                                    text: i18.n + qsTr("Keywords size")
+                                }
+
+                                StyledSlider {
+                                    id: keywordSizeSlider
+                                    width: 150
+                                    minimumValue: 1.0
+                                    maximumValue: 1.2
+                                    stepSize: 0.0001
+                                    orientation: Qt.Horizontal
+
+                                    Component.onCompleted: {
+                                        keywordSizeSlider.value = uxTab.sizeSliderValue
+                                        uxTab.resetRequested.connect(keywordSizeSlider.onResetRequested)
+                                        // do not use direct onValueChanged because of glitch with reassignning min. value
+                                        keywordSizeSlider.onValueChanged.connect(keywordSizeSlider.valueChangedHandler)
+                                    }
+
+                                    function onResetRequested() {
+                                        value = settingsModel.keywordSizeScale
+                                        uxTab.sizeSliderValue = value
+                                    }
+
+                                    function valueChangedHandler() {
+                                        uxTab.sizeSliderValue = value
+                                    }
+                                }
+                            }
+
+                            Rectangle {
+                                id: keywordPreview
+                                anchors.left: row.right
+                                anchors.leftMargin: 10
+                                anchors.verticalCenter: row.verticalCenter
+                                color: uiColors.inputForegroundColor
+
+                                width: childrenRect.width
+                                height: childrenRect.height
+
+                                Item {
                                     anchors.left: parent.left
-                                    anchors.leftMargin: 5 + (uxTab.sizeSliderValue - 1)*10
                                     anchors.top: parent.top
-                                    anchors.bottom: parent.bottom
-                                    verticalAlignment: Text.AlignVCenter
-                                    text: i18.n + qsTr("keyword", "standalone")
-                                    color: uiColors.defaultControlColor
-                                    font.pixelSize: UIConfig.fontPixelSize * uxTab.sizeSliderValue
-                                }
-                            }
+                                    id: tagTextRect
+                                    width: childrenRect.width + 5
+                                    height: 20*uxTab.sizeSliderValue + (uxTab.sizeSliderValue - 1)*10
 
-                            Item {
-                                anchors.left: tagTextRect.right
-                                anchors.top: parent.top
-                                height: 20 * uxTab.sizeSliderValue + (uxTab.sizeSliderValue - 1)*10
-                                width: height
-
-                                CloseIcon {
-                                    isPlus: false
-                                    width: 14*uxTab.sizeSliderValue
-                                    height: 14*uxTab.sizeSliderValue
-                                    isActive: true
-                                    anchors.centerIn: parent
-                                }
-                            }
-                        }
-                    }
-
-                    Item {
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        height: childrenRect.height
-
-                        RowLayout {
-                            anchors.left: parent.left
-                            spacing: 10
-
-                            StyledText {
-                                text: i18.n + qsTr("Scroll sensitivity")
-                            }
-
-                            StyledSlider {
-                                id: scrollSensivitySlider
-                                width: 150
-                                minimumValue: 0.1
-                                maximumValue: 2.0
-                                stepSize: 0.01
-                                orientation: Qt.Horizontal
-
-                                Component.onCompleted: {
-                                    scrollSensivitySlider.value = uxTab.scrollSpeedScale
-                                    uxTab.resetRequested.connect(scrollSensivitySlider.onResetRequested)
-                                    // do not use direct onValueChanged because of glitch with reassignning min. value
-                                    scrollSensivitySlider.onValueChanged.connect(scrollSensivitySlider.valueChangedHandler)
-                                }
-
-                                function onResetRequested() {
-                                    value = settingsModel.scrollSpeedScale
-                                    uxTab.scrollSpeedScale = value
-                                }
-
-                                function valueChangedHandler() {
-                                    uxTab.scrollSpeedScale = value
-                                }
-                            }
-                        }
-                    }
-
-                    RowLayout {
-                        width: parent.width
-                        spacing: 10
-
-                        StyledText {
-                            horizontalAlignment: Text.AlignLeft
-                            text: i18.n + qsTr("Undo dismiss duration:")
-                        }
-
-                        Rectangle {
-                            color: enabled ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
-                            border.color: uiColors.artworkActiveColor
-                            border.width: dismissDuration.activeFocus ? 1 : 0
-                            width: 115
-                            height: UIConfig.textInputHeight
-                            clip: true
-
-                            StyledTextInput {
-                                id: dismissDuration
-                                text: settingsModel.dismissDuration
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                anchors.leftMargin: 5
-                                anchors.rightMargin: 5
-                                anchors.verticalCenter: parent.verticalCenter
-                                onTextChanged: {
-                                    if (text.length > 0) {
-                                        settingsModel.dismissDuration = parseInt(text)
+                                    StyledText {
+                                        id: keywordText
+                                        anchors.left: parent.left
+                                        anchors.leftMargin: 5 + (uxTab.sizeSliderValue - 1)*10
+                                        anchors.top: parent.top
+                                        anchors.bottom: parent.bottom
+                                        verticalAlignment: Text.AlignVCenter
+                                        text: i18.n + qsTr("keyword", "standalone")
+                                        color: uiColors.defaultControlColor
+                                        font.pixelSize: UIConfig.fontPixelSize * uxTab.sizeSliderValue
                                     }
                                 }
 
-                                function onResetRequested() {
-                                    text = settingsModel.dismissDuration
-                                }
+                                Item {
+                                    anchors.left: tagTextRect.right
+                                    anchors.top: parent.top
+                                    height: 20 * uxTab.sizeSliderValue + (uxTab.sizeSliderValue - 1)*10
+                                    width: height
 
-                                validator: IntValidator {
-                                    bottom: 1
-                                    top: 100
+                                    CloseIcon {
+                                        isPlus: false
+                                        width: 14*uxTab.sizeSliderValue
+                                        height: 14*uxTab.sizeSliderValue
+                                        isActive: true
+                                        anchors.centerIn: parent
+                                    }
                                 }
                             }
                         }
 
-                        StyledText {
-                            text: i18.n + qsTr("(seconds)")
-                            isActive: false
-                        }
-                    }
+                        Item {
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            height: childrenRect.height
 
-                    Item {
-                        Layout.fillHeight: true
+                            RowLayout {
+                                anchors.left: parent.left
+                                spacing: 10
+
+                                StyledText {
+                                    text: i18.n + qsTr("Scroll sensitivity")
+                                }
+
+                                StyledSlider {
+                                    id: scrollSensivitySlider
+                                    width: 150
+                                    minimumValue: 0.1
+                                    maximumValue: 2.0
+                                    stepSize: 0.01
+                                    orientation: Qt.Horizontal
+
+                                    Component.onCompleted: {
+                                        scrollSensivitySlider.value = uxTab.scrollSpeedScale
+                                        uxTab.resetRequested.connect(scrollSensivitySlider.onResetRequested)
+                                        // do not use direct onValueChanged because of glitch with reassignning min. value
+                                        scrollSensivitySlider.onValueChanged.connect(scrollSensivitySlider.valueChangedHandler)
+                                    }
+
+                                    function onResetRequested() {
+                                        value = settingsModel.scrollSpeedScale
+                                        uxTab.scrollSpeedScale = value
+                                    }
+
+                                    function valueChangedHandler() {
+                                        uxTab.scrollSpeedScale = value
+                                    }
+                                }
+                            }
+                        }
+
+                        RowLayout {
+                            width: parent.width
+                            spacing: 10
+
+                            StyledText {
+                                horizontalAlignment: Text.AlignLeft
+                                text: i18.n + qsTr("Undo dismiss duration:")
+                            }
+
+                            Rectangle {
+                                color: enabled ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
+                                border.color: uiColors.artworkActiveColor
+                                border.width: dismissDuration.activeFocus ? 1 : 0
+                                width: 115
+                                height: UIConfig.textInputHeight
+                                clip: true
+
+                                StyledTextInput {
+                                    id: dismissDuration
+                                    text: settingsModel.dismissDuration
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    anchors.leftMargin: 5
+                                    anchors.rightMargin: 5
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    onTextChanged: {
+                                        if (text.length > 0) {
+                                            settingsModel.dismissDuration = parseInt(text)
+                                        }
+                                    }
+
+                                    function onResetRequested() {
+                                        text = settingsModel.dismissDuration
+                                    }
+
+                                    validator: IntValidator {
+                                        bottom: 1
+                                        top: 100
+                                    }
+                                }
+                            }
+
+                            StyledText {
+                                text: i18.n + qsTr("(seconds)")
+                                isActive: false
+                            }
+                        }
+
+                        Item {
+                            Layout.fillHeight: true
+                        }
                     }
                 }
-            }
 
-            Tab {
-                id: extTab
-                title: i18.n + qsTr("External")
-                signal resetRequested()
-
-                ColumnLayout {
+                Item {
+                    id: extTab
+                    signal resetRequested()
                     anchors.fill: parent
-                    anchors.leftMargin: 5
-                    anchors.rightMargin: 20
-                    anchors.topMargin: 20
-                    anchors.bottomMargin: 10
-                    spacing: 20
+                    anchors.margins: 20
 
-                    StyledCheckbox {
-                        id: useExifToolCheckbox
-                        text: i18.n + qsTr("Use ExifTool")
-                        onCheckedChanged: {
-                            settingsModel.useExifTool = checked
-                        }
-                        function onResetRequested() {
-                            checked = settingsModel.useExifTool
-                        }
-                        Component.onCompleted: {
-                            checked = settingsModel.useExifTool
-                            extTab.resetRequested.connect(useExifToolCheckbox.onResetRequested)
-                        }
+                    Connections {
+                        target: settingsModel
+                        onSettingsReset: { resetRequested() }
                     }
 
-                    GridLayout {
-                        width: parent.width
-                        rows: 2
-                        columns: 4
-                        rowSpacing: 20
-                        columnSpacing: 15
+                    ColumnLayout {
+                        anchors.fill: parent
+                        anchors.leftMargin: 5
+                        anchors.rightMargin: 20
+                        anchors.topMargin: 20
+                        anchors.bottomMargin: 10
+                        spacing: 0
+
+                        StyledCheckbox {
+                            id: useExifToolCheckbox
+                            text: i18.n + qsTr("Use ExifTool")
+                            onCheckedChanged: {
+                                settingsModel.useExifTool = checked
+                            }
+                            function onResetRequested() {
+                                checked = settingsModel.useExifTool
+                            }
+                            Component.onCompleted: {
+                                checked = settingsModel.useExifTool
+                                extTab.resetRequested.connect(useExifToolCheckbox.onResetRequested)
+                            }
+                        }
+
+                        Item {
+                            height: 20
+                        }
 
                         StyledText {
-                            Layout.row: 0
-                            Layout.column: 0
-                            Layout.fillWidth: true
-                            Layout.maximumWidth: 80
                             enabled: settingsModel.useExifTool
                             isActive: useExifToolCheckbox.checked
-
-                            horizontalAlignment: Text.AlignRight
                             text: i18.n + qsTr("ExifTool path:")
                         }
 
-                        Rectangle {
-                            color: enabled ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
-                            border.color: uiColors.artworkActiveColor
-                            border.width: exifToolText.activeFocus ? 1 : 0
-                            Layout.row: 0
-                            Layout.column: 1
-                            width: 165
-                            height: UIConfig.textInputHeight
-                            clip: true
-                            enabled: settingsModel.useExifTool
+                        Item {
+                            height: 10
+                        }
 
-                            StyledTextInput {
-                                id: exifToolText
-                                text: settingsModel.exifToolPath
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                anchors.leftMargin: 5
-                                anchors.rightMargin: 5
-                                anchors.verticalCenter: parent.verticalCenter
-                                onTextChanged: settingsModel.exifToolPath = text
+                        RowLayout {
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            spacing: 20
 
-                                function onResetRequested() {
-                                    text = settingsModel.exifToolPath
+                            Rectangle {
+                                color: enabled ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
+                                border.color: uiColors.artworkActiveColor
+                                border.width: exifToolText.activeFocus ? 1 : 0
+                                Layout.fillWidth: true
+                                height: UIConfig.textInputHeight
+                                clip: true
+                                enabled: settingsModel.useExifTool
+
+                                StyledTextInput {
+                                    id: exifToolText
+                                    text: settingsModel.exifToolPath
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    anchors.leftMargin: 5
+                                    anchors.rightMargin: 5
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    onTextChanged: settingsModel.exifToolPath = text
+
+                                    function onResetRequested() {
+                                        text = settingsModel.exifToolPath
+                                    }
+
+                                    Component.onCompleted: {
+                                        extTab.resetRequested.connect(exifToolText.onResetRequested)
+                                    }
                                 }
-                                Component.onCompleted: {
-                                    extTab.resetRequested.connect(exifToolText.onResetRequested)
-                                }
+                            }
+
+                            StyledButton {
+                                text: i18.n + qsTr("Select...")
+                                width: 100
+                                onClicked: exifToolFileDialog.open()
+                                enabled: settingsModel.useExifTool
+                            }
+
+                            StyledButton {
+                                text: i18.n + qsTr("Reset")
+                                width: 100
+                                onClicked: settingsModel.resetExifTool()
+                                enabled: settingsModel.useExifTool
                             }
                         }
 
-                        StyledButton {
-                            Layout.row: 0
-                            Layout.column: 2
-                            text: i18.n + qsTr("Select...")
-                            width: 100
-                            onClicked: exifToolFileDialog.open()
-                            enabled: settingsModel.useExifTool
+                        Item {
+                            height: 20
                         }
 
-                        StyledButton {
-                            Layout.row: 0
-                            Layout.column: 3
-                            text: i18.n + qsTr("Reset")
-                            width: 100
-                            onClicked: settingsModel.resetExifTool()
-                            enabled: settingsModel.useExifTool
+                        Rectangle {
+                            height: 1
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.leftMargin: 10
+                            anchors.rightMargin: 10
+                            color: uiColors.panelSelectedColor
+                        }
+
+                        Item {
+                            height: 20
                         }
 
                         StyledText {
-                            Layout.row: 2
-                            Layout.column: 0
-                            Layout.fillWidth: true
-                            Layout.maximumWidth: 80
-                            horizontalAlignment: Text.AlignRight
                             text: i18.n + qsTr("Dictionary path:")
-                            visible: Qt.platform.os === "linux"
+                            enabled: Qt.platform.os === "linux"
+                            visible: enabled
                         }
 
-                        Rectangle {
-                            color: enabled ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
-                            border.color: uiColors.artworkActiveColor
-                            border.width: dictText.activeFocus ? 1 : 0
-                            Layout.row: 2
-                            Layout.column: 1
-                            width: 165
-                            height: UIConfig.textInputHeight
-                            clip: true
-                            visible: Qt.platform.os === "linux"
+                        Item {
+                            height: 10
+                            enabled: Qt.platform.os === "linux"
+                            visible: enabled
+                        }
 
-                            StyledTextInput {
-                                id: dictText
-                                text: settingsModel.dictionaryPath
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                anchors.leftMargin: 5
-                                anchors.rightMargin: 5
-                                anchors.verticalCenter: parent.verticalCenter
-                                onTextChanged: settingsModel.dictionaryPath = text
+                        RowLayout {
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            spacing: 20
+                            enabled: Qt.platform.os === "linux"
+                            visible: enabled
+
+                            Rectangle {
+                                color: enabled ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
+                                border.color: uiColors.artworkActiveColor
+                                border.width: dictText.activeFocus ? 1 : 0
+                                Layout.fillWidth: true
+                                height: UIConfig.textInputHeight
+                                clip: true
+
+                                StyledTextInput {
+                                    id: dictText
+                                    text: settingsModel.dictionaryPath
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    anchors.leftMargin: 5
+                                    anchors.rightMargin: 5
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    onTextChanged: settingsModel.dictionaryPath = text
+                                }
+                            }
+
+                            StyledButton {
+                                text: i18.n + qsTr("Select...")
+                                width: 100
+                                onClicked: dictPathDialog.open()
+                            }
+
+                            StyledButton {
+                                text: i18.n + qsTr("Reset")
+                                width: 100
+                                onClicked: settingsModel.resetDictPath()
                             }
                         }
 
-                        StyledButton {
-                            Layout.row: 2
-                            Layout.column: 2
-                            text: i18.n + qsTr("Select...")
-                            width: 100
-                            onClicked: dictPathDialog.open()
-                            visible: Qt.platform.os === "linux"
+                        Item {
+                            height: 20
+                            enabled: Qt.platform.os === "linux"
+                            visible: enabled
+                        }
+
+                        Rectangle {
+                            height: 1
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.leftMargin: 10
+                            anchors.rightMargin: 10
+                            color: uiColors.panelSelectedColor
+                            enabled: Qt.platform.os === "linux"
+                            visible: enabled
+                        }
+
+                        Item {
+                            height: 20
+                            enabled: Qt.platform.os === "linux"
+                            visible: enabled
                         }
 
                         StyledButton {
-                            Layout.row: 2
-                            Layout.column: 3
-                            text: i18.n + qsTr("Reset")
-                            width: 100
-                            onClicked: settingsModel.resetDictPath()
-                            visible: Qt.platform.os === "linux"
+                            width: 200
+                            text: i18.n + qsTr("Manage user dictionary")
+                            onClicked: {
+                                userDictEditModel.initializeModel()
+                                Common.launchDialog("../Dialogs/UserDictEditDialog.qml",
+                                                    settingsWindow,
+                                                    {
+                                                        componentParent: settingsWindow
+                                                    })
+                            }
                         }
-                    }
 
-                    StyledButton {
-                        width: 200
-                        text: i18.n + qsTr("Manage user dictionary")
-                        onClicked: {
-                            userDictEditModel.initializeModel()
-                            Common.launchDialog("../Dialogs/UserDictEditDialog.qml",
-                                                settingsWindow,
-                                                {
-                                                    componentParent: settingsWindow
-                                                })
+                        Item {
+                            Layout.fillHeight: true
                         }
-                    }
-
-                    Item {
-                        Layout.fillHeight: true
                     }
                 }
-            }
 
-            Tab {
-                id: uploadTab
-                title: i18.n + qsTr("Upload")
-                signal resetRequested()
-
-                ColumnLayout {
-                    spacing: 20
+                Item {
+                    id: uploadTab
+                    signal resetRequested()
                     anchors.fill: parent
-                    anchors.leftMargin: 20
-                    anchors.rightMargin: 20
-                    anchors.topMargin: 20
-                    anchors.bottomMargin: 10
+                    anchors.margins: 20
 
-                    RowLayout {
-                        width: parent.width
-                        spacing: 10
-
-                        StyledText {
-                            Layout.preferredWidth: 130
-                            horizontalAlignment: Text.AlignRight
-                            text: i18.n + qsTr("File upload timeout:")
-                        }
-
-                        Rectangle {
-                            color: enabled ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
-                            border.width: timeoutSeconds.activeFocus ? 1 : 0
-                            border.color: uiColors.artworkActiveColor
-                            width: 115
-                            height: UIConfig.textInputHeight
-                            clip: true
-
-                            StyledTextInput {
-                                id: timeoutSeconds
-                                text: settingsModel.uploadTimeout
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                anchors.leftMargin: 5
-                                anchors.rightMargin: 5
-                                anchors.verticalCenter: parent.verticalCenter
-                                onTextChanged: {
-                                    if (text.length > 0) {
-                                        settingsModel.uploadTimeout = parseInt(text)
-                                    }
-                                }
-
-                                function onResetRequested() {
-                                    text = settingsModel.uploadTimeout
-                                }
-
-                                Component.onCompleted: {
-                                    uploadTab.resetRequested.connect(timeoutSeconds.onResetRequested)
-                                }
-
-                                KeyNavigation.tab: maxParallelUploads
-                                validator: IntValidator {
-                                    bottom: 0
-                                    top: 300
-                                }
-                            }
-                        }
-
-                        StyledText {
-                            text: i18.n + qsTr("(seconds)")
-                            isActive: false
-                        }
+                    Connections {
+                        target: settingsModel
+                        onSettingsReset: { resetRequested() }
                     }
 
-                    RowLayout {
-                        width: parent.width
-                        spacing: 10
+                    ColumnLayout {
+                        spacing: 20
+                        anchors.fill: parent
+                        anchors.leftMargin: 20
+                        anchors.rightMargin: 20
+                        anchors.topMargin: 20
+                        anchors.bottomMargin: 10
 
-                        StyledText {
-                            Layout.preferredWidth: 130
-                            horizontalAlignment: Text.AlignRight
-                            text: i18.n + qsTr("Max parallel uploads:")
-                        }
-
-                        Rectangle {
-                            color: enabled ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
-                            border.width: maxParallelUploads.activeFocus ? 1 : 0
-                            border.color: uiColors.artworkActiveColor
-                            width: 115
-                            height: UIConfig.textInputHeight
-                            clip: true
-
-                            StyledTextInput {
-                                id: maxParallelUploads
-                                text: settingsModel.maxParallelUploads
-                                anchors.left: parent.left
-                                anchors.right: parent.right
-                                anchors.leftMargin: 5
-                                anchors.rightMargin: 5
-                                anchors.verticalCenter: parent.verticalCenter
-                                onTextChanged: {
-                                    if (text.length > 0) {
-                                        settingsModel.maxParallelUploads = parseInt(text)
-                                    }
-                                }
-
-                                function onResetRequested() {
-                                    text = settingsModel.maxParallelUploads
-                                }
-
-                                Component.onCompleted: {
-                                    uploadTab.resetRequested.connect(maxParallelUploads.onResetRequested)
-                                }
-                                KeyNavigation.backtab: timeoutSeconds
-                                validator: IntValidator {
-                                    bottom: 1
-                                    top: 4
-                                }
-                            }
-                        }
-
-                        StyledText {
-                            text: i18.n + qsTr("(takes effect after relaunch)")
-                            isActive: false
-                        }
-                    }
-
-                    RowLayout {
-                        width: parent.width
-                        spacing: 10
-
-                        StyledCheckbox {
-                            id: useProxyCheckbox
-                            text: i18.n + qsTr("Use Proxy")
-
-                            onClicked: {
-                                if (checked) {
-                                    openProxyDialog(true)
-                                } else {
-                                    settingsModel.useProxy = false
-                                }
-                            }
-
-                            function refreshProxyHandler() {
-                                checked = settingsModel.useProxy
-                            }
-
-                            Component.onCompleted: {
-                                uploadTab.resetRequested.connect(refreshProxyHandler)
-                                checked = settingsModel.useProxy
-                                settingsWindow.refreshProxy.connect(refreshProxyHandler)
-                            }
-                        }
-
-                        Item {
-                            Layout.fillWidth: true
-                        }
-
-                        StyledButton {
-                            width: 190
-                            text: i18.n + qsTr("Configure proxy")
-                            enabled: useProxyCheckbox.checked
-
-                            onClicked: {
-                                openProxyDialog(false)
-                            }
-                        }
-                    }
-
-                    StyledCheckbox {
-                        id: verboseUploadCheckbox
-                        text: i18.n + qsTr("Detailed logging")
-                        onCheckedChanged: {
-                            settingsModel.verboseUpload = checked
-                        }
-                        function onResetRequested() {
-                            checked = settingsModel.verboseUpload
-                        }
-                        Component.onCompleted: {
-                            checked = settingsModel.verboseUpload
-                            uploadTab.resetRequested.connect(verboseUploadCheckbox.onResetRequested)
-                        }
-                    }
-
-                    Item {
-                        Layout.fillHeight: true
-                    }
-                }
-            }
-
-            Tab {
-                id : secTab
-                title: i18.n + qsTr("Security")
-                signal resetRequested()
-
-                property bool useStatistics: settingsModel.userStatistics
-
-                ColumnLayout {
-                    anchors.fill: parent
-                    anchors.leftMargin: 20
-                    anchors.rightMargin: 20
-                    anchors.topMargin: 20
-                    anchors.bottomMargin: 10
-
-                    RowLayout {
-                        StyledCheckbox {
-                            id: masterPasswordCheckbox
-                            text: i18.n + qsTr("Use Master password")
-                            onClicked: {
-                                if (checked) {
-                                    if (!settingsModel.mustUseMasterPassword) {
-                                        var firstTime = true;
-                                        openMasterPasswordDialog(firstTime)
-                                    }
-                                } else {
-                                    masterPasswordOffWarningDialog.open()
-                                }
-                            }
-
-                            Component.onCompleted: {
-                                checked = settingsModel.mustUseMasterPassword
-                                secTab.resetRequested.connect(masterPasswordCheckbox.onResetRequested)
-                            }
-
-                            Connections {
-                                target: settingsModel
-                                onMustUseMasterPasswordChanged: {
-                                    masterPasswordCheckbox.checked = settingsModel.mustUseMasterPassword
-                                }
-
-                            }
-
-                            function onResetRequested() {
-                                checked = settingsModel.mustUseMasterPassword
-                            }
-                        }
-
-                        Item {
-                            Layout.fillWidth: true
-                        }
-
-                        StyledButton {
-                            width: 190
-                            text: i18.n + qsTr("Change Master password")
-                            enabled: masterPasswordCheckbox.checked
-
-                            onClicked: {
-                                openMasterPasswordDialog(false)
-                            }
-                        }
-                    }
-
-                    RowLayout {
-                        Item {
-                            Layout.fillWidth: true
-                        }
-
-                        StyledButton {
-                            width: 190
-                            text: i18.n + qsTr("Reset Master password")
-                            enabled: masterPasswordCheckbox.checked
-
-                            onClicked: {
-                                resetMPDialog.open()
-                            }
-                        }
-                    }
-
-                    Item {
-                        id: container
-                        anchors.left: parent.left
-                        anchors.right: parent.right
-                        height: childrenRect.height
-                        property bool expanded: false
-
-                        StyledText {
-                            id: link
-                            text: i18.n + qsTr("More...")
-                            color: uiColors.artworkActiveColor
-                            anchors.top: parent.top
-                            anchors.left: parent.left
-
-                            MouseArea {
-                                anchors.fill: parent
-                                cursorShape: Qt.PointingHandCursor
-                                onClicked: {
-                                    if (container.expanded) {
-                                        container.expanded = false
-                                        contentsRect.height = 0
-                                        link.text = i18.n + qsTr("More...")
-                                    } else {
-                                        contentsRect.height = 50
-                                        container.expanded = true
-                                        link.text = i18.n + qsTr("Less...")
-                                    }
-                                }
-                            }
-                        }
-
-                        Rectangle {
-                            id: contentsRect
-                            color: "transparent"
-                            border.color: uiColors.defaultControlColor
-                            border.width: 1
-                            anchors.left: parent.left
-                            anchors.top: link.bottom
-                            anchors.topMargin: 5
-                            height: 0
+                        RowLayout {
                             width: parent.width
+                            spacing: 10
 
-                            Behavior on height {
-                                NumberAnimation {
-                                    duration: 200
-                                    easing.type: Easing.InQuad
+                            StyledText {
+                                Layout.preferredWidth: 130
+                                horizontalAlignment: Text.AlignRight
+                                text: i18.n + qsTr("File upload timeout:")
+                            }
+
+                            Rectangle {
+                                color: enabled ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
+                                border.width: timeoutSeconds.activeFocus ? 1 : 0
+                                border.color: uiColors.artworkActiveColor
+                                width: 115
+                                height: UIConfig.textInputHeight
+                                clip: true
+
+                                StyledTextInput {
+                                    id: timeoutSeconds
+                                    text: settingsModel.uploadTimeout
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    anchors.leftMargin: 5
+                                    anchors.rightMargin: 5
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    onTextChanged: {
+                                        if (text.length > 0) {
+                                            settingsModel.uploadTimeout = parseInt(text)
+                                        }
+                                    }
+
+                                    function onResetRequested() {
+                                        text = settingsModel.uploadTimeout
+                                    }
+
+                                    Component.onCompleted: {
+                                        uploadTab.resetRequested.connect(timeoutSeconds.onResetRequested)
+                                    }
+
+                                    KeyNavigation.tab: maxParallelUploads
+                                    validator: IntValidator {
+                                        bottom: 0
+                                        top: 300
+                                    }
                                 }
                             }
 
-                            RowLayout {
-                                visible: container.expanded
-                                anchors.left: parent.left
-                                anchors.leftMargin: 10
-                                anchors.verticalCenter: parent.verticalCenter
-                                spacing: 10
+                            StyledText {
+                                text: i18.n + qsTr("(seconds)")
+                                isActive: false
+                            }
+                        }
+
+                        RowLayout {
+                            width: parent.width
+                            spacing: 10
+
+                            StyledText {
+                                Layout.preferredWidth: 130
+                                horizontalAlignment: Text.AlignRight
+                                text: i18.n + qsTr("Max parallel uploads:")
+                            }
+
+                            Rectangle {
+                                color: enabled ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
+                                border.width: maxParallelUploads.activeFocus ? 1 : 0
+                                border.color: uiColors.artworkActiveColor
+                                width: 115
+                                height: UIConfig.textInputHeight
+                                clip: true
+
+                                StyledTextInput {
+                                    id: maxParallelUploads
+                                    text: settingsModel.maxParallelUploads
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    anchors.leftMargin: 5
+                                    anchors.rightMargin: 5
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    onTextChanged: {
+                                        if (text.length > 0) {
+                                            settingsModel.maxParallelUploads = parseInt(text)
+                                        }
+                                    }
+
+                                    function onResetRequested() {
+                                        text = settingsModel.maxParallelUploads
+                                    }
+
+                                    Component.onCompleted: {
+                                        uploadTab.resetRequested.connect(maxParallelUploads.onResetRequested)
+                                    }
+                                    KeyNavigation.backtab: timeoutSeconds
+                                    validator: IntValidator {
+                                        bottom: 1
+                                        top: 4
+                                    }
+                                }
+                            }
+
+                            StyledText {
+                                text: i18.n + qsTr("(takes effect after relaunch)")
+                                isActive: false
+                            }
+                        }
+
+                        RowLayout {
+                            width: parent.width
+                            spacing: 10
+
+                            StyledCheckbox {
+                                id: useProxyCheckbox
+                                text: i18.n + qsTr("Use Proxy")
+
+                                onClicked: {
+                                    if (checked) {
+                                        openProxyDialog(true)
+                                    } else {
+                                        settingsModel.useProxy = false
+                                    }
+                                }
+
+                                function refreshProxyHandler() {
+                                    checked = settingsModel.useProxy
+                                }
+
+                                Component.onCompleted: {
+                                    uploadTab.resetRequested.connect(refreshProxyHandler)
+                                    checked = settingsModel.useProxy
+                                    settingsWindow.refreshProxy.connect(refreshProxyHandler)
+                                }
+                            }
+
+                            Item {
+                                Layout.fillWidth: true
+                            }
+
+                            StyledButton {
+                                width: 190
+                                text: i18.n + qsTr("Configure proxy")
+                                enabled: useProxyCheckbox.checked
+
+                                onClicked: {
+                                    openProxyDialog(false)
+                                }
+                            }
+                        }
+
+                        StyledCheckbox {
+                            id: verboseUploadCheckbox
+                            text: i18.n + qsTr("Detailed logging")
+                            onCheckedChanged: {
+                                settingsModel.verboseUpload = checked
+                            }
+                            function onResetRequested() {
+                                checked = settingsModel.verboseUpload
+                            }
+                            Component.onCompleted: {
+                                checked = settingsModel.verboseUpload
+                                uploadTab.resetRequested.connect(verboseUploadCheckbox.onResetRequested)
+                            }
+                        }
+
+                        Item {
+                            Layout.fillHeight: true
+                        }
+                    }
+                }
+
+                Item {
+                    id : secTab
+                    signal resetRequested()
+                    anchors.fill: parent
+                    anchors.margins: 20
+                    property bool useStatistics: settingsModel.userStatistics
+
+                    Connections {
+                        target: settingsModel
+                        onSettingsReset: { resetRequested() }
+                    }
+
+                    ColumnLayout {
+                        anchors.fill: parent
+                        anchors.leftMargin: 20
+                        anchors.rightMargin: 20
+                        anchors.topMargin: 20
+                        anchors.bottomMargin: 10
+
+                        RowLayout {
+                            StyledCheckbox {
+                                id: masterPasswordCheckbox
+                                text: i18.n + qsTr("Use Master password")
+                                onClicked: {
+                                    if (checked) {
+                                        if (!settingsModel.mustUseMasterPassword) {
+                                            var firstTime = true;
+                                            openMasterPasswordDialog(firstTime)
+                                        }
+                                    } else {
+                                        masterPasswordOffWarningDialog.open()
+                                    }
+                                }
+
+                                Component.onCompleted: {
+                                    checked = settingsModel.mustUseMasterPassword
+                                    secTab.resetRequested.connect(masterPasswordCheckbox.onResetRequested)
+                                }
+
+                                Connections {
+                                    target: settingsModel
+                                    onMustUseMasterPasswordChanged: {
+                                        masterPasswordCheckbox.checked = settingsModel.mustUseMasterPassword
+                                    }
+
+                                }
+
+                                function onResetRequested() {
+                                    checked = settingsModel.mustUseMasterPassword
+                                }
+                            }
+
+                            Item {
+                                Layout.fillWidth: true
+                            }
+
+                            StyledButton {
+                                width: 190
+                                text: i18.n + qsTr("Change Master password")
+                                enabled: masterPasswordCheckbox.checked
+
+                                onClicked: {
+                                    openMasterPasswordDialog(false)
+                                }
+                            }
+                        }
+
+                        RowLayout {
+                            Item {
+                                Layout.fillWidth: true
+                            }
+
+                            StyledButton {
+                                width: 190
+                                text: i18.n + qsTr("Reset Master password")
+                                enabled: masterPasswordCheckbox.checked
+
+                                onClicked: {
+                                    resetMPDialog.open()
+                                }
+                            }
+                        }
+
+                        Item {
+                            height: 20
+                        }
+
+                        Rectangle {
+                            height: 1
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.leftMargin: 10
+                            anchors.rightMargin: 10
+                            color: uiColors.panelSelectedColor
+                        }
+
+                        Item {
+                            height: 20
+                        }
+
+                        Flow {
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            spacing: 10
+                            property real itemHeight: 40
+                            property real itemWidth: 250
+
+                            Item {
+                                width: parent.itemWidth
+                                height: parent.itemHeight
 
                                 StyledCheckbox {
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: 10
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    id: saveSessionCheckbox
+                                    text: i18.n + qsTr("Restore last session on startup")
+                                    onCheckedChanged: {
+                                        settingsModel.saveSession = checked
+                                    }
+                                    function onResetRequested() {
+                                        checked = settingsModel.saveSession
+                                    }
+
+                                    Component.onCompleted: {
+                                        checked = settingsModel.saveSession
+                                        behaviorTab.resetRequested.connect(saveSessionCheckbox.onResetRequested)
+                                    }
+                                }
+                            }
+
+                            Item {
+                                width: parent.itemWidth
+                                height: parent.itemHeight
+
+                                StyledCheckbox {
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: 10
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    id: useConfirmationDialogsCheckbox
+                                    text: i18.n + qsTr("Use confirmation dialogs")
+                                    onCheckedChanged: {
+                                        settingsModel.mustUseConfirmations = checked
+                                    }
+                                    function onResetRequested() {
+                                        checked = settingsModel.mustUseConfirmations
+                                    }
+
+                                    Component.onCompleted: {
+                                        checked = settingsModel.mustUseConfirmations
+                                        behaviorTab.resetRequested.connect(useConfirmationDialogsCheckbox.onResetRequested)
+                                    }
+                                }
+                            }
+
+                            Item {
+                                width: parent.itemWidth
+                                height: parent.itemHeight
+
+                                StyledCheckbox {
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: 10
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    id: checkForUpdatesCheckbox
+                                    text: i18.n + qsTr("Check for updates")
+                                    onCheckedChanged: {
+                                        settingsModel.checkForUpdates = checked
+                                    }
+                                    function onResetRequested() {
+                                        checked = settingsModel.checkForUpdates
+                                    }
+
+                                    Component.onCompleted: {
+                                        checked = settingsModel.checkForUpdates
+                                        behaviorTab.resetRequested.connect(checkForUpdatesCheckbox.onResetRequested)
+                                    }
+                                }
+                            }
+
+                            Item {
+                                width: parent.itemWidth
+                                height: parent.itemHeight
+
+                                StyledCheckbox {
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: 10
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    id: saveBackupsCheckbox
+                                    text: i18.n + qsTr("Save backups for artworks")
+                                    onCheckedChanged: {
+                                        settingsModel.saveBackups = checked
+                                    }
+                                    function onResetRequested() {
+                                        checked = settingsModel.saveBackups
+                                    }
+
+                                    Component.onCompleted: {
+                                        checked = settingsModel.saveBackups
+                                        behaviorTab.resetRequested.connect(saveBackupsCheckbox.onResetRequested)
+                                    }
+                                }
+                            }
+
+                            Item {
+                                width: parent.itemWidth
+                                height: parent.itemHeight
+
+                                StyledCheckbox {
+                                    anchors.left: parent.left
+                                    anchors.leftMargin: 10
+                                    anchors.verticalCenter: parent.verticalCenter
                                     id: userStatisticCheckBox
-                                    text: i18.n + qsTr("Collect usage statistics")
+                                    text: i18.n + qsTr("Health report")
 
                                     function onResetRequested() {
                                         checked = settingsModel.userStatistics
@@ -1201,73 +1425,65 @@ ApplicationWindow {
                                     onCheckedChanged: {
                                         secTab.useStatistics = checked
                                     }
-
-                                }
-
-                                StyledText {
-                                    text: i18.n + qsTr("(simple statistics of feature usage)")
                                 }
                             }
                         }
-                    }
 
-                    Item {
-                        Layout.fillHeight: true
+                        Item {
+                            Layout.fillHeight: true
+                        }
                     }
                 }
             }
         }
 
-        RowLayout {
-            id: bottomRow
+        Rectangle {
+            id: footer
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.bottom: parent.bottom
-            anchors.leftMargin: 20
-            anchors.rightMargin: 20
-            anchors.bottomMargin: 20
-            height: 24
-            spacing: 0
-            width: parent.width
+            height: 50
+            color: uiColors.defaultDarkColor
 
-            Item {
-                width: 10
-            }
+            RowLayout {
+                id: footerRow
+                anchors.fill: parent
+                anchors.leftMargin: 20
+                anchors.rightMargin: 20
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                spacing: 20
 
-            StyledButton {
-                text: i18.n + qsTr("Reset to defaults")
-                width: 140
-                onClicked: {
-                    resetSettingsDialog.open()
+                StyledLink {
+                    normalLinkColor: uiColors.labelInactiveForeground
+                    text: i18.n + qsTr("Reset to defaults")
+                    onClicked: {
+                        resetSettingsDialog.open()
 
-                    if (typeof useConfirmationDialogsCheckbox !== "undefined") {
-                        useConfirmationDialogsCheckbox.checked = settingsModel.mustUseConfirmations
-                    }
+                        if (typeof useConfirmationDialogsCheckbox !== "undefined") {
+                            useConfirmationDialogsCheckbox.checked = settingsModel.mustUseConfirmations
+                        }
 
-                    if (typeof masterPasswordCheckbox !== "undefined") {
-                        masterPasswordCheckbox.checked = settingsModel.mustUseMasterPassword;
+                        if (typeof masterPasswordCheckbox !== "undefined") {
+                            masterPasswordCheckbox.checked = settingsModel.mustUseMasterPassword;
+                        }
                     }
                 }
-            }
 
-            Item {
-                Layout.fillWidth: true
-            }
-
-            StyledButton {
-                text: i18.n + qsTr("Close")
-                width: 100
-                onClicked: {
-                    saveSettings()
-                    closeSettings()
+                Item {
+                    Layout.fillWidth: true
                 }
-            }
 
-            Item {
-                width: 10
+                StyledButton {
+                    text: i18.n + qsTr("Save and close")
+                    width: 150
+                    onClicked: {
+                        saveSettings()
+                        closeSettings()
+                    }
+                }
             }
         }
-
     }
 
     Component.onCompleted: {

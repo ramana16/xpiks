@@ -32,6 +32,11 @@ Item {
     }
 
     QtObject {
+        id: warningsModel
+        property int minKeywordsCount: 7
+    }
+
+    QtObject {
         id: helpersWrapper
         signal globalCloseRequested();
         signal globalBeforeDestruction();
@@ -56,6 +61,9 @@ Item {
         property bool changeKeywords: true
         property bool appendKeywords: false
         property int keywordsCount: 0
+        property bool hasKeywordsSpellErrors: false
+        property bool hasTitleSpellErrors: false
+        property bool hasDescriptionSpellErrors: false
 
         signal requestCloseWindow()
         signal completionsAvailable()
@@ -64,7 +72,12 @@ Item {
         function initTitleHighlighting(){}
         function getKeywordsModel() { return {}; }
         function registerAsCurrentItem() {}
-        function getBasicModel() { return { hasSpellErrors: false, hasDuplicates: false }; }
+        function getBasicModel() { return {
+                hasKeywordsSpellErrors: false,
+                hasTitleSpellErrors: false,
+                hasDescriptionSpellErrors: false,
+                hasDuplicates: false };
+        }
 
         property string thumbpath: ""
         property bool isvideo: false
@@ -122,6 +135,7 @@ Item {
 
     CombinedEditView {
         id: combinedView
+        anchors.fill: parent
     }
 
     TestCase {

@@ -58,6 +58,7 @@ namespace QMLExtensions {
         Q_PROPERTY(QColor listSeparatorColor READ listSeparatorColor WRITE setListSeparatorColor NOTIFY listSeparatorColorChanged)
 
         Q_PROPERTY(QColor buttonHoverBackground READ buttonHoverBackground WRITE setButtonHoverBackground NOTIFY buttonHoverBackgroundChanged)
+        Q_PROPERTY(QColor buttonHoverForeground READ buttonHoverForeground WRITE setButtonHoverForeground NOTIFY buttonHoverForegroundChanged)
         Q_PROPERTY(QColor buttonPressedBackground READ buttonPressedBackground WRITE setButtonPressedBackground NOTIFY buttonPressedBackgroundChanged)
         Q_PROPERTY(QColor buttonPressedForeground READ buttonPressedForeground WRITE setButtonPressedForeground NOTIFY buttonPressedForegroundChanged)
         Q_PROPERTY(QColor buttonDisabledForeground READ buttonDisabledForeground WRITE setButtonDisabledForeground NOTIFY buttonDisabledForegroundChanged)
@@ -120,7 +121,7 @@ namespace QMLExtensions {
         QColor m_greenColor;
         QColor m_listSeparatorColor;
         QColor m_statusBarColor;
-        QColor m_leftSliderColor;        
+        QColor m_leftSliderColor;
         QColor m_popupBackgroundColor;
         QColor m_inactiveControlColor;
         QColor m_panelColor;
@@ -133,8 +134,9 @@ namespace QMLExtensions {
         QColor m_closeIconInactiveColor;
         QColor m_closeIconDisabledColor;
         QColor m_inputHintForeground;
-        QColor m_popupDarkInputBackground;        
+        QColor m_popupDarkInputBackground;
         QColor m_goldColor;
+        QColor m_buttonHoverForeground;
 
     public:
         explicit ColorsModel(QObject *parent = 0);
@@ -366,6 +368,11 @@ namespace QMLExtensions {
             return m_goldColor;
         }
 
+        QColor buttonHoverForeground() const
+        {
+            return m_buttonHoverForeground;
+        }
+
     signals:
         void themeChanged();
         void defaultDarkColorChanged(QColor defaultDarkColor);
@@ -392,11 +399,11 @@ namespace QMLExtensions {
         void itemsSourceSelectedChanged(QColor itemsSourceSelected);
         void itemsSourceForegroundChanged(QColor itemsSourceForeground);
         void destructiveColorChanged(QColor destructiveColor);
-        void greenColorChanged(QColor greenColor);        
+        void greenColorChanged(QColor greenColor);
         void defaultDarkerColorChanged(QColor defaultDarkerColor);
         void listSeparatorColorChanged(QColor listSeparatorColor);
         void statusBarColorChanged(QColor statusBarColor);
-        void leftSliderColorChanged(QColor leftSliderColor);        
+        void leftSliderColorChanged(QColor leftSliderColor);
         void popupBackgroundColorChanged(QColor popupBackgroundColor);
         void inactiveControlColorChanged(QColor inactiveControlColor);
         void panelColorChanged(QColor panelColor);
@@ -409,8 +416,9 @@ namespace QMLExtensions {
         void closeIconInactiveColorChanged(QColor closeIconInactiveColor);
         void closeIconDisabledColorChanged(QColor closeIconDisabledColor);
         void inputHintForegroundChanged(QColor inputHintForeground);
-        void popupDarkInputBackgroundChanged(QColor popupInputBackground);        
+        void popupDarkInputBackgroundChanged(QColor popupInputBackground);
         void goldColorChanged(QColor goldColor);
+        void buttonHoverForegroundChanged(QColor buttonHoverForeground);
 
     public slots:
         void setDefaultDarkColor(QColor defaultDarkColor)
@@ -756,6 +764,14 @@ namespace QMLExtensions {
 
             m_goldColor = goldColor;
             emit goldColorChanged(goldColor);
+        }
+        void setButtonHoverForeground(QColor buttonHoverForeground)
+        {
+            if (m_buttonHoverForeground == buttonHoverForeground)
+                return;
+
+            m_buttonHoverForeground = buttonHoverForeground;
+            emit buttonHoverForegroundChanged(buttonHoverForeground);
         }
     };
 }

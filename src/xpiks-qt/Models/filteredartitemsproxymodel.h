@@ -31,6 +31,7 @@ namespace Models {
         Q_OBJECT
         Q_PROPERTY(QString searchTerm READ getSearchTerm WRITE setSearchTerm NOTIFY searchTermChanged)
         Q_PROPERTY(int selectedArtworksCount READ getSelectedArtworksCount NOTIFY selectedArtworksCountChanged)
+        Q_PROPERTY(bool s READ getGlobalSelectionChanged NOTIFY allItemsSelectedChanged)
 
     public:
         FilteredArtItemsProxyModel(QObject *parent=0);
@@ -40,6 +41,7 @@ namespace Models {
         void setSearchTerm(const QString &value);
 
         int getSelectedArtworksCount() const { return m_SelectedArtworksCount; }
+        bool getGlobalSelectionChanged() const { return false; }
         void spellCheckAllItems();
 
         MetadataIO::ArtworksSnapshot::Container getSearchablePreviewOriginalItems(const QString &searchTerm, Common::SearchFlags flags) const;
@@ -70,6 +72,7 @@ namespace Models {
         Q_INVOKABLE void removeArtworksDirectory(int index);
         Q_INVOKABLE void deleteKeywordsFromSelected();
         Q_INVOKABLE void setSelectedForCsvExport();
+        Q_INVOKABLE void selectArtworksEx(int comboboxSelectionIndex);
 
         Q_INVOKABLE int getItemsCount() const { return rowCount(); }
         Q_INVOKABLE void reimportMetadataForSelected();
@@ -80,10 +83,12 @@ namespace Models {
         Q_INVOKABLE void updateFilter() { invalidateFilter(); emit afterInvalidateFilter(); }
         Q_INVOKABLE void focusNextItem(int index);
         Q_INVOKABLE void focusPreviousItem(int index);
+        Q_INVOKABLE void focusCurrentItemKeywords(int index);
         Q_INVOKABLE void toggleSorted();
         Q_INVOKABLE void detachVectorFromSelected();
         Q_INVOKABLE QObject *getArtworkMetadata(int index);
         Q_INVOKABLE QObject *getBasicModel(int index);
+        Q_INVOKABLE QString getKeywordsString(int index);
 
         Q_INVOKABLE bool hasTitleWordSpellError(int index, const QString &word);
         Q_INVOKABLE bool hasDescriptionWordSpellError(int index, const QString &word);
@@ -106,12 +111,12 @@ namespace Models {
         void selectedArtworksCountChanged();
         void afterInvalidateFilter();
         void allItemsSelectedChanged();
-        void forceUnselected();
 
     private:
         void removeMetadataInItems(MetadataIO::ArtworksSnapshot::Container &itemsToClear, Common::CombinedEditFlags flags) const;
         void removeKeywordsInItem(ArtworkMetadata *artwork);
         void setFilteredItemsSelected(bool selected);
+        void setFilteredItemsSelectedEx(const std::function<bool (ArtworkMetadata *)> pred, bool selected, bool unselectFirst);
         void invertFilteredItemsSelected();
 
         MetadataIO::WeakArtworksSnapshot getSelectedOriginalItems() const;
