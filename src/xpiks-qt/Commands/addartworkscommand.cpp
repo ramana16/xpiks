@@ -51,7 +51,6 @@ std::shared_ptr<Commands::ICommandResult> Commands::AddArtworksCommand::execute(
     const int newFilesCount = artworksRepository->getNewFilesCount(m_FilePathes);
     const int initialCount = artItemsModel->rowCount();
     const bool filesWereAccounted = artworksRepository->beginAccountingFiles(m_FilePathes);
-    const bool isFullDirectory = getIsFullDirectoryFlag();
 
     MetadataIO::ArtworksSnapshot artworksToImport;
     artworksToImport.reserve(newFilesCount);
@@ -65,7 +64,7 @@ std::shared_ptr<Commands::ICommandResult> Commands::AddArtworksCommand::execute(
 
         const int count = m_FilePathes.count();
         Common::flag_t directoryFlags = 0;
-        if (m_IsFullDirectory) { Common::SetFlag(directoryFlags, Common::DirectoryFlags::IsAddedAsDirectory); }
+        if (getIsFullDirectoryFlag()) { Common::SetFlag(directoryFlags, Common::DirectoryFlags::IsAddedAsDirectory); }
 
         for (int i = 0; i < count; ++i) {
             const QString &filename = m_FilePathes[i];
