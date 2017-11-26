@@ -56,7 +56,7 @@ int UserDictEditTest::doTest() {
 
     auto *basicKeywordsModel = metadata->getBasicModel();
 
-    QString wrongWord = "abbreviatioe";
+    QString wrongWord = "Abbreviatioe";
     metadata->setDescription(metadata->getDescription() + ' ' + wrongWord);
     metadata->setTitle(metadata->getTitle() + ' ' + wrongWord);
     metadata->appendKeyword("correct part " + wrongWord);

@@ -966,7 +966,7 @@ namespace Models {
             ArtworkMetadata *metadata = accessArtwork(i);
             auto *metadataModel = metadata->getBasicModel();
             SpellCheck::SpellCheckItemInfo *info = metadataModel->getSpellCheckInfo();
-            if(!overwritten) {
+            if (!overwritten) {
                 info->removeWordsFromErrors(keywords);
             } else {
                 info->clear();

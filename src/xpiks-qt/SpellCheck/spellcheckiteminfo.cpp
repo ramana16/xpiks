@@ -121,8 +121,8 @@ namespace SpellCheck {
         LOG_DEBUG << "#";
 
         for (const QString &word: words) {
-            m_TitleErrors.removeWordFromErrors(word);
-            m_DescriptionErrors.removeWordFromErrors(word);
+            m_TitleErrors.removeWordFromErrors(word.toLower());
+            m_DescriptionErrors.removeWordFromErrors(word.toLower());
         }
     }
 
