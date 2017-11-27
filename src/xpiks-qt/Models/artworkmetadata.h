@@ -60,7 +60,8 @@ namespace Models {
             FlagIsAlmostInitialized = 1 << 3, // is initialized from cached storage
             FlagIsUnavailable = 1 << 4,
             FlagIsLockedForEditing = 1 << 5,
-            FlagIsLockedIO = 1 << 6
+            FlagIsLockedIO = 1 << 6,
+            FlagIsReimportPending = 1 << 7
         };
 
 #define PROTECT_FLAGS_READ QReadLocker rlocker(&m_FlagsLock); Q_UNUSED(rlocker);
@@ -73,6 +74,7 @@ namespace Models {
         inline bool getIsAlmostInitializedFlag() { PROTECT_FLAGS_READ; return Common::HasFlag(m_MetadataFlags, FlagIsAlmostInitialized); }
         inline bool getIsLockedForEditingFlag() { PROTECT_FLAGS_READ; return Common::HasFlag(m_MetadataFlags, FlagIsLockedForEditing); }
         inline bool getIsLockedIOFlag() { PROTECT_FLAGS_READ; return Common::HasFlag(m_MetadataFlags, FlagIsLockedIO); }
+        inline bool getIsReimportPendingFlag() { PROTECT_FLAGS_READ; return Common::HasFlag(m_MetadataFlags, FlagIsReimportPending); }
 
         inline void setIsModifiedFlag(bool value) { PROTECT_FLAGS_WRITE; Common::ApplyFlag(m_MetadataFlags, value, FlagIsModified); }
         inline void setIsSelectedFlag(bool value) { PROTECT_FLAGS_WRITE; Common::ApplyFlag(m_MetadataFlags, value, FlagsIsSelected); }
@@ -81,11 +83,13 @@ namespace Models {
         inline void setIsAlmostInitializedFlag(bool value) { PROTECT_FLAGS_WRITE; Common::ApplyFlag(m_MetadataFlags, value, FlagIsAlmostInitialized); }
         inline void setIsLockedForEditingFlag(bool value) { PROTECT_FLAGS_WRITE; Common::ApplyFlag(m_MetadataFlags, value, FlagIsLockedForEditing); }
         inline void setIsLockedIOFlag(bool value) { PROTECT_FLAGS_WRITE; Common::ApplyFlag(m_MetadataFlags, value, FlagIsLockedIO); }
+        inline void setIsReimportPendingFlag(bool value) { PROTECT_FLAGS_WRITE; Common::ApplyFlag(m_MetadataFlags, value, FlagIsReimportPending); }
 
 #undef PROTECT_FLAGS_READ
 #undef PROTECT_FLAGS_WRITE
 
     public:
+        void prepareForReimport();
         bool initFromOrigin(const MetadataIO::OriginalMetadata &originalMetadata, bool overwrite=false);
         bool initFromStorage(const MetadataIO::CachedArtwork &cachedArtwork);
         // called when Close is pressed in the Import dialog

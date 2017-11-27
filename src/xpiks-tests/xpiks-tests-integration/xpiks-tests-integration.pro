@@ -224,7 +224,8 @@ SOURCES += main.cpp \
     ../../xpiks-qt/KeywordsPresets/presetgroupsmodel.cpp \
     ../../xpiks-qt/UndoRedo/removedirectoryitem.cpp \
     undorestoresessiontest.cpp \
-    masterpasswordtest.cpp
+    masterpasswordtest.cpp \
+    reimporttest.cpp
 
 RESOURCES +=
 
@@ -483,7 +484,8 @@ HEADERS += \
     undoadddirectorytest.h \
     ../../xpiks-qt/UndoRedo/removedirectoryitem.h \
     undorestoresessiontest.h \
-    masterpasswordtest.h
+    masterpasswordtest.h \
+    reimporttest.h
 
 INCLUDEPATH += ../../../vendors/tiny-aes
 INCLUDEPATH += ../../../vendors/cpp-libface

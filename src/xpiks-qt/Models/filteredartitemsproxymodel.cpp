@@ -269,7 +269,11 @@ namespace Models {
         LOG_DEBUG << "#";
         auto selectedArtworks = getSelectedOriginalItems();
 
-        m_CommandManager->readMetadata(selectedArtworks);
+        for (auto *artwork: selectedArtworks) {
+            artwork->prepareForReimport();
+        }
+
+        m_CommandManager->reimportMetadata(selectedArtworks);
         ArtItemsModel *artItemsModel = getArtItemsModel();
         artItemsModel->raiseArtworksAdded((int)selectedArtworks.size(), 0);
     }

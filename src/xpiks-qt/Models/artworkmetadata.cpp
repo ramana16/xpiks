@@ -55,20 +55,25 @@ namespace Models {
 #endif
     }
 
+    void ArtworkMetadata::prepareForReimport() {
+        LOG_INTEGRATION_TESTS << "#" << m_ID;
+        setIsReimportPendingFlag(true);
+    }
+
     bool ArtworkMetadata::initFromOrigin(const MetadataIO::OriginalMetadata &originalMetadata, bool overwrite) {
         LOG_INTEGRATION_TESTS << "#" << m_ID << originalMetadata.m_Title << originalMetadata.m_Description << originalMetadata.m_Keywords;
         bool anythingChanged = false;
         QMutexLocker initLocker(&m_InitMutex);
         Q_UNUSED(initLocker);
 
-        Q_ASSERT(!getIsInitializedFlag());
+        Q_ASSERT(getIsReimportPendingFlag() || !getIsInitializedFlag());
 
-        if (!getIsAlmostInitializedFlag() || overwrite) {
+        if (getIsReimportPendingFlag() || !getIsAlmostInitializedFlag() || overwrite) {
             anythingChanged = m_MetadataModel.setTitle(originalMetadata.m_Title) || anythingChanged;
             anythingChanged = m_MetadataModel.setDescription(originalMetadata.m_Description) || anythingChanged;
             m_MetadataModel.setKeywords(originalMetadata.m_Keywords);
             anythingChanged = anythingChanged || !originalMetadata.m_Keywords.isEmpty();
-            Q_ASSERT(getIsModifiedFlag() == false);
+            Q_ASSERT(getIsReimportPendingFlag() || !getIsModifiedFlag());
         } else {
             Q_ASSERT(getIsAlmostInitializedFlag());
             bool shouldPreserveModified = false;
@@ -112,7 +117,14 @@ namespace Models {
         QMutexLocker initLocker(&m_InitMutex);
         Q_UNUSED(initLocker);
 
-        Q_ASSERT(!getIsAlmostInitializedFlag());
+        // we should not even get here when reimporting because we ignore local storage
+        Q_ASSERT(!getIsReimportPendingFlag());
+        if (getIsReimportPendingFlag()) {
+            Q_ASSERT(getIsAlmostInitializedFlag() || getIsInitializedFlag());
+            return false;
+        }
+
+        Q_ASSERT(getIsReimportPendingFlag() || !getIsAlmostInitializedFlag());
 
         if (!getIsInitializedFlag()) {
             anythingChanged = m_MetadataModel.setTitle(cachedArtwork.m_Title) || anythingChanged;
@@ -144,6 +156,8 @@ namespace Models {
     void ArtworkMetadata::initAsEmpty(const MetadataIO::OriginalMetadata &originalMetadata) {
         QMutexLocker initLocker(&m_InitMutex);
         Q_UNUSED(initLocker);
+
+        Q_ASSERT(!getIsReimportPendingFlag());
 
         m_MetadataModel.clearModel();
         setIsInitializedFlag(true);

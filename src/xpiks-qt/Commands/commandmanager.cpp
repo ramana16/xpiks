@@ -699,6 +699,7 @@ void Commands::CommandManager::disconnectArtworkSignals(Models::ArtworkMetadata 
 }
 
 void Commands::CommandManager::readMetadata(const MetadataIO::ArtworksSnapshot &snapshot) const {
+    LOG_DEBUG << "#";
 #ifndef CORE_TESTS
     quint32 batchID = 0;
 
@@ -709,19 +710,30 @@ void Commands::CommandManager::readMetadata(const MetadataIO::ArtworksSnapshot &
     if (m_MetadataIOCoordinator != nullptr) {
         m_MetadataIOCoordinator->readMetadataExifTool(snapshot, batchID);
     }
+#else
+    Q_UNUSED(snapshot);
+#endif
+}
 
+void Commands::CommandManager::reimportMetadata(const MetadataIO::ArtworksSnapshot &snapshot) const {
+    LOG_DEBUG << "#";
+#ifndef CORE_TESTS
+    if (m_MetadataIOCoordinator != nullptr) {
+        m_MetadataIOCoordinator->readMetadataExifTool(snapshot, INVALID_BATCH_ID);
+    }
 #else
     Q_UNUSED(snapshot);
 #endif
 }
 
 void Commands::CommandManager::writeMetadata(const MetadataIO::WeakArtworksSnapshot &artworks, bool useBackups) const {
+    LOG_DEBUG << "#";
 #ifndef CORE_TESTS
     if (m_MetadataIOCoordinator != nullptr) {
         m_MetadataIOService->writeArtworks(artworks);
     }
 
-    if (m_MetadataIOCoordinator) {
+    if (m_MetadataIOCoordinator != nullptr) {
         m_MetadataIOCoordinator->writeMetadataExifTool(artworks, useBackups);
     }
 

@@ -62,7 +62,7 @@ namespace Common {
                 Common::SetFlag(flags, FlagIsSeparator);
 
                 bool wasEmpty = m_Queue.empty();
-                m_Queue.emplace_back(std::shared_ptr<T>(), 0, flags);
+                m_Queue.emplace_back(std::shared_ptr<T>(), flags, INVALID_BATCH_ID);
 
                 if (wasEmpty) {
                     m_WaitAnyItem.wakeOne();
@@ -73,7 +73,7 @@ namespace Common {
 
         batch_id_t submitItem(const std::shared_ptr<T> &item) {
             if (m_Cancel) {
-                return 0;
+                return INVALID_BATCH_ID;
             }
 
             batch_id_t batchID;
@@ -82,7 +82,7 @@ namespace Common {
             {
                 batchID = getNextBatchID();
                 bool wasEmpty = m_Queue.empty();
-                m_Queue.emplace_back(item, batchID, flags);
+                m_Queue.emplace_back(item, flags, batchID);
 
                 if (wasEmpty) {
                     m_WaitAnyItem.wakeOne();
@@ -95,7 +95,7 @@ namespace Common {
 
         batch_id_t submitFirst(const std::shared_ptr<T> &item) {
             if (m_Cancel) {
-                return 0;
+                return INVALID_BATCH_ID;
             }
 
             batch_id_t batchID;
@@ -104,7 +104,7 @@ namespace Common {
             {
                 batchID = getNextBatchID();
                 bool wasEmpty = m_Queue.empty();
-                m_Queue.emplace_front(item, batchID, flags);
+                m_Queue.emplace_front(item, flags, batchID);
 
                 if (wasEmpty) {
                     m_WaitAnyItem.wakeOne();
@@ -117,7 +117,7 @@ namespace Common {
 
         batch_id_t submitItems(const std::vector<std::shared_ptr<T> > &items) {
             if (m_Cancel) {
-                return 0;
+                return INVALID_BATCH_ID;
             }
 
             batch_id_t batchID;
@@ -134,7 +134,7 @@ namespace Common {
                     Common::flag_t flags = commonFlags;
                     if (i % m_DelayPeriod == 0) { Common::SetFlag(flags, FlagIsWithDelay); }
 
-                    m_Queue.emplace_back(item, batchID, flags);
+                    m_Queue.emplace_back(item, flags, batchID);
                 }
 
                 if (wasEmpty) {
@@ -157,14 +157,14 @@ namespace Common {
         }
 
         void cancelBatch(batch_id_t batchID) {
-            if (batchID == 0) { return; }
+            if (batchID == INVALID_BATCH_ID) { return; }
 
             bool isEmpty = false;
             m_QueueMutex.lock();
             {
                 m_Queue.erase(std::remove_if(m_Queue.begin(), m_Queue.end(),
                                              [&batchID](const ItemType &item) {
-                    return std::get<1>(item) == batchID;
+                    return std::get<2>(item) == batchID;
                 }),
                               m_Queue.end());
 
@@ -210,7 +210,7 @@ namespace Common {
                 Common::flag_t flags = 0;
                 Common::SetFlag(flags, FlagIsStopper);
 
-                m_Queue.emplace_back(std::shared_ptr<T>(), 0, flags);
+                m_Queue.emplace_back(std::shared_ptr<T>(), flags, INVALID_BATCH_ID);
                 m_WaitAnyItem.wakeOne();
             }
             m_QueueMutex.unlock();
@@ -244,7 +244,7 @@ namespace Common {
                 bool noMoreItems = false;
                 std::shared_ptr<T> item;
                 Common::flag_t flags = 0;
-                batch_id_t batchID = 0;
+                batch_id_t batchID = INVALID_BATCH_ID;
 
                 m_QueueMutex.lock();
                 {
@@ -257,8 +257,8 @@ namespace Common {
 
                     auto &nextItem = m_Queue.front();
                     item = std::get<0>(nextItem);
-                    batchID = std::get<1>(nextItem);
-                    flags = std::get<2>(nextItem);
+                    flags = std::get<1>(nextItem);
+                    batchID = std::get<2>(nextItem);
                     m_Queue.pop_front();
 
                     noMoreItems = m_Queue.empty();

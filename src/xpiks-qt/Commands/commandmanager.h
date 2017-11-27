@@ -217,6 +217,7 @@ namespace Commands {
         virtual void connectArtworkSignals(Models::ArtworkMetadata *artwork) const;
         void disconnectArtworkSignals(Models::ArtworkMetadata *metadata) const;
         void readMetadata(const MetadataIO::ArtworksSnapshot &snapshot) const;
+        void reimportMetadata(const MetadataIO::ArtworksSnapshot &snapshot) const;
         void writeMetadata(const MetadataIO::WeakArtworksSnapshot &artworks, bool useBackups) const;
         void addToLibrary(const MetadataIO::WeakArtworksSnapshot &artworks) const;
         void updateArtworksAtIndices(const QVector<int> &indices) const;

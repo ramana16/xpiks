@@ -115,6 +115,7 @@
 #include "undoadddirectorytest.h"
 #include "undorestoresessiontest.h"
 #include "masterpasswordtest.h"
+#include "reimporttest.h"
 
 #if defined(WITH_PLUGINS)
 #undef WITH_PLUGINS
@@ -396,6 +397,7 @@ int main(int argc, char *argv[]) {
     integrationTests.append(new UndoAddDirectoryTest(&commandManager));
     integrationTests.append(new UndoRestoreSessionTest(&commandManager));
     integrationTests.append(new MasterPasswordTest(&commandManager));
+    integrationTests.append(new ReimportTest(&commandManager));
     // always the last one. insert new tests above
     integrationTests.append(new LocalLibrarySearchTest(&commandManager));
 
