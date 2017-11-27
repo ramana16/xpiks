@@ -275,7 +275,7 @@ namespace Models {
 
         m_CommandManager->reimportMetadata(selectedArtworks);
         ArtItemsModel *artItemsModel = getArtItemsModel();
-        artItemsModel->raiseArtworksAdded((int)selectedArtworks.size(), 0, true);
+        artItemsModel->raiseArtworksReimported((int)selectedArtworks.size());
     }
 
     int FilteredArtItemsProxyModel::findSelectedItemIndex() const {

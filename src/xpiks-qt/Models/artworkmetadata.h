@@ -96,6 +96,12 @@ namespace Models {
         void initAsEmpty(const MetadataIO::OriginalMetadata &originalMetadata);
         void initAsEmpty();
 
+    private:
+        bool initFromOriginBeforeStorageUnsafe(const MetadataIO::OriginalMetadata &originalMetadata);
+        bool initFromOriginAfterStorageUnsafe(const MetadataIO::OriginalMetadata &originalMetadata);
+        bool initFromStorageBeforeOriginUnsafe(const MetadataIO::CachedArtwork &cachedArtwork);
+        bool initFromStorageAfterOriginUnsafe(const MetadataIO::CachedArtwork &cachedArtwork);
+
     protected:
         virtual bool initFromOriginUnsafe(const MetadataIO::OriginalMetadata &originalMetadata) { Q_UNUSED(originalMetadata); return false; }
         virtual bool initFromStorageUnsafe(const MetadataIO::CachedArtwork &cachedArtwork) { Q_UNUSED(cachedArtwork); return false; }

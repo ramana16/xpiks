@@ -208,6 +208,22 @@ ApplicationWindow {
                            })
     }
 
+    function launchImportDialog(imagesCount, vectorsCount, reimport) {
+        var latestDir = recentDirectories.getLatestItem()
+        chooseArtworksDialog.folder = latestDir
+        chooseDirectoryDialog.folder = latestDir
+
+        if (imagesCount > 0) {
+            Common.launchDialog("Dialogs/ImportMetadata.qml", applicationWindow,
+                                {
+                                    backupsEnabled: !reimport
+                                })
+        } else if (vectorsCount > 0) {
+            vectorsAttachedDialog.vectorsAttached = vectorsCount
+            vectorsAttachedDialog.open()
+        }
+    }
+
     Component.onCompleted: {
         console.debug("onCompleted handler")
         openingTimer.start()
@@ -1167,19 +1183,11 @@ ApplicationWindow {
                 return;
             }
 
-            var latestDir = recentDirectories.getLatestItem()
-            chooseArtworksDialog.folder = latestDir
-            chooseDirectoryDialog.folder = latestDir
+            launchImportDialog(imagesCount, vectorsCount, false)
+        }
 
-            if (imagesCount > 0) {
-                Common.launchDialog("Dialogs/ImportMetadata.qml", applicationWindow,
-                                    {
-                                        backupsEnabled: !reimport
-                                    })
-            } else if (vectorsCount > 0) {
-                vectorsAttachedDialog.vectorsAttached = vectorsCount
-                vectorsAttachedDialog.open()
-            }
+        onArtworksReimported: {
+            launchImportDialog(artworksCount, 0, true)
         }
     }
 

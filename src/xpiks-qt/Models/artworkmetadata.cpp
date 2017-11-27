@@ -69,38 +69,9 @@ namespace Models {
         Q_ASSERT(getIsReimportPendingFlag() || !getIsInitializedFlag());
 
         if (getIsReimportPendingFlag() || !getIsAlmostInitializedFlag() || overwrite) {
-            anythingChanged = m_MetadataModel.setTitle(originalMetadata.m_Title) || anythingChanged;
-            anythingChanged = m_MetadataModel.setDescription(originalMetadata.m_Description) || anythingChanged;
-            m_MetadataModel.setKeywords(originalMetadata.m_Keywords);
-            anythingChanged = anythingChanged || !originalMetadata.m_Keywords.isEmpty();
-            Q_ASSERT(getIsReimportPendingFlag() || !getIsModifiedFlag());
+            anythingChanged = initFromOriginBeforeStorageUnsafe(originalMetadata);
         } else {
-            Q_ASSERT(getIsAlmostInitializedFlag());
-            bool shouldPreserveModified = false;
-
-            if (!originalMetadata.m_Title.trimmed().isEmpty()) {
-                anythingChanged = m_MetadataModel.setTitle(originalMetadata.m_Title) || anythingChanged;
-            } else {
-                shouldPreserveModified = !m_MetadataModel.isTitleEmpty() || shouldPreserveModified;
-            }
-
-            if (!originalMetadata.m_Description.trimmed().isEmpty()) {
-                anythingChanged = m_MetadataModel.setDescription(originalMetadata.m_Description) || anythingChanged;
-            } else {
-                shouldPreserveModified = !m_MetadataModel.isDescriptionEmpty() || shouldPreserveModified;
-            }
-
-            if (!m_MetadataModel.containsKeywords(originalMetadata.m_Keywords)) {
-                m_MetadataModel.setKeywords(originalMetadata.m_Keywords);
-                anythingChanged = true;
-            } else {
-                const int existingCount = m_MetadataModel.getKeywordsCount();
-                const int originCount = originalMetadata.m_Keywords.count();
-                // which should mean that this artwork has been already imported from storage
-                shouldPreserveModified = (existingCount > originCount) || shouldPreserveModified;
-            }
-
-            setIsModifiedFlag(shouldPreserveModified);
+            anythingChanged = initFromOriginAfterStorageUnsafe(originalMetadata);
         }
 
         setIsInitializedFlag(true);
@@ -124,27 +95,12 @@ namespace Models {
             return false;
         }
 
-        Q_ASSERT(getIsReimportPendingFlag() || !getIsAlmostInitializedFlag());
+        Q_ASSERT(!getIsAlmostInitializedFlag());
 
         if (!getIsInitializedFlag()) {
-            anythingChanged = m_MetadataModel.setTitle(cachedArtwork.m_Title) || anythingChanged;
-            anythingChanged = m_MetadataModel.setDescription(cachedArtwork.m_Description) || anythingChanged;
-            m_MetadataModel.setKeywords(cachedArtwork.m_Keywords);
-            anythingChanged = anythingChanged || !cachedArtwork.m_Keywords.isEmpty();
-            Q_ASSERT(getIsModifiedFlag() == false);
+            anythingChanged = initFromStorageBeforeOriginUnsafe(cachedArtwork);
         } else {
-            if (m_MetadataModel.isTitleEmpty() && !cachedArtwork.m_Title.trimmed().isEmpty()) {
-                anythingChanged = this->setTitle(cachedArtwork.m_Title) || anythingChanged;
-            }
-
-            if (m_MetadataModel.isDescriptionEmpty() && !cachedArtwork.m_Description.trimmed().isEmpty()) {
-                anythingChanged = this->setDescription(cachedArtwork.m_Description) || anythingChanged;
-            }
-
-            const size_t addedCount = this->appendKeywords(cachedArtwork.m_Keywords);
-            if (addedCount > 0) {
-                anythingChanged = true;
-            }
+            anythingChanged = initFromStorageAfterOriginUnsafe(cachedArtwork);
         }
 
         setIsAlmostInitializedFlag(true);
@@ -175,6 +131,82 @@ namespace Models {
         m_MetadataModel.clearModel();
         setIsInitializedFlag(true);
         setIsModifiedFlag(false);
+    }
+
+    bool ArtworkMetadata::initFromOriginBeforeStorageUnsafe(const MetadataIO::OriginalMetadata &originalMetadata) {
+        bool anythingChanged = false;
+
+        anythingChanged = m_MetadataModel.setTitle(originalMetadata.m_Title) || anythingChanged;
+        anythingChanged = m_MetadataModel.setDescription(originalMetadata.m_Description) || anythingChanged;
+        m_MetadataModel.setKeywords(originalMetadata.m_Keywords);
+        anythingChanged = anythingChanged || !originalMetadata.m_Keywords.isEmpty();
+        Q_ASSERT(getIsReimportPendingFlag() || !getIsModifiedFlag());
+        if (getIsReimportPendingFlag()) {
+            setIsModifiedFlag(false);
+        }
+
+        return anythingChanged;
+    }
+
+    bool ArtworkMetadata::initFromOriginAfterStorageUnsafe(const MetadataIO::OriginalMetadata &originalMetadata) {
+        Q_ASSERT(getIsAlmostInitializedFlag());
+        bool shouldPreserveModified = false;
+        bool anythingChanged = false;
+
+        if (!originalMetadata.m_Title.trimmed().isEmpty()) {
+            anythingChanged = m_MetadataModel.setTitle(originalMetadata.m_Title) || anythingChanged;
+        } else {
+            shouldPreserveModified = !m_MetadataModel.isTitleEmpty() || shouldPreserveModified;
+        }
+
+        if (!originalMetadata.m_Description.trimmed().isEmpty()) {
+            anythingChanged = m_MetadataModel.setDescription(originalMetadata.m_Description) || anythingChanged;
+        } else {
+            shouldPreserveModified = !m_MetadataModel.isDescriptionEmpty() || shouldPreserveModified;
+        }
+
+        if (!m_MetadataModel.containsKeywords(originalMetadata.m_Keywords)) {
+            m_MetadataModel.setKeywords(originalMetadata.m_Keywords);
+            anythingChanged = true;
+        } else {
+            const int existingCount = m_MetadataModel.getKeywordsCount();
+            const int originCount = originalMetadata.m_Keywords.count();
+            // which should mean that this artwork has been already imported from storage
+            shouldPreserveModified = (existingCount > originCount) || shouldPreserveModified;
+        }
+
+        setIsModifiedFlag(shouldPreserveModified);
+
+        return anythingChanged;
+    }
+
+    bool ArtworkMetadata::initFromStorageBeforeOriginUnsafe(const MetadataIO::CachedArtwork &cachedArtwork) {
+        bool anythingChanged = false;
+        anythingChanged = m_MetadataModel.setTitle(cachedArtwork.m_Title) || anythingChanged;
+        anythingChanged = m_MetadataModel.setDescription(cachedArtwork.m_Description) || anythingChanged;
+        m_MetadataModel.setKeywords(cachedArtwork.m_Keywords);
+        anythingChanged = anythingChanged || !cachedArtwork.m_Keywords.isEmpty();
+        Q_ASSERT(getIsModifiedFlag() == false);
+        return anythingChanged;
+    }
+
+    bool ArtworkMetadata::initFromStorageAfterOriginUnsafe(const MetadataIO::CachedArtwork &cachedArtwork) {
+        bool anythingChanged = false;
+
+        if (m_MetadataModel.isTitleEmpty() && !cachedArtwork.m_Title.trimmed().isEmpty()) {
+            anythingChanged = this->setTitle(cachedArtwork.m_Title) || anythingChanged;
+        }
+
+        if (m_MetadataModel.isDescriptionEmpty() && !cachedArtwork.m_Description.trimmed().isEmpty()) {
+            anythingChanged = this->setDescription(cachedArtwork.m_Description) || anythingChanged;
+        }
+
+        const size_t addedCount = this->appendKeywords(cachedArtwork.m_Keywords);
+        if (addedCount > 0) {
+            anythingChanged = true;
+        }
+
+        return anythingChanged;
     }
 
     QString ArtworkMetadata::getBaseFilename() const {
