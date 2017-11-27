@@ -461,7 +461,7 @@ ApplicationWindow {
         enabled: (filteredArtItemsModel.selectedArtworksCount > 0) && applicationWindow.actionsEnabled
         onTriggered: {
             console.info("Reimport metadata triggered")
-            filteredArtItemsModel.reimportMetadataForSelected()
+            reimportConfirmationDialog.open()
         }
     }
 
@@ -1001,6 +1001,16 @@ ApplicationWindow {
     }
 
     MessageDialog {
+        id: reimportConfirmationDialog
+        title: i18.n + qsTr("Confirmation")
+        text: i18.n + qsTr("You will lose all unsaved changes after reimport. Proceed?")
+        standardButtons: StandardButton.Yes | StandardButton.No
+        onYes: {
+            filteredArtItemsModel.reimportMetadataForSelected()
+        }
+    }
+
+    MessageDialog {
         id: confirmRemoveDirectoryDialog
         property int directoryIndex
         title: i18.n + qsTr("Confirmation")
@@ -1162,7 +1172,10 @@ ApplicationWindow {
             chooseDirectoryDialog.folder = latestDir
 
             if (imagesCount > 0) {
-                Common.launchDialog("Dialogs/ImportMetadata.qml", applicationWindow, {})
+                Common.launchDialog("Dialogs/ImportMetadata.qml", applicationWindow,
+                                    {
+                                        backupsEnabled: !reimport
+                                    })
             } else if (vectorsCount > 0) {
                 vectorsAttachedDialog.vectorsAttached = vectorsCount
                 vectorsAttachedDialog.open()

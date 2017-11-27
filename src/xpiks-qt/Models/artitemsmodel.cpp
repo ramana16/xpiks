@@ -1059,11 +1059,11 @@ namespace Models {
         return result;
     }
 
-    void ArtItemsModel::raiseArtworksAdded(int imagesCount, int vectorsCount) {
-        emit artworksAdded(imagesCount, vectorsCount);
+    void ArtItemsModel::raiseArtworksAdded(int imagesCount, int vectorsCount, bool reimport) {
+        emit artworksAdded(imagesCount, vectorsCount, reimport);
         QCoreApplication::processEvents(QEventLoop::AllEvents);
 
-        LOG_INFO << imagesCount << "images" << vectorsCount << "vectors";
+        LOG_INFO << "images:" << imagesCount << "vectors:" << vectorsCount << "reimport:" << reimport;
     }
 
     void ArtItemsModel::raiseArtworksChanged(bool navigateToCurrent) {

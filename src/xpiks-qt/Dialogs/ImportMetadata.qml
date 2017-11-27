@@ -25,6 +25,7 @@ Item {
 
     property bool isInProgress: false
     property bool autoImport: false
+    property bool backupsEnabled: true
 
     Keys.onEscapePressed: {
         if (!metadataImportComponent.isInProgress) {
@@ -198,8 +199,8 @@ Item {
                 StyledCheckbox {
                     id: ignoreAutosavesCheckbox
                     text: i18.n + qsTr("Ignore autosaves")
-                    enabled: settingsModel.saveBackups && !metadataImportComponent.isInProgress
-                    checked: false
+                    enabled: settingsModel.saveBackups && !metadataImportComponent.isInProgress && metadataImportComponent.backupsEnabled
+                    checked: !metadataImportComponent.backupsEnabled
                 }
 
                 RowLayout {

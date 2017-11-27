@@ -183,7 +183,7 @@ namespace Models {
         void appendArtwork(ArtworkMetadata *artwork);
         void removeArtworks(const QVector<QPair<int, int> > &ranges);
         ArtworkMetadata *getArtwork(size_t index) const;
-        void raiseArtworksAdded(int imagesCount, int vectorsCount);
+        void raiseArtworksAdded(int imagesCount, int vectorsCount, bool reimport = false);
         void raiseArtworksChanged(bool navigateToCurrent);
         virtual void updateItemsAtIndices(const QVector<int> &indices);
         void updateItemsAtIndicesEx(const QVector<int> &indices, const QVector<int> &roles);
@@ -215,7 +215,7 @@ namespace Models {
     signals:
         void modifiedArtworksCountChanged();
         void artworksChanged(bool needToMoveCurrentItem);
-        void artworksAdded(int imagesCount, int vectorsCount);
+        void artworksAdded(int imagesCount, int vectorsCount, bool reimport);
         void selectedArtworksRemoved(int count);
         void fileWithIndexUnavailable(size_t index);
         void unavailableArtworksFound();

@@ -157,8 +157,6 @@ namespace Models {
         QMutexLocker initLocker(&m_InitMutex);
         Q_UNUSED(initLocker);
 
-        Q_ASSERT(!getIsReimportPendingFlag());
-
         m_MetadataModel.clearModel();
         setIsInitializedFlag(true);
         setIsModifiedFlag(false);
@@ -166,6 +164,8 @@ namespace Models {
         setFileSize(originalMetadata.m_FileSize);
 
         initFromOriginUnsafe(originalMetadata);
+
+        setIsReimportPendingFlag(false);
     }
 
     void ArtworkMetadata::initAsEmpty() {
