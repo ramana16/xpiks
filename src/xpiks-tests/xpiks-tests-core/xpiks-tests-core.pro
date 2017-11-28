@@ -101,7 +101,6 @@ SOURCES += main.cpp \
     ../../xpiks-qt/Models/artitemsmodel.cpp \
         ../../xpiks-qt/Models/filteredartitemsproxymodel.cpp \
     ../../xpiks-qt/Commands/addartworkscommand.cpp \
-    ../../xpiks-qt/Models/artworksprocessor.cpp \
     ../../xpiks-qt/Models/combinedartworksmodel.cpp \
     ../../xpiks-qt/UndoRedo/addartworksitem.cpp \
     ../../xpiks-qt/UndoRedo/undoredomanager.cpp \
@@ -212,7 +211,6 @@ HEADERS += \
         ../../xpiks-qt/Models/filteredartitemsproxymodel.h \
     Mocks/artitemsmodelmock.h \
     ../../xpiks-qt/Commands/addartworkscommand.h \
-    ../../xpiks-qt/Models/artworksprocessor.h \
     ../../xpiks-qt/Models/combinedartworksmodel.h \
     ../../xpiks-qt/UndoRedo/addartworksitem.h \
     ../../xpiks-qt/UndoRedo/historyitem.h \

@@ -15,8 +15,8 @@ namespace Helpers {
     class IFileNotAvailableModel
     {
     public:
-        virtual bool removeUnavailableItems()=0;
         virtual ~IFileNotAvailableModel() {}
+        virtual bool removeUnavailableItems() = 0;
     };
 }
 #endif // IFILENOTAVAILABLEMODEL_H

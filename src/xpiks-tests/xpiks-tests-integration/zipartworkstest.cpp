@@ -30,7 +30,7 @@ int ZipArtworksTest::doTest() {
 
     MetadataIO::MetadataIOCoordinator *ioCoordinator = m_CommandManager->getMetadataIOCoordinator();
     SignalWaiter waiter;
-    QObject::connect(ioCoordinator, SIGNAL(metadataReadingFinished()), &waiter, SIGNAL(finished()));    
+    QObject::connect(ioCoordinator, SIGNAL(metadataReadingFinished()), &waiter, SIGNAL(finished()));
 
     int addedCount = artItemsModel->addLocalArtworks(files);
     VERIFY(addedCount == files.length(), "Failed to add files");
@@ -57,7 +57,7 @@ int ZipArtworksTest::doTest() {
     }
 
     VERIFY(zipArchiver->getItemsCount() > 0, "Empty archiver");
-    VERIFY(!zipArchiver->getIsError(), "Errors while zipping");
+    VERIFY(!zipArchiver->getHasErrors(), "Errors while zipping");
 
     for (int i = 0; i < files.length(); ++i) {
         Models::ArtworkMetadata *metadata = artItemsModel->getArtwork(i);

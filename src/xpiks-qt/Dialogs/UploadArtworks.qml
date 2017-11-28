@@ -386,9 +386,9 @@ Item {
 
                     Connections {
                         target: artworkUploader
-                        onItemsNumberChanged: {
+                        onItemsCountChanged: {
                             textItemsAvailable.originalText = artworkUploader.itemsCount === 1 ? qsTr("1 artwork selected") : qsTr("%1 artworks selected").arg(artworkUploader.itemsCount)
-                            textItemsAvailable.text=i18.n + originalText
+                            textItemsAvailable.text = i18.n + originalText
                         }
                     }
                 }

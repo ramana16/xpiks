@@ -31,6 +31,7 @@ Item {
 
     function closePopup() {
         zipArtworksComponent.destroy()
+        zipArchiver.resetModel();
     }
 
     Connections {
@@ -138,9 +139,9 @@ Item {
 
                         Connections {
                             target: zipArchiver
-                            onItemsNumberChanged: {
-                               textItemsAvailable.originalText=zipArchiver.itemsCount == 1 ? qsTr("1 artwork with vector") : qsTr("%1 artworks with vectors").arg(zipArchiver.itemsCount)
-                               textItemsAvailable.text=i18.n + originalText
+                            onItemsCountChanged: {
+                               textItemsAvailable.originalText = zipArchiver.itemsCount == 1 ? qsTr("1 artwork with vector") : qsTr("%1 artworks with vectors").arg(zipArchiver.itemsCount)
+                               textItemsAvailable.text = i18.n + originalText
                             }
                        }
                     }
@@ -173,7 +174,6 @@ Item {
                         enabled: !zipArchiver.inProgress && (zipArchiver.itemsCount > 0)
                         onClicked: {
                             text = i18.n + qsTr("Zipping...")
-                            zipArchiver.resetModel()
                             zipArchiver.archiveArtworks()
                         }
 
@@ -213,7 +213,7 @@ Item {
     Component.onCompleted: {
         focus = true
         if (immediateProcessing) {
-            zipArchiver.resetModel()
+            console.debug("immediate processing for zipper")
             zipArchiver.archiveArtworks()
         }
     }

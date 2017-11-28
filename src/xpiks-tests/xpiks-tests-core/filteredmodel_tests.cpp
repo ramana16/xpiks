@@ -188,6 +188,7 @@ void FilteredModelTests::setSelectedForZippingTest() {
     for (int i = 0; i < 10; ++i) {
         auto *metadata = artItemsModelMock.getMockArtwork(i);
         metadata->set("title", "description", QStringList() << "keyword1" << "keyword2");
+        metadata->attachVector("/path/to/random/vector.eps");
 
         if (i % 2) {
             metadata->setIsSelected(true);

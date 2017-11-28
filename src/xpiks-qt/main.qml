@@ -151,7 +151,7 @@ ApplicationWindow {
 
     function doOpenUploadDialog(masterPasswordCorrectOrEmpty, skipUploadItems) {
         var artworkUploader = helpersWrapper.getArtworkUploader()
-        artworkUploader.resetModel()
+        artworkUploader.clearModel()
 
         if (!skipUploadItems) {
             filteredArtItemsModel.setSelectedForUpload()

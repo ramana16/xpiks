@@ -608,10 +608,14 @@ void Commands::CommandManager::deleteKeywordsFromArtworks(MetadataIO::WeakArtwor
 }
 
 void Commands::CommandManager::setArtworksForUpload(MetadataIO::ArtworksSnapshot &artworks) const {
+#ifndef CORE_TESTS
     LOG_INFO << artworks.size() << "artworks";
     if (m_ArtworkUploader) {
         m_ArtworkUploader->setArtworks(artworks);
     }
+#else
+    Q_UNUSED(artworks);
+#endif
 }
 
 void Commands::CommandManager::setArtworksForZipping(MetadataIO::ArtworksSnapshot &artworks) const {

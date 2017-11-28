@@ -14,11 +14,12 @@
 #include <QAbstractListModel>
 #include <QStringList>
 #include <QFutureWatcher>
-#include "artworksprocessor.h"
 #include "../Connectivity/testconnection.h"
 #include "../AutoComplete/stringsautocompletemodel.h"
 #include "../AutoComplete/stocksftplistmodel.h"
 #include "../Connectivity/uploadwatcher.h"
+#include "../Helpers/ifilenotavailablemodel.h"
+#include "../MetadataIO/artworkssnapshot.h"
 
 namespace Helpers {
     class TestConnectionResult;
@@ -39,8 +40,15 @@ namespace Helpers {
 namespace Models {
     class ArtworkMetadata;
 
-    class ArtworkUploader: public ArtworksProcessor
+    class ArtworkUploader:
+            public QObject,
+            public Common::BaseEntity,
+            public Helpers::IFileNotAvailableModel
     {
+        Q_PROPERTY(int percent READ getPercent WRITE setPercent NOTIFY percentChanged)
+        Q_PROPERTY(bool inProgress READ getInProgress WRITE setInProgress NOTIFY inProgressChanged)
+        Q_PROPERTY(bool isError READ getHasErrors WRITE setHasErrors NOTIFY hasErrorsChanged)
+        Q_PROPERTY(int itemsCount READ getItemsCount NOTIFY itemsCountChanged)
         Q_OBJECT
     public:
         ArtworkUploader(Connectivity::IFtpCoordinator *ftpCoordinator, QObject *parent=0);
@@ -53,11 +61,25 @@ namespace Models {
         virtual void setCommandManager(Commands::CommandManager *commandManager) override;
 
     signals:
+        void inProgressChanged();
+        void hasErrorsChanged();
         void percentChanged();
+        void itemsCountChanged();
+        void startedProcessing();
+        void finishedProcessing();
+        void requestCloseWindow();
         void credentialsChecked(bool result, const QString &url);
 
     public:
-        virtual int getPercent() const override { return m_Percent; }
+        int getPercent() const { return m_Percent; }
+        bool getInProgress() const { return m_IsInProgress; }
+        bool getHasErrors() const { return m_HasErrors; }
+        int getItemsCount() const { return (int)m_ArtworksSnapshot.size(); }
+
+    public:
+        void setPercent(int value);
+        void setInProgress(bool value);
+        void setHasErrors(bool value);
 
     public slots:
         void onUploadStarted();
@@ -78,15 +100,25 @@ namespace Models {
         Q_INVOKABLE QString getFtpAddress(const QString &stockName) const { return m_StocksFtpList.getFtpAddress(stockName); }
         Q_INVOKABLE QString getFtpName(const QString &stockAddress) const;
 
-        Q_INVOKABLE QObject *getUploadWatcher() {
-            auto *model = &m_UploadWatcher;
-            QQmlEngine::setObjectOwnership(model, QQmlEngine::CppOwnership);
+        Q_INVOKABLE QObject *getUploadWatcher();
 
-            return model;
-        }
+        Q_INVOKABLE void resetModel();
+        Q_INVOKABLE void clearModel();
+        Q_INVOKABLE void resetProgress();
+        Q_INVOKABLE void cancelOperation();
 
         void initializeStocksList(Helpers::AsyncCoordinator *initCoordinator);
 
+    public:
+        void setArtworks(MetadataIO::ArtworksSnapshot &snapshot);
+        void resetArtworks();
+
+#ifdef CORE_TESTS
+    public:
+#else
+    protected:
+#endif
+        const MetadataIO::ArtworksSnapshot &getArtworksSnapshot() const { return m_ArtworksSnapshot; }
 
 #ifdef INTEGRATION_TESTS
     public:
@@ -97,17 +129,18 @@ namespace Models {
         void doUploadArtworks(const MetadataIO::ArtworksSnapshot &snapshot);
 
     protected:
-        virtual void cancelProcessing() override;
-
-        virtual void innerResetModel() override { m_Percent = 0; m_UploadWatcher.resetModel(); }
+        virtual bool removeUnavailableItems() override;
 
     private:
+        MetadataIO::ArtworksSnapshot m_ArtworksSnapshot;
         Connectivity::UploadWatcher m_UploadWatcher;
         Connectivity::IFtpCoordinator *m_FtpCoordinator;
         AutoComplete::StringsAutoCompleteModel m_StocksCompletionSource;
         AutoComplete::StocksFtpListModel m_StocksFtpList;
         QFutureWatcher<Connectivity::ContextValidationResult> *m_TestingCredentialWatcher;
         int m_Percent;
+        volatile bool m_IsInProgress;
+        volatile bool m_HasErrors;
     };
 }
 

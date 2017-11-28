@@ -19,7 +19,6 @@ SOURCES += main.cpp \
     Models/combinedartworksmodel.cpp \
     Helpers/indiceshelper.cpp \
     Models/artworkuploader.cpp \
-    Models/artworksprocessor.cpp \
     Models/uploadinforepository.cpp \
     ../../vendors/tiny-aes/aes.cpp \
     ../../vendors/sqlite/sqlite3.c \
@@ -203,7 +202,6 @@ HEADERS += \
     Common/abstractlistmodel.h \
     Helpers/constants.h \
     Models/artworkuploader.h \
-    Models/artworksprocessor.h \
     Models/uploadinfo.h \
     Models/exportinfo.h \
     Models/uploadinforepository.h \

@@ -67,7 +67,6 @@ SOURCES += main.cpp \
     ../../xpiks-qt/MetadataIO/metadataiocoordinator.cpp \
     ../../xpiks-qt/Models/artitemsmodel.cpp \
     ../../xpiks-qt/Models/artworkmetadata.cpp \
-    ../../xpiks-qt/Models/artworksprocessor.cpp \
     ../../xpiks-qt/Models/artworksrepository.cpp \
     ../../xpiks-qt/Models/artworkuploader.cpp \
     ../../xpiks-qt/Models/combinedartworksmodel.cpp \
@@ -293,7 +292,6 @@ HEADERS += \
     ../../xpiks-qt/Models/artworkelement.h \
     ../../xpiks-qt/Models/artitemsmodel.h \
     ../../xpiks-qt/Models/artworkmetadata.h \
-    ../../xpiks-qt/Models/artworksprocessor.h \
     ../../xpiks-qt/Models/artworksrepository.h \
     ../../xpiks-qt/Models/artworkuploader.h \
     ../../xpiks-qt/Models/combinedartworksmodel.h \

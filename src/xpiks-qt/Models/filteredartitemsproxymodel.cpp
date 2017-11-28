@@ -168,8 +168,15 @@ namespace Models {
 
     void FilteredArtItemsProxyModel::setSelectedForZipping() {
         LOG_DEBUG << "#";
-        auto selectedArtworks = getSelectedArtworksSnapshot();
-        MetadataIO::ArtworksSnapshot snapshot(selectedArtworks);
+        auto itemsForZipping = getFilteredOriginalItems<ArtworkMetadata *>(
+                    [](ArtworkMetadata *artwork) {
+                if (!artwork->isSelected()) { return false; }
+                ImageArtwork *image = dynamic_cast<ImageArtwork*>(artwork);
+                return (image != nullptr) && (image->hasVectorAttached());
+            },
+                [] (ArtworkMetadata *artwork, int, int) { return artwork; });
+
+        MetadataIO::ArtworksSnapshot snapshot(itemsForZipping);
         m_CommandManager->setArtworksForZipping(snapshot);
     }
 
