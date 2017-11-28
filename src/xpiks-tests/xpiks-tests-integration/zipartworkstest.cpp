@@ -12,6 +12,7 @@
 #include "../../xpiks-qt/Models/filteredartitemsproxymodel.h"
 #include "../../xpiks-qt/Models/ziparchiver.h"
 #include "../../xpiks-qt/Helpers/filehelpers.h"
+#include "../../xpiks-qt/Models/imageartwork.h"
 
 QString ZipArtworksTest::testName() {
     return QLatin1String("ZipArtworksTest");
@@ -27,6 +28,7 @@ int ZipArtworksTest::doTest() {
     QList<QUrl> files;
     files << getFilePathForTest("images-for-tests/vector/026.jpg");
     files << getFilePathForTest("images-for-tests/vector/027.jpg");
+    files << getFilePathForTest("images-for-tests/pixmap/seagull.jpg");
 
     MetadataIO::MetadataIOCoordinator *ioCoordinator = m_CommandManager->getMetadataIOCoordinator();
     SignalWaiter waiter;
@@ -56,14 +58,18 @@ int ZipArtworksTest::doTest() {
         VERIFY(false, "Timeout while zipping artworks");
     }
 
-    VERIFY(zipArchiver->getItemsCount() > 0, "Empty archiver");
+    VERIFY(zipArchiver->getItemsCount() == 2, "ZipArchiver didn't get all the files");
     VERIFY(!zipArchiver->getHasErrors(), "Errors while zipping");
 
     for (int i = 0; i < files.length(); ++i) {
-        Models::ArtworkMetadata *metadata = artItemsModel->getArtwork(i);
-        QString zipPath = Helpers::getArchivePath(metadata->getFilepath());
+        Models::ArtworkMetadata *artwork = artItemsModel->getArtwork(i);
+        Models::ImageArtwork *image = dynamic_cast<Models::ImageArtwork*>(artwork);
+        Q_ASSERT(image != nullptr);
 
-        VERIFY(QFileInfo(zipPath).exists(), "Zip file not found");
+        if (image->hasVectorAttached()) {
+            QString zipPath = Helpers::getArchivePath(artwork->getFilepath());
+            VERIFY(QFileInfo(zipPath).exists(), "Zip file not found");
+        }
     }
 
     return 0;
