@@ -13,6 +13,7 @@
 
 #include <QSet>
 #include <QJsonDocument>
+#include <QFileInfo>
 #include "../Helpers/comparevaluesjson.h"
 #include "../Helpers/remoteconfig.h"
 #include "../Helpers/localconfig.h"
@@ -33,6 +34,13 @@ namespace Models {
         Helpers::LocalConfig &getLocalConfig() { return m_LocalConfig; }
         void setOnlyLocal() { m_OnlyLocal = true; }
 
+#ifdef INTEGRATION_TESTS
+        void setRemoteOverride(const QString &localPath) {
+            Q_ASSERT(QFileInfo(localPath).exists());
+            m_RemoteOverrideLocalPath = localPath;
+        }
+#endif
+
     private slots:
         void remoteConfigArrived();
 
@@ -50,6 +58,10 @@ namespace Models {
         Helpers::LocalConfig m_LocalConfig;
         bool m_ForceOverwrite;
         bool m_OnlyLocal;
+
+#ifdef INTEGRATION_TESTS
+        QString m_RemoteOverrideLocalPath;
+#endif
     };
 }
 #endif // QABSTRACTUPDATERCONFIGMODEL_H

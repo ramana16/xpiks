@@ -23,12 +23,14 @@ Item {
     id: metadataImportComponent
     anchors.fill: parent
 
-    property bool isInProgress: false
-    property bool autoImport: false
+    property int importID: 0
     property bool backupsEnabled: true
 
+    signal dialogDestruction();
+    Component.onDestruction: dialogDestruction();
+
     Keys.onEscapePressed: {
-        if (!metadataImportComponent.isInProgress) {
+        if (!metadataIOCoordinator.isInProgress) {
             closePopup()
         }
 
@@ -39,17 +41,29 @@ Item {
         metadataImportComponent.destroy()
     }
 
-    Component.onCompleted: {
-        focus = true
+    Connections {
+        target: metadataIOCoordinator
+        onMetadataReadingFinished: {
+            console.log("UI::ImportMetadata # Import finished handler")
 
-        if (autoImport) {
-            console.log("Auto import")
-            continueImport()
+            warningsModel.update()
+
+            if (metadataIOCoordinator.hasErrors) {
+                errorsNotification.open()
+            } else {
+                closePopup()
+            }
         }
     }
 
-    signal dialogDestruction();
-    Component.onDestruction: dialogDestruction();
+    Component.onCompleted: {
+        focus = true
+
+        if (metadataIOCoordinator.hasImportFinished(metadataImportComponent.importID)) {
+            console.debug("UI::ImportMetadata # Import seems to be finished")
+            closePopup()
+        }
+    }
 
     MessageDialog {
         id: errorsNotification
@@ -77,7 +91,6 @@ Item {
 
     function continueImport() {
         importButton.text = i18.n + qsTr("Importing...")
-        metadataImportComponent.isInProgress = true
 
         spinner.height = spinner.width
         dialogWindow.height += spinner.height + column.spacing
@@ -199,7 +212,7 @@ Item {
                 StyledCheckbox {
                     id: ignoreAutosavesCheckbox
                     text: i18.n + qsTr("Ignore autosaves")
-                    enabled: settingsModel.saveBackups && !metadataImportComponent.isInProgress && metadataImportComponent.backupsEnabled
+                    enabled: settingsModel.saveBackups && !metadataIOCoordinator.isInProgress && metadataImportComponent.backupsEnabled
                     checked: !metadataImportComponent.backupsEnabled
                 }
 
@@ -213,30 +226,13 @@ Item {
                         isDefault: true
                         width: 130
                         text: i18.n + qsTr("Start Import")
-                        enabled: !metadataImportComponent.isInProgress
+                        enabled: !metadataIOCoordinator.isInProgress
                         onClicked: {
                             console.debug("Start Import pressed")
                             if (metadataIOCoordinator.exiftoolNotFound) {
                                 installExiftoolDialog.open()
                             } else {
                                 continueImport()
-                            }
-                        }
-
-                        Connections {
-                            target: metadataIOCoordinator
-                            onMetadataReadingFinished: {
-                                console.log("UI::ImportMetadata # Import finished handler")
-
-                                metadataImportComponent.isInProgress = false
-                                warningsModel.update()
-
-                                if (metadataIOCoordinator.hasErrors) {
-                                    errorsNotification.open()
-                                } else {
-                                    importButton.text = i18.n + qsTr("Start Import")
-                                    closePopup()
-                                }
                             }
                         }
                     }
@@ -248,7 +244,7 @@ Item {
                     StyledButton {
                         text: i18.n + qsTr("Close")
                         width: 100
-                        enabled: !metadataImportComponent.isInProgress
+                        enabled: !metadataIOCoordinator.isInProgress
                         onClicked: {
                             console.debug("Close without Import pressed")
                             metadataIOCoordinator.continueWithoutReading()

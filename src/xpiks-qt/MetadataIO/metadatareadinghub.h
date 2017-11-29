@@ -27,7 +27,7 @@ namespace MetadataIO {
         MetadataReadingHub();
 
     public:
-        void initializeImport(const ArtworksSnapshot &artworksToRead, quint32 storageReadBatchID);
+        void initializeImport(const ArtworksSnapshot &artworksToRead, int importID, quint32 storageReadBatchID);
         void finalizeImport();
 
     public:
@@ -45,7 +45,7 @@ namespace MetadataIO {
         void onCanInitialize(int status);
 
     signals:
-        void readingFinished();
+        void readingFinished(int importID);
 
     private:
         void initializeArtworks(bool ignoreBackups, bool initEmpty);
@@ -54,6 +54,7 @@ namespace MetadataIO {
         ArtworksSnapshot m_ArtworksToRead;
         Helpers::AsyncCoordinator m_AsyncCoordinator;
         Common::ReaderWriterQueue<OriginalMetadata> m_ImportQueue;
+        int m_ImportID;
         quint32 m_StorageReadBatchID;
         volatile bool m_IgnoreBackupsAtImport;
         volatile bool m_InitAsEmpty;

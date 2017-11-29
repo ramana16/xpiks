@@ -49,12 +49,24 @@ namespace Models {
     }
 
     void AbstractConfigUpdaterModel::initRemoteConfig(const QString &configUrl) {
-        Q_ASSERT(m_CommandManager != NULL);
-        Q_ASSERT(!configUrl.isEmpty());
-        m_RemoteConfig.setConfigUrl(configUrl);
+#ifdef INTEGRATION_TESTS
+        if (!m_RemoteOverrideLocalPath.isEmpty()) {
+            LOG_DEBUG << "Using remote override" << m_RemoteOverrideLocalPath;
+            Helpers::LocalConfig m_RemoteOverrideConfig;
+            m_RemoteOverrideConfig.initConfig(m_RemoteOverrideLocalPath);
 
-        Connectivity::RequestsService *requestsService = m_CommandManager->getRequestsService();
-        requestsService->receiveConfig(configUrl, &m_RemoteConfig);
+            const QJsonDocument &localDocument = m_RemoteOverrideConfig.getConfig();
+            processRemoteConfig(localDocument, m_ForceOverwrite);
+        } else
+#endif
+        {
+            Q_ASSERT(m_CommandManager != NULL);
+            Q_ASSERT(!configUrl.isEmpty());
+            m_RemoteConfig.setConfigUrl(configUrl);
+
+            Connectivity::RequestsService *requestsService = m_CommandManager->getRequestsService();
+            requestsService->receiveConfig(configUrl, &m_RemoteConfig);
+        }
     }
 
     void AbstractConfigUpdaterModel::initLocalConfig(const QString &filePath){

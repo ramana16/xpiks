@@ -69,11 +69,13 @@
 #define DEFAULT_PROGRESSIVE_SUGGESTION_INCREMENT 10
 
 #ifndef INTEGRATION_TESTS
+    #define DEFAULT_USE_AUTOIMPORT true
     #define DEFAULT_AUTO_CACHE_IMAGES true
     #define DEFAULT_VERBOSE_UPLOAD true
     #define DEFAULT_USE_DIRECT_EXIFTOOL_EXPORT false
 #else
     // used in INTEGRATION TESTS
+    #define DEFAULT_USE_AUTOIMPORT false
     #define DEFAULT_USE_DIRECT_EXIFTOOL_EXPORT true
     #define DEFAULT_AUTO_CACHE_IMAGES false
     #define DEFAULT_VERBOSE_UPLOAD false
@@ -146,7 +148,8 @@ namespace Models {
         m_VerboseUpload(DEFAULT_VERBOSE_UPLOAD),
         m_UseProgressiveSuggestionPreviews(DEFAULT_USE_PROGRESSIVE_SUGGESTION_PREVIEWS),
         m_ProgressiveSuggestionIncrement(DEFAULT_PROGRESSIVE_SUGGESTION_INCREMENT),
-        m_UseDirectExiftoolExport(DEFAULT_USE_DIRECT_EXIFTOOL_EXPORT)
+        m_UseDirectExiftoolExport(DEFAULT_USE_DIRECT_EXIFTOOL_EXPORT),
+        m_UseAutoImport(DEFAULT_USE_AUTOIMPORT)
     {
     }
 
@@ -356,7 +359,7 @@ namespace Models {
         QMutexLocker locker(&m_SettingsMutex);
         Q_UNUSED(locker);
 
-        doRetrieveAllValues();
+        doReadAllValues();
     }
 
     void SettingsModel::saveProxySetting(const QString &address, const QString &user,
@@ -405,7 +408,7 @@ namespace Models {
         }
     }
 
-    void SettingsModel::doRetrieveAllValues() {
+    void SettingsModel::doReadAllValues() {
         using namespace Constants;
 
         setExifToolPath(stringValue(pathToExifTool, DEFAULT_EXIFTOOL));
@@ -439,6 +442,7 @@ namespace Models {
         setUseProgressiveSuggestionPreviews(expBoolValue(useProgressiveSuggestionPreviews, DEFAULT_USE_PROGRESSIVE_SUGGESTION_PREVIEWS));
         setProgressiveSuggestionIncrement(expIntValue(progressiveSuggestionIncrement, DEFAULT_PROGRESSIVE_SUGGESTION_INCREMENT));
         setUseDirectExiftoolExport(expBoolValue(useDirectExiftoolExport, DEFAULT_USE_DIRECT_EXIFTOOL_EXPORT));
+        setUseAutoImport(expBoolValue(useAutoImport, DEFAULT_USE_AUTOIMPORT));
 
         deserializeProxyFromSettings(stringValue(proxyHost, DEFAULT_PROXY_HOST));
 
@@ -497,7 +501,7 @@ namespace Models {
         //moveSetting(oldSettings, TRANSLATOR_SELECTED_DICT_INDEX, translatorSelectedDictIndex, QMetaType::Int);
 
         // apply imported settings
-        doRetrieveAllValues();
+        doReadAllValues();
 
         setValue(settingsVersion, CURRENT_SETTINGS_VERSION);
         sync();
@@ -541,6 +545,7 @@ namespace Models {
         setUseProgressiveSuggestionPreviews(DEFAULT_USE_PROGRESSIVE_SUGGESTION_PREVIEWS);
         setProgressiveSuggestionIncrement(DEFAULT_PROGRESSIVE_SUGGESTION_INCREMENT);
         setUseDirectExiftoolExport(DEFAULT_USE_DIRECT_EXIFTOOL_EXPORT);
+        setUseAutoImport(DEFAULT_USE_AUTOIMPORT);
 
 #if defined(QT_DEBUG)
         setValue(Constants::userConsent, DEFAULT_HAVE_USER_CONSENT);
@@ -586,6 +591,7 @@ namespace Models {
         setExperimentalValue(useProgressiveSuggestionPreviews, m_UseProgressiveSuggestionPreviews);
         setExperimentalValue(progressiveSuggestionIncrement, m_ProgressiveSuggestionIncrement);
         setExperimentalValue(useDirectExiftoolExport, m_UseDirectExiftoolExport);
+        setExperimentalValue(useAutoImport, m_UseAutoImport);
 
         if (!m_MustUseMasterPassword) {
             setValue(masterPasswordHash, "");

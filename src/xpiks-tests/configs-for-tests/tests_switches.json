@@ -1,0 +1,25 @@
+{
+    "directExport": {
+        "t": 50,
+        "v": true
+    },
+    "donateCampaign1": {
+        "v": false
+    },
+    "donateCampaign1Stage2": {
+        "v": false
+    },
+    "overwrite": {
+        "v": true
+    },
+    "progressiveSuggestionPreviews": {
+        "v": true
+    },
+    "qualityVideoPreviews": {
+        "t": 30,
+        "v": true
+    },
+    "autoImport": {
+        "v": true
+    }
+}

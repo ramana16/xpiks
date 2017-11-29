@@ -280,9 +280,9 @@ namespace Models {
             artwork->prepareForReimport();
         }
 
-        m_CommandManager->reimportMetadata(selectedArtworks);
+        int importID = m_CommandManager->reimportMetadata(selectedArtworks);
         ArtItemsModel *artItemsModel = getArtItemsModel();
-        artItemsModel->raiseArtworksReimported((int)selectedArtworks.size());
+        artItemsModel->raiseArtworksReimported(importID, (int)selectedArtworks.size());
     }
 
     int FilteredArtItemsProxyModel::findSelectedItemIndex() const {

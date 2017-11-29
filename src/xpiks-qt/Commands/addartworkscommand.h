@@ -29,13 +29,15 @@ namespace Commands {
         enum AddArtworksFlags {
             FlagAutoFindVectors = 1 << 0,
             FlagIsFullDirectory = 1 << 1,
-            FlagIsSessionRestore = 1 << 2
+            FlagIsSessionRestore = 1 << 2,
+            FlagAutoImport = 1 << 3
         };
 
     private:
         inline bool getAutoFindVectorsFlag() const { return Common::HasFlag(m_Flags, FlagAutoFindVectors); }
         inline bool getIsFullDirectoryFlag() const { return Common::HasFlag(m_Flags, FlagIsFullDirectory); }
-        inline bool getIsSessionRestore() const { return Common::HasFlag(m_Flags, FlagIsSessionRestore); }
+        inline bool getIsSessionRestoreFlag() const { return Common::HasFlag(m_Flags, FlagIsSessionRestore); }
+        inline bool getAutoImportFlag() const { return Common::HasFlag(m_Flags, FlagAutoImport); }
 
     public:
         AddArtworksCommand(const QStringList &pathes, const QStringList &vectorPathes, Common::flag_t flags) :
@@ -43,7 +45,7 @@ namespace Commands {
             m_FilePathes(pathes),
             m_VectorsPathes(vectorPathes),
             m_Flags(flags)
-        {}
+        { }
 
         virtual ~AddArtworksCommand();
 
@@ -51,10 +53,10 @@ namespace Commands {
         virtual std::shared_ptr<ICommandResult> execute(const ICommandManager *commandManagerInterface) const override;
 
     private:
-        void afterAddedHandler(CommandManager *commandManager,
-                               const MetadataIO::ArtworksSnapshot &artworksToImport,
-                               QStringList filesToWatch,
-                               int initialCount, int newFilesCount) const;
+        int afterAddedHandler(CommandManager *commandManager,
+                              const MetadataIO::ArtworksSnapshot &artworksToImport,
+                              QStringList filesToWatch,
+                              int initialCount, int newFilesCount) const;
         void decomposeVectors(QHash<QString, QHash<QString, QString> > &vectors) const;
 
     public:
@@ -65,11 +67,21 @@ namespace Commands {
 
     class AddArtworksCommandResult : public CommandResult {
     public:
-        AddArtworksCommandResult(int count):
-        m_NewFilesAdded(count)
-        {}
+        AddArtworksCommandResult(int addedFilesCount, int attachedVectorsCount, int importID, bool autoImport):
+            m_NewFilesAdded(addedFilesCount),
+            m_AttachedVectorsCount(attachedVectorsCount),
+            m_ImportID(importID),
+            m_AutoImport(autoImport)
+        { }
+
+    public:
+        virtual void afterExecCallback(const ICommandManager *commandManagerInterface) const override;
+
     public:
         int m_NewFilesAdded;
+        int m_AttachedVectorsCount;
+        int m_ImportID;
+        bool m_AutoImport;
     };
 }
 

@@ -198,6 +198,7 @@ namespace Constants {
     const char progressiveSuggestionIncrement[] = "progressiveSuggestionIncrement";
     const char useDirectExiftoolExport[] = "useDirectExiftoolExport";
     const char suggestorSearchTypeIndex[] = "suggestorSearchTypeIndex";
+    const char useAutoImport[] = "useAutoImport";
 }
 
 #endif // CONSTANTS

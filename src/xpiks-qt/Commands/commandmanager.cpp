@@ -702,8 +702,10 @@ void Commands::CommandManager::disconnectArtworkSignals(Models::ArtworkMetadata 
     }
 }
 
-void Commands::CommandManager::readMetadata(const MetadataIO::ArtworksSnapshot &snapshot) const {
+int Commands::CommandManager::readMetadata(const MetadataIO::ArtworksSnapshot &snapshot) const {
     LOG_DEBUG << "#";
+    int importID = 0;
+
 #ifndef CORE_TESTS
     quint32 batchID = 0;
 
@@ -712,22 +714,28 @@ void Commands::CommandManager::readMetadata(const MetadataIO::ArtworksSnapshot &
     }
 
     if (m_MetadataIOCoordinator != nullptr) {
-        m_MetadataIOCoordinator->readMetadataExifTool(snapshot, batchID);
+        importID = m_MetadataIOCoordinator->readMetadataExifTool(snapshot, batchID);
     }
 #else
     Q_UNUSED(snapshot);
 #endif
+
+    return importID;
 }
 
-void Commands::CommandManager::reimportMetadata(const MetadataIO::ArtworksSnapshot &snapshot) const {
+int Commands::CommandManager::reimportMetadata(const MetadataIO::ArtworksSnapshot &snapshot) const {
     LOG_DEBUG << "#";
+    int importID = 0;
+
 #ifndef CORE_TESTS
     if (m_MetadataIOCoordinator != nullptr) {
-        m_MetadataIOCoordinator->readMetadataExifTool(snapshot, INVALID_BATCH_ID);
+        importID = m_MetadataIOCoordinator->readMetadataExifTool(snapshot, INVALID_BATCH_ID);
     }
 #else
     Q_UNUSED(snapshot);
 #endif
+
+    return importID;
 }
 
 void Commands::CommandManager::writeMetadata(const MetadataIO::WeakArtworksSnapshot &artworks, bool useBackups) const {
@@ -1152,6 +1160,14 @@ int Commands::CommandManager::restoreFiles(const QStringList &filenames, const Q
     Common::flag_t flags = 0;
     Common::SetFlag(flags, Commands::AddArtworksCommand::FlagIsSessionRestore);
 
+#if !defined(CORE_TESTS) && !defined(INTEGRATION_TESTS)
+    if ((m_SettingsModel != nullptr) && (m_SwitcherModel != nullptr)) {
+        if (m_SettingsModel->getUseAutoImport() && m_SwitcherModel->getUseAutoImport()) {
+            Common::SetFlag(flags, Commands::AddArtworksCommand::FlagAutoImport);
+        }
+    }
+#endif
+
     std::shared_ptr<Commands::AddArtworksCommand> addArtworksCommand(new Commands::AddArtworksCommand(filenames, vectors, flags));
     std::shared_ptr<Commands::ICommandResult> result = processCommand(addArtworksCommand);
     std::shared_ptr<Commands::AddArtworksCommandResult> addArtworksResult =
@@ -1300,6 +1316,7 @@ void Commands::CommandManager::cleanup() {
     m_SettingsModel->resetToDefault();
     m_SpellCheckerService->clearUserDictionary();
     m_SessionManager->clearSession();
+    m_MetadataIOCoordinator->clear();
 }
 #endif
 

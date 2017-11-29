@@ -16,6 +16,7 @@
 
 namespace MetadataIO {
     MetadataReadingHub::MetadataReadingHub():
+        m_ImportID(0),
         m_StorageReadBatchID(0),
         m_IgnoreBackupsAtImport(false),
         m_InitAsEmpty(false)
@@ -24,9 +25,10 @@ namespace MetadataIO {
                          this, &MetadataReadingHub::onCanInitialize);
     }
 
-    void MetadataReadingHub::initializeImport(const ArtworksSnapshot &artworksToRead, quint32 storageReadBatchID) {
+    void MetadataReadingHub::initializeImport(const ArtworksSnapshot &artworksToRead, int importID, quint32 storageReadBatchID) {
         m_ArtworksToRead = artworksToRead;
         m_ImportQueue.reservePush(artworksToRead.size());
+        m_ImportID = importID;
         m_StorageReadBatchID = storageReadBatchID;
         m_IgnoreBackupsAtImport = false;
         m_InitAsEmpty = false;
@@ -69,7 +71,7 @@ namespace MetadataIO {
 
         initializeArtworks(ignoreBackups, initAsEmpty);
 
-        emit readingFinished();
+        emit readingFinished(m_ImportID);
 
         const auto &itemsToRead = m_ArtworksToRead.getWeakSnapshot();
 

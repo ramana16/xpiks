@@ -23,6 +23,9 @@
 #include "../Helpers/artworkshelpers.h"
 #include "../Models/imageartwork.h"
 #include "../MetadataIO/artworkssnapshot.h"
+#include "../Models/settingsmodel.h"
+#include "../Models/switchermodel.h"
+#include "../MetadataIO/metadataiocoordinator.h"
 
 void accountVectors(Models::ArtworksRepository *artworksRepository, const MetadataIO::WeakArtworksSnapshot &artworks) {
     LOG_DEBUG << "#";
@@ -106,21 +109,26 @@ std::shared_ptr<Commands::ICommandResult> Commands::AddArtworksCommand::execute(
         }
     }
 
+    int importID = 0;
+
     if (newFilesCount > 0) {
-        afterAddedHandler(commandManager, artworksToImport, filesToWatch, initialCount, newFilesCount);
+        importID = afterAddedHandler(commandManager, artworksToImport, filesToWatch, initialCount, newFilesCount);
     }
 
-    artItemsModel->raiseArtworksAdded(newFilesCount, attachedCount);
     artItemsModel->updateItems(modifiedIndices, QVector<int>() << Models::ArtItemsModel::HasVectorAttachedRole);
 
-    std::shared_ptr<AddArtworksCommandResult> result(new AddArtworksCommandResult(newFilesCount));
+    std::shared_ptr<AddArtworksCommandResult> result(new AddArtworksCommandResult(
+                                                         newFilesCount,
+                                                         attachedCount,
+                                                         importID,
+                                                         getAutoImportFlag()));
     return result;
 }
 
-void Commands::AddArtworksCommand::afterAddedHandler(CommandManager *commandManager, const MetadataIO::ArtworksSnapshot &artworksToImport, QStringList filesToWatch, int initialCount, int newFilesCount) const {
+int Commands::AddArtworksCommand::afterAddedHandler(CommandManager *commandManager, const MetadataIO::ArtworksSnapshot &artworksToImport, QStringList filesToWatch, int initialCount, int newFilesCount) const {
     Models::ArtworksRepository *artworksRepository = commandManager->getArtworksRepository();
 
-    commandManager->readMetadata(artworksToImport);
+    int importID = commandManager->readMetadata(artworksToImport);
     accountVectors(artworksRepository, artworksToImport.getWeakSnapshot());
     artworksRepository->refresh();
 
@@ -133,9 +141,11 @@ void Commands::AddArtworksCommand::afterAddedHandler(CommandManager *commandMana
     commandManager->generatePreviews(artworksToImport);
     commandManager->addToRecentFiles(filesToWatch);
 
-    if (!getIsSessionRestore()) {
+    if (!getIsSessionRestoreFlag()) {
         commandManager->saveSessionInBackground();
     }
+
+    return importID;
 }
 
 void Commands::AddArtworksCommand::decomposeVectors(QHash<QString, QHash<QString, QString> > &vectors) const {
@@ -153,4 +163,20 @@ void Commands::AddArtworksCommand::decomposeVectors(QHash<QString, QHash<QString
 
         vectors[absolutePath].insert(fi.baseName().toLower(), path);
     }
+}
+
+void Commands::AddArtworksCommandResult::afterExecCallback(const Commands::ICommandManager *commandManagerInterface) const {
+    CommandManager *commandManager = (CommandManager*)commandManagerInterface;
+
+#ifndef CORE_TESTS
+    if (m_AutoImport) {
+        LOG_DEBUG << "Autoimport is ON. Proceeding...";
+        MetadataIO::MetadataIOCoordinator *ioCoordinator = commandManager->getMetadataIOCoordinator();
+        ioCoordinator->continueReading(false);
+        QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
+    }
+#endif
+
+    Models::ArtItemsModel *artItemsModel = commandManager->getArtItemsModel();
+    artItemsModel->raiseArtworksAdded(m_ImportID, m_NewFilesAdded, m_AttachedVectorsCount);
 }

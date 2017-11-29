@@ -38,6 +38,7 @@ namespace Connectivity {
 #define PROGRESSIVE_SUGGESTION_PREVIEWS QLatin1String("progressiveSuggestionPreviews")
 #define DIRECT_METADATA_EXPORT QLatin1String("directExport")
 #define GOOD_QUALITY_VIDEO_PREVIEWS QLatin1String("qualityVideoPreviews")
+#define METADATA_AUTO_IMPORT QLatin1String("autoImport")
 
     QDebug operator << (QDebug d, const SwitcherConfig::SwitchValue &value) {
         d << "{" << value.m_IsOn << "*" << value.m_Threshold << "}";
@@ -223,12 +224,14 @@ namespace Connectivity {
         SwitchValue progressiveSuggestionPreviews;
         SwitchValue directExport;
         SwitchValue qualityVideoPreviews;
+        SwitchValue autoImport;
 
         initSwitchValue(object, DONATE_CAMPAIGN_1_KEY, donateCampaign1Active);
         initSwitchValue(object, DONATE_CAMPAIGN_1_STAGE_2, donateCampaign1Stage2);
         initSwitchValue(object, PROGRESSIVE_SUGGESTION_PREVIEWS, progressiveSuggestionPreviews);
         initSwitchValue(object, DIRECT_METADATA_EXPORT, directExport);
         initSwitchValue(object, GOOD_QUALITY_VIDEO_PREVIEWS, qualityVideoPreviews);
+        initSwitchValue(object, METADATA_AUTO_IMPORT, autoImport);
 
         // overwrite these values
         {
@@ -241,6 +244,7 @@ namespace Connectivity {
             m_SwitchesHash[ProgressiveSuggestionPreviews] = progressiveSuggestionPreviews;
             m_SwitchesHash[DirectMetadataExport] = directExport;
             m_SwitchesHash[GoodQualityVideoPreviews] = qualityVideoPreviews;
+            m_SwitchesHash[MetadataAutoImport] = autoImport;
 
             LOG_INTEGR_TESTS_OR_DEBUG << m_SwitchesHash;
         }

@@ -56,7 +56,8 @@ namespace Connectivity {
             DonateCampaign1Stage2,
             ProgressiveSuggestionPreviews,
             DirectMetadataExport,
-            GoodQualityVideoPreviews
+            GoodQualityVideoPreviews,
+            MetadataAutoImport
         };
 
     private:

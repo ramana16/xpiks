@@ -26,6 +26,7 @@ namespace Models {
         Q_PROPERTY(QString donateCampaign1Link READ getDonateCampaign1Link CONSTANT)
         Q_PROPERTY(bool isDonateCampaign1LinkClicked READ getDonateCampaign1LinkClicked NOTIFY donateCampaign1LinkClicked)
         Q_PROPERTY(bool isDonateCampaign1Stage2On READ getIsDonateCampaign1Stage2On NOTIFY switchesUpdated)
+        Q_PROPERTY(bool useAutoImport READ getUseAutoImport NOTIFY switchesUpdated)
     public:
         SwitcherModel(QObject *parent=nullptr);
 
@@ -46,10 +47,16 @@ namespace Models {
         bool getProgressiveSuggestionPreviewsOn() { return m_Config.isSwitchOn(Connectivity::SwitcherConfig::ProgressiveSuggestionPreviews, m_Threshold); }
         bool getUseDirectMetadataExport() { return m_Config.isSwitchOn(Connectivity::SwitcherConfig::DirectMetadataExport, m_Threshold); }
         bool getGoodQualityVideoPreviews() { return m_Config.isSwitchOn(Connectivity::SwitcherConfig::GoodQualityVideoPreviews, m_Threshold); }
+        bool getUseAutoImport() { return m_Config.isSwitchOn(Connectivity::SwitcherConfig::MetadataAutoImport, m_Threshold); }
 
     public:
         bool getDonateCampaign1LinkClicked() const;
         QString getDonateCampaign1Link() const { return QString("https://ribtoks.github.io/xpiks/donatecampaign/"); }
+
+#ifdef INTEGRATION_TESTS
+    public:
+        void setRemoteConfigOverride(const QString &localPath) { m_Config.setRemoteOverride(localPath); }
+#endif
 
     public:
         Q_INVOKABLE void setDonateCampaign1LinkClicked();

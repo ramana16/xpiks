@@ -208,16 +208,21 @@ ApplicationWindow {
                            })
     }
 
-    function launchImportDialog(imagesCount, vectorsCount, reimport) {
+    function launchImportDialog(importID, imagesCount, vectorsCount, reimport) {
         var latestDir = recentDirectories.getLatestItem()
         chooseArtworksDialog.folder = latestDir
         chooseDirectoryDialog.folder = latestDir
 
         if (imagesCount > 0) {
-            Common.launchDialog("Dialogs/ImportMetadata.qml", applicationWindow,
-                                {
-                                    backupsEnabled: !reimport
-                                })
+            if (!metadataIOCoordinator.hasImportFinished(importID)) {
+                Common.launchDialog("Dialogs/ImportMetadata.qml", applicationWindow,
+                                    {
+                                        importID: importID,
+                                        backupsEnabled: !reimport
+                                    })
+            } else {
+                console.debug("UI::main # Import seems to be finished already")
+            }
         } else if (vectorsCount > 0) {
             vectorsAttachedDialog.vectorsAttached = vectorsCount
             vectorsAttachedDialog.open()
@@ -234,7 +239,6 @@ ApplicationWindow {
         text: i18.n + qsTr("&Settings")
         shortcut: StandardKey.Preferences
         onTriggered: {
-            settingsModel.retrieveAllValues()
             Common.launchDialog("Dialogs/SettingsWindow.qml",
                                 applicationWindow, {},
                                 function(wnd) {wnd.show();});
@@ -1183,11 +1187,11 @@ ApplicationWindow {
                 return;
             }
 
-            launchImportDialog(imagesCount, vectorsCount, false)
+            launchImportDialog(importID, imagesCount, vectorsCount, false)
         }
 
         onArtworksReimported: {
-            launchImportDialog(artworksCount, 0, true)
+            launchImportDialog(importID, artworksCount, 0, true)
         }
     }
 

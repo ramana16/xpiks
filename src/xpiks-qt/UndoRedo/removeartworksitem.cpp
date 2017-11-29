@@ -18,6 +18,7 @@
 #include "../Models/artworkmetadata.h"
 #include "../Models/imageartwork.h"
 #include "addartworksitem.h"
+#include "../MetadataIO/metadataiocoordinator.h"
 
 void UndoRedo::RemoveArtworksHistoryItem::undo(const Commands::ICommandManager *commandManagerInterface) {
     LOG_INFO << "#";
@@ -105,8 +106,8 @@ void UndoRedo::RemoveArtworksHistoryItem::undo(const Commands::ICommandManager *
     std::unique_ptr<IHistoryItem> addArtworksItem(new AddArtworksHistoryItem(getCommandID(), ranges));
     commandManager->recordHistoryItem(addArtworksItem);
 
-    commandManager->readMetadata(artworksToImport);
-    artItemsModel->raiseArtworksAdded(usedCount, attachedVectors);
+    int importID = commandManager->readMetadata(artworksToImport);
+    artItemsModel->raiseArtworksAdded(importID, usedCount, attachedVectors);
 
     if (!willResetModel) {
         artItemsModel->raiseArtworksChanged(true);
@@ -114,4 +115,12 @@ void UndoRedo::RemoveArtworksHistoryItem::undo(const Commands::ICommandManager *
     }
 
     commandManager->saveSessionInBackground();
+
+#ifndef CORE_TESTS
+    MetadataIO::MetadataIOCoordinator *coordinator = commandManager->getMetadataIOCoordinator();
+    if ((coordinator != nullptr) && coordinator->shouldUseAutoImport()) {
+        LOG_DEBUG << "Autoimport artworks";
+        coordinator->continueReading(false);
+    }
+#endif
 }

@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QDir>
 #include "../../xpiks-qt/Commands/commandmanager.h"
+#include "testshelpers.h"
 
 #define VERIFY(condition, message) \
     if (!(condition)) {\
@@ -26,19 +27,7 @@ public:
 
 protected:
     QUrl getFilePathForTest(const QString &prefix) {
-        QFileInfo fi(prefix);
-        int tries = 6;
-        QStringList parents;
-        while (tries--) {
-            if (!fi.exists()) {
-                parents.append("..");
-                fi.setFile(parents.join('/') + "/" + prefix);
-            } else {
-                return QUrl::fromLocalFile(fi.absoluteFilePath());
-            }
-        }
-
-        return QUrl::fromLocalFile(QFileInfo(prefix).absoluteFilePath());
+        return QUrl::fromLocalFile(findFullPathForTests(prefix));
     }
 
     QUrl getDirPathForTest(const QString &prefix) {

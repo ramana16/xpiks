@@ -43,6 +43,7 @@
 #include "../Helpers/filehelpers.h"
 #include "../AutoComplete/keywordsautocompletemodel.h"
 #include "../AutoComplete/completionitem.h"
+#include "../Models/switchermodel.h"
 
 namespace Models {
     ArtItemsModel::ArtItemsModel(QObject *parent):
@@ -1059,18 +1060,21 @@ namespace Models {
         return result;
     }
 
-    void ArtItemsModel::raiseArtworksAdded(int imagesCount, int vectorsCount) {
-        emit artworksAdded(imagesCount, vectorsCount);
+    void ArtItemsModel::raiseArtworksAdded(int importID, int imagesCount, int vectorsCount) {
+        // if there're no images added, then we've only attached vectors and no import took place
+        Q_ASSERT((imagesCount > 0) || (importID == 0));
+
+        emit artworksAdded(importID, imagesCount, vectorsCount);
         QCoreApplication::processEvents(QEventLoop::AllEvents);
 
-        LOG_INFO << "images:" << imagesCount << "vectors:" << vectorsCount;
+        LOG_INFO << "import #" << importID << "images:" << imagesCount << "vectors:" << vectorsCount;
     }
 
-    void ArtItemsModel::raiseArtworksReimported(int artworksCount) {
-        emit artworksReimported(artworksCount);
+    void ArtItemsModel::raiseArtworksReimported(int importID, int artworksCount) {
+        emit artworksReimported(importID, artworksCount);
         QCoreApplication::processEvents(QEventLoop::AllEvents);
 
-        LOG_INFO << "artworks:" << artworksCount;
+        LOG_INFO << "import #" << importID << "artworks:" << artworksCount;
     }
 
     void ArtItemsModel::raiseArtworksChanged(bool navigateToCurrent) {
@@ -1262,6 +1266,13 @@ namespace Models {
         Common::flag_t flags = 0;
         Common::ApplyFlag(flags, autoFindVectors, Commands::AddArtworksCommand::FlagAutoFindVectors);
         Common::ApplyFlag(flags, isFullDirectory, Commands::AddArtworksCommand::FlagIsFullDirectory);
+
+        bool autoImportEnabled = settingsModel->getUseAutoImport();
+#if !defined(CORE_TESTS)
+        Models::SwitcherModel *switcherModel = m_CommandManager->getSwitcherModel();
+        autoImportEnabled = autoImportEnabled && switcherModel->getUseAutoImport();
+#endif
+        Common::ApplyFlag(flags, autoImportEnabled, Commands::AddArtworksCommand::FlagAutoImport);
 
         std::shared_ptr<Commands::AddArtworksCommand> addArtworksCommand(new Commands::AddArtworksCommand(filenames, vectors, flags));
         std::shared_ptr<Commands::ICommandResult> result = m_CommandManager->processCommand(addArtworksCommand);

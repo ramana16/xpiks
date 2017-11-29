@@ -76,6 +76,8 @@
 #include <cstdlib>
 #endif
 
+#include "testshelpers.h"
+
 #include "integrationtestbase.h"
 #include "addfilesbasictest.h"
 #include "autoattachvectorstest.h"
@@ -116,6 +118,7 @@
 #include "undorestoresessiontest.h"
 #include "masterpasswordtest.h"
 #include "reimporttest.h"
+#include "autoimporttest.h"
 
 #if defined(WITH_PLUGINS)
 #undef WITH_PLUGINS
@@ -349,6 +352,8 @@ int main(int argc, char *argv[]) {
     settingsModel.setExifToolPath("c:/projects/xpiks-deps/windows-3rd-party-bin/exiftool.exe");
 #endif
 
+    switcherModel.setRemoteConfigOverride(findFullPathForTests("configs-for-tests/tests_switches.json"));
+
     commandManager.connectEntitiesSignalsSlots();
     commandManager.afterConstructionCallback();
 
@@ -398,6 +403,7 @@ int main(int argc, char *argv[]) {
     integrationTests.append(new UndoRestoreSessionTest(&commandManager));
     integrationTests.append(new MasterPasswordTest(&commandManager));
     integrationTests.append(new ReimportTest(&commandManager));
+    integrationTests.append(new AutoImportTest(&commandManager));
     // always the last one. insert new tests above
     integrationTests.append(new LocalLibrarySearchTest(&commandManager));
 

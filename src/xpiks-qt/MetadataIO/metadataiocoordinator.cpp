@@ -42,7 +42,9 @@ namespace MetadataIO {
 
     MetadataIOCoordinator::MetadataIOCoordinator():
         Common::BaseEntity(),
+        m_LastImportID(1),
         m_ProcessingItemsCount(0),
+        m_IsInProgress(false),
         m_HasErrors(false),
         m_ExiftoolNotFound(false)
     {
@@ -52,7 +54,7 @@ namespace MetadataIO {
                          this, &MetadataIOCoordinator::writingWorkersFinished);
 
         QObject::connect(&m_ReadingHub, &MetadataReadingHub::readingFinished,
-                         this, &MetadataIOCoordinator::metadataReadingFinished);
+                         this, &MetadataIOCoordinator::onReadingFinished);
     }
 
     void MetadataIOCoordinator::setCommandManager(Commands::CommandManager *commandManager) {
@@ -79,12 +81,29 @@ namespace MetadataIO {
         }
     }
 
-    void MetadataIOCoordinator::readMetadataExifTool(const ArtworksSnapshot &artworksToRead, quint32 storageReadBatchID) {
-        initializeImport(artworksToRead, storageReadBatchID);
+    bool MetadataIOCoordinator::shouldUseAutoImport() const {
+        bool autoImport = false;
+
+#if !defined(CORE_TESTS)
+        Models::SettingsModel *settingsModel = m_CommandManager->getSettingsModel();
+        Models::SwitcherModel *switcherModel = m_CommandManager->getSwitcherModel();
+        if (settingsModel->getUseAutoImport() && switcherModel->getUseAutoImport()) {
+            autoImport = true;
+        }
+#endif
+
+        return autoImport;
+    }
+
+    int MetadataIOCoordinator::readMetadataExifTool(const ArtworksSnapshot &artworksToRead, quint32 storageReadBatchID) {
+        int importID = getNextImportID();
+        initializeImport(artworksToRead, importID, storageReadBatchID);
 
         libxpks::io::ReadingOrchestrator readingOrchestrator(&m_ReadingHub,
                                                              m_CommandManager->getSettingsModel());
         readingOrchestrator.startReading();
+
+        return importID;
     }
 
     void MetadataIOCoordinator::writeMetadataExifTool(const ArtworksSnapshot &artworksToWrite, bool useBackups) {
@@ -126,11 +145,22 @@ namespace MetadataIO {
     }
 
     void MetadataIOCoordinator::continueReading(bool ignoreBackups) {
+        LOG_DEBUG << "ignore backups:" << ignoreBackups;
+        setIsInProgress(true);
         m_ReadingHub.proceedImport(ignoreBackups);
     }
 
     void MetadataIOCoordinator::continueWithoutReading() {
+        LOG_DEBUG << "#";
+        setIsInProgress(true);
         m_ReadingHub.cancelImport();
+    }
+
+    bool MetadataIOCoordinator::hasImportFinished(int importID) {
+        Q_ASSERT(m_PreviousImportIDs.find(0) == m_PreviousImportIDs.end());
+        if (importID == 0) { return false; }
+        bool found = m_PreviousImportIDs.find(importID) != m_PreviousImportIDs.end();
+        return found;
     }
 
     void MetadataIOCoordinator::writingWorkersFinished(int status) {
@@ -145,9 +175,24 @@ namespace MetadataIO {
         emit metadataWritingFinished();
     }
 
-    void MetadataIOCoordinator::initializeImport(const ArtworksSnapshot &artworksToRead, quint32 storageReadBatchID) {
-        m_ReadingHub.initializeImport(artworksToRead, storageReadBatchID);
+    void MetadataIOCoordinator::onReadingFinished(int importID) {
+        LOG_DEBUG << "import #" << importID;
+
+        m_PreviousImportIDs.insert(importID);
+        emit metadataReadingFinished();
+        setIsInProgress(false);
+    }
+
+    int MetadataIOCoordinator::getNextImportID() {
+        int id = m_LastImportID++;
+        return id;
+    }
+
+    void MetadataIOCoordinator::initializeImport(const ArtworksSnapshot &artworksToRead, int importID, quint32 storageReadBatchID) {
+        m_ReadingHub.initializeImport(artworksToRead, importID, storageReadBatchID);
+
         setHasErrors(false);
+        setIsInProgress(false);
         setProcessingItemsCount((int)artworksToRead.size());
     }
 }

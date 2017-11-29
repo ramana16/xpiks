@@ -74,6 +74,7 @@ namespace Models {
         Q_PROPERTY(bool verboseUpload READ getVerboseUpload WRITE setVerboseUpload NOTIFY verboseUploadChanged)
         Q_PROPERTY(bool useProgressiveSuggestionPreviews READ getUseProgressiveSuggestionPreviews WRITE setUseProgressiveSuggestionPreviews NOTIFY useProgressiveSuggestionPreviewsChanged)
         Q_PROPERTY(int progressiveSuggestionIncrement READ getProgressiveSuggestionIncrement WRITE setProgressiveSuggestionIncrement NOTIFY progressiveSuggestionIncrementChanged)
+        Q_PROPERTY(bool useAutoImport READ getUseAutoImport WRITE setUseAutoImport NOTIFY useAutoImportChanged)
 
         Q_PROPERTY(QString appVersion READ getAppVersion CONSTANT)
 
@@ -115,7 +116,7 @@ namespace Models {
         Q_INVOKABLE void updateSaveSession(bool value);
 
     private:
-        void doRetrieveAllValues();
+        void doReadAllValues();
         void doMoveSettingsFromQSettingsToJson();
         void doResetToDefault();
         void doSaveAllValues();
@@ -321,6 +322,7 @@ namespace Models {
         bool getUseProgressiveSuggestionPreviews() const { return m_UseProgressiveSuggestionPreviews; }
         int getProgressiveSuggestionIncrement() const { return m_ProgressiveSuggestionIncrement; }
         int getUseDirectExiftoolExport() const { return m_UseDirectExiftoolExport; }
+        bool getUseAutoImport() const { return m_UseAutoImport; }
 
     signals:
         void settingsReset();
@@ -361,6 +363,7 @@ namespace Models {
         void verboseUploadChanged(bool verboseUpload);
         void useProgressiveSuggestionPreviewsChanged(bool progressiveSuggestionPreviews);
         void progressiveSuggestionIncrementChanged(int progressiveSuggestionIncrement);
+        void useAutoImportChanged(bool value);
 
     public:
         void setExifToolPath(QString exifToolPath);
@@ -601,6 +604,15 @@ namespace Models {
             m_UseDirectExiftoolExport = value;
         }
 
+        void setUseAutoImport(bool value)
+        {
+            if (m_UseAutoImport == value)
+                return;
+
+            m_UseAutoImport = value;
+            emit useAutoImportChanged(value);
+        }
+
 #ifndef INTEGRATION_TESTS
     private:
 #else
@@ -654,6 +666,7 @@ namespace Models {
         bool m_UseProgressiveSuggestionPreviews;
         int m_ProgressiveSuggestionIncrement;
         bool m_UseDirectExiftoolExport;
+        bool m_UseAutoImport;
     };
 }
 

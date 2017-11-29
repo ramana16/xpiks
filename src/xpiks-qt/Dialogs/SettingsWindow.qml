@@ -17,6 +17,7 @@ import "../Components"
 import "../StyledControls"
 import "../Common.js" as Common
 import "../Constants/UIConfig.js" as UIConfig
+import xpiks 1.0
 
 ApplicationWindow {
     id: settingsWindow
@@ -1200,7 +1201,7 @@ ApplicationWindow {
                 }
 
                 Item {
-                    id : secTab
+                    id: secTab
                     signal resetRequested()
                     anchors.fill: parent
                     anchors.margins: 20
@@ -1325,7 +1326,7 @@ ApplicationWindow {
 
                                     Component.onCompleted: {
                                         checked = settingsModel.saveSession
-                                        behaviorTab.resetRequested.connect(saveSessionCheckbox.onResetRequested)
+                                        secTab.resetRequested.connect(saveSessionCheckbox.onResetRequested)
                                     }
                                 }
                             }
@@ -1349,7 +1350,7 @@ ApplicationWindow {
 
                                     Component.onCompleted: {
                                         checked = settingsModel.mustUseConfirmations
-                                        behaviorTab.resetRequested.connect(useConfirmationDialogsCheckbox.onResetRequested)
+                                        secTab.resetRequested.connect(useConfirmationDialogsCheckbox.onResetRequested)
                                     }
                                 }
                             }
@@ -1373,7 +1374,7 @@ ApplicationWindow {
 
                                     Component.onCompleted: {
                                         checked = settingsModel.checkForUpdates
-                                        behaviorTab.resetRequested.connect(checkForUpdatesCheckbox.onResetRequested)
+                                        secTab.resetRequested.connect(checkForUpdatesCheckbox.onResetRequested)
                                     }
                                 }
                             }
@@ -1397,7 +1398,7 @@ ApplicationWindow {
 
                                     Component.onCompleted: {
                                         checked = settingsModel.saveBackups
-                                        behaviorTab.resetRequested.connect(saveBackupsCheckbox.onResetRequested)
+                                        secTab.resetRequested.connect(saveBackupsCheckbox.onResetRequested)
                                     }
                                 }
                             }
@@ -1424,6 +1425,115 @@ ApplicationWindow {
 
                                     onCheckedChanged: {
                                         secTab.useStatistics = checked
+                                    }
+                                }
+                            }
+                        }
+
+                        Item {
+                            height: 20
+                        }
+
+                        Item {
+                            id: container
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            height: childrenRect.height
+                            property bool expanded: false
+                            clip: true
+
+                            TriangleElement {
+                                id: expanderTriangle
+                                anchors.left: parent.left
+                                anchors.leftMargin: 5
+                                anchors.verticalCenter: link.verticalCenter
+                                anchors.verticalCenterOffset: isFlipped ? 0 : -1
+                                color: link.color
+                                isFlipped: !container.expanded
+                                width: 10
+                                height: 6
+                            }
+
+                            StyledText {
+                                id: link
+                                text: i18.n + qsTr("Experimental settings")
+                                anchors.top: parent.top
+                                anchors.left: expanderTriangle.right
+                                anchors.leftMargin: 7
+                                isActive: true
+
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        if (container.expanded) {
+                                            container.expanded = false
+                                            contentsRect.height = 0
+                                            contentsRect.opacity = 0
+                                        } else {
+                                            contentsRect.height = 50
+                                            contentsRect.opacity = 1
+                                            container.expanded = true
+                                        }
+                                    }
+                                }
+                            }
+
+                            Item {
+                                id: contentsRect
+                                anchors.top: link.bottom
+                                anchors.topMargin: 10
+                                height: 0
+                                opacity: 0
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+
+                                Behavior on height {
+                                    NumberAnimation {
+                                        duration: 200
+                                        easing.type: Easing.InOutQuad
+                                    }
+                                }
+
+                                Behavior on opacity {
+                                    NumberAnimation {
+                                        duration: 200
+                                        easing.type: Easing.InOutQuad
+                                    }
+                                }
+
+                                Flow {
+                                    id: expSettingsHost
+                                    anchors.left: parent.left
+                                    anchors.right: parent.right
+                                    spacing: 10
+                                    property real itemHeight: 40
+                                    property real itemWidth: 250
+
+                                    Item {
+                                        width: parent.itemWidth
+                                        height: parent.itemHeight
+                                        visible: switcher.useAutoImport
+                                        enabled: switcher.useAutoImport
+
+                                        StyledCheckbox {
+                                            anchors.left: parent.left
+                                            anchors.leftMargin: 10
+                                            anchors.verticalCenter: parent.verticalCenter
+                                            id: autoImportCheckbox
+                                            text: i18.n + qsTr("Automatic metadata import")
+                                            onCheckedChanged: {
+                                                settingsModel.useAutoImport = checked
+                                            }
+                                            function onResetRequested() {
+                                                checked = settingsModel.useAutoImport
+                                            }
+
+                                            Component.onCompleted: {
+                                                checked = settingsModel.useAutoImport
+                                                secTab.resetRequested.connect(autoImportCheckbox.onResetRequested)
+                                            }
+                                        }
                                     }
                                 }
                             }
