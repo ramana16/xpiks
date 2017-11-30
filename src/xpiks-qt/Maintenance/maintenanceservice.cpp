@@ -19,6 +19,7 @@
 #include "movesettingsjobitem.h"
 #include "savesessionjobitem.h"
 #include "moveimagecachejobitem.h"
+#include "xpkscleanupjob.h"
 
 namespace Maintenance {
     MaintenanceService::MaintenanceService():
@@ -105,6 +106,13 @@ namespace Maintenance {
         LOG_DEBUG << "#";
 
         std::shared_ptr<IMaintenanceItem> jobItem(new SaveSessionJobItem(sessionSnapshot, sessionManager));
+        m_MaintenanceWorker->submitItem(jobItem);
+    }
+
+    void MaintenanceService::cleanupOldXpksBackups(const QString &directory) {
+        LOG_DEBUG << directory;
+
+        std::shared_ptr<IMaintenanceItem> jobItem(new XpksCleanupJob(directory));
         m_MaintenanceWorker->submitItem(jobItem);
     }
 

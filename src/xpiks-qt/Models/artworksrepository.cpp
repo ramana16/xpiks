@@ -140,14 +140,13 @@ namespace Models {
     }
 
     bool ArtworksRepository::accountFile(const QString &filepath, qint64 &directoryID, Common::flag_t directoryFlags) {
-        bool wasModified = false;
+        bool wasModified = false, wasAdded = false;
         QString absolutePath;
 
         if (this->checkFileExists(filepath, absolutePath) &&
                 !m_FilesSet.contains(filepath)) {
-
             int occurances = 0;
-            size_t index;
+            size_t index = 0;
             bool alreadyExists = tryFindDirectory(absolutePath, index);
             if (!alreadyExists) {
                 qint64 id = generateNextID();
@@ -157,12 +156,7 @@ namespace Models {
                 item.setIsSelectedFlag(true);
                 index = m_DirectoriesList.size() - 1;
                 directoryID = id;
-#ifdef CORE_TESTS
-                if (m_CommandManager != nullptr)
-#endif
-                {
-                    m_CommandManager->addToRecentDirectories(absolutePath);
-                }
+                wasAdded = true;
             } else {
                 auto &item = m_DirectoriesList[index];
                 occurances = item.m_FilesCount;
@@ -177,6 +171,16 @@ namespace Models {
             if (Common::HasFlag(directoryFlags, Common::DirectoryFlags::IsAddedAsDirectory)) { item.setAddedAsDirectoryFlag(true); }
             if (Common::HasFlag(directoryFlags, Common::DirectoryFlags::IsSelected)) { item.setIsSelectedFlag(true); }
             wasModified = true;
+        }
+
+        if (wasAdded) {
+#ifdef CORE_TESTS
+            if (m_CommandManager != nullptr)
+#endif
+            {
+                m_CommandManager->addToRecentDirectories(absolutePath);
+                m_CommandManager->cleanupOldXpksBackups(absolutePath);
+            }
         }
 
         return wasModified;

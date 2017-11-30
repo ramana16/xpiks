@@ -228,6 +228,7 @@ namespace Commands {
         void addToRecentFiles(const QString &path) const;
         void addToRecentFiles(const QStringList &filenames) const;
         void autoDiscoverExiftool() const;
+        void cleanupOldXpksBackups(const QString &directory) const;
 
     public:
         void generatePreviews(const MetadataIO::ArtworksSnapshot &snapshot) const;

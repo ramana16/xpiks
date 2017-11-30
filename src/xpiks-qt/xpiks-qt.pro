@@ -172,7 +172,8 @@ SOURCES += main.cpp \
     Helpers/threadhelpers.cpp \
     KeywordsPresets/presetgroupsmodel.cpp \
     UndoRedo/removedirectoryitem.cpp \
-    Common/basickeywordsmodelimpl.cpp
+    Common/basickeywordsmodelimpl.cpp \
+    Maintenance/xpkscleanupjob.cpp
 
 RESOURCES += qml.qrc
 
@@ -408,7 +409,8 @@ HEADERS += \
     Helpers/threadhelpers.h \
     KeywordsPresets/presetgroupsmodel.h \
     UndoRedo/removedirectoryitem.h \
-    Common/basickeywordsmodelimpl.h
+    Common/basickeywordsmodelimpl.h \
+    Maintenance/xpkscleanupjob.h
 
 DISTFILES += \
     Components/CloseIcon.qml \

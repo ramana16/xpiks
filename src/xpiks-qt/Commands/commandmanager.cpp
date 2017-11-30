@@ -841,6 +841,14 @@ void Commands::CommandManager::autoDiscoverExiftool() const {
 #endif
 }
 
+void Commands::CommandManager::cleanupOldXpksBackups(const QString &directory) const {
+#ifndef CORE_TESTS
+    if (m_MaintenanceService != nullptr) {
+        m_MaintenanceService->cleanupOldXpksBackups(directory);
+    }
+#endif
+}
+
 void Commands::CommandManager::generatePreviews(const MetadataIO::ArtworksSnapshot &snapshot) const {
 #ifndef CORE_TESTS
     if (m_ImageCachingService != NULL) {

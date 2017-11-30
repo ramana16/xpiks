@@ -60,6 +60,7 @@ namespace Maintenance {
         void moveSettings(Models::SettingsModel *settingsModel);
         void upgradeImagesCache(QMLExtensions::ImageCachingService *imageCachingService);
         void saveSession(std::unique_ptr<MetadataIO::SessionSnapshot> &sessionSnapshot, Models::SessionManager *sessionManager);
+        void cleanupOldXpksBackups(const QString &directory);
 
     private slots:
         void workerFinished();
