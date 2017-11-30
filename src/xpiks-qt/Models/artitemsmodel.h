@@ -170,7 +170,7 @@ namespace Models {
         void userDictClearedHandler();
 
     public:
-        virtual void removeItemsAtIndices(const QVector<QPair<int, int> > &ranges) override;
+        virtual void removeItemsFromRanges(const QVector<QPair<int, int> > &ranges) override;
         void beginAccountingFiles(int filesCount);
         void beginAccountingFiles(int start, int end);
         void endAccountingFiles();
@@ -234,7 +234,7 @@ namespace Models {
 
     private:
         void destroyInnerItem(ArtworkMetadata *artwork);
-        void doRemoveItemsAtIndices(QVector<int> &indicesToRemove, bool isFullDirectory = false);
+        void doRemoveItemsFromRanges(QVector<int> &indicesToRemove, bool isFullDirectory = false);
         void doRemoveItemsInRanges(const QVector<QPair<int, int> > &rangesToRemove, bool isFullDirectory = false);
         void getSelectedItemsIndices(QVector<int> &indices);
 

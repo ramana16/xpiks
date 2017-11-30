@@ -206,7 +206,7 @@ namespace Models {
             }
         }
 
-        doRemoveItemsAtIndices(indicesToRemove, isFullDirectory);
+        doRemoveItemsFromRanges(indicesToRemove, isFullDirectory);
 
         emit modifiedArtworksCountChanged();
     }
@@ -370,7 +370,7 @@ namespace Models {
     }
 
     void ArtItemsModel::removeSelectedArtworks(QVector<int> &selectedIndices) {
-        doRemoveItemsAtIndices(selectedIndices);
+        doRemoveItemsFromRanges(selectedIndices);
     }
 
     void ArtItemsModel::updateSelectedArtworks(const QVector<int> &selectedIndices) {
@@ -997,8 +997,8 @@ namespace Models {
         m_CommandManager->submitForSpellCheck(itemsToCheck);
     }
 
-    void ArtItemsModel::removeItemsAtIndices(const QVector<QPair<int, int> > &ranges) {
-        AbstractListModel::removeItemsAtIndices(ranges);
+    void ArtItemsModel::removeItemsFromRanges(const QVector<QPair<int, int> > &ranges) {
+        AbstractListModel::removeItemsFromRanges(ranges);
         syncArtworksIndices();
         emit artworksChanged(true);
     }
@@ -1404,7 +1404,7 @@ namespace Models {
         }
     }
 
-    void ArtItemsModel::doRemoveItemsAtIndices(QVector<int> &indicesToRemove, bool isFullDirectory) {
+    void ArtItemsModel::doRemoveItemsFromRanges(QVector<int> &indicesToRemove, bool isFullDirectory) {
         qSort(indicesToRemove);
         QVector<QPair<int, int> > rangesToRemove;
         Helpers::indicesToRanges(indicesToRemove, rangesToRemove);

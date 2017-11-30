@@ -74,7 +74,7 @@ namespace Commands {
         if (artworksToRemoveCount > 0) {
             QVector<QPair<int, int> > rangesToRemove;
             Helpers::indicesToRanges(removedItemsIndices, rangesToRemove);
-            artItemsModel->removeItemsAtIndices(rangesToRemove);
+            artItemsModel->removeItemsFromRanges(rangesToRemove);
 
             commandManager->clearCurrentItem();
 

@@ -24,6 +24,7 @@
 #include "ipresetsmanager.h"
 #include "presetkeywordsmodelconfig.h"
 #include "presetgroupsmodel.h"
+#include "../Common/hold.h"
 
 namespace KeywordsPresets {
     struct PresetModel {

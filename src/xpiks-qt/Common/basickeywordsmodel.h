@@ -16,17 +16,12 @@
 #include <QVariant>
 #include <QByteArray>
 #include <QHash>
-#include <QSet>
 #include <QVector>
 #include <QHash>
-#include <QReadWriteLock>
-#include <vector>
-#include "baseentity.h"
-#include "hold.h"
+#include <memory>
+#include "flags.h"
+#include "wordanalysisresult.h"
 #include "keyword.h"
-#include "../Common/flags.h"
-#include "../Common/imetadataoperator.h"
-#include "../Common/wordanalysisresult.h"
 
 namespace SpellCheck {
     class SpellCheckQueryItem;
@@ -36,6 +31,9 @@ namespace SpellCheck {
 }
 
 namespace Common {
+    class BasicKeywordsModelImpl;
+    class Hold;
+
     class BasicKeywordsModel:
             public AbstractListModel
     {
@@ -58,16 +56,16 @@ namespace Common {
 
 #ifdef CORE_TESTS
     public:
-        const QString &getKeywordAt(int index) const { return m_KeywordsList.at(index).m_Value; }
-        std::vector<Keyword> &getRawKeywords() { return m_KeywordsList; }
+        const QString &getKeywordAt(int index) const;
+        std::vector<Keyword> &getRawKeywords();
 #endif
 
 #ifdef INTEGRATION_TESTS
-        bool hasDuplicateAt(size_t i) const { return m_KeywordsList.at(i).m_HasDuplicates; }
+        bool hasDuplicateAt(size_t i) const;
 #endif
 
     public:
-        virtual void removeItemsAtIndices(const QVector<QPair<int, int> > &ranges) override;
+        virtual void removeItemsFromRanges(const QVector<QPair<int, int> > &ranges) override;
         virtual int getRangesLengthForReset() const override { return 10; }
 
     protected:
@@ -101,26 +99,6 @@ namespace Common {
         virtual bool replace(const QString &replaceWhat, const QString &replaceTo, Common::SearchFlags flags);
         virtual bool removeKeywords(const QSet<QString> &keywords, bool caseSensitive);
 
-    private:
-        bool appendKeywordUnsafe(const QString &keyword);
-        void takeKeywordAtUnsafe(size_t index, QString &removedKeyword, bool &wasCorrect);
-        void setKeywordsUnsafe(const QStringList &keywordsList);
-        size_t appendKeywordsUnsafe(const QStringList &keywordsList);
-        bool canEditKeywordUnsafe(size_t index, const QString &replacement) const;
-        bool editKeywordUnsafe(size_t index, const QString &replacement);
-        bool replaceKeywordUnsafe(size_t index, const QString &existing, const QString &replacement);
-        bool clearKeywordsUnsafe();
-        bool containsKeywordUnsafe(const QString &searchTerm, Common::SearchFlags searchFlags=Common::SearchFlags::Keywords);
-        bool hasKeywordsSpellErrorUnsafe() const;
-        bool hasKeywordsDuplicatesUnsafe() const;
-        bool removeKeywordsUnsafe(const QSet<QString> &keywordsToRemove, bool caseSensitive);
-        void expandPresetUnsafe(size_t keywordsIndex, const QStringList &keywordsList);
-        bool hasKeywordsUnsafe(const QStringList &keywordsList) const;
-        QStringList generateStringListUnsafe();
-
-        void lockKeywordsRead() { m_KeywordsLock.lockForRead(); }
-        void unlockKeywords() { m_KeywordsLock.unlock(); }
-
     public:
         virtual QString retrieveKeyword(size_t wordIndex);
         virtual QStringList getKeywords();
@@ -131,11 +109,6 @@ namespace Common {
         virtual bool processFailedKeywordReplacements(const std::vector<std::shared_ptr<SpellCheck::KeywordSpellSuggestions> > &candidatesForRemoval);
         virtual void connectSignals(SpellCheck::SpellCheckItem *item);
         virtual void afterReplaceCallback();
-
-    private:
-        void removeKeywordsAtIndicesUnsafe(const QVector<int> &indices);
-        bool replaceInKeywordsUnsafe(const QString &replaceWhat, const QString &replaceTo,
-                                     Common::SearchFlags flags);
 
     public:
         bool containsKeyword(const QString &searchTerm, Common::SearchFlags searchFlags=Common::SearchFlags::ExactKeywords);
@@ -156,12 +129,8 @@ namespace Common {
         void notifyKeywordsSpellingChanged();
 
     public:
-        void acquire() { m_Hold.acquire(); }
-        bool release() { return m_Hold.release(); }
-
-    private:
-        void resetSpellCheckResultsUnsafe();
-        bool canBeAddedUnsafe(const QString &keyword) const;
+        void acquire();
+        bool release();
 
     public:
         Q_INVOKABLE bool hasKeyword(const QString &keyword);
@@ -179,16 +148,10 @@ namespace Common {
         void onSpellCheckRequestReady(Common::SpellCheckFlags flags, int index);
 
     private:
-        void setSpellCheckResultsUnsafe(const std::vector<std::shared_ptr<SpellCheck::SpellCheckQueryItem> > &items);
-        bool isReplacedADuplicateUnsafe(size_t index, const QString &existingPrev,
-                                        const QString &replacement) const;
         void updateKeywordsHighlighting(int index=-1);
 
     private:
-        Common::Hold &m_Hold;
-        QReadWriteLock m_KeywordsLock;
-        std::vector<Keyword> m_KeywordsList;
-        QSet<QString> m_KeywordsSet;
+        std::shared_ptr<BasicKeywordsModelImpl> m_Impl;
     };
 }
 

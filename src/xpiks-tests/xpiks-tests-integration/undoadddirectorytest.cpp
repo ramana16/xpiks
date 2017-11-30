@@ -39,7 +39,7 @@ int UndoAddDirectoryTest::doTest() {
     VERIFY(!ioCoordinator->getHasErrors(), "Errors in IO Coordinator while reading");
 
     // remove 2 artworks
-    artItemsModel->removeItemsAtIndices({{0, 1}});
+    artItemsModel->removeItemsFromRanges({{0, 1}});
     VERIFY(artItemsModel->getArtworksCount() == artworksCount - 2, "Artworks were not removed");
 
     // remove directory

@@ -13,6 +13,7 @@
 #include "../Models/artworkproxybase.h"
 #include "../Common/basicmetadatamodel.h"
 #include "../SpellCheck/spellcheckiteminfo.h"
+#include "../Common/hold.h"
 
 #ifndef SPELLCHECKUSERDICT_H
 #define SPELLCHECKUSERDICT_H

@@ -122,7 +122,7 @@ namespace Models {
 
             QVector<QPair<int, int> > rangesToRemove;
             Helpers::indicesToRanges(indicesToRemove, rangesToRemove);
-            removeItemsAtIndices(rangesToRemove);
+            removeItemsFromRanges(rangesToRemove);
 
             if (m_ArtworksSnapshot.empty()) {
                 emit requestCloseWindow();
@@ -240,7 +240,7 @@ namespace Models {
             QVector<QPair<int, int> > rangesToRemove;
             Helpers::indicesToRanges(indicesToRemove, rangesToRemove);
 
-            removeItemsAtIndices(rangesToRemove);
+            removeItemsFromRanges(rangesToRemove);
 
             if (m_ArtworksSnapshot.empty()) {
                 emit requestCloseWindow();

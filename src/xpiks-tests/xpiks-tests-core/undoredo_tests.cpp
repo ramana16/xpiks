@@ -138,7 +138,7 @@ void UndoRedoTests::undoRemoveAddFullDirectoryTest() {
     dirs << QUrl::fromLocalFile(DIRECTORY_PATH);
     int addedCount = artItemsModel->addLocalDirectories(dirs);
 
-    artItemsMock.removeItemsAtIndices({{1, 3}});
+    artItemsMock.removeItemsFromRanges({{1, 3}});
     QCOMPARE(artItemsMock.getArtworksCount(), addedCount - 3);
 
     artItemsMock.removeArtworksDirectory(0);
@@ -163,7 +163,7 @@ void UndoRedoTests::undoRemoveNotFullDirectoryTest() {
 
     artworksRepository.unsetWasAddedAsFullDirectory(0);
 
-    artItemsMock.removeItemsAtIndices({{1, 3}});
+    artItemsMock.removeItemsFromRanges({{1, 3}});
     QCOMPARE(artItemsMock.getArtworksCount(), addedCount - 3);
 
     artItemsMock.removeArtworksDirectory(0);
@@ -194,7 +194,7 @@ void UndoRedoTests::undoRemoveLaterFullDirectoryTest() {
     qDebug() << "max count is" << maxCount;
 
     // removing selected files from 1st directory
-    artItemsMock.removeItemsAtIndices({{0, 0}, {2, 2}, {4, 4}});
+    artItemsMock.removeItemsFromRanges({{0, 0}, {2, 2}, {4, 4}});
     QCOMPARE(artItemsMock.getArtworksCount(), maxCount - 3);
 
     artItemsMock.removeArtworksDirectory(0);

@@ -17,6 +17,7 @@
 #include "../Common/basicmetadatamodel.h"
 #include "../SpellCheck/spellcheckiteminfo.h"
 #include "../Suggestion/suggestionartwork.h"
+#include "../Common/hold.h"
 
 namespace QuickBuffer {
     class QuickBuffer : public QObject, public Models::ArtworkProxyBase

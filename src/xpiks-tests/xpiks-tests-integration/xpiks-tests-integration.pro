@@ -225,7 +225,8 @@ SOURCES += main.cpp \
     undorestoresessiontest.cpp \
     masterpasswordtest.cpp \
     reimporttest.cpp \
-    autoimporttest.cpp
+    autoimporttest.cpp \
+    ../../xpiks-qt/Common/basickeywordsmodelimpl.cpp
 
 RESOURCES +=
 
@@ -485,7 +486,8 @@ HEADERS += \
     undorestoresessiontest.h \
     masterpasswordtest.h \
     reimporttest.h \
-    autoimporttest.h
+    autoimporttest.h \
+    ../../xpiks-qt/Common/basickeywordsmodelimpl.h
 
 INCLUDEPATH += ../../../vendors/tiny-aes
 INCLUDEPATH += ../../../vendors/cpp-libface

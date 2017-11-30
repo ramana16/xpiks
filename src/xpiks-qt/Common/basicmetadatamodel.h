@@ -15,7 +15,8 @@
 #include <QStringList>
 #include <QHash>
 #include <QReadWriteLock>
-#include "../Common/flags.h"
+#include "flags.h"
+#include "imetadataoperator.h"
 
 namespace SpellCheck {
     class SpellCheckQueryItem;

@@ -21,28 +21,42 @@
 #include "../Common/defines.h"
 #include "../Helpers/indiceshelper.h"
 #include "../Common/flags.h"
+#include "basickeywordsmodelimpl.h"
 
 namespace Common {
     BasicKeywordsModel::BasicKeywordsModel(Hold &hold, QObject *parent):
         AbstractListModel(parent),
-        m_Hold(hold)
+        m_Impl(new BasicKeywordsModelImpl(hold))
     {}
 
-    void BasicKeywordsModel::removeItemsAtIndices(const QVector<QPair<int, int> > &ranges) {
+#ifdef CORE_TESTS
+    const QString &BasicKeywordsModel::getKeywordAt(int index) const { return m_Impl->getKeywordAt(index); }
+    std::vector<Keyword> &BasicKeywordsModel::getRawKeywords() { return m_Impl->getRawKeywords(); }
+#endif
+
+#ifdef INTEGRATION_TESTS
+        bool BasicKeywordsModel::hasDuplicateAt(size_t i) const { return m_Impl->hasDuplicateAt(i); }
+#endif
+
+    void BasicKeywordsModel::removeItemsFromRanges(const QVector<QPair<int, int> > &ranges) {
         LOG_INFO << "#";
-
-        QWriteLocker writeLocker(&m_KeywordsLock);
-        Q_UNUSED(writeLocker);
-
         int rangesLength = Helpers::getRangesLength(ranges);
-        AbstractListModel::doRemoveItemsAtIndices(ranges, rangesLength);
+
+        {
+            QWriteLocker writeLocker(m_Impl->accessLock());
+            Q_UNUSED(writeLocker);
+
+            AbstractListModel::doRemoveItemsFromRanges(ranges);
+        }
+
+        AbstractListModel::doEmitItemsRemovedAtIndices(ranges, rangesLength);
     }
 
     void BasicKeywordsModel::removeInnerItem(int row) {
         QString removedKeyword;
         bool wasCorrect = false;
 
-        this->takeKeywordAtUnsafe(row, removedKeyword, wasCorrect);
+        m_Impl->takeKeywordAtUnsafe(row, removedKeyword, wasCorrect);
         LOG_INTEGRATION_TESTS << "keyword:" << removedKeyword << "was correct:" << wasCorrect;
         Q_UNUSED(removedKeyword);
         Q_UNUSED(wasCorrect);
@@ -50,28 +64,20 @@ namespace Common {
 
     int BasicKeywordsModel::rowCount(const QModelIndex &parent) const {
         Q_UNUSED(parent);
-
-        // QReadLocker readLocker(&m_KeywordsLock);
-        // Q_UNUSED(readLocker);
-        // due to the qt limitations, pray the keyword will be there
-        // for now we only change number of keywords from the UI anyways
-
-        return (int)m_KeywordsList.size();
+        return m_Impl->getKeywordsCount();
     }
 
     QVariant BasicKeywordsModel::data(const QModelIndex &index, int role) const {
-        // QReadLocker readLocker(&m_KeywordsLock);
-        // Q_UNUSED(readLocker);
-        // due to the qt limitations, pray the keyword will be there
-        // for now we only change number of keywords from the UI anyways
+        QReadLocker readLocker(m_Impl->accessLock());
+        Q_UNUSED(readLocker);
 
         const int row = index.row();
 
-        if (row < 0 || row >= (int)m_KeywordsList.size()) {
+        if (row < 0 || row >= (int)m_Impl->getKeywordsSizeUnsafe()) {
             return QVariant();
         }
 
-        auto &keyword = m_KeywordsList.at(row);
+        auto &keyword = m_Impl->accessKeyword(row);
 
         switch (role) {
             case KeywordRole:
@@ -94,52 +100,51 @@ namespace Common {
     }
 
     int BasicKeywordsModel::getKeywordsCount() {
-        QReadLocker readLocker(&m_KeywordsLock);
-        Q_UNUSED(readLocker);
-
-        return (int)m_KeywordsSet.size();
+        return m_Impl->getKeywordsCount();
     }
 
     QSet<QString> BasicKeywordsModel::getKeywordsSet() {
-        QReadLocker readLocker(&m_KeywordsLock);
-        Q_UNUSED(readLocker);
-
-        return m_KeywordsSet;
+        return m_Impl->getKeywordsSet();
     }
 
     QString BasicKeywordsModel::getKeywordsString() {
-        QReadLocker readLocker(&m_KeywordsLock);
-        Q_UNUSED(readLocker);
-
-        QStringList keywords = generateStringListUnsafe();
-        QString result = keywords.join(", ");
-        return result;
+        return m_Impl->getKeywordsString();
     }
 
     bool BasicKeywordsModel::appendKeyword(const QString &keyword) {
-        QWriteLocker writeLocker(&m_KeywordsLock);
-        Q_UNUSED(writeLocker);
+        bool added = false;
+        size_t index = 0;
 
-        return appendKeywordUnsafe(keyword);
+        {
+            QWriteLocker writeLocker(m_Impl->accessLock());
+            Q_UNUSED(writeLocker);
+            added = m_Impl->appendKeywordUnsafe(keyword, index);
+        }
+
+        if (added) {
+            beginInsertRows(QModelIndex(), (int)index, (int)index);
+            endInsertRows();
+        }
+
+        return added;
     }
 
     bool BasicKeywordsModel::removeKeywordAt(size_t index, QString &removedKeyword) {
         bool wasCorrect = false, removed = false;
 
-        m_KeywordsLock.lockForWrite();
+        m_Impl->lockKeywordsWrite();
         {
-            if (index < m_KeywordsList.size()) {
-                beginRemoveRows(QModelIndex(), (int)index, (int)index);
-                {
-                    takeKeywordAtUnsafe(index, removedKeyword, wasCorrect);
-                }
-                endRemoveRows();
+            if (index < m_Impl->getKeywordsSizeUnsafe()) {
+                m_Impl->takeKeywordAtUnsafe(index, removedKeyword, wasCorrect);
                 removed = true;
             }
         }
-        m_KeywordsLock.unlock();
+        m_Impl->unlockKeywords();
 
-        if (removed) {
+        if (removed) {            
+            beginRemoveRows(QModelIndex(), (int)index, (int)index);
+            endRemoveRows();
+
             if (!wasCorrect) {
                 notifyKeywordsSpellingChanged();
             }
@@ -152,23 +157,23 @@ namespace Common {
 
     bool BasicKeywordsModel::removeLastKeyword(QString &removedKeyword) {
         bool wasCorrect = false, removed = false;
+        size_t indexLast = 0;
 
-        m_KeywordsLock.lockForWrite();
+        m_Impl->lockKeywordsWrite();
         {
-            const size_t size = m_KeywordsList.size();
+            const size_t size = m_Impl->getKeywordsSizeUnsafe();
             if (size > 0) {
-                const size_t indexLast = size - 1;
-                beginRemoveRows(QModelIndex(), (int)indexLast, (int)indexLast);
-                {
-                    takeKeywordAtUnsafe(indexLast, removedKeyword, wasCorrect);
-                }
-                endRemoveRows();
+                indexLast = size - 1;
+                m_Impl->takeKeywordAtUnsafe(indexLast, removedKeyword, wasCorrect);
                 removed = true;
             }
         }
-        m_KeywordsLock.unlock();
+        m_Impl->unlockKeywords();
 
         if (removed) {
+            beginRemoveRows(QModelIndex(), (int)indexLast, (int)indexLast);
+            endRemoveRows();
+
             if (!wasCorrect) {
                 notifyKeywordsSpellingChanged();
             }
@@ -180,31 +185,56 @@ namespace Common {
     }
 
     void BasicKeywordsModel::setKeywords(const QStringList &keywordsList) {
-        QWriteLocker writeLocker(&m_KeywordsLock);
-        Q_UNUSED(writeLocker);
+        bool anyChange = false;
 
-        setKeywordsUnsafe(keywordsList);
+        {
+            QWriteLocker writeLocker(m_Impl->accessLock());
+            Q_UNUSED(writeLocker);
+
+
+            anyChange = m_Impl->clearKeywordsUnsafe();
+
+            size_t start = 0, end = 0;
+            size_t size = m_Impl->appendKeywordsUnsafe(keywordsList, start, end);
+            if (size > 0) { anyChange = true; }
+        }
+
+        if (anyChange) {
+            beginResetModel();
+            endResetModel();
+        }
     }
 
     size_t BasicKeywordsModel::appendKeywords(const QStringList &keywordsList) {
-        QWriteLocker writeLocker(&m_KeywordsLock);
+        size_t size = 0;
+        size_t start = 0, end = 0;
 
-        Q_UNUSED(writeLocker);
-        return appendKeywordsUnsafe(keywordsList);
+        {
+            QWriteLocker writeLocker(m_Impl->accessLock());
+            Q_UNUSED(writeLocker);
+            size = m_Impl->appendKeywordsUnsafe(keywordsList, start, end);
+        }
+
+        if (size > 0) {
+            beginInsertRows(QModelIndex(), (int)start, (int)end);
+            endInsertRows();
+        }
+
+        return size;
     }
 
     bool BasicKeywordsModel::editKeyword(size_t index, const QString &replacement) {
         bool result = false;
 
-        m_KeywordsLock.lockForWrite();
+        m_Impl->lockKeywordsWrite();
         {
-            if (index < m_KeywordsList.size()) {
-                result = editKeywordUnsafe(index, replacement);
+            if (index < m_Impl->getKeywordsSizeUnsafe()) {
+                result = m_Impl->editKeywordUnsafe(index, replacement);
             } else {
                 LOG_WARNING << "Failed to edit keyword with index" << index;
             }
         }
-        m_KeywordsLock.unlock();
+        m_Impl->unlockKeywords();
 
         if (result) {
             QModelIndex i = this->index((int)index);
@@ -217,13 +247,16 @@ namespace Common {
     bool BasicKeywordsModel::clearKeywords() {
         bool result = false;
 
-        m_KeywordsLock.lockForWrite();
+        m_Impl->lockKeywordsWrite();
         {
-            result = clearKeywordsUnsafe();
+            result = m_Impl->clearKeywordsUnsafe();
         }
-        m_KeywordsLock.unlock();
+        m_Impl->unlockKeywords();
 
         if (result) {
+            beginResetModel();
+            endResetModel();
+
             notifyKeywordsSpellingChanged();
             emit hasDuplicatesChanged();
         }
@@ -233,17 +266,41 @@ namespace Common {
 
     bool BasicKeywordsModel::expandPreset(size_t keywordIndex, const QStringList &presetList) {
         LOG_INFO << keywordIndex;
-        bool result = false;
+        bool expanded = false;
+        size_t start = 0, end = 0;
+        size_t addedCount = 0;
 
-        QWriteLocker writeLocker(&m_KeywordsLock);
-        Q_UNUSED(writeLocker);
+        {
+            QWriteLocker writeLocker(m_Impl->accessLock());
+            Q_UNUSED(writeLocker);
 
-        if (keywordIndex < m_KeywordsList.size()) {
-            expandPresetUnsafe(keywordIndex, presetList);
-            result = true;
+            if (keywordIndex < m_Impl->getKeywordsSizeUnsafe()) {
+                LOG_INFO << "index" << keywordIndex << "list:" << presetList;
+                QString removedKeyword;
+                bool wasCorrect = false;
+                m_Impl->takeKeywordAtUnsafe(keywordIndex, removedKeyword, wasCorrect);
+
+                LOG_INFO << "replaced keyword" << removedKeyword;
+                Q_UNUSED(wasCorrect);
+
+                size_t addedCount = m_Impl->appendKeywordsUnsafe(presetList, start, end);
+                LOG_INFO << addedCount << "new added";
+
+                expanded = true;
+            }
         }
 
-        return result;
+        if (expanded) {
+            beginRemoveRows(QModelIndex(), (int)keywordIndex, (int)keywordIndex);
+            endRemoveRows();
+
+            if (addedCount > 0) {
+                beginInsertRows(QModelIndex(), (int)start, (int)end);
+                endInsertRows();
+            }
+        }
+
+        return expanded;
     }
 
     bool BasicKeywordsModel::appendPreset(const QStringList &presetList) {
@@ -253,18 +310,11 @@ namespace Common {
     }
 
     bool BasicKeywordsModel::hasKeywords(const QStringList &keywordsList) {
-        QReadLocker readLocker(&m_KeywordsLock);
-        Q_UNUSED(readLocker);
-
-        bool result = hasKeywordsUnsafe(keywordsList);
-        return result;
+        return m_Impl->hasKeywords(keywordsList);
     }
 
     bool BasicKeywordsModel::areKeywordsEmpty() {
-        QReadLocker readLocker(&m_KeywordsLock);
-        Q_UNUSED(readLocker);
-
-        return m_KeywordsList.empty();
+        return m_Impl->areKeywordsEmpty();
     }
 
     bool BasicKeywordsModel::replace(const QString &replaceWhat, const QString &replaceTo, Common::SearchFlags flags) {
@@ -273,420 +323,77 @@ namespace Common {
         Q_ASSERT(((int)flags & (int)Common::SearchFlags::Metadata) != 0);
 
         bool anyChanged = false;
+        QVector<int> indicesToUpdate, indicesToRemove;
+        QVector<QPair<int, int> > rangesToRemove;
 
         const bool needToCheckKeywords = Common::HasFlag(flags, Common::SearchFlags::Keywords);
         if (needToCheckKeywords) {
-            QWriteLocker locker(&m_KeywordsLock);
+            QWriteLocker locker(m_Impl->accessLock());
             Q_UNUSED(locker);
-            if (this->replaceInKeywordsUnsafe(replaceWhat, replaceTo, flags)) {
+
+            if (m_Impl->replaceInKeywordsUnsafe(replaceWhat, replaceTo, flags, indicesToRemove, indicesToUpdate)) {
+                Helpers::indicesToRanges(indicesToRemove, rangesToRemove);
+                AbstractListModel::doRemoveItemsFromRanges(rangesToRemove);
                 anyChanged = true;
             }
+        }
+
+        if (anyChanged) {
+            AbstractListModel::emitRemovedSignalsForRanges(rangesToRemove);
+            int size = m_Impl->getKeywordsCount();
+            // update all because of easiness instead of calculated correct shifts after removal
+            this->updateItemsInRanges({{0, size - 1}}, QVector<int>() << KeywordRole);
         }
 
         return anyChanged;
     }
 
     bool BasicKeywordsModel::removeKeywords(const QSet<QString> &keywords, bool caseSensitive) {
-        bool result = false;
+        bool anyRemoved = false;
 
-        m_KeywordsLock.lockForWrite();
+        QVector<QPair<int, int> > rangesToRemove;
+
         {
-            result = removeKeywordsUnsafe(keywords, caseSensitive);
-        }
-        m_KeywordsLock.unlock();
+            QWriteLocker locker(m_Impl->accessLock());
+            Q_UNUSED(locker);
 
-        return result;
-    }
-
-    bool BasicKeywordsModel::appendKeywordUnsafe(const QString &keyword) {
-        bool added = false;
-        QString sanitizedKeyword = keyword.simplified();
-
-        if (canBeAddedUnsafe(sanitizedKeyword)) {
-            size_t keywordsCount = m_KeywordsList.size();
-
-            m_KeywordsSet.insert(sanitizedKeyword.toLower());
-
-            beginInsertRows(QModelIndex(), (int)keywordsCount, (int)keywordsCount);
-            {
-                m_KeywordsList.emplace_back(sanitizedKeyword);
-            }
-            endInsertRows();
-            added = true;
-        }
-
-        return added;
-    }
-
-    void BasicKeywordsModel::takeKeywordAtUnsafe(size_t index, QString &removedKeyword, bool &wasCorrect) {
-        Q_ASSERT((0 <= index) && (index < m_KeywordsList.size()));
-        const auto &keyword = m_KeywordsList.at(index);
-        const QString invariant = keyword.m_Value.toLower();
-
-        m_KeywordsSet.remove(invariant);
-
-        wasCorrect = keyword.m_IsCorrect;
-        removedKeyword = keyword.m_Value;
-
-        m_KeywordsList.erase(m_KeywordsList.begin() + index);
-    }
-
-    void BasicKeywordsModel::setKeywordsUnsafe(const QStringList &keywordsList) {
-        clearKeywordsUnsafe();
-        appendKeywordsUnsafe(keywordsList);
-    }
-
-    size_t BasicKeywordsModel::appendKeywordsUnsafe(const QStringList &keywordsList) {
-        QStringList keywordsToAdd;
-        int appendedCount = 0, size = keywordsList.length();
-
-        keywordsToAdd.reserve(size);
-        QSet<QString> accountedKeywords;
-
-        for (int i = 0; i < size; ++i) {
-            const QString &keyword = keywordsList.at(i);
-            const QString &sanitizedKeyword = keyword.simplified();
-            const QString &lowerCased = sanitizedKeyword.toLower();
-
-            if (canBeAddedUnsafe(sanitizedKeyword) && !accountedKeywords.contains(lowerCased)) {
-                keywordsToAdd.append(sanitizedKeyword);
-                accountedKeywords.insert(lowerCased);
-                appendedCount++;
+            QVector<int> indicesToRemove;
+            if (m_Impl->removeKeywordsUnsafe(keywords, caseSensitive, indicesToRemove)) {
+                Helpers::indicesToRanges(indicesToRemove, rangesToRemove);
+                AbstractListModel::doRemoveItemsFromRanges(rangesToRemove);
+                anyRemoved = true;
             }
         }
 
-        size = keywordsToAdd.size();
-        Q_ASSERT(size == appendedCount);
-
-        if (size > 0) {
-            int rowsCount = (int)m_KeywordsList.size();
-            beginInsertRows(QModelIndex(), rowsCount, rowsCount + size - 1);
-
-            for (int i = 0; i < size; ++i) {
-                const QString &keywordToAdd = keywordsToAdd.at(i);
-                m_KeywordsSet.insert(keywordToAdd.toLower());
-                m_KeywordsList.emplace_back(keywordToAdd);
-            }
-
-            endInsertRows();
+        if (anyRemoved) {
+            AbstractListModel::emitRemovedSignalsForRanges(rangesToRemove);
         }
 
-        return appendedCount;
-    }
-
-    bool BasicKeywordsModel::canEditKeywordUnsafe(size_t index, const QString &replacement) const {
-        Q_ASSERT((0 <= index) && (index < m_KeywordsList.size()));
-        bool result = false;
-        LOG_INFO << "index:" << index << "replacement:" << replacement;
-
-        QString sanitized = Helpers::doSanitizeKeyword(replacement);
-        const QString existing = m_KeywordsList.at(index).m_Value;
-        // IMPORTANT: keep track of copy-paste in editKeywordUnsafe()
-        if (existing != sanitized && Helpers::isValidKeyword(sanitized)) {
-            QString lowerCasedNew = sanitized.toLower();
-            QString lowerCasedExisting = existing.toLower();
-
-            if (!m_KeywordsSet.contains(lowerCasedNew)) {
-                result = true;
-            } else if (lowerCasedNew == lowerCasedExisting) {
-                result = true;
-            }
-        }
-
-        return result;
-    }
-
-    bool BasicKeywordsModel::editKeywordUnsafe(size_t index, const QString &replacement) {
-        Q_ASSERT((0 <= index) && (index < m_KeywordsList.size()));
-        bool result = false;
-
-        LOG_INFO << "index:" << index << "replacement:" << replacement;
-        QString sanitized = Helpers::doSanitizeKeyword(replacement);
-
-        auto &keyword = m_KeywordsList.at(index);
-        QString existing = keyword.m_Value;
-        // IMPORTANT: keep track of copy-paste in canEditKeywordUnsafe()
-        if (existing != sanitized && Helpers::isValidKeyword(sanitized)) {
-            QString lowerCasedNew = sanitized.toLower();
-            QString lowerCasedExisting = existing.toLower();
-
-            if (!m_KeywordsSet.contains(lowerCasedNew)) {
-                m_KeywordsSet.insert(lowerCasedNew);
-                m_KeywordsList[index].m_Value = sanitized;
-                m_KeywordsSet.remove(lowerCasedExisting);
-                LOG_INFO << "common case edit:" << existing << "->" << sanitized;
-
-                result = true;
-            } else if (lowerCasedNew == lowerCasedExisting) {
-                LOG_INFO << "changing case in same keyword";
-                m_KeywordsList[index].m_Value = sanitized;
-
-                result = true;
-            } else {
-                LOG_WARNING << "Attempt to rename keyword to existing one. Use remove instead!";
-            }
-        }
-
-        return result;
-    }
-
-    bool BasicKeywordsModel::replaceKeywordUnsafe(size_t index, const QString &existing, const QString &replacement) {
-        Q_ASSERT((0 <= index) && (index < m_KeywordsList.size()));
-        bool result = false;
-
-        auto &keyword = m_KeywordsList.at(index);
-        const QString &internal = keyword.m_Value;
-
-        if (internal == existing) {
-            if (this->editKeywordUnsafe(index, replacement)) {
-                result = true;
-            }
-        } else if (internal.contains(existing) && internal.contains(QChar::Space)) {
-            LOG_INFO << "Replacing composite keyword";
-            QString existingFixed = internal;
-            existingFixed.replace(existing, replacement);
-            if (this->editKeywordUnsafe(index, existingFixed)) {
-                // TODO: reimplement this someday
-                // no need to mark keyword as correct
-                // if we replace only part of it
-                result = true;
-            }
-        }
-
-        return result;
-    }
-
-    bool BasicKeywordsModel::clearKeywordsUnsafe() {
-        const bool anyKeywords = !m_KeywordsList.empty();
-
-        if (anyKeywords) {
-            beginResetModel();
-            {
-                m_KeywordsList.clear();
-            }
-            endResetModel();
-
-            m_KeywordsSet.clear();
-        } else {
-            Q_ASSERT(m_KeywordsSet.empty());
-        }
-
-        return anyKeywords;
-    }
-
-    bool BasicKeywordsModel::containsKeywordUnsafe(const QString &searchTerm, Common::SearchFlags searchFlags) {
-        bool hasMatch = false;
-        const bool caseSensitive = Common::HasFlag(searchFlags, Common::SearchFlags::CaseSensitive);
-        Qt::CaseSensitivity caseSensivity = caseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive;
-        const bool wholeWords = Common::HasFlag(searchFlags, Common::SearchFlags::WholeWords);
-
-        if (wholeWords) {
-            for (auto &keyword: m_KeywordsList) {
-                if (QString::compare(keyword.m_Value, searchTerm, caseSensivity) == 0) {
-                    hasMatch = true;
-                    break;
-                }
-            }
-        } else {
-            for (auto &keyword: m_KeywordsList) {
-                if (keyword.m_Value.contains(searchTerm, caseSensivity)) {
-                    hasMatch = true;
-                    break;
-                }
-            }
-        }
-
-        return hasMatch;
-    }
-
-    bool BasicKeywordsModel::hasKeywordsSpellErrorUnsafe() const {
-        bool anyError = false;
-
-        for (auto &keyword: m_KeywordsList) {
-            if (!keyword.m_IsCorrect) {
-                anyError = true;
-                break;
-            }
-        }
-
-        return anyError;
-    }
-
-    bool BasicKeywordsModel::hasKeywordsDuplicatesUnsafe() const {
-        bool hasDuplicate = false;
-
-        for (auto &keyword: m_KeywordsList) {
-            if (keyword.m_HasDuplicates) {
-                hasDuplicate = true;
-                break;
-            }
-        }
-
-        return hasDuplicate;
-    }
-
-    bool BasicKeywordsModel::removeKeywordsUnsafe(const QSet<QString> &keywordsToRemove, bool caseSensitive) {
-        size_t size = m_KeywordsList.size();
-
-        QVector<int> indicesToRemove;
-        indicesToRemove.reserve((int)size/2);
-
-        for (size_t i = 0; i < size; ++i) {
-            QString keyword = m_KeywordsList.at(i).m_Value;
-
-            if (!caseSensitive) {
-                keyword = keyword.toLower();
-            }
-
-            if (keywordsToRemove.contains(keyword)) {
-                indicesToRemove.append((int)i);
-            }
-        }
-
-        bool anythingRemoved = !indicesToRemove.empty();
-        removeKeywordsAtIndicesUnsafe(indicesToRemove);
-
-        return anythingRemoved;
-    }
-
-    void BasicKeywordsModel::expandPresetUnsafe(size_t keywordsIndex, const QStringList &keywordsList) {
-        Q_ASSERT((0 <= keywordsIndex) && (keywordsIndex < m_KeywordsList.size()));
-
-        LOG_INFO << "index" << keywordsIndex << "list:" << keywordsList;
-        QString removedKeyword;
-        bool wasCorrect = false;
-
-        beginRemoveRows(QModelIndex(), (int)keywordsIndex, (int)keywordsIndex);
-        {
-            this->takeKeywordAtUnsafe(keywordsIndex, removedKeyword, wasCorrect);
-        }
-        endRemoveRows();
-        LOG_INFO << "replaced keyword" << removedKeyword;
-        Q_UNUSED(wasCorrect);
-
-        size_t addedCount = appendKeywordsUnsafe(keywordsList);
-        LOG_INFO << addedCount << "new added";
-    }
-
-    bool BasicKeywordsModel::hasKeywordsUnsafe(const QStringList &keywordsList) const {
-        bool anyMissing = false;
-
-        for (auto &item: keywordsList) {
-            if (canBeAddedUnsafe(item.simplified())) {
-                anyMissing = true;
-                break;
-            }
-        }
-
-        return !anyMissing;
-    }
-
-    QStringList BasicKeywordsModel::generateStringListUnsafe() {
-        QStringList result;
-        result.reserve((int)m_KeywordsList.size());
-
-        for (auto &keyword: m_KeywordsList) {
-            result.append(keyword.m_Value);
-        }
-
-        return result;
+        return anyRemoved;
     }
 
     QString BasicKeywordsModel::retrieveKeyword(size_t wordIndex) {
-        QReadLocker readLocker(&m_KeywordsLock);
-        Q_UNUSED(readLocker);
-
-        QString keyword;
-        if (wordIndex < m_KeywordsList.size()) {
-            keyword = m_KeywordsList.at(wordIndex).m_Value;
-        }
-
-        return keyword;
+        return m_Impl->retrieveKeyword(wordIndex);
     }
 
     QStringList BasicKeywordsModel::getKeywords() {
-        QReadLocker readLocker(&m_KeywordsLock);
-        Q_UNUSED(readLocker);
-
-        return generateStringListUnsafe();
+        return m_Impl->getKeywords();
     }
 
     void BasicKeywordsModel::setKeywordsSpellCheckResults(const std::vector<std::shared_ptr<SpellCheck::SpellCheckQueryItem> > &items) {
-        LOG_DEBUG << items.size() << "results";
-
-        QWriteLocker writeLocker(&m_KeywordsLock);
-        Q_UNUSED(writeLocker);
-
-        setSpellCheckResultsUnsafe(items);
+       m_Impl->setKeywordsSpellCheckResults(items);
     }
 
     std::vector<KeywordItem> BasicKeywordsModel::retrieveMisspelledKeywords() {
-        QReadLocker readLocker(&m_KeywordsLock);
-        Q_UNUSED(readLocker);
-
-        std::vector<KeywordItem> misspelledKeywords;
-        size_t size = m_KeywordsList.size();
-        misspelledKeywords.reserve(size/3);
-
-        for (size_t i = 0; i < size; ++i) {
-            auto &item = m_KeywordsList.at(i);
-            if (!item.m_IsCorrect) {
-                const QString &keyword = item.m_Value;
-                LOG_INTEGR_TESTS_OR_DEBUG << keyword << "has wrong spelling";
-
-                if (!keyword.contains(QChar::Space)) {
-                    misspelledKeywords.emplace_back(keyword, i);
-                } else {
-                    QStringList items = keyword.split(QChar::Space, QString::SkipEmptyParts);
-                    foreach(const QString &item, items) {
-                        misspelledKeywords.emplace_back(item, i, keyword);
-                    }
-                }
-            }
-        }
-
-        return misspelledKeywords;
+        return m_Impl->retrieveMisspelledKeywords();
     }
 
     std::vector<KeywordItem> BasicKeywordsModel::retrieveDuplicatedKeywords() {
-        QReadLocker readLocker(&m_KeywordsLock);
-        Q_UNUSED(readLocker);
-
-        std::vector<KeywordItem> duplicatedKeywords;
-        size_t size = m_KeywordsList.size();
-        duplicatedKeywords.reserve(size/3);
-
-        for (size_t i = 0; i < size; ++i) {
-            auto &item = m_KeywordsList.at(i);
-            if (item.m_HasDuplicates) {
-                duplicatedKeywords.emplace_back(item.m_Value, i);
-            }
-        }
-
-        return duplicatedKeywords;
+        return m_Impl->retrieveDuplicatedKeywords();
     }
 
     Common::KeywordReplaceResult BasicKeywordsModel::fixKeywordSpelling(size_t index, const QString &existing, const QString &replacement) {
-        Common::KeywordReplaceResult result;
-
-        LOG_INFO << "Replacing" << existing << "to" << replacement << "with index" << index;
-
-        m_KeywordsLock.lockForWrite();
-        {
-            const size_t size = m_KeywordsList.size();
-            if (index < size) {
-                if (replaceKeywordUnsafe(index, existing, replacement)) {
-                    m_KeywordsList[index].m_IsCorrect = true;
-                    result = Common::KeywordReplaceResult::Succeeded;
-                } else {
-                    result = Common::KeywordReplaceResult::FailedDuplicate;
-                }
-            } else {
-                LOG_INFO << "Failure. Index is negative or exceeds count" << size;
-                result = Common::KeywordReplaceResult::FailedIndex;
-            }
-        }
-        m_KeywordsLock.unlock();
+        Common::KeywordReplaceResult result = m_Impl->fixKeywordSpelling(index, existing, replacement);
 
         if (result == Common::KeywordReplaceResult::Succeeded) {
             QModelIndex i = this->index((int)index);
@@ -700,42 +407,23 @@ namespace Common {
     bool BasicKeywordsModel::processFailedKeywordReplacements(const
                                                               std::vector<std::shared_ptr<SpellCheck::KeywordSpellSuggestions> > &candidatesForRemoval)
     {
-        LOG_INFO << candidatesForRemoval.size() << "candidates to remove";
         bool anyReplaced = false;
+        QVector<QPair<int, int> > rangesToRemove;
 
-        if (candidatesForRemoval.empty()) {
-            return anyReplaced;
-        }
+        {
+            QWriteLocker locker(m_Impl->accessLock());
+            Q_UNUSED(locker);
 
-        QVector<int> indicesToRemove;
-        size_t size = candidatesForRemoval.size();
-        indicesToRemove.reserve((int)size);
-
-        QWriteLocker writeLocker(&m_KeywordsLock);
-
-        for (size_t i = 0; i < size; ++i) {
-            auto &item = candidatesForRemoval.at(i);
-
-            size_t index = item->getOriginalIndex();
-            if (index >= m_KeywordsList.size()) {
-                LOG_DEBUG << "index is out of range";
-                continue;
-            }
-
-            const QString &existingPrev = item->getWord();
-            QString sanitized = Helpers::doSanitizeKeyword(item->getReplacement());
-
-            if (isReplacedADuplicateUnsafe(index, existingPrev, sanitized)) {
-                indicesToRemove.append((int)index);
+            QVector<int> indicesToRemove;
+            if (m_Impl->processFailedKeywordReplacementsUnsafe(candidatesForRemoval, indicesToRemove)) {
+                Q_ASSERT(!indicesToRemove.isEmpty());
+                Helpers::indicesToRanges(indicesToRemove, rangesToRemove);
+                AbstractListModel::doRemoveItemsFromRanges(rangesToRemove);
+                anyReplaced = true;
             }
         }
 
-        LOG_INFO << "confirmed" << indicesToRemove.size() << "duplicates to remove";
-
-        if (!indicesToRemove.isEmpty()) {
-            this->removeKeywordsAtIndicesUnsafe(indicesToRemove);
-            anyReplaced = true;
-        }
+        AbstractListModel::emitRemovedSignalsForRanges(rangesToRemove);
 
         return anyReplaced;
     }
@@ -752,117 +440,32 @@ namespace Common {
         emit hasDuplicatesChanged();
     }
 
-    void BasicKeywordsModel::removeKeywordsAtIndicesUnsafe(const QVector<int> &indices) {
-        LOG_DEBUG << indices.size() << "item(s)";
-        QVector<QPair<int, int> > rangesToRemove;
-        Helpers::indicesToRanges(indices, rangesToRemove);
-        AbstractListModel::removeItemsAtIndices(rangesToRemove);
-    }
-
-    bool BasicKeywordsModel::replaceInKeywordsUnsafe(const QString &replaceWhat, const QString &replaceTo,
-                                                     Common::SearchFlags flags) {
-        bool anyChanged = false;
-
-        QVector<int> indicesToRemove;
-
-        const bool caseSensitive = Common::HasFlag(flags, Common::SearchFlags::CaseSensitive);
-        const bool wholeWords = Common::HasFlag(flags, Common::SearchFlags::WholeWords);
-        const Qt::CaseSensitivity caseSensivity = caseSensitive ? Qt::CaseSensitive : Qt::CaseInsensitive;
-
-        const size_t size = m_KeywordsList.size();
-        for (size_t i = 0; i < size; ++i) {
-            auto &keyword = m_KeywordsList.at(i);
-            QString internal = keyword.m_Value;
-            const bool hasMatch = wholeWords ?
-                                  Helpers::containsWholeWords(internal, replaceWhat, caseSensivity) :
-                                  internal.contains(replaceWhat, caseSensivity);
-            LOG_FOR_TESTS << "[" << internal << "] has match [" << replaceWhat << "] =" << hasMatch;
-
-            if (hasMatch) {
-                QString replaced = wholeWords ?
-                                   Helpers::replaceWholeWords(internal, replaceWhat, replaceTo, caseSensivity) :
-                                   internal.replace(replaceWhat, replaceTo, caseSensivity);
-
-                QString replacement = Helpers::doSanitizeKeyword(replaced);
-
-                if (!this->editKeywordUnsafe(i, replacement)) {
-                    if (replacement.isEmpty()) {
-                        LOG_INFO << "Replaced" << internal << "to empty";
-                        indicesToRemove.append((int)i);
-                    } else if (m_KeywordsSet.contains(replacement.toLower())) {
-                        LOG_INFO << "Replacing" << internal << "to" << replacement << "creates a duplicate";
-                        indicesToRemove.append((int)i);
-                    }
-                } else {
-                    QModelIndex j = this->index((int)i);
-                    emit dataChanged(j, j, QVector<int>() << KeywordRole);
-                    anyChanged = true;
-                }
-            }
-        }
-
-        if (!indicesToRemove.isEmpty()) {
-            this->removeKeywordsAtIndicesUnsafe(indicesToRemove);
-            anyChanged = true;
-        }
-
-        return anyChanged;
-    }
-
     bool BasicKeywordsModel::containsKeyword(const QString &searchTerm, Common::SearchFlags searchFlags) {
-        QReadLocker readLocker(&m_KeywordsLock);
-
-        Q_UNUSED(readLocker);
-
-        return containsKeywordUnsafe(searchTerm, searchFlags);
+        return m_Impl->containsKeyword(searchTerm, searchFlags);
     }
 
     bool BasicKeywordsModel::containsKeywords(const QStringList &keywordsList) {
-        QReadLocker readLocker(&m_KeywordsLock);
-        Q_UNUSED(readLocker);
-
-        bool anyError = false;
-
-        Common::SearchFlags searchFlags = Common::SearchFlags::ExactKeywords;
-        for (auto &keyword: keywordsList) {
-            if (!containsKeywordUnsafe(keyword, searchFlags)) {
-                anyError = true;
-                break;
-            }
-        }
-
-        return !anyError;
+        return m_Impl->containsKeywords(keywordsList);
     }
 
     bool BasicKeywordsModel::isEmpty() {
-        QReadLocker readLocker(&m_KeywordsLock);
-        Q_UNUSED(readLocker);
-
-        return m_KeywordsList.empty();
+        return m_Impl->isEmpty();
     }
 
     bool BasicKeywordsModel::hasKeywordsSpellError() {
-        QReadLocker readLocker(&m_KeywordsLock);
-        Q_UNUSED(readLocker);
-
-        return hasKeywordsSpellErrorUnsafe();
+        return m_Impl->hasKeywordsSpellError();
     }
 
     bool BasicKeywordsModel::hasKeywordsDuplicates() {
-        QReadLocker readLocker(&m_KeywordsLock);
-        Q_UNUSED(readLocker);
-
-        return hasKeywordsDuplicatesUnsafe();
+        return m_Impl->hasKeywordsDuplicates();
     }
 
     bool BasicKeywordsModel::hasSpellErrors() {
-        bool hasErrors = hasKeywordsSpellError();
-        return hasErrors;
+        return m_Impl->hasSpellErrors();
     }
 
     bool BasicKeywordsModel::hasDuplicates() {
-        bool hasDuplicates = hasKeywordsDuplicates();
-        return hasDuplicates;
+        return m_Impl->hasDuplicates();
     }
 
     void BasicKeywordsModel::notifySpellCheckResults(Common::SpellCheckFlags flags) {
@@ -877,33 +480,20 @@ namespace Common {
         emit keywordsSpellingChanged();
     }
 
-    void BasicKeywordsModel::resetSpellCheckResultsUnsafe() {
-        for (auto &keyword: m_KeywordsList) {
-            keyword.m_IsCorrect = true;
-        }
+    void BasicKeywordsModel::acquire() {
+        m_Impl->acquire();
     }
 
-    bool BasicKeywordsModel::canBeAddedUnsafe(const QString &keyword) const {
-        bool isValid = Helpers::isValidKeyword(keyword);
-        bool result = isValid && !m_KeywordsSet.contains(keyword.toLower());
-
-        return result;
+    bool BasicKeywordsModel::release() {
+        return m_Impl->release();
     }
 
     bool BasicKeywordsModel::hasKeyword(const QString &keyword) {
-        QReadLocker readLocker(&m_KeywordsLock);
-
-        Q_UNUSED(readLocker);
-
-        return !canBeAddedUnsafe(keyword.simplified());
+        return m_Impl->hasKeyword(keyword);
     }
 
     bool BasicKeywordsModel::canEditKeyword(int index, const QString &replacement) {
-        QReadLocker readLocker(&m_KeywordsLock);
-
-        Q_UNUSED(readLocker);
-
-        return canEditKeywordUnsafe(index, replacement);
+        return m_Impl->canEditKeyword(index, replacement);
     }
 
     void BasicKeywordsModel::onSpellCheckRequestReady(Common::SpellCheckFlags flags, int index) {
@@ -915,84 +505,8 @@ namespace Common {
         emit spellingInfoUpdated();
     }
 
-    void BasicKeywordsModel::setSpellCheckResultsUnsafe(const std::vector<std::shared_ptr<SpellCheck::SpellCheckQueryItem> > &items) {
-        const size_t itemsSize = items.size();
-        const size_t keywordsSize = m_KeywordsList.size();
-
-        // reset relative items
-        for (size_t i = 0; i < itemsSize; ++i) {
-            auto &item = items.at(i);
-            size_t index = item->m_Index;
-            if (index < keywordsSize) {
-                m_KeywordsList[index].resetSpelling();
-            }
-
-            if (index >= keywordsSize) {
-                LOG_DEBUG << "Skipping the rest of overflowing results";
-#ifdef QT_DEBUG
-                // if any of these has overflowing index, then all of them should
-                for (size_t j = i; j < itemsSize; ++j) {
-                    Q_ASSERT(items.at(j)->m_Index >= keywordsSize);
-                }
-#endif
-                break;
-            }
-        }
-
-        for (size_t i = 0; i < itemsSize; ++i) {
-            auto &item = items.at(i);
-            size_t index = item->m_Index;
-            // looks like this is a stupid assert to trace impossible race conditions
-            Q_ASSERT(keywordsSize == m_KeywordsList.size());
-
-            if (index < keywordsSize) {
-                auto &keyword = m_KeywordsList[index];
-                if (keyword.m_Value.contains(item->m_Word)) {
-                    // if keyword contains several words, there would be
-                    // several queryiIems and there's error if any has error
-                    keyword.m_IsCorrect = keyword.m_IsCorrect && item->m_IsCorrect;
-                    keyword.m_HasDuplicates = keyword.m_HasDuplicates || item->m_IsDuplicate;
-                }
-            }
-
-            if (index >= keywordsSize) {
-                LOG_DEBUG << "Skipping the rest of overflowing results";
-                break;
-            }
-        }
-    }
-
-    bool BasicKeywordsModel::isReplacedADuplicateUnsafe(size_t index, const QString &existingPrev,
-                                                        const QString &replacement) const {
-        bool isDuplicate = false;
-        const QString &existingCurrent = m_KeywordsList.at(index).m_Value;
-
-        if (existingCurrent == existingPrev) {
-            if (m_KeywordsSet.contains(replacement.toLower())) {
-                isDuplicate = true;
-                LOG_INFO << "safe to remove duplicate [" << existingCurrent << "] at index" << index;
-            } else {
-                LOG_INFO << replacement << "was not found";
-            }
-        } else if (existingCurrent.contains(existingPrev) && existingCurrent.contains(QChar::Space)) {
-            QString existingFixed = existingCurrent;
-            existingFixed.replace(existingPrev, replacement);
-
-            if (m_KeywordsSet.contains(existingFixed.toLower())) {
-                isDuplicate = true;
-                LOG_INFO << "safe to remove composite duplicate [" << existingCurrent << "] at index" << index;
-            } else {
-                LOG_INFO << existingFixed << "was not found";
-            }
-        } else {
-            LOG_INFO << existingCurrent << "is now instead of" << existingPrev << "at index" << index;
-        }
-
-        return isDuplicate;
-    }
-
     void BasicKeywordsModel::updateKeywordsHighlighting(int index) {
-        const int count = (int)m_KeywordsList.size();
+        const int count = getKeywordsCount();
 
         if (index == -1) {
             if (count > 0) {

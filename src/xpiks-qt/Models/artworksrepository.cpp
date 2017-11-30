@@ -231,7 +231,7 @@ namespace Models {
 
             QVector<QPair<int, int> > rangesToRemove;
             Helpers::indicesToRanges(indicesToRemove, rangesToRemove);
-            removeItemsAtIndices(rangesToRemove);
+            removeItemsFromRanges(rangesToRemove);
 
             updateSelectedState();
         }
