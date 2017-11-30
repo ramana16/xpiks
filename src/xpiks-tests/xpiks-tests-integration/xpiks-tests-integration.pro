@@ -226,7 +226,8 @@ SOURCES += main.cpp \
     masterpasswordtest.cpp \
     reimporttest.cpp \
     autoimporttest.cpp \
-    ../../xpiks-qt/Common/basickeywordsmodelimpl.cpp
+    ../../xpiks-qt/Common/basickeywordsmodelimpl.cpp \
+    ../../xpiks-qt/Maintenance/xpkscleanupjob.cpp
 
 RESOURCES +=
 
@@ -487,7 +488,8 @@ HEADERS += \
     masterpasswordtest.h \
     reimporttest.h \
     autoimporttest.h \
-    ../../xpiks-qt/Common/basickeywordsmodelimpl.h
+    ../../xpiks-qt/Common/basickeywordsmodelimpl.h \
+    ../../xpiks-qt/Maintenance/xpkscleanupjob.h
 
 INCLUDEPATH += ../../../vendors/tiny-aes
 INCLUDEPATH += ../../../vendors/cpp-libface
