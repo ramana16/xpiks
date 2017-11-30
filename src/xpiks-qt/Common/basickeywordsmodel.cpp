@@ -18,9 +18,8 @@
 #include "../Helpers/keywordshelpers.h"
 #include "../Helpers/stringhelper.h"
 #include "flags.h"
-#include "../Common/defines.h"
+#include "defines.h"
 #include "../Helpers/indiceshelper.h"
-#include "../Common/flags.h"
 #include "basickeywordsmodelimpl.h"
 
 namespace Common {
@@ -35,7 +34,7 @@ namespace Common {
 #endif
 
 #ifdef INTEGRATION_TESTS
-        bool BasicKeywordsModel::hasDuplicateAt(size_t i) const { return m_Impl->accessKeywordUnsafe(i).m_HasDuplicate; }
+        bool BasicKeywordsModel::hasDuplicateAt(size_t i) const { return m_Impl->accessKeywordUnsafe(i).m_HasDuplicates; }
 #endif
 
     void BasicKeywordsModel::removeItemsFromRanges(const QVector<QPair<int, int> > &ranges) {
