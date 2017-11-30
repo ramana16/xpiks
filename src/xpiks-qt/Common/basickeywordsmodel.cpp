@@ -30,12 +30,12 @@ namespace Common {
     {}
 
 #ifdef CORE_TESTS
-    const QString &BasicKeywordsModel::getKeywordAt(int index) const { return m_Impl->getKeywordAt(index); }
-    std::vector<Keyword> &BasicKeywordsModel::getRawKeywords() { return m_Impl->getRawKeywords(); }
+    const QString &BasicKeywordsModel::getKeywordAt(int index) const { return m_Impl->accessKeywordUnsafe(index).m_Value; }
+    std::vector<Keyword> &BasicKeywordsModel::getRawKeywords() { return m_Impl->m_KeywordsList; }
 #endif
 
 #ifdef INTEGRATION_TESTS
-        bool BasicKeywordsModel::hasDuplicateAt(size_t i) const { return m_Impl->hasDuplicateAt(i); }
+        bool BasicKeywordsModel::hasDuplicateAt(size_t i) const { return m_Impl->accessKeywordUnsafe(i).m_HasDuplicate; }
 #endif
 
     void BasicKeywordsModel::removeItemsFromRanges(const QVector<QPair<int, int> > &ranges) {
@@ -77,7 +77,7 @@ namespace Common {
             return QVariant();
         }
 
-        auto &keyword = m_Impl->accessKeyword(row);
+        auto &keyword = m_Impl->accessKeywordUnsafe(row);
 
         switch (role) {
             case KeywordRole:
@@ -141,7 +141,7 @@ namespace Common {
         }
         m_Impl->unlockKeywords();
 
-        if (removed) {            
+        if (removed) {
             beginRemoveRows(QModelIndex(), (int)index, (int)index);
             endRemoveRows();
 

@@ -755,6 +755,19 @@ void Commands::CommandManager::writeMetadata(const MetadataIO::WeakArtworksSnaps
 #endif
 }
 
+void Commands::CommandManager::wipeAllMetadata(const MetadataIO::ArtworksSnapshot &artworks, bool useBackups) const {
+    LOG_DEBUG << "#";
+#ifndef CORE_TESTS
+    if (m_MetadataIOCoordinator != nullptr) {
+        m_MetadataIOCoordinator->wipeAllMetadataExifTool(artworks, useBackups);
+    }
+
+#else
+    Q_UNUSED(artworks);
+    Q_UNUSED(useBackups);
+#endif
+}
+
 void Commands::CommandManager::addToLibrary(const MetadataIO::WeakArtworksSnapshot &artworks) const {
 #ifndef CORE_TESTS
     if (m_MetadataIOService != nullptr) {

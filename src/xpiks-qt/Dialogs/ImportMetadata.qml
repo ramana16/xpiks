@@ -68,7 +68,7 @@ Item {
     MessageDialog {
         id: errorsNotification
         title: i18.n + qsTr("Warning")
-        text: i18.n + qsTr("Import finished with errors. See logs for details.")
+        text: i18.n + qsTr("Action finished with errors. See logs for details.")
 
         onAccepted: {
             closePopup()

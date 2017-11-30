@@ -136,6 +136,26 @@ namespace MetadataIO {
         writingOrchestrator.startWriting(useBackups, useDirectExport || directExportOn);
     }
 
+    void MetadataIOCoordinator::wipeAllMetadataExifTool(const ArtworksSnapshot &artworksToWipe, bool useBackups) {
+        LOG_DEBUG << "use backups:" << useBackups;
+        m_WritingAsyncCoordinator.reset();
+
+        lockForIO(artworksToWipe);
+
+        // this should prevent a race between video thumbnails and exiftool
+        // https://github.com/ribtoks/xpiks/issues/477
+        // ---
+        QMLExtensions::VideoCachingService *videoCachingService = m_CommandManager->getVideoCachingService();
+        videoCachingService->waitWorkerIdle();
+        // ---
+
+        libxpks::io::WritingOrchestrator writingOrchestrator(artworksToWipe,
+                                                             &m_WritingAsyncCoordinator,
+                                                             m_CommandManager->getSettingsModel());
+
+        writingOrchestrator.startMetadataWiping(useBackups);
+    }
+
     void MetadataIOCoordinator::autoDiscoverExiftool() {
         LOG_DEBUG << "#";
         Models::SettingsModel *settingsModel = m_CommandManager->getSettingsModel();

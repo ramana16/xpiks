@@ -25,6 +25,7 @@ namespace libxpks {
 
         public:
             void startWriting(bool useBackups, bool useDirectExport=true);
+            void startMetadataWiping(bool useBackups);
 
         private:
             const MetadataIO::ArtworksSnapshot &m_ItemsToWriteSnapshot;

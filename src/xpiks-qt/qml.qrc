@@ -135,5 +135,6 @@
         <file>Graphics/slategray/More_icon_disabled.svg</file>
         <file>Graphics/slategray/More_icon_hovered.svg</file>
         <file>Graphics/slategray/More_icon_normal.svg</file>
+        <file>Dialogs/WipeMetadata.qml</file>
     </qresource>
 </RCC>

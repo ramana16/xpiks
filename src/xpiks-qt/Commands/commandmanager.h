@@ -219,6 +219,7 @@ namespace Commands {
         int readMetadata(const MetadataIO::ArtworksSnapshot &snapshot) const;
         int reimportMetadata(const MetadataIO::ArtworksSnapshot &snapshot) const;
         void writeMetadata(const MetadataIO::WeakArtworksSnapshot &artworks, bool useBackups) const;
+        void wipeAllMetadata(const MetadataIO::ArtworksSnapshot &artworks, bool useBackups) const;
         void addToLibrary(const MetadataIO::WeakArtworksSnapshot &artworks) const;
         void updateArtworksAtIndices(const QVector<int> &indices) const;
         void updateArtworks(const MetadataIO::WeakArtworksSnapshot &artworks) const;

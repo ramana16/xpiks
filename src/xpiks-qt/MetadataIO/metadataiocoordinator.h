@@ -89,6 +89,7 @@ namespace MetadataIO {
     public:
         int readMetadataExifTool(const ArtworksSnapshot &artworksToRead, quint32 storageReadBatchID);
         void writeMetadataExifTool(const ArtworksSnapshot &artworksToWrite, bool useBackups);
+        void wipeAllMetadataExifTool(const ArtworksSnapshot &artworksToWipe, bool useBackups);
         void autoDiscoverExiftool();
         void setRecommendedExiftoolPath(const QString &recommendedExiftool);
 

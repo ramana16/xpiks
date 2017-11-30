@@ -745,6 +745,18 @@ ApplicationWindow {
                 }
 
                 MenuItem {
+                    text: i18.n + qsTr("&Wipe all metadata from files")
+                    onTriggered: {
+                        console.info("Wipe metadata triggered")
+                        if (filteredArtItemsModel.selectedArtworksCount == 0) {
+                            mustSelectDialog.open()
+                        } else if (filteredArtItemsModel.selectedArtworksCount > 0) {
+                            Common.launchDialog("Dialogs/WipeMetadata.qml", applicationWindow, {})
+                        }
+                    }
+                }
+
+                MenuItem {
                     text: i18.n + qsTr("Show logs")
                     action: showLogsAction
                 }

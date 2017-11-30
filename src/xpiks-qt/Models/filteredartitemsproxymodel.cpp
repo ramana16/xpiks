@@ -159,6 +159,14 @@ namespace Models {
         artItemsModel->saveSelectedArtworks(indices, overwriteAll, useBackups);
     }
 
+    void FilteredArtItemsProxyModel::wipeMetadataFromSelectedArtworks(bool useBackups) {
+        LOG_INFO << "useBackups:" << useBackups;
+
+        auto selectedArtworks = getSelectedArtworksSnapshot();
+        MetadataIO::ArtworksSnapshot snapshot(selectedArtworks);
+        m_CommandManager->wipeAllMetadata(snapshot, useBackups);
+    }
+
     void FilteredArtItemsProxyModel::setSelectedForUpload() {
         LOG_DEBUG << "#";
         auto selectedArtworks = getSelectedArtworksSnapshot();

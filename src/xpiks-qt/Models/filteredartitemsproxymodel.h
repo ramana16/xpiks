@@ -64,6 +64,7 @@ namespace Models {
         Q_INVOKABLE void updateSelectedArtworks();
         /*Q_INVOKABLE*/ void updateSelectedArtworksEx(const QVector<int> &roles);
         Q_INVOKABLE void saveSelectedArtworks(bool overwriteAll, bool useBackups);
+        Q_INVOKABLE void wipeMetadataFromSelectedArtworks(bool useBackups);
         Q_INVOKABLE void setSelectedForUpload();
         Q_INVOKABLE void setSelectedForZipping();
         Q_INVOKABLE bool areSelectedArtworksSaved();

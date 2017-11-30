@@ -43,20 +43,7 @@ namespace Common {
 
     public:
         BasicKeywordsModelImpl(Common::Hold &hold);
-
-        virtual ~BasicKeywordsModelImpl() {}
-
-    public:
-
-#ifdef CORE_TESTS
-    public:
-        const QString &getKeywordAt(int index) const { return m_KeywordsList.at(index).m_Value; }
-        std::vector<Keyword> &getRawKeywords() { return m_KeywordsList; }
-#endif
-
-#ifdef INTEGRATION_TESTS
-        bool hasDuplicateAt(size_t i) const { return m_KeywordsList.at(i).m_HasDuplicates; }
-#endif
+        virtual ~BasicKeywordsModelImpl() { }
 
     public:
         int getKeywordsCount();
@@ -69,7 +56,7 @@ namespace Common {
 
     private:
         inline size_t getKeywordsSizeUnsafe() { return m_KeywordsList.size(); }
-        inline Keyword &accessKeyword(size_t row) { Q_ASSERT(row < m_KeywordsList.size()); return m_KeywordsList.at(row); }
+        inline Keyword &accessKeywordUnsafe(size_t row) { Q_ASSERT(row < m_KeywordsList.size()); return m_KeywordsList.at(row); }
 
     private:
         bool appendKeywordUnsafe(const QString &keyword, size_t &index);

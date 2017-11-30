@@ -59,5 +59,14 @@ namespace libxpks {
             thread->start();
             LOG_INFO << "Started image writing worker...";
         }
+
+        void WritingOrchestrator::startMetadataWiping(bool useBackups) {
+            Helpers::AsyncCoordinatorStarter deferredStarter(m_AsyncCoordinator, -1);
+            Q_UNUSED(deferredStarter);
+
+            Q_UNUSED(useBackups);
+
+            LOG_INFO << "This functionality is missing from libxpks_stub";
+        }
     }
 }

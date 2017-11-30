@@ -25,10 +25,12 @@ namespace libxpks {
 
         public:
             void startWriting(bool useBackups, bool useDirectExport=true);
+            void startMetadataWiping(bool useBackups);
 
         private:
-            void startWritingImages(bool useBackups, bool useDirectExport);
-            void startWritingVideos(bool useBackups, bool useDirectExport);
+            void startWritingImages(MetadataIO::ArtworksSnapshot::Container &rawSnapshot, bool useBackups, bool useDirectExport);
+            void startWritingVideos(MetadataIO::ArtworksSnapshot::Container &rawSnapshot, bool useBackups, bool useDirectExport);
+            void startWipingImages(MetadataIO::ArtworksSnapshot::Container &rawSnapshot, bool useBackups);
 
         private:
             const MetadataIO::ArtworksSnapshot &m_ItemsToWriteSnapshot;

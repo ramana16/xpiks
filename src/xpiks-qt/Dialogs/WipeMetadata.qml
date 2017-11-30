@@ -20,18 +20,17 @@ import "../Components"
 import "../StyledControls"
 
 Item {
-    id: metadataExportComponent
+    id: metadataWipingComponent
     anchors.fill: parent
     property bool isInProgress: false
-    property bool overwriteAll: false
 
     function closePopup() {
-        metadataExportComponent.isInProgress = false
-        metadataExportComponent.destroy()
+        metadataWipingComponent.isInProgress = false
+        metadataWipingComponent.destroy()
     }
 
     Keys.onEscapePressed: {
-        if (!metadataExportComponent.isInProgress) {
+        if (!metadataWipingComponent.isInProgress) {
             closePopup()
         }
 
@@ -39,6 +38,19 @@ Item {
     }
 
     Component.onCompleted: focus = true
+
+    Connections {
+        target: metadataIOCoordinator
+        onMetadataWritingFinished: {
+            metadataWipingComponent.isInProgress = false
+
+            if (!metadataIOCoordinator.hasErrors) {
+                wipeInfoDialog.open()
+            } else {
+                errorsNotification.open()
+            }
+        }
+    }
 
     MessageDialog {
         id: errorsNotification
@@ -50,10 +62,35 @@ Item {
         }
     }
 
+    MessageDialog {
+        id: confirmWipeDialog
+        title: i18.n + qsTr("Warning")
+        text: i18.n + qsTr("This action cannot be undone. Proceed?")
+        standardButtons: StandardButton.Yes | StandardButton.No
+        onYes: {
+            exportButton.text = i18.n + qsTr("Wiping...")
+            metadataWipingComponent.isInProgress = true
+            spinner.height = spinner.width
+            dialogWindow.height += spinner.height + column.spacing
+            spinner.running = true
+            filteredArtItemsModel.wipeMetadataFromSelectedArtworks(useBackupsCheckbox.checked)
+        }
+    }
+
+    MessageDialog {
+        id: wipeInfoDialog
+        title: i18.n + qsTr("Information")
+        text: i18.n + qsTr("Metadata is wiped, but your edits are still available in Xpiks.")
+
+        onAccepted: {
+            closePopup()
+        }
+    }
+
     signal dialogDestruction();
     Component.onDestruction: dialogDestruction();
 
-    PropertyAnimation { target: metadataExportComponent; property: "opacity";
+    PropertyAnimation { target: metadataWipingComponent; property: "opacity";
         duration: 400; from: 0; to: 1;
         easing.type: Easing.InOutQuad ; running: true }
 
@@ -84,20 +121,20 @@ Item {
             property real old_y : 0
 
             onPressed:{
-                var tmp = mapToItem(metadataExportComponent, mouse.x, mouse.y);
+                var tmp = mapToItem(metadataWipingComponent, mouse.x, mouse.y);
                 old_x = tmp.x;
                 old_y = tmp.y;
 
                 var dialogPoint = mapToItem(dialogWindow, mouse.x, mouse.y);
                 if (!Common.isInComponent(dialogPoint, dialogWindow)) {
-                    if (!metadataExportComponent.isInProgress) {
+                    if (!metadataWipingComponent.isInProgress) {
                         closePopup()
                     }
                 }
             }
 
             onPositionChanged: {
-                var old_xy = Common.movePopupInsideComponent(metadataExportComponent, dialogWindow, mouse, old_x, old_y);
+                var old_xy = Common.movePopupInsideComponent(metadataWipingComponent, dialogWindow, mouse, old_x, old_y);
                 old_x = old_xy[0]; old_y = old_xy[1];
             }
         }
@@ -152,12 +189,13 @@ Item {
 
                     StyledText {
                         anchors.left: parent.left
-                        text: i18.n + qsTr("Export metadata")
+                        text: i18.n + qsTr("Wipe metadata", "caption")
+                        color: uiColors.artworkModifiedColor
                     }
 
                     StyledText {
                         anchors.right: parent.right
-                        text: i18.n + qsTr("%1 modified artwork(s) selected").arg(filteredArtItemsModel.getModifiedSelectedCount(overwriteAll))
+                        text: i18.n + qsTr("%1 file(s) selected").arg(filteredArtItemsModel.selectedArtworksCount)
                         color: uiColors.inputForegroundColor
                     }
                 }
@@ -174,8 +212,14 @@ Item {
                     id: useBackupsCheckbox
                     text: i18.n + qsTr("Backup each file")
                     checked: true
-                    enabled: settingsModel.useExifTool && !metadataExportComponent.isInProgress
+                    enabled: settingsModel.useExifTool && !metadataWipingComponent.isInProgress
                     visible: settingsModel.useExifTool
+                }
+
+                StyledCheckbox {
+                    id: consentCheckbox
+                    text: i18.n + qsTr("I know what I'm doing")
+                    checked: false
                 }
 
                 RowLayout {
@@ -186,30 +230,11 @@ Item {
                     StyledButton {
                         id: exportButton
                         isDefault: true
-                        text: i18.n + qsTr("Start Export")
+                        text: i18.n + qsTr("Start")
                         width: 130
-                        enabled: !metadataExportComponent.isInProgress
+                        enabled: !metadataWipingComponent.isInProgress && consentCheckbox.checked
                         onClicked: {
-                            text = i18.n + qsTr("Exporting...")
-                            metadataExportComponent.isInProgress = true
-                            spinner.height = spinner.width
-                            dialogWindow.height += spinner.height + column.spacing
-                            spinner.running = true
-                            filteredArtItemsModel.saveSelectedArtworks(overwriteAll, useBackupsCheckbox.checked)
-                        }
-
-                        Connections {
-                            target: metadataIOCoordinator
-                            onMetadataWritingFinished: {
-                                metadataExportComponent.isInProgress = false
-
-                                if (!metadataIOCoordinator.hasErrors) {
-                                    exportButton.text = i18.n + qsTr("Start Export")
-                                    closePopup()
-                                } else {
-                                    errorsNotification.open()
-                                }
-                            }
+                            confirmWipeDialog.open()
                         }
                     }
 
@@ -220,7 +245,7 @@ Item {
                     StyledButton {
                         text: i18.n + qsTr("Close")
                         width: 100
-                        enabled: !metadataExportComponent.isInProgress
+                        enabled: !metadataWipingComponent.isInProgress
                         onClicked: {
                             closePopup()
                         }
