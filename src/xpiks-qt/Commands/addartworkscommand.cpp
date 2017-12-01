@@ -127,22 +127,23 @@ std::shared_ptr<Commands::ICommandResult> Commands::AddArtworksCommand::execute(
 
 int Commands::AddArtworksCommand::afterAddedHandler(CommandManager *commandManager, const MetadataIO::ArtworksSnapshot &artworksToImport, QStringList filesToWatch, int initialCount, int newFilesCount) const {
     Models::ArtworksRepository *artworksRepository = commandManager->getArtworksRepository();
+    auto *xpiks = commandManager->getDelegator();
 
-    int importID = commandManager->readMetadata(artworksToImport);
+    int importID = xpiks->readMetadata(artworksToImport);
     accountVectors(artworksRepository, artworksToImport.getWeakSnapshot());
     artworksRepository->refresh();
 
     std::unique_ptr<UndoRedo::IHistoryItem> addArtworksItem(new UndoRedo::AddArtworksHistoryItem(getCommandID(), initialCount, newFilesCount));
-    commandManager->recordHistoryItem(addArtworksItem);
+    xpiks->recordHistoryItem(addArtworksItem);
 
     // Generating previews was in the metadata io coordinator
     // called _after_ the reading to make reading (in Xpiks)
     // as fast as possible. Not needed if using only exiftool now
-    commandManager->generatePreviews(artworksToImport);
-    commandManager->addToRecentFiles(filesToWatch);
+    xpiks->generatePreviews(artworksToImport);
+    xpiks->addToRecentFiles(filesToWatch);
 
     if (!getIsSessionRestoreFlag()) {
-        commandManager->saveSessionInBackground();
+        xpiks->saveSessionInBackground();
     }
 
     return importID;

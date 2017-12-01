@@ -25,6 +25,7 @@ std::shared_ptr<Commands::ICommandResult> Commands::PasteKeywordsCommand::execut
     LOG_INFO << "Pasting" << m_KeywordsList.length() << "keywords to" << m_RawSnapshot.size() << "item(s)";
 
     CommandManager *commandManager = (CommandManager*)commandManagerInterface;
+    auto *xpiks = commandManager->getDelegator();
 
     QVector<int> indicesToUpdate;
     std::vector<UndoRedo::ArtworkMetadataBackup> artworksBackups;
@@ -46,16 +47,16 @@ std::shared_ptr<Commands::ICommandResult> Commands::PasteKeywordsCommand::execut
     }
 
     if (size > 0) {
-        commandManager->submitForSpellCheck(affectedArtworks);
-        commandManager->submitForWarningsCheck(affectedArtworks);
-        commandManager->saveArtworksBackups(affectedArtworks);
+        xpiks->submitForSpellCheck(affectedArtworks);
+        xpiks->submitForWarningsCheck(affectedArtworks);
+        xpiks->saveArtworksBackups(affectedArtworks);
 
         std::unique_ptr<UndoRedo::IHistoryItem> modifyArtworksItem(
                     new UndoRedo::ModifyArtworksHistoryItem(
                         getCommandID(),
                         artworksBackups, indicesToUpdate,
                         UndoRedo::PasteModificationType));
-        commandManager->recordHistoryItem(modifyArtworksItem);
+        xpiks->recordHistoryItem(modifyArtworksItem);
     } else {
         LOG_WARNING << "Pasted zero real words!";
     }

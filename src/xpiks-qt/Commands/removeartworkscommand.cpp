@@ -26,6 +26,7 @@ namespace Commands {
     std::shared_ptr<ICommandResult> RemoveArtworksCommand::execute(const ICommandManager *commandManagerInterface) const {
         LOG_INFO << "removing" << m_RangesToRemove.length() << "ranges received";
         CommandManager *commandManager = (CommandManager*)commandManagerInterface;
+        auto *xpiks = commandManager->getDelegator();
 
         Models::ArtItemsModel *artItemsModel = commandManager->getArtItemsModel();
         QSet<qint64> touchedDirectories;
@@ -76,7 +77,7 @@ namespace Commands {
             Helpers::indicesToRanges(removedItemsIndices, rangesToRemove);
             artItemsModel->removeItemsFromRanges(rangesToRemove);
 
-            commandManager->clearCurrentItem();
+            xpiks->clearCurrentItem();
 
             Models::ArtworksRepository *artworkRepository = commandManager->getArtworksRepository();
             artworkRepository->refresh();
@@ -104,7 +105,7 @@ namespace Commands {
                                                                     removedAttachedVectors,
                                                                     removedSelectedDirectoryIds,
                                                                     unselectAll));
-                    commandManager->recordHistoryItem(removeArtworksItem);
+                    xpiks->recordHistoryItem(removeArtworksItem);
                 }
             } else {
                 LOG_DEBUG << "Removing files as directory";
@@ -116,11 +117,11 @@ namespace Commands {
                     const bool wasSelected = removedSelectedDirectoryIds.contains(dirID);
                     std::unique_ptr<UndoRedo::IHistoryItem> removeDirectoryItem(
                                 new UndoRedo::RemoveDirectoryHistoryItem(getCommandID(), firstArtworkIndex, dirID, wasSelected, unselectAll));
-                    commandManager->recordHistoryItem(removeDirectoryItem);
+                    xpiks->recordHistoryItem(removeDirectoryItem);
                 }
             }
 
-            commandManager->saveSessionInBackground();
+            xpiks->saveSessionInBackground();
 
         } else {
             LOG_WARNING << "No items to remove found!";

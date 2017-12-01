@@ -381,10 +381,10 @@ namespace Models {
         size_t lastKnownIndex = m_ArtworkMetadata->getLastKnownIndex();
         LOG_DEBUG << "index:" << lastKnownIndex;
 
-        m_CommandManager->updateArtworksAtIndices(QVector<int>() << (int)lastKnownIndex);
+        xpiks()->updateArtworksAtIndices(QVector<int>() << (int)lastKnownIndex);
 
-        m_CommandManager->submitForWarningsCheck(m_ArtworkMetadata);
-        m_CommandManager->checkSemanticDuplicates(m_ArtworkMetadata->getBasicModel());
+        xpiks()->submitForWarningsCheck(m_ArtworkMetadata);
+        xpiks()->checkSemanticDuplicates(m_ArtworkMetadata->getBasicModel());
 
         emit warningsCouldHaveChanged(lastKnownIndex);
         emit duplicatesCouldHaveChanged(lastKnownIndex);

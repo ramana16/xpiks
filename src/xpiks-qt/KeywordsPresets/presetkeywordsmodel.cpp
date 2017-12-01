@@ -477,7 +477,7 @@ namespace KeywordsPresets {
         if (0 <= index && index < getPresetsCount()) {
             auto &keywordsModel = m_PresetsList.at(index)->m_KeywordsModel;
             if (keywordsModel.editKeyword(keywordIndex, replacement)) {
-                m_CommandManager->submitKeywordForSpellCheck(&keywordsModel, keywordIndex);
+                xpiks()->submitKeywordForSpellCheck(&keywordsModel, keywordIndex);
                 justChanged();
             }
         }
@@ -523,7 +523,7 @@ namespace KeywordsPresets {
             auto &keywordsModel = preset->m_KeywordsModel;
             keywordsModel.appendKeywords(keywords);
             justChanged();
-            m_CommandManager->submitItemForSpellCheck(&keywordsModel);
+            xpiks()->submitItemForSpellCheck(&keywordsModel);
 
             QModelIndex indexToUpdate = this->index(index);
             emit dataChanged(indexToUpdate, indexToUpdate, QVector<int>() << KeywordsCountRole);
@@ -545,7 +545,7 @@ namespace KeywordsPresets {
 
             keywordsModel.setKeywords(keywords);
             justChanged();
-            m_CommandManager->submitItemForSpellCheck(&keywordsModel);
+            xpiks()->submitItemForSpellCheck(&keywordsModel);
 
             QModelIndex indexToUpdate = this->index(index);
             emit dataChanged(indexToUpdate, indexToUpdate, QVector<int>() << KeywordsCountRole);
@@ -560,7 +560,7 @@ namespace KeywordsPresets {
             auto &keywordsModel = preset->m_KeywordsModel;
             keywordsModel.appendKeyword(keyword);
             justChanged();
-            m_CommandManager->submitKeywordForSpellCheck(&keywordsModel, keywordsModel.getKeywordsCount() - 1);
+            xpiks()->submitKeywordForSpellCheck(&keywordsModel, keywordsModel.getKeywordsCount() - 1);
 
             QModelIndex indexToUpdate = this->index(index);
             emit dataChanged(indexToUpdate, indexToUpdate, QVector<int>() << KeywordsCountRole);
@@ -628,7 +628,7 @@ namespace KeywordsPresets {
                 int nextID = generateNextID();
                 PresetModel *model = new PresetModel(nextID, name, keywords, item.m_GroupID);
                 m_PresetsList.push_back(model);
-                m_CommandManager->submitItemForSpellCheck(&model->m_KeywordsModel, Common::SpellCheckFlags::Keywords);
+                xpiks()->submitItemForSpellCheck(&model->m_KeywordsModel, Common::SpellCheckFlags::Keywords);
             } else {
                 LOG_WARNING << "Preset" << name << "already exists. Skipping...";
             }

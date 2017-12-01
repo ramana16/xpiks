@@ -20,6 +20,7 @@ void UndoRedo::ModifyArtworksHistoryItem::undo(const Commands::ICommandManager *
     LOG_INFO << m_Indices.count() << "item(s) affected";
 
     Commands::CommandManager *commandManager = (Commands::CommandManager*)commandManagerInterface;
+    auto *xpiks = commandManager->getDelegator();
 
     Models::ArtItemsModel *artItemsModel = commandManager->getArtItemsModel();
     int count = m_Indices.count();
@@ -37,8 +38,8 @@ void UndoRedo::ModifyArtworksHistoryItem::undo(const Commands::ICommandManager *
         }
     }
 
-    commandManager->submitForSpellCheck(itemsToSave);
-    commandManager->saveArtworksBackups(itemsToSave);
+    xpiks->submitForSpellCheck(itemsToSave);
+    xpiks->saveArtworksBackups(itemsToSave);
     artItemsModel->updateItemsAtIndices(m_Indices);
     artItemsModel->updateModifiedCount();
 }

@@ -117,6 +117,8 @@ Commands::CommandManager::CommandManager():
     m_AfterInitCalled(false),
     m_LastCommandID(0)
 {
+    m_MainDelegator.setCommandManager(this);
+
     QObject::connect(&m_InitCoordinator, &Helpers::AsyncCoordinator::statusReported,
                      this, &Commands::CommandManager::servicesInitialized);
 }
@@ -146,13 +148,13 @@ void Commands::CommandManager::InjectDependency(Models::FilteredArtItemsProxyMod
 void Commands::CommandManager::InjectDependency(Models::CombinedArtworksModel *combinedArtworksModel) {
     Q_ASSERT(combinedArtworksModel != NULL); m_CombinedArtworksModel = combinedArtworksModel;
     m_CombinedArtworksModel->setCommandManager(this);
-    m_AvailabilityListeners.append(combinedArtworksModel);
+    m_MainDelegator.addAvailabilityListener(combinedArtworksModel);
 }
 
 void Commands::CommandManager::InjectDependency(Models::ArtworkUploader *artworkUploader) {
     Q_ASSERT(artworkUploader != NULL); m_ArtworkUploader = artworkUploader;
     m_ArtworkUploader->setCommandManager(this);
-    m_AvailabilityListeners.append(m_ArtworkUploader);
+    m_MainDelegator.addAvailabilityListener(m_ArtworkUploader);
 }
 
 void Commands::CommandManager::InjectDependency(Models::UploadInfoRepository *uploadInfoRepository) {
@@ -178,7 +180,7 @@ void Commands::CommandManager::InjectDependency(UndoRedo::UndoRedoManager *undoR
 void Commands::CommandManager::InjectDependency(Models::ZipArchiver *zipArchiver) {
     Q_ASSERT(zipArchiver != NULL); m_ZipArchiver = zipArchiver;
     m_ZipArchiver->setCommandManager(this);
-    m_AvailabilityListeners.append(zipArchiver);
+    m_MainDelegator.addAvailabilityListener(zipArchiver);
 }
 
 void Commands::CommandManager::InjectDependency(Suggestion::KeywordsSuggestor *keywordsSuggestor) {
@@ -357,19 +359,6 @@ std::shared_ptr<Commands::ICommandResult> Commands::CommandManager::processComma
     return result;
 }
 
-void Commands::CommandManager::addWarningsService(Common::IServiceBase<Common::IBasicArtwork, Common::WarningsCheckFlags> *service) {
-    if (service != NULL) {
-        // TODO: check if we don't have such checker
-        m_WarningsCheckers.append(service);
-    }
-}
-
-void Commands::CommandManager::recordHistoryItem(std::unique_ptr<UndoRedo::IHistoryItem> &historyItem) const {
-    if (m_UndoRedoManager) {
-        m_UndoRedoManager->recordHistoryItem(historyItem);
-    }
-}
-
 void Commands::CommandManager::connectEntitiesSignalsSlots() const {
     if (m_SecretsManager != NULL && m_UploadInfoRepository != NULL) {
         QObject::connect(m_SecretsManager, &Encryption::SecretsManager::beforeMasterPasswordChange,
@@ -507,135 +496,6 @@ void Commands::CommandManager::connectEntitiesSignalsSlots() const {
     }
 }
 
-void Commands::CommandManager::ensureDependenciesInjected() {
-    Q_ASSERT(m_ArtworksRepository != NULL);
-    Q_ASSERT(m_ArtItemsModel != NULL);
-    Q_ASSERT(m_FilteredItemsModel != NULL);
-    Q_ASSERT(m_CombinedArtworksModel != NULL);
-    Q_ASSERT(m_ArtworkUploader != NULL);
-    Q_ASSERT(m_UploadInfoRepository != NULL);
-    Q_ASSERT(m_WarningsService != NULL);
-    Q_ASSERT(m_SecretsManager != NULL);
-    Q_ASSERT(m_UndoRedoManager != NULL);
-    Q_ASSERT(m_ZipArchiver != NULL);
-    Q_ASSERT(m_KeywordsSuggestor != NULL);
-    Q_ASSERT(m_SettingsModel != NULL);
-    Q_ASSERT(m_RecentDirectories != NULL);
-    Q_ASSERT(m_RecentFiles != NULL);
-    Q_ASSERT(m_SpellCheckerService != NULL);
-    Q_ASSERT(m_SpellCheckSuggestionModel != NULL);
-    Q_ASSERT(m_MetadataIOService != NULL);
-    Q_ASSERT(m_TelemetryService != NULL);
-    Q_ASSERT(m_UpdateService != NULL);
-    Q_ASSERT(m_LogsModel != NULL);
-    Q_ASSERT(m_MetadataIOCoordinator != NULL);
-    Q_ASSERT(m_PluginManager != NULL);
-    Q_ASSERT(m_LanguagesModel != NULL);
-    Q_ASSERT(m_ColorsModel != NULL);
-    Q_ASSERT(m_AutoCompleteService != NULL);
-    Q_ASSERT(m_ImageCachingService != NULL);
-    Q_ASSERT(m_FindAndReplaceModel != NULL);
-    Q_ASSERT(m_DeleteKeywordsViewModel != NULL);
-    Q_ASSERT(m_PresetsModel != NULL);
-    Q_ASSERT(m_TranslationService != NULL);
-    Q_ASSERT(m_TranslationManager != NULL);
-    Q_ASSERT(m_ArtworkProxyModel != NULL);
-    Q_ASSERT(m_SessionManager != NULL);
-    Q_ASSERT(m_WarningsModel != NULL);
-    Q_ASSERT(m_QuickBuffer != NULL);
-    Q_ASSERT(m_MaintenanceService != NULL);
-    Q_ASSERT(m_VideoCachingService != NULL);
-    Q_ASSERT(m_RequestsService != NULL);
-    Q_ASSERT(m_ArtworksUpdateHub != NULL);
-    Q_ASSERT(m_DuplicatesModel != NULL);
-
-#if !defined(CORE_TESTS)
-    Q_ASSERT(m_DatabaseManager != NULL);
-    Q_ASSERT(m_AutoCompleteModel != NULL);
-    Q_ASSERT(m_CsvExportModel != NULL);
-    Q_ASSERT(m_SwitcherModel != NULL);
-#endif
-
-#if !defined(INTEGRATION_TESTS)
-    Q_ASSERT(m_HelpersQmlWrapper != NULL);
-#endif
-
-#if !defined(INTEGRATION_TESTS) && !defined(CORE_TESTS)
-    Q_ASSERT(m_UIManager != NULL);
-#endif
-}
-
-void Commands::CommandManager::recodePasswords(const QString &oldMasterPassword,
-                                               const QString &newMasterPassword,
-                                               const std::vector<std::shared_ptr<Models::UploadInfo> > &uploadInfos) const {
-    if (m_SecretsManager) {
-        LOG_INFO << uploadInfos.size() << "item(s)";
-
-        for (auto &info: uploadInfos) {
-            if (info->hasPassword()) {
-                QString newPassword = m_SecretsManager->recodePassword(
-                    info->getPassword(), oldMasterPassword, newMasterPassword);
-                info->setPassword(newPassword);
-            }
-        }
-    }
-}
-
-void Commands::CommandManager::combineArtwork(Models::ArtworkMetadata *metadata, int index) const {
-    LOG_INFO << "one item with index" << index;
-    if (m_CombinedArtworksModel) {
-        MetadataIO::WeakArtworksSnapshot items;
-        items.push_back(metadata);
-
-        m_CombinedArtworksModel->resetModel();
-        m_CombinedArtworksModel->setArtworks(items);
-    }
-}
-
-void Commands::CommandManager::combineArtworks(MetadataIO::WeakArtworksSnapshot &artworks) const {
-    LOG_INFO << artworks.size() << "artworks";
-    if (m_CombinedArtworksModel) {
-        m_CombinedArtworksModel->resetModel();
-        m_CombinedArtworksModel->setArtworks(artworks);
-    }
-}
-
-void Commands::CommandManager::deleteKeywordsFromArtworks(MetadataIO::WeakArtworksSnapshot &artworks) const {
-    LOG_INFO << artworks.size() << "artworks";
-    if (m_DeleteKeywordsViewModel != NULL) {
-        m_DeleteKeywordsViewModel->setArtworks(artworks);
-    }
-}
-
-void Commands::CommandManager::setArtworksForUpload(MetadataIO::ArtworksSnapshot &artworks) const {
-#ifndef CORE_TESTS
-    LOG_INFO << artworks.size() << "artworks";
-    if (m_ArtworkUploader) {
-        m_ArtworkUploader->setArtworks(artworks);
-    }
-#else
-    Q_UNUSED(artworks);
-#endif
-}
-
-void Commands::CommandManager::setArtworksForZipping(MetadataIO::ArtworksSnapshot &artworks) const {
-    LOG_INFO << artworks.size() << "artworks";
-    if (m_ZipArchiver) {
-        m_ZipArchiver->setArtworks(artworks);
-    }
-}
-
-void Commands::CommandManager::setArtworksForCsvExport(MetadataIO::ArtworksSnapshot::Container &rawSnapshot) const {
-#ifndef CORE_TESTS
-    LOG_INFO << rawSnapshot.size() << "artworks";
-    if (m_CsvExportModel) {
-        m_CsvExportModel->setupModel(rawSnapshot);
-    }
-#else
-    Q_UNUSED(rawSnapshot);
-#endif
-}
-
 /*virtual*/
 void Commands::CommandManager::connectArtworkSignals(Models::ArtworkMetadata *artwork) const {
 #if defined(CORE_TESTS) || defined(INTEGRATION_TESTS)
@@ -702,331 +562,65 @@ void Commands::CommandManager::disconnectArtworkSignals(Models::ArtworkMetadata 
     }
 }
 
-int Commands::CommandManager::readMetadata(const MetadataIO::ArtworksSnapshot &snapshot) const {
-    LOG_DEBUG << "#";
-    int importID = 0;
+void Commands::CommandManager::ensureDependenciesInjected() {
+    Q_ASSERT(m_ArtworksRepository != NULL);
+    Q_ASSERT(m_ArtItemsModel != NULL);
+    Q_ASSERT(m_FilteredItemsModel != NULL);
+    Q_ASSERT(m_CombinedArtworksModel != NULL);
+    Q_ASSERT(m_ArtworkUploader != NULL);
+    Q_ASSERT(m_UploadInfoRepository != NULL);
+    Q_ASSERT(m_WarningsService != NULL);
+    Q_ASSERT(m_SecretsManager != NULL);
+    Q_ASSERT(m_UndoRedoManager != NULL);
+    Q_ASSERT(m_ZipArchiver != NULL);
+    Q_ASSERT(m_KeywordsSuggestor != NULL);
+    Q_ASSERT(m_SettingsModel != NULL);
+    Q_ASSERT(m_RecentDirectories != NULL);
+    Q_ASSERT(m_RecentFiles != NULL);
+    Q_ASSERT(m_SpellCheckerService != NULL);
+    Q_ASSERT(m_SpellCheckSuggestionModel != NULL);
+    Q_ASSERT(m_MetadataIOService != NULL);
+    Q_ASSERT(m_TelemetryService != NULL);
+    Q_ASSERT(m_UpdateService != NULL);
+    Q_ASSERT(m_LogsModel != NULL);
+    Q_ASSERT(m_MetadataIOCoordinator != NULL);
+    Q_ASSERT(m_PluginManager != NULL);
+    Q_ASSERT(m_LanguagesModel != NULL);
+    Q_ASSERT(m_ColorsModel != NULL);
+    Q_ASSERT(m_AutoCompleteService != NULL);
+    Q_ASSERT(m_ImageCachingService != NULL);
+    Q_ASSERT(m_FindAndReplaceModel != NULL);
+    Q_ASSERT(m_DeleteKeywordsViewModel != NULL);
+    Q_ASSERT(m_PresetsModel != NULL);
+    Q_ASSERT(m_TranslationService != NULL);
+    Q_ASSERT(m_TranslationManager != NULL);
+    Q_ASSERT(m_ArtworkProxyModel != NULL);
+    Q_ASSERT(m_SessionManager != NULL);
+    Q_ASSERT(m_WarningsModel != NULL);
+    Q_ASSERT(m_QuickBuffer != NULL);
+    Q_ASSERT(m_MaintenanceService != NULL);
+    Q_ASSERT(m_VideoCachingService != NULL);
+    Q_ASSERT(m_RequestsService != NULL);
+    Q_ASSERT(m_ArtworksUpdateHub != NULL);
+    Q_ASSERT(m_DuplicatesModel != NULL);
 
-#ifndef CORE_TESTS
-    quint32 batchID = 0;
-
-    if (m_MetadataIOService != nullptr) {
-        batchID = m_MetadataIOService->readArtworks(snapshot);
-    }
-
-    if (m_MetadataIOCoordinator != nullptr) {
-        importID = m_MetadataIOCoordinator->readMetadataExifTool(snapshot, batchID);
-    }
-#else
-    Q_UNUSED(snapshot);
+#if !defined(CORE_TESTS)
+    Q_ASSERT(m_DatabaseManager != NULL);
+    Q_ASSERT(m_AutoCompleteModel != NULL);
+    Q_ASSERT(m_CsvExportModel != NULL);
+    Q_ASSERT(m_SwitcherModel != NULL);
 #endif
 
-    return importID;
-}
-
-int Commands::CommandManager::reimportMetadata(const MetadataIO::ArtworksSnapshot &snapshot) const {
-    LOG_DEBUG << "#";
-    int importID = 0;
-
-#ifndef CORE_TESTS
-    if (m_MetadataIOCoordinator != nullptr) {
-        importID = m_MetadataIOCoordinator->readMetadataExifTool(snapshot, INVALID_BATCH_ID);
-    }
-#else
-    Q_UNUSED(snapshot);
+#if !defined(INTEGRATION_TESTS)
+    Q_ASSERT(m_HelpersQmlWrapper != NULL);
 #endif
 
-    return importID;
-}
-
-void Commands::CommandManager::writeMetadata(const MetadataIO::WeakArtworksSnapshot &artworks, bool useBackups) const {
-    LOG_DEBUG << "#";
-#ifndef CORE_TESTS
-    if (m_MetadataIOCoordinator != nullptr) {
-        m_MetadataIOService->writeArtworks(artworks);
-    }
-
-    if (m_MetadataIOCoordinator != nullptr) {
-        m_MetadataIOCoordinator->writeMetadataExifTool(artworks, useBackups);
-    }
-
-#else
-    Q_UNUSED(artworks);
-    Q_UNUSED(useBackups);
-#endif
-}
-
-void Commands::CommandManager::wipeAllMetadata(const MetadataIO::ArtworksSnapshot &artworks, bool useBackups) const {
-    LOG_DEBUG << "#";
-#ifndef CORE_TESTS
-    if (m_MetadataIOCoordinator != nullptr) {
-        m_MetadataIOCoordinator->wipeAllMetadataExifTool(artworks, useBackups);
-    }
-
-#else
-    Q_UNUSED(artworks);
-    Q_UNUSED(useBackups);
+#if !defined(INTEGRATION_TESTS) && !defined(CORE_TESTS)
+    Q_ASSERT(m_UIManager != NULL);
 #endif
 }
 
-void Commands::CommandManager::addToLibrary(const MetadataIO::WeakArtworksSnapshot &artworks) const {
-#ifndef CORE_TESTS
-    if (m_MetadataIOService != nullptr) {
-        m_MetadataIOService->addArtworks(artworks);
-    }
-#else
-    Q_UNUSED(artworks);
-#endif
-}
 
-void Commands::CommandManager::updateArtworksAtIndices(const QVector<int> &indices) const {
-    if (m_ArtItemsModel) {
-        m_ArtItemsModel->updateItemsAtIndices(indices);
-    }
-}
-
-void Commands::CommandManager::updateArtworks(const MetadataIO::WeakArtworksSnapshot &artworks) const {
-    if (m_ArtItemsModel != nullptr) {
-        QVector<int> indices;
-        indices.reserve((int)artworks.size());
-        for (auto *artwork: artworks) {
-            indices.push_back((int)artwork->getLastKnownIndex());
-        }
-
-        m_ArtItemsModel->updateItemsAtIndices(indices);
-    }
-}
-
-void Commands::CommandManager::updateArtworks(const MetadataIO::ArtworksSnapshot::Container &artworks) {
-    if (m_ArtItemsModel != nullptr) {
-        QVector<int> indices;
-        indices.reserve((int)artworks.size());
-        for (auto &locker: artworks) {
-            Models::ArtworkMetadata *artwork = locker->getArtworkMetadata();
-            indices.push_back((int)artwork->getLastKnownIndex());
-        }
-
-        m_ArtItemsModel->updateItemsAtIndices(indices);
-    }
-}
-
-void Commands::CommandManager::addToRecentDirectories(const QString &path) const {
-    if (m_RecentDirectories) {
-        m_RecentDirectories->pushItem(path);
-    }
-}
-
-void Commands::CommandManager::addToRecentFiles(const QString &path) const {
-    if (m_RecentFiles) {
-        m_RecentFiles->pushItem(path);
-    }
-}
-
-void Commands::CommandManager::addToRecentFiles(const QStringList &filenames) const {
-    if (m_RecentFiles) {
-        int maxFiles = m_RecentFiles->getMaxRecentItems();
-        const int length = filenames.length();
-        int first = qMax(0, length - maxFiles);
-
-        for (; first < length; ++first) {
-            m_RecentFiles->pushItem(filenames[first]);
-        }
-    }
-}
-
-void Commands::CommandManager::autoDiscoverExiftool() const {
-#ifndef CORE_TESTS
-    if (m_MetadataIOCoordinator) {
-        m_MetadataIOCoordinator->autoDiscoverExiftool();
-    }
-#endif
-}
-
-void Commands::CommandManager::cleanupOldXpksBackups(const QString &directory) const {
-#ifndef CORE_TESTS
-    if (m_MaintenanceService != nullptr) {
-        m_MaintenanceService->cleanupOldXpksBackups(directory);
-    }
-#endif
-}
-
-void Commands::CommandManager::generatePreviews(const MetadataIO::ArtworksSnapshot &snapshot) const {
-#ifndef CORE_TESTS
-    if (m_ImageCachingService != NULL) {
-        m_ImageCachingService->generatePreviews(snapshot);
-    }
-
-    if (m_VideoCachingService != NULL) {
-        m_VideoCachingService->generateThumbnails(snapshot);
-    }
-#else
-    Q_UNUSED(snapshot);
-#endif
-}
-
-void Commands::CommandManager::submitKeywordForSpellCheck(Common::BasicKeywordsModel *item, int keywordIndex) const {
-    Q_ASSERT(item != NULL);
-    const Common::WordAnalysisFlags wordAnalysisFlags = getWordAnalysisFlags();
-    if ((wordAnalysisFlags != Common::WordAnalysisFlags::None) && (m_SpellCheckerService != NULL)) {
-        m_SpellCheckerService->submitKeyword(item, keywordIndex);
-    }
-}
-
-void Commands::CommandManager::submitForSpellCheck(const MetadataIO::WeakArtworksSnapshot &items) const {
-    const Common::WordAnalysisFlags wordAnalysisFlags = getWordAnalysisFlags();
-    if ((wordAnalysisFlags != Common::WordAnalysisFlags::None) &&
-            (m_SpellCheckerService != NULL) &&
-            !items.empty()) {
-        std::vector<Common::BasicKeywordsModel *> itemsToSubmit;
-        size_t count = items.size();
-        itemsToSubmit.reserve(count);
-
-        for (auto *artwork: items) {
-            itemsToSubmit.push_back(artwork->getBasicModel());
-        }
-
-        this->submitForSpellCheck(itemsToSubmit);
-    }
-}
-
-void Commands::CommandManager::submitForSpellCheck(const std::vector<Common::BasicKeywordsModel *> &items) const {
-    const Common::WordAnalysisFlags wordAnalysisFlags = getWordAnalysisFlags();
-    if ((wordAnalysisFlags != Common::WordAnalysisFlags::None) && (m_SpellCheckerService != NULL)) {
-        m_SpellCheckerService->submitItems(items);
-    }
-}
-
-void Commands::CommandManager::submitItemForSpellCheck(Common::BasicKeywordsModel *item, Common::SpellCheckFlags flags) const {
-    Q_ASSERT(item != NULL);
-    const Common::WordAnalysisFlags wordAnalysisFlags = getWordAnalysisFlags();
-    if ((wordAnalysisFlags != Common::WordAnalysisFlags::None) && (m_SpellCheckerService != NULL)) {
-        m_SpellCheckerService->submitItem(item, flags);
-    }
-}
-
-void Commands::CommandManager::checkSemanticDuplicates(Common::BasicKeywordsModel *item) {
-    Q_ASSERT(item != NULL);
-    const Common::WordAnalysisFlags wordAnalysisFlags = getWordAnalysisFlags();
-    if (Common::HasFlag(wordAnalysisFlags, Common::WordAnalysisFlags::Stemming) && (m_SpellCheckerService != NULL)) {
-        m_SpellCheckerService->submitItem(item, Common::SpellCheckFlags::All);
-    }
-}
-
-void Commands::CommandManager::setupSpellCheckSuggestions(Common::IMetadataOperator *item, int index, Common::SuggestionFlags flags) {
-    Q_ASSERT(item != NULL);
-    if (m_SpellCheckSuggestionModel) {
-        m_SpellCheckSuggestionModel->setupModel(item, index, flags);
-        reportUserAction(Connectivity::UserAction::SpellSuggestions);
-    }
-}
-
-void Commands::CommandManager::setupSpellCheckSuggestions(std::vector<std::pair<Common::IMetadataOperator *, int> > &itemPairs, Common::SuggestionFlags flags) {
-    if (m_SpellCheckSuggestionModel) {
-        m_SpellCheckSuggestionModel->setupModel(itemPairs, flags);
-        reportUserAction(Connectivity::UserAction::SpellSuggestions);
-    }
-}
-
-void Commands::CommandManager::submitForSpellCheck(const std::vector<Common::BasicKeywordsModel *> &items,
-                                                   const QStringList &wordsToCheck) const {
-    Common::WordAnalysisFlags wordAnalysisFlags = getWordAnalysisFlags();
-    if ((wordAnalysisFlags != Common::WordAnalysisFlags::None) && (m_SpellCheckerService != NULL)) {
-        m_SpellCheckerService->submitItems(items, wordsToCheck);
-    }
-}
-
-void Commands::CommandManager::submitKeywordsForWarningsCheck(Models::ArtworkMetadata *item) const {
-    Q_ASSERT(item != NULL);
-    this->submitForWarningsCheck(item, Common::WarningsCheckFlags::Keywords);
-}
-
-void Commands::CommandManager::setupDuplicatesModel(Common::BasicMetadataModel *item) {
-    if (m_DuplicatesModel != nullptr) {
-        m_DuplicatesModel->setupModel(item);
-    }
-}
-
-void Commands::CommandManager::setupDuplicatesModel(const std::vector<Models::ArtworkMetadata*> &items) {
-    if (m_DuplicatesModel != nullptr) {
-        m_DuplicatesModel->setupModel(items);
-    }
-}
-
-void Commands::CommandManager::submitForWarningsCheck(Models::ArtworkMetadata *item, Common::WarningsCheckFlags flags) const {
-    Q_ASSERT(item != NULL);
-
-    if (m_WarningsService != NULL) {
-        m_WarningsService->submitItem(item, flags);
-    }
-
-    const int count = m_WarningsCheckers.length();
-
-    LOG_INTEGRATION_TESTS << count << "checkers available";
-
-    for (int i = 0; i < count; ++i) {
-        Common::IServiceBase<Common::IBasicArtwork, Common::WarningsCheckFlags> *checker = m_WarningsCheckers.at(i);
-        if (checker->isAvailable()) {
-            checker->submitItem(item, flags);
-        }
-    }
-}
-
-void Commands::CommandManager::submitForWarningsCheck(const MetadataIO::WeakArtworksSnapshot &items) const {
-    if (m_WarningsService != NULL) {
-        m_WarningsService->submitItems(items);
-    }
-
-    if (!m_WarningsCheckers.isEmpty()) {
-        std::vector<Common::IBasicArtwork *> itemsToSubmit;
-        size_t size = items.size();
-        itemsToSubmit.reserve(size);
-
-        for (auto &item: items) {
-            itemsToSubmit.push_back(item);
-        }
-
-        this->submitForWarningsCheck(itemsToSubmit);
-    }
-}
-
-void Commands::CommandManager::submitForWarningsCheck(const std::vector<Common::IBasicArtwork *> &items) const {
-    int count = m_WarningsCheckers.length();
-
-    for (int i = 0; i < count; ++i) {
-        Common::IServiceBase<Common::IBasicArtwork, Common::WarningsCheckFlags> *checker = m_WarningsCheckers.at(i);
-        if (checker->isAvailable()) {
-            checker->submitItems(items);
-        }
-    }
-}
-
-void Commands::CommandManager::saveArtworkBackup(Models::ArtworkMetadata *metadata) const {
-    Q_ASSERT(metadata != NULL);
-#ifndef CORE_TESTS
-    if (m_MetadataIOService != nullptr) {
-        m_MetadataIOService->writeArtwork(metadata);
-    }
-#endif
-}
-
-void Commands::CommandManager::saveArtworksBackups(const MetadataIO::WeakArtworksSnapshot &artworks) const {
-#ifndef CORE_TESTS
-    if (m_MetadataIOService != NULL) {
-        m_MetadataIOService->writeArtworks(artworks);
-    }
-#else
-    Q_UNUSED(artworks);
-#endif
-}
-
-void Commands::CommandManager::reportUserAction(Connectivity::UserAction userAction) const {
-#ifndef CORE_TESTS
-    if (m_TelemetryService) {
-        m_TelemetryService->reportAction(userAction);
-    }
-#else
-    Q_UNUSED(userAction);
-#endif
-}
 
 void Commands::CommandManager::afterConstructionCallback() {
     if (m_AfterInitCalled) {
@@ -1088,7 +682,7 @@ void Commands::CommandManager::afterConstructionCallback() {
 
     executeMaintenanceJobs();
 
-    readSession();
+    m_MainDelegator.readSession();
 }
 
 void Commands::CommandManager::afterInnerServicesInitialized() {
@@ -1100,11 +694,11 @@ void Commands::CommandManager::afterInnerServicesInitialized() {
 #endif
 #endif
 
-    int newFilesAdded = restoreReadSession();
+    int newFilesAdded = m_MainDelegator.restoreReadSession();
     if (newFilesAdded > 0) {
         // immediately save restored session - to beat race between
         // saving session from Add Command and restoring FULL_DIR flag
-        saveSessionInBackground();
+        m_MainDelegator.saveSessionInBackground();
     }
 
 #if !defined(CORE_TESTS) && !defined(INTEGRATION_TESTS)
@@ -1114,7 +708,6 @@ void Commands::CommandManager::afterInnerServicesInitialized() {
 }
 
 void Commands::CommandManager::executeMaintenanceJobs() {
-
 #if !defined(CORE_TESTS)
     // integration test just don't have old ones
     m_MetadataIOCoordinator->autoDiscoverExiftool();
@@ -1128,100 +721,6 @@ void Commands::CommandManager::executeMaintenanceJobs() {
     m_MaintenanceService->cleanupUpdatesArtifacts();
 #endif
 
-#endif
-}
-
-void Commands::CommandManager::readSession() {
-    LOG_DEBUG << "#";
-
-    Q_ASSERT(m_SettingsModel != nullptr);
-    if (!m_SettingsModel->getSaveSession()) {
-        return;
-    }
-
-    m_SessionManager->readSessionFromFile();
-}
-
-int Commands::CommandManager::restoreReadSession() {
-    LOG_DEBUG << "#";
-
-    m_SessionManager->onBeforeRestore();
-
-    if (!m_SettingsModel || !m_SettingsModel->getSaveSession()) {
-        LOG_DEBUG << "Ignoring the session";
-        return 0;
-    }
-
-    auto &filenames = m_SessionManager->getFilenames();
-    auto &fullDirectories = m_SessionManager->getFullDirectories();
-    if (filenames.empty() && fullDirectories.empty()) {
-        LOG_INFO << "Session was empty";
-        return 0;
-    }
-
-    auto &vectors = m_SessionManager->getVectors();
-
-    int newFilesCount = restoreFiles(filenames, vectors);
-    if (newFilesCount > 0) {
-        m_ArtworksRepository->restoreFullDirectories(fullDirectories);
-    }
-
-    m_SessionManager->onAfterRestore();
-
-    return newFilesCount;
-}
-
-int Commands::CommandManager::restoreFiles(const QStringList &filenames, const QStringList &vectors) {
-    LOG_INFO << filenames.size() << "file(s)";
-
-    if (filenames.empty()) { return 0; }
-
-    // we should have saved all vectors from that session
-    // directory is considered to be not full and restored later
-    Common::flag_t flags = 0;
-    Common::SetFlag(flags, Commands::AddArtworksCommand::FlagIsSessionRestore);
-
-#if !defined(CORE_TESTS) && !defined(INTEGRATION_TESTS)
-    if ((m_SettingsModel != nullptr) && (m_SwitcherModel != nullptr)) {
-        if (m_SettingsModel->getUseAutoImport() && m_SwitcherModel->getUseAutoImport()) {
-            Common::SetFlag(flags, Commands::AddArtworksCommand::FlagAutoImport);
-        }
-    }
-#endif
-
-    std::shared_ptr<Commands::AddArtworksCommand> addArtworksCommand(new Commands::AddArtworksCommand(filenames, vectors, flags));
-    std::shared_ptr<Commands::ICommandResult> result = processCommand(addArtworksCommand);
-    std::shared_ptr<Commands::AddArtworksCommandResult> addArtworksResult =
-        std::dynamic_pointer_cast<Commands::AddArtworksCommandResult>(result);
-
-    int addedCount = addArtworksResult->m_NewFilesAdded;
-    return addedCount;
-}
-
-#ifdef INTEGRATION_TESTS
-int Commands::CommandManager::restoreSessionForTest() {
-    LOG_DEBUG << "#";
-    readSession();
-
-    int filesRead = restoreReadSession();
-    return filesRead;
-}
-#endif
-
-void Commands::CommandManager::saveSessionInBackground() {
-#ifndef CORE_TESTS
-    LOG_DEBUG << "#";
-
-    if (!m_SettingsModel || !m_SettingsModel->getSaveSession()) {
-        LOG_DEBUG << "Session saving is turned OFF";
-        return;
-    }
-
-    auto artworkList = m_ArtItemsModel->getArtworkList();
-    QStringList fullDirectoriesSnapshot = m_ArtworksRepository->retrieveFullDirectories();
-    std::unique_ptr<MetadataIO::SessionSnapshot> sessionSnapshot(new MetadataIO::SessionSnapshot(artworkList, fullDirectoriesSnapshot));
-
-    m_MaintenanceService->saveSession(sessionSnapshot, m_SessionManager);
 #endif
 }
 
@@ -1239,7 +738,7 @@ void Commands::CommandManager::beforeDestructionCallback() const {
     #endif
 #endif
 
-    clearCurrentItem();
+    m_MainDelegator.clearCurrentItem();
 
     m_ArtworksRepository->stopListeningToUnavailableFiles();
 
@@ -1269,54 +768,6 @@ void Commands::CommandManager::beforeDestructionCallback() const {
     m_TelemetryService->stopReporting();
     m_RequestsService->stopService();
 #endif
-}
-
-void Commands::CommandManager::requestCloseApplication() const {
-    if (m_HelpersQmlWrapper != NULL) {
-        m_HelpersQmlWrapper->requestCloseApplication();
-    }
-}
-
-void Commands::CommandManager::restartSpellChecking() {
-    if (m_SpellCheckerService) {
-        m_SpellCheckerService->restartWorker();
-    }
-}
-
-void Commands::CommandManager::generateCompletions(const QString &prefix, Common::BasicKeywordsModel *source) const {
-#ifndef CORE_TESTS
-    if (m_AutoCompleteService != NULL) {
-        m_AutoCompleteService->generateCompletions(prefix, source);
-    }
-#else
-    Q_UNUSED(prefix);
-    Q_UNUSED(source);
-#endif
-}
-
-void Commands::CommandManager::removeUnavailableFiles() {
-    LOG_DEBUG << "#";
-
-    m_CombinedArtworksModel->generateAboutToBeRemoved();
-    m_ArtItemsModel->generateAboutToBeRemoved();
-    QCoreApplication::processEvents(QEventLoop::ExcludeUserInputEvents);
-
-    int size = m_AvailabilityListeners.size();
-    for (int i = 0; i < size; ++i) {
-        m_AvailabilityListeners[i]->removeUnavailableItems();
-    }
-
-    m_ArtItemsModel->removeUnavailableItems();
-
-#ifndef CORE_TESTS
-    m_UndoRedoManager->discardLastAction();
-#endif
-
-    if (m_ArtworksRepository->canPurgeUnavailableFiles()) {
-        m_ArtworksRepository->purgeUnavailableFiles();
-    } else {
-        LOG_INFO << "Unavailable files purging postponed";
-    }
 }
 
 #ifdef INTEGRATION_TESTS
@@ -1355,42 +806,4 @@ void Commands::CommandManager::servicesInitialized(int status) {
             this->afterInnerServicesInitialized();
         }
     }
-}
-
-void Commands::CommandManager::registerCurrentItem(Models::ArtworkMetadata *artwork) {
-    if (m_UIManager != nullptr) {
-        std::shared_ptr<QuickBuffer::ICurrentEditable> currentItem(new QuickBuffer::CurrentEditableArtwork(
-                                                                       artwork,
-                                                                       artwork->getLastKnownIndex(),
-                                                                       this));
-        m_UIManager->registerCurrentItem(currentItem);
-    }
-}
-
-void Commands::CommandManager::registerCurrentItem(Models::ArtworkProxyBase *artworkProxy) const {
-    if (m_UIManager != nullptr) {
-        std::shared_ptr<QuickBuffer::ICurrentEditable> currentItem(new QuickBuffer::CurrentEditableProxyArtwork(artworkProxy));
-        m_UIManager->registerCurrentItem(currentItem);
-    }
-}
-
-void Commands::CommandManager::clearCurrentItem() const {
-    LOG_DEBUG << "#";
-    if (m_UIManager != nullptr) {
-        m_UIManager->clearCurrentItem();
-    }
-}
-
-Common::WordAnalysisFlags Commands::CommandManager::getWordAnalysisFlags() const {
-    Common::WordAnalysisFlags result = Common::WordAnalysisFlags::None;
-    if (m_SettingsModel != NULL) {
-        if (m_SettingsModel->getUseSpellCheck()) {
-            Common::SetFlag(result, Common::WordAnalysisFlags::Spelling);
-        }
-
-        if (m_SettingsModel->getDetectDuplicates()) {
-            Common::SetFlag(result, Common::WordAnalysisFlags::Stemming);
-        }
-    }
-    return result;
 }

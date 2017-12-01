@@ -56,7 +56,7 @@ int AutoCompletePresetsTest::doTest() {
 
     // --------------------------------------------------------------
 
-    m_CommandManager->generateCompletions("pr:stock", nullptr);
+    xpiks()->generateCompletions("pr:stock", nullptr);
 
     sleepWaitUntil(5, [&]() {
         return completionsModel.getLastGeneratedCompletionsCount() > 0;
@@ -75,7 +75,7 @@ int AutoCompletePresetsTest::doTest() {
 
     // --------------------------------------------------------------
 
-    m_CommandManager->generateCompletions("pr:shttrst", nullptr);
+    xpiks()->generateCompletions("pr:shttrst", nullptr);
 
     sleepWaitUntil(5, [&]() {
         return completionsModel.getLastGeneratedCompletionsCount() > 0;

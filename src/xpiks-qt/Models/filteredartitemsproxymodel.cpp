@@ -64,8 +64,8 @@ namespace Models {
     void FilteredArtItemsProxyModel::spellCheckAllItems() {
         LOG_DEBUG << "#";
         auto allArtworks = getAllOriginalItems();
-        m_CommandManager->submitForSpellCheck(allArtworks);
-        m_CommandManager->reportUserAction(Connectivity::UserAction::SpellCheck);
+        xpiks()->submitForSpellCheck(allArtworks);
+        xpiks()->reportUserAction(Connectivity::UserAction::SpellCheck);
     }
 
     int FilteredArtItemsProxyModel::getOriginalIndex(int index) const {
@@ -120,7 +120,7 @@ namespace Models {
     void FilteredArtItemsProxyModel::combineSelectedArtworks() {
         LOG_DEBUG << "#";
         auto artworksList = getSelectedOriginalItems();
-        m_CommandManager->combineArtworks(artworksList);
+        xpiks()->combineArtworks(artworksList);
     }
 
     void FilteredArtItemsProxyModel::setSelectedItemsSaved() {
@@ -164,14 +164,14 @@ namespace Models {
 
         auto selectedArtworks = getSelectedArtworksSnapshot();
         MetadataIO::ArtworksSnapshot snapshot(selectedArtworks);
-        m_CommandManager->wipeAllMetadata(snapshot, useBackups);
+        xpiks()->wipeAllMetadata(snapshot, useBackups);
     }
 
     void FilteredArtItemsProxyModel::setSelectedForUpload() {
         LOG_DEBUG << "#";
         auto selectedArtworks = getSelectedArtworksSnapshot();
         MetadataIO::ArtworksSnapshot snapshot(selectedArtworks);
-        m_CommandManager->setArtworksForUpload(snapshot);
+        xpiks()->setArtworksForUpload(snapshot);
     }
 
     void FilteredArtItemsProxyModel::setSelectedForZipping() {
@@ -185,7 +185,7 @@ namespace Models {
                 [] (ArtworkMetadata *artwork, int, int) { return artwork; });
 
         MetadataIO::ArtworksSnapshot snapshot(itemsForZipping);
-        m_CommandManager->setArtworksForZipping(snapshot);
+        xpiks()->setArtworksForZipping(snapshot);
     }
 
     bool FilteredArtItemsProxyModel::areSelectedArtworksSaved() {
@@ -197,8 +197,8 @@ namespace Models {
     void FilteredArtItemsProxyModel::spellCheckSelected() {
         LOG_DEBUG << "#";
         auto selectedArtworks = getSelectedOriginalItems();
-        m_CommandManager->submitForSpellCheck(selectedArtworks);
-        m_CommandManager->reportUserAction(Connectivity::UserAction::SpellCheck);
+        xpiks()->submitForSpellCheck(selectedArtworks);
+        xpiks()->reportUserAction(Connectivity::UserAction::SpellCheck);
     }
 
     int FilteredArtItemsProxyModel::getModifiedSelectedCount(bool overwriteAll) {
@@ -224,13 +224,13 @@ namespace Models {
 
     void FilteredArtItemsProxyModel::deleteKeywordsFromSelected() {
         auto selectedItems = getSelectedOriginalItems();
-        m_CommandManager->deleteKeywordsFromArtworks(selectedItems);
+        xpiks()->deleteKeywordsFromArtworks(selectedItems);
     }
 
     void FilteredArtItemsProxyModel::setSelectedForCsvExport() {
         LOG_DEBUG << "#";
         auto selectedArtworks = getSelectedArtworksSnapshot();
-        m_CommandManager->setArtworksForCsvExport(selectedArtworks);
+        xpiks()->setArtworksForCsvExport(selectedArtworks);
     }
 
     void FilteredArtItemsProxyModel::selectArtworksEx(int comboboxSelectionIndex) {
@@ -288,7 +288,7 @@ namespace Models {
             artwork->prepareForReimport();
         }
 
-        int importID = m_CommandManager->reimportMetadata(selectedArtworks);
+        int importID = xpiks()->reimportMetadata(selectedArtworks);
         ArtItemsModel *artItemsModel = getArtItemsModel();
         artItemsModel->raiseArtworksReimported(importID, (int)selectedArtworks.size());
     }
@@ -462,7 +462,7 @@ namespace Models {
             ArtworkMetadata *artwork = artItemsModel->getArtwork(originalIndex);
 
             if (artwork != NULL) {
-                m_CommandManager->registerCurrentItem(artwork);
+                xpiks()->registerCurrentItem(artwork);
             }
         }
     }
@@ -503,7 +503,7 @@ namespace Models {
         auto itemsForSuggestions = getFilteredOriginalItems<std::pair<Common::IMetadataOperator *, int> >(
                     [](ArtworkMetadata *artwork) { return artwork->isSelected(); },
                     [] (ArtworkMetadata *metadata, int index, int) { return std::pair<Common::IMetadataOperator *, int>(metadata, index); });
-        m_CommandManager->setupSpellCheckSuggestions(itemsForSuggestions, (SuggestionFlags)flags);
+        xpiks()->setupSpellCheckSuggestions(itemsForSuggestions, (SuggestionFlags)flags);
     }
 
     void FilteredArtItemsProxyModel::generateCompletions(const QString &prefix, int index) {
@@ -513,7 +513,7 @@ namespace Models {
             ArtItemsModel *artItemsModel = getArtItemsModel();
             auto *basicModel = artItemsModel->getBasicModel(originalIndex);
 
-            m_CommandManager->generateCompletions(prefix, basicModel);
+            xpiks()->generateCompletions(prefix, basicModel);
         }
     }
 
@@ -521,7 +521,7 @@ namespace Models {
         auto itemsForSuggestions = getFilteredOriginalItems<ArtworkMetadata *>(
                     [](ArtworkMetadata *artwork) { return artwork->hasDuplicates(); },
                     [] (ArtworkMetadata *artwork, int, int) { return artwork; });
-        m_CommandManager->setupDuplicatesModel(itemsForSuggestions);
+        xpiks()->setupDuplicatesModel(itemsForSuggestions);
     }
 
     void FilteredArtItemsProxyModel::itemSelectedChanged(bool value) {
@@ -607,7 +607,7 @@ namespace Models {
         artItemsModel->updateItems(indices, QVector<int>() << ArtItemsModel::IsSelectedRole);
         emit allItemsSelectedChanged();
 
-        m_CommandManager->clearCurrentItem();
+        xpiks()->clearCurrentItem();
     }
 
     void FilteredArtItemsProxyModel::invertFilteredItemsSelected() {
@@ -707,7 +707,7 @@ namespace Models {
         m_SelectedArtworksCount = 0;
         emit selectedArtworksCountChanged();
         emit allItemsSelectedChanged();
-        m_CommandManager->clearCurrentItem();
+        xpiks()->clearCurrentItem();
     }
 
     ArtItemsModel *FilteredArtItemsProxyModel::getArtItemsModel() const {

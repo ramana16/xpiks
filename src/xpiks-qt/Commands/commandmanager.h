@@ -32,6 +32,7 @@
 #include "../Helpers/asynccoordinator.h"
 #include "../MetadataIO/artworkssnapshot.h"
 #include "../Common/flags.h"
+#include "maindelegator.h"
 
 namespace Encryption {
     class SecretsManager;
@@ -192,89 +193,27 @@ namespace Commands {
         int generateNextCommandID() { int id = m_LastCommandID++; return id; }
 
     public:
-        virtual std::shared_ptr<Commands::ICommandResult> processCommand(const std::shared_ptr<ICommandBase> &command) override;
-        virtual void addWarningsService(Common::IServiceBase<Common::IBasicArtwork, Common::WarningsCheckFlags> *service) override;
+        MainDelegator *getDelegator() { return &m_MainDelegator; }
+        const MainDelegator *getDelegator() const { return &m_MainDelegator; }
 
     public:
-        void recordHistoryItem(std::unique_ptr<UndoRedo::IHistoryItem> &historyItem) const;
+        virtual std::shared_ptr<Commands::ICommandResult> processCommand(const std::shared_ptr<ICommandBase> &command) override;
+
+    public:\
         void connectEntitiesSignalsSlots() const;
+        virtual void connectArtworkSignals(Models::ArtworkMetadata *artwork) const;
+        void disconnectArtworkSignals(Models::ArtworkMetadata *metadata) const;
 
     public:
         void ensureDependenciesInjected();
-        void removeUnavailableFiles();
-
-    public:
-        void recodePasswords(const QString &oldMasterPassword,
-                                const QString &newMasterPassword,
-                                const std::vector<std::shared_ptr<Models::UploadInfo> > &uploadInfos) const;
-
-        void combineArtwork(Models::ArtworkMetadata *metadata, int index) const;
-        void combineArtworks(MetadataIO::WeakArtworksSnapshot &artworks) const;
-        void deleteKeywordsFromArtworks(MetadataIO::WeakArtworksSnapshot &artworks) const;
-        void setArtworksForUpload(MetadataIO::ArtworksSnapshot &artworks) const;
-        void setArtworksForZipping(MetadataIO::ArtworksSnapshot &artworks) const;
-        void setArtworksForCsvExport(MetadataIO::ArtworksSnapshot::Container &rawSnapshot) const;
-        virtual void connectArtworkSignals(Models::ArtworkMetadata *artwork) const;
-        void disconnectArtworkSignals(Models::ArtworkMetadata *metadata) const;
-        int readMetadata(const MetadataIO::ArtworksSnapshot &snapshot) const;
-        int reimportMetadata(const MetadataIO::ArtworksSnapshot &snapshot) const;
-        void writeMetadata(const MetadataIO::WeakArtworksSnapshot &artworks, bool useBackups) const;
-        void wipeAllMetadata(const MetadataIO::ArtworksSnapshot &artworks, bool useBackups) const;
-        void addToLibrary(const MetadataIO::WeakArtworksSnapshot &artworks) const;
-        void updateArtworksAtIndices(const QVector<int> &indices) const;
-        void updateArtworks(const MetadataIO::WeakArtworksSnapshot &artworks) const;
-        void updateArtworks(const MetadataIO::ArtworksSnapshot::Container &artworks);
-        void addToRecentDirectories(const QString &path) const;
-        void addToRecentFiles(const QString &path) const;
-        void addToRecentFiles(const QStringList &filenames) const;
-        void autoDiscoverExiftool() const;
-        void cleanupOldXpksBackups(const QString &directory) const;
-
-    public:
-        void generatePreviews(const MetadataIO::ArtworksSnapshot &snapshot) const;
-        void submitKeywordForSpellCheck(Common::BasicKeywordsModel *item, int keywordIndex) const;
-        void submitForSpellCheck(const MetadataIO::WeakArtworksSnapshot &items) const;
-        void submitForSpellCheck(const std::vector<Common::BasicKeywordsModel *> &items) const;
-        void submitItemForSpellCheck(Common::BasicKeywordsModel *item, Common::SpellCheckFlags flags = Common::SpellCheckFlags::All) const;
-        void checkSemanticDuplicates(Common::BasicKeywordsModel *item);
-        void setupSpellCheckSuggestions(Common::IMetadataOperator *item, int index, Common::SuggestionFlags flags);
-        void setupSpellCheckSuggestions(std::vector<std::pair<Common::IMetadataOperator *, int> > &itemPairs, Common::SuggestionFlags flags);
-        void submitForSpellCheck(const std::vector<Common::BasicKeywordsModel *> &items, const QStringList &wordsToCheck) const;
-        void setupDuplicatesModel(Common::BasicMetadataModel *item);
-        void setupDuplicatesModel(const std::vector<Models::ArtworkMetadata *> &items);
-
-    public:
-        void submitKeywordsForWarningsCheck(Models::ArtworkMetadata *item) const;
-        void submitForWarningsCheck(Models::ArtworkMetadata *item, Common::WarningsCheckFlags flags = Common::WarningsCheckFlags::All) const;
-        void submitForWarningsCheck(const MetadataIO::WeakArtworksSnapshot &items) const;
-
-    private:
-        void submitForWarningsCheck(const std::vector<Common::IBasicArtwork *> &items) const;
-
-    public:
-        void saveArtworkBackup(Models::ArtworkMetadata *metadata) const;
-        void saveArtworksBackups(const MetadataIO::WeakArtworksSnapshot &artworks) const;
-        void reportUserAction(Connectivity::UserAction userAction) const;
         void afterConstructionCallback();
 
     private:
         void afterInnerServicesInitialized();
         void executeMaintenanceJobs();
-        void readSession();
-        int restoreReadSession();
-        int restoreFiles(const QStringList &filenames, const QStringList &vectors);
-
-    public:
-#ifdef INTEGRATION_TESTS
-        int restoreSessionForTest();
-#endif
-        void saveSessionInBackground();
 
     public:
         void beforeDestructionCallback() const;
-        void requestCloseApplication() const;
-        void restartSpellChecking();
-        void generateCompletions(const QString &prefix, Common::BasicKeywordsModel *source) const;
 
 #ifdef INTEGRATION_TESTS
         void cleanup();
@@ -282,11 +221,6 @@ namespace Commands {
 
     private slots:
         void servicesInitialized(int status);
-
-    public:
-        void registerCurrentItem(Models::ArtworkMetadata *artwork);
-        void registerCurrentItem(Models::ArtworkProxyBase *artworkProxy) const;
-        void clearCurrentItem() const;
 
     public:
         // methods for getters
@@ -325,19 +259,21 @@ namespace Commands {
         virtual MetadataIO::MetadataIOCoordinator *getMetadataIOCoordinator() const { return m_MetadataIOCoordinator; }
         virtual AutoComplete::KeywordsAutoCompleteModel *getAutoCompleteModel() const { return m_AutoCompleteModel; }
         virtual QMLExtensions::VideoCachingService *getVideoCachingService() const { return m_VideoCachingService; }
+        virtual Models::CombinedArtworksModel *getCombinedArtworksModel() const { return m_CombinedArtworksModel; }
+        virtual MetadataIO::CsvExportModel *getCsvExportModel() const { return m_CsvExportModel; }
+        virtual SpellCheck::DuplicatesReviewModel *getDuplicatesReviewModel() const { return m_DuplicatesModel; }
+        virtual Warnings::WarningsService *getWarningsService() const { return m_WarningsService; }
+        virtual Connectivity::TelemetryService *getTelemetryService() const { return m_TelemetryService; }
+        virtual Helpers::HelpersQmlWrapper *getHelpersQmlWrapper() const { return m_HelpersQmlWrapper; }
+        virtual AutoComplete::AutoCompleteService *getAutoCompleteService() const { return m_AutoCompleteService; }
 
 #ifdef INTEGRATION_TESTS
         virtual Translation::TranslationManager *getTranslationManager() const { return m_TranslationManager; }
-        virtual Models::CombinedArtworksModel *getCombinedArtworksModel() const { return m_CombinedArtworksModel; }
-        virtual AutoComplete::AutoCompleteService *getAutoCompleteService() const { return m_AutoCompleteService; }
-        virtual Warnings::WarningsService *getWarningsService() const { return m_WarningsService; }
         virtual Models::FindAndReplaceModel *getFindAndReplaceModel() const { return m_FindAndReplaceModel; }
-        virtual MetadataIO::CsvExportModel *getCsvExportModel() const { return m_CsvExportModel; }
 #endif
-    private:
-        Common::WordAnalysisFlags getWordAnalysisFlags() const;
 
     private:
+        MainDelegator m_MainDelegator;
         Helpers::AsyncCoordinator m_InitCoordinator;
 
         Models::ArtworksRepository *m_ArtworksRepository;
@@ -386,9 +322,6 @@ namespace Commands {
         Helpers::DatabaseManager *m_DatabaseManager;
         SpellCheck::DuplicatesReviewModel *m_DuplicatesModel;
         MetadataIO::CsvExportModel *m_CsvExportModel;
-
-        QVector<Common::IServiceBase<Common::IBasicArtwork, Common::WarningsCheckFlags> *> m_WarningsCheckers;
-        QVector<Helpers::IFileNotAvailableModel*> m_AvailabilityListeners;
 
         volatile bool m_ServicesInitialized;
         volatile bool m_AfterInitCalled;

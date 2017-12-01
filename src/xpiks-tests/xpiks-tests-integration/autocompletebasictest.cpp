@@ -55,7 +55,7 @@ int AutoCompleteBasicTest::doTest() {
 
     // --------------------------------------------------------------
 
-    m_CommandManager->generateCompletions("tes", metadata->getBasicModel());
+    xpiks()->generateCompletions("tes", metadata->getBasicModel());
 
     if (!completionWaiter.wait(10)) {
         VERIFY(false, "Timeout while waiting for the completion");
@@ -73,7 +73,7 @@ int AutoCompleteBasicTest::doTest() {
 
     // --------------------------------------------------------------
 
-    m_CommandManager->generateCompletions("Tes", metadata->getBasicModel());
+    xpiks()->generateCompletions("Tes", metadata->getBasicModel());
 
     if (!completionWaiter.wait(10)) {
         VERIFY(false, "Timeout while waiting for the completion");

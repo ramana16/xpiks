@@ -277,7 +277,7 @@ namespace Models {
     void UploadInfoRepository::onBeforeMasterPasswordChanged(const QString &oldMasterPassword,
                                                              const QString &newMasterPassword) {
         LOG_INFO << "#";
-        m_CommandManager->recodePasswords(oldMasterPassword, newMasterPassword, m_UploadInfos);
+        xpiks()->recodePasswords(oldMasterPassword, newMasterPassword, m_UploadInfos);
     }
 
     void UploadInfoRepository::onAfterMasterPasswordReset() {

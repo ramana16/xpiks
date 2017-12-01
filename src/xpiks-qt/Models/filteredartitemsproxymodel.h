@@ -26,7 +26,8 @@ namespace Models {
     class ArtItemsModel;
 
     class FilteredArtItemsProxyModel:
-        public QSortFilterProxyModel, public Common::BaseEntity
+            public QSortFilterProxyModel,
+            public Common::BaseEntity
     {
         Q_OBJECT
         Q_PROPERTY(QString searchTerm READ getSearchTerm WRITE setSearchTerm NOTIFY searchTermChanged)

@@ -22,5 +22,5 @@ void UndoRedo::AddArtworksHistoryItem::undo(const Commands::ICommandManager *com
     Models::ArtItemsModel *artItemsModel = commandManager->getArtItemsModel();
     artItemsModel->removeArtworks(m_AddedRanges);
 
-    commandManager->saveSessionInBackground();
+    commandManager->getDelegator()->saveSessionInBackground();
 }

@@ -76,11 +76,11 @@ namespace MetadataIO {
         const auto &itemsToRead = m_ArtworksToRead.getWeakSnapshot();
 
         if (!initAsEmpty) {
-            m_CommandManager->addToLibrary(itemsToRead);
+            xpiks()->addToLibrary(itemsToRead);
         }
-        m_CommandManager->updateArtworks(itemsToRead);
-        m_CommandManager->submitForSpellCheck(itemsToRead);
-        m_CommandManager->submitForWarningsCheck(itemsToRead);
+        xpiks()->updateArtworks(itemsToRead);
+        xpiks()->submitForSpellCheck(itemsToRead);
+        xpiks()->submitForWarningsCheck(itemsToRead);
 
         finalizeImport();
     }

@@ -69,7 +69,7 @@ int RestoreSessionTest::doTest() {
     artItemsModel->fakeDeleteAllItems();
     LOG_DEBUG << "About to restore...";
 
-    int restoredCount = m_CommandManager->restoreSessionForTest();
+    int restoredCount = xpiks()->restoreSessionForTest();
     VERIFY(addedCount == restoredCount, "Failed to properly restore");
     ioCoordinator->continueReading(true);
 

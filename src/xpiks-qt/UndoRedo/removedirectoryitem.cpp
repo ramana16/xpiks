@@ -70,6 +70,7 @@ void UndoRedo::RemoveDirectoryHistoryItem::fillFilesAndVectors(const QString &di
 void UndoRedo::RemoveDirectoryHistoryItem::undo(const Commands::ICommandManager *commandManagerInterface) {
     Commands::CommandManager *commandManager = (Commands::CommandManager *)commandManagerInterface;
     Models::ArtworksRepository *artworksRepository = commandManager->getArtworksRepository();
+    auto *xpiks = commandManager->getDelegator();
 
     QString directoryPath;
     Models::SettingsModel *settingsModel = commandManager->getSettingsModel();
@@ -88,7 +89,7 @@ void UndoRedo::RemoveDirectoryHistoryItem::undo(const Commands::ICommandManager 
         filteredArtItemProxyModel->updateFilter();
 #endif
 
-        commandManager->saveSessionInBackground();
+        xpiks->saveSessionInBackground();
     } else {
         // directory should not be removed until undo stack is empty
         Q_ASSERT(false);

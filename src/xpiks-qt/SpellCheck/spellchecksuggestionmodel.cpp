@@ -156,7 +156,7 @@ namespace SpellCheck {
                  itemsToSubmit.push_back(item->getBasicKeywordsModel());
              }
 
-             m_CommandManager->submitForSpellCheck(itemsToSubmit);
+             xpiks()->submitForSpellCheck(itemsToSubmit);
         }
 
         updateItems();
@@ -339,6 +339,6 @@ namespace SpellCheck {
             }
         }
 
-        m_CommandManager->updateArtworksAtIndices(indices);
+        xpiks()->updateArtworksAtIndices(indices);
     }
 }

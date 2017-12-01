@@ -104,9 +104,9 @@ void UndoRedo::RemoveArtworksHistoryItem::undo(const Commands::ICommandManager *
     artworksRepository->updateFilesCounts();
 
     std::unique_ptr<IHistoryItem> addArtworksItem(new AddArtworksHistoryItem(getCommandID(), ranges));
-    commandManager->recordHistoryItem(addArtworksItem);
+    commandManager->getDelegator()->recordHistoryItem(addArtworksItem);
 
-    int importID = commandManager->readMetadata(artworksToImport);
+    int importID = commandManager->getDelegator()->readMetadata(artworksToImport);
     artItemsModel->raiseArtworksAdded(importID, usedCount, attachedVectors);
 
     if (!willResetModel) {
@@ -114,7 +114,7 @@ void UndoRedo::RemoveArtworksHistoryItem::undo(const Commands::ICommandManager *
         artItemsModel->syncArtworksIndices();
     }
 
-    commandManager->saveSessionInBackground();
+    commandManager->getDelegator()->saveSessionInBackground();
 
 #ifndef CORE_TESTS
     MetadataIO::MetadataIOCoordinator *coordinator = commandManager->getMetadataIOCoordinator();

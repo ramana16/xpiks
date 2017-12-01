@@ -58,7 +58,7 @@ int CombinedEditFixSpellingTest::doTest() {
     QObject::connect(basicModel, &Common::BasicMetadataModel::descriptionSpellingChanged,
                      &waiter, &SignalWaiter::finished);
 
-    m_CommandManager->submitItemForSpellCheck(basicModel);
+    xpiks()->submitItemForSpellCheck(basicModel);
 
     if (!waiter.wait(5)) {
         VERIFY(false, "Timeout for waiting for initial spellcheck results");

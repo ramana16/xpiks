@@ -59,6 +59,7 @@ std::shared_ptr<Commands::ICommandResult> Commands::CombinedEditCommand::execute
     MetadataIO::WeakArtworksSnapshot itemsToSave, affectedItems;
 
     CommandManager *commandManager = (CommandManager*)commandManagerInterface;
+    auto *xpiks = commandManager->getDelegator();
 
     size_t size = m_RawSnapshot.size();
     indicesToUpdate.reserve((int)size);
@@ -93,7 +94,7 @@ std::shared_ptr<Commands::ICommandResult> Commands::CombinedEditCommand::execute
                     getCommandID(),
                     artworksBackups, indicesToUpdate,
                     UndoRedo::CombinedEditModificationType));
-    commandManager->recordHistoryItem(modifyArtworksItem);
+    xpiks->recordHistoryItem(modifyArtworksItem);
 
     std::shared_ptr<ICommandResult> result(new CombinedEditCommandResult(affectedItems, itemsToSave, indicesToUpdate));
     return result;
@@ -136,17 +137,18 @@ void Commands::CombinedEditCommand::setTitle(Models::ArtworkMetadata *metadata) 
 
 void Commands::CombinedEditCommandResult::afterExecCallback(const Commands::ICommandManager *commandManagerInterface) const {
     CommandManager *commandManager = (CommandManager*)commandManagerInterface;
+    auto *xpiks = commandManager->getDelegator();
 
     if (!m_IndicesToUpdate.isEmpty()) {
-        commandManager->updateArtworksAtIndices(m_IndicesToUpdate);
+        xpiks->updateArtworksAtIndices(m_IndicesToUpdate);
     }
 
     if (!m_ItemsToSave.empty()) {
-        commandManager->saveArtworksBackups(m_ItemsToSave);
+        xpiks->saveArtworksBackups(m_ItemsToSave);
     }
 
     if (!m_AffectedItems.empty()) {
-        commandManager->submitForSpellCheck(m_AffectedItems);
-        commandManager->submitForWarningsCheck(m_AffectedItems);
+        xpiks->submitForSpellCheck(m_AffectedItems);
+        xpiks->submitForWarningsCheck(m_AffectedItems);
     }
 }

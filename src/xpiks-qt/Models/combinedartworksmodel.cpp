@@ -86,7 +86,7 @@ namespace Models {
         LOG_DEBUG << "After recombine title:" << getTitle();
         LOG_DEBUG << "After recombine keywords:" << getKeywordsString();
 
-        m_CommandManager->submitItemForSpellCheck(&m_CommonKeywordsModel);
+        xpiks()->submitItemForSpellCheck(&m_CommonKeywordsModel);
     }
 
     void CombinedArtworksModel::acceptSuggestedKeywords(const QStringList &keywords) {
@@ -273,7 +273,7 @@ namespace Models {
         LOG_DEBUG << "After recombine title:" << getTitle();
         LOG_DEBUG << "After recombine keywords:" << getKeywordsString();
 
-        m_CommandManager->submitItemForSpellCheck(&m_CommonKeywordsModel);
+        xpiks()->submitItemForSpellCheck(&m_CommonKeywordsModel);
     }
 
     void CombinedArtworksModel::plainTextEdit(const QString &rawKeywords, bool spaceIsSeparator) {
@@ -533,7 +533,7 @@ namespace Models {
         initTitle("");
         initKeywords(QStringList());
 
-        m_CommandManager->clearCurrentItem();
+        xpiks()->clearCurrentItem();
     }
 
     void CombinedArtworksModel::doOnTimer() {
@@ -569,6 +569,6 @@ namespace Models {
 
     void CombinedArtworksModel::onEditingPaused() {
         LOG_INTEGR_TESTS_OR_DEBUG << "#";
-        m_CommandManager->submitItemForSpellCheck(&m_CommonKeywordsModel);
+        xpiks()->submitItemForSpellCheck(&m_CommonKeywordsModel);
     }
 }

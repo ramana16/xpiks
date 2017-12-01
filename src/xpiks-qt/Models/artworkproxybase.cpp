@@ -84,7 +84,7 @@ namespace Models {
         bool result = metadataOperator->editKeyword(index, replacement);
         if (result) {
             auto *basicModel = getBasicMetadataModel();
-            m_CommandManager->submitKeywordForSpellCheck(basicModel, index);
+            xpiks()->submitKeywordForSpellCheck(basicModel, index);
             doJustEdited();
         } else {
             LOG_INFO << "Failed to edit to" << replacement;
@@ -126,7 +126,7 @@ namespace Models {
         if (result) {
             signalKeywordsCountChanged();
             auto *basicModel = getBasicMetadataModel();
-            m_CommandManager->submitKeywordForSpellCheck(basicModel, basicModel->rowCount() - 1);
+            xpiks()->submitKeywordForSpellCheck(basicModel, basicModel->rowCount() - 1);
             doJustEdited();
         } else {
             LOG_INFO << "Failed to append:" << keyword;
@@ -145,7 +145,7 @@ namespace Models {
             signalKeywordsCountChanged();
 
             auto *basicModel = getBasicMetadataModel();
-            m_CommandManager->submitItemForSpellCheck(basicModel, Common::SpellCheckFlags::Keywords);
+            xpiks()->submitItemForSpellCheck(basicModel, Common::SpellCheckFlags::Keywords);
             doJustEdited();
         }
 
@@ -191,13 +191,13 @@ namespace Models {
     void ArtworkProxyBase::doSuggestCorrections() {
         LOG_DEBUG << "#";
         auto *metadataOperator = getMetadataOperator();
-        m_CommandManager->setupSpellCheckSuggestions(metadataOperator, -1, Common::SuggestionFlags::All);
+        xpiks()->setupSpellCheckSuggestions(metadataOperator, -1, Common::SuggestionFlags::All);
     }
 
     void ArtworkProxyBase::doSetupDuplicatesModel() {
         LOG_DEBUG << "#";
         auto *basicModel = getBasicMetadataModel();
-        m_CommandManager->setupDuplicatesModel(basicModel);
+        xpiks()->setupDuplicatesModel(basicModel);
     }
 
     QSyntaxHighlighter *ArtworkProxyBase::doCreateDescriptionHighligher(QQuickTextDocument *document) {
@@ -222,7 +222,7 @@ namespace Models {
         LOG_DEBUG << "#";
         auto *keywordsModel = getBasicMetadataModel();
         if (!keywordsModel->getDescription().trimmed().isEmpty()) {
-            m_CommandManager->submitItemForSpellCheck(keywordsModel, Common::SpellCheckFlags::Description);
+            xpiks()->submitItemForSpellCheck(keywordsModel, Common::SpellCheckFlags::Description);
         } else {
             keywordsModel->notifySpellCheckResults(Common::SpellCheckFlags::Description);
         }
@@ -232,7 +232,7 @@ namespace Models {
         LOG_DEBUG << "#";
         auto *keywordsModel = getBasicMetadataModel();
         if (!keywordsModel->getTitle().trimmed().isEmpty()) {
-            m_CommandManager->submitItemForSpellCheck(keywordsModel, Common::SpellCheckFlags::Title);
+            xpiks()->submitItemForSpellCheck(keywordsModel, Common::SpellCheckFlags::Title);
         } else {
             keywordsModel->notifySpellCheckResults(Common::SpellCheckFlags::Title);
         }
@@ -378,7 +378,7 @@ namespace Models {
 
     void ArtworkProxyBase::doRegisterAsCurrentItem() {
         LOG_DEBUG << "#";
-        m_CommandManager->registerCurrentItem(this);
+        xpiks()->registerCurrentItem(this);
     }
 
     void ArtworkProxyBase::doHandleUserDictChanged(const QStringList &keywords, bool overwritten) {
@@ -394,18 +394,18 @@ namespace Models {
             // special case after words added to dict
             std::vector<Common::BasicKeywordsModel *> items;
             items.push_back(metadataModel);
-            m_CommandManager->submitForSpellCheck(items, keywords);
+            xpiks()->submitForSpellCheck(items, keywords);
         }
         else {
             info->clear();
-            m_CommandManager->submitItemForSpellCheck(metadataModel);
+            xpiks()->submitItemForSpellCheck(metadataModel);
         }
     }
 
     void ArtworkProxyBase::doHandleUserDictCleared() {
         LOG_DEBUG << "#";
         auto *metadataModel = getBasicMetadataModel();
-        m_CommandManager->submitItemForSpellCheck(metadataModel);
+        xpiks()->submitItemForSpellCheck(metadataModel);
     }
 
     void ArtworkProxyBase::doCopyToQuickBuffer() {
@@ -428,12 +428,12 @@ namespace Models {
 
     void ArtworkProxyBase::doCheckSemanticDuplicates() {
         auto *basicArwork = getBasicMetadataModel();
-        m_CommandManager->checkSemanticDuplicates(basicArwork);
+        xpiks()->checkSemanticDuplicates(basicArwork);
     }
 
     void ArtworkProxyBase::doGenerateCompletions(const QString &prefix) {
         auto *basicArwork = getBasicMetadataModel();
-        m_CommandManager->generateCompletions(prefix, basicArwork);
+        xpiks()->generateCompletions(prefix, basicArwork);
     }
 
     bool ArtworkProxyBase::doAcceptCompletionAsPreset(int completionID) {
@@ -461,11 +461,11 @@ namespace Models {
 
     void ArtworkProxyBase::spellCheckEverything() {
         auto *basicModel = getBasicMetadataModel();
-        m_CommandManager->submitItemForSpellCheck(basicModel);
+        xpiks()->submitItemForSpellCheck(basicModel);
     }
 
     void ArtworkProxyBase::spellCheckKeywords() {
         auto *basicModel = getBasicMetadataModel();
-        m_CommandManager->submitItemForSpellCheck(basicModel, Common::SpellCheckFlags::Keywords);
+        xpiks()->submitItemForSpellCheck(basicModel, Common::SpellCheckFlags::Keywords);
     }
 }

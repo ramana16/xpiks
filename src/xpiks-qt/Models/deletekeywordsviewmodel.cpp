@@ -102,7 +102,7 @@ namespace Models {
         if (m_KeywordsToDeleteModel.appendKeyword(keyword)) {
             emit keywordsToDeleteCountChanged();
 
-            m_CommandManager->submitKeywordForSpellCheck(&m_KeywordsToDeleteModel, m_KeywordsToDeleteModel.rowCount() - 1);
+            xpiks()->submitKeywordForSpellCheck(&m_KeywordsToDeleteModel, m_KeywordsToDeleteModel.rowCount() - 1);
         }
     }
 
@@ -111,7 +111,7 @@ namespace Models {
         if (m_KeywordsToDeleteModel.appendKeywords(keywords) > 0) {
             emit keywordsToDeleteCountChanged();
 
-            m_CommandManager->submitItemForSpellCheck(&m_KeywordsToDeleteModel, Common::SpellCheckFlags::Keywords);
+            xpiks()->submitItemForSpellCheck(&m_KeywordsToDeleteModel, Common::SpellCheckFlags::Keywords);
         }
     }
 
@@ -146,7 +146,7 @@ namespace Models {
             if (m_KeywordsToDeleteModel.appendKeywords(keywords) > 0) {
                 emit keywordsToDeleteCountChanged();
 
-                m_CommandManager->submitItemForSpellCheck(&m_KeywordsToDeleteModel, Common::SpellCheckFlags::Keywords);
+                xpiks()->submitItemForSpellCheck(&m_KeywordsToDeleteModel, Common::SpellCheckFlags::Keywords);
             }
         }
 

@@ -220,7 +220,7 @@ namespace Models {
             if (metadata->removeKeywordAt(keywordIndex, removed)) {
                 QModelIndex index = this->index(metadataIndex);
                 emit dataChanged(index, index, QVector<int>() << IsModifiedRole << KeywordsCountRole);
-                m_CommandManager->submitKeywordsForWarningsCheck(metadata);
+                xpiks()->submitKeywordsForWarningsCheck(metadata);
                 metadata->justEdited();
             }
         }
@@ -235,7 +235,7 @@ namespace Models {
             if (metadata->removeLastKeyword(removed)) {
                 QModelIndex index = this->index(metadataIndex);
                 emit dataChanged(index, index, QVector<int>() << IsModifiedRole << KeywordsCountRole);
-                m_CommandManager->submitKeywordsForWarningsCheck(metadata);
+                xpiks()->submitKeywordsForWarningsCheck(metadata);
                 metadata->justEdited();
             }
         }
@@ -251,8 +251,8 @@ namespace Models {
                 emit dataChanged(index, index, QVector<int>() << IsModifiedRole << KeywordsCountRole);
                 auto *keywordsModel = metadata->getBasicModel();
 
-                m_CommandManager->submitKeywordForSpellCheck(keywordsModel, keywordsModel->getKeywordsCount() - 1);
-                m_CommandManager->submitKeywordsForWarningsCheck(metadata);
+                xpiks()->submitKeywordForSpellCheck(keywordsModel, keywordsModel->getKeywordsCount() - 1);
+                xpiks()->submitKeywordsForWarningsCheck(metadata);
                 metadata->justEdited();
             }
         }
@@ -313,14 +313,14 @@ namespace Models {
             Common::SetFlag(flags, SuggestionFlags::Title);
             Common::SetFlag(flags, SuggestionFlags::Keywords);
             ArtworkMetadata *metadata = accessArtwork(metadataIndex);
-            m_CommandManager->setupSpellCheckSuggestions(metadata, metadataIndex, (SuggestionFlags)flags);
+            xpiks()->setupSpellCheckSuggestions(metadata, metadataIndex, (SuggestionFlags)flags);
         }
     }
 
     void ArtItemsModel::backupItem(int metadataIndex) {
         if (0 <= metadataIndex && metadataIndex < getArtworksCount()) {
             ArtworkMetadata *metadata = accessArtwork(metadataIndex);
-            m_CommandManager->saveArtworkBackup(metadata);
+            xpiks()->saveArtworkBackup(metadata);
         }
     }
 
@@ -405,7 +405,7 @@ namespace Models {
             }
         }
 
-        m_CommandManager->writeMetadata(modifiedSelectedArtworks, useBackups);
+        xpiks()->writeMetadata(modifiedSelectedArtworks, useBackups);
     }
 
     ArtworkMetadata *ArtItemsModel::getArtworkMetadata(int index) const {
@@ -562,8 +562,8 @@ namespace Models {
                 emit dataChanged(index, index, QVector<int>() << IsModifiedRole << KeywordsCountRole);
 
                 auto *keywordsModel = metadata->getBasicModel();
-                m_CommandManager->submitKeywordForSpellCheck(keywordsModel, keywordIndex);
-                m_CommandManager->submitKeywordsForWarningsCheck(metadata);
+                xpiks()->submitKeywordForSpellCheck(keywordsModel, keywordIndex);
+                xpiks()->submitKeywordsForWarningsCheck(metadata);
                 metadata->justEdited();
             }
         }
@@ -713,7 +713,7 @@ namespace Models {
             Q_ASSERT(artwork != nullptr);
             std::vector<ArtworkMetadata*> artworks;
             artworks.push_back(artwork);
-            m_CommandManager->setupDuplicatesModel(artworks);
+            xpiks()->setupDuplicatesModel(artworks);
         }
     }
 
@@ -917,7 +917,7 @@ namespace Models {
         ArtworkMetadata *metadata = qobject_cast<ArtworkMetadata *>(sender());
         Q_ASSERT(metadata != nullptr);
         if (metadata != NULL) {
-            m_CommandManager->saveArtworkBackup(metadata);
+            xpiks()->saveArtworkBackup(metadata);
         }
     }
 
@@ -926,7 +926,7 @@ namespace Models {
         ArtworkMetadata *artwork = qobject_cast<ArtworkMetadata *>(sender());
         Q_ASSERT(artwork != nullptr);
         if (artwork != NULL) {
-            m_CommandManager->submitItemForSpellCheck(artwork->getBasicModel());
+            xpiks()->submitItemForSpellCheck(artwork->getBasicModel());
         }
     }
 
@@ -935,7 +935,7 @@ namespace Models {
         ArtworkMetadata *artwork = qobject_cast<ArtworkMetadata *>(sender());
         Q_ASSERT(artwork != nullptr);
         if (artwork != NULL) {
-            m_CommandManager->submitForWarningsCheck(artwork, Common::WarningsCheckFlags::Spelling);
+            xpiks()->submitForWarningsCheck(artwork, Common::WarningsCheckFlags::Spelling);
         }
     }
 
@@ -977,9 +977,9 @@ namespace Models {
         }
 
         if (!overwritten) {
-            m_CommandManager->submitForSpellCheck(itemsToCheck, keywords);
+            xpiks()->submitForSpellCheck(itemsToCheck, keywords);
         } else {
-            m_CommandManager->submitForSpellCheck(itemsToCheck);
+            xpiks()->submitForSpellCheck(itemsToCheck);
         }
     }
 
@@ -994,7 +994,7 @@ namespace Models {
             itemsToCheck.push_back(keywordsModel);
         }
 
-        m_CommandManager->submitForSpellCheck(itemsToCheck);
+        xpiks()->submitForSpellCheck(itemsToCheck);
     }
 
     void ArtItemsModel::removeItemsFromRanges(const QVector<QPair<int, int> > &ranges) {
@@ -1289,7 +1289,7 @@ namespace Models {
             // QModelIndex qmIndex = this->index(index);
             // emit dataChanged(qmIndex, qmIndex, QVector<int>() << IsSelectedRole);
 
-            m_CommandManager->combineArtwork(metadata, index);
+            xpiks()->combineArtwork(metadata, index);
         }
     }
 

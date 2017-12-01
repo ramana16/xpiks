@@ -11,7 +11,10 @@
 #ifndef BASEENTITY
 #define BASEENTITY
 
-namespace Commands { class CommandManager; }
+namespace Commands {
+    class MainDelegator;
+    class CommandManager;
+}
 
 #include <QtGlobal>
 
@@ -27,6 +30,10 @@ namespace Common {
             Q_ASSERT(commandManager != 0);
             m_CommandManager = commandManager;
         }
+
+    protected:
+        Commands::MainDelegator *xpiks();
+        const Commands::MainDelegator *xpiks() const;
 
     protected:
         Commands::CommandManager *m_CommandManager;

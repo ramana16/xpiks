@@ -193,7 +193,9 @@ SOURCES += main.cpp \
     ../../xpiks-qt/Common/statefulentity.cpp \
     ../../xpiks-qt/KeywordsPresets/presetgroupsmodel.cpp \
     ../../xpiks-qt/UndoRedo/removedirectoryitem.cpp \
-    ../../xpiks-qt/Common/basickeywordsmodelimpl.cpp
+    ../../xpiks-qt/Common/basickeywordsmodelimpl.cpp \
+    ../../xpiks-qt/Commands/maindelegator.cpp \
+    ../../xpiks-qt/Common/baseentity.cpp
 
 HEADERS += \
     encryption_tests.h \
@@ -328,5 +330,6 @@ HEADERS += \
     ../../xpiks-qt/Common/delayedactionentity.h \
     ../../xpiks-qt/KeywordsPresets/presetgroupsmodel.h \
     ../../xpiks-qt/UndoRedo/removedirectoryitem.h \
-    ../../xpiks-qt/Common/basickeywordsmodelimpl.h
+    ../../xpiks-qt/Common/basickeywordsmodelimpl.h \
+    ../../xpiks-qt/Commands/maindelegator.h
 

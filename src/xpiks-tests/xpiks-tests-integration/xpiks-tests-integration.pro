@@ -227,7 +227,9 @@ SOURCES += main.cpp \
     reimporttest.cpp \
     autoimporttest.cpp \
     ../../xpiks-qt/Common/basickeywordsmodelimpl.cpp \
-    ../../xpiks-qt/Maintenance/xpkscleanupjob.cpp
+    ../../xpiks-qt/Maintenance/xpkscleanupjob.cpp \
+    ../../xpiks-qt/Common/baseentity.cpp \
+    ../../xpiks-qt/Commands/maindelegator.cpp
 
 RESOURCES +=
 
@@ -489,7 +491,8 @@ HEADERS += \
     reimporttest.h \
     autoimporttest.h \
     ../../xpiks-qt/Common/basickeywordsmodelimpl.h \
-    ../../xpiks-qt/Maintenance/xpkscleanupjob.h
+    ../../xpiks-qt/Maintenance/xpkscleanupjob.h \
+    ../../xpiks-qt/Commands/maindelegator.h
 
 INCLUDEPATH += ../../../vendors/tiny-aes
 INCLUDEPATH += ../../../vendors/cpp-libface

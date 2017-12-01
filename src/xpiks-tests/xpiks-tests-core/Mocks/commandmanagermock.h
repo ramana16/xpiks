@@ -22,7 +22,7 @@ namespace Mocks {
         void resetAnyCommandProcessed() { m_AnyCommandProcessed = false; }
         void disableCommands() { m_CanExecuteCommands = false; }
         void enableCommands() { m_CanExecuteCommands = true; }
-        void mockAcceptDeletion() {Commands::CommandManager::removeUnavailableFiles();}
+        void mockAcceptDeletion() { getDelegator()->removeUnavailableFiles();}
 
     public:
         void generateAndAddArtworks(size_t count, bool withVector=true) {

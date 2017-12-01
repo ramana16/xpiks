@@ -31,6 +31,7 @@ namespace Commands {
         MetadataIO::WeakArtworksSnapshot affectedItems;
 
         CommandManager *commandManager = (CommandManager*)commandManagerInterface;
+        auto *xpiks = commandManager->getDelegator();
 
         size_t size = m_RawSnapshot.size();
         indicesToUpdate.reserve((int)size);
@@ -57,7 +58,7 @@ namespace Commands {
                             getCommandID(),
                             artworksBackups, indicesToUpdate,
                             UndoRedo::CombinedEditModificationType));
-            commandManager->recordHistoryItem(modifyArtworksItem);
+            xpiks->recordHistoryItem(modifyArtworksItem);
         }
 
         std::shared_ptr<ICommandResult> result(new DeleteKeywordsCommandResult(affectedItems, indicesToUpdate));
@@ -66,15 +67,16 @@ namespace Commands {
 
     void DeleteKeywordsCommandResult::afterExecCallback(const ICommandManager *commandManagerInterface) const {
         CommandManager *commandManager = (CommandManager*)commandManagerInterface;
+        auto *xpiks = commandManager->getDelegator();
 
         if (!m_IndicesToUpdate.isEmpty()) {
-            commandManager->updateArtworksAtIndices(m_IndicesToUpdate);
+            xpiks->updateArtworksAtIndices(m_IndicesToUpdate);
         }
 
         if (!m_AffectedItems.empty()) {
-            commandManager->saveArtworksBackups(m_AffectedItems);
-            commandManager->submitForSpellCheck(m_AffectedItems);
-            commandManager->submitForWarningsCheck(m_AffectedItems);
+            xpiks->saveArtworksBackups(m_AffectedItems);
+            xpiks->submitForSpellCheck(m_AffectedItems);
+            xpiks->submitForWarningsCheck(m_AffectedItems);
         }
     }
 }

@@ -20,6 +20,7 @@ namespace Models {
 
 namespace Commands {
     class CommandManager;
+    class MainDelegator;
 }
 
 namespace QuickBuffer {
@@ -52,6 +53,9 @@ namespace QuickBuffer {
 
         virtual void spellCheck() override;
         virtual void update() override;
+
+    private:
+        Commands::MainDelegator *xpiks();
 
     private:
         Commands::CommandManager * const m_CommandManager;

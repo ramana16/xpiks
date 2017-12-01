@@ -26,6 +26,8 @@ public:
     virtual void teardown() { m_CommandManager->cleanup(); }
 
 protected:
+    Commands::MainDelegator *xpiks() { return m_CommandManager->getDelegator(); }
+
     QUrl getFilePathForTest(const QString &prefix) {
         return QUrl::fromLocalFile(findFullPathForTests(prefix));
     }

@@ -404,7 +404,7 @@ namespace Models {
         sync();
 
         if (value) {
-            m_CommandManager->saveSessionInBackground();
+            xpiks()->saveSessionInBackground();
         }
     }
 
@@ -606,12 +606,12 @@ namespace Models {
 #if defined(Q_OS_LINUX)
         if (m_DictsPathChanged) {
             // TODO: check if need to restart depending on path
-            m_CommandManager->restartSpellChecking();
+            xpiks()->restartSpellChecking();
             m_DictsPathChanged = false;
         }
 #endif
 
-        m_CommandManager->autoDiscoverExiftool();
+        xpiks()->autoDiscoverExiftool();
 
         emit keywordSizeScaleChanged(m_KeywordSizeScale);
         emit settingsUpdated();

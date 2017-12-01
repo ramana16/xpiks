@@ -306,9 +306,9 @@ namespace Suggestion {
             engine->submitQuery(query);
 
             if (dynamic_cast<LocalLibraryQueryEngine*>(engine) == NULL) {
-                m_CommandManager->reportUserAction(Connectivity::UserAction::SuggestionRemote);
+                xpiks()->reportUserAction(Connectivity::UserAction::SuggestionRemote);
             } else {
-                m_CommandManager->reportUserAction(Connectivity::UserAction::SuggestionLocal);
+                xpiks()->reportUserAction(Connectivity::UserAction::SuggestionLocal);
             }
         }
     }

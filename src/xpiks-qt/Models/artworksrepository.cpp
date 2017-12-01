@@ -178,8 +178,8 @@ namespace Models {
             if (m_CommandManager != nullptr)
 #endif
             {
-                m_CommandManager->addToRecentDirectories(absolutePath);
-                m_CommandManager->cleanupOldXpksBackups(absolutePath);
+                xpiks()->addToRecentDirectories(absolutePath);
+                xpiks()->cleanupOldXpksBackups(absolutePath);
             }
         }
 

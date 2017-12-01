@@ -16,6 +16,7 @@
 #include "../Commands/expandpresetcommand.h"
 #include "../Models/artworkelement.h"
 #include "../Commands/deletekeywordscommand.h"
+#include "../Commands/maindelegator.h"
 
 namespace QuickBuffer {
     CurrentEditableArtwork::CurrentEditableArtwork(Models::ArtworkMetadata *artworkMetadata, size_t originalIndex, Commands::CommandManager * const commandManager):
@@ -112,10 +113,14 @@ namespace QuickBuffer {
     }
 
     void CurrentEditableArtwork::spellCheck() {
-        m_CommandManager->submitItemForSpellCheck(m_ArtworkMetadata->getBasicModel());
+        xpiks()->submitItemForSpellCheck(m_ArtworkMetadata->getBasicModel());
     }
 
     void CurrentEditableArtwork::update() {
-        m_CommandManager->updateArtworksAtIndices(QVector<int>() << (int)m_OriginalIndex);
+        xpiks()->updateArtworksAtIndices(QVector<int>() << (int)m_OriginalIndex);
+    }
+
+    Commands::MainDelegator *CurrentEditableArtwork::xpiks() {
+        return m_CommandManager->getDelegator();
     }
 }

@@ -25,6 +25,7 @@ namespace Commands {
     std::shared_ptr<Commands::ICommandResult> FindAndReplaceCommand::execute(const ICommandManager *commandManagerInterface) const {
         LOG_INFO << "Replacing [" << m_ReplaceWhat << "] to [" << m_ReplaceTo << "] in" << m_RawSnapshot.size() << "item(s)";
         CommandManager *commandManager = (CommandManager *)commandManagerInterface;
+        auto *xpiks = commandManager->getDelegator();
 
         std::vector<UndoRedo::ArtworkMetadataBackup> artworksBackups;
 
@@ -60,7 +61,7 @@ namespace Commands {
                             getCommandID(),
                             artworksBackups, indicesToUpdate,
                             UndoRedo::CombinedEditModificationType));
-            commandManager->recordHistoryItem(modifyArtworksItem);
+            xpiks->recordHistoryItem(modifyArtworksItem);
         }
 
         std::shared_ptr<ICommandResult> result(new FindAndReplaceCommandResult(itemsToSave, indicesToUpdate));
@@ -69,15 +70,16 @@ namespace Commands {
 
     void FindAndReplaceCommandResult::afterExecCallback(const Commands::ICommandManager *commandManagerInterface) const {
         CommandManager *commandManager = (CommandManager *)commandManagerInterface;
+        auto *xpiks = commandManager->getDelegator();
 
         if (!m_IndicesToUpdate.isEmpty()) {
-            commandManager->updateArtworksAtIndices(m_IndicesToUpdate);
+            xpiks->updateArtworksAtIndices(m_IndicesToUpdate);
         }
 
         if (!m_ItemsToSave.empty()) {
-            commandManager->saveArtworksBackups(m_ItemsToSave);
-            commandManager->submitForSpellCheck(m_ItemsToSave);
-            commandManager->submitForWarningsCheck(m_ItemsToSave);
+            xpiks->saveArtworksBackups(m_ItemsToSave);
+            xpiks->submitForSpellCheck(m_ItemsToSave);
+            xpiks->submitForWarningsCheck(m_ItemsToSave);
         }
     }
 }

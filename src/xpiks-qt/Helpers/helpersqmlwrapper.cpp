@@ -91,7 +91,7 @@ namespace Helpers {
     }
 
     void Helpers::HelpersQmlWrapper::reportOpen() {
-        m_CommandManager->reportUserAction(Connectivity::UserAction::Open);
+        xpiks()->reportUserAction(Connectivity::UserAction::Open);
     }
 
     void HelpersQmlWrapper::setProgressIndicator(QQuickWindow *window) {
@@ -143,7 +143,7 @@ namespace Helpers {
     }
 
     void HelpersQmlWrapper::removeUnavailableFiles() {
-        m_CommandManager->removeUnavailableFiles();
+        xpiks()->removeUnavailableFiles();
     }
 
     bool HelpersQmlWrapper::isVector(const QString &path) const {

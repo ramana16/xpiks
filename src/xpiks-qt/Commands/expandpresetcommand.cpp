@@ -23,6 +23,7 @@ namespace Commands {
         LOG_INFO << "Expand preset" << m_PresetID;
 
         CommandManager *commandManager = (CommandManager*)commandManagerInterface;
+        auto *xpiks = commandManager->getDelegator();
         auto *presetsModel = commandManager->getPresetsModel();
         QStringList keywords;
 
@@ -48,9 +49,9 @@ namespace Commands {
         }
 
         if (affectedArtworks.size() > 0) {
-            commandManager->submitForSpellCheck(affectedArtworks);
-            commandManager->submitForWarningsCheck(affectedArtworks);
-            commandManager->saveArtworksBackups(affectedArtworks);
+            xpiks->submitForSpellCheck(affectedArtworks);
+            xpiks->submitForWarningsCheck(affectedArtworks);
+            xpiks->saveArtworksBackups(affectedArtworks);
 
             std::unique_ptr<UndoRedo::IHistoryItem> modifyArtworksItem(
                         new UndoRedo::ModifyArtworksHistoryItem(
@@ -58,7 +59,7 @@ namespace Commands {
                             artworksBackups,
                             QVector<int>() << indexToUpdate,
                             UndoRedo::PasteModificationType));
-            commandManager->recordHistoryItem(modifyArtworksItem);
+            xpiks->recordHistoryItem(modifyArtworksItem);
         } else {
             LOG_WARNING << "Failed to expand preset";
         }
