@@ -481,8 +481,16 @@ namespace Models {
     }
 
     void ArtworkMetadata::clearSpellingInfo() {
-        LOG_DEBUG << "#";
+        LOG_INTEGR_TESTS_OR_DEBUG << "#";
         m_SpellCheckInfo.clear();
+    }
+
+    void ArtworkMetadata::resetSpellingInfo() {
+        LOG_DEBUG << "#";
+        m_MetadataModel.resetSpellCheckResults();
+        m_SpellCheckInfo.clear();
+
+        m_MetadataModel.notifySpellCheckResults(Common::SpellCheckFlags::All);
     }
 
     void ArtworkMetadata::doOnTimer() {

@@ -73,6 +73,7 @@ namespace SpellCheck {
         void cancelSpellChecking();
         void spellCheckQueueIsEmpty();
         void serviceAvailable(bool afterRestart);
+        void serviceDisabled();
         void userDictWordsNumberChanged();
         void userDictUpdate(const QStringList &keywords, bool overwritten);
         void userDictCleared();

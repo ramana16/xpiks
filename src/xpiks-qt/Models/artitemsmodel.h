@@ -193,6 +193,7 @@ namespace Models {
         void setAllItemsSelected(bool selected);
         int attachVectors(const QHash<QString, QHash<QString, QString> > &vectorsPaths, QVector<int> &indicesToUpdate) const;
         void unlockAllForIO();
+        void resetSpellCheckResults();
 
     public:
         // update hub related

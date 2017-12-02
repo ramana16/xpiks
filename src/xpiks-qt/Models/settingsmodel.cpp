@@ -15,6 +15,7 @@
 #include "../Maintenance/maintenanceservice.h"
 #include "../MetadataIO/metadataiocoordinator.h"
 #include "../Commands/commandmanager.h"
+#include "filteredartitemsproxymodel.h"
 
 #ifdef Q_OS_MAC
 #  define DEFAULT_EXIFTOOL "/usr/bin/exiftool"
@@ -139,6 +140,7 @@ namespace Models {
         m_CheckForUpdates(DEFAULT_CHECK_FOR_UPDATES),
         m_AutoDownloadUpdates(DEFAULT_AUTO_DOWNLOAD_UPDATES),
         m_DictsPathChanged(false),
+        m_UseSpellCheckChanged(false),
         m_AutoFindVectors(DEFAULT_AUTO_FIND_VECTORS),
         m_UseKeywordsAutoComplete(DEFAULT_USE_KEYWORDS_AUTO_COMPLETE),
         m_UsePresetsAutoComplete(DEFAULT_USE_PRESETS_AUTO_COMPLETE),
@@ -447,6 +449,8 @@ namespace Models {
         deserializeProxyFromSettings(stringValue(proxyHost, DEFAULT_PROXY_HOST));
 
         setAutoCacheImages(boolValue(cacheImagesAutomatically, DEFAULT_AUTO_CACHE_IMAGES));
+
+        resetChangeStates();
     }
 
     void SettingsModel::doMoveSettingsFromQSettingsToJson() {
@@ -553,6 +557,8 @@ namespace Models {
 #endif
 
         sync();
+
+        resetChangeStates();
     }
 
     void SettingsModel::doSaveAllValues() {
@@ -611,10 +617,26 @@ namespace Models {
         }
 #endif
 
+        if (m_UseSpellCheckChanged) {
+            if (!getUseSpellCheck()) {
+                xpiks()->disableSpellChecking();
+            } else {
+                auto *filteredModel = m_CommandManager->getFilteredArtItemsModel();
+                filteredModel->spellCheckAllItems();
+            }
+        }
+
         xpiks()->autoDiscoverExiftool();
+
+        resetChangeStates();
 
         emit keywordSizeScaleChanged(m_KeywordSizeScale);
         emit settingsUpdated();
+    }
+
+    void SettingsModel::resetChangeStates() {
+        m_DictsPathChanged = false;
+        m_UseSpellCheckChanged = false;
     }
 
     QString SettingsModel::getWhatsNewText() const {

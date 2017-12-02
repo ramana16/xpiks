@@ -1180,6 +1180,15 @@ namespace Models {
         }
     }
 
+    void ArtItemsModel::resetSpellCheckResults() {
+        LOG_DEBUG << "#";
+        const size_t size = m_ArtworkList.size();
+        for (size_t i = 0; i < size; i++) {
+            ArtworkMetadata *artwork = accessArtwork(i);
+            artwork->resetSpellingInfo();
+        }
+    }
+
     void ArtItemsModel::processUpdateRequests(const std::vector<std::shared_ptr<QMLExtensions::ArtworkUpdateRequest> > &updateRequests) {
         LOG_INFO << updateRequests.size() << "requests to process";
 

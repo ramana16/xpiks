@@ -121,6 +121,7 @@ namespace Models {
         void doResetToDefault();
         void doSaveAllValues();
         void afterSaveHandler();
+        void resetChangeStates();
 
     private:
         inline void setValue(const char *key, const QJsonValue &value) {
@@ -470,6 +471,7 @@ namespace Models {
 
             m_UseSpellCheck = value;
             emit useSpellCheckChanged(value);
+            m_UseSpellCheckChanged = true;
         }
 
         void setDetectDuplicates(bool value)  {
@@ -655,6 +657,7 @@ namespace Models {
         bool m_CheckForUpdates;
         bool m_AutoDownloadUpdates;
         bool m_DictsPathChanged;
+        bool m_UseSpellCheckChanged;
         bool m_AutoFindVectors;
         bool m_UseKeywordsAutoComplete;
         bool m_UsePresetsAutoComplete;

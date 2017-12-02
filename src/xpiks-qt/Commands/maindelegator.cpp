@@ -642,6 +642,14 @@ namespace Commands {
         }
     }
 
+    void MainDelegator::disableSpellChecking() {
+        LOG_DEBUG << "#";
+        auto *artItemsModel = m_CommandManager->getArtItemsModel();
+        if (artItemsModel) {
+            artItemsModel->resetSpellCheckResults();
+        }
+    }
+
     void MainDelegator::generateCompletions(const QString &prefix, Common::BasicKeywordsModel *source) const {
     #ifndef CORE_TESTS
         auto *autoCompleteService = m_CommandManager->getAutoCompleteService();

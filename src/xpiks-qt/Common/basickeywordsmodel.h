@@ -111,6 +111,7 @@ namespace Common {
         virtual void afterReplaceCallback();
 
     public:
+        void resetSpellCheckResults();
         bool containsKeyword(const QString &searchTerm, Common::SearchFlags searchFlags=Common::SearchFlags::ExactKeywords);
         bool containsKeywords(const QStringList &keywordsList);
         virtual bool isEmpty();

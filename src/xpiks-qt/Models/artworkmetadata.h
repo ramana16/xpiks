@@ -208,6 +208,7 @@ namespace Models {
         virtual bool hasKeywords(const QStringList &keywordsList) override;
         void deepDisconnect();
         void clearSpellingInfo();
+        void resetSpellingInfo();
 
 #ifdef INTEGRATION_TESTS
     public:

@@ -439,6 +439,10 @@ namespace Common {
         emit hasDuplicatesChanged();
     }
 
+    void BasicKeywordsModel::resetSpellCheckResults() {
+        m_Impl->resetSpellCheckResults();
+    }
+
     bool BasicKeywordsModel::containsKeyword(const QString &searchTerm, Common::SearchFlags searchFlags) {
         return m_Impl->containsKeyword(searchTerm, searchFlags);
     }

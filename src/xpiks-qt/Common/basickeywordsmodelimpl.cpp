@@ -341,6 +341,13 @@ namespace Common {
         return generateStringListUnsafe();
     }
 
+    void BasicKeywordsModelImpl::resetSpellCheckResults() {
+        QWriteLocker writeLocker(&m_KeywordsLock);
+        Q_UNUSED(writeLocker);
+
+        resetSpellCheckResultsUnsafe();
+    }
+
     void BasicKeywordsModelImpl::setKeywordsSpellCheckResults(const std::vector<std::shared_ptr<SpellCheck::SpellCheckQueryItem> > &items) {
         LOG_DEBUG << items.size() << "results";
 
