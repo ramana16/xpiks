@@ -37,8 +37,6 @@ Rectangle {
     signal dialogDestruction();
     Component.onDestruction: dialogDestruction();
 
-    Keys.onEscapePressed: closePopup()
-
     function onAutoCompleteClose() {
         autoCompleteBox = undefined
     }
@@ -339,6 +337,24 @@ Rectangle {
             }
         }
     }
+
+    Keys.onPressed: {
+        var withMeta = (event.modifiers & Qt.ControlModifier) ||
+                (event.modifiers & Qt.MetaModifier);
+        var withAlt = (event.modifiers & Qt.AltModifier);
+
+        if ((event.key === Qt.Key_Left) && (withMeta && withAlt)) {
+            reloadItemEditing(rosterListView.currentIndex - 1)
+            event.accepted = true;
+        }
+
+        if ((event.key === Qt.Key_Right) && (withMeta && withAlt)) {
+            reloadItemEditing(rosterListView.currentIndex + 1)
+            event.accepted = true;
+        }
+    }
+
+    Keys.onEscapePressed: closePopup()
 
     Component.onCompleted: {
         focus = true
@@ -771,13 +787,15 @@ Rectangle {
                                     onCursorRectangleChanged: titleFlick.ensureVisible(cursorRectangle)
 
                                     Keys.onPressed: {
-                                        if(event.matches(StandardKey.Paste)) {
+                                        if (event.matches(StandardKey.Paste)) {
                                             var clipboardText = clipboard.getText();
                                             if (Common.safeInsert(titleTextInput, clipboardText)) {
                                                 event.accepted = true
                                             }
                                         } else if ((event.key === Qt.Key_Return) || (event.key === Qt.Key_Enter)) {
                                             event.accepted = true
+                                        } else {
+                                            event.accepted = false
                                         }
                                     }
                                 }
