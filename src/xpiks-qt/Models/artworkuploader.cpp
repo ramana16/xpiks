@@ -114,7 +114,8 @@ namespace Models {
     }
 
     void ArtworkUploader::uploaderPercentChanged(double percent) {
-        setPercent((int)percent);
+        int percentage = percent < 1.0 ? 1.0 : percent;
+        setPercent((int)percentage);
         LOG_DEBUG << "Overall progress =" << percent;
 
         UploadInfoRepository *uploadInfoRepository = m_CommandManager->getUploadInfoRepository();

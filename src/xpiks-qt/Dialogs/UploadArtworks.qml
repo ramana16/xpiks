@@ -741,6 +741,22 @@ Item {
                                     id: showPasswordCheckBox
                                     text: i18.n + qsTr("Show password")
                                     checked: false
+
+                                    onCheckedChanged: {
+                                        if (checked) {
+                                            passwordTimer.start()
+                                        }
+                                    }
+                                }
+
+                                Timer {
+                                    id: passwordTimer
+                                    repeat: false
+                                    triggeredOnStart: false
+                                    interval: 5000
+                                    onTriggered: {
+                                        showPasswordCheckBox.checked = false
+                                    }
                                 }
 
                                 Item {

@@ -181,8 +181,10 @@ namespace Models {
                 return uploadInfo->getIsSelected();
             case ZipBeforeUploadRole:
                 return uploadInfo->getZipBeforeUpload();
-            case PercentRole:
-                return uploadInfo->getPercent();
+            case PercentRole: {
+            double percent = uploadInfo->getPercent();
+            return percent < 1.0 ? 1.0 : percent;
+        }
             /*case FtpPassiveModeRole:
                 return uploadInfo->getFtpPassiveMode();*/
             case DisableFtpPassiveModeRole:
