@@ -36,9 +36,9 @@ Item {
     ListModel {
         id: presetsModel
 
-        ListElement { name: "Jane"; keywordscount: 1 }
-        ListElement { name: "Harry"; keywordscount: 2 }
-        ListElement { name: "Wendy"; keywordscount: 3 }
+        ListElement { name: "Jane"; keywordscount: 1; isnamevalid: true }
+        ListElement { name: "Harry"; keywordscount: 2; isnamevalid: true }
+        ListElement { name: "Wendy"; keywordscount: 3; isnamevalid: true }
 
         function getKeywordsModel(index) { return {} }
     }
