@@ -157,7 +157,7 @@ namespace Commands {
         LOG_DEBUG << "#";
         int importID = 0;
 
-    #ifndef CORE_TESTS        
+    #ifndef CORE_TESTS
         auto *metadataIOService = m_CommandManager->getMetadataIOService();
         auto *metadataIOCoordinator = m_CommandManager->getMetadataIOCoordinator();
         quint32 batchID = 0;
@@ -179,9 +179,9 @@ namespace Commands {
     int MainDelegator::reimportMetadata(const MetadataIO::ArtworksSnapshot &snapshot) const {
         LOG_DEBUG << "#";
         int importID = 0;
-        auto *metadataIOCoordinator = m_CommandManager->getMetadataIOCoordinator();
 
     #ifndef CORE_TESTS
+        auto *metadataIOCoordinator = m_CommandManager->getMetadataIOCoordinator();
         if (metadataIOCoordinator != nullptr) {
             importID = metadataIOCoordinator->readMetadataExifTool(snapshot, INVALID_BATCH_ID);
         }
@@ -195,10 +195,10 @@ namespace Commands {
     void MainDelegator::writeMetadata(const MetadataIO::WeakArtworksSnapshot &artworks, bool useBackups) const {
         LOG_DEBUG << "#";
 
+    #ifndef CORE_TESTS
         auto *metadataIOService = m_CommandManager->getMetadataIOService();
         auto *metadataIOCoordinator = m_CommandManager->getMetadataIOCoordinator();
 
-    #ifndef CORE_TESTS
         if (metadataIOService != nullptr) {
             metadataIOService->writeArtworks(artworks);
         }
@@ -215,9 +215,10 @@ namespace Commands {
 
     void MainDelegator::wipeAllMetadata(const MetadataIO::ArtworksSnapshot &artworks, bool useBackups) const {
         LOG_DEBUG << "#";
-        auto *metadataIOCoordinator = m_CommandManager->getMetadataIOCoordinator();
 
     #ifndef CORE_TESTS
+        auto *metadataIOCoordinator = m_CommandManager->getMetadataIOCoordinator();
+
         if (metadataIOCoordinator != nullptr) {
             metadataIOCoordinator->wipeAllMetadataExifTool(artworks, useBackups);
         }
@@ -574,7 +575,7 @@ namespace Commands {
         Common::flag_t flags = 0;
         Common::SetFlag(flags, Commands::AddArtworksCommand::FlagIsSessionRestore);
 
-    #if !defined(CORE_TESTS) && !defined(INTEGRATION_TESTS)        
+    #if !defined(CORE_TESTS) && !defined(INTEGRATION_TESTS)
         auto *settingsModel = m_CommandManager->getSettingsModel();
         auto *switcherModel = m_CommandManager->getSwitcherModel();
 

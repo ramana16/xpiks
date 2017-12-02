@@ -14,10 +14,9 @@
 #include <QString>
 #include <QVector>
 #include <QPair>
+#include "presetmodel.h"
 
 namespace KeywordsPresets {
-    typedef unsigned int ID_t;
-
     class IPresetsManager {
     public:
         virtual ~IPresetsManager() {}

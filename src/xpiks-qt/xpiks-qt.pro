@@ -413,7 +413,9 @@ HEADERS += \
     UndoRedo/removedirectoryitem.h \
     Common/basickeywordsmodelimpl.h \
     Maintenance/xpkscleanupjob.h \
-    Commands/maindelegator.h
+    Commands/maindelegator.h \
+    KeywordsPresets/presetmodel.h \
+    KeywordsPresets/groupmodel.h
 
 DISTFILES += \
     Components/CloseIcon.qml \

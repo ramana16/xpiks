@@ -11,6 +11,7 @@
 #include "presetkeywordsmodel.h"
 #include "../Commands/commandmanager.h"
 #include "../Helpers/stringhelper.h"
+#include "presetmodel.h"
 
 #define MAX_SAVE_PAUSE_RESTARTS 5
 #define PRESET_SAVE_TIMEOUT 3000
@@ -588,6 +589,31 @@ namespace KeywordsPresets {
         m_PresetsConfig.sync();
     }
 
+    void PresetKeywordsModel::makeTitleValid(int row) {
+        LOG_DEBUG << row;
+
+        QWriteLocker locker(&m_PresetsLock);
+        Q_UNUSED(locker);
+
+        const QString originalName = m_PresetsList[row]->m_PresetName;
+        QString currentName = originalName;
+        int attemptNumber = 0;
+
+        while (hasDuplicateNamesUnsafe(currentName, row)) {
+            LOG_DEBUG << "Preset" << currentName << "already exists";
+            attemptNumber++;
+            currentName = QString("%1 (%2)").arg(originalName).arg(attemptNumber);
+        }
+
+        if (currentName != originalName) {
+            m_PresetsList[row]->m_PresetName = currentName;
+            m_PresetsList[row]->setIsNameDuplicateFlag(false);
+            justChanged();
+            QModelIndex index = this->index(row);
+            emit dataChanged(index, index, QVector<int>() << NameRole << IsNameValidRole);
+        }
+    }
+
     void PresetKeywordsModel::loadModelFromConfig() {
         beginResetModel();
         {
@@ -655,6 +681,24 @@ namespace KeywordsPresets {
         return lastID;
     }
 
+    bool PresetKeywordsModel::hasDuplicateNamesUnsafe(const QString &presetName, size_t index) {
+        if (presetName.isEmpty()) { return false; }
+
+        bool anyDuplicate = false;
+
+        const size_t size = m_PresetsList.size();
+        for (size_t i = 0; i < size; i++) {
+            if (i == index) { continue; }
+
+            if (QString::compare(m_PresetsList[i]->m_PresetName, presetName, Qt::CaseInsensitive) == 0) {
+                anyDuplicate = true;
+                break;
+            }
+        }
+
+        return anyDuplicate;
+    }
+
     int PresetKeywordsModel::rowCount(const QModelIndex &parent) const {
         Q_UNUSED(parent);
         return (int)m_PresetsList.size();
@@ -680,6 +724,8 @@ namespace KeywordsPresets {
             return item->m_GroupID;
         case IdRole:
             return item->m_ID;
+        case IsNameValidRole:
+            return !item->getIsNameDuplicateFlag();
         default:
             return QVariant();
         }
@@ -701,8 +747,10 @@ namespace KeywordsPresets {
             if (name != sanitized) {
                 LOG_INFO << "Preset" << row << name << "renamed to" << sanitized;
                 m_PresetsList[row]->m_PresetName = sanitized;
+                bool isDuplicate = hasDuplicateNamesUnsafe(name, row);
+                m_PresetsList[row]->setIsNameDuplicateFlag(isDuplicate);
                 justChanged();
-                emit dataChanged(index, index, QVector<int>() << NameRole);
+                emit dataChanged(index, index, QVector<int>() << NameRole << IsNameValidRole);
                 return true;
             }
 
@@ -725,6 +773,16 @@ namespace KeywordsPresets {
         return false;
     }
 
+    Qt::ItemFlags PresetKeywordsModel::flags(const QModelIndex &index) const {
+        int row = index.row();
+
+        if (row < 0 || row >= getPresetsCount()) {
+            return Qt::ItemIsEnabled;
+        }
+
+        return QAbstractItemModel::flags(index) | Qt::ItemIsEditable;
+    }
+
     QHash<int, QByteArray> PresetKeywordsModel::roleNames() const {
         QHash<int, QByteArray> roles = QAbstractListModel::roleNames();
         roles[NameRole] = "name";
@@ -734,6 +792,7 @@ namespace KeywordsPresets {
         roles[GroupRole] = "group";
         roles[EditGroupRole] = "editgroup";
         roles[IdRole] = "pid";
+        roles[IsNameValidRole] = "isnamevalid";
         return roles;
     }
 

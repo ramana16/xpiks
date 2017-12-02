@@ -492,7 +492,9 @@ HEADERS += \
     autoimporttest.h \
     ../../xpiks-qt/Common/basickeywordsmodelimpl.h \
     ../../xpiks-qt/Maintenance/xpkscleanupjob.h \
-    ../../xpiks-qt/Commands/maindelegator.h
+    ../../xpiks-qt/Commands/maindelegator.h \
+    ../../xpiks-qt/KeywordsPresets/groupmodel.h \
+    ../../xpiks-qt/KeywordsPresets/presetmodel.h
 
 INCLUDEPATH += ../../../vendors/tiny-aes
 INCLUDEPATH += ../../../vendors/cpp-libface

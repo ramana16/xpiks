@@ -14,8 +14,7 @@
 #include <vector>
 #include "../Helpers/localconfig.h"
 #include "presetgroupsmodel.h"
-
-#define DEFAULT_GROUP_ID -1
+#include "../Common/defines.h"
 
 namespace Helpers {
     class AsyncCoordinator;

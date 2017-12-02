@@ -331,5 +331,7 @@ HEADERS += \
     ../../xpiks-qt/KeywordsPresets/presetgroupsmodel.h \
     ../../xpiks-qt/UndoRedo/removedirectoryitem.h \
     ../../xpiks-qt/Common/basickeywordsmodelimpl.h \
-    ../../xpiks-qt/Commands/maindelegator.h
+    ../../xpiks-qt/Commands/maindelegator.h \
+    ../../xpiks-qt/KeywordsPresets/groupmodel.h \
+    ../../xpiks-qt/KeywordsPresets/presetmodel.h
 

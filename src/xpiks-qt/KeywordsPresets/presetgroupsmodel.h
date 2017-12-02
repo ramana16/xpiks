@@ -16,18 +16,9 @@
 #include <QReadWriteLock>
 #include <vector>
 #include <memory>
+#include "groupmodel.h"
 
 namespace KeywordsPresets {
-    struct GroupModel {
-        GroupModel(const QString &name, int groupID):
-            m_Name(name),
-            m_GroupID(groupID)
-        { }
-
-        QString m_Name;
-        int m_GroupID;
-    };
-
     struct PresetGroupData;
     class PresetKeywordsGroupModel;
     class PresetKeywordsModel;

@@ -296,7 +296,8 @@ Item {
                     Rectangle {
                         id: titleWrapper
                         border.width: titleText.activeFocus ? 1 : 0
-                        border.color: uiColors.artworkActiveColor
+                        property bool isValid: presetNamesListView.currentItem ? presetNamesListView.currentItem.myData.isnamevalid : false
+                        border.color: isValid ? uiColors.artworkActiveColor : uiColors.artworkModifiedColor
                         anchors.left: parent.left
                         anchors.right: parent.right
                         color: enabled ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
@@ -327,6 +328,8 @@ Item {
                                         presetNamesListView.currentItem.myData.editname = qsTr("Untitled")
                                     }
                                 }
+
+                                presetsModel.makeTitleValid(presetNamesListView.currentIndex)
                             }
 
                             onActiveFocusChanged: {

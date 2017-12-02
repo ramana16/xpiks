@@ -17,51 +17,15 @@
 #include <QReadWriteLock>
 #include <QAtomicInt>
 #include <functional>
-#include "../Common/basickeywordsmodel.h"
 #include "../Common/baseentity.h"
 #include "../Common/abstractlistmodel.h"
 #include "../Common/delayedactionentity.h"
 #include "ipresetsmanager.h"
 #include "presetkeywordsmodelconfig.h"
 #include "presetgroupsmodel.h"
-#include "../Common/hold.h"
 
 namespace KeywordsPresets {
-    struct PresetModel {
-        PresetModel(ID_t id):
-            m_KeywordsModel(m_Hold),
-            m_PresetName(QObject::tr("Untitled")),
-            m_ID(id),
-            m_GroupID(DEFAULT_GROUP_ID)
-        {
-        }
-
-        PresetModel(ID_t id, const QString &name):
-            m_KeywordsModel(m_Hold),
-            m_PresetName(name),
-            m_ID(id),
-            m_GroupID(DEFAULT_GROUP_ID)
-        {}
-
-        PresetModel(ID_t id, const QString &name, const QStringList &keywords, int groupID):
-            m_KeywordsModel(m_Hold),
-            m_PresetName(name),
-            m_ID(id),
-            m_GroupID(groupID)
-        {
-            m_KeywordsModel.setKeywords(keywords);
-        }
-
-        void acquire() { m_Hold.acquire(); }
-        bool release() { return m_Hold.release(); }
-
-        Common::BasicKeywordsModel m_KeywordsModel;
-        QString m_PresetName;
-        ID_t m_ID;
-        int m_GroupID;
-        Common::Hold m_Hold;
-    };
-
+    struct PresetModel;
     class FilteredPresetKeywordsModel;
 
     class PresetKeywordsModel:
@@ -144,7 +108,8 @@ namespace KeywordsPresets {
             KeywordsStringRole,
             GroupRole,
             EditGroupRole,
-            IdRole
+            IdRole,
+            IsNameValidRole
         };
 
     signals:
@@ -155,6 +120,7 @@ namespace KeywordsPresets {
         virtual int rowCount(const QModelIndex &parent=QModelIndex()) const override;
         virtual QVariant data(const QModelIndex &index, int role=Qt::DisplayRole) const override;
         virtual bool setData(const QModelIndex &index, const QVariant &value, int role=Qt::EditRole) override;
+        virtual Qt::ItemFlags flags(const QModelIndex &index) const override;
 
     protected:
         virtual QHash<int, QByteArray> roleNames() const override;
@@ -171,6 +137,7 @@ namespace KeywordsPresets {
         Q_INVOKABLE void plainTextEdit(int index, const QString &rawKeywords, bool spaceIsSeparator);
         Q_INVOKABLE QObject *getKeywordsModel(int index);
         Q_INVOKABLE void saveToConfig();
+        Q_INVOKABLE void makeTitleValid(int row);
 
     private:
         /*Q_INVOKABLE*/ void loadModelFromConfig();
@@ -185,6 +152,7 @@ namespace KeywordsPresets {
         void doLoadFromConfig();
         void removeAllPresets();
         int generateNextID();
+        bool hasDuplicateNamesUnsafe(const QString &presetName, size_t index);
 
         // DelayedActionEntity implementation
     protected:

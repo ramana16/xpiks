@@ -51,7 +51,7 @@ Exiv2InitHelper::~Exiv2InitHelper() {
 // helper from libkexiv2
 bool isUtf8(const char * const buffer) {
     int i, n;
-    register unsigned char c;
+    unsigned char c;
     bool gotone = false;
 
     if (!buffer) {
