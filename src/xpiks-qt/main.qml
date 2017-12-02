@@ -118,6 +118,8 @@ ApplicationWindow {
                                         {
                                             termsText: licenseText
                                         })
+                } else {
+                    licenseMissingDialog.open()
                 }
             } else {
                 helpersWrapper.reportOpen()
@@ -973,8 +975,14 @@ ApplicationWindow {
     }
 
     MessageDialog {
-        id: configExitDialog
+        id: licenseMissingDialog
+        title: i18.n + qsTr("Warning")
+        text: i18.n + qsTr("Xpiks installation is corrupted.\nPlease reinstall Xpiks and try again.")
+        onAccepted: shutdownEverything()
+    }
 
+    MessageDialog {
+        id: configExitDialog
         title: i18.n + qsTr("Confirmation")
         text: i18.n + qsTr("You have some artworks modified. Really exit?")
         standardButtons: StandardButton.Yes | StandardButton.No
