@@ -1669,28 +1669,6 @@ ApplicationWindow {
                 }
             }
 
-            StyledText {
-                text: "|"
-                isActive: false
-                verticalAlignment: Text.AlignVCenter
-            }
-
-            StyledLink {
-                text: i18.n + getOriginalText()
-                verticalAlignment: Text.AlignVCenter
-                color: artItemsModel.modifiedArtworksCount > 0 ? uiColors.artworkModifiedColor : uiColors.labelInactiveForeground
-
-                function getOriginalText() {
-                    return artItemsModel.modifiedArtworksCount > 1 ? qsTr("%1 modified items").arg(artItemsModel.modifiedArtworksCount) : (artItemsModel.modifiedArtworksCount === 1 ? qsTr("1 modified item") : qsTr("No modified items"))
-                }
-
-                onClicked: {
-                    if (artItemsModel.modifiedArtworksCount > 0) {
-                        filteredArtItemsModel.searchTerm = "x:modified"
-                    }
-                }
-            }
-
             Item {
                 width: 20
             }

@@ -559,6 +559,9 @@ Item {
                         }
 
                         filterWrapper.userOpened = !filterWrapper.userOpened
+                        if (filterWrapper.userOpened) {
+                            filterText.forceActiveFocus()
+                        }
                     }
                 }
             }
@@ -630,6 +633,7 @@ Item {
                 selectionColor: uiColors.inputInactiveForeground
                 selectedTextColor: uiColors.whiteColor
                 color: uiColors.inputInactiveForeground
+                focus: true
 
                 onAccepted: {
                     filteredArtItemsModel.searchTerm = text
