@@ -516,6 +516,27 @@ namespace KeywordsPresets {
         }
     }
 
+    bool PresetKeywordsModel::appendKeyword(int index, const QString &keyword) {
+        LOG_INFO << "index" << index << "keyword" << keyword;
+        bool added = false;
+
+        if (0 <= index && index < getPresetsCount()) {
+            auto *preset = m_PresetsList.at(index);
+            auto &keywordsModel = preset->m_KeywordsModel;
+            if (keywordsModel.appendKeyword(keyword)) {
+                added = true;
+
+                justChanged();
+                xpiks()->submitKeywordForSpellCheck(&keywordsModel, keywordsModel.getKeywordsCount() - 1);
+
+                QModelIndex indexToUpdate = this->index(index);
+                emit dataChanged(indexToUpdate, indexToUpdate, QVector<int>() << KeywordsCountRole);
+            }
+        }
+
+        return added;
+    }
+
     void PresetKeywordsModel::pasteKeywords(int index, const QStringList &keywords) {
         LOG_INFO << "index" << index << "keywords:" << keywords;
 
@@ -547,21 +568,6 @@ namespace KeywordsPresets {
             keywordsModel.setKeywords(keywords);
             justChanged();
             xpiks()->submitItemForSpellCheck(&keywordsModel);
-
-            QModelIndex indexToUpdate = this->index(index);
-            emit dataChanged(indexToUpdate, indexToUpdate, QVector<int>() << KeywordsCountRole);
-        }
-    }
-
-    void PresetKeywordsModel::appendKeyword(int index, const QString &keyword) {
-        LOG_INFO << "index" << index << "keyword" << keyword;
-
-        if (0 <= index && index < getPresetsCount()) {
-            auto *preset = m_PresetsList.at(index);
-            auto &keywordsModel = preset->m_KeywordsModel;
-            keywordsModel.appendKeyword(keyword);
-            justChanged();
-            xpiks()->submitKeywordForSpellCheck(&keywordsModel, keywordsModel.getKeywordsCount() - 1);
 
             QModelIndex indexToUpdate = this->index(index);
             emit dataChanged(indexToUpdate, indexToUpdate, QVector<int>() << KeywordsCountRole);

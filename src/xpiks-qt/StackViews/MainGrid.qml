@@ -1535,6 +1535,7 @@ Item {
                                             border.color: uiColors.artworkActiveColor
                                             border.width: flv.isFocused ? 1 : 0
                                             color: rowWrapper.isHighlighted ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
+                                            state: ""
 
                                             function removeKeyword(index) {
                                                 artItemsModel.removeKeywordAt(rowWrapper.getIndex(), index)
@@ -1545,7 +1546,11 @@ Item {
                                             }
 
                                             function appendKeyword(keyword) {
-                                                artItemsModel.appendKeyword(rowWrapper.getIndex(), keyword)
+                                                var added = artItemsModel.appendKeyword(rowWrapper.getIndex(), keyword)
+                                                if (!added) {
+                                                    keywordsWrapper.state = "blinked"
+                                                    blinkTimer.start()
+                                                }
                                             }
 
                                             function pasteKeywords(keywords) {
@@ -1678,6 +1683,22 @@ Item {
                                                 anchors.rightMargin: -15
                                                 flickable: flv
                                                 handleColor: rowWrapper.isHighlighted ? uiColors.artworkActiveColor : uiColors.panelSelectedColor
+                                            }
+
+                                            Timer {
+                                                id: blinkTimer
+                                                repeat: false
+                                                interval: 400
+                                                triggeredOnStart: false
+                                                onTriggered: keywordsWrapper.state = ""
+                                            }
+
+                                            states: State {
+                                                name: "blinked";
+                                                PropertyChanges {
+                                                    target: keywordsWrapper;
+                                                    border.width: 0
+                                                }
                                             }
                                         }
 

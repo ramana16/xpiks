@@ -958,6 +958,7 @@ Rectangle {
                             anchors.left: parent.left
                             anchors.right: parent.right
                             color: uiColors.inputBackgroundColor
+                            state: ""
 
                             function removeKeyword(index) {
                                 artworkProxy.removeKeywordAt(index)
@@ -970,8 +971,12 @@ Rectangle {
                             }
 
                             function appendKeyword(keyword) {
-                                artworkProxy.appendKeyword(keyword)
-                                updateChangesText()
+                                if (artworkProxy.appendKeyword(keyword)) {
+                                    updateChangesText()
+                                } else {
+                                    keywordsWrapper.state = "blinked"
+                                    blinkTimer.start()
+                                }
                             }
 
                             function pasteKeywords(keywords) {
@@ -1079,6 +1084,22 @@ Rectangle {
                                 anchors.bottomMargin: -5
                                 anchors.rightMargin: -15
                                 flickable: flv
+                            }
+
+                            Timer {
+                                id: blinkTimer
+                                repeat: false
+                                interval: 400
+                                triggeredOnStart: false
+                                onTriggered: keywordsWrapper.state = ""
+                            }
+
+                            states: State {
+                                name: "blinked";
+                                PropertyChanges {
+                                    target: keywordsWrapper;
+                                    border.width: 0
+                                }
                             }
                         }
 

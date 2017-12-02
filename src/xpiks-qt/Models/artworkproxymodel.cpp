@@ -145,8 +145,8 @@ namespace Models {
         doRemoveLastKeyword(keyword);
     }
 
-    void ArtworkProxyModel::appendKeyword(const QString &keyword) {
-        doAppendKeyword(keyword);
+    bool ArtworkProxyModel::appendKeyword(const QString &keyword) {
+        return doAppendKeyword(keyword);
     }
 
     void ArtworkProxyModel::pasteKeywords(const QStringList &keywords) {

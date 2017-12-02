@@ -858,6 +858,7 @@ Rectangle {
                         Layout.fillHeight: true
                         color: enabled ? uiColors.inputBackgroundColor : uiColors.inputInactiveBackground
                         property var keywordsModel: combinedArtworks.getBasicModel()
+                        state: ""
 
                         function removeKeyword(index) {
                             combinedArtworks.removeKeywordAt(index)
@@ -868,7 +869,11 @@ Rectangle {
                         }
 
                         function appendKeyword(keyword) {
-                            combinedArtworks.appendKeyword(keyword)
+                            var added = combinedArtworks.appendKeyword(keyword)
+                            if (!added) {
+                                keywordsWrapper.state = "blinked"
+                                blinkTimer.start()
+                            }
                         }
 
                         function pasteKeywords(keywordsList) {
@@ -980,6 +985,22 @@ Rectangle {
                             anchors.bottomMargin: -5
                             anchors.rightMargin: -15
                             flickable: flv
+                        }
+
+                        Timer {
+                            id: blinkTimer
+                            repeat: false
+                            interval: 400
+                            triggeredOnStart: false
+                            onTriggered: keywordsWrapper.state = ""
+                        }
+
+                        states: State {
+                            name: "blinked";
+                            PropertyChanges {
+                                target: keywordsWrapper;
+                                border.width: 0
+                            }
                         }
                     }
 

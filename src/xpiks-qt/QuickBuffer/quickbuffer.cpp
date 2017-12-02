@@ -74,9 +74,10 @@ namespace QuickBuffer {
         emit isEmptyChanged();
     }
 
-    void QuickBuffer::appendKeyword(const QString &keyword) {
-        doAppendKeyword(keyword);
+    bool QuickBuffer::appendKeyword(const QString &keyword) {
+        bool added = doAppendKeyword(keyword);
         emit isEmptyChanged();
+        return added;
     }
 
     void QuickBuffer::pasteKeywords(const QStringList &keywords) {

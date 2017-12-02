@@ -458,6 +458,7 @@ Item {
                         border.color: uiColors.artworkActiveColor
                         border.width: flv.isFocused ? 1 : 0
                         color: uiColors.inputBackgroundColor
+                        state: ""
 
                         function removeKeyword(index) {
                             presetsModel.removeKeywordAt(presetNamesListView.currentIndex, index)
@@ -468,7 +469,11 @@ Item {
                         }
 
                         function appendKeyword(keyword) {
-                            presetsModel.appendKeyword(presetNamesListView.currentIndex, keyword)
+                            var added = presetsModel.appendKeyword(presetNamesListView.currentIndex, keyword)
+                            if (!added) {
+                                keywordsWrapper.state = "blinked"
+                                blinkTimer.start()
+                            }
                         }
 
                         function pasteKeywords(keywordsList) {
@@ -542,6 +547,22 @@ Item {
                             anchors.bottomMargin: -5
                             anchors.rightMargin: -15
                             flickable: flv
+                        }
+
+                        Timer {
+                            id: blinkTimer
+                            repeat: false
+                            interval: 400
+                            triggeredOnStart: false
+                            onTriggered: keywordsWrapper.state = ""
+                        }
+
+                        states: State {
+                            name: "blinked";
+                            PropertyChanges {
+                                target: keywordsWrapper;
+                                border.width: 0
+                            }
                         }
                     }
                 }

@@ -309,6 +309,7 @@ ColumnLayout {
         anchors.rightMargin: quickScrollBar.visible ? 10 : 0
         color: uiColors.inputInactiveBackground
         property var keywordsModel: quickBuffer.getBasicModel()
+        state: ""
 
         function removeKeyword(index) {
             quickBuffer.removeKeywordAt(index)
@@ -319,7 +320,11 @@ ColumnLayout {
         }
 
         function appendKeyword(keyword) {
-            quickBuffer.appendKeyword(keyword)
+            var added = quickBuffer.appendKeyword(keyword)
+            if (!added) {
+                keywordsWrapper.state = "blinked"
+                blinkTimer.start()
+            }
         }
 
         function pasteKeywords(keywords) {
@@ -381,6 +386,22 @@ ColumnLayout {
             anchors.bottomMargin: -5
             anchors.rightMargin: -15
             flickable: flv
+        }
+
+        Timer {
+            id: blinkTimer
+            repeat: false
+            interval: 400
+            triggeredOnStart: false
+            onTriggered: keywordsWrapper.state = ""
+        }
+
+        states: State {
+            name: "blinked";
+            PropertyChanges {
+                target: keywordsWrapper;
+                border.width: 0
+            }
         }
     }
 

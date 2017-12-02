@@ -78,14 +78,17 @@ namespace AutoComplete {
 
         std::vector<CompletionResult> completionsList;
         auto *basicModel = item->getBasicModel();
+        size_t generatedCount = 0;
 
         if (onlyFindPresets) {
             if (m_PresetsCompletionEngine.generateCompletions(*item.get(), completionsList)) {
+                generatedCount = completionsList.size();
                 auto &completionsModel = m_AutoCompleteModel->getInnerModel();
                 completionsModel.setPresetCompletions(completionsList);
             }
         } else {
             if (m_FaceCompletionEngine.generateCompletions(*item.get(), completionsList)) {
+                generatedCount = completionsList.size();
                 auto &completionsModel = m_AutoCompleteModel->getInnerModel();
                 completionsModel.setKeywordCompletions(completionsList);
 
@@ -101,7 +104,9 @@ namespace AutoComplete {
 #else
         Q_ASSERT(basicModel != nullptr); {
 #endif
-            basicModel->notifyCompletionsAvailable();
+            if (generatedCount > 0) {
+                basicModel->notifyCompletionsAvailable();
+            }
         }
     }
 

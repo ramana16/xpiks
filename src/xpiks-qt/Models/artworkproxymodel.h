@@ -100,7 +100,7 @@ namespace Models {
         Q_INVOKABLE void editKeyword(int index, const QString &replacement);
         Q_INVOKABLE void removeKeywordAt(int keywordIndex);
         Q_INVOKABLE void removeLastKeyword();
-        Q_INVOKABLE void appendKeyword(const QString &keyword);
+        Q_INVOKABLE bool appendKeyword(const QString &keyword);
         Q_INVOKABLE void pasteKeywords(const QStringList &keywords);
         Q_INVOKABLE void clearKeywords();
         Q_INVOKABLE QString getKeywordsString();

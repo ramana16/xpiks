@@ -185,11 +185,14 @@ namespace Models {
         }
     }
 
-    void CombinedArtworksModel::appendKeyword(const QString &keyword) {
-        if (doAppendKeyword(keyword)) {
+    bool CombinedArtworksModel::appendKeyword(const QString &keyword) {
+        bool added = doAppendKeyword(keyword);
+        if (added) {
             setKeywordsModified(true);
             justChanged();
         }
+
+        return added;
     }
 
     void CombinedArtworksModel::pasteKeywords(const QStringList &keywords) {

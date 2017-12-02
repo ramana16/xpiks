@@ -241,8 +241,10 @@ namespace Models {
         }
     }
 
-    void ArtItemsModel::appendKeyword(int metadataIndex, const QString &keyword) {
+    bool ArtItemsModel::appendKeyword(int metadataIndex, const QString &keyword) {
+        bool added = false;
         LOG_INFO << "metadata index" << metadataIndex << "| keyword" << keyword;
+
         if (0 <= metadataIndex && metadataIndex < getArtworksCount()) {
             ArtworkMetadata *metadata = accessArtwork(metadataIndex);
 
@@ -254,8 +256,12 @@ namespace Models {
                 xpiks()->submitKeywordForSpellCheck(keywordsModel, keywordsModel->getKeywordsCount() - 1);
                 xpiks()->submitKeywordsForWarningsCheck(metadata);
                 metadata->justEdited();
+
+                added = true;
             }
         }
+
+        return added;
     }
 
     void ArtItemsModel::pasteKeywords(int metadataIndex, const QStringList &keywords) {

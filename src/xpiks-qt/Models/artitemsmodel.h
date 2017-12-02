@@ -102,7 +102,7 @@ namespace Models {
         /*Q_INVOKABLE*/ void removeArtworksDirectory(int index);
         Q_INVOKABLE void removeKeywordAt(int metadataIndex, int keywordIndex);
         Q_INVOKABLE void removeLastKeyword(int metadataIndex);
-        Q_INVOKABLE void appendKeyword(int metadataIndex, const QString &keyword);
+        Q_INVOKABLE bool appendKeyword(int metadataIndex, const QString &keyword);
         Q_INVOKABLE void pasteKeywords(int metadataIndex, const QStringList &keywords);
         Q_INVOKABLE void addSuggestedKeywords(int metadataIndex, const QStringList &keywords);
         Q_INVOKABLE void suggestCorrections(int metadataIndex);
