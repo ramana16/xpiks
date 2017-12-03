@@ -91,6 +91,7 @@ Item {
             disablepassivemode: false
             disableEPSV: false
             zipbeforeupload: false
+            vectorfirst: false
         }
     }
 
