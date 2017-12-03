@@ -103,6 +103,7 @@ namespace Encryption {
     }
 
     void SecretsManager::resetMasterPassword() {
+        LOG_DEBUG <<  "#";
         QString keyForEncryption = getKeyForEncryption();
         emit beforeMasterPasswordChange(keyForEncryption, m_DefaultMasterPassword);
         m_EncodedMasterPassword.clear();

@@ -44,14 +44,19 @@ namespace Models {
             m_ZipBeforeUpload(false),
             m_IsSelected(false),
             m_DisableFtpPassiveMode(false),
-            m_DisableEPSV(false)
+            m_DisableEPSV(false),
+            m_VectorFirst(false)
         {
             m_Title = QObject::tr("Untitled");
         }
 
         UploadInfo(const QHash<int, QString> &items) :
             m_Percent(0),
-            m_IsSelected(false)
+            m_ZipBeforeUpload(false),
+            m_IsSelected(false),
+            m_DisableFtpPassiveMode(false),
+            m_DisableEPSV(false),
+            m_VectorFirst(false)
         {
             QString emptyString = QString::fromLatin1("");
             m_Title = items.value(TitleField, QObject::tr("Untitled"));
@@ -82,6 +87,7 @@ namespace Models {
         bool getDisableFtpPassiveMode() const { return m_DisableFtpPassiveMode; }
         bool getDisableEPSV() const { return m_DisableEPSV; }
         QString getAnyPassword() { return m_EncodedPassword.isEmpty() ? m_EncodedPasswordBackup : m_EncodedPassword; }
+        bool getVectorFirst() const { return m_VectorFirst; }
 
     public:
         bool setTitle(const QString &value) { bool result = m_Title != value; m_Title = value; return result; }
@@ -123,6 +129,11 @@ namespace Models {
             m_DisableEPSV = value;
             return result;
         }
+        bool setVectorsFirst(bool value) {
+            bool result = m_VectorFirst != value;
+            m_VectorFirst = value;
+            return result;
+        }
 
     private:
         QMutex m_Mutex;
@@ -137,6 +148,7 @@ namespace Models {
         bool m_IsSelected;
         bool m_DisableFtpPassiveMode;
         bool m_DisableEPSV;
+        bool m_VectorFirst;
     };
 }
 

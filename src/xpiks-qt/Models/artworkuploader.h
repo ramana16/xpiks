@@ -95,7 +95,7 @@ namespace Models {
     public:
         Q_INVOKABLE void uploadArtworks();
         Q_INVOKABLE void checkCredentials(const QString &host, const QString &username,
-                                          const QString &password, bool disablePassiveMode, bool disableEPSV) const;
+                                          const QString &password, bool disablePassiveMode, bool disableEPSV);
         Q_INVOKABLE bool needCreateArchives() const;
 
         Q_INVOKABLE QString getFtpAddress(const QString &stockName) const { return m_StocksFtpList.getFtpAddress(stockName); }

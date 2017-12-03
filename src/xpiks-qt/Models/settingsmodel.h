@@ -37,7 +37,9 @@ namespace Models {
     int ensureInBounds(int value, int boundA, int boundB);
     double ensureInBounds(double value, double boundA, double boundB);
 
-    class SettingsModel : public QObject, public Common::BaseEntity
+    class SettingsModel:
+            public QObject,
+            public Common::BaseEntity
     {
         Q_OBJECT
         Q_PROPERTY(QString exifToolPath READ getExifToolPath WRITE setExifToolPath NOTIFY exifToolPathChanged)

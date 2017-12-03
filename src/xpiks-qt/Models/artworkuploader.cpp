@@ -138,7 +138,12 @@ namespace Models {
     }
 
     void ArtworkUploader::checkCredentials(const QString &host, const QString &username,
-                                           const QString &password, bool disablePassiveMode, bool disableEPSV) const {
+                                           const QString &password, bool disablePassiveMode, bool disableEPSV) {
+        if (host.isEmpty() || username.isEmpty()) {
+            emit credentialsChecked(false, host);
+            return;
+        }
+
         std::shared_ptr<libxpks::net::UploadContext> context(new libxpks::net::UploadContext());
 
         context->m_Host = host;

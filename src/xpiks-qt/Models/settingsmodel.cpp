@@ -122,6 +122,7 @@ namespace Models {
 
     SettingsModel::SettingsModel(QObject *parent) :
         QObject(parent),
+        Common::BaseEntity(),
         m_ExifToolPath(DEFAULT_EXIFTOOL),
         m_DictPath(DEFAULT_DICT_PATH),
         m_SelectedLocale(DEFAULT_LOCALE),

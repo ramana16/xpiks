@@ -60,7 +60,9 @@ namespace Models {
             DisableFtpPassiveModeRole,
             EditDisableFtpPassiveModeRole,
             DisableEPSVRole,
-            EditDisableEPSVRole
+            EditDisableEPSVRole,
+            VectorFirstRole,
+            EditVectorFirstRole
         };
 
     public:

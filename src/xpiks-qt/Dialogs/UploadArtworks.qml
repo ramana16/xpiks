@@ -878,11 +878,29 @@ Item {
                                 }
                             }
 
+                            StyledCheckbox {
+                                id: vectorsFirstCheckBox
+                                text: i18.n + qsTr("Upload vectors before previews")
+                                Component.onCompleted: checked = uploadHostsListView.currentItem ? uploadHostsListView.currentItem.myData.vectorfirst : false
+
+                                onClicked: {
+                                    if (uploadHostsListView.currentItem) {
+                                        uploadHostsListView.currentItem.myData.editvectorfirst = checked
+                                    }
+                                }
+
+                                Connections {
+                                    target: uploadInfos
+                                    onDataChanged: {
+                                        vectorsFirstCheckBox.checked = uploadHostsListView.currentItem ? uploadHostsListView.currentItem.myData.vectorfirst : false
+                                    }
+                                }
+                            }
+
                             Item {
                                 Layout.fillHeight: true
                             }
                         }
-
                     }
                 }
 

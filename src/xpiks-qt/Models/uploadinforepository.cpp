@@ -29,6 +29,7 @@
 #define FTP_DISABLE_PASSIVE QLatin1String("nopassive")
 #define FTP_DISABLE_EPSV QLatin1String("noepsv")
 #define FTP_ISSELECTED QLatin1String("selected")
+#define FTP_VECTORS_FIRST QLatin1String("vectorder")
 
 #ifdef QT_DEBUG
     #ifdef INTEGRATION_TESTS
@@ -58,6 +59,7 @@ namespace Models {
             object.insert(FTP_DISABLE_PASSIVE, uploadInfo->getDisableFtpPassiveMode());
             object.insert(FTP_DISABLE_EPSV, uploadInfo->getDisableEPSV());
             object.insert(FTP_ISSELECTED, uploadInfo->getIsSelected());
+            object.insert(FTP_VECTORS_FIRST, uploadInfo->getVectorFirst());
 
             uploadInfoArray.append(object);
         }
@@ -107,6 +109,11 @@ namespace Models {
             QJsonValue isSelectedValue = element.value(FTP_ISSELECTED);
             if (isSelectedValue.isBool()) {
                 destination->setIsSelected(isSelectedValue.toBool(false));
+            }
+
+            QJsonValue vectorFirstValue = element.value(FTP_VECTORS_FIRST);
+            if (vectorFirstValue.isBool()) {
+                destination->setVectorsFirst(vectorFirstValue.toBool(false));
             }
 
             uploadInfo.swap(destination);
@@ -343,6 +350,8 @@ namespace Models {
                 return uploadInfo->getDisableFtpPassiveMode();
             case DisableEPSVRole:
                 return uploadInfo->getDisableEPSV();
+            case VectorFirstRole:
+                return uploadInfo->getVectorFirst();
             default:
                 return QVariant();
         }
@@ -417,6 +426,10 @@ namespace Models {
                 roleToUpdate = DisableEPSVRole;
                 needToUpdate = uploadInfo->setDisableEPSV(value.toBool());
                 break;
+            case EditVectorFirstRole:
+                roleToUpdate = EditVectorFirstRole;
+                needToUpdate = uploadInfo->setVectorsFirst(value.toBool());
+                break;
             default:
                 return false;
         }
@@ -433,6 +446,7 @@ namespace Models {
                                                              const QString &newMasterPassword) {
         LOG_INFO << "#";
         xpiks()->recodePasswords(oldMasterPassword, newMasterPassword, m_UploadInfos);
+        justChanged();
     }
 
     void UploadInfoRepository::onAfterMasterPasswordReset() {
@@ -488,6 +502,8 @@ namespace Models {
         roles[EditDisableFtpPassiveModeRole] = "editdisablepassivemode";
         roles[DisableEPSVRole] = "disableEPSV";
         roles[EditDisableEPSVRole] = "editdisableEPSV";
+        roles[VectorFirstRole] = "vectorfirst";
+        roles[EditVectorFirstRole] = "editvectorfirst";
         return roles;
     }
 
