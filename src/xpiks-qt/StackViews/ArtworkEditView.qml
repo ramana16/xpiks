@@ -33,6 +33,7 @@ Rectangle {
     property bool wasLeftSideCollapsed
     property bool listViewEnabled: true
     property bool canShowChangesSaved: false
+    property bool showInfo: false
 
     signal dialogDestruction();
     Component.onDestruction: dialogDestruction();
@@ -362,6 +363,10 @@ Rectangle {
         artworkProxy.registerAsCurrentItem()
         titleTextInput.forceActiveFocus()
         titleTextInput.cursorPosition = titleTextInput.text.length
+
+        if (showInfo) {
+            editTabView.setCurrentIndex(1)
+        }
     }
 
     Connections {

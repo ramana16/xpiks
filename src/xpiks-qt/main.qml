@@ -193,7 +193,7 @@ ApplicationWindow {
         applicationWindow.leftSideCollapsed = !leftSideCollapsed
     }
 
-    function startOneItemEditing(metadata, index, originalIndex) {
+    function startOneItemEditing(metadata, index, originalIndex, showInfoFirst) {
         var keywordsModel = filteredArtItemsModel.getBasicModel(index)
         artworkProxy.setSourceArtwork(metadata)
         var wasCollapsed = applicationWindow.leftSideCollapsed
@@ -204,7 +204,8 @@ ApplicationWindow {
                                    artworkIndex: index,
                                    keywordsModel: keywordsModel,
                                    componentParent: applicationWindow,
-                                   wasLeftSideCollapsed: wasCollapsed
+                                   wasLeftSideCollapsed: wasCollapsed,
+                                   showInfo: showInfoFirst
                                },
                                destroyOnPop: true
                            })
@@ -952,6 +953,15 @@ ApplicationWindow {
                 var originalIndex = filteredArtItemsModel.getOriginalIndex(artworkContextMenu.index)
                 var metadata = filteredArtItemsModel.getArtworkMetadata(artworkContextMenu.index)
                 startOneItemEditing(metadata, artworkContextMenu.index, originalIndex)
+            }
+        }
+
+        MenuItem {
+            text: i18.n + qsTr("Show info")
+            onTriggered: {
+                var originalIndex = filteredArtItemsModel.getOriginalIndex(artworkContextMenu.index)
+                var metadata = filteredArtItemsModel.getArtworkMetadata(artworkContextMenu.index)
+                startOneItemEditing(metadata, artworkContextMenu.index, originalIndex, true)
             }
         }
 
