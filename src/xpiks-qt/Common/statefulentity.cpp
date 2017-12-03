@@ -59,8 +59,8 @@ namespace Common {
     void StatefulEntity::syncState() {
         LOG_DEBUG << m_StateName;
 
-        Helpers::LocalConfigDropper dropper(&m_StateConfig);
-        Q_UNUSED(dropper);
+        // do not use dropper
+        // Helpers::LocalConfigDropper dropper(&m_StateConfig);
 
         QJsonDocument doc;
         doc.setObject(m_StateJson);
