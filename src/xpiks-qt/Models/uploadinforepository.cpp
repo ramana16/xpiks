@@ -10,15 +10,145 @@
 
 #include "uploadinforepository.h"
 #include "uploadinfo.h"
+#include <QJsonObject>
+#include <QJsonArray>
 #include "../Commands/commandmanager.h"
 #include "../Encryption/secretsmanager.h"
 #include "../Common/defines.h"
+#include "../Models/settingsmodel.h"
+
+#define UPLOAD_INFO_SAVE_TIMEOUT 3000
+#define UPLOAD_INFO_DELAYS_COUNT 10
+
+#define FTP_DESTINATIONS QLatin1String("destinations")
+#define FTP_HOST_KEY QLatin1String("host")
+#define FTP_USERNAME_KEY QLatin1String("user")
+#define FTP_PASS_KEY QLatin1String("pass")
+#define FTP_TITLE_KEY QLatin1String("title")
+#define FTP_CREATE_ZIP QLatin1String("zip")
+#define FTP_DISABLE_PASSIVE QLatin1String("nopassive")
+#define FTP_DISABLE_EPSV QLatin1String("noepsv")
+#define FTP_ISSELECTED QLatin1String("selected")
+
+#ifdef QT_DEBUG
+    #ifdef INTEGRATION_TESTS
+        #define UPLOAD_INFOS_FILE "integration_uploadinfos.json"
+    #else
+        #define UPLOAD_INFOS_FILE "debug_uploadinfos.json"
+    #endif
+#else
+#define UPLOAD_INFOS_FILE "uploadinfos.json"
+#endif
+
+#define OVERWRITE_KEY "overwrite"
+#define OVERWRITE_CSV_PLANS false
 
 namespace Models {
+    void serializeUploadInfos(const std::vector<std::shared_ptr<UploadInfo> > &uploadInfos, QJsonObject &result) {
+        QJsonArray uploadInfoArray;
+
+        for (auto &uploadInfo: uploadInfos) {
+            QJsonObject object;
+
+            object.insert(FTP_TITLE_KEY, uploadInfo->getTitle());
+            object.insert(FTP_HOST_KEY, uploadInfo->getHost());
+            object.insert(FTP_USERNAME_KEY, uploadInfo->getUsername());
+            object.insert(FTP_PASS_KEY, uploadInfo->getAnyPassword());
+            object.insert(FTP_CREATE_ZIP, uploadInfo->getZipBeforeUpload());
+            object.insert(FTP_DISABLE_PASSIVE, uploadInfo->getDisableFtpPassiveMode());
+            object.insert(FTP_DISABLE_EPSV, uploadInfo->getDisableEPSV());
+            object.insert(FTP_ISSELECTED, uploadInfo->getIsSelected());
+
+            uploadInfoArray.append(object);
+        }
+
+        result.insert(FTP_DESTINATIONS, uploadInfoArray);
+    }
+
+    bool tryParseHost(const QJsonObject &element, std::shared_ptr<UploadInfo> &uploadInfo) {
+        bool parsed = false;
+
+        std::shared_ptr<UploadInfo> destination(new UploadInfo());
+
+        do {
+            QJsonValue titleValue = element.value(FTP_TITLE_KEY);
+            if (!titleValue.isString()) { break; }
+            destination->setTitle(titleValue.toString());
+
+            QJsonValue hostValue = element.value(FTP_HOST_KEY);
+            if (!hostValue.isString()) { break; }
+            destination->setHost(hostValue.toString());
+
+            QJsonValue usernameValue = element.value(FTP_USERNAME_KEY);
+            if (usernameValue.isString()) {
+                destination->setUsername(usernameValue.toString());
+            }
+
+            QJsonValue passwordValue = element.value(FTP_PASS_KEY);
+            if (passwordValue.isString()) {
+                destination->setPassword(passwordValue.toString());
+            }
+
+            QJsonValue createZipValue = element.value(FTP_CREATE_ZIP);
+            if (createZipValue.isBool()) {
+                destination->setZipBeforeUpload(createZipValue.toBool(false));
+            }
+
+            QJsonValue disablePassiveValue = element.value(FTP_DISABLE_PASSIVE);
+            if (disablePassiveValue.isBool()) {
+                destination->setDisableFtpPassiveMode(disablePassiveValue.toBool(false));
+            }
+
+            QJsonValue disableEpsvValue = element.value(FTP_DISABLE_EPSV);
+            if (disableEpsvValue.isBool()) {
+                destination->setDisableEPSV(disableEpsvValue.toBool(false));
+            }
+
+            QJsonValue isSelectedValue = element.value(FTP_ISSELECTED);
+            if (isSelectedValue.isBool()) {
+                destination->setIsSelected(isSelectedValue.toBool(false));
+            }
+
+            uploadInfo.swap(destination);
+            parsed = true;
+        } while(false);
+
+        return parsed;
+    }
+
+    void parseUploadInfos(const QJsonObject &root, std::vector<std::shared_ptr<UploadInfo> > &uploadInfos) {
+        if (!root.contains(FTP_DESTINATIONS)) { return; }
+        QJsonValue destinationsObject = root.value(FTP_DESTINATIONS);
+        if (!destinationsObject.isArray()) { return; }
+        QJsonArray hostsArray = destinationsObject.toArray();
+        const int size = hostsArray.size();
+
+        for (int i = 0; i < size; i++) {
+            QJsonValue element = hostsArray.at(i);
+            if (!element.isObject()) { continue; }
+
+            std::shared_ptr<UploadInfo> item;
+            if (tryParseHost(element.toObject(), item)) {
+                uploadInfos.emplace_back(item);
+            }
+        }
+    }
+
+    UploadInfoRepository::UploadInfoRepository(QObject *parent):
+        QAbstractListModel(parent),
+        Common::BaseEntity(),
+        Common::DelayedActionEntity(UPLOAD_INFO_SAVE_TIMEOUT, UPLOAD_INFO_DELAYS_COUNT),
+        m_EmptyPasswordsMode(false)
+    {
+        QObject::connect(this, &UploadInfoRepository::backupRequired, this, &UploadInfoRepository::onBackupRequired);
+    }
+
     UploadInfoRepository::~UploadInfoRepository() { m_UploadInfos.clear();  }
 
     void UploadInfoRepository::initFromString(const QString &savedString) {
         LOG_DEBUG << "#";
+        if (savedString.isEmpty()) { return; }
+
         QByteArray originalData;
         originalData.append(savedString.toLatin1());
         QByteArray result = QByteArray::fromBase64(originalData);
@@ -38,6 +168,43 @@ namespace Models {
         }
 
         LOG_INFO << length << "item(s) found";
+
+        justChanged();
+    }
+
+    void UploadInfoRepository::initializeConfig() {
+        LOG_DEBUG << "#";
+        QString localConfigPath;
+
+        QString appDataPath = XPIKS_USERDATA_PATH;
+        if (!appDataPath.isEmpty()) {
+            QDir appDataDir(appDataPath);
+            localConfigPath = appDataDir.filePath(UPLOAD_INFOS_FILE);
+        } else {
+            localConfigPath = UPLOAD_INFOS_FILE;
+        }
+
+        m_LocalConfig.initConfig(localConfigPath);
+        const QJsonDocument &localDocument = m_LocalConfig.getConfig();
+
+        decltype(m_UploadInfos) tempInfos;
+        parseUploadInfos(localDocument.object(), tempInfos);
+        LOG_INFO << "Parsed" << tempInfos.size() << "upload host(s)";
+
+        if (!tempInfos.empty()) {
+            m_UploadInfos.swap(tempInfos);
+        }
+    }
+
+    void UploadInfoRepository::removeItem(int row) {
+        beginRemoveRows(QModelIndex(), row, row);
+        {
+            removeInnerItem(row);
+        }
+        endRemoveRows();
+        emit infosCountChanged();
+
+        justChanged();
     }
 
     void UploadInfoRepository::addItem() {
@@ -45,29 +212,14 @@ namespace Models {
 
         LOG_INFO << lastIndex;
         beginInsertRows(QModelIndex(), lastIndex, lastIndex);
-        m_UploadInfos.emplace_back(new UploadInfo());
-        endInsertRows();
-        emit infosCountChanged();
-    }
-
-    QString UploadInfoRepository::getInfoString() const {
-        LOG_INFO << "Serializing" << m_UploadInfos.size() << "info(s)";
-        // bad type QList instead of QVector
-        // but users already have this
-        QList<QHash<int, QString> > items;
-        for (auto &info: m_UploadInfos) {
-            if (!info->isEmpty()) {
-                items.append(info->toHash());
-            }
+        {
+            m_UploadInfos.emplace_back(new UploadInfo());
         }
+        endInsertRows();
 
-        // TODO: move to SFTP
-        // while stocks use FTP, sophisticated passwords
-        // saving on client side is useless
-        QByteArray result;
-        QDataStream stream(&result, QIODevice::WriteOnly);
-        stream << items;
-        return QString::fromUtf8(result.toBase64());
+        emit infosCountChanged();
+
+        justChanged();
     }
 
     int UploadInfoRepository::getSelectedInfosCount() const {
@@ -271,6 +423,7 @@ namespace Models {
 
         if (needToUpdate) {
             emit dataChanged(index, index, QVector<int>() << roleToUpdate);
+            justChanged();
         }
 
         return true;
@@ -287,6 +440,31 @@ namespace Models {
         for (auto &info: m_UploadInfos) {
             info->dropPassword();
         }
+    }
+
+    void UploadInfoRepository::onBackupRequired() {
+        LOG_DEBUG << "#";
+
+        if (saveUploadInfos()) {
+            auto *settingsModel = m_CommandManager->getSettingsModel();
+            settingsModel->clearLegacyUploadInfos();
+        }
+    }
+
+    bool UploadInfoRepository::saveUploadInfos() {
+        LOG_DEBUG << "#";
+        QJsonObject uploadInfosObject;
+        serializeUploadInfos(m_UploadInfos, uploadInfosObject);
+
+        QJsonDocument doc;
+        doc.setObject(uploadInfosObject);
+
+        Helpers::LocalConfigDropper dropper(&m_LocalConfig);
+        Q_UNUSED(dropper);
+
+        m_LocalConfig.setConfig(doc);
+        bool success = m_LocalConfig.saveToFile();
+        return success;
     }
 
     QHash<int, QByteArray> UploadInfoRepository::roleNames() const {

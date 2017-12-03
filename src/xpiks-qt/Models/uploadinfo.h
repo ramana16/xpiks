@@ -81,6 +81,7 @@ namespace Models {
         double getPercent() const { return m_Percent; }
         bool getDisableFtpPassiveMode() const { return m_DisableFtpPassiveMode; }
         bool getDisableEPSV() const { return m_DisableEPSV; }
+        QString getAnyPassword() { return m_EncodedPassword.isEmpty() ? m_EncodedPasswordBackup : m_EncodedPassword; }
 
     public:
         bool setTitle(const QString &value) { bool result = m_Title != value; m_Title = value; return result; }
@@ -121,20 +122,6 @@ namespace Models {
             bool result = m_DisableEPSV != value;
             m_DisableEPSV = value;
             return result;
-        }
-
-    public:
-        QHash<int, QString> toHash() {
-            QHash<int, QString> hash;
-            hash[TitleField] = m_Title.simplified().isEmpty() ? QObject::tr("Untitled") : m_Title;
-            hash[HostField] = m_Host;
-            hash[UsernameField] = m_Username;
-            hash[PasswordField] = m_EncodedPassword;
-            hash[ZipPreviewAndVectorField] = BOOL_TO_STR(m_ZipBeforeUpload);
-            hash[DisableFtpPassiveModeField] = BOOL_TO_STR(m_DisableFtpPassiveMode);
-            hash[DisableEPSVField] = BOOL_TO_STR(m_DisableEPSV);
-            hash[IsSelectedField] = BOOL_TO_STR(m_IsSelected);
-            return hash;
         }
 
     private:

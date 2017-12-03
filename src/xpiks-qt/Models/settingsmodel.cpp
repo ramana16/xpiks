@@ -116,6 +116,10 @@ namespace Models {
         return value;
     }
 
+    void clearSetting(QSettings &oldSettings, const char *settingName) {
+        oldSettings.remove(QLatin1String(settingName));
+    }
+
     SettingsModel::SettingsModel(QObject *parent) :
         QObject(parent),
         m_ExifToolPath(DEFAULT_EXIFTOOL),
@@ -200,10 +204,23 @@ namespace Models {
     }
 
     void SettingsModel::migrateSettings() {
-        int settingsVersion = getSettingsVersion();
+        const int settingsVersion = getSettingsVersion();
+        LOG_INFO << "Current settings version:" << settingsVersion;
 
         if (settingsVersion < CURRENT_SETTINGS_VERSION) {
             moveSettingsFromQSettingsToJson();
+        }
+    }
+
+    void SettingsModel::clearLegacyUploadInfos() {
+        LOG_DEBUG << "#";
+
+        if (containsValue(Constants::legacyUploadHosts)) {
+            LOG_INFO << "Removing legacy upload hosts info";
+            QString empty = "";
+            setValue(Constants::legacyUploadHosts, empty);
+            deleteValue(Constants::legacyUploadHosts);
+            sync();
         }
     }
 
@@ -280,10 +297,6 @@ namespace Models {
         clearSetting(oldSettings, TRANSLATOR_SELECTED_DICT_INDEX);
     }
 
-    void SettingsModel::clearSetting(QSettings &oldSettings, const char *settingName) {
-        oldSettings.remove(QLatin1String(settingName));
-    }
-
     void SettingsModel::moveSettingsFromQSettingsToJson() {
         LOG_DEBUG << "#";
 
@@ -297,7 +310,7 @@ namespace Models {
         Encryption::SecretsManager *secretsManager = m_CommandManager->getSecretsManager();
         Models::UploadInfoRepository *uploadInfoRepository = m_CommandManager->getUploadInfoRepository();
         secretsManager->setMasterPasswordHash(getMasterPasswordHash());
-        uploadInfoRepository->initFromString(getUploadHosts());
+        uploadInfoRepository->initFromString(getLegacyUploadHosts());
 
         emit recentDirectoriesUpdated(getRecentDirectories());
         emit recentFilesUpdated(getRecentFiles());
@@ -480,7 +493,7 @@ namespace Models {
         moveSetting(oldSettings, AUTO_FIND_VECTORS, autoFindVectors, QMetaType::Bool);
         moveSetting(oldSettings, USE_PROXY, useProxy, QMetaType::Bool);
         moveProxyHostSetting(oldSettings);
-        moveSetting(oldSettings, UPLOAD_HOSTS, uploadHosts, QMetaType::QString);
+        moveSetting(oldSettings, UPLOAD_HOSTS, legacyUploadHosts, QMetaType::QString);
         moveSetting(oldSettings, USE_MASTER_PASSWORD, useMasterPassword, QMetaType::Bool);
         moveSetting(oldSettings, MASTER_PASSWORD_HASH, masterPasswordHash, QMetaType::QString);
         moveSetting(oldSettings, ONE_UPLOAD_SECONDS_TIMEMOUT, oneUploadSecondsTimeout, QMetaType::Int);

@@ -676,6 +676,7 @@ void Commands::CommandManager::afterConstructionCallback() {
     m_ArtworkUploader->initializeStocksList(&m_InitCoordinator);
     m_WarningsService->initWarningsSettings();
     m_TranslationManager->initializeDictionaries();
+    m_UploadInfoRepository->initializeConfig();
     m_PresetsModel->initializePresets();
     m_CsvExportModel->initializeExportPlans(&m_InitCoordinator);
 #endif
@@ -713,7 +714,6 @@ void Commands::CommandManager::executeMaintenanceJobs() {
     m_MetadataIOCoordinator->autoDiscoverExiftool();
 
 #if !defined(INTEGRATION_TESTS)
-
     m_MaintenanceService->moveSettings(m_SettingsModel);
     m_MaintenanceService->upgradeImagesCache(m_ImageCachingService);
 

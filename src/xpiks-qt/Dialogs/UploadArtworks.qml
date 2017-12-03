@@ -53,7 +53,6 @@ Item {
         secretsManager.purgeMasterPassword()
         warningsModel.resetShowSelected()
         uploadInfos.finalizeAccounts()
-        settingsModel.saveUploadHosts()
         uploadArtworksComponent.destroy()
         uploadWatcher.resetModel()
     }

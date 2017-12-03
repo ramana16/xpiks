@@ -19,23 +19,22 @@
 #include <vector>
 #include <memory>
 #include "../Common/baseentity.h"
+#include "../Common/delayedactionentity.h"
+#include "../Helpers/localconfig.h"
 
 namespace Models {
     class UploadInfo;
 
     class UploadInfoRepository:
-        public QAbstractListModel, public Common::BaseEntity
+            public QAbstractListModel,
+            public Common::BaseEntity,
+            public Common::DelayedActionEntity
     {
-    Q_OBJECT
-    Q_PROPERTY(int infosCount READ getInfosCount NOTIFY infosCountChanged)
+        Q_OBJECT
+        Q_PROPERTY(int infosCount READ getInfosCount NOTIFY infosCountChanged)
 
     public:
-        UploadInfoRepository(QObject *parent = 0):
-            QAbstractListModel(parent),
-            Common::BaseEntity(),
-            m_EmptyPasswordsMode(false)
-        {}
-
+        UploadInfoRepository(QObject *parent = 0);
         virtual ~UploadInfoRepository();
 
         void initFromString(const QString &savedString);
@@ -64,21 +63,17 @@ namespace Models {
             EditDisableEPSVRole
         };
 
+    public:
         int getInfosCount() const { return (int)m_UploadInfos.size(); }
 
-    signals:
-        void infosCountChanged();
+    public:
+        void initializeConfig();
+
+    private:
 
     public:
-        Q_INVOKABLE void removeItem(int row) {
-            beginRemoveRows(QModelIndex(), row, row);
-            removeInnerItem(row);
-            endRemoveRows();
-            emit infosCountChanged();
-        }
-
+        Q_INVOKABLE void removeItem(int row);
         Q_INVOKABLE void addItem();
-        Q_INVOKABLE QString getInfoString() const;
         Q_INVOKABLE int getSelectedInfosCount() const;
         Q_INVOKABLE QString getAgenciesWithMissingDetails();
         Q_INVOKABLE void updateProperties(int itemIndex);
@@ -112,17 +107,33 @@ namespace Models {
         virtual Qt::ItemFlags flags(const QModelIndex &index) const override;
         virtual bool setData(const QModelIndex &index, const QVariant &value, int role=Qt::EditRole) override;
 
+    signals:
+        void infosCountChanged();
+        void backupRequired();
+
     public slots:
         void onBeforeMasterPasswordChanged(const QString &oldMasterPassword, const QString &newMasterPassword);
         void onAfterMasterPasswordReset();
 
-    protected:
-        virtual QHash<int, QByteArray> roleNames() const override;
+    private slots:
+        void onBackupRequired();
 
+    protected:
+        bool saveUploadInfos();
+        virtual QHash<int, QByteArray> roleNames() const override;
         void removeInnerItem(int row);
+
+        // DelayedActionEntity implementation
+    protected:
+        virtual void doKillTimer(int timerId) override { this->killTimer(timerId); }
+        virtual int doStartTimer(int interval, Qt::TimerType timerType) override { return this->startTimer(interval, timerType); }
+        virtual void doOnTimer() override { emit backupRequired(); }
+        virtual void timerEvent(QTimerEvent *event) override { onQtTimer(event); }
+        virtual void callBaseTimer(QTimerEvent *event) override { QObject::timerEvent(event); }
 
     private:
         std::vector<std::shared_ptr<UploadInfo> > m_UploadInfos;
+        Helpers::LocalConfig m_LocalConfig;
         // when MP is cancelled before Upload dialog
         // all passwords should be empty
         bool m_EmptyPasswordsMode;

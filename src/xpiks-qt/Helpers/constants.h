@@ -167,7 +167,7 @@ namespace Constants {
     const char autoFindVectors[] = "autoFindVectors";
     const char useProxy[] = "useProxy";
     const char proxyHost[] = "proxyHostHash";
-    const char uploadHosts[] = "uploadHostsHash";
+    const char legacyUploadHosts[] = "legacyUploadHostsHash";
     const char useMasterPassword[] = "useMasterPassword";
     const char masterPasswordHash[] = "masterPasswordHash";
     const char oneUploadSecondsTimeout[] = "oneUploadSecondsTimeout";

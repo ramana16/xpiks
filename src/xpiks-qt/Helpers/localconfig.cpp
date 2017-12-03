@@ -29,7 +29,8 @@ namespace Helpers {
         }
     }
 
-    void LocalConfig::saveToFile() {
+    bool LocalConfig::saveToFile() {
+        bool success = false;
         QFile file(m_FilePath);
 
         Q_ASSERT(!m_FilePath.isEmpty());
@@ -37,9 +38,12 @@ namespace Helpers {
         if (file.open(QIODevice::WriteOnly)) {
             file.write(m_Config.toJson(QJsonDocument::Indented));
             file.close();
+            success = true;
         } else {
             LOG_WARNING << "Opening file" << m_FilePath << "failed";
         }
+
+        return success;
     }
 
     void LocalConfig::dropConfig() {

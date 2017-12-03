@@ -91,12 +91,12 @@ namespace Models {
         void initializeConfigs();
         void syncronizeSettings() { sync(); }
         void migrateSettings();
+        void clearLegacyUploadInfos();
 
     private:
         void moveSetting(QSettings &settingsQSettings, const QString &oldKey, const char* newKey, int type);
         void moveProxyHostSetting(QSettings &settingsQSettings);
         void wipeOldSettings(QSettings &settingsQSettings);
-        void clearSetting(QSettings &oldSettings, const char* settingName);
         void moveSettingsFromQSettingsToJson();
 
     public:
@@ -166,6 +166,9 @@ namespace Models {
             return m_SettingsJson.value(QLatin1String(key)).toString(defaultValue);
         }
 
+        inline void deleteValue(const char *key) { m_SettingsJson.remove(QLatin1String(key)); }
+        inline bool containsValue(const char *key) { return m_SettingsJson.contains(QLatin1String(key)); }
+
     private:
         QString getAppVersion() const { return QCoreApplication::applicationVersion(); }
         QString getWhatsNewText() const;
@@ -176,7 +179,7 @@ namespace Models {
         QString getRecentFiles() const { return stringValue(Constants::recentFiles); }
         QString getUserAgentId() const { return stringValue(Constants::userAgentId); }
         QString getPathToUpdate() const { return stringValue(Constants::pathToUpdate); }
-        QString getUploadHosts() const { return stringValue(Constants::uploadHosts); }
+        QString getLegacyUploadHosts() const { return stringValue(Constants::legacyUploadHosts); }
         QString getMasterPasswordHash() const { return stringValue(Constants::masterPasswordHash); }
         QString getDictPath() const { return stringValue(Constants::dictPath); }
         bool getMustUseConfirmationDialogs() const { return boolValue(Constants::useConfirmationDialogs, true); }
@@ -236,12 +239,6 @@ namespace Models {
             LOG_DEBUG << "#";
             Encryption::SecretsManager *secretsManager = m_CommandManager->getSecretsManager();
             setValue(Constants::masterPasswordHash, secretsManager->getMasterPasswordHash());
-        }
-
-        Q_INVOKABLE void saveUploadHosts() {
-            LOG_DEBUG << "#";
-            UploadInfoRepository *uploadInfoRepository = m_CommandManager->getUploadInfoRepository();
-            setValue(Constants::uploadHosts, uploadInfoRepository->getInfoString());
         }
 
         Q_INVOKABLE void saveRecentDirectories() {
