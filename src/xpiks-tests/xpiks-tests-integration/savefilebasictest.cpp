@@ -26,7 +26,7 @@ int SaveFileBasicTest::doTest() {
 
     MetadataIO::MetadataIOCoordinator *ioCoordinator = m_CommandManager->getMetadataIOCoordinator();
     SignalWaiter waiter;
-    QObject::connect(ioCoordinator, SIGNAL(metadataReadingFinished()), &waiter, SIGNAL(finished()));    
+    QObject::connect(ioCoordinator, SIGNAL(metadataReadingFinished()), &waiter, SIGNAL(finished()));
 
     int addedCount = artItemsModel->addLocalArtworks(files);
     VERIFY(addedCount == files.length(), "Failed to add file");
@@ -56,7 +56,8 @@ int SaveFileBasicTest::doTest() {
     bool doOverwrite = true, dontSaveBackups = false;
 
     QObject::connect(ioCoordinator, SIGNAL(metadataWritingFinished()), &waiter, SIGNAL(finished()));
-    artItemsModel->saveSelectedArtworks(QVector<int>() << 0, doOverwrite, dontSaveBackups);
+    auto *filteredModel = m_CommandManager->getFilteredArtItemsModel();
+    filteredModel->saveSelectedArtworks(doOverwrite, dontSaveBackups);
 
     if (!waiter.wait(20)) {
         VERIFY(false, "Timeout exceeded for writing metadata.");

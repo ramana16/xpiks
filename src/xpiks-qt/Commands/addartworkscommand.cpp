@@ -74,13 +74,13 @@ std::shared_ptr<Commands::ICommandResult> Commands::AddArtworksCommand::execute(
             qint64 directoryID = 0;
 
             if (artworksRepository->accountFile(filename, directoryID, directoryFlags)) {
-                Models::ArtworkMetadata *metadata = artItemsModel->createMetadata(filename, directoryID);
-                commandManager->connectArtworkSignals(metadata);
+                Models::ArtworkMetadata *artwork = artItemsModel->createArtwork(filename, directoryID);
+                commandManager->connectArtworkSignals(artwork);
 
                 LOG_INTEGRATION_TESTS << "Added file:" << filename;
 
-                artItemsModel->appendArtwork(metadata);
-                artworksToImport.append(metadata);
+                artItemsModel->appendArtwork(artwork);
+                artworksToImport.append(artwork);
                 filesToWatch.append(filename);
             } else {
                 LOG_INFO << "Rejected file:" << filename;

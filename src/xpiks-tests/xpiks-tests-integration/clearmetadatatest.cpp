@@ -57,7 +57,7 @@ int ClearMetadataTest::doTest() {
     bool doOverwrite = true, dontSaveBackups = false;
     QObject::connect(ioCoordinator, SIGNAL(metadataWritingFinished()), &waiter, SIGNAL(finished()));
 
-    artItemsModel->saveSelectedArtworks(QVector<int>() << 0, doOverwrite, dontSaveBackups);
+    filteredModel->saveSelectedArtworks(doOverwrite, dontSaveBackups);
 
     if (!waiter.wait(20)) {
         VERIFY(false, "Timeout exceeded for writing metadata.");

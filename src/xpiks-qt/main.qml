@@ -1162,7 +1162,7 @@ ApplicationWindow {
     MessageDialog {
         id: alreadySavedDialog
         title: i18.n + qsTr("Information")
-        text: i18.n + qsTr("All selected items are already saved")
+        text: i18.n + qsTr("All selected files are already saved or read-only")
     }
 
     MessageDialog {

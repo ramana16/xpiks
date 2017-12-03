@@ -69,7 +69,7 @@ namespace Models {
 #endif
     }
 
-    ArtworkMetadata *ArtItemsModel::createMetadata(const QString &filepath, qint64 directoryID) {
+    ArtworkMetadata *ArtItemsModel::createArtwork(const QString &filepath, qint64 directoryID) {
         const int id = m_LastID++;
 
         LOG_INTEGRATION_TESTS << "Creating artwork with ID:" << id << "path:" << filepath;
@@ -392,26 +392,6 @@ namespace Models {
         AbstractListModel::updateItemsInRanges(rangesToUpdate, roles);
 
         emit artworksChanged(false);
-    }
-
-    void ArtItemsModel::saveSelectedArtworks(const QVector<int> &selectedIndices, bool overwriteAll, bool useBackups) {
-        LOG_INFO << "overwrite:" << overwriteAll << "useBackups:" << useBackups;
-
-        MetadataIO::WeakArtworksSnapshot modifiedSelectedArtworks;
-        const int count = selectedIndices.count();
-        modifiedSelectedArtworks.reserve(count/2);
-
-        for (int i = 0; i < count; ++i) {
-            int index = selectedIndices.at(i);
-            ArtworkMetadata *metadata = getArtwork(index);
-            if (metadata != NULL && metadata->isSelected()) {
-                if (metadata->isModified() || overwriteAll) {
-                    modifiedSelectedArtworks.push_back(metadata);
-                }
-            }
-        }
-
-        xpiks()->writeMetadata(modifiedSelectedArtworks, useBackups);
     }
 
     ArtworkMetadata *ArtItemsModel::getArtworkMetadata(int index) const {
@@ -793,38 +773,40 @@ namespace Models {
             return QVariant();
         }
 
-        ArtworkMetadata *metadata = accessArtwork(row);
+        ArtworkMetadata *artwork = accessArtwork(row);
         switch (role) {
             case ArtworkDescriptionRole:
-                return metadata->getDescription();
+                return artwork->getDescription();
             case ArtworkFilenameRole:
-                return metadata->getFilepath();
+                return artwork->getFilepath();
             case ArtworkTitleRole:
-                return metadata->getTitle();
+                return artwork->getTitle();
             case KeywordsStringRole: {
-                Common::BasicKeywordsModel *keywordsModel = metadata->getBasicModel();
+                Common::BasicKeywordsModel *keywordsModel = artwork->getBasicModel();
                 return keywordsModel->getKeywordsString();
             }
             case IsModifiedRole:
-                return metadata->isModified();
+                return artwork->isModified();
             case IsSelectedRole:
-                return metadata->isSelected();
+                return artwork->isSelected();
             case KeywordsCountRole: {
-                Common::BasicKeywordsModel *keywordsModel = metadata->getBasicModel();
+                Common::BasicKeywordsModel *keywordsModel = artwork->getBasicModel();
                 return keywordsModel->getKeywordsCount();
             }
             case HasVectorAttachedRole: {
-                ImageArtwork *image = dynamic_cast<ImageArtwork *>(metadata);
+                ImageArtwork *image = dynamic_cast<ImageArtwork *>(artwork);
                 return (image != NULL) && image->hasVectorAttached();
             }
             case BaseFilenameRole:
-                return metadata->getBaseFilename();
+                return artwork->getBaseFilename();
             case IsVideoRole: {
-                bool isVideo = dynamic_cast<VideoArtwork*>(metadata) != nullptr;
+                bool isVideo = dynamic_cast<VideoArtwork*>(artwork) != nullptr;
                 return isVideo;
             }
             case ArtworkThumbnailRole:
-                return metadata->getThumbnailPath();
+                return artwork->getThumbnailPath();
+            case IsReadOnlyRole:
+                return artwork->isReadOnly();
             default:
                 return QVariant();
         }
@@ -1331,6 +1313,7 @@ namespace Models {
         roles[BaseFilenameRole] = "basefilename";
         roles[ArtworkThumbnailRole] = "thumbpath";
         roles[IsVideoRole] = "isvideo";
+        roles[IsReadOnlyRole] = "isreadonly";
         return roles;
     }
 

@@ -80,7 +80,8 @@ int UnicodeIoTest::doTest() {
     bool doOverwrite = true, dontSaveBackups = false;
 
     QObject::connect(ioCoordinator, SIGNAL(metadataWritingFinished()), &waiter, SIGNAL(finished()));
-    artItemsModel->saveSelectedArtworks(QVector<int>() << 1, doOverwrite, dontSaveBackups);
+    auto *filteredModel = m_CommandManager->getFilteredArtItemsModel();
+    filteredModel->saveSelectedArtworks(doOverwrite, dontSaveBackups);
 
     if (!waiter.wait(20)) {
         VERIFY(false, "Timeout exceeded for writing metadata.");

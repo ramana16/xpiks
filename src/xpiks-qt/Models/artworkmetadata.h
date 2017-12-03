@@ -61,7 +61,8 @@ namespace Models {
             FlagIsUnavailable = 1 << 4,
             FlagIsLockedForEditing = 1 << 5,
             FlagIsLockedIO = 1 << 6,
-            FlagIsReimportPending = 1 << 7
+            FlagIsReimportPending = 1 << 7,
+            FlagIsReadOnly = 1 << 8
         };
 
 #define PROTECT_FLAGS_READ QReadLocker rlocker(&m_FlagsLock); Q_UNUSED(rlocker);
@@ -75,6 +76,7 @@ namespace Models {
         inline bool getIsLockedForEditingFlag() { PROTECT_FLAGS_READ; return Common::HasFlag(m_MetadataFlags, FlagIsLockedForEditing); }
         inline bool getIsLockedIOFlag() { PROTECT_FLAGS_READ; return Common::HasFlag(m_MetadataFlags, FlagIsLockedIO); }
         inline bool getIsReimportPendingFlag() { PROTECT_FLAGS_READ; return Common::HasFlag(m_MetadataFlags, FlagIsReimportPending); }
+        inline bool getIsReadOnlyFlag() { PROTECT_FLAGS_READ; return Common::HasFlag(m_MetadataFlags, FlagIsReadOnly); }
 
         inline void setIsModifiedFlag(bool value) { PROTECT_FLAGS_WRITE; Common::ApplyFlag(m_MetadataFlags, value, FlagIsModified); }
         inline void setIsSelectedFlag(bool value) { PROTECT_FLAGS_WRITE; Common::ApplyFlag(m_MetadataFlags, value, FlagsIsSelected); }
@@ -84,6 +86,7 @@ namespace Models {
         inline void setIsLockedForEditingFlag(bool value) { PROTECT_FLAGS_WRITE; Common::ApplyFlag(m_MetadataFlags, value, FlagIsLockedForEditing); }
         inline void setIsLockedIOFlag(bool value) { PROTECT_FLAGS_WRITE; Common::ApplyFlag(m_MetadataFlags, value, FlagIsLockedIO); }
         inline void setIsReimportPendingFlag(bool value) { PROTECT_FLAGS_WRITE; Common::ApplyFlag(m_MetadataFlags, value, FlagIsReimportPending); }
+        inline void setIsReadOnlyFlag(bool value) { PROTECT_FLAGS_WRITE; Common::ApplyFlag(m_MetadataFlags, value, FlagIsReadOnly); }
 
 #undef PROTECT_FLAGS_READ
 #undef PROTECT_FLAGS_WRITE
@@ -113,6 +116,7 @@ namespace Models {
         QString getBaseFilename() const;
         bool isInDirectory(const QString &directoryAbsolutePath) const;
 
+        bool isReadOnly() { return getIsReadOnlyFlag(); }
         bool isModified() { return getIsModifiedFlag(); }
         bool isSelected() { return getIsSelectedFlag(); }
         bool isUnavailable() { return getIsUnavailableFlag(); }

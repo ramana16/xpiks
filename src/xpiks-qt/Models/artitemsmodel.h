@@ -77,11 +77,12 @@ namespace Models {
             BaseFilenameRole,
             IsVideoRole,
             ArtworkThumbnailRole,
+            IsReadOnlyRole,
             RolesNumber
         };
 
     public:
-        virtual ArtworkMetadata *createMetadata(const QString &filepath, qint64 directoryID);
+        virtual ArtworkMetadata *createArtwork(const QString &filepath, qint64 directoryID);
         void deleteAllItems();
 #ifdef INTEGRATION_TESTS
         void fakeDeleteAllItems();
@@ -117,8 +118,6 @@ namespace Models {
 
         /*Q_INVOKABLE*/ void updateSelectedArtworks(const QVector<int> &selectedIndices);
         /*Q_INVOKABLE*/ void updateSelectedArtworksEx(const QVector<int> &selectedIndices, const QVector<int> roles);
-
-        /*Q_INVOKABLE*/ void saveSelectedArtworks(const QVector<int> &selectedIndices, bool overwriteAll, bool useBackups);
 
         /*Q_INVOKABLE*/ ArtworkMetadata *getArtworkMetadata(int index) const;
 

@@ -154,9 +154,13 @@ namespace Models {
     void FilteredArtItemsProxyModel::saveSelectedArtworks(bool overwriteAll, bool useBackups) {
         LOG_INFO << "ovewriteAll:" << overwriteAll << "useBackups:" << useBackups;
         // former patchSelectedArtworks
-        QVector<int> indices = getSelectedOriginalIndices();
-        ArtItemsModel *artItemsModel = getArtItemsModel();
-        artItemsModel->saveSelectedArtworks(indices, overwriteAll, useBackups);
+        auto itemsToSave = getFilteredOriginalItems<ArtworkMetadata*>(
+                    [&overwriteAll](ArtworkMetadata *artwork) {
+                return artwork->isSelected() && !artwork->isReadOnly() && (artwork->isModified() || overwriteAll);
+    },
+                [] (ArtworkMetadata *artwork, int, int) { return artwork; });
+
+        xpiks()->writeMetadata(itemsToSave, useBackups);
     }
 
     void FilteredArtItemsProxyModel::wipeMetadataFromSelectedArtworks(bool useBackups) {
@@ -205,8 +209,8 @@ namespace Models {
         auto selectedArtworks = getSelectedOriginalItems();
         int modifiedCount = 0;
 
-        for (ArtworkMetadata *metadata: selectedArtworks) {
-            if (metadata->isModified() || overwriteAll) {
+        for (ArtworkMetadata *artwork: selectedArtworks) {
+            if (!artwork->isReadOnly() && (artwork->isModified() || overwriteAll)) {
                 modifiedCount++;
             }
         }

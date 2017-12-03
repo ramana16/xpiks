@@ -61,6 +61,7 @@ namespace Models {
         enum class ImageProperties {
             FilePathProperty,
             FileSizeProperty,
+            FileAccessProperty,
             ImageSizeProperty,
             DateTakenProperty,
             AttachedVectorProperty,
@@ -70,6 +71,7 @@ namespace Models {
         enum class VideoProperties {
             FilePathProperty,
             FileSizeProperty,
+            FileAccessProperty,
             CodecProperty,
             FrameSizeProperty,
             VideoDurationProperty,

@@ -13,6 +13,7 @@
 #include <QWriteLocker>
 #include <QStringBuilder>
 #include <QDir>
+#include <QFileInfo>
 #include "../Helpers/keywordshelpers.h"
 #include "settingsmodel.h"
 #include "../SpellCheck/spellsuggestionsitem.h"
@@ -47,6 +48,9 @@ namespace Models {
         m_MetadataModel.setSpellCheckInfo(&m_SpellCheckInfo);
 
         QObject::connect(&m_MetadataModel, &Common::BasicMetadataModel::spellingInfoUpdated, this, &ArtworkMetadata::spellingInfoUpdated);
+
+        QFileInfo fi(filepath);
+        setIsReadOnlyFlag(!fi.isWritable());
     }
 
     ArtworkMetadata::~ArtworkMetadata() {

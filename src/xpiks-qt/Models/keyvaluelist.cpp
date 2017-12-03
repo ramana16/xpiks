@@ -92,6 +92,7 @@ namespace Models {
     void ArtworkPropertiesMap::setForTheImage(ImageArtwork *imageArtwork) {
         m_ValuesHash[int(ImageProperties::FilePathProperty)] = imageArtwork->getFilepath();
         m_ValuesHash[int(ImageProperties::FileSizeProperty)] = Helpers::describeFileSize(imageArtwork->getFileSize());
+        m_ValuesHash[int(ImageProperties::FileAccessProperty)] = imageArtwork->isReadOnly() ? QObject::tr("Read-only") : QObject::tr("Normal");
 
         QSize size;
         if (imageArtwork->isInitialized()) {
@@ -109,6 +110,7 @@ namespace Models {
     void ArtworkPropertiesMap::setForTheVideo(VideoArtwork *videoArtwork) {
         m_ValuesHash[int(VideoProperties::FilePathProperty)] = videoArtwork->getFilepath();
         m_ValuesHash[int(VideoProperties::FileSizeProperty)] = Helpers::describeFileSize(videoArtwork->getFileSize());
+        m_ValuesHash[int(ImageProperties::FileAccessProperty)] = videoArtwork->isReadOnly() ? QObject::tr("Read-only") : QObject::tr("Normal");
 
         QSize size;
         if (videoArtwork->isInitialized()) {
@@ -129,6 +131,7 @@ namespace Models {
         static const char *imagesPropertyNames[] = {
             /*FilePathProperty*/ QT_TRANSLATE_NOOP("ImageProperties", "File path"),
             /*FileSizeProperty*/ QT_TRANSLATE_NOOP("ImageProperties", "File size"),
+            /*FileAccessProperty*/  QT_TRANSLATE_NOOP("ImageProperties", "File access"),
             /*ImageSizeProperty*/QT_TRANSLATE_NOOP("ImageProperties", "Image size"),
             /*DateTakenProperty*/QT_TRANSLATE_NOOP("ImageProperties", "Date taken"),
             /*AttachedVectorProperty*/QT_TRANSLATE_NOOP("ImageProperties", "Vector")
@@ -137,6 +140,7 @@ namespace Models {
         static const char *videoPropertyNames[] = {
             /*FilePathProperty*/ QT_TRANSLATE_NOOP("VideoProperties", "File path"),
             /*FileSizeProperty*/ QT_TRANSLATE_NOOP("VideoProperties", "File size"),
+            /*FileAccessProperty*/  QT_TRANSLATE_NOOP("VideoProperties", "File access"),
             /*CodecProperty*/ QT_TRANSLATE_NOOP("VideoProperties", "Codec"),
             /*FrameSizeProperty*/QT_TRANSLATE_NOOP("VideoProperties", "Frame size"),
             /*VideoDurationProperty*/QT_TRANSLATE_NOOP("VideoProperties", "Duration"),

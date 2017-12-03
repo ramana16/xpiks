@@ -42,7 +42,7 @@ namespace Mocks {
                 qint64 directoryID;
 
                 if (artworksRepository->accountFile(filename, directoryID)) {
-                    Models::ArtworkMetadata *artwork = artItemsModel->createMetadata(filename, directoryID);
+                    Models::ArtworkMetadata *artwork = artItemsModel->createArtwork(filename, directoryID);
                     artwork->initAsEmpty();
 
                     Models::ImageArtwork *image = dynamic_cast<Models::ImageArtwork*>(artwork);
