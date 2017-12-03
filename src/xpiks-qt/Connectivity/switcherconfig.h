@@ -57,7 +57,8 @@ namespace Connectivity {
             ProgressiveSuggestionPreviews,
             DirectMetadataExport,
             GoodQualityVideoPreviews,
-            MetadataAutoImport
+            MetadataAutoImport,
+            GettySuggestionEnabled
         };
 
     private:

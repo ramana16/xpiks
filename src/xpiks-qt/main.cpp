@@ -384,8 +384,6 @@ int main(int argc, char *argv[]) {
 
     commandManager.ensureDependenciesInjected();
 
-    keywordsSuggestor.initSuggestionEngines();
-
     // other initializations
     secretsManager.setMasterPasswordHash(settingsModel.getMasterPasswordHash());
     recentDirectorieModel.deserializeFromSettings(settingsModel.getRecentDirectories());

@@ -24,6 +24,7 @@
 #include "../Models/switchermodel.h"
 #include "../Models/settingsmodel.h"
 #include "../Helpers/constants.h"
+#include "../Models/switchermodel.h"
 
 #define LINEAR_TIMER_INTERVAL 1000
 #define DEFAULT_SEARCH_TYPE_INDEX 0
@@ -57,13 +58,18 @@ namespace Suggestion {
     }
 
     void KeywordsSuggestor::initSuggestionEngines() {
+        LOG_DEBUG << "#";
         Q_ASSERT(m_CommandManager != NULL);
         auto *settingsModel = m_CommandManager->getSettingsModel();
         auto *metadataIOService = m_CommandManager->getMetadataIOService();
+        auto *switcherModel = m_CommandManager->getSwitcherModel();
 
         int id = 0;
         m_QueryEngines.append(new ShutterstockQueryEngine(id++, settingsModel));
-        m_QueryEngines.append(new GettyQueryEngine(id++, settingsModel));
+        if (switcherModel->getGettySuggestionEnabled()) {
+            // https://github.com/ribtoks/xpiks/issues/463
+            m_QueryEngines.append(new GettyQueryEngine(id++, settingsModel));
+        }
         m_QueryEngines.append(new FotoliaQueryEngine(id++, settingsModel));
         m_QueryEngines.append(new LocalLibraryQueryEngine(id++, metadataIOService));
         m_LocalSearchIndex = m_QueryEngines.length() - 1;

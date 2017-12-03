@@ -679,6 +679,7 @@ void Commands::CommandManager::afterConstructionCallback() {
     m_UploadInfoRepository->initializeConfig();
     m_PresetsModel->initializePresets();
     m_CsvExportModel->initializeExportPlans(&m_InitCoordinator);
+    m_KeywordsSuggestor->initSuggestionEngines();
 #endif
 
     executeMaintenanceJobs();
