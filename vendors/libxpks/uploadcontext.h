@@ -19,6 +19,7 @@ namespace libxpks {
                 m_UseEPSV(false),
                 m_UseProxy(false),
                 m_VerboseLogging(false),
+                m_VectorsFirst(false),
                 m_ProxySettings(nullptr)
             { }
 
@@ -39,6 +40,7 @@ namespace libxpks {
             bool m_UseEPSV;
             bool m_UseProxy;
             bool m_VerboseLogging;
+            bool m_VectorsFirst;
             Models::ProxySettings *m_ProxySettings;
         };
     }
