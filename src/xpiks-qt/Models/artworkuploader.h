@@ -38,6 +38,7 @@ namespace Helpers {
 }
 
 namespace Models {
+#define PERCENT_EPSILON 0.0001
     class ArtworkMetadata;
 
     class ArtworkUploader:
@@ -45,7 +46,7 @@ namespace Models {
             public Common::BaseEntity,
             public Helpers::IFileNotAvailableModel
     {
-        Q_PROPERTY(int percent READ getPercent WRITE setPercent NOTIFY percentChanged)
+        Q_PROPERTY(int percent READ getUIPercent NOTIFY percentChanged)
         Q_PROPERTY(bool inProgress READ getInProgress WRITE setInProgress NOTIFY inProgressChanged)
         Q_PROPERTY(bool isError READ getHasErrors WRITE setHasErrors NOTIFY hasErrorsChanged)
         Q_PROPERTY(int itemsCount READ getItemsCount NOTIFY itemsCountChanged)
@@ -71,13 +72,13 @@ namespace Models {
         void credentialsChecked(bool result, const QString &url);
 
     public:
-        int getPercent() const { return m_Percent; }
+        int getUIPercent() const { return ((PERCENT_EPSILON < m_Percent) && (m_Percent < 1.0)) ? 1 : (int)m_Percent; }
         bool getInProgress() const { return m_IsInProgress; }
         bool getHasErrors() const { return m_HasErrors; }
         int getItemsCount() const { return (int)m_ArtworksSnapshot.size(); }
 
     public:
-        void setPercent(int value);
+        void setPercent(double value);
         void setInProgress(bool value);
         void setHasErrors(bool value);
 
@@ -138,7 +139,7 @@ namespace Models {
         AutoComplete::StringsAutoCompleteModel m_StocksCompletionSource;
         AutoComplete::StocksFtpListModel m_StocksFtpList;
         QFutureWatcher<Connectivity::ContextValidationResult> *m_TestingCredentialWatcher;
-        int m_Percent;
+        double m_Percent;
         volatile bool m_IsInProgress;
         volatile bool m_HasErrors;
     };

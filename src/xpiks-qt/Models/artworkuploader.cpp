@@ -71,8 +71,8 @@ namespace Models {
         m_StocksFtpList.setCommandManager(commandManager);
     }
 
-    void ArtworkUploader::setPercent(int value) {
-        if (m_Percent != value) {
+    void ArtworkUploader::setPercent(double value) {
+        if (fabs(m_Percent - value) > PERCENT_EPSILON) {
             m_Percent = value;
             emit percentChanged();
         }
@@ -114,8 +114,7 @@ namespace Models {
     }
 
     void ArtworkUploader::uploaderPercentChanged(double percent) {
-        int percentage = percent < 1.0 ? 1.0 : percent;
-        setPercent((int)percentage);
+        setPercent(percent);
         LOG_DEBUG << "Overall progress =" << percent;
 
         UploadInfoRepository *uploadInfoRepository = m_CommandManager->getUploadInfoRepository();

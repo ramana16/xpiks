@@ -106,12 +106,12 @@ namespace Models {
         void backupPassword() { m_EncodedPasswordBackup = m_EncodedPassword; }
         void dropPassword() { m_EncodedPassword = ""; }
         void setPercent(double value) {
-            if (m_Percent != value) {
+            if (fabs(m_Percent - value) > 0.0001) {
                 m_Percent = value;
                 emit progressChanged(value);
             }
         }
-        void resetPercent() { m_Percent = 0; }
+        void resetPercent() { m_Percent = 0.0; }
         bool setDisableFtpPassiveMode(bool value) {
             bool result = m_DisableFtpPassiveMode != value;
             m_DisableFtpPassiveMode = value;
