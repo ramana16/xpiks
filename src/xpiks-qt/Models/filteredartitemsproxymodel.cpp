@@ -113,8 +113,8 @@ namespace Models {
             }
         }
 
-        emit allItemsSelectedChanged();
         artItemsModel->updateItems(directoryItems, QVector<int>() << ArtItemsModel::IsSelectedRole);
+        emit allItemsSelectedChanged();
     }
 
     void FilteredArtItemsProxyModel::combineSelectedArtworks() {
