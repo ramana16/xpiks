@@ -93,6 +93,7 @@
 #include "MetadataIO/csvexportmodel.h"
 #include "KeywordsPresets/presetgroupsmodel.h"
 #include <ftpcoordinator.h>
+#include "Helpers/filehelpers.h"
 
 void myMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg) {
     Q_UNUSED(context);
@@ -211,8 +212,10 @@ int main(int argc, char *argv[]) {
     settingsModel.retrieveAllValues();
     ensureUserIdExists(&settingsModel);
 
-#ifdef WITH_LOGS
     QString appDataPath = XPIKS_USERDATA_PATH;
+    const QString statesPath = QDir::cleanPath(appDataPath + QDir::separator() + Constants::STATES_DIR);
+    Helpers::ensureDirectoryExists(statesPath);
+#ifdef WITH_LOGS
     const QString &logFileDir = QDir::cleanPath(appDataPath + QDir::separator() + Constants::LOGS_DIR);
     if (!logFileDir.isEmpty()) {
         QDir dir(logFileDir);

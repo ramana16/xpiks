@@ -14,7 +14,6 @@
 #include "../Helpers/localconfig.h"
 #include <QString>
 #include <QJsonObject>
-#include <QAtomicInt>
 
 namespace Common {
     class StatefulEntity
@@ -62,7 +61,6 @@ namespace Common {
         }
 
     private:
-        static QAtomicInt s_DirectoryInitialized;
         QString m_StateName;
         Helpers::LocalConfig m_StateConfig;
         QJsonObject m_StateJson;

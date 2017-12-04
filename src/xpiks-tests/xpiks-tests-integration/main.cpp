@@ -63,6 +63,7 @@
 #include "../../xpiks-qt/SpellCheck/duplicatesreviewmodel.h"
 #include "../../xpiks-qt/MetadataIO/csvexportmodel.h"
 #include "../../xpiks-qt/Models/switchermodel.h"
+#include "../../xpiks-qt/Helpers/filehelpers.h"
 
 #include "exiv2iohelpers.h"
 
@@ -216,8 +217,10 @@ int main(int argc, char *argv[]) {
     settingsModel.initializeConfigs();
     settingsModel.retrieveAllValues();
 
-#ifdef WITH_LOGS
     QString appDataPath = XPIKS_USERDATA_PATH;
+    const QString statesPath = QDir::cleanPath(appDataPath + QDir::separator() + Constants::STATES_DIR);
+    Helpers::ensureDirectoryExists(statesPath);
+#ifdef WITH_LOGS
     const QString &logFileDir = QDir::cleanPath(appDataPath + QDir::separator() + Constants::LOGS_DIR);
     if (!logFileDir.isEmpty()) {
         QDir dir(logFileDir);

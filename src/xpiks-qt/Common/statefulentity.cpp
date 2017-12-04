@@ -14,8 +14,6 @@
 #include "../Helpers/filehelpers.h"
 
 namespace Common {
-    QAtomicInt StatefulEntity::s_DirectoryInitialized = 0;
-
     StatefulEntity::StatefulEntity(const QString &stateName):
         m_StateName(stateName)
     {
@@ -37,10 +35,6 @@ namespace Common {
         QString appDataPath = XPIKS_USERDATA_PATH;
         if (!appDataPath.isEmpty()) {
             const QString statesPath = QDir::cleanPath(appDataPath + QDir::separator() + Constants::STATES_DIR);
-            if (s_DirectoryInitialized.fetchAndAddOrdered(1) == 0) {
-                Helpers::ensureDirectoryExists(statesPath);
-            }
-
             QDir statesDir(statesPath);
             Q_ASSERT(statesDir.exists());
             localConfigPath = statesDir.filePath(filename);
