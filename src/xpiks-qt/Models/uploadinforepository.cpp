@@ -54,7 +54,9 @@ namespace Models {
             object.insert(FTP_TITLE_KEY, uploadInfo->getTitle());
             object.insert(FTP_HOST_KEY, uploadInfo->getHost());
             object.insert(FTP_USERNAME_KEY, uploadInfo->getUsername());
-            object.insert(FTP_PASS_KEY, uploadInfo->getAnyPassword());
+            QString password = uploadInfo->getAnyPassword();
+            QString rawPassword = QString::fromLatin1(password.toUtf8().toBase64());
+            object.insert(FTP_PASS_KEY, rawPassword);
             object.insert(FTP_CREATE_ZIP, uploadInfo->getZipBeforeUpload());
             object.insert(FTP_DISABLE_PASSIVE, uploadInfo->getDisableFtpPassiveMode());
             object.insert(FTP_DISABLE_EPSV, uploadInfo->getDisableEPSV());
@@ -88,7 +90,10 @@ namespace Models {
 
             QJsonValue passwordValue = element.value(FTP_PASS_KEY);
             if (passwordValue.isString()) {
-                destination->setPassword(passwordValue.toString());
+                QString rawPassword = passwordValue.toString();
+                QByteArray base64Password = QByteArray::fromBase64(rawPassword.toLatin1());
+                QString password = QString::fromUtf8(base64Password);
+                destination->setPassword(password);
             }
 
             QJsonValue createZipValue = element.value(FTP_CREATE_ZIP);
