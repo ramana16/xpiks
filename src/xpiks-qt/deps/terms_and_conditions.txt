@@ -2,7 +2,9 @@ By accessing and using Xpiks (heretofore called the "application" or the "progra
 
 Xpiks is distributed under Mozilla Public License, v. 2.0. Xpiks source code is subject to the terms of the Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-Xpiks has an option to save credentials of FTP uploads. When you enter such sensitive data, Xpiks always encrypts it. Also you have option to encrypt it with your own password (Master Password). Application sends anonymous statistics data to collect analytics of how many users on which platforms use Xpiks daily. Also Xpiks records which features are used the most to invest more time in developing most needed parts. Such analytics data is not shared with any third-parties and is saved in a secure manner.
+Xpiks has an option to save credentials of FTP uploads. When you enter such sensitive data, Xpiks always encrypts it. Also you have option to encrypt it with your own password (Master Password). Application sends anonymous statistics data to collect analytics of how many users on which platforms use Xpiks daily. Such analytics data is not shared with any third-parties and is saved in a secure manner.
+
+This software uses code of <a href=http://ffmpeg.org>FFmpeg</a> licensed under the <a href=http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html>LGPLv2.1</a> and its source can be downloaded <a href=link_to_your_sources>here</a>.
 
 Application and its original content, features, and functionality are owned by Taras Kushnir and are protected by international copyright.
 
