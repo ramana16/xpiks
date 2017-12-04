@@ -374,6 +374,7 @@ namespace Models {
 
             m_UploadTimeout = ensureInBounds(uploadTimeout, 1, 300);
             emit uploadTimeoutChanged(m_UploadTimeout);
+            m_ExiftoolPathChanged = true;
         }
 
         void setMustUseMasterPassword(bool mustUseMasterPassword) {
@@ -669,6 +670,7 @@ namespace Models {
         int m_ProgressiveSuggestionIncrement;
         bool m_UseDirectExiftoolExport;
         bool m_UseAutoImport;
+        bool m_ExiftoolPathChanged;
     };
 }
 

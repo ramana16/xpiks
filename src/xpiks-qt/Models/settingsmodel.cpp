@@ -156,7 +156,8 @@ namespace Models {
         m_UseProgressiveSuggestionPreviews(DEFAULT_USE_PROGRESSIVE_SUGGESTION_PREVIEWS),
         m_ProgressiveSuggestionIncrement(DEFAULT_PROGRESSIVE_SUGGESTION_INCREMENT),
         m_UseDirectExiftoolExport(DEFAULT_USE_DIRECT_EXIFTOOL_EXPORT),
-        m_UseAutoImport(DEFAULT_USE_AUTOIMPORT)
+        m_UseAutoImport(DEFAULT_USE_AUTOIMPORT),
+        m_ExiftoolPathChanged(false)
     {
     }
 
@@ -640,7 +641,9 @@ namespace Models {
             }
         }
 
-        xpiks()->autoDiscoverExiftool();
+        if (m_ExiftoolPathChanged) {
+            xpiks()->autoDiscoverExiftool();
+        }
 
         resetChangeStates();
 
@@ -651,6 +654,7 @@ namespace Models {
     void SettingsModel::resetChangeStates() {
         m_DictsPathChanged = false;
         m_UseSpellCheckChanged = false;
+        m_ExiftoolPathChanged = false;
     }
 
     QString SettingsModel::getWhatsNewText() const {
