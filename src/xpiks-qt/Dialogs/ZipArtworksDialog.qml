@@ -130,7 +130,7 @@ Item {
                     }
 
                     StyledText {
-                        id:textItemsAvailable
+                        id: textItemsAvailable
                         text: i18.n + getOriginalText()
 
                         function getOriginalText() {
@@ -140,8 +140,7 @@ Item {
                         Connections {
                             target: zipArchiver
                             onItemsCountChanged: {
-                               textItemsAvailable.originalText = zipArchiver.itemsCount == 1 ? qsTr("1 artwork with vector") : qsTr("%1 artworks with vectors").arg(zipArchiver.itemsCount)
-                               textItemsAvailable.text = i18.n + originalText
+                                textItemsAvailable.text = i18.n + textItemsAvailable.getOriginalText()
                             }
                        }
                     }
