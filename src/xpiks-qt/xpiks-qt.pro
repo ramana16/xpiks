@@ -545,7 +545,8 @@ DISTFILES += \
     Graphics/slategray/More_icon_disabled.svg \
     Graphics/slategray/More_icon_hovered.svg \
     Graphics/slategray/More_icon_normal.svg \
-    Dialogs/WipeMetadata.qml
+    Dialogs/WipeMetadata.qml \
+    Dialogs/SimplePreview.qml
 
 lupdate_only {
 SOURCES += *.qml \

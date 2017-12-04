@@ -171,6 +171,8 @@ namespace Models {
         Q_INVOKABLE void copyToQuickBuffer();
         Q_INVOKABLE void generateCompletions(const QString &prefix);
         Q_INVOKABLE bool acceptCompletionAsPreset(int completionID);
+        Q_INVOKABLE QString getSourcePathAt(int index) const;
+        Q_INVOKABLE QString getThumbPathAt(int index) const;
 
     private:
         void processCombinedEditCommand();

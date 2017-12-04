@@ -336,6 +336,24 @@ namespace Models {
         return doAcceptCompletionAsPreset(completionID);
     }
 
+    QString CombinedArtworksModel::getSourcePathAt(int index) const {
+        if (index >= getArtworksCount() || index < 0) {
+            return QString();
+        }
+
+        ArtworkMetadata *metadata = getArtworkMetadata(index);
+        return metadata->getFilepath();
+    }
+
+    QString CombinedArtworksModel::getThumbPathAt(int index) const
+    {
+        if (index >= getArtworksCount() || index < 0) {
+            return QString();
+        }
+
+        ArtworkMetadata *metadata = getArtworkMetadata(index);
+        return metadata->getThumbnailPath();
+    }
     void CombinedArtworksModel::processCombinedEditCommand() {
         MetadataIO::ArtworksSnapshot::Container rawSnapshot(getRawSnapshot());
 

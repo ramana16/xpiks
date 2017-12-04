@@ -291,6 +291,22 @@ Rectangle {
         }
     }
 
+    Menu {
+        id: contextMenu
+        property int artworkIndex
+
+        MenuItem {
+            text: i18.n + qsTr("Preview")
+            onTriggered: {
+                Common.launchDialog("Dialogs/SimplePreview.qml",
+                                    applicationWindow,
+                                    {
+                                        index: contextMenu.artworkIndex
+                                    })
+            }
+        }
+    }
+
     Component.onCompleted: {
         focus = true
 
@@ -1374,8 +1390,21 @@ Rectangle {
                     id: imageMA
                     anchors.fill: parent
                     hoverEnabled: true
+                    acceptedButtons: Qt.LeftButton | Qt.RightButton
+                    onDoubleClicked: {
+                        Common.launchDialog("Dialogs/SimplePreview.qml",
+                                            applicationWindow,
+                                            {
+                                                index: cellItem.delegateIndex
+                                            })
+                    }
                     onClicked: {
-                        combinedArtworks.setArtworkSelected(delegateIndex, !isselected)
+                        if (mouse.button == Qt.RightButton) {
+                            contextMenu.artworkIndex = cellItem.delegateIndex
+                            contextMenu.popup()
+                        } else {
+                             combinedArtworks.setArtworkSelected(delegateIndex, !isselected)
+                        }
                     }
                 }
             }
