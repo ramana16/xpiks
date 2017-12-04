@@ -441,9 +441,9 @@ namespace Models {
 
         if (needToUpdate) {
             emit dataChanged(index, index, QVector<int>() << roleToUpdate);
-            justChanged();
         }
 
+        justChanged();
         return true;
     }
 
