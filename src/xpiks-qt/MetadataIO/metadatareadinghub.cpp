@@ -19,7 +19,7 @@ namespace MetadataIO {
         m_ImportID(0),
         m_StorageReadBatchID(0),
         m_IgnoreBackupsAtImport(false),
-        m_InitAsEmpty(false)
+        m_IsCancelled(false)
     {
         QObject::connect(&m_AsyncCoordinator, &Helpers::AsyncCoordinator::statusReported,
                          this, &MetadataReadingHub::onCanInitialize);
@@ -31,7 +31,7 @@ namespace MetadataIO {
         m_ImportID = importID;
         m_StorageReadBatchID = storageReadBatchID;
         m_IgnoreBackupsAtImport = false;
-        m_InitAsEmpty = false;
+        m_IsCancelled = false;
         m_AsyncCoordinator.reset();
         LOG_DEBUG << "ReadingHub bound to batch ID" << m_StorageReadBatchID;
         // add 1 for the user to click a button
@@ -49,9 +49,17 @@ namespace MetadataIO {
         m_AsyncCoordinator.justEnded();
     }
 
-    void MetadataReadingHub::cancelImport() {
+    void MetadataReadingHub::cancelImport(bool ignoreBackups) {
         LOG_DEBUG << "#";
-        m_InitAsEmpty = true;
+        m_IgnoreBackupsAtImport = ignoreBackups;
+        m_IsCancelled = true;
+        m_AsyncCoordinator.justEnded();
+    }
+
+    void MetadataReadingHub::skipImport() {
+        LOG_DEBUG << "#";
+        m_ImportQueue.clear();
+        m_IgnoreBackupsAtImport = true;
         m_AsyncCoordinator.justEnded();
     }
 
@@ -60,39 +68,46 @@ namespace MetadataIO {
     }
 
     void MetadataReadingHub::onCanInitialize(int status) {
-        LOG_DEBUG << status;
+        LOG_DEBUG << "status:" << status;
         const bool ignoreBackups = m_IgnoreBackupsAtImport;
-        const bool initAsEmpty = m_InitAsEmpty;
+        const bool isCancelled = m_IsCancelled;
 
         if (ignoreBackups) {
             MetadataIOService *metadataIOService = m_CommandManager->getMetadataIOService();
             metadataIOService->cancelBatch(m_StorageReadBatchID);
         }
 
-        initializeArtworks(ignoreBackups, initAsEmpty);
+        const bool anyChanged = initializeArtworks(ignoreBackups, isCancelled);
 
         emit readingFinished(m_ImportID);
 
-        const auto &itemsToRead = m_ArtworksToRead.getWeakSnapshot();
+        if (anyChanged) {
+            const auto &itemsToRead = m_ArtworksToRead.getWeakSnapshot();
 
-        if (!initAsEmpty) {
-            xpiks()->addToLibrary(itemsToRead);
+            if (!isCancelled) {
+                xpiks()->addToLibrary(itemsToRead);
+            }
+
+            xpiks()->updateArtworks(itemsToRead);
+            xpiks()->submitForSpellCheck(itemsToRead);
+
+            xpiks()->submitForWarningsCheck(itemsToRead);
         }
-        xpiks()->updateArtworks(itemsToRead);
-        xpiks()->submitForSpellCheck(itemsToRead);
-        xpiks()->submitForWarningsCheck(itemsToRead);
 
         finalizeImport();
     }
 
-    void MetadataReadingHub::initializeArtworks(bool ignoreBackups, bool initAsEmpty) {
-        LOG_DEBUG << "ignore backups =" << ignoreBackups << ", init empty =" << initAsEmpty;
+    bool MetadataReadingHub::initializeArtworks(bool ignoreBackups, bool isCancelled) {
+        LOG_DEBUG << "ignore backups =" << ignoreBackups << "| cancelled =" << isCancelled;
         QHash<QString, size_t> filepathToIndexMap;
 
         std::vector<std::shared_ptr<MetadataIO::OriginalMetadata> > metadataToImport;
         // popAll() returns queue in reversed order for performance reasons
         m_ImportQueue.popAll(metadataToImport);
 
+        if (metadataToImport.empty()) { return false; }
+
+        bool anyChanged = false;
         const size_t size = metadataToImport.size();
         filepathToIndexMap.reserve((int)size);
 
@@ -107,6 +122,7 @@ namespace MetadataIO {
         }
 
         const bool shouldOverwrite = ignoreBackups;
+        MetadataIO::OriginalMetadata emptyOriginalMetadata;
 
         auto &items = m_ArtworksToRead.getRawData();
         for (auto &item: items) {
@@ -116,14 +132,16 @@ namespace MetadataIO {
             const size_t index = filepathToIndexMap.value(filepath, size);
             if (index < size) {
                 MetadataIO::OriginalMetadata *originalMetadata = metadataToImport[index].get();
-                if (!initAsEmpty) {
+                if (!isCancelled) {
                     artwork->initFromOrigin(*originalMetadata, shouldOverwrite);
                 } else {
-                    artwork->initAsEmpty(*originalMetadata);
+                    artwork->initFromOrigin(emptyOriginalMetadata, shouldOverwrite);
                 }
             } else {
                 artwork->initAsEmpty();
             }
         }
+
+        return anyChanged;
     }
 }

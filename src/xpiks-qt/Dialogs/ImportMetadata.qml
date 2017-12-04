@@ -25,6 +25,7 @@ Item {
 
     property int importID: 0
     property bool backupsEnabled: true
+    property bool reimport: false
 
     signal dialogDestruction();
     Component.onDestruction: dialogDestruction();
@@ -247,7 +248,7 @@ Item {
                         enabled: !metadataIOCoordinator.isInProgress
                         onClicked: {
                             console.debug("Close without Import pressed")
-                            metadataIOCoordinator.continueWithoutReading()
+                            metadataIOCoordinator.continueWithoutReading(ignoreAutosavesCheckbox.checked, metadataImportComponent.reimport)
                             closePopup()
                         }
                     }

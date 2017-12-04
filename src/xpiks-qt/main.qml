@@ -221,7 +221,8 @@ ApplicationWindow {
                 Common.launchDialog("Dialogs/ImportMetadata.qml", applicationWindow,
                                     {
                                         importID: importID,
-                                        backupsEnabled: !reimport
+                                        backupsEnabled: !reimport,
+                                        reimport: reimport
                                     })
             } else {
                 console.debug("UI::main # Import seems to be finished already")

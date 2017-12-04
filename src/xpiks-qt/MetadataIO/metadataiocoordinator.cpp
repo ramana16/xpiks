@@ -170,10 +170,14 @@ namespace MetadataIO {
         m_ReadingHub.proceedImport(ignoreBackups);
     }
 
-    void MetadataIOCoordinator::continueWithoutReading() {
-        LOG_DEBUG << "#";
+    void MetadataIOCoordinator::continueWithoutReading(bool ignoreBackups, bool reimport) {
+        LOG_INFO << "ignore backups:" << ignoreBackups << "reimport:" << reimport;
         setIsInProgress(true);
-        m_ReadingHub.cancelImport();
+        if (!reimport) {
+            m_ReadingHub.cancelImport(ignoreBackups);
+        } else {
+            m_ReadingHub.skipImport();
+        }
     }
 
     bool MetadataIOCoordinator::hasImportFinished(int importID) {

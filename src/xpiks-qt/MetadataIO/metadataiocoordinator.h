@@ -102,7 +102,7 @@ namespace MetadataIO {
     public:
         Q_INVOKABLE bool shouldUseAutoImport() const;
         Q_INVOKABLE void continueReading(bool ignoreBackups);
-        Q_INVOKABLE void continueWithoutReading();
+        Q_INVOKABLE void continueWithoutReading(bool ignoreBackups, bool reimport = false);
         Q_INVOKABLE bool hasImportFinished(int importID);
 
     private slots:

@@ -36,7 +36,8 @@ namespace MetadataIO {
 
     public:
         void proceedImport(bool ignoreBackups);
-        void cancelImport();
+        void cancelImport(bool ignoreBackups);
+        void skipImport();
 
     public:
         void push(std::shared_ptr<OriginalMetadata> &item);
@@ -48,7 +49,7 @@ namespace MetadataIO {
         void readingFinished(int importID);
 
     private:
-        void initializeArtworks(bool ignoreBackups, bool initEmpty);
+        bool initializeArtworks(bool ignoreBackups, bool isCancelled);
 
     private:
         ArtworksSnapshot m_ArtworksToRead;
@@ -57,7 +58,7 @@ namespace MetadataIO {
         int m_ImportID;
         quint32 m_StorageReadBatchID;
         volatile bool m_IgnoreBackupsAtImport;
-        volatile bool m_InitAsEmpty;
+        volatile bool m_IsCancelled;
     };
 }
 
