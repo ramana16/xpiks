@@ -49,7 +49,7 @@ namespace MetadataIO {
         void readingFinished(int importID);
 
     private:
-        bool initializeArtworks(bool ignoreBackups, bool isCancelled);
+        void initializeArtworks(bool ignoreBackups, bool isCancelled);
 
     private:
         ArtworksSnapshot m_ArtworksToRead;

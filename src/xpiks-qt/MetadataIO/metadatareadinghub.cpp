@@ -46,6 +46,7 @@ namespace MetadataIO {
     void MetadataReadingHub::proceedImport(bool ignoreBackups) {
         LOG_DEBUG << "ignore backups =" << ignoreBackups;
         m_IgnoreBackupsAtImport = ignoreBackups;
+        m_IsCancelled = false;
         m_AsyncCoordinator.justEnded();
     }
 
@@ -60,6 +61,7 @@ namespace MetadataIO {
         LOG_DEBUG << "#";
         m_ImportQueue.clear();
         m_IgnoreBackupsAtImport = true;
+        m_IsCancelled = false;
         m_AsyncCoordinator.justEnded();
     }
 
@@ -77,27 +79,24 @@ namespace MetadataIO {
             metadataIOService->cancelBatch(m_StorageReadBatchID);
         }
 
-        const bool anyChanged = initializeArtworks(ignoreBackups, isCancelled);
+        initializeArtworks(ignoreBackups, isCancelled);
 
         emit readingFinished(m_ImportID);
 
-        if (anyChanged) {
-            const auto &itemsToRead = m_ArtworksToRead.getWeakSnapshot();
+        const auto &itemsToRead = m_ArtworksToRead.getWeakSnapshot();
 
-            if (!isCancelled) {
-                xpiks()->addToLibrary(itemsToRead);
-            }
-
-            xpiks()->updateArtworks(itemsToRead);
-            xpiks()->submitForSpellCheck(itemsToRead);
-
-            xpiks()->submitForWarningsCheck(itemsToRead);
+        if (!isCancelled) {
+            xpiks()->addToLibrary(itemsToRead);
         }
+
+        xpiks()->updateArtworks(itemsToRead);
+        xpiks()->submitForSpellCheck(itemsToRead);
+        xpiks()->submitForWarningsCheck(itemsToRead);
 
         finalizeImport();
     }
 
-    bool MetadataReadingHub::initializeArtworks(bool ignoreBackups, bool isCancelled) {
+    void MetadataReadingHub::initializeArtworks(bool ignoreBackups, bool isCancelled) {
         LOG_DEBUG << "ignore backups =" << ignoreBackups << "| cancelled =" << isCancelled;
         QHash<QString, size_t> filepathToIndexMap;
 
@@ -105,9 +104,6 @@ namespace MetadataIO {
         // popAll() returns queue in reversed order for performance reasons
         m_ImportQueue.popAll(metadataToImport);
 
-        if (metadataToImport.empty()) { return false; }
-
-        bool anyChanged = false;
         const size_t size = metadataToImport.size();
         filepathToIndexMap.reserve((int)size);
 
@@ -141,7 +137,5 @@ namespace MetadataIO {
                 artwork->initAsEmpty();
             }
         }
-
-        return anyChanged;
     }
 }
