@@ -88,6 +88,7 @@ namespace Models {
         Q_INVOKABLE void focusCurrentItemKeywords(int index);
         Q_INVOKABLE void toggleSorted();
         Q_INVOKABLE void detachVectorFromSelected();
+        Q_INVOKABLE void detachVectorFromArtwork(int index);
         Q_INVOKABLE QObject *getArtworkMetadata(int index);
         Q_INVOKABLE QObject *getBasicModel(int index);
         Q_INVOKABLE QString getKeywordsString(int index);

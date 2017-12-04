@@ -946,6 +946,7 @@ ApplicationWindow {
         id: artworkContextMenu
         property string filename
         property int index
+        property bool hasVectorAttached
 
         MenuItem {
             text: i18.n + qsTr("Edit")
@@ -962,6 +963,15 @@ ApplicationWindow {
                 var originalIndex = filteredArtItemsModel.getOriginalIndex(artworkContextMenu.index)
                 var metadata = filteredArtItemsModel.getArtworkMetadata(artworkContextMenu.index)
                 startOneItemEditing(metadata, artworkContextMenu.index, originalIndex, true)
+            }
+        }
+
+        MenuItem {
+            text: i18.n + qsTr("Detach vector")
+            enabled: artworkContextMenu.hasVectorAttached
+            visible: artworkContextMenu.hasVectorAttached
+            onTriggered: {
+                filteredArtItemsModel.detachVectorFromArtwork(artworkContextMenu.index)
             }
         }
 

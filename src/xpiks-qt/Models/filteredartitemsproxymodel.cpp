@@ -396,7 +396,14 @@ namespace Models {
         LOG_DEBUG << "#";
         QVector<int> indices = getSelectedOriginalIndices();
         ArtItemsModel *artItemsModel = getArtItemsModel();
-        artItemsModel->detachVectorsFromSelected(indices);
+        artItemsModel->detachVectorsFromArtworks(indices);
+    }
+
+    void FilteredArtItemsProxyModel::detachVectorFromArtwork(int index) {
+        LOG_DEBUG << index;
+        int originalIndex = getOriginalIndex(index);
+        ArtItemsModel *artItemsModel = getArtItemsModel();
+        artItemsModel->detachVectorsFromArtworks(QVector<int>() << originalIndex);
     }
 
     QObject *FilteredArtItemsProxyModel::getArtworkMetadata(int index) {

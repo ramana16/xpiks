@@ -906,6 +906,7 @@ Item {
                                 console.log("Context menu for artwork")
                                 artworkContextMenu.filename = filename;
                                 artworkContextMenu.index = rowWrapper.delegateIndex
+                                artworkContextMenu.hasVectorAttached = hasvectorattached
                                 artworkContextMenu.popup()
                             }
 

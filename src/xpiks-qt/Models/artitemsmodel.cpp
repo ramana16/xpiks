@@ -582,12 +582,13 @@ namespace Models {
         }
     }
 
-    void ArtItemsModel::detachVectorsFromSelected(const QVector<int> &selectedIndices) {
+    void ArtItemsModel::detachVectorsFromArtworks(const QVector<int> &indices) {
+        LOG_INFO << indices.size() << "indices";
         QVector<int> indicesToUpdate;
-        indicesToUpdate.reserve(selectedIndices.length());
+        indicesToUpdate.reserve(indices.length());
         Models::ArtworksRepository *artworksRepository = m_CommandManager->getArtworksRepository();
 
-        foreach(int index, selectedIndices) {
+        for(int index: indices) {
             ArtworkMetadata *metadata = accessArtwork(index);
             ImageArtwork *image = dynamic_cast<ImageArtwork *>(metadata);
 

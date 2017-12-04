@@ -138,7 +138,7 @@ namespace Models {
         Q_INVOKABLE void editKeyword(int metadataIndex, int keywordIndex, const QString &replacement);
         Q_INVOKABLE void plainTextEdit(int metadataIndex, const QString &rawKeywords, bool spaceIsSeparator=false);
 
-        /*Q_INVOKABLE*/ void detachVectorsFromSelected(const QVector<int> &selectedIndices);
+        /*Q_INVOKABLE*/ void detachVectorsFromArtworks(const QVector<int> &indices);
 
         Q_INVOKABLE void expandPreset(int artworkIndex, int keywordIndex, unsigned int presetID);
         Q_INVOKABLE void expandLastAsPreset(int metadataIndex);
