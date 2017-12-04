@@ -69,6 +69,7 @@ namespace Suggestion {
         if (switcherModel->getGettySuggestionEnabled()) {
             // https://github.com/ribtoks/xpiks/issues/463
             m_QueryEngines.append(new GettyQueryEngine(id++, settingsModel));
+            LOG_DEBUG << "Getty query engine is disabled";
         }
         m_QueryEngines.append(new FotoliaQueryEngine(id++, settingsModel));
         m_QueryEngines.append(new LocalLibraryQueryEngine(id++, metadataIOService));

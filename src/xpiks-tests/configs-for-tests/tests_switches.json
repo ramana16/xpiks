@@ -21,5 +21,8 @@
     },
     "autoImport": {
         "v": true
+    },
+    "iStockSuggestion": {
+        "v": false
     }
 }

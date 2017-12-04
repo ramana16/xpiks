@@ -341,8 +341,6 @@ int main(int argc, char *argv[]) {
 
     commandManager.ensureDependenciesInjected();
 
-    keywordsSuggestor.initSuggestionEngines();
-
     secretsManager.setMasterPasswordHash(settingsModel.getMasterPasswordHash());
     recentDirectorieModel.deserializeFromSettings(settingsModel.getRecentDirectories());
     recentFileModel.deserializeFromSettings(settingsModel.getRecentFiles());
