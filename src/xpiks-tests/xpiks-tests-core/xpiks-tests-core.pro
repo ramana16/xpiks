@@ -17,9 +17,9 @@ CONFIG   += c++11
 
 win32:QT += winextras
 
-INCLUDEPATH += ../../tiny-aes
+INCLUDEPATH += ../../../vendors/tiny-aes
 win32:INCLUDEPATH += ../../xpiks-qt/Encryption
-INCLUDEPATH += "../../hunspell-1.6.0/src"
+INCLUDEPATH += "../../../vendors/hunspell-1.6.0/src"
 DEFINES += HUNSPELL_STATIC
 DEFINES += CORE_TESTS
 
@@ -27,7 +27,7 @@ DEFINES += QT_NO_CAST_TO_ASCII \
            QT_RESTRICTED_CAST_FROM_ASCII \
            QT_NO_CAST_FROM_BYTEARRAY
 
-LIBS += -L"$$PWD/../../libs/"
+LIBS += -L"$$PWD/../../../libs/"
 LIBS += -lhunspell
 
 macx {
@@ -36,7 +36,7 @@ macx {
 }
 
 win32 {
-    INCLUDEPATH += "../../zlib-1.2.8"
+    INCLUDEPATH += "../../../vendors/zlib-1.2.8"
     #INCLUDEPATH += "../quazip"
     #INCLUDEPATH += "../libcurl/include"
     #LIBS -= -lcurl
@@ -70,7 +70,7 @@ TEMPLATE = app
 
 SOURCES += main.cpp \
     encryption_tests.cpp \
-    ../../tiny-aes/aes.cpp \
+    ../../../vendors/tiny-aes/aes.cpp \
     indicestoranges_tests.cpp \
     ../../xpiks-qt/Helpers/indiceshelper.cpp \
     ../../xpiks-qt/Commands/commandmanager.cpp \
@@ -114,6 +114,9 @@ SOURCES += main.cpp \
     ../../xpiks-qt/SpellCheck/spellcheckerrorshighlighter.cpp \
     artworkmetadata_tests.cpp \
     combinedmodel_tests.cpp \
+    ../../xpiks-qt/Helpers/localconfig.cpp \
+    ../../xpiks-qt/Models/proxysettings.cpp \
+    ../../xpiks-qt/Models/uploadinforepository.cpp \
     ../../xpiks-qt/Models/settingsmodel.cpp \
     stringhelpers_tests.cpp \
     ../../xpiks-qt/Helpers/stringhelper.cpp \
@@ -167,7 +170,7 @@ SOURCES += main.cpp \
 
 HEADERS += \
     encryption_tests.h \
-    ../../tiny-aes/aes.h \
+    ../../../vendors/tiny-aes/aes.h \
     ../../xpiks-qt/Encryption/aes-qt.h \
     indicestoranges_tests.h \
     ../../xpiks-qt/Helpers/indiceshelper.h \
@@ -219,8 +222,11 @@ HEADERS += \
     ../../xpiks-qt/SpellCheck/spellcheckerrorshighlighter.h \
     artworkmetadata_tests.h \
     combinedmodel_tests.h \
+    ../../xpiks-qt/Helpers/localconfig.h \
+    ../../xpiks-qt/Models/proxysettings.h \
+    ../../xpiks-qt/Models/uploadinfo.h \
+    ../../xpiks-qt/Models/uploadinforepository.h \
     ../../xpiks-qt/Models/settingsmodel.h \
-    ../../xpiks-qt/Helpers/appsettings.h \
     stringhelpers_tests.h \
     keywordvalidation_tests.h \
     artworkrepository_tests.h \

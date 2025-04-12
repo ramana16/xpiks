@@ -125,6 +125,17 @@ ColumnLayout {
                             color: Colors.itemsSourceForeground
                             text: path + " (" + usedimagescount + ")"
                             elide: Text.ElideMiddle
+                            font.bold: isselected
+
+                            MouseArea {
+                                id: selectionMA
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                hoverEnabled: true
+                                onClicked: {
+                                    artworkRepository.selectDirectory(sourceWrapper.delegateIndex)
+                                }
+                            }
                         }
 
                         CloseIcon {

@@ -21,7 +21,7 @@ SOURCES += main.cpp \
     Models/artworkuploader.cpp \
     Models/artworksprocessor.cpp \
     Models/uploadinforepository.cpp \
-    ../tiny-aes/aes.cpp \
+    ../../vendors/tiny-aes/aes.cpp \
     Encryption/secretsmanager.cpp \
     Helpers/stringhelper.cpp \
     Commands/commandmanager.cpp \
@@ -173,7 +173,6 @@ HEADERS += \
     Models/combinedartworksmodel.h \
     Common/abstractlistmodel.h \
     Helpers/constants.h \
-    Helpers/appsettings.h \
     Models/artworkuploader.h \
     Models/artworksprocessor.h \
     Models/uploadinfo.h \
@@ -181,7 +180,7 @@ HEADERS += \
     Models/uploadinforepository.h \
     Models/logsmodel.h \
     Encryption/aes-qt.h \
-    ../tiny-aes/aes.h \
+    ../../vendors/tiny-aes/aes.h \
     Encryption/secretsmanager.h \
     Helpers/stringhelper.h \
     Helpers/logger.h \
@@ -433,12 +432,12 @@ SOURCES += *.qml \
           StackViews/*.qml
 }
 
-INCLUDEPATH += ../tiny-aes
-INCLUDEPATH += ../cpp-libface
-INCLUDEPATH += ../ssdll/src/ssdll
-INCLUDEPATH += ../hunspell-1.6.0/src
+INCLUDEPATH += ../../vendors/tiny-aes
+INCLUDEPATH += ../../vendors/cpp-libface
+INCLUDEPATH += ../../vendors/ssdll/src/ssdll
+INCLUDEPATH += ../../vendors/hunspell-1.6.0/src
 
-LIBS += -L"$$PWD/../libs/"
+LIBS += -L"$$PWD/../../libs/"
 LIBS += -lhunspell
 LIBS += -lcurl
 LIBS += -lface
@@ -462,9 +461,9 @@ macx {
     LIBS += -liconv
     LIBS += -lexpat
 
-    INCLUDEPATH += "../quazip"
-    INCLUDEPATH += "../../libcurl/include"
-    INCLUDEPATH += ../exiv2-0.25/include
+    INCLUDEPATH += "../../vendors/quazip"
+    INCLUDEPATH += "../../../vendors/libcurl/include"
+    INCLUDEPATH += ../../vendors/exiv2-0.25/include
 
     LIBS += -lxmpsdk
 
@@ -495,10 +494,10 @@ win32 {
     QT += winextras
     DEFINES += ZLIB_WINAPI \
                ZLIB_DLL
-    INCLUDEPATH += "../zlib-1.2.11"
-    INCLUDEPATH += "../quazip"
-    INCLUDEPATH += "../libcurl/include"
-    INCLUDEPATH += "../exiv2-0.25/include"
+    INCLUDEPATH += "../../vendors/zlib-1.2.11"
+    INCLUDEPATH += "../../vendors/quazip"
+    INCLUDEPATH += "../../vendors/libcurl/include"
+    INCLUDEPATH += "../../vendors/exiv2-0.25/include"
 
     LIBS -= -lcurl
     LIBS -= -lexiv2
@@ -545,7 +544,7 @@ travis-ci {
     LIBS -= -lz
     LIBS += /usr/lib/x86_64-linux-gnu/libz.so
     DEFINES += TRAVIS_CI
-    INCLUDEPATH += "../quazip"
+    INCLUDEPATH += "../../vendors/quazip"
 }
 
 linux-g++-64 {

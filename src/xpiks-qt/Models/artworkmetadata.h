@@ -52,7 +52,7 @@ namespace Models {
         Q_OBJECT
 
     public:
-        ArtworkMetadata(const QString &filepath, qint64 ID);
+        ArtworkMetadata(const QString &filepath, qint64 ID, qint64 directoryID);
         virtual ~ArtworkMetadata();
 
     private:
@@ -137,7 +137,6 @@ namespace Models {
         void resetSelected() {
             if (getIsSelectedFlag()) {
                 setIsSelectedFlag(false);
-                // emit fileSelectedChanged(m_ArtworkFilepath, false);
             }
         }
 
@@ -175,6 +174,9 @@ namespace Models {
         virtual QString getDescription() override { return m_MetadataModel.getDescription(); }
         virtual QString getTitle() override { return m_MetadataModel.getTitle(); }
 
+   public:
+        virtual qint64 getDirectoryID() const { return m_DirectoryID; }
+
     public:
         void markModified();
         void setUnavailable() { setIsUnavailableFlag(true); }
@@ -197,7 +199,6 @@ namespace Models {
     signals:
         void modifiedChanged(bool newValue);
         void selectedChanged(bool newValue);
-        void fileSelectedChanged(const QString &filepath, bool newValue);
         void focusRequested(int directionSign);
         void backupRequired();
         void aboutToBeRemoved();
@@ -215,6 +216,7 @@ namespace Models {
         QTimer m_BackupTimer;
         int m_BackupTimerDelay;
         qint64 m_ID;
+        qint64 m_DirectoryID;
         volatile int m_MetadataFlags;
         volatile Common::WarningFlags m_WarningsFlags;
         volatile bool m_IsLockedForEditing;

@@ -27,11 +27,13 @@
 #include "../Common/defines.h"
 #include "../Helpers/indiceshelper.h"
 #include "../Commands/commandmanager.h"
+#include "../Models/filteredartitemsproxymodel.h"
 
 namespace Models {
     ArtworksRepository::ArtworksRepository(QObject *parent) :
         AbstractListModel(parent),
-        m_LastUnavailableFilesCount(0)
+        m_LastUnavailableFilesCount(0),
+        m_LastID(0)
     {
         QObject::connect(&m_FilesWatcher, SIGNAL(fileChanged(const QString &)),
                      this, SLOT(checkFileUnavailable(const QString &)));
@@ -47,13 +49,13 @@ namespace Models {
 
     void ArtworksRepository::cleanupEmptyDirectories() {
         LOG_DEBUG << "#";
-        int count = m_DirectoriesList.length();
+        size_t count = m_DirectoriesList.size();
         QVector<int> indicesToRemove;
         indicesToRemove.reserve(count);
 
-        for (int i = 0; i < count; ++i) {
-            const QString &directory = m_DirectoriesList[i];
-            if (m_DirectoriesHash[directory] == 0) {
+        for (size_t i = 0; i < count; ++i) {
+            auto &directory = m_DirectoriesList[i];
+            if (directory.m_FilesCount == 0) {
                 indicesToRemove.append(i);
             }
         }
@@ -64,6 +66,8 @@ namespace Models {
             QVector<QPair<int, int> > rangesToRemove;
             Helpers::indicesToRanges(indicesToRemove, rangesToRemove);
             removeItemsAtIndices(rangesToRemove);
+
+            updateSelectedState();
         }
     }
 
@@ -117,8 +121,9 @@ namespace Models {
         }
 
         int count = 0;
+        size_t phony;
         foreach (const QString &directory, filteredDirectories) {
-            if (!m_DirectoriesHash.contains(directory)) {
+            if (!tryFindDirectory(directory, phony)) {
                 count++;
             }
         }
@@ -139,7 +144,18 @@ namespace Models {
         return count;
     }
 
-    bool ArtworksRepository::accountFile(const QString &filepath) {
+    bool ArtworksRepository::isDirectoryIncluded(qint64 directoryID) const {
+        bool isSelected = false;
+        const size_t size = m_DirectoriesList.size();
+        size_t index = m_DirectoryIdToIndex.value(directoryID, size);
+        if (index < size) {
+            isSelected = m_DirectoriesList[index].m_IsSelected;
+        }
+
+        return isSelected;
+    }
+
+    bool ArtworksRepository::accountFile(const QString &filepath, qint64 &directoryID) {
         bool wasModified = false;
         QString absolutePath;
 
@@ -147,13 +163,16 @@ namespace Models {
                 !m_FilesSet.contains(filepath)) {
 
             int occurances = 0;
-            QHash<QString, int>::iterator dirHashIterator = m_DirectoriesHash.find(absolutePath);
+            size_t index;
+            bool alreadyExists = tryFindDirectory(absolutePath, index);
 
-            if (dirHashIterator == m_DirectoriesHash.end()) {
-                LOG_INFO << "Adding new directory" << absolutePath << "with index" << m_DirectoriesList.length();
-                m_DirectoriesList.append(absolutePath);
-                m_DirectoriesSelectedHash.insert(absolutePath, 0);
-                dirHashIterator = m_DirectoriesHash.insert(absolutePath, 0);
+            if (!alreadyExists) {
+                qint64 id = generateNextID();
+                LOG_INFO << "Adding new directory" << absolutePath << "with index" << m_DirectoriesList.size() << "and id" << id;
+                m_DirectoriesList.emplace_back(absolutePath, id, 0, true);
+                index = m_DirectoriesList.size() - 1;
+                m_DirectoryIdToIndex[id] = index;
+                directoryID = id;
                 emit artworksSourcesCountChanged();
 #ifdef CORE_TESTS
                 if (m_CommandManager != nullptr)
@@ -162,12 +181,14 @@ namespace Models {
                     m_CommandManager->addToRecentDirectories(absolutePath);
                 }
             } else {
-                occurances = dirHashIterator.value();
+                auto &item = m_DirectoriesList[index];
+                occurances = item.m_FilesCount;
+                directoryID = item.m_Id;
             }
 
             // watchFilePath(filepath);
             m_FilesSet.insert(filepath);
-            dirHashIterator.value() = occurances + 1;
+            m_DirectoriesList[index].m_FilesCount = occurances + 1;
             wasModified = true;
         }
 
@@ -178,15 +199,14 @@ namespace Models {
         watchFilePath(vectorPath);
     }
 
-    bool ArtworksRepository::removeFile(const QString &filepath, const QString &fileDirectory) {
+    bool ArtworksRepository::removeFile(const QString &filepath, qint64 directoryID) {
         bool result = false;
 
-        if (m_FilesSet.contains(filepath) && m_DirectoriesHash.contains(fileDirectory)) {
-            int occurances = m_DirectoriesHash[fileDirectory] - 1;
-            int selectedCount = m_DirectoriesSelectedHash[fileDirectory] - 1;
-
-            m_DirectoriesHash[fileDirectory] = occurances;
-            m_DirectoriesSelectedHash[fileDirectory] = selectedCount;
+        if (m_FilesSet.contains(filepath)) {
+            Q_ASSERT(m_DirectoryIdToIndex.contains(directoryID));
+            auto existingIndex = m_DirectoryIdToIndex[directoryID];
+            auto &item = m_DirectoriesList[existingIndex];
+            item.m_FilesCount--;
             m_FilesWatcher.removePath(filepath);
             m_FilesSet.remove(filepath);
             result = true;
@@ -197,20 +217,6 @@ namespace Models {
 
     void ArtworksRepository::removeVector(const QString &vectorPath) {
         m_FilesWatcher.removePath(vectorPath);
-    }
-
-    void ArtworksRepository::setFileSelected(const QString &filepath, bool selected) {
-        QFileInfo fi(filepath);
-        const QString absolutePath = fi.absolutePath();
-
-        if (m_DirectoriesSelectedHash.contains(absolutePath)) {
-            int plus = selected ? +1 : -1;
-            m_DirectoriesSelectedHash[absolutePath] = m_DirectoriesSelectedHash[absolutePath] + plus;
-
-            int directoryIndex = m_DirectoriesList.indexOf(QRegExp(absolutePath));
-            QModelIndex index = this->index(directoryIndex);
-            emit dataChanged(index, index, QVector<int>() << IsSelectedRole);
-        }
     }
 
     void ArtworksRepository::purgeUnavailableFiles() {
@@ -240,9 +246,19 @@ namespace Models {
     }
 
     void ArtworksRepository::updateFilesCounts() {
+        if (m_DirectoriesList.empty()) { return; }
+
         auto first = this->index(0);
         auto last = this->index(rowCount() - 1);
         emit dataChanged(first, last, QVector<int>() << UsedImagesCountRole);
+    }
+
+    void ArtworksRepository::updateSelectedState() {
+        if (m_DirectoriesList.empty()) { return; }
+
+        auto first = this->index(0);
+        auto last = this->index(rowCount() - 1);
+        emit dataChanged(first, last, QVector<int>() << IsSelectedRole);
     }
 
     void ArtworksRepository::watchFilePath(const QString &filepath) {
@@ -272,35 +288,156 @@ namespace Models {
 
 #ifdef INTEGRATION_TESTS
     void ArtworksRepository::resetEverything() {
-        m_DirectoriesHash.clear();
         m_DirectoriesList.clear();
-        m_DirectoriesSelectedHash.clear();
         m_FilesSet.clear();
+        m_DirectoryIdToIndex.clear();
     }
 #endif
 
     int ArtworksRepository::rowCount(const QModelIndex &parent) const {
         Q_UNUSED(parent);
-        return m_DirectoriesList.count();
+        return (int)m_DirectoriesList.size();
     }
 
     QVariant ArtworksRepository::data(const QModelIndex &index, int role) const {
-        if (index.row() < 0 || index.row() >= m_DirectoriesList.count())
+        int row = index.row();
+        if ((row < 0) || (row >= (int)m_DirectoriesList.size())) {
             return QVariant();
+        }
 
-        const QString &directory = m_DirectoriesList.at(index.row());
-        QDir dir(directory);
+        auto &directory = m_DirectoriesList.at(index.row());
 
         switch (role) {
-        case PathRole:
+        case PathRole: {
+            QDir dir(directory.m_AbsolutePath);
             return dir.dirName();
+        }
         case UsedImagesCountRole:
-            return QVariant(m_DirectoriesHash[directory]);
+            return directory.m_FilesCount;
         case IsSelectedRole:
-            return m_DirectoriesSelectedHash[directory] > 0;
+            return !allAreSelected() && directory.m_IsSelected;
         default:
             return QVariant();
         }
+    }
+
+    void ArtworksRepository::selectDirectory(int row) {
+        if ((row < 0) || (row >= (int)m_DirectoriesList.size())) {
+            return;
+        }
+
+        auto &directory = m_DirectoriesList.at(row);
+
+        bool oldValue = directory.m_IsSelected;
+        bool newValue = !oldValue;
+        if (changeSelectedState(row, newValue, oldValue)) {
+            updateSelectedState();
+#ifndef CORE_TESTS
+            LOG_DEBUG << "Updating artworks";
+            auto *filteredArtItemsModel = m_CommandManager->getFilteredArtItemsModel();
+            Q_ASSERT(filteredArtItemsModel != NULL);
+            filteredArtItemsModel->updateFilter();
+#endif
+        }
+    }
+
+    bool ArtworksRepository::setDirectorySelected(int index, bool value) {
+        auto &directory = m_DirectoriesList[index];
+        bool changed = directory.m_IsSelected != value;
+        directory.m_IsSelected = value;
+
+        return changed;
+    }
+
+    bool ArtworksRepository::changeSelectedState(int row, bool newValue, bool oldValue) {
+        if (oldValue == newValue) { return false; }
+
+        bool anySelectionChanged = false;
+
+        const int count = m_DirectoriesList.size();
+        if (count == 1) {
+            Q_ASSERT(row == 0);
+            anySelectionChanged = setDirectorySelected(row, true);
+            return anySelectionChanged;
+        }
+
+        const int selectedCount = retrieveSelectedDirsCount();
+        const bool allAreSelected = selectedCount == count;
+        const bool wasSelected = (oldValue == true);
+        const bool onlyOneSelected = (selectedCount == 1);
+        const bool isUnselected = (newValue == false);
+
+        if (allAreSelected && (count > 1)) {
+            Q_ASSERT(newValue == false);
+            unselectAllDirectories();
+            setDirectorySelected(row, true);
+            anySelectionChanged = true;
+        } else if (onlyOneSelected && wasSelected && isUnselected) {
+            selectAllDirectories();
+            anySelectionChanged = true;
+        } else {
+            anySelectionChanged = setDirectorySelected(row, newValue);
+        }
+
+        return anySelectionChanged;
+    }
+
+    bool ArtworksRepository::setAllSelected(bool value) {
+        bool anyChange = false;
+        int size = m_DirectoriesList.size();
+
+        for (int i = 0; i < size; i++) {
+            if (setDirectorySelected(i, value)) {
+                anyChange = true;
+            }
+        }
+
+        if (anyChange) {
+            updateSelectedState();
+        }
+
+        return anyChange;
+    }
+
+    size_t ArtworksRepository::retrieveSelectedDirsCount() const {
+        size_t count = 0;
+
+        for (auto &directory: m_DirectoriesList) {
+            if (directory.m_IsSelected) {
+                count++;
+            }
+        }
+
+        return count;
+    }
+
+    bool ArtworksRepository::allAreSelected() const {
+        bool anyUnselected = false;
+
+        for (auto &item: m_DirectoriesList) {
+            if (!item.m_IsSelected) {
+                anyUnselected = true;
+                break;
+            }
+        }
+
+        return !anyUnselected;
+    }
+
+    bool ArtworksRepository::tryFindDirectory(const QString &directoryPath, size_t &index) const {
+        bool found = false;
+        const size_t size = m_DirectoriesList.size();
+
+        for (size_t i = 0; i < size; ++i) {
+            auto &item = m_DirectoriesList[i];
+            if (item.m_AbsolutePath == directoryPath) {
+                found = true;
+                index = i;
+                break;
+            }
+        }
+
+        return found;
     }
 
     QHash<int, QByteArray> ArtworksRepository::roleNames() const {

@@ -51,15 +51,11 @@ ApplicationWindow {
     }
 
     function onCancelMP(firstTime) {
-        settingsModel.mustUseMasterPassword = !firstTime
-        settingsModel.raiseMasterPasswordSignal()
+        settingsModel.onMasterPasswordUnset(firstTime);
     }
 
     function onMasterPasswordSet() {
-        console.log('UI:SettingsWindow # Master password changed')
-        appSettings.setValue(appSettings.masterPasswordHashKey, secretsManager.getMasterPasswordHash())
-        appSettings.setValue(appSettings.mustUseMasterPasswordKey, true)
-        settingsModel.mustUseMasterPassword = true
+        settingsModel.onMasterPasswordSet();
     }
 
     function onProxySettingsSet() {
@@ -981,6 +977,21 @@ ApplicationWindow {
                             onClicked: {
                                 openProxyDialog(false)
                             }
+                        }
+                    }
+
+                    StyledCheckbox {
+                        id: verboseUploadCheckbox
+                        text: i18.n + qsTr("Detailed logging")
+                        onCheckedChanged: {
+                            settingsModel.verboseUpload = checked
+                        }
+                        function onResetRequested() {
+                            checked = settingsModel.verboseUpload
+                        }
+                        Component.onCompleted: {
+                            checked = settingsModel.verboseUpload
+                            uploadTab.resetRequested.connect(verboseUploadCheckbox.onResetRequested)
                         }
                     }
 

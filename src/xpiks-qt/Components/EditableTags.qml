@@ -453,9 +453,10 @@ Flickable {
                         }
 
                         acceptSelected(tryExpandPreset);
+                        event.accepted = true
 
-                        if (hasSelectedCompletion()) {
-                            event.accepted = true
+                        if (!hasSelectedCompletion()) {
+                            submitCurrentKeyword()
                         }
                     } else if (autoCompleteActive && (event.key === Qt.Key_Up)) {
                         moveSelectionUp()

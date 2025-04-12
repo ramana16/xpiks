@@ -1,4 +1,4 @@
-﻿/*
+/*
  * This file is a part of Xpiks - cross platform application for
  * keywording and uploading images for microstocks
  * Copyright (C) 2014-2017 Taras Kushnir <kushnirTV@gmail.com>
@@ -25,8 +25,19 @@
 #include <QAbstractListModel>
 #include <QObject>
 #include <QString>
+#include <QCoreApplication>
+#include <QDir>
+#include <QJsonObject>
 #include "../Common/baseentity.h"
+#include "../Common/version.h"
 #include "../Models/proxysettings.h"
+#include "../Helpers/localconfig.h"
+#include "../Helpers/constants.h"
+#include "../Commands/commandmanager.h"
+#include "../Encryption/secretsmanager.h"
+#include "../Models/recentdirectoriesmodel.h"
+#include "../Models/recentfilesmodel.h"
+#include "../Models/uploadinforepository.h"
 
 #define SETTINGS_EPSILON 1e-9
 
@@ -67,17 +78,26 @@ namespace Models {
         Q_PROPERTY(QString proxyPort READ getProxyPort NOTIFY proxyPortChanged)
         Q_PROPERTY(bool autoCacheImages READ getAutoCacheImages WRITE setAutoCacheImages NOTIFY autoCacheImagesChanged)
         Q_PROPERTY(int artworkEditRightPaneWidth READ getArtworkEditRightPaneWidth WRITE setArtworkEditRightPaneWidth NOTIFY artworkEditRightPaneWidthChanged)
+        Q_PROPERTY(bool verboseUpload READ getVerboseUpload WRITE setVerboseUpload NOTIFY verboseUploadChanged)
+
+        Q_PROPERTY(QString appVersion READ getAppVersion CONSTANT)
+
+        Q_PROPERTY(QString whatsNewText READ getWhatsNewText CONSTANT)
+        Q_PROPERTY(QString termsAndConditionsText READ getTermsAndConditionsText CONSTANT)
 
     public:
         explicit SettingsModel(QObject *parent = 0);
-        virtual ~SettingsModel() {}
+        virtual ~SettingsModel() { sync(); }
 
     public:
         void saveExiftool();
         void saveLocale();
+        void initializeConfigs();
+        void syncronizeSettings() { sync(); }
 
     public:
         ProxySettings *retrieveProxySettings();
+        bool getIsTelemetryEnabled() const { return boolValue(Constants::userStatistics, true); }
 
     public:
         Q_INVOKABLE void resetAllValues();
@@ -90,6 +110,188 @@ namespace Models {
         Q_INVOKABLE void saveProxySetting(const QString &address, const QString &user, const QString &password, const QString &port);
         Q_INVOKABLE void saveArtworkEditUISettings();
         Q_INVOKABLE void saveSelectedDictionaryIndex();
+
+    private:
+        inline void setValue(const char *key, const QJsonValue &value) {
+            m_SettingsJson.insert(QLatin1String(key), value);
+        }
+
+        inline QJsonValue value(const char *key, const QJsonValue &defaultValue = QJsonValue()) const {
+            QJsonValue value = m_SettingsJson.value(QLatin1String(key));
+
+            if (value.isUndefined()) {
+                return defaultValue;
+            }
+
+            return value;
+        }
+
+        inline bool boolValue(const char *key, const bool defaultValue = false) const {
+            return m_SettingsJson.value(QLatin1String(key)).toBool(defaultValue);
+        }
+
+        inline double doubleValue(const char *key, const double defaultValue = 0) const {
+            return m_SettingsJson.value(QLatin1String(key)).toDouble(defaultValue);
+        }
+
+        inline int intValue(const char *key, const int defaultValue = 0) const {
+            return m_SettingsJson.value(QLatin1String(key)).toInt(defaultValue);
+        }
+
+        inline QString stringValue(const char *key, const QString defaultValue = QString("")) const {
+            return m_SettingsJson.value(QLatin1String(key)).toString(defaultValue);
+        }
+
+    private:
+        QString getAppVersion() const { return QCoreApplication::applicationVersion(); }
+        QString getWhatsNewText() const;
+        QString getTermsAndConditionsText() const;
+
+    public:
+        Q_INVOKABLE QString getRecentDirectories() { return stringValue(Constants::recentDirectories); }
+        Q_INVOKABLE QString getRecentFiles() { return stringValue(Constants::recentFiles); }
+        Q_INVOKABLE QString getUserAgentId() { return stringValue(Constants::userAgentId); }
+        Q_INVOKABLE QString getPathToUpdate() { return stringValue(Constants::pathToUpdate); }
+        Q_INVOKABLE QString getUploadHosts() { return stringValue(Constants::uploadHosts); }
+        Q_INVOKABLE QString getMasterPasswordHash() { return stringValue(Constants::masterPasswordHash); }
+        Q_INVOKABLE QString getDictPath() { return stringValue(Constants::dictPath); }
+        Q_INVOKABLE bool getMustUseConfirmationDialogs() { return boolValue(Constants::useConfirmationDialogs, true); }
+        Q_INVOKABLE int getAvailableUpdateVersion() { return intValue(Constants::availableUpdateVersion); }
+
+    public:
+        Q_INVOKABLE bool needToShowWhatsNew() {
+            int lastVersion = intValue(Constants::installedVersion, 0);
+            int installedMajorPart = lastVersion / 10;
+            int currentMajorPart = XPIKS_VERSION_INT / 10;
+            bool result = currentMajorPart > installedMajorPart;
+            return result;
+        }
+
+        Q_INVOKABLE bool needToShowTextWhatsNew() {
+            int lastVersion = intValue(Constants::installedVersion, 0);
+            int installedMajorPart = lastVersion / 10;
+            int currentMajorPart = XPIKS_VERSION_INT / 10;
+            bool result = (currentMajorPart == installedMajorPart) &&
+                    (XPIKS_VERSION_INT > lastVersion);
+            return result;
+        }
+
+        Q_INVOKABLE void saveCurrentVersion() {
+            LOG_DEBUG << "Saving current xpiks version";
+            setValue(Constants::installedVersion, XPIKS_VERSION_INT);
+        }
+
+        Q_INVOKABLE bool needToShowTermsAndConditions() {
+            bool haveConsent = boolValue(Constants::userConsent, false);
+            return !haveConsent;
+        }
+
+        Q_INVOKABLE void userAgreeHandler() {
+            LOG_DEBUG << "#";
+            setValue(Constants::userConsent, true);
+        }
+
+        Q_INVOKABLE int getAppWidth(int defaultWidth) {
+            return intValue(Constants::appWindowWidth, defaultWidth);
+        }
+
+        Q_INVOKABLE void setAppWidth(int width) {
+            LOG_DEBUG << "#";
+
+            setValue(Constants::appWindowWidth, width);
+        }
+
+        Q_INVOKABLE int getAppHeight(int defaultHeight) {
+            return intValue(Constants::appWindowHeight, defaultHeight);
+        }
+
+        Q_INVOKABLE void setAppHeight(int height) {
+            LOG_DEBUG << "#";
+
+            setValue(Constants::appWindowHeight, height);
+        }
+
+        Q_INVOKABLE int getAppPosX(int defaultPosX) {
+            int posX = intValue(Constants::appWindowX, defaultPosX);
+            if (posX == -1) { posX = defaultPosX; }
+            return posX;
+        }
+
+        Q_INVOKABLE void setAppPosX(int x) {
+            LOG_DEBUG << "#";
+
+            setValue(Constants::appWindowX, x);
+        }
+
+        Q_INVOKABLE int getAppPosY(int defaultPosY) {
+            int posY = intValue(Constants::appWindowY, defaultPosY);
+            if (posY == -1) { posY = defaultPosY; }
+            return posY;
+        }
+
+        Q_INVOKABLE void setAppPosY(int y) {
+            LOG_DEBUG << "#";
+            setValue(Constants::appWindowY, y);
+        }
+
+        Q_INVOKABLE void setUseMasterPassword(bool value) {
+            LOG_DEBUG << "#";
+            setValue(Constants::useMasterPassword, value);
+        }
+
+        Q_INVOKABLE void setMasterPasswordHash() {
+            LOG_DEBUG << "#";
+            Encryption::SecretsManager *secretsManager = m_CommandManager->getSecretsManager();
+            setValue(Constants::masterPasswordHash, secretsManager->getMasterPasswordHash());
+        }
+
+        Q_INVOKABLE void saveUploadHosts() {
+            LOG_DEBUG << "#";
+            UploadInfoRepository *uploadInfoRepository = m_CommandManager->getUploadInfoRepository();
+            setValue(Constants::uploadHosts, uploadInfoRepository->getInfoString());
+        }
+
+        Q_INVOKABLE void saveRecentDirectories() {
+            LOG_DEBUG << "#";
+            Models::RecentDirectoriesModel *recentDirectories = m_CommandManager->getRecentDirectories();
+            setValue(Constants::recentDirectories, recentDirectories->serializeForSettings());
+        }
+
+        Q_INVOKABLE void saveRecentFiles() {
+            LOG_DEBUG << "#";
+            Models::RecentFilesModel *recentFiles = m_CommandManager->getRecentFiles();
+            setValue(Constants::recentFiles, recentFiles->serializeForSettings());
+        }
+
+        Q_INVOKABLE void setUserAgentId(const QString &id) {
+            LOG_DEBUG << "#";
+            setValue(Constants::userAgentId, id);
+        }
+
+        Q_INVOKABLE void setAvailableUpdateVersion(int version) {
+            LOG_DEBUG << "#";
+            setValue(Constants::availableUpdateVersion, version);
+        }
+
+        Q_INVOKABLE void setPathToUpdate(QString path) {
+            LOG_DEBUG << "#";
+            setValue(Constants::pathToUpdate, path);
+        }
+
+        Q_INVOKABLE void protectTelemetry();
+
+        Q_INVOKABLE void onMasterPasswordSet() {
+            LOG_INFO << "Master password changed";
+
+            setMasterPasswordHash();
+            setUseMasterPassword(true);
+            setMustUseMasterPassword(true);
+        }
+
+        Q_INVOKABLE void onMasterPasswordUnset(bool firstTime) {
+            setMustUseMasterPassword(!firstTime);
+            raiseMasterPasswordSignal();
+        }
 
     public:
         QString getExifToolPath() const { return m_ExifToolPath; }
@@ -123,6 +325,7 @@ namespace Models {
         bool getAutoCacheImages() const { return m_AutoCacheImages; }
         int getArtworkEditRightPaneWidth() const { return m_ArtworkEditRightPaneWidth; }
         int getSelectedDictIndex() const { return m_SelectedDictIndex; }
+        bool getVerboseUpload() const { return m_VerboseUpload; }
 
     signals:
         void settingsReset();
@@ -156,7 +359,8 @@ namespace Models {
         void proxyPortChanged(QString value);
         void autoCacheImagesChanged(bool value);
         void artworkEditRightPaneWidthChanged(int value);
-        void selectedDictIndexChanged(int value);
+        void selectedDictIndexChanged(int value);        
+        void verboseUploadChanged(bool verboseUpload);
 
     public:
         void setExifToolPath(QString exifToolPath) {
@@ -358,6 +562,17 @@ namespace Models {
             }
         }
 
+        void setVerboseUpload(bool verboseUpload)
+        {
+            if (m_VerboseUpload == verboseUpload)
+                return;
+
+            m_VerboseUpload = verboseUpload;
+            emit verboseUploadChanged(verboseUpload);
+        }
+
+    public:
+
 #ifndef INTEGRATION_TESTS
     private:
 #else
@@ -369,6 +584,13 @@ namespace Models {
         void resetProxySetting();
 
     private:
+        void sync();
+        QString serializeProxyForSettings(ProxySettings &settings);
+        void deserializeProxyFromSettings(const QString &serialized);
+
+    private:
+        Helpers::LocalConfig m_Config;
+        QJsonObject m_SettingsJson;
         QString m_ExifToolPath;
         QString m_DictPath;
         QString m_SelectedLocale;
@@ -397,6 +619,7 @@ namespace Models {
         bool m_UseProxy;
         ProxySettings m_ProxySettings;
         bool m_AutoCacheImages;
+        bool m_VerboseUpload;
     };
 }
 
